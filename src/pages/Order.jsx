@@ -199,126 +199,197 @@ const Order = () => {
       const pdf = new jsPDF("p", "mm", "a4");
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 20;
 
-      // Header
-      pdf.setFontSize(20);
-      pdf.setFont(undefined, "bold");
-      pdf.text("HARE KRISHNA MEDICAL", 20, 25);
+      // Colors
+      const primaryColor = [220, 53, 69]; // Medical red
+      const darkColor = [26, 26, 26]; // Dark gray
+      const lightColor = [102, 102, 102]; // Light gray
+
+      // Header with logo placeholder and company info
+      pdf.setFillColor(...primaryColor);
+      pdf.rect(0, 0, pageWidth, 35, "F");
+
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(22);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("HARE KRISHNA MEDICAL", margin, 22);
 
       pdf.setFontSize(10);
-      pdf.setFont(undefined, "normal");
-      pdf.text("3 Sahyog Complex, Man Sarovar circle, Amroli, 394107", 20, 35);
-      pdf.text(
+      pdf.setFont("helvetica", "normal");
+      pdf.text("Your Trusted Health Partner", margin, 30);
+
+      // Company details
+      pdf.setTextColor(...darkColor);
+      pdf.setFontSize(9);
+      const companyDetails = [
+        "3 Sahyog Complex, Man Sarovar circle, Amroli, 394107",
         "Phone: +91 76989 13354 | Email: harekrishnamedical@gmail.com",
-        20,
-        42,
-      );
+      ];
+      companyDetails.forEach((line, index) => {
+        pdf.text(line, margin, 45 + index * 5);
+      });
 
-      // Invoice details
-      pdf.setFontSize(16);
-      pdf.setFont(undefined, "bold");
-      pdf.text("INVOICE", pageWidth - 40, 25);
+      // Invoice title and details
+      pdf.setTextColor(...primaryColor);
+      pdf.setFontSize(24);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("INVOICE", pageWidth - 60, 22);
 
+      pdf.setTextColor(...darkColor);
       pdf.setFontSize(10);
-      pdf.setFont(undefined, "normal");
-      pdf.text(`Invoice #: ${orderDetails.invoiceId}`, pageWidth - 80, 35);
-      pdf.text(`Order #: ${orderDetails.orderId}`, pageWidth - 80, 42);
-      pdf.text(
-        `Date: ${orderDetails.orderDate} ${orderDetails.orderTime}`,
-        pageWidth - 80,
-        49,
-      );
+      pdf.setFont("helvetica", "normal");
+      const invoiceDetails = [
+        `Invoice #: ${orderDetails.invoiceId}`,
+        `Order #: ${orderDetails.orderId}`,
+        `Date: ${orderDetails.orderDate}`,
+        `Time: ${orderDetails.orderTime}`,
+      ];
+      invoiceDetails.forEach((line, index) => {
+        pdf.text(line, pageWidth - 80, 35 + index * 5);
+      });
 
       // QR Code
       if (qrCode) {
-        pdf.addImage(qrCode, "PNG", pageWidth - 60, 55, 35, 35);
-        pdf.setFontSize(8);
-        pdf.text("Scan for invoice", pageWidth - 52, 95);
+        try {
+          pdf.addImage(qrCode, "PNG", pageWidth - 60, 55, 30, 30);
+          pdf.setFontSize(7);
+          pdf.text("Scan for online invoice", pageWidth - 55, 90);
+        } catch (e) {
+          console.log("QR code could not be added to PDF");
+        }
       }
 
-      // Customer details
+      // Customer details section
+      let yPosition = 70;
+      pdf.setFillColor(240, 240, 240);
+      pdf.rect(margin, yPosition, pageWidth - 2 * margin, 30, "F");
+
+      pdf.setTextColor(...darkColor);
       pdf.setFontSize(12);
-      pdf.setFont(undefined, "bold");
-      pdf.text("Bill To:", 20, 65);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("BILL TO:", margin + 5, yPosition + 10);
 
       pdf.setFontSize(10);
-      pdf.setFont(undefined, "normal");
-      let yPos = 75;
-      pdf.text(orderDetails.customerDetails.fullName, 20, yPos);
-      pdf.text(orderDetails.customerDetails.email, 20, yPos + 7);
-      pdf.text(orderDetails.customerDetails.mobile, 20, yPos + 14);
-      pdf.text(orderDetails.customerDetails.address, 20, yPos + 21);
-      pdf.text(
+      pdf.setFont("helvetica", "normal");
+      const customerInfo = [
+        orderDetails.customerDetails.fullName,
+        orderDetails.customerDetails.email,
+        orderDetails.customerDetails.mobile,
+        orderDetails.customerDetails.address,
         `${orderDetails.customerDetails.city}, ${orderDetails.customerDetails.state} ${orderDetails.customerDetails.pincode}`,
-        20,
-        yPos + 28,
-      );
+      ];
 
-      // Items table
-      yPos = 120;
-      pdf.setFontSize(12);
-      pdf.setFont(undefined, "bold");
-      pdf.text("Items Ordered:", 20, yPos);
-
-      yPos += 10;
-      pdf.setFontSize(10);
-      pdf.setFont(undefined, "bold");
-      pdf.text("Item", 20, yPos);
-      pdf.text("Qty", 120, yPos);
-      pdf.text("Price", 140, yPos);
-      pdf.text("Total", 170, yPos);
-
-      // Table header line
-      pdf.line(20, yPos + 2, pageWidth - 20, yPos + 2);
-
-      yPos += 10;
-      pdf.setFont(undefined, "normal");
-
-      orderDetails.items.forEach((item) => {
-        pdf.text(item.name, 20, yPos);
-        pdf.text(item.quantity.toString(), 120, yPos);
-        pdf.text(`₹${item.price}`, 140, yPos);
-        pdf.text(`₹${(item.price * item.quantity).toFixed(2)}`, 170, yPos);
-        yPos += 10;
+      customerInfo.forEach((line, index) => {
+        pdf.text(line, margin + 5, yPosition + 18 + index * 4);
       });
 
-      // Totals
-      yPos += 10;
-      pdf.line(140, yPos - 5, pageWidth - 20, yPos - 5);
+      // Items table
+      yPosition = 115;
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("ITEMS ORDERED:", margin, yPosition);
 
-      pdf.text("Subtotal:", 140, yPos);
-      pdf.text(`₹${orderDetails.orderSummary.subtotal.toFixed(2)}`, 170, yPos);
+      yPosition += 10;
 
-      yPos += 7;
-      pdf.text("Shipping:", 140, yPos);
+      // Table header
+      pdf.setFillColor(...primaryColor);
+      pdf.rect(margin, yPosition, pageWidth - 2 * margin, 8, "F");
+
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Item Description", margin + 2, yPosition + 5);
+      pdf.text("Qty", margin + 100, yPosition + 5);
+      pdf.text("Price", margin + 120, yPosition + 5);
+      pdf.text("Total", margin + 145, yPosition + 5);
+
+      yPosition += 8;
+
+      // Table rows
+      pdf.setTextColor(...darkColor);
+      pdf.setFont("helvetica", "normal");
+
+      orderDetails.items.forEach((item, index) => {
+        const rowColor = index % 2 === 0 ? [255, 255, 255] : [250, 250, 250];
+        pdf.setFillColor(...rowColor);
+        pdf.rect(margin, yPosition, pageWidth - 2 * margin, 8, "F");
+
+        pdf.text(item.name, margin + 2, yPosition + 5);
+        pdf.text(item.quantity.toString(), margin + 102, yPosition + 5);
+        pdf.text(`₹${item.price.toFixed(2)}`, margin + 122, yPosition + 5);
+        pdf.text(
+          `₹${(item.price * item.quantity).toFixed(2)}`,
+          margin + 147,
+          yPosition + 5,
+        );
+
+        yPosition += 8;
+      });
+
+      // Summary section
+      yPosition += 10;
+      const summaryX = pageWidth - 80;
+
+      pdf.setDrawColor(...lightColor);
+      pdf.line(summaryX, yPosition, pageWidth - margin, yPosition);
+
+      yPosition += 5;
+      pdf.setFont("helvetica", "normal");
       pdf.text(
-        orderDetails.orderSummary.shipping === 0
-          ? "FREE"
-          : `₹${orderDetails.orderSummary.shipping.toFixed(2)}`,
-        170,
-        yPos,
+        `Subtotal: ₹${orderDetails.orderSummary.subtotal.toFixed(2)}`,
+        summaryX,
+        yPosition,
       );
 
-      yPos += 7;
-      pdf.text("Tax (5%):", 140, yPos);
-      pdf.text(`₹${orderDetails.orderSummary.tax.toFixed(2)}`, 170, yPos);
+      yPosition += 5;
+      pdf.text(
+        `Shipping: ${orderDetails.orderSummary.shipping === 0 ? "FREE" : `₹${orderDetails.orderSummary.shipping.toFixed(2)}`}`,
+        summaryX,
+        yPosition,
+      );
 
-      yPos += 10;
-      pdf.setFont(undefined, "bold");
-      pdf.text("Total:", 140, yPos);
-      pdf.text(`₹${orderDetails.orderSummary.total.toFixed(2)}`, 170, yPos);
+      yPosition += 5;
+      pdf.text(
+        `Tax (5%): ₹${orderDetails.orderSummary.tax.toFixed(2)}`,
+        summaryX,
+        yPosition,
+      );
+
+      yPosition += 8;
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(12);
+      pdf.setTextColor(...primaryColor);
+      pdf.text(
+        `TOTAL: ₹${orderDetails.orderSummary.total.toFixed(2)}`,
+        summaryX,
+        yPosition,
+      );
 
       // Footer
-      yPos = pageHeight - 30;
+      yPosition = pageHeight - 30;
+      pdf.setTextColor(...lightColor);
       pdf.setFontSize(8);
-      pdf.setFont(undefined, "normal");
-      pdf.text("Thank you for choosing Hare Krishna Medical!", 20, yPos);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(
+        "Thank you for choosing Hare Krishna Medical!",
+        margin,
+        yPosition,
+      );
       pdf.text(
         "For any queries, contact: harekrishnamedical@gmail.com",
-        20,
-        yPos + 7,
+        margin,
+        yPosition + 5,
       );
 
+      // Terms
+      pdf.text(
+        "Terms: All sales are final. Returns accepted within 7 days.",
+        margin,
+        yPosition + 15,
+      );
+
+      // Save the PDF
       pdf.save(`Invoice_${orderDetails.orderId}.pdf`);
     } catch (error) {
       console.error("Error generating PDF:", error);
