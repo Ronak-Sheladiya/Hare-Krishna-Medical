@@ -24,7 +24,13 @@ import Contact from "./pages/Contact.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
+import AdminProducts from "./pages/admin/AdminProducts.jsx";
+import AdminOrders from "./pages/admin/AdminOrders.jsx";
+import AdminUsers from "./pages/admin/AdminUsers.jsx";
+import AdminAnalytics from "./pages/admin/AdminAnalytics.jsx";
 import UserDashboard from "./pages/UserDashboard.jsx";
+import UserOrders from "./pages/user/UserOrders.jsx";
+import UserInvoices from "./pages/user/UserInvoices.jsx";
 import InvoiceView from "./pages/InvoiceView.jsx";
 import NotFound from "./pages/NotFound.jsx";
 
@@ -119,25 +125,34 @@ function App() {
               }
             />
             <Route
-              path="/admin/*"
+              path="/admin/products"
               element={
                 <ProtectedRoute adminOnly={true}>
-                  <div className="section-padding">
-                    <div className="container">
-                      <div className="text-center">
-                        <div className="medical-card p-5">
-                          <i className="bi bi-tools display-1 text-medical-red mb-3"></i>
-                          <h3>Admin Feature</h3>
-                          <p className="text-muted">
-                            This admin feature is under development. Additional
-                            admin pages like product management, order
-                            management, user management, and analytics will be
-                            implemented here.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <AdminProducts />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/orders"
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminOrders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminUsers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/analytics"
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminAnalytics />
                 </ProtectedRoute>
               }
             />
@@ -152,6 +167,22 @@ function App() {
               }
             />
             <Route
+              path="/user/orders"
+              element={
+                <ProtectedRoute>
+                  <UserOrders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/user/invoices"
+              element={
+                <ProtectedRoute>
+                  <UserInvoices />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/user/*"
               element={
                 <ProtectedRoute>
@@ -162,9 +193,9 @@ function App() {
                           <i className="bi bi-person-gear display-1 text-medical-blue mb-3"></i>
                           <h3>User Feature</h3>
                           <p className="text-muted">
-                            This user feature is under development. Additional
-                            user pages like order history, invoice management,
-                            profile editing will be implemented here.
+                            Additional user features like profile editing and
+                            other account management tools will be implemented
+                            here.
                           </p>
                         </div>
                       </div>
