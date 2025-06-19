@@ -15,6 +15,9 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { clearCart } from "../store/slices/cartSlice.js";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import QRCode from "qrcode";
 
 const Order = () => {
   const navigate = useNavigate();
@@ -38,6 +41,8 @@ const Order = () => {
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
   const [errors, setErrors] = useState({});
+  const [qrCode, setQrCode] = useState("");
+  const [pdfGenerating, setPdfGenerating] = useState(false);
 
   const shippingCost = totalAmount > 500 ? 0 : 50;
   const taxRate = 0.05;
@@ -131,7 +136,25 @@ const Order = () => {
     return "HKM" + Date.now().toString().slice(-8);
   };
 
-  const handlePlaceOrder = (e) => {
+  const generateQRCode = async (orderId) => {
+    try {
+      const invoiceUrl = `${window.location.origin}/invoice/${orderId}`;
+      const qrCodeDataURL = await QRCode.toDataURL(invoiceUrl, {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: "#000000",
+          light: "#FFFFFF",
+        },
+      });
+      return qrCodeDataURL;
+    } catch (error) {
+      console.error("Error generating QR code:", error);
+      return null;
+    }
+  };
+
+  const handlePlaceOrder = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -139,8 +162,11 @@ const Order = () => {
     }
 
     const orderId = generateOrderId();
+    const qrCodeData = await generateQRCode(orderId);
+
     const orderData = {
       orderId,
+      invoiceId: `INV${orderId.slice(-6)}`,
       items: [...items],
       customerDetails: { ...formData },
       orderSummary: {
@@ -152,9 +178,11 @@ const Order = () => {
       orderDate: new Date().toLocaleDateString(),
       orderTime: new Date().toLocaleTimeString(),
       status: "Pending",
+      qrCode: qrCodeData,
     };
 
     setOrderDetails(orderData);
+    setQrCode(qrCodeData);
     setShowOrderModal(true);
   };
 
@@ -163,51 +191,148 @@ const Order = () => {
     setShowInvoiceModal(true);
   };
 
-  const handleDownloadInvoice = () => {
-    // In a real app, this would generate and download a PDF
-    const invoiceContent = generateInvoiceContent();
-    const blob = new Blob([invoiceContent], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Invoice_${orderDetails.orderId}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const generatePDFInvoice = async () => {
+    if (!orderDetails) return;
+
+    setPdfGenerating(true);
+    try {
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      // Header
+      pdf.setFontSize(20);
+      pdf.setFont(undefined, "bold");
+      pdf.text("HARE KRISHNA MEDICAL", 20, 25);
+
+      pdf.setFontSize(10);
+      pdf.setFont(undefined, "normal");
+      pdf.text("3 Sahyog Complex, Man Sarovar circle, Amroli, 394107", 20, 35);
+      pdf.text(
+        "Phone: +91 76989 13354 | Email: harekrishnamedical@gmail.com",
+        20,
+        42,
+      );
+
+      // Invoice details
+      pdf.setFontSize(16);
+      pdf.setFont(undefined, "bold");
+      pdf.text("INVOICE", pageWidth - 40, 25);
+
+      pdf.setFontSize(10);
+      pdf.setFont(undefined, "normal");
+      pdf.text(`Invoice #: ${orderDetails.invoiceId}`, pageWidth - 80, 35);
+      pdf.text(`Order #: ${orderDetails.orderId}`, pageWidth - 80, 42);
+      pdf.text(
+        `Date: ${orderDetails.orderDate} ${orderDetails.orderTime}`,
+        pageWidth - 80,
+        49,
+      );
+
+      // QR Code
+      if (qrCode) {
+        pdf.addImage(qrCode, "PNG", pageWidth - 60, 55, 35, 35);
+        pdf.setFontSize(8);
+        pdf.text("Scan for invoice", pageWidth - 52, 95);
+      }
+
+      // Customer details
+      pdf.setFontSize(12);
+      pdf.setFont(undefined, "bold");
+      pdf.text("Bill To:", 20, 65);
+
+      pdf.setFontSize(10);
+      pdf.setFont(undefined, "normal");
+      let yPos = 75;
+      pdf.text(orderDetails.customerDetails.fullName, 20, yPos);
+      pdf.text(orderDetails.customerDetails.email, 20, yPos + 7);
+      pdf.text(orderDetails.customerDetails.mobile, 20, yPos + 14);
+      pdf.text(orderDetails.customerDetails.address, 20, yPos + 21);
+      pdf.text(
+        `${orderDetails.customerDetails.city}, ${orderDetails.customerDetails.state} ${orderDetails.customerDetails.pincode}`,
+        20,
+        yPos + 28,
+      );
+
+      // Items table
+      yPos = 120;
+      pdf.setFontSize(12);
+      pdf.setFont(undefined, "bold");
+      pdf.text("Items Ordered:", 20, yPos);
+
+      yPos += 10;
+      pdf.setFontSize(10);
+      pdf.setFont(undefined, "bold");
+      pdf.text("Item", 20, yPos);
+      pdf.text("Qty", 120, yPos);
+      pdf.text("Price", 140, yPos);
+      pdf.text("Total", 170, yPos);
+
+      // Table header line
+      pdf.line(20, yPos + 2, pageWidth - 20, yPos + 2);
+
+      yPos += 10;
+      pdf.setFont(undefined, "normal");
+
+      orderDetails.items.forEach((item) => {
+        pdf.text(item.name, 20, yPos);
+        pdf.text(item.quantity.toString(), 120, yPos);
+        pdf.text(`₹${item.price}`, 140, yPos);
+        pdf.text(`₹${(item.price * item.quantity).toFixed(2)}`, 170, yPos);
+        yPos += 10;
+      });
+
+      // Totals
+      yPos += 10;
+      pdf.line(140, yPos - 5, pageWidth - 20, yPos - 5);
+
+      pdf.text("Subtotal:", 140, yPos);
+      pdf.text(`₹${orderDetails.orderSummary.subtotal.toFixed(2)}`, 170, yPos);
+
+      yPos += 7;
+      pdf.text("Shipping:", 140, yPos);
+      pdf.text(
+        orderDetails.orderSummary.shipping === 0
+          ? "FREE"
+          : `₹${orderDetails.orderSummary.shipping.toFixed(2)}`,
+        170,
+        yPos,
+      );
+
+      yPos += 7;
+      pdf.text("Tax (5%):", 140, yPos);
+      pdf.text(`₹${orderDetails.orderSummary.tax.toFixed(2)}`, 170, yPos);
+
+      yPos += 10;
+      pdf.setFont(undefined, "bold");
+      pdf.text("Total:", 140, yPos);
+      pdf.text(`₹${orderDetails.orderSummary.total.toFixed(2)}`, 170, yPos);
+
+      // Footer
+      yPos = pageHeight - 30;
+      pdf.setFontSize(8);
+      pdf.setFont(undefined, "normal");
+      pdf.text("Thank you for choosing Hare Krishna Medical!", 20, yPos);
+      pdf.text(
+        "For any queries, contact: harekrishnamedical@gmail.com",
+        20,
+        yPos + 7,
+      );
+
+      pdf.save(`Invoice_${orderDetails.orderId}.pdf`);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Error generating PDF. Please try again.");
+    } finally {
+      setPdfGenerating(false);
+    }
   };
 
-  const generateInvoiceContent = () => {
-    return `
-HARE KRISHNA MEDICAL
-Invoice #${orderDetails.orderId}
-Date: ${orderDetails.orderDate} ${orderDetails.orderTime}
-
-CUSTOMER DETAILS:
-Name: ${orderDetails.customerDetails.fullName}
-Email: ${orderDetails.customerDetails.email}
-Mobile: ${orderDetails.customerDetails.mobile}
-Address: ${orderDetails.customerDetails.address}
-City: ${orderDetails.customerDetails.city}, ${orderDetails.customerDetails.state}
-Pincode: ${orderDetails.customerDetails.pincode}
-
-ITEMS ORDERED:
-${orderDetails.items
-  .map(
-    (item) =>
-      `${item.name} - Qty: ${item.quantity} - Price: ₹${item.price} - Total: ₹${(item.price * item.quantity).toFixed(2)}`,
-  )
-  .join("\n")}
-
-ORDER SUMMARY:
-Subtotal: ₹${orderDetails.orderSummary.subtotal.toFixed(2)}
-Shipping: ₹${orderDetails.orderSummary.shipping.toFixed(2)}
-Tax (5%): ₹${orderDetails.orderSummary.tax.toFixed(2)}
-TOTAL: ₹${orderDetails.orderSummary.total.toFixed(2)}
-
-Thank you for choosing Hare Krishna Medical!
-Contact: harekrishnamedical@gmail.com | +91 76989 13354
-    `;
+  const handleViewOnlineInvoice = () => {
+    if (orderDetails) {
+      const invoiceUrl = `/invoice/${orderDetails.orderId}`;
+      window.open(invoiceUrl, "_blank");
+    }
   };
 
   const handleInvoiceClose = () => {
@@ -536,121 +661,80 @@ Contact: harekrishnamedical@gmail.com | +91 76989 13354
         keyboard={false}
       >
         <Modal.Header>
-          <Modal.Title>Order Invoice</Modal.Title>
+          <Modal.Title>
+            <i className="bi bi-receipt me-2"></i>
+            Order Invoice Generated
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          <div className="invoice-content">
-            <div className="text-center mb-4">
-              <h4>HARE KRISHNA MEDICAL</h4>
-              <p className="text-muted">
-                3 Sahyog Complex, Man Sarovar circle, Amroli, 394107
-              </p>
-              <p className="text-muted">
-                Email: harekrishnamedical@gmail.com | Phone: +91 76989 13354
-              </p>
-            </div>
+        <Modal.Body className="text-center">
+          <div className="mb-4">
+            <i className="bi bi-file-pdf display-1 text-medical-red mb-3"></i>
+            <h5>Invoice Ready for Download</h5>
+            <p className="text-muted">
+              Your invoice has been generated successfully. You can download it
+              as a PDF or view it online.
+            </p>
 
-            <Row className="mb-4">
-              <Col md={6}>
-                <h6>Invoice Details:</h6>
-                <p className="mb-1">
-                  <strong>Invoice #:</strong> {orderDetails?.orderId}
+            {qrCode && (
+              <div className="my-4">
+                <img
+                  src={qrCode}
+                  alt="QR Code"
+                  style={{ width: "150px", height: "150px" }}
+                  className="border rounded"
+                />
+                <p className="text-muted mt-2">
+                  <small>
+                    <i className="bi bi-qr-code me-1"></i>
+                    Scan this QR code to view invoice online
+                  </small>
                 </p>
-                <p className="mb-1">
-                  <strong>Date:</strong> {orderDetails?.orderDate}{" "}
-                  {orderDetails?.orderTime}
-                </p>
-                <p className="mb-1">
-                  <strong>Status:</strong>{" "}
-                  <Badge bg="warning">{orderDetails?.status}</Badge>
-                </p>
-              </Col>
-              <Col md={6}>
-                <h6>Customer Details:</h6>
-                <p className="mb-1">{orderDetails?.customerDetails.fullName}</p>
-                <p className="mb-1">{orderDetails?.customerDetails.email}</p>
-                <p className="mb-1">{orderDetails?.customerDetails.mobile}</p>
-                <p className="mb-1">{orderDetails?.customerDetails.address}</p>
-                <p className="mb-1">
-                  {orderDetails?.customerDetails.city},{" "}
-                  {orderDetails?.customerDetails.state}{" "}
-                  {orderDetails?.customerDetails.pincode}
-                </p>
-              </Col>
-            </Row>
+              </div>
+            )}
 
-            <Table bordered className="mb-4">
-              <thead className="table-light">
-                <tr>
-                  <th>Item</th>
-                  <th>Qty</th>
-                  <th>Price</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orderDetails?.items.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.name}</td>
-                    <td>{item.quantity}</td>
-                    <td>₹{item.price}</td>
-                    <td>₹{(item.price * item.quantity).toFixed(2)}</td>
-                  </tr>
-                ))}
-                <tr>
-                  <td colSpan="3" className="text-end">
-                    <strong>Subtotal:</strong>
-                  </td>
-                  <td>
-                    <strong>
-                      ₹{orderDetails?.orderSummary.subtotal.toFixed(2)}
-                    </strong>
-                  </td>
-                </tr>
-                <tr>
-                  <td colSpan="3" className="text-end">
-                    Shipping:
-                  </td>
-                  <td>₹{orderDetails?.orderSummary.shipping.toFixed(2)}</td>
-                </tr>
-                <tr>
-                  <td colSpan="3" className="text-end">
-                    Tax (5%):
-                  </td>
-                  <td>₹{orderDetails?.orderSummary.tax.toFixed(2)}</td>
-                </tr>
-                <tr className="table-success">
-                  <td colSpan="3" className="text-end">
-                    <strong>Total:</strong>
-                  </td>
-                  <td>
-                    <strong>
-                      ₹{orderDetails?.orderSummary.total.toFixed(2)}
-                    </strong>
-                  </td>
-                </tr>
-              </tbody>
-            </Table>
-
-            <div className="text-center">
-              <p className="text-muted">
-                Thank you for choosing Hare Krishna Medical!
-              </p>
+            <div className="alert alert-info">
+              <strong>Invoice ID:</strong> {orderDetails?.invoiceId}
+              <br />
+              <strong>Order ID:</strong> {orderDetails?.orderId}
             </div>
           </div>
         </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="outline-primary"
-            onClick={handleDownloadInvoice}
-            className="btn-medical-outline"
-          >
-            <i className="bi bi-download me-2"></i>
-            Download Invoice
-          </Button>
-          <Button className="btn-medical-primary" onClick={handleInvoiceClose}>
-            Continue Shopping
-          </Button>
+        <Modal.Footer className="justify-content-center">
+          <div className="d-flex gap-2 flex-wrap justify-content-center">
+            <Button
+              variant="outline-primary"
+              onClick={generatePDFInvoice}
+              disabled={pdfGenerating}
+              className="btn-medical-outline"
+            >
+              {pdfGenerating ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2"></span>
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-download me-2"></i>
+                  Download PDF
+                </>
+              )}
+            </Button>
+            <Button
+              variant="outline-info"
+              onClick={handleViewOnlineInvoice}
+              className="btn-medical-outline"
+            >
+              <i className="bi bi-eye me-2"></i>
+              View Online
+            </Button>
+            <Button
+              className="btn-medical-primary"
+              onClick={handleInvoiceClose}
+            >
+              <i className="bi bi-house me-2"></i>
+              Continue Shopping
+            </Button>
+          </div>
         </Modal.Footer>
       </Modal>
     </div>
