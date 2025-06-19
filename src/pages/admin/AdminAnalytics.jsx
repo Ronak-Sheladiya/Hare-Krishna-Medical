@@ -5,13 +5,32 @@ import {
   Col,
   Card,
   Form,
-  ProgressBar,
-  Table,
+  Button,
   Badge,
+  ButtonGroup,
 } from "react-bootstrap";
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 const AdminAnalytics = () => {
   const [dateRange, setDateRange] = useState("30");
+  const [activeView, setActiveView] = useState("overview");
+  const [chartType, setChartType] = useState("line");
 
   // Mock analytics data
   const salesData = {
@@ -25,61 +44,289 @@ const AdminAnalytics = () => {
     monthlyGrowth: 12.5,
   };
 
-  const topProducts = [
-    { name: "Paracetamol Tablets", sales: 450, revenue: 11697.5 },
-    { name: "Vitamin D3 Capsules", sales: 287, revenue: 13058.5 },
-    { name: "Blood Pressure Monitor", sales: 45, revenue: 58499.55 },
-    { name: "Cough Syrup", sales: 234, revenue: 8365.5 },
-    { name: "Antiseptic Liquid", sales: 189, revenue: 5292.0 },
+  // Sample data for charts
+  const monthlyRevenueData = [
+    { month: "Jan", revenue: 12000, orders: 45, customers: 120 },
+    { month: "Feb", revenue: 15500, orders: 52, customers: 145 },
+    { month: "Mar", revenue: 18200, orders: 68, customers: 165 },
+    { month: "Apr", revenue: 22100, orders: 72, customers: 180 },
+    { month: "May", revenue: 25800, orders: 85, customers: 200 },
+    { month: "Jun", revenue: 28900, orders: 95, customers: 220 },
+    { month: "Jul", revenue: 32400, orders: 108, customers: 245 },
+    { month: "Aug", revenue: 35600, orders: 125, customers: 270 },
+    { month: "Sep", revenue: 38900, orders: 138, customers: 295 },
+    { month: "Oct", revenue: 42100, orders: 148, customers: 315 },
+    { month: "Nov", revenue: 45200, orders: 156, customers: 340 },
+    { month: "Dec", revenue: 48500, orders: 165, customers: 365 },
   ];
 
-  const categoryPerformance = [
-    { category: "Pain Relief", orders: 45, revenue: 15680.5, growth: 8.2 },
-    { category: "Vitamins", orders: 38, revenue: 18750.25, growth: 15.6 },
-    { category: "Medical Devices", orders: 23, revenue: 78450.0, growth: 22.8 },
-    { category: "Cough & Cold", orders: 31, revenue: 12890.75, growth: -2.1 },
-    { category: "First Aid", orders: 19, revenue: 8945.5, growth: 5.4 },
+  const categoryData = [
+    { name: "Pain Relief", value: 35, revenue: 15680.5, color: "#DC3545" },
+    { name: "Vitamins", value: 28, revenue: 18750.25, color: "#198754" },
+    { name: "Medical Devices", value: 20, revenue: 78450.0, color: "#0D6EFD" },
+    { name: "Cough & Cold", value: 12, revenue: 12890.75, color: "#FFC107" },
+    { name: "First Aid", value: 5, revenue: 8945.5, color: "#6C757D" },
   ];
 
-  const recentActivity = [
-    {
-      type: "order",
-      message: "New order #HKM12345678 placed",
-      amount: 102.35,
-      time: "2 minutes ago",
-    },
-    {
-      type: "product",
-      message: "Product 'Vitamin D3' stock updated",
-      amount: null,
-      time: "15 minutes ago",
-    },
-    {
-      type: "user",
-      message: "New user registration",
-      amount: null,
-      time: "1 hour ago",
-    },
-    {
-      type: "order",
-      message: "Order #HKM12345677 delivered",
-      amount: 256.75,
-      time: "2 hours ago",
-    },
+  const paymentStatusData = [
+    { name: "Paid", value: 85, count: 132, color: "#198754" },
+    { name: "Unpaid (COD)", value: 12, count: 19, color: "#FFC107" },
+    { name: "Partial", value: 3, count: 5, color: "#DC3545" },
   ];
 
-  const getActivityIcon = (type) => {
-    switch (type) {
-      case "order":
-        return "bi-bag-check text-success";
-      case "product":
-        return "bi-box-seam text-primary";
-      case "user":
-        return "bi-person-plus text-info";
+  const weeklyOrdersData = [
+    { day: "Mon", orders: 12, revenue: 3200 },
+    { day: "Tue", orders: 18, revenue: 4800 },
+    { day: "Wed", orders: 15, revenue: 3900 },
+    { day: "Thu", orders: 22, revenue: 5800 },
+    { day: "Fri", orders: 25, revenue: 6700 },
+    { day: "Sat", reviews: 28, revenue: 7500 },
+    { day: "Sun", orders: 20, revenue: 5200 },
+  ];
+
+  const productPerformanceData = [
+    { name: "Paracetamol", sales: 450, revenue: 11697.5, profit: 4500 },
+    { name: "Vitamin D3", sales: 287, revenue: 13058.5, profit: 5200 },
+    { name: "BP Monitor", sales: 45, revenue: 58499.55, profit: 15000 },
+    { name: "Cough Syrup", sales: 234, revenue: 8365.5, profit: 3200 },
+    { name: "Antiseptic", sales: 189, revenue: 5292.0, profit: 2100 },
+  ];
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 border rounded shadow">
+          <p className="fw-bold mb-2">{label}</p>
+          {payload.map((entry, index) => (
+            <p key={index} style={{ color: entry.color }} className="mb-1">
+              {entry.dataKey}: {entry.dataKey.includes("revenue") ? "₹" : ""}
+              {entry.value.toLocaleString()}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const renderChart = () => {
+    switch (activeView) {
+      case "revenue":
+        return (
+          <ResponsiveContainer width="100%" height={400}>
+            {chartType === "line" ? (
+              <LineChart data={monthlyRevenueData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#DC3545"
+                  strokeWidth={3}
+                  dot={{ fill: "#DC3545", strokeWidth: 2, r: 6 }}
+                />
+              </LineChart>
+            ) : chartType === "area" ? (
+              <AreaChart data={monthlyRevenueData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#DC3545"
+                  fill="#DC3545"
+                  fillOpacity={0.3}
+                />
+              </AreaChart>
+            ) : (
+              <BarChart data={monthlyRevenueData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+                <Bar dataKey="revenue" fill="#DC3545" />
+              </BarChart>
+            )}
+          </ResponsiveContainer>
+        );
+
+      case "orders":
+        return (
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={weeklyOrdersData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="day" />
+              <YAxis />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              <Bar dataKey="orders" fill="#0D6EFD" />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+
+      case "categories":
+        return (
+          <ResponsiveContainer width="100%" height={400}>
+            <PieChart>
+              <Pie
+                data={categoryData}
+                cx="50%"
+                cy="50%"
+                outerRadius={120}
+                dataKey="value"
+                label={({ name, value }) => `${name}: ${value}%`}
+              >
+                {categoryData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        );
+
+      case "payments":
+        return (
+          <Row>
+            <Col md={6}>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={paymentStatusData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    dataKey="value"
+                    label={({ name, value }) => `${name}: ${value}%`}
+                  >
+                    {paymentStatusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </Col>
+            <Col md={6}>
+              <div className="mt-4">
+                <h6>Payment Status Details</h6>
+                {paymentStatusData.map((item, index) => (
+                  <div
+                    key={index}
+                    className="d-flex justify-content-between align-items-center mb-3"
+                  >
+                    <div className="d-flex align-items-center">
+                      <div
+                        className="me-2"
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          backgroundColor: item.color,
+                          borderRadius: "50%",
+                        }}
+                      ></div>
+                      <span>{item.name}</span>
+                    </div>
+                    <div className="text-end">
+                      <div className="fw-bold">{item.count} orders</div>
+                      <small className="text-muted">{item.value}%</small>
+                    </div>
+                  </div>
+                ))}
+                <div className="mt-4 p-3 bg-light rounded">
+                  <h6>Payment Notes:</h6>
+                  <ul className="small mb-0">
+                    <li>
+                      <strong>Paid:</strong> Orders with complete payment
+                      received
+                    </li>
+                    <li>
+                      <strong>Unpaid (COD):</strong> Cash on Delivery orders -
+                      payment pending
+                    </li>
+                    <li>
+                      <strong>Partial:</strong> Orders with partial payment
+                      received
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </Col>
+          </Row>
+        );
+
+      case "products":
+        return (
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={productPerformanceData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              <Bar dataKey="sales" fill="#0D6EFD" name="Sales" />
+              <Bar dataKey="profit" fill="#198754" name="Profit (₹)" />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+
       default:
-        return "bi-circle text-muted";
+        return (
+          <ResponsiveContainer width="100%" height={400}>
+            <LineChart data={monthlyRevenueData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="revenue"
+                stroke="#DC3545"
+                strokeWidth={3}
+                name="Revenue (₹)"
+              />
+              <Line
+                type="monotone"
+                dataKey="orders"
+                stroke="#0D6EFD"
+                strokeWidth={3}
+                name="Orders"
+              />
+              <Line
+                type="monotone"
+                dataKey="customers"
+                stroke="#198754"
+                strokeWidth={3}
+                name="Customers"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        );
     }
   };
+
+  const viewOptions = [
+    { key: "overview", label: "Overview", icon: "bi-graph-up" },
+    { key: "revenue", label: "Revenue", icon: "bi-currency-rupee" },
+    { key: "orders", label: "Orders", icon: "bi-bag" },
+    { key: "categories", label: "Categories", icon: "bi-pie-chart" },
+    { key: "payments", label: "Payments", icon: "bi-credit-card" },
+    { key: "products", label: "Products", icon: "bi-box" },
+  ];
+
+  const chartTypes = [
+    { key: "line", label: "Line", icon: "bi-graph-up" },
+    { key: "area", label: "Area", icon: "bi-bar-chart" },
+    { key: "bar", label: "Bar", icon: "bi-bar-chart-fill" },
+  ];
 
   return (
     <div className="fade-in">
@@ -90,12 +337,12 @@ const AdminAnalytics = () => {
             <Col lg={12}>
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <h2>Analytics Dashboard</h2>
+                  <h2>Advanced Analytics</h2>
                   <p className="text-muted">
-                    Detailed analysis and performance metrics
+                    Comprehensive data analysis with interactive charts
                   </p>
                 </div>
-                <div>
+                <div className="d-flex gap-2">
                   <Form.Select
                     value={dateRange}
                     onChange={(e) => setDateRange(e.target.value)}
@@ -124,7 +371,7 @@ const AdminAnalytics = () => {
                       <p className="text-muted mb-0">Total Revenue</p>
                       <small className="text-success">
                         <i className="bi bi-arrow-up"></i> +
-                        {salesData.monthlyGrowth}% from last month
+                        {salesData.monthlyGrowth}% growth
                       </small>
                     </div>
                     <div className="bg-success text-white rounded-circle p-3">
@@ -166,7 +413,7 @@ const AdminAnalytics = () => {
                       </h3>
                       <p className="text-muted mb-0">Avg Order Value</p>
                       <small className="text-success">
-                        <i className="bi bi-arrow-up"></i> +5.1% from last month
+                        <i className="bi bi-arrow-up"></i> +5.1% improvement
                       </small>
                     </div>
                     <div className="bg-medical-red text-white rounded-circle p-3">
@@ -187,7 +434,7 @@ const AdminAnalytics = () => {
                       </h3>
                       <p className="text-muted mb-0">Conversion Rate</p>
                       <small className="text-success">
-                        <i className="bi bi-arrow-up"></i> +1.8% from last month
+                        <i className="bi bi-arrow-up"></i> +1.8% this month
                       </small>
                     </div>
                     <div className="bg-warning text-white rounded-circle p-3">
@@ -199,216 +446,101 @@ const AdminAnalytics = () => {
             </Col>
           </Row>
 
-          <Row>
-            {/* Top Products */}
-            <Col lg={6} className="mb-4">
-              <Card className="medical-card h-100">
+          {/* Analytics Controls */}
+          <Row className="mb-4">
+            <Col lg={8}>
+              <Card className="medical-card">
                 <Card.Header className="bg-medical-light">
-                  <h5 className="mb-0">
-                    <i className="bi bi-trophy me-2"></i>
-                    Top Performing Products
-                  </h5>
-                </Card.Header>
-                <Card.Body>
-                  <Table responsive>
-                    <thead>
-                      <tr>
-                        <th>Product</th>
-                        <th>Sales</th>
-                        <th>Revenue</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {topProducts.map((product, index) => (
-                        <tr key={index}>
-                          <td>
-                            <div className="d-flex align-items-center">
-                              <Badge
-                                bg={index === 0 ? "warning" : "secondary"}
-                                className="me-2"
-                              >
-                                {index + 1}
-                              </Badge>
-                              {product.name}
-                            </div>
-                          </td>
-                          <td>
-                            <Badge bg="primary">{product.sales}</Badge>
-                          </td>
-                          <td>
-                            <span className="fw-bold">
-                              ₹{product.revenue.toLocaleString()}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </Card.Body>
-              </Card>
-            </Col>
-
-            {/* Category Performance */}
-            <Col lg={6} className="mb-4">
-              <Card className="medical-card h-100">
-                <Card.Header className="bg-medical-light">
-                  <h5 className="mb-0">
-                    <i className="bi bi-pie-chart me-2"></i>
-                    Category Performance
-                  </h5>
-                </Card.Header>
-                <Card.Body>
-                  {categoryPerformance.map((category, index) => (
-                    <div key={index} className="mb-4">
-                      <div className="d-flex justify-content-between align-items-center mb-2">
-                        <span className="fw-bold">{category.category}</span>
-                        <div className="text-end">
-                          <div className="fw-bold">
-                            ₹{category.revenue.toLocaleString()}
-                          </div>
-                          <small
-                            className={
-                              category.growth >= 0
-                                ? "text-success"
-                                : "text-danger"
-                            }
-                          >
-                            {category.growth >= 0 ? "+" : ""}
-                            {category.growth}%
-                          </small>
-                        </div>
-                      </div>
-                      <div className="d-flex justify-content-between align-items-center mb-1">
-                        <small className="text-muted">
-                          {category.orders} orders
-                        </small>
-                        <small className="text-muted">
-                          {Math.round((category.orders / 156) * 100)}% of total
-                        </small>
-                      </div>
-                      <ProgressBar
-                        variant={category.growth >= 0 ? "success" : "danger"}
-                        now={(category.orders / 156) * 100}
-                        style={{ height: "6px" }}
-                      />
+                  <div className="d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0">
+                      <i className="bi bi-graph-up me-2"></i>
+                      Analytics Dashboard
+                    </h5>
+                    <div className="d-flex gap-2">
+                      {/* Chart Type Toggle */}
+                      {(activeView === "revenue" ||
+                        activeView === "overview") && (
+                        <ButtonGroup size="sm">
+                          {chartTypes.map((type) => (
+                            <Button
+                              key={type.key}
+                              variant={
+                                chartType === type.key
+                                  ? "primary"
+                                  : "outline-secondary"
+                              }
+                              onClick={() => setChartType(type.key)}
+                              className={
+                                chartType === type.key
+                                  ? "btn-medical-primary"
+                                  : "btn-medical-outline"
+                              }
+                            >
+                              <i className={`${type.icon} me-1`}></i>
+                              {type.label}
+                            </Button>
+                          ))}
+                        </ButtonGroup>
+                      )}
                     </div>
-                  ))}
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-
-          <Row>
-            {/* Performance Metrics */}
-            <Col lg={8} className="mb-4">
-              <Card className="medical-card h-100">
-                <Card.Header className="bg-medical-light">
-                  <h5 className="mb-0">
-                    <i className="bi bi-graph-up-arrow me-2"></i>
-                    Performance Metrics
-                  </h5>
+                  </div>
                 </Card.Header>
-                <Card.Body>
-                  <Row>
-                    <Col md={6} className="mb-4">
-                      <h6>Customer Metrics</h6>
-                      <div className="mb-3">
-                        <div className="d-flex justify-content-between mb-1">
-                          <span>Total Customers</span>
-                          <span className="fw-bold">
-                            {salesData.totalCustomers}
-                          </span>
-                        </div>
-                        <ProgressBar variant="primary" now={100} />
-                      </div>
-                      <div className="mb-3">
-                        <div className="d-flex justify-content-between mb-1">
-                          <span>Repeat Customer Rate</span>
-                          <span className="fw-bold">
-                            {salesData.repeatCustomerRate}%
-                          </span>
-                        </div>
-                        <ProgressBar
-                          variant="success"
-                          now={salesData.repeatCustomerRate}
-                        />
-                      </div>
-                      <div className="mb-3">
-                        <div className="d-flex justify-content-between mb-1">
-                          <span>Conversion Rate</span>
-                          <span className="fw-bold">
-                            {salesData.conversionRate}%
-                          </span>
-                        </div>
-                        <ProgressBar
-                          variant="warning"
-                          now={salesData.conversionRate * 10}
-                        />
-                      </div>
-                    </Col>
-                    <Col md={6} className="mb-4">
-                      <h6>Sales Metrics</h6>
-                      <div className="mb-3">
-                        <div className="d-flex justify-content-between mb-1">
-                          <span>Monthly Growth</span>
-                          <span className="fw-bold">
-                            +{salesData.monthlyGrowth}%
-                          </span>
-                        </div>
-                        <ProgressBar
-                          variant="success"
-                          now={salesData.monthlyGrowth * 5}
-                        />
-                      </div>
-                      <div className="mb-3">
-                        <div className="d-flex justify-content-between mb-1">
-                          <span>Order Fulfillment</span>
-                          <span className="fw-bold">94%</span>
-                        </div>
-                        <ProgressBar variant="info" now={94} />
-                      </div>
-                      <div className="mb-3">
-                        <div className="d-flex justify-content-between mb-1">
-                          <span>Customer Satisfaction</span>
-                          <span className="fw-bold">88%</span>
-                        </div>
-                        <ProgressBar variant="success" now={88} />
-                      </div>
-                    </Col>
-                  </Row>
-                </Card.Body>
+                <Card.Body>{renderChart()}</Card.Body>
               </Card>
             </Col>
 
-            {/* Recent Activity */}
-            <Col lg={4} className="mb-4">
+            <Col lg={4}>
               <Card className="medical-card h-100">
                 <Card.Header className="bg-medical-light">
                   <h5 className="mb-0">
-                    <i className="bi bi-activity me-2"></i>
-                    Recent Activity
+                    <i className="bi bi-toggles me-2"></i>
+                    View Options
                   </h5>
                 </Card.Header>
                 <Card.Body>
-                  {recentActivity.map((activity, index) => (
-                    <div
-                      key={index}
-                      className="d-flex align-items-start mb-3 pb-3 border-bottom"
-                    >
-                      <i
-                        className={`${getActivityIcon(activity.type)} me-3 mt-1`}
-                      ></i>
-                      <div className="flex-grow-1">
-                        <p className="mb-1 small">{activity.message}</p>
-                        {activity.amount && (
-                          <p className="mb-1 fw-bold text-success">
-                            ₹{activity.amount}
-                          </p>
+                  <div className="d-grid gap-2">
+                    {viewOptions.map((option) => (
+                      <Button
+                        key={option.key}
+                        variant={
+                          activeView === option.key
+                            ? "primary"
+                            : "outline-secondary"
+                        }
+                        onClick={() => setActiveView(option.key)}
+                        className={`text-start ${
+                          activeView === option.key
+                            ? "btn-medical-primary"
+                            : "btn-medical-outline"
+                        }`}
+                      >
+                        <i className={`${option.icon} me-2`}></i>
+                        {option.label}
+                        {activeView === option.key && (
+                          <Badge bg="light" text="dark" className="ms-2">
+                            Active
+                          </Badge>
                         )}
-                        <small className="text-muted">{activity.time}</small>
-                      </div>
-                    </div>
-                  ))}
+                      </Button>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 p-3 bg-light rounded">
+                    <h6 className="mb-3">Current View Info:</h6>
+                    <p className="small mb-0">
+                      {activeView === "overview" &&
+                        "Complete business overview with all key metrics"}
+                      {activeView === "revenue" &&
+                        "Detailed revenue analysis over time"}
+                      {activeView === "orders" && "Order patterns and trends"}
+                      {activeView === "categories" &&
+                        "Product category performance breakdown"}
+                      {activeView === "payments" &&
+                        "Payment status and method analysis"}
+                      {activeView === "products" &&
+                        "Individual product performance metrics"}
+                    </p>
+                  </div>
                 </Card.Body>
               </Card>
             </Col>
