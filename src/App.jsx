@@ -25,6 +25,7 @@ import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
 import UserDashboard from "./pages/UserDashboard.jsx";
+import InvoiceView from "./pages/InvoiceView.jsx";
 import NotFound from "./pages/NotFound.jsx";
 
 // Styles
@@ -88,6 +89,7 @@ function App() {
             <Route path="/order" element={<Order />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/invoice/:orderId" element={<InvoiceView />} />
 
             {/* Auth Routes (redirect if already authenticated) */}
             <Route
