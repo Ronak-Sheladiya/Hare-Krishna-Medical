@@ -7,7 +7,6 @@ import {
   Button,
   Table,
   Badge,
-  ProgressBar,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -21,8 +20,6 @@ const UserDashboard = () => {
     pendingOrders: 2,
     completedOrders: 9,
     cancelledOrders: 1,
-    totalSpent: 2356.75,
-    loyaltyPoints: 156,
     invoicesCount: 10,
   };
 
@@ -93,16 +90,6 @@ const UserDashboard = () => {
         return "secondary";
     }
   };
-
-  const calculateLoyaltyLevel = (points) => {
-    if (points >= 500)
-      return { level: "Gold", progress: 100, next: "Platinum" };
-    if (points >= 200)
-      return { level: "Silver", progress: (points / 500) * 100, next: "Gold" };
-    return { level: "Bronze", progress: (points / 200) * 100, next: "Silver" };
-  };
-
-  const loyaltyInfo = calculateLoyaltyLevel(userStats.loyaltyPoints);
 
   return (
     <div className="fade-in">
@@ -196,13 +183,15 @@ const UserDashboard = () => {
                   <div className="d-flex justify-content-between align-items-start">
                     <div>
                       <h3 className="text-success">
-                        ₹{userStats.totalSpent.toLocaleString()}
+                        {userStats.completedOrders}
                       </h3>
-                      <p className="text-muted mb-0">Total Spent</p>
-                      <small className="text-success">All time purchases</small>
+                      <p className="text-muted mb-0">Completed Orders</p>
+                      <small className="text-success">
+                        Successfully delivered
+                      </small>
                     </div>
                     <div className="bg-success text-white rounded-circle p-3">
-                      <i className="bi bi-currency-rupee fs-4"></i>
+                      <i className="bi bi-check-circle fs-4"></i>
                     </div>
                   </div>
                 </Card.Body>
@@ -215,70 +204,17 @@ const UserDashboard = () => {
                   <div className="d-flex justify-content-between align-items-start">
                     <div>
                       <h3 className="text-medical-red">
-                        {userStats.loyaltyPoints}
+                        {userStats.invoicesCount}
                       </h3>
-                      <p className="text-muted mb-0">Loyalty Points</p>
+                      <p className="text-muted mb-0">Total Invoices</p>
                       <small className="text-medical-red">
-                        {loyaltyInfo.level} member
+                        Available for download
                       </small>
                     </div>
                     <div className="bg-medical-red text-white rounded-circle p-3">
-                      <i className="bi bi-star fs-4"></i>
+                      <i className="bi bi-receipt fs-4"></i>
                     </div>
                   </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-
-          {/* Loyalty Status */}
-          <Row className="mb-4">
-            <Col lg={12}>
-              <Card className="medical-card">
-                <Card.Header className="bg-medical-light">
-                  <h5 className="mb-0">
-                    <i className="bi bi-trophy me-2"></i>
-                    Loyalty Status
-                  </h5>
-                </Card.Header>
-                <Card.Body>
-                  <Row className="align-items-center">
-                    <Col md={8}>
-                      <div className="d-flex justify-content-between align-items-center mb-2">
-                        <span className="fw-bold">
-                          Current Level: {loyaltyInfo.level}
-                        </span>
-                        <span className="text-muted">
-                          Next: {loyaltyInfo.next}
-                        </span>
-                      </div>
-                      <ProgressBar
-                        variant="warning"
-                        now={loyaltyInfo.progress}
-                        className="mb-2"
-                        style={{ height: "8px" }}
-                      />
-                      <small className="text-muted">
-                        {userStats.loyaltyPoints} points earned •{" "}
-                        {loyaltyInfo.level === "Bronze"
-                          ? 200 - userStats.loyaltyPoints
-                          : loyaltyInfo.level === "Silver"
-                            ? 500 - userStats.loyaltyPoints
-                            : 0}{" "}
-                        points to next level
-                      </small>
-                    </Col>
-                    <Col md={4} className="text-md-end">
-                      <Button
-                        size="sm"
-                        variant="outline-warning"
-                        className="btn-medical-outline"
-                      >
-                        <i className="bi bi-gift me-2"></i>
-                        Redeem Points
-                      </Button>
-                    </Col>
-                  </Row>
                 </Card.Body>
               </Card>
             </Col>
@@ -456,6 +392,8 @@ const UserDashboard = () => {
                           size="sm"
                           variant="outline-primary"
                           className="btn-medical-outline"
+                          as={Link}
+                          to={`/invoice/${invoice.orderId}`}
                         >
                           <i className="bi bi-download"></i>
                         </Button>
