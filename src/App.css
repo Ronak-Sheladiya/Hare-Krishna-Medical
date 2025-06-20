@@ -1,397 +1,511 @@
-/* Medical Website Specific Styles */
+/* Existing CSS preserved, adding print and layout fixes */
 
-/* Section Spacing */
+/* Print Invoice Styles */
+@media print {
+  /* Hide everything except invoice content */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Hide header, footer, and navigation */
+  .medical-header,
+  .medical-footer,
+  nav,
+  .navbar {
+    display: none !important;
+  }
+
+  /* Make invoice full width for print */
+  .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Remove shadows and borders for print */
+  .card,
+  .medical-card {
+    box-shadow: none !important;
+    border: 1px solid #000 !important;
+    margin: 0 !important;
+  }
+
+  /* Ensure good contrast for print */
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    color: #000 !important;
+    background: white !important;
+  }
+
+  /* Page breaks */
+  .invoice-section {
+    page-break-inside: avoid;
+  }
+
+  /* Remove margins for full page print */
+  @page {
+    margin: 0.5in;
+    size: A4;
+  }
+
+  /* Print-specific table styling */
+  .table {
+    border-collapse: collapse !important;
+    font-size: 11px !important;
+  }
+
+  .table th,
+  .table td {
+    border: 1px solid #000 !important;
+    padding: 6px !important;
+    word-wrap: break-word !important;
+  }
+
+  /* Ensure colors print correctly */
+  .text-medical-red {
+    color: #dc3545 !important;
+  }
+
+  .text-success {
+    color: #28a745 !important;
+  }
+
+  .text-info {
+    color: #17a2b8 !important;
+  }
+
+  /* Invoice specific print styles */
+  .invoice-header-right {
+    page-break-inside: avoid;
+  }
+
+  .customer-section,
+  .payment-section,
+  .items-section,
+  .totals-section {
+    page-break-inside: avoid;
+    margin-bottom: 20px !important;
+  }
+
+  /* Safe print spacing */
+  .invoice-content {
+    padding: 20px !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Layout fixes for overlapping issues */
 .section-padding {
-  padding: 5rem 0;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
 }
 
 .section-padding-sm {
-  padding: 3rem 0;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
 }
 
-/* Typography */
-.section-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--color-dark-1);
-  margin-bottom: 1rem;
-  text-align: center;
-  position: relative;
+/* Sticky positioning fixes */
+.cart-summary-sticky {
+  position: sticky;
+  top: 120px;
+  z-index: 10;
 }
 
-.section-title::after {
-  content: "";
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(
-    90deg,
-    var(--color-medical-red),
-    var(--color-medical-blue)
-  );
-  border-radius: 2px;
+.order-summary-sticky {
+  position: sticky;
+  top: 120px;
+  z-index: 10;
 }
 
-.section-subtitle {
-  font-size: 1.1rem;
-  color: var(--color-gray-1);
-  text-align: center;
-  margin-bottom: 3rem;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* Features Section */
-.feature-icon {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(
-    135deg,
-    var(--color-medical-red),
-    var(--color-medical-blue)
-  );
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-white);
-  font-size: 2rem;
-  margin: 0 auto 1.5rem;
-  transition: all 0.3s ease;
-}
-
-.feature-icon:hover {
-  transform: scale(1.1) rotate(5deg);
-}
-
-/* Product Grid */
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
-}
-
-/* Contact Info Cards */
-.contact-card {
-  background: var(--color-white);
-  padding: 2rem;
-  border-radius: 15px;
-  text-align: center;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  border: 1px solid var(--color-light-2);
-}
-
-.contact-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-}
-
-.contact-icon {
-  width: 60px;
-  height: 60px;
-  background: var(--color-medical-red);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-white);
-  font-size: 1.5rem;
-  margin: 0 auto 1rem;
-}
-
-/* Stats Section */
-.stats-section {
-  background: linear-gradient(135deg, var(--color-dark-1), var(--color-dark-2));
-  color: var(--color-white);
-}
-
-.stat-item {
-  text-align: center;
-  padding: 2rem 1rem;
-}
-
-.stat-number {
-  font-size: 3rem;
-  font-weight: 700;
-  color: var(--color-medical-red);
-  display: block;
-  line-height: 1;
-}
-
-.stat-label {
-  font-size: 1.1rem;
-  color: var(--color-light-1);
-  margin-top: 0.5rem;
-}
-
-/* CTA Section */
-.cta-section {
-  background: linear-gradient(
-    135deg,
-    var(--color-medical-red),
-    var(--color-medical-blue)
-  );
-  color: var(--color-white);
-}
-
-.cta-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-}
-
-.cta-subtitle {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  opacity: 0.9;
-}
-
-/* About Section */
-.about-content {
-  font-size: 1.1rem;
-  line-height: 1.8;
-  color: var(--color-gray-1);
-}
-
-.about-highlight {
-  background: var(--color-light-3);
-  padding: 2rem;
-  border-radius: 15px;
-  border-left: 4px solid var(--color-medical-red);
-  margin: 2rem 0;
-}
-
-/* Service Cards */
-.service-card {
-  background: var(--color-white);
-  padding: 2.5rem 2rem;
-  border-radius: 15px;
-  text-align: center;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  border: 1px solid var(--color-light-2);
-  height: 100%;
-}
-
-.service-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-}
-
-.service-card h4 {
-  color: var(--color-dark-2);
-  margin: 1.5rem 0 1rem;
-  font-weight: 600;
-}
-
-.service-card p {
-  color: var(--color-gray-1);
-  line-height: 1.6;
-}
-
-/* Breadcrumb */
+/* Header spacing to prevent overlap */
 .medical-breadcrumb {
-  background: var(--color-light-3);
-  padding: 1rem 0;
+  margin-top: 20px;
 }
 
-.breadcrumb {
-  background: transparent;
-  margin: 0;
+/* Ensure proper spacing for all content */
+main {
+  padding-top: 0;
+  min-height: calc(100vh - 200px);
 }
 
-.breadcrumb-item a {
-  color: var(--color-gray-1);
-  text-decoration: none;
+/* Fade in animation */
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
 }
 
-.breadcrumb-item a:hover {
-  color: var(--color-medical-red);
-}
-
-.breadcrumb-item.active {
-  color: var(--color-dark-2);
-}
-
-/* Form Styles */
-.medical-form {
-  background: var(--color-white);
-  padding: 2.5rem;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-.form-label {
-  color: var(--color-dark-2);
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.form-control {
-  border: 2px solid var(--color-light-2);
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  transition: all 0.3s ease;
-}
-
-.form-control:focus {
-  border-color: var(--color-medical-red);
-  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
-}
-
-/* Utility Classes */
-.text-medical-red {
-  color: var(--color-medical-red) !important;
-}
-
-.text-medical-blue {
-  color: var(--color-medical-blue) !important;
-}
-
-.text-medical-green {
-  color: var(--color-medical-green) !important;
-}
-
-.bg-medical-light {
-  background-color: var(--color-light-3) !important;
-}
-
-.border-medical {
-  border-color: var(--color-medical-red) !important;
-}
-
-/* Social Media Icons */
-.social-icons {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-top: 1rem;
-}
-
-.social-icon {
-  width: 45px;
-  height: 45px;
-  background: var(--color-gray-2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-white);
-  font-size: 1.2rem;
-  transition: all 0.3s ease;
-  text-decoration: none;
-}
-
-.social-icon:hover {
-  transform: translateY(-3px);
-  color: var(--color-white);
-}
-
-.social-icon.instagram:hover {
-  background: linear-gradient(
-    45deg,
-    #f09433,
-    #e6683c,
-    #dc2743,
-    #cc2366,
-    #bc1888
-  );
-}
-
-.social-icon.facebook:hover {
-  background: #1877f2;
-}
-
-.social-icon.email:hover {
-  background: var(--color-medical-red);
-}
-
-/* Responsive Utilities */
-@media (max-width: 992px) {
-  .section-title {
-    font-size: 2rem;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
-
-  .hero-section {
-    min-height: 60vh;
-  }
-
-  .stats-section .stat-number {
-    font-size: 2.5rem;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@media (max-width: 576px) {
-  .section-padding {
-    padding: 3rem 0;
-  }
-
-  .section-title {
-    font-size: 1.8rem;
-  }
-
-  .medical-form {
-    padding: 1.5rem;
-  }
-
-  .products-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-}
-
-/* Message Link Styles */
-.message-link {
-  color: var(--color-dark-1) !important;
-  transition: all 0.3s ease;
-}
-
-.message-link:hover {
-  color: var(--color-medical-red) !important;
-  transform: scale(1.1);
-}
-
-/* Cart Link Styles */
-.cart-link {
-  color: var(--color-dark-1) !important;
-  transition: all 0.3s ease;
-}
-
-.cart-link:hover {
-  color: var(--color-medical-red) !important;
-  transform: scale(1.1);
-}
-
-/* Contact Form Styles */
+/* Contact form card styles */
 .contact-form-card {
-  background: var(--color-white);
+  background: #ffffff;
   border-radius: 15px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   border: none;
-  max-width: 600px;
-  margin: 0 auto;
+  overflow: hidden;
+}
+
+.contact-form-card .card-header {
+  background: linear-gradient(135deg, #e63946, #dc3545);
+  color: white;
+  border: none;
+  padding: 2rem;
+}
+
+.contact-form-card .card-body {
+  padding: 2rem;
 }
 
 .contact-form-card .form-control {
-  border: 2px solid var(--color-light-2);
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  padding: 12px 15px;
+  font-size: 16px;
   transition: all 0.3s ease;
 }
 
 .contact-form-card .form-control:focus {
-  border-color: var(--color-medical-red);
-  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+  border-color: #e63946;
+  box-shadow: 0 0 0 0.2rem rgba(230, 57, 70, 0.25);
 }
 
-.contact-form-card .form-label {
-  color: var(--color-dark-2);
+.contact-form-card .btn-medical-primary {
+  background: linear-gradient(135deg, #e63946, #dc3545);
+  border: none;
+  border-radius: 25px;
+  padding: 12px 30px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.contact-form-card .btn-medical-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(230, 57, 70, 0.3);
+}
+
+/* Medical theme colors */
+:root {
+  --medical-red: #e63946;
+  --medical-blue: #457b9d;
+  --medical-green: #2a9d8f;
+  --medical-gray: #6c757d;
+  --medical-light: #f8f9fa;
+}
+
+.text-medical-red {
+  color: var(--medical-red) !important;
+}
+
+.text-medical-blue {
+  color: var(--medical-blue) !important;
+}
+
+.bg-medical-red {
+  background-color: var(--medical-red) !important;
+}
+
+.bg-medical-blue {
+  background-color: var(--medical-blue) !important;
+}
+
+.bg-medical-light {
+  background-color: var(--medical-light) !important;
+}
+
+.btn-medical-primary {
+  background-color: var(--medical-red);
+  border-color: var(--medical-red);
+  color: white;
+}
+
+.btn-medical-primary:hover {
+  background-color: #d32f2f;
+  border-color: #d32f2f;
+  color: white;
+}
+
+.btn-medical-outline {
+  border-color: var(--medical-red);
+  color: var(--medical-red);
+}
+
+.btn-medical-outline:hover {
+  background-color: var(--medical-red);
+  border-color: var(--medical-red);
+  color: white;
+}
+
+.medical-card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.medical-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive design improvements */
+@media (max-width: 768px) {
+  .section-padding {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .cart-summary-sticky,
+  .order-summary-sticky {
+    position: relative;
+    top: auto;
+  }
+
+  .contact-form-card .card-header {
+    padding: 1.5rem;
+  }
+
+  .contact-form-card .card-body {
+    padding: 1.5rem;
+  }
+}
+
+/* Loading spinner styles */
+.spinner-border-medical {
+  color: var(--medical-red);
+}
+
+/* Form validation styles */
+.was-validated .form-control:valid {
+  border-color: var(--medical-green);
+}
+
+.was-validated .form-control:invalid {
+  border-color: var(--medical-red);
+}
+
+/* Table responsive improvements */
+.table-responsive {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* Badge styles */
+.badge {
   font-weight: 500;
-  margin-bottom: 0.5rem;
+  font-size: 0.75em;
+}
+
+/* Custom alert styles */
+.alert {
+  border-radius: 10px;
+  border: none;
+}
+
+/* Progress bar styles */
+.progress {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* Modal improvements */
+.modal-content {
+  border-radius: 15px;
+  border: none;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  border-bottom: 1px solid #e9ecef;
+  border-radius: 15px 15px 0 0;
+}
+
+.modal-footer {
+  border-top: 1px solid #e9ecef;
+  border-radius: 0 0 15px 15px;
+}
+
+/* Breadcrumb styles */
+.medical-breadcrumb {
+  background: var(--medical-light);
+  padding: 1rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.breadcrumb {
+  margin-bottom: 0;
+  background: transparent;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  content: "›";
+  color: var(--medical-gray);
+}
+
+/* Header and footer styles */
+.medical-header {
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.medical-footer {
+  background: #2c3e50;
+  color: white;
+  padding: 3rem 0 1rem;
+}
+
+.medical-footer a {
+  color: #bdc3c7;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.medical-footer a:hover {
+  color: white;
+}
+
+/* Logo styles */
+.medical-logo {
+  height: 50px;
+  width: auto;
+}
+
+/* Social icons */
+.social-icons a {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  border-radius: 50%;
+  margin-right: 10px;
+  transition: all 0.3s ease;
+}
+
+.social-icon.instagram {
+  background: #e4405f;
+  color: white;
+}
+
+.social-icon.email {
+  background: #34495e;
+  color: white;
+}
+
+.social-icon.facebook {
+  background: #3b5998;
+  color: white;
+}
+
+.social-icons a:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Product card styles */
+.product-card {
+  transition: all 0.3s ease;
+  border: none;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.product-image {
+  height: 200px;
+  object-fit: cover;
+  width: 100%;
+}
+
+/* Cart and checkout improvements */
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quantity-controls .btn {
+  width: 35px;
+  height: 35px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Timeline styles */
+.timeline {
+  position: relative;
+  padding-left: 30px;
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.timeline-item:not(:last-child):before {
+  content: "";
+  position: absolute;
+  left: -19px;
+  top: 25px;
+  width: 2px;
+  height: calc(100% - 20px);
+  background-color: #e9ecef;
+}
+
+.timeline-item.completed:not(:last-child):before {
+  background-color: var(--medical-red);
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -30px;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+}
+
+.timeline-item.completed .timeline-marker i {
+  color: var(--medical-red);
+  font-size: 16px;
+}
+
+.timeline-item.pending .timeline-marker i {
+  color: #6c757d;
+  font-size: 16px;
+}
+
+.timeline-content h6 {
+  color: var(--medical-red);
+  margin-bottom: 4px;
+}
+
+.timeline-item.pending .timeline-content h6 {
+  color: #6c757d;
 }
