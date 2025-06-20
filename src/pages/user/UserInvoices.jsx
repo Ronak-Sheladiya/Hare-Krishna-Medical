@@ -249,7 +249,7 @@ const UserInvoices = () => {
     // Use React to render the component to HTML string
     const { createRoot } = await import("react-dom/client");
     const ProfessionalInvoice = (
-      await import("../components/common/ProfessionalInvoice.jsx")
+      await import("../../components/common/ProfessionalInvoice.jsx")
     ).default;
 
     const root = createRoot(tempDiv);
