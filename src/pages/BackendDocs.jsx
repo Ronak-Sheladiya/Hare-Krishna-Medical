@@ -644,7 +644,7 @@ This documentation provides a comprehensive guide for implementing the backend s
 │   │   ├── UserOrders.jsx              # User order history
 │   │   └── UserProfile.jsx             # Profile editing
 │   ├── About.jsx                       # About page
-│   ├── AdminDashboard.jsx              # Admin dashboard
+���   ├── AdminDashboard.jsx              # Admin dashboard
 │   ├── BackendDocs.jsx                 # This documentation
 │   ├── Cart.jsx                        # Shopping cart
 │   ├── Contact.jsx                     # Contact form
@@ -1288,6 +1288,34 @@ S3_BUCKET_NAME=hkmed-assets`}</pre>
       </Container>
 
       <style>{`
+        /* File Structure Styles */
+        .structure-section {
+          margin-bottom: 30px;
+        }
+
+        .file-descriptions .file-list {
+          list-style: none;
+          padding-left: 0;
+        }
+
+        .file-descriptions .file-list li {
+          padding: 8px 0;
+          border-bottom: 1px solid #f8f9fa;
+          position: relative;
+          padding-left: 25px;
+        }
+
+        .file-descriptions .file-list li:before {
+          content: "📄";
+          position: absolute;
+          left: 0;
+          top: 8px;
+        }
+
+        .file-descriptions .file-list li:last-child {
+          border-bottom: none;
+        }
+
         .tech-item {
           margin-bottom: 10px;
           display: flex;
@@ -1306,7 +1334,7 @@ S3_BUCKET_NAME=hkmed-assets`}</pre>
         }
 
         .feature-list li:before {
-          content: "✓";
+          content: "��";
           position: absolute;
           left: 0;
           color: var(--medical-red);
