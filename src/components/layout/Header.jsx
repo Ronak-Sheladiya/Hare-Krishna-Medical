@@ -18,6 +18,7 @@ const Header = () => {
   const dispatch = useDispatch();
   const { totalItems } = useSelector((state) => state.cart);
   const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { unreadCount } = useSelector((state) => state.messages);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const isActiveRoute = (path) => {
