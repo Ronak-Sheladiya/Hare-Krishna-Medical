@@ -180,6 +180,8 @@ const Order = () => {
       orderDate: new Date().toLocaleDateString(),
       orderTime: new Date().toLocaleTimeString(),
       status: "Pending",
+      paymentMethod: paymentMethod,
+      paymentStatus: paymentMethod === "cod" ? "Unpaid" : "Paid",
       qrCode: qrCodeData,
     };
 
