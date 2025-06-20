@@ -375,11 +375,7 @@ const Order = () => {
       pdf.setTextColor(...lightColor);
       pdf.setFontSize(8);
       pdf.setFont("helvetica", "normal");
-      pdf.text(
-        "Thank you for choosing Hare Krishna Medical!",
-        margin,
-        yPosition,
-      );
+      pdf.text("Thank you for choosing Hare Krishna Medical!", margin, yPosition);
       pdf.text(
         "For any queries, contact: harekrishnamedical@gmail.com",
         margin,
@@ -606,10 +602,8 @@ const Order = () => {
 
               {/* Order Summary */}
               <Col lg={4}>
-                <Card
-                  className="medical-card sticky-top"
-                  style={{ top: "100px" }}
-                >
+                <div style={{ position: "sticky", top: "120px", zIndex: 10 }}>
+                <Card className="medical-card">
                   <Card.Header className="bg-medical-light">
                     <h5 className="mb-0">
                       <i className="bi bi-receipt me-2"></i>
