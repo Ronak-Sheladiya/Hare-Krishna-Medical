@@ -9,13 +9,20 @@ import {
   Badge,
   Form,
   InputGroup,
+  Modal,
+  ProgressBar,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const UserInvoices = () => {
   const [invoices, setInvoices] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [bulkDownloading, setBulkDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [showBulkModal, setShowBulkModal] = useState(false);
 
   // Mock invoices data
   const mockInvoices = [
@@ -122,6 +129,132 @@ const UserInvoices = () => {
   };
 
   const stats = getDownloadStats();
+
+  const handleBulkDownload = async () => {
+    if (filteredInvoices.length === 0) {
+      alert("No invoices to download");
+      return;
+    }
+
+    setShowBulkModal(true);
+    setBulkDownloading(true);
+    setDownloadProgress(0);
+
+    try {
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pageHeight = 295;
+      let isFirstPage = true;
+
+      for (let i = 0; i < filteredInvoices.length; i++) {
+        const invoice = filteredInvoices[i];
+
+        // Update progress
+        setDownloadProgress(((i + 1) / filteredInvoices.length) * 100);
+
+        // Create invoice content for each invoice
+        const invoiceHtml = createInvoiceHTML(invoice);
+
+        // Create a temporary div to render the invoice
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = invoiceHtml;
+        tempDiv.style.position = "absolute";
+        tempDiv.style.left = "-9999px";
+        tempDiv.style.width = "210mm";
+        tempDiv.style.padding = "20px";
+        tempDiv.style.backgroundColor = "white";
+        document.body.appendChild(tempDiv);
+
+        // Wait a bit for rendering
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        // Convert to canvas
+        const canvas = await html2canvas(tempDiv, {
+          scale: 2,
+          logging: false,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+        });
+
+        // Remove temporary div
+        document.body.removeChild(tempDiv);
+
+        // Add new page if not first
+        if (!isFirstPage) {
+          pdf.addPage();
+        }
+        isFirstPage = false;
+
+        // Add to PDF
+        const imgData = canvas.toDataURL("image/png");
+        const imgWidth = 210;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      }
+
+      // Download the combined PDF
+      pdf.save(`All_Invoices_${new Date().toISOString().split("T")[0]}.pdf`);
+    } catch (error) {
+      console.error("Error generating bulk PDF:", error);
+      alert(
+        "Error generating PDF. Please try downloading individual invoices.",
+      );
+    } finally {
+      setBulkDownloading(false);
+      setDownloadProgress(0);
+      setTimeout(() => setShowBulkModal(false), 1000);
+    }
+  };
+
+  const createInvoiceHTML = (invoice) => {
+    return `
+      <div style="font-family: Arial, sans-serif; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #dc3545; margin-bottom: 10px;">HARE KRISHNA MEDICAL</h1>
+          <p style="color: #6c757d;">Your Trusted Health Partner</p>
+          <div style="margin-top: 20px;">
+            <h2 style="color: #dc3545;">INVOICE</h2>
+            <p><strong>Invoice #:</strong> ${invoice.id}</p>
+            <p><strong>Order #:</strong> ${invoice.orderId}</p>
+            <p><strong>Date:</strong> ${invoice.date}</p>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+          <h3 style="color: #dc3545; margin-bottom: 15px;">Bill To:</h3>
+          <p><strong>${invoice.customerName}</strong></p>
+          <p>john.doe@example.com</p>
+          <p>+91 9876543210</p>
+          <p>123 Medical Street, Surat, Gujarat 395007</p>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+          <h3 style="color: #dc3545; margin-bottom: 15px;">Invoice Details:</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr style="background-color: #f8f9fa;">
+              <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left;">Description</th>
+              <th style="border: 1px solid #dee2e6; padding: 8px; text-align: center;">Qty</th>
+              <th style="border: 1px solid #dee2e6; padding: 8px; text-align: right;">Amount</th>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #dee2e6; padding: 8px;">Medical Products (${invoice.items} items)</td>
+              <td style="border: 1px solid #dee2e6; padding: 8px; text-align: center;">${invoice.items}</td>
+              <td style="border: 1px solid #dee2e6; padding: 8px; text-align: right;">₹${invoice.amount.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #dee2e6; padding: 8px;" colspan="2"><strong>Total Amount:</strong></td>
+              <td style="border: 1px solid #dee2e6; padding: 8px; text-align: right;"><strong>₹${invoice.amount.toFixed(2)}</strong></td>
+            </tr>
+          </table>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+          <p><strong>Thank you for choosing Hare Krishna Medical!</strong></p>
+          <p style="color: #6c757d;">For any queries, contact us at harekrishnamedical@gmail.com</p>
+        </div>
+      </div>
+    `;
+  };
 
   return (
     <div className="fade-in">
@@ -255,7 +388,7 @@ const UserInvoices = () => {
                         </td>
                         <td>
                           <Link
-                            to={`/user/orders/${invoice.orderId}`}
+                            to={`/order/${invoice.orderId}`}
                             className="text-decoration-none"
                           >
                             {invoice.orderId}
@@ -350,19 +483,17 @@ const UserInvoices = () => {
                       <Button
                         variant="outline-primary"
                         className="btn-medical-outline"
-                        onClick={() => {
-                          invoices.forEach((invoice) => {
-                            setTimeout(() => {
-                              window.open(
-                                `/invoice/${invoice.orderId}`,
-                                "_blank",
-                              );
-                            }, 500);
-                          });
-                        }}
+                        onClick={handleBulkDownload}
+                        disabled={
+                          bulkDownloading || filteredInvoices.length === 0
+                        }
                       >
-                        <i className="bi bi-download me-2"></i>
-                        Download All (PDF)
+                        <i
+                          className={`bi bi-${bulkDownloading ? "hourglass-split" : "download"} me-2`}
+                        ></i>
+                        {bulkDownloading
+                          ? "Generating PDF..."
+                          : "Download All (PDF)"}
                       </Button>
                     </Col>
                   </Row>
@@ -372,6 +503,34 @@ const UserInvoices = () => {
           </Row>
         </Container>
       </section>
+
+      {/* Bulk Download Progress Modal */}
+      <Modal show={showBulkModal} centered backdrop="static" keyboard={false}>
+        <Modal.Header>
+          <Modal.Title>Generating PDF</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="text-center">
+            <i className="bi bi-file-earmark-pdf display-1 text-danger mb-3"></i>
+            <h5>Creating Combined Invoice PDF</h5>
+            <p className="text-muted mb-3">
+              Processing {filteredInvoices.length} invoice(s)...
+            </p>
+            <ProgressBar
+              now={downloadProgress}
+              label={`${Math.round(downloadProgress)}%`}
+              className="mb-3"
+              style={{ height: "25px" }}
+            />
+            {downloadProgress === 100 && !bulkDownloading && (
+              <div className="text-success">
+                <i className="bi bi-check-circle me-2"></i>
+                PDF generated successfully!
+              </div>
+            )}
+          </div>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };

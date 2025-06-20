@@ -11,6 +11,7 @@ import {
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../store/slices/authSlice.js";
+import NotificationSystem from "../common/NotificationSystem.jsx";
 
 const Header = () => {
   const location = useLocation();
@@ -135,36 +136,8 @@ const Header = () => {
                 )}
               </Nav.Link>
 
-              {/* Messages Icon for Admin */}
-              {isAuthenticated && user?.role === 1 && (
-                <Nav.Link
-                  as={Link}
-                  to="/admin/messages"
-                  className="position-relative me-3 message-link"
-                  title="Messages"
-                >
-                  <i className="bi bi-envelope fs-5"></i>
-                  {unreadCount > 0 && (
-                    <Badge
-                      bg="danger"
-                      className="position-absolute"
-                      style={{
-                        top: "-8px",
-                        right: "-8px",
-                        fontSize: "0.75rem",
-                        minWidth: "20px",
-                        height: "20px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: "50%",
-                      }}
-                    >
-                      {unreadCount}
-                    </Badge>
-                  )}
-                </Nav.Link>
-              )}
+              {/* Real-time Notifications for Admin */}
+              {isAuthenticated && user?.role === 1 && <NotificationSystem />}
 
               {/* Authentication Buttons/User Menu */}
               {isAuthenticated ? (
@@ -251,6 +224,10 @@ const Header = () => {
                         <Dropdown.Item as={Link} to="/admin/orders">
                           <i className="bi bi-list-check me-2"></i>
                           Manage Orders
+                        </Dropdown.Item>
+                        <Dropdown.Item as={Link} to="/admin/invoices">
+                          <i className="bi bi-receipt me-2"></i>
+                          Manage Invoices
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/users">
                           <i className="bi bi-people me-2"></i>

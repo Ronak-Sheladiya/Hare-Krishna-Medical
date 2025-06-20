@@ -105,7 +105,7 @@ const AdminDashboard = () => {
                 <div className="d-flex gap-2">
                   <Button
                     as={Link}
-                    to="/admin/add-product"
+                    to="/admin/products"
                     className="btn-medical-primary"
                   >
                     <i className="bi bi-plus-circle me-2"></i>
@@ -282,7 +282,7 @@ const AdminDashboard = () => {
                     <Col lg={3} md={6} className="mb-3">
                       <Button
                         as={Link}
-                        to="/admin/add-product"
+                        to="/admin/products"
                         variant="outline-primary"
                         className="w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3"
                       >
