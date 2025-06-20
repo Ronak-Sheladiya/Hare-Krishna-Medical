@@ -12,15 +12,13 @@ import {
   Alert,
 } from "react-bootstrap";
 import { useParams, Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { addToCart } from "../store/slices/cartSlice.js";
-import { setSelectedProduct } from "../store/slices/productsSlice.js";
 import ProductCard from "../components/products/ProductCard.jsx";
 
 const ProductDetails = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { selectedProduct } = useSelector((state) => state.products);
   const [quantity, setQuantity] = useState(1);
   const [showAddedAlert, setShowAddedAlert] = useState(false);
 
@@ -364,7 +362,7 @@ const ProductDetails = () => {
                 <div className="price-section mb-4">
                   <div className="d-flex align-items-center mb-2">
                     <span className="product-price me-3">
-                      ���{mockProduct.price}
+                      ₹{mockProduct.price}
                     </span>
                     {mockProduct.originalPrice && (
                       <>
