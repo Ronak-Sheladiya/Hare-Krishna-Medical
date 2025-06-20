@@ -118,10 +118,6 @@ const Login = () => {
     }
   };
 
-  const handleForgotPassword = () => {
-    navigate("/forgot-password");
-  };
-
   const mockCredentials = [
     {
       type: "Admin",
@@ -137,6 +133,15 @@ const Login = () => {
       description: "Access user dashboard",
     },
   ];
+
+  const handleUseCredentials = (credentials) => {
+    setFormData({
+      emailOrMobile: credentials.email,
+      password: credentials.password,
+      rememberMe: false,
+    });
+    setErrors({});
+  };
 
   return (
     <div className="fade-in">
@@ -224,13 +229,12 @@ const Login = () => {
                             />
                           </Col>
                           <Col className="text-end">
-                            <Button
-                              variant="link"
-                              className="p-0 text-medical-red text-decoration-none"
-                              onClick={handleForgotPassword}
+                            <Link
+                              to="/forgot-password"
+                              className="text-medical-red text-decoration-none"
                             >
                               Forgot Password?
-                            </Button>
+                            </Link>
                           </Col>
                         </Row>
 
@@ -290,33 +294,42 @@ const Login = () => {
                           <Card.Body className="p-3">
                             <div className="d-flex justify-content-between align-items-start mb-2">
                               <h6 className="mb-0">{cred.type} Login</h6>
-                              <Link
-                                to="/forgot-password"
-                                className="text-medical-red text-decoration-none"
+                              <Button
+                                size="sm"
+                                className="btn-medical-primary"
+                                onClick={() => handleUseCredentials(cred)}
+                                style={{
+                                  fontSize: "12px",
+                                  padding: "4px 12px",
+                                }}
                               >
-                                Forgot Password?
-                              </Link>
-                              {cred.mobile && (
-                                <p className="mb-1">
-                                  <strong>Mobile:</strong> {cred.mobile}
-                                </p>
-                              )}
-                              <p className="mb-1">
-                                <strong>Password:</strong> {cred.password}
-                              </p>
-                              <p className="text-muted mb-0">
-                                {cred.description}
-                              </p>
+                                <i className="bi bi-arrow-right me-1"></i>
+                                Use
+                              </Button>
                             </div>
+                            <p className="mb-1">
+                              <strong>Email:</strong> {cred.email}
+                            </p>
+                            {cred.mobile && (
+                              <p className="mb-1">
+                                <strong>Mobile:</strong> {cred.mobile}
+                              </p>
+                            )}
+                            <p className="mb-1">
+                              <strong>Password:</strong> {cred.password}
+                            </p>
+                            <p className="text-muted mb-0">
+                              {cred.description}
+                            </p>
                           </Card.Body>
                         </Card>
                       ))}
 
                       <Alert variant="info" className="mt-3">
                         <i className="bi bi-info-circle me-2"></i>
-                        <strong>Note:</strong> This is a demo application. In a
-                        real application, user authentication would be handled
-                        securely with proper encryption and backend validation.
+                        <strong>Note:</strong> This is a demo application. Click
+                        "Use" button above to auto-fill credentials, then click
+                        "Sign In".
                       </Alert>
                     </Card.Body>
                   </Card>
