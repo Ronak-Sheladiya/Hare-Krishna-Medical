@@ -8,6 +8,9 @@ import {
   Button,
   Badge,
   ButtonGroup,
+  Table,
+  Tab,
+  Nav,
 } from "react-bootstrap";
 import {
   LineChart,
@@ -31,6 +34,7 @@ const AdminAnalytics = () => {
   const [dateRange, setDateRange] = useState("30");
   const [activeView, setActiveView] = useState("overview");
   const [chartType, setChartType] = useState("line");
+  const [viewMode, setViewMode] = useState("chart"); // 'chart' or 'table'
 
   // Mock analytics data
   const salesData = {
@@ -80,7 +84,7 @@ const AdminAnalytics = () => {
     { day: "Wed", orders: 15, revenue: 3900 },
     { day: "Thu", orders: 22, revenue: 5800 },
     { day: "Fri", orders: 25, revenue: 6700 },
-    { day: "Sat", reviews: 28, revenue: 7500 },
+    { day: "Sat", orders: 28, revenue: 7500 },
     { day: "Sun", orders: 20, revenue: 5200 },
   ];
 
@@ -313,6 +317,219 @@ const AdminAnalytics = () => {
     }
   };
 
+  const renderTable = () => {
+    switch (activeView) {
+      case "revenue":
+        return (
+          <Table striped bordered hover responsive>
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Revenue (₹)</th>
+                <th>Orders</th>
+                <th>Customers</th>
+                <th>Avg Order Value (₹)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {monthlyRevenueData.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.month}</td>
+                  <td>₹{item.revenue.toLocaleString()}</td>
+                  <td>{item.orders}</td>
+                  <td>{item.customers}</td>
+                  <td>₹{(item.revenue / item.orders).toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        );
+
+      case "orders":
+        return (
+          <Table striped bordered hover responsive>
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Orders</th>
+                <th>Revenue (₹)</th>
+                <th>Avg Order Value (₹)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {weeklyOrdersData.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.day}</td>
+                  <td>{item.orders}</td>
+                  <td>₹{item.revenue.toLocaleString()}</td>
+                  <td>₹{(item.revenue / item.orders).toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        );
+
+      case "categories":
+        return (
+          <Table striped bordered hover responsive>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Percentage (%)</th>
+                <th>Revenue (₹)</th>
+                <th>Growth</th>
+              </tr>
+            </thead>
+            <tbody>
+              {categoryData.map((item, index) => (
+                <tr key={index}>
+                  <td>
+                    <div className="d-flex align-items-center">
+                      <div
+                        className="me-2"
+                        style={{
+                          width: "16px",
+                          height: "16px",
+                          backgroundColor: item.color,
+                          borderRadius: "50%",
+                        }}
+                      ></div>
+                      {item.name}
+                    </div>
+                  </td>
+                  <td>{item.value}%</td>
+                  <td>₹{item.revenue.toLocaleString()}</td>
+                  <td>
+                    <Badge bg="success">
+                      +{(Math.random() * 10 + 5).toFixed(1)}%
+                    </Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        );
+
+      case "payments":
+        return (
+          <Table striped bordered hover responsive>
+            <thead>
+              <tr>
+                <th>Payment Status</th>
+                <th>Count</th>
+                <th>Percentage (%)</th>
+                <th>Amount (₹)</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paymentStatusData.map((item, index) => (
+                <tr key={index}>
+                  <td>
+                    <div className="d-flex align-items-center">
+                      <div
+                        className="me-2"
+                        style={{
+                          width: "16px",
+                          height: "16px",
+                          backgroundColor: item.color,
+                          borderRadius: "50%",
+                        }}
+                      ></div>
+                      {item.name}
+                    </div>
+                  </td>
+                  <td>{item.count}</td>
+                  <td>{item.value}%</td>
+                  <td>₹{(item.count * 293).toLocaleString()}</td>
+                  <td>
+                    {item.name === "Paid" && "Complete payment received"}
+                    {item.name === "Unpaid (COD)" && "Cash on delivery orders"}
+                    {item.name === "Partial" && "Partial payment received"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        );
+
+      case "products":
+        return (
+          <Table striped bordered hover responsive>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Sales</th>
+                <th>Revenue (₹)</th>
+                <th>Profit (₹)</th>
+                <th>Profit Margin (%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {productPerformanceData.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.name}</td>
+                  <td>{item.sales}</td>
+                  <td>₹{item.revenue.toLocaleString()}</td>
+                  <td>₹{item.profit.toLocaleString()}</td>
+                  <td>
+                    <Badge
+                      bg={
+                        (item.profit / item.revenue) * 100 > 30
+                          ? "success"
+                          : "warning"
+                      }
+                    >
+                      {((item.profit / item.revenue) * 100).toFixed(1)}%
+                    </Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        );
+
+      default:
+        return (
+          <Table striped bordered hover responsive>
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Revenue (₹)</th>
+                <th>Orders</th>
+                <th>Customers</th>
+                <th>Growth (%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {monthlyRevenueData.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.month}</td>
+                  <td>₹{item.revenue.toLocaleString()}</td>
+                  <td>{item.orders}</td>
+                  <td>{item.customers}</td>
+                  <td>
+                    <Badge bg="success">
+                      +
+                      {index === 0
+                        ? "0"
+                        : (
+                            (item.revenue /
+                              monthlyRevenueData[index - 1].revenue -
+                              1) *
+                            100
+                          ).toFixed(1)}
+                      %
+                    </Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        );
+    }
+  };
+
   const viewOptions = [
     { key: "overview", label: "Overview", icon: "bi-graph-up" },
     { key: "revenue", label: "Revenue", icon: "bi-currency-rupee" },
@@ -339,7 +556,8 @@ const AdminAnalytics = () => {
                 <div>
                   <h2>Advanced Analytics</h2>
                   <p className="text-muted">
-                    Comprehensive data analysis with interactive charts
+                    Comprehensive data analysis with interactive charts and
+                    tables
                   </p>
                 </div>
                 <div className="d-flex gap-2">
@@ -456,36 +674,60 @@ const AdminAnalytics = () => {
                       <i className="bi bi-graph-up me-2"></i>
                       Analytics Dashboard
                     </h5>
-                    <div className="d-flex gap-2">
-                      {/* Chart Type Toggle */}
-                      {(activeView === "revenue" ||
-                        activeView === "overview") && (
-                        <ButtonGroup size="sm">
-                          {chartTypes.map((type) => (
-                            <Button
-                              key={type.key}
-                              variant={
-                                chartType === type.key
-                                  ? "primary"
-                                  : "outline-secondary"
-                              }
-                              onClick={() => setChartType(type.key)}
-                              className={
-                                chartType === type.key
-                                  ? "btn-medical-primary"
-                                  : "btn-medical-outline"
-                              }
-                            >
-                              <i className={`${type.icon} me-1`}></i>
-                              {type.label}
-                            </Button>
-                          ))}
-                        </ButtonGroup>
-                      )}
+                    <div className="d-flex gap-2 align-items-center">
+                      {/* View Mode Toggle */}
+                      <ButtonGroup size="sm">
+                        <Button
+                          variant={
+                            viewMode === "chart"
+                              ? "primary"
+                              : "outline-secondary"
+                          }
+                          onClick={() => setViewMode("chart")}
+                        >
+                          <i className="bi bi-bar-chart me-1"></i>
+                          Chart
+                        </Button>
+                        <Button
+                          variant={
+                            viewMode === "table"
+                              ? "primary"
+                              : "outline-secondary"
+                          }
+                          onClick={() => setViewMode("table")}
+                        >
+                          <i className="bi bi-table me-1"></i>
+                          Table
+                        </Button>
+                      </ButtonGroup>
+
+                      {/* Chart Type Toggle - Only show for chart mode and relevant views */}
+                      {viewMode === "chart" &&
+                        (activeView === "revenue" ||
+                          activeView === "overview") && (
+                          <ButtonGroup size="sm">
+                            {chartTypes.map((type) => (
+                              <Button
+                                key={type.key}
+                                variant={
+                                  chartType === type.key
+                                    ? "primary"
+                                    : "outline-secondary"
+                                }
+                                onClick={() => setChartType(type.key)}
+                              >
+                                <i className={`${type.icon} me-1`}></i>
+                                {type.label}
+                              </Button>
+                            ))}
+                          </ButtonGroup>
+                        )}
                     </div>
                   </div>
                 </Card.Header>
-                <Card.Body>{renderChart()}</Card.Body>
+                <Card.Body>
+                  {viewMode === "chart" ? renderChart() : renderTable()}
+                </Card.Body>
               </Card>
             </Col>
 
@@ -527,6 +769,10 @@ const AdminAnalytics = () => {
 
                   <div className="mt-4 p-3 bg-light rounded">
                     <h6 className="mb-3">Current View Info:</h6>
+                    <p className="small mb-2">
+                      <strong>Mode:</strong>{" "}
+                      {viewMode === "chart" ? "Chart View" : "Table View"}
+                    </p>
                     <p className="small mb-0">
                       {activeView === "overview" &&
                         "Complete business overview with all key metrics"}
@@ -536,11 +782,32 @@ const AdminAnalytics = () => {
                       {activeView === "categories" &&
                         "Product category performance breakdown"}
                       {activeView === "payments" &&
-                        "Payment status and method analysis"}
+                        "Payment status and method analysis with COD tracking"}
                       {activeView === "products" &&
                         "Individual product performance metrics"}
                     </p>
                   </div>
+
+                  {viewMode === "chart" && (
+                    <div className="mt-3 p-3 bg-light rounded">
+                      <h6 className="mb-2">Chart Controls:</h6>
+                      <p className="small mb-0">
+                        Use the chart type buttons to switch between Line, Area,
+                        and Bar charts for revenue and overview data.
+                      </p>
+                    </div>
+                  )}
+
+                  {viewMode === "table" && (
+                    <div className="mt-3 p-3 bg-light rounded">
+                      <h6 className="mb-2">Table Features:</h6>
+                      <p className="small mb-0">
+                        Detailed tabular data with sorting capabilities and
+                        export options. Perfect for detailed analysis and
+                        reporting.
+                      </p>
+                    </div>
+                  )}
                 </Card.Body>
               </Card>
             </Col>
