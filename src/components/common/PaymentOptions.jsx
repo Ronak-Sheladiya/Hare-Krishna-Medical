@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { Card, Form, Row, Col, Alert, Badge } from "react-bootstrap";
 
-const PaymentOptions = ({ onPaymentMethodChange, selectedMethod = "cod" }) => {
+const PaymentOptions = ({
+  onPaymentMethodChange,
+  selectedMethod = "cod",
+  compact = false,
+}) => {
   const [paymentMethod, setPaymentMethod] = useState(selectedMethod);
 
   const handleMethodChange = (method) => {
@@ -43,6 +47,54 @@ const PaymentOptions = ({ onPaymentMethodChange, selectedMethod = "cod" }) => {
       note: "Instant payment confirmation.",
     },
   ];
+
+  if (compact) {
+    return (
+      <div>
+        <h6 className="mb-3">
+          <i className="bi bi-credit-card-2-front me-2"></i>
+          Payment Method
+        </h6>
+
+        {paymentMethods.map((method) => (
+          <div key={method.id} className="form-check mb-2">
+            <input
+              className="form-check-input"
+              type="radio"
+              name="paymentMethod"
+              id={method.id}
+              value={method.id}
+              checked={paymentMethod === method.id}
+              onChange={() => handleMethodChange(method.id)}
+            />
+            <label className="form-check-label" htmlFor={method.id}>
+              <i className={`${method.icon} me-2`}></i>
+              {method.name}
+              {method.badge && (
+                <Badge
+                  bg={method.badgeColor}
+                  className="ms-2"
+                  style={{ fontSize: "9px" }}
+                >
+                  {method.badge}
+                </Badge>
+              )}
+            </label>
+          </div>
+        ))}
+
+        {paymentMethod === "cod" && (
+          <div className="alert alert-warning mt-2 p-2">
+            <small>
+              <i className="bi bi-info-circle me-1"></i>
+              Payment due on delivery. Order will be marked as "Unpaid" until
+              payment is received.
+            </small>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -165,17 +217,17 @@ const PaymentOptions = ({ onPaymentMethodChange, selectedMethod = "cod" }) => {
           border: 2px solid #e9ecef;
           transition: all 0.3s ease;
         }
-        
+
         .payment-option:hover {
           border-color: #dee2e6;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        
+
         .payment-option.selected {
           border-color: var(--medical-red);
           background-color: #fff5f5;
         }
-        
+
         .payment-note {
           margin-top: 8px;
           padding: 8px 12px;
