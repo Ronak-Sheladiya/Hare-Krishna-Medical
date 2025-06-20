@@ -1,3 +1,6 @@
+/* Import Professional Invoice Styles */
+@import url("./styles/ProfessionalInvoice.css");
+
 /* Existing CSS preserved, adding print and layout fixes */
 
 /* Print Invoice Styles */

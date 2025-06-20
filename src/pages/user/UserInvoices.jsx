@@ -151,8 +151,8 @@ const UserInvoices = () => {
         // Update progress
         setDownloadProgress(((i + 1) / filteredInvoices.length) * 100);
 
-        // Create invoice content for each invoice
-        const invoiceHtml = createInvoiceHTML(invoice);
+        // Create invoice content for each invoice using professional component
+        const invoiceHtml = await createInvoiceHTML(invoice);
 
         // Create a temporary div to render the invoice
         const tempDiv = document.createElement("div");
@@ -206,154 +206,69 @@ const UserInvoices = () => {
     }
   };
 
-  const createInvoiceHTML = (invoice) => {
-    return `
-      <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 210mm; margin: 0 auto; background: white;">
-        <!-- Header Section - Exact PDF Layout -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 20px;">
-          <!-- Left Side - Company Info -->
-          <div style="flex: 1;">
-            <div style="display: flex; align-items: center; margin-bottom: 15px;">
-              <img src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/invoice_hkm12345678-1-e0e726" alt="Hare Krishna Medical Logo" style="height: 60px; width: auto; margin-right: 15px;" onError="this.src='https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800';" />
-              <div>
-                <h1 style="font-size: 24px; font-weight: bold; color: #000; margin: 0; line-height: 1.2;">HARE KRISHNA MEDICAL</h1>
-                <p style="font-size: 12px; color: #666; margin: 2px 0;">Your Trusted Health Partner</p>
-              </div>
-            </div>
-            <div style="font-size: 11px; color: #000; line-height: 1.4;">
-              <div>3 Sahyog Complex, Man Sarovar circle</div>
-              <div>Amroli, 394107, Gujarat, India</div>
-              <div>Phone: +91 76989 13354 | +91 91060 18508</div>
-              <div>Email: harekrishnamedical@gmail.com</div>
-            </div>
-          </div>
-          <!-- Right Side - Invoice Info -->
-          <div style="text-align: right; min-width: 200px;">
-            <h1 style="font-size: 36px; font-weight: bold; color: #000; margin: 0 0 15px 0;">INVOICE</h1>
-            <div style="background: #f5f5f5; border: 1px solid #000; padding: 15px; font-size: 12px; text-align: left;">
-              <div style="margin-bottom: 5px;"><strong>Invoice No:</strong> ${invoice.id}</div>
-              <div style="margin-bottom: 5px;"><strong>Order No:</strong> ${invoice.orderId}</div>
-              <div style="margin-bottom: 5px;"><strong>Date:</strong> ${invoice.date}</div>
-              <div style="margin-bottom: 5px;"><strong>Time:</strong> 14:30:25</div>
-              <div><strong>Status:</strong> Delivered</div>
-            </div>
-          </div>
-        </div>
+  const createInvoiceHTML = async (invoice) => {
+    // Use the professional invoice component for bulk downloads
+    const invoiceData = {
+      invoiceId: invoice.id,
+      orderId: invoice.orderId,
+      orderDate: invoice.date,
+      orderTime: "14:30:25",
+      customerDetails: {
+        fullName: invoice.customerName,
+        email: "john.doe@example.com",
+        mobile: "+91 9876543210",
+        address: "123 Medical Street",
+        city: "Surat",
+        state: "Gujarat",
+        pincode: "395007",
+      },
+      items: [
+        {
+          id: 1,
+          name: "Medical Products",
+          company: "Various Brands",
+          quantity: invoice.items,
+          price: invoice.amount / invoice.items,
+          total: invoice.amount,
+        },
+      ],
+      subtotal: invoice.amount * 0.95,
+      shipping: 0,
+      tax: invoice.amount * 0.05,
+      total: invoice.amount,
+      paymentMethod: "Cash on Delivery",
+      paymentStatus: "Paid",
+      status: "Delivered",
+    };
 
-        <!-- Bill To and Ship To Section -->
-        <div style="display: flex; justify-content: space-between; margin-bottom: 30px; gap: 30px;">
-          <!-- Bill To -->
-          <div style="flex: 1; border: 1px solid #000; padding: 15px;">
-            <h3 style="font-size: 14px; font-weight: bold; margin: 0 0 10px 0; text-transform: uppercase;">BILL TO:</h3>
-            <div style="font-size: 12px; line-height: 1.5;">
-              <div style="font-weight: bold; margin-bottom: 5px;">${invoice.customerName}</div>
-              <div>john.doe@example.com</div>
-              <div>+91 9876543210</div>
-              <div>123 Medical Street</div>
-              <div>Surat, Gujarat 395007</div>
-            </div>
-          </div>
-          <!-- Ship To -->
-          <div style="flex: 1; border: 1px solid #000; padding: 15px;">
-            <h3 style="font-size: 14px; font-weight: bold; margin: 0 0 10px 0; text-transform: uppercase;">SHIP TO:</h3>
-            <div style="font-size: 12px; line-height: 1.5;">
-              <div style="font-weight: bold; margin-bottom: 5px;">${invoice.customerName}</div>
-              <div>123 Medical Street</div>
-              <div>Surat, Gujarat 395007</div>
-              <div style="margin-top: 10px;"><strong>Payment Method:</strong> Cash on Delivery</div>
-              <div><strong>Payment Status:</strong> Paid</div>
-            </div>
-          </div>
-        </div>
+    // Create a temporary element with the professional invoice
+    const tempDiv = document.createElement("div");
+    tempDiv.style.width = "210mm";
+    tempDiv.style.backgroundColor = "white";
 
-        <!-- Items Table -->
-        <div style="margin-bottom: 30px;">
-          <table style="width: 100%; border-collapse: collapse; border: 2px solid #000;">
-            <thead>
-              <tr style="background: #f5f5f5;">
-                <th style="border: 1px solid #000; padding: 12px 8px; font-size: 12px; font-weight: bold; text-align: left;">S.No</th>
-                <th style="border: 1px solid #000; padding: 12px 8px; font-size: 12px; font-weight: bold; text-align: left;">Description</th>
-                <th style="border: 1px solid #000; padding: 12px 8px; font-size: 12px; font-weight: bold; text-align: center;">Qty</th>
-                <th style="border: 1px solid #000; padding: 12px 8px; font-size: 12px; font-weight: bold; text-align: right;">Price (₹)</th>
-                <th style="border: 1px solid #000; padding: 12px 8px; font-size: 12px; font-weight: bold; text-align: right;">Amount (₹)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="border: 1px solid #000; padding: 8px; font-size: 11px; text-align: center;">1</td>
-                <td style="border: 1px solid #000; padding: 8px; font-size: 11px;">
-                  <div style="font-weight: bold;">Medical Products</div>
-                  <div style="color: #666; font-size: 10px;">${invoice.items} items included</div>
-                </td>
-                <td style="border: 1px solid #000; padding: 8px; font-size: 11px; text-align: center;">${invoice.items}</td>
-                <td style="border: 1px solid #000; padding: 8px; font-size: 11px; text-align: right;">${(invoice.amount * 0.95).toFixed(2)}</td>
-                <td style="border: 1px solid #000; padding: 8px; font-size: 11px; text-align: right; font-weight: bold;">${invoice.amount.toFixed(2)}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+    // Use React to render the component to HTML string
+    const { createRoot } = await import("react-dom/client");
+    const ProfessionalInvoice = (
+      await import("../components/common/ProfessionalInvoice.jsx")
+    ).default;
 
-        <!-- Totals Section -->
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 30px;">
-          <div style="min-width: 300px;">
-            <table style="width: 100%; border-collapse: collapse; border: 2px solid #000;">
-              <tbody>
-                <tr>
-                  <td style="border: 1px solid #000; padding: 8px 12px; font-size: 12px; font-weight: bold; background: #f5f5f5;">Subtotal:</td>
-                  <td style="border: 1px solid #000; padding: 8px 12px; font-size: 12px; text-align: right;">₹${(invoice.amount * 0.95).toFixed(2)}</td>
-                </tr>
-                <tr>
-                  <td style="border: 1px solid #000; padding: 8px 12px; font-size: 12px; font-weight: bold; background: #f5f5f5;">Shipping:</td>
-                  <td style="border: 1px solid #000; padding: 8px 12px; font-size: 12px; text-align: right;">FREE</td>
-                </tr>
-                <tr>
-                  <td style="border: 1px solid #000; padding: 8px 12px; font-size: 12px; font-weight: bold; background: #f5f5f5;">Tax (5%):</td>
-                  <td style="border: 1px solid #000; padding: 8px 12px; font-size: 12px; text-align: right;">₹${(invoice.amount * 0.05).toFixed(2)}</td>
-                </tr>
-                <tr>
-                  <td style="border: 2px solid #000; padding: 12px; font-size: 14px; font-weight: bold; background: #000; color: #fff;">TOTAL:</td>
-                  <td style="border: 2px solid #000; padding: 12px; font-size: 14px; text-align: right; font-weight: bold; background: #000; color: #fff;">₹${invoice.amount.toFixed(2)}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+    const root = createRoot(tempDiv);
+    await new Promise((resolve) => {
+      root.render(
+        React.createElement(ProfessionalInvoice, {
+          invoiceData,
+          forPrint: true,
+        }),
+      );
+      setTimeout(() => {
+        resolve();
+      }, 100);
+    });
 
-        <!-- QR Code and Footer -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 2px solid #000; padding-top: 20px;">
-          <div style="flex: 1;">
-            <h4 style="font-size: 16px; font-weight: bold; margin: 0 0 15px 0;">Thank You for Your Business!</h4>
-            <div style="font-size: 11px; line-height: 1.6;">
-              <div><strong>Terms & Conditions:</strong></div>
-              <div>• Payment due within 30 days</div>
-              <div>• Goods once sold will not be taken back</div>
-              <div>• Subject to Gujarat jurisdiction only</div>
-              <div style="margin-top: 10px;"><strong>Contact:</strong> harekrishnamedical@gmail.com | +91 76989 13354</div>
-            </div>
-          </div>
-          <div style="text-align: center; margin-left: 20px;">
-            <div style="width: 80px; height: 80px; border: 1px solid #000; background: #f5f5f5; display: flex; align-items: center; justify-content: center;">QR</div>
-            <div style="font-size: 10px; margin-top: 5px;">Scan for Online Verification</div>
-          </div>
-        </div>
+    const htmlContent = tempDiv.innerHTML;
+    root.unmount();
 
-        <!-- Authorization Section -->
-        <div style="display: flex; justify-content: space-between; margin-top: 40px; font-size: 12px;">
-          <div>
-            <div style="border-top: 1px solid #000; padding-top: 5px; margin-top: 30px;"><strong>Customer Signature</strong></div>
-          </div>
-          <div style="text-align: right;">
-            <div style="border-top: 1px solid #000; padding-top: 5px; margin-top: 30px;"><strong>Authorized Signatory</strong><br /><small>Hare Krishna Medical</small></div>
-          </div>
-        </div>
-
-        <!-- Footer Note -->
-        <div style="text-align: center; margin-top: 20px; font-size: 10px; color: #666; border-top: 1px solid #ccc; padding-top: 10px;">
-          This is a computer generated invoice. No physical signature required.<br />
-          Generated on: ${new Date().toLocaleString()}
-        </div>
-      </div>
-    `;
+    return htmlContent;
   };
 
   return (
