@@ -9,18 +9,54 @@ import {
   Badge,
   Button,
 } from "react-bootstrap";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const BackendDocs = () => {
   const [activeTab, setActiveTab] = useState("overview");
 
-  const downloadDocumentation = () => {
-    const element = document.createElement("a");
-    const file = new Blob([documentationText], { type: "text/plain" });
-    element.href = URL.createObjectURL(file);
-    element.download = "hare-krishna-medical-backend-docs.txt";
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+  const downloadDocumentation = async () => {
+    try {
+      const element = document.getElementById("documentation-content");
+      const canvas = await html2canvas(element, {
+        scale: 1.5,
+        logging: false,
+        useCORS: true,
+        height: element.scrollHeight,
+        width: element.scrollWidth,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      let position = 0;
+
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save("hare-krishna-medical-backend-docs.pdf");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      // Fallback to text download
+      const element = document.createElement("a");
+      const file = new Blob([documentationText], { type: "text/plain" });
+      element.href = URL.createObjectURL(file);
+      element.download = "hare-krishna-medical-backend-docs.txt";
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }
   };
 
   const documentationText = `
