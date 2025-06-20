@@ -798,7 +798,7 @@ This documentation provides a comprehensive guide for implementing the backend s
                           </li>
                           <li>
                             <strong>Password Hashing:</strong> Use bcryptjs with
-                            salt rounds >= 12
+                            salt rounds {">"}= 12
                           </li>
                           <li>
                             <strong>Role-based Access:</strong> Implement
@@ -1005,18 +1005,18 @@ S3_BUCKET_NAME=hkmed-assets`}</pre>
           display: flex;
           align-items: center;
         }
-        
+
         .feature-list {
           list-style: none;
           padding-left: 0;
         }
-        
+
         .feature-list li {
           padding: 5px 0;
           position: relative;
           padding-left: 20px;
         }
-        
+
         .feature-list li:before {
           content: "✓";
           position: absolute;
@@ -1024,7 +1024,7 @@ S3_BUCKET_NAME=hkmed-assets`}</pre>
           color: var(--medical-red);
           font-weight: bold;
         }
-        
+
         .code-block {
           background: #f8f9fa;
           border: 1px solid #e9ecef;
@@ -1032,51 +1032,51 @@ S3_BUCKET_NAME=hkmed-assets`}</pre>
           padding: 15px;
           margin: 15px 0;
         }
-        
+
         .code-block pre {
           margin: 0;
           font-size: 14px;
           color: #495057;
         }
-        
+
         .schema-section, .api-section, .security-section, .deployment-section {
           margin-bottom: 30px;
         }
-        
+
         .api-item {
           display: flex;
           align-items: center;
           padding: 10px 0;
           border-bottom: 1px solid #f8f9fa;
         }
-        
+
         .api-item .badge {
           margin-right: 15px;
           min-width: 60px;
         }
-        
+
         .api-item span {
           font-family: monospace;
           margin-right: 15px;
           font-weight: bold;
         }
-        
+
         .api-item small {
           color: #6c757d;
         }
-        
+
         .security-list, .deployment-list {
           list-style: none;
           padding-left: 0;
         }
-        
+
         .security-list li, .deployment-list li {
           padding: 8px 0;
           border-bottom: 1px solid #f8f9fa;
           position: relative;
           padding-left: 25px;
         }
-        
+
         .security-list li:before, .deployment-list li:before {
           content: "•";
           position: absolute;
