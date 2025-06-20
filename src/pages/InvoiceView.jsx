@@ -24,9 +24,7 @@ const InvoiceView = () => {
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
-    return (
-      <Navigate to="/login" state={{ from: `/invoice/${orderId}` }} replace />
-    );
+    return <Navigate to="/login" state={{ from: `/invoice/${orderId}` }} replace />;
   }
 
   // Mock invoice data - in real app, this would be fetched from API
@@ -162,41 +160,49 @@ const InvoiceView = () => {
 
   return (
     <div className="fade-in">
-      <section className="section-padding">
-        <Container>
-          {/* Action Buttons */}
-          <Row className="mb-4 d-print-none">
-            <Col lg={12} className="text-end">
-              <div className="d-flex gap-2 justify-content-end">
+      <Container className="my-5">
+        {showAlert && (
+          <Alert variant="success" className="mb-4 no-print">
+            <i className="bi bi-check-circle me-2"></i>
+            PDF downloaded successfully!
+          </Alert>
+        )}
+
+        <Card className="medical-card shadow-lg">
+          <Card.Body className="p-4">
+            <div className="d-flex justify-content-between align-items-center mb-4 no-print">
+              <h3 className="mb-0">
+                <i className="bi bi-receipt me-2"></i>
+                Invoice Details
+              </h3>
+              <div>
                 <Button
-                  variant="outline-primary"
-                  onClick={printInvoice}
-                  className="btn-medical-outline"
-                >
-                  <i className="bi bi-printer me-2"></i>
-                  Print
-                </Button>
-                <Button
-                  variant="primary"
                   onClick={downloadPDF}
-                  className="btn-medical-primary"
+                  className="btn-medical-primary me-2"
+                  disabled={!invoice}
                 >
                   <i className="bi bi-download me-2"></i>
                   Download PDF
                 </Button>
+                <Button
+                  onClick={() => window.print()}
+                  variant="outline-primary"
+                  className="btn-medical-outline me-2"
+                >
+                  <i className="bi bi-printer me-2"></i>
+                  Print Invoice
+                </Button>
+                <Button
+                  as={Link}
+                  to="/user/invoices"
+                  variant="outline-secondary"
+                  className="btn-medical-outline"
+                >
+                  <i className="bi bi-arrow-left me-2"></i>
+                  Back to Invoices
+                </Button>
               </div>
-            </Col>
-          </Row>
-
-          {/* Invoice Content */}
-          <div id="invoice-content">
-            <Card className="medical-card">
-              <Card.Body className="p-5">
-                {/* Header */}
-                <Row className="mb-4">
-                  <Col md={6}>
-                    <div className="d-flex align-items-center mb-3">
-                      <img
+            </div>
                         src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
                         alt="Hare Krishna Medical"
                         style={{ height: "60px", width: "auto" }}
