@@ -18,22 +18,14 @@ const ContactForm = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    mobile: "",
-    subject: "",
     message: "",
-    priority: "Medium",
   });
   const [loading, setLoading] = useState(false);
-  const [alert, setAlert] = useState({ show: false, message: "", variant: "" });
+  const [submitted, setSubmitted] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const showAlert = (message, variant) => {
-    setAlert({ show: true, message, variant });
-    setTimeout(() => setAlert({ show: false, message: "", variant: "" }), 5000);
   };
 
   const handleSubmit = async (e) => {
@@ -47,27 +39,31 @@ const ContactForm = () => {
         !formData.email.trim() ||
         !formData.message.trim()
       ) {
-        throw new Error("Please fill in all required fields");
+        alert("Please fill in all required fields");
+        setLoading(false);
+        return;
       }
 
       // Email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
-        throw new Error("Please enter a valid email address");
+        alert("Please enter a valid email address");
+        setLoading(false);
+        return;
       }
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Simulate API call to save to database
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Create message object
+      // Create message object for admin
       const newMessage = {
         id: Date.now(),
         name: formData.name,
         email: formData.email,
-        mobile: formData.mobile,
-        subject: formData.subject || "General Inquiry",
+        mobile: "",
+        subject: "Contact Form Inquiry",
         message: formData.message,
-        priority: formData.priority,
+        priority: "Medium",
         status: "Open",
         isRead: false,
         createdAt: new Date(),
@@ -75,172 +71,97 @@ const ContactForm = () => {
         repliedAt: null,
       };
 
-      // Add to Redux store (simulating backend)
+      // Add to Redux store (this simulates saving to database)
       dispatch(addMessage(newMessage));
 
-      // Reset form
+      // Reset form and show success
       setFormData({
         name: "",
         email: "",
-        mobile: "",
-        subject: "",
         message: "",
-        priority: "Medium",
       });
-
-      showAlert(
-        "Message sent successfully! We'll get back to you soon.",
-        "success",
-      );
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 5000);
     } catch (error) {
-      showAlert(error.message, "danger");
+      alert("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Card className="medical-form shadow-lg">
-      <Card.Body className="p-5">
+    <Card className="contact-form-card">
+      <Card.Body className="p-4">
         <div className="text-center mb-4">
-          <h3 className="text-medical-red mb-2">
-            <i className="bi bi-envelope-heart me-2"></i>
-            Send Us a Message
-          </h3>
+          <h4 className="text-medical-red">
+            <i className="bi bi-envelope me-2"></i>
+            Contact Us
+          </h4>
           <p className="text-muted">
-            We're here to help! Send us your questions, concerns, or feedback
-            and we'll respond promptly.
+            Send us a message and we'll respond quickly
           </p>
         </div>
 
-        {alert.show && (
-          <Alert variant={alert.variant} className="mb-4">
-            <i
-              className={`bi bi-${alert.variant === "success" ? "check-circle" : "exclamation-triangle"} me-2`}
-            ></i>
-            {alert.message}
+        {submitted && (
+          <Alert variant="success" className="mb-4">
+            <i className="bi bi-check-circle me-2"></i>
+            Thank you! Your message has been sent successfully. We'll get back
+            to you soon.
           </Alert>
         )}
 
         <Form onSubmit={handleSubmit}>
-          <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label className="fw-bold">
-                  Full Name <span className="text-danger">*</span>
-                </Form.Label>
-                <Form.Control
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Enter your full name"
-                  required
-                  disabled={loading}
-                />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label className="fw-bold">
-                  Email Address <span className="text-danger">*</span>
-                </Form.Label>
-                <Form.Control
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="Enter your email address"
-                  required
-                  disabled={loading}
-                />
-              </Form.Group>
-            </Col>
-          </Row>
+          <Form.Group className="mb-3">
+            <Form.Label>Name *</Form.Label>
+            <Form.Control
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              placeholder="Your full name"
+              required
+              disabled={loading}
+            />
+          </Form.Group>
 
-          <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label className="fw-bold">Phone Number</Form.Label>
-                <Form.Control
-                  type="tel"
-                  name="mobile"
-                  value={formData.mobile}
-                  onChange={handleInputChange}
-                  placeholder="Enter your phone number"
-                  disabled={loading}
-                />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label className="fw-bold">Priority</Form.Label>
-                <Form.Select
-                  name="priority"
-                  value={formData.priority}
-                  onChange={handleInputChange}
-                  disabled={loading}
-                >
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="High">High</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
-          </Row>
+          <Form.Group className="mb-3">
+            <Form.Label>Email *</Form.Label>
+            <Form.Control
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="Your email address"
+              required
+              disabled={loading}
+            />
+          </Form.Group>
 
-          <Row>
-            <Col lg={12}>
-              <Form.Group className="mb-3">
-                <Form.Label className="fw-bold">Subject</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleInputChange}
-                  placeholder="Brief subject of your message"
-                  disabled={loading}
-                />
-              </Form.Group>
-            </Col>
-          </Row>
+          <Form.Group className="mb-4">
+            <Form.Label>Message *</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={4}
+              name="message"
+              value={formData.message}
+              onChange={handleInputChange}
+              placeholder="How can we help you?"
+              required
+              disabled={loading}
+            />
+          </Form.Group>
 
-          <Row>
-            <Col lg={12}>
-              <Form.Group className="mb-4">
-                <Form.Label className="fw-bold">
-                  Message <span className="text-danger">*</span>
-                </Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={6}
-                  name="message"
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  placeholder="Write your message here... Please provide as much detail as possible so we can assist you better."
-                  required
-                  disabled={loading}
-                />
-                <Form.Text className="text-muted">
-                  <i className="bi bi-info-circle me-1"></i>
-                  Your message will be sent to our admin team and you'll receive
-                  a response via email.
-                </Form.Text>
-              </Form.Group>
-            </Col>
-          </Row>
-
-          <div className="text-center">
+          <div className="d-grid">
             <Button
               type="submit"
-              className="btn-medical-primary px-5 py-2"
+              className="btn-medical-primary"
               disabled={loading}
               size="lg"
             >
               {loading ? (
                 <>
                   <Spinner size="sm" className="me-2" />
-                  Sending Message...
+                  Sending...
                 </>
               ) : (
                 <>
@@ -249,13 +170,6 @@ const ContactForm = () => {
                 </>
               )}
             </Button>
-          </div>
-
-          <div className="text-center mt-3">
-            <small className="text-muted">
-              <i className="bi bi-clock me-1"></i>
-              We typically respond within 24 hours during business days
-            </small>
           </div>
         </Form>
       </Card.Body>
