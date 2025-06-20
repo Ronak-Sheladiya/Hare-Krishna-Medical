@@ -660,6 +660,14 @@ const Order = () => {
                       </div>
                     </div>
 
+                    {/* Payment Method Selection */}
+                    <div className="mb-4">
+                      <PaymentOptions
+                        selectedMethod={paymentMethod}
+                        onPaymentMethodChange={setPaymentMethod}
+                      />
+                    </div>
+
                     {/* Place Order Button */}
                     <div className="d-grid gap-2">
                       <Button
