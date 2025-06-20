@@ -208,49 +208,143 @@ const UserInvoices = () => {
 
   const createInvoiceHTML = (invoice) => {
     return `
-      <div style="font-family: Arial, sans-serif; padding: 20px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #dc3545; margin-bottom: 10px;">HARE KRISHNA MEDICAL</h1>
-          <p style="color: #6c757d;">Your Trusted Health Partner</p>
-          <div style="margin-top: 20px;">
-            <h2 style="color: #dc3545;">INVOICE</h2>
-            <p><strong>Invoice #:</strong> ${invoice.id}</p>
-            <p><strong>Order #:</strong> ${invoice.orderId}</p>
-            <p><strong>Date:</strong> ${invoice.date}</p>
+      <div style="font-family: Arial, sans-serif; padding: 30px; max-width: 800px; margin: 0 auto; background: white;">
+        <!-- Header Section -->
+        <div style="display: flex; align-items: center; margin-bottom: 40px; border-bottom: 3px solid #dc3545; padding-bottom: 20px;">
+          <div style="flex: 1;">
+            <h1 style="color: #dc3545; margin: 0; font-size: 2.2rem; font-weight: bold;">HARE KRISHNA MEDICAL</h1>
+            <p style="color: #6c757d; margin: 5px 0; font-size: 0.9rem;">Your Trusted Health Partner</p>
+            <div style="color: #666; font-size: 0.85rem; line-height: 1.4;">
+              <div>3 Sahyog Complex, Man Sarovar circle, Amroli, 394107</div>
+              <div>📞 +91 76989 13354 | 📧 harekrishnamedical@gmail.com</div>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="background: #f8f9fa; border: 2px solid #dc3545; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+              <h2 style="color: #dc3545; margin: 0 0 10px 0; font-size: 1.8rem;">INVOICE</h2>
+              <div style="line-height: 1.6;">
+                <div><strong>Invoice #:</strong> ${invoice.id}</div>
+                <div><strong>Order #:</strong> ${invoice.orderId}</div>
+                <div><strong>Date:</strong> ${invoice.date}</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div style="margin-bottom: 30px;">
-          <h3 style="color: #dc3545; margin-bottom: 15px;">Bill To:</h3>
-          <p><strong>${invoice.customerName}</strong></p>
-          <p>john.doe@example.com</p>
-          <p>+91 9876543210</p>
-          <p>123 Medical Street, Surat, Gujarat 395007</p>
+        <!-- Customer & Payment Details -->
+        <div style="display: flex; gap: 30px; margin-bottom: 40px;">
+          <div style="flex: 1; border: 2px solid #dc3545; border-radius: 8px; padding: 20px;">
+            <h3 style="color: #dc3545; margin: 0 0 15px 0; border-bottom: 2px solid #dc3545; padding-bottom: 8px; font-size: 1.1rem;">
+              📍 BILL TO:
+            </h3>
+            <div style="line-height: 1.6;">
+              <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 8px;">${invoice.customerName}</div>
+              <div>📧 john.doe@example.com</div>
+              <div>📱 +91 9876543210</div>
+              <div>🏠 123 Medical Street</div>
+              <div>📍 Surat, Gujarat 395007</div>
+            </div>
+          </div>
+          <div style="flex: 1; border: 2px solid #17a2b8; border-radius: 8px; padding: 20px;">
+            <h3 style="color: #17a2b8; margin: 0 0 15px 0; border-bottom: 2px solid #17a2b8; padding-bottom: 8px; font-size: 1.1rem;">
+              💳 PAYMENT DETAILS:
+            </h3>
+            <div style="line-height: 1.6;">
+              <div><strong>Method:</strong> <span style="background: #17a2b8; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.85rem;">Cash on Delivery</span></div>
+              <div><strong>Status:</strong> <span style="background: #28a745; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.85rem;">Paid</span></div>
+              <div><strong>Amount:</strong> <span style="font-size: 1.2rem; color: #28a745;">₹${invoice.amount.toFixed(2)}</span></div>
+            </div>
+          </div>
         </div>
 
-        <div style="margin-bottom: 30px;">
-          <h3 style="color: #dc3545; margin-bottom: 15px;">Invoice Details:</h3>
-          <table style="width: 100%; border-collapse: collapse;">
-            <tr style="background-color: #f8f9fa;">
-              <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left;">Description</th>
-              <th style="border: 1px solid #dee2e6; padding: 8px; text-align: center;">Qty</th>
-              <th style="border: 1px solid #dee2e6; padding: 8px; text-align: right;">Amount</th>
-            </tr>
-            <tr>
-              <td style="border: 1px solid #dee2e6; padding: 8px;">Medical Products (${invoice.items} items)</td>
-              <td style="border: 1px solid #dee2e6; padding: 8px; text-align: center;">${invoice.items}</td>
-              <td style="border: 1px solid #dee2e6; padding: 8px; text-align: right;">₹${invoice.amount.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td style="border: 1px solid #dee2e6; padding: 8px;" colspan="2"><strong>Total Amount:</strong></td>
-              <td style="border: 1px solid #dee2e6; padding: 8px; text-align: right;"><strong>₹${invoice.amount.toFixed(2)}</strong></td>
-            </tr>
-          </table>
+        <!-- Items Section -->
+        <div style="margin-bottom: 40px;">
+          <h3 style="color: #dc3545; margin: 0 0 15px 0; border-bottom: 3px solid #dc3545; padding-bottom: 8px; font-size: 1.2rem;">
+            🛒 ORDERED ITEMS:
+          </h3>
+          <div style="border: 2px solid #dc3545; border-radius: 8px; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse; background: white;">
+              <thead style="background: #dc3545; color: white;">
+                <tr>
+                  <th style="border: none; padding: 12px; text-align: left; font-weight: bold;">S.No</th>
+                  <th style="border: none; padding: 12px; text-align: left; font-weight: bold;">Item Description</th>
+                  <th style="border: none; padding: 12px; text-align: center; font-weight: bold;">Qty</th>
+                  <th style="border: none; padding: 12px; text-align: right; font-weight: bold;">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="background: #f8f9fa; border-bottom: 1px solid #e0e0e0;">
+                  <td style="padding: 12px; font-weight: bold;">1</td>
+                  <td style="padding: 12px;">
+                    <div style="font-weight: bold; color: #333;">Medical Products</div>
+                    <small style="color: #666;">${invoice.items} items included</small>
+                  </td>
+                  <td style="padding: 12px; text-align: center;">
+                    <span style="background: #6c757d; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.85rem;">${invoice.items}</span>
+                  </td>
+                  <td style="padding: 12px; text-align: right; font-weight: bold; color: #dc3545;">₹${invoice.amount.toFixed(2)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #dee2e6;">
-          <p><strong>Thank you for choosing Hare Krishna Medical!</strong></p>
-          <p style="color: #6c757d;">For any queries, contact us at harekrishnamedical@gmail.com</p>
+        <!-- Totals Section -->
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 40px;">
+          <div style="width: 300px; border: 2px solid #28a745; border-radius: 8px; padding: 20px; background: #f8f9fa;">
+            <h4 style="color: #28a745; margin: 0 0 15px 0; border-bottom: 2px solid #28a745; padding-bottom: 5px; font-size: 1.1rem;">
+              💰 INVOICE SUMMARY:
+            </h4>
+            <div style="line-height: 2;">
+              <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
+                <span><strong>Subtotal:</strong></span>
+                <span>₹${(invoice.amount * 0.95).toFixed(2)}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
+                <span><strong>Shipping:</strong></span>
+                <span style="color: #28a745;">FREE</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
+                <span><strong>Tax (5%):</strong></span>
+                <span>₹${(invoice.amount * 0.05).toFixed(2)}</span>
+              </div>
+              <div style="background: #28a745; color: white; margin: 15px -20px -20px -20px; padding: 15px 20px; border-radius: 0 0 5px 5px; font-size: 1.2rem;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span><strong>TOTAL AMOUNT:</strong></span>
+                  <span><strong>₹${invoice.amount.toFixed(2)}</strong></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Section -->
+        <div style="border-top: 3px solid #dc3545; background: #f8f9fa; border-radius: 8px; padding: 25px; margin-top: 30px;">
+          <div style="text-align: center;">
+            <h3 style="color: #dc3545; margin: 0 0 20px 0; font-size: 1.3rem;">
+              🙏 Thank You for Choosing Hare Krishna Medical! 🙏
+            </h3>
+            <div style="display: flex; justify-content: space-around; margin-bottom: 20px; flex-wrap: wrap;">
+              <div style="text-align: center; min-width: 150px; margin: 10px;">
+                <h4 style="color: #17a2b8; margin: 0 0 5px 0; font-size: 1rem;">📞 Contact Us</h4>
+                <div style="font-size: 0.85rem;">+91 76989 13354</div>
+                <div style="font-size: 0.85rem;">+91 91060 18508</div>
+              </div>
+              <div style="text-align: center; min-width: 150px; margin: 10px;">
+                <h4 style="color: #17a2b8; margin: 0 0 5px 0; font-size: 1rem;">📧 Email Support</h4>
+                <div style="font-size: 0.85rem;">harekrishnamedical@gmail.com</div>
+              </div>
+              <div style="text-align: center; min-width: 150px; margin: 10px;">
+                <h4 style="color: #17a2b8; margin: 0 0 5px 0; font-size: 1rem;">🏠 Visit Our Store</h4>
+                <div style="font-size: 0.85rem;">3 Sahyog Complex, Amroli</div>
+              </div>
+            </div>
+            <hr style="border: 1px solid #dc3545; margin: 20px 0;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #666;">
+              <div><strong>Note:</strong> This is a computer generated invoice. No signature required.</div>
+              <div>Generated on ${new Date().toLocaleString()}</div>
+            </div>
+          </div>
         </div>
       </div>
     `;

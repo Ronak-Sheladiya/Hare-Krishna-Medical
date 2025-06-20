@@ -375,7 +375,11 @@ const Order = () => {
       pdf.setTextColor(...lightColor);
       pdf.setFontSize(8);
       pdf.setFont("helvetica", "normal");
-      pdf.text("Thank you for choosing Hare Krishna Medical!", margin, yPosition);
+      pdf.text(
+        "Thank you for choosing Hare Krishna Medical!",
+        margin,
+        yPosition,
+      );
       pdf.text(
         "For any queries, contact: harekrishnamedical@gmail.com",
         margin,
@@ -603,97 +607,135 @@ const Order = () => {
               {/* Order Summary */}
               <Col lg={4}>
                 <div style={{ position: "sticky", top: "120px", zIndex: 10 }}>
-                <Card className="medical-card">
-                  <Card.Header className="bg-medical-light">
-                    <h5 className="mb-0">
-                      <i className="bi bi-receipt me-2"></i>
-                      Order Summary
-                    </h5>
-                  </Card.Header>
-                  <Card.Body>
-                    {/* Items List */}
-                    <div className="order-items mb-3">
-                      {items.map((item) => (
-                        <div
-                          key={item.id}
-                          className="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom"
-                        >
-                          <div className="flex-grow-1">
-                            <h6 className="mb-0 small">{item.name}</h6>
-                            <small className="text-muted">
-                              Qty: {item.quantity} × ₹{item.price}
-                            </small>
+                  <Card className="medical-card">
+                    <Card.Header className="bg-medical-light">
+                      <h5 className="mb-0">
+                        <i className="bi bi-receipt me-2"></i>
+                        Order Summary
+                      </h5>
+                    </Card.Header>
+                    <Card.Body>
+                      {/* Items List */}
+                      <div className="order-items mb-3">
+                        {items.map((item) => (
+                          <div
+                            key={item.id}
+                            className="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom"
+                          >
+                            <div className="flex-grow-1">
+                              <h6 className="mb-0 small">{item.name}</h6>
+                              <small className="text-muted">
+                                Qty: {item.quantity} × ₹{item.price}
+                              </small>
+                            </div>
+                            <span className="fw-bold">
+                              ₹{(item.price * item.quantity).toFixed(2)}
+                            </span>
                           </div>
-                          <span className="fw-bold">
-                            ₹{(item.price * item.quantity).toFixed(2)}
+                        ))}
+                      </div>
+
+                      {/* Price Breakdown */}
+                      <div className="order-totals">
+                        <div className="d-flex justify-content-between mb-2">
+                          <span>Subtotal</span>
+                          <span>₹{totalAmount.toFixed(2)}</span>
+                        </div>
+                        <div className="d-flex justify-content-between mb-2">
+                          <span>Shipping</span>
+                          <span>
+                            {shippingCost === 0 ? "FREE" : `₹${shippingCost}`}
                           </span>
                         </div>
-                      ))}
-                    </div>
-
-                    {/* Price Breakdown */}
-                    <div className="order-totals">
-                      <div className="d-flex justify-content-between mb-2">
-                        <span>Subtotal</span>
-                        <span>₹{totalAmount.toFixed(2)}</span>
+                        <div className="d-flex justify-content-between mb-2">
+                          <span>Tax (5%)</span>
+                          <span>₹{taxAmount.toFixed(2)}</span>
+                        </div>
+                        <hr />
+                        <div className="d-flex justify-content-between mb-3">
+                          <strong>Total</strong>
+                          <strong className="text-medical-red">
+                            ₹{finalTotal.toFixed(2)}
+                          </strong>
+                        </div>
                       </div>
-                      <div className="d-flex justify-content-between mb-2">
-                        <span>Shipping</span>
-                        <span>
-                          {shippingCost === 0 ? "FREE" : `₹${shippingCost}`}
-                        </span>
-                      </div>
-                      <div className="d-flex justify-content-between mb-2">
-                        <span>Tax (5%)</span>
-                        <span>₹{taxAmount.toFixed(2)}</span>
-                      </div>
-                      <hr />
-                      <div className="d-flex justify-content-between mb-3">
-                        <strong>Total</strong>
-                        <strong className="text-medical-red">
-                          ₹{finalTotal.toFixed(2)}
-                        </strong>
-                      </div>
-                    </div>
 
-                    {/* Payment Method Selection */}
-                    <div className="mb-4">
-                      <PaymentOptions
-                        selectedMethod={paymentMethod}
-                        onPaymentMethodChange={setPaymentMethod}
-                        compact={true}
-                      />
-                    </div>
+                      {/* Payment Method Selection */}
+                      <div className="mb-4">
+                        <PaymentOptions
+                          selectedMethod={paymentMethod}
+                          onMethodChange={setPaymentMethod}
+                          compact={false}
+                        />
 
-                    {/* Place Order Button */}
-                    <div className="d-grid gap-2">
-                      <Button
-                        type="submit"
-                        className="btn-medical-primary"
-                        size="lg"
-                      >
-                        <i className="bi bi-check-circle me-2"></i>
-                        Place Order
-                      </Button>
-                      <Button
-                        as={Link}
-                        to="/cart"
-                        variant="outline-secondary"
-                        className="btn-medical-outline"
-                      >
-                        <i className="bi bi-arrow-left me-2"></i>
-                        Back to Cart
-                      </Button>
-                    </div>
+                        {(paymentMethod === "online" ||
+                          paymentMethod === "upi") && (
+                          <Alert variant="info" className="mt-3">
+                            <div className="d-flex align-items-start">
+                              <i className="bi bi-info-circle me-2 mt-1"></i>
+                              <div>
+                                <h6 className="mb-2">
+                                  Online Payment Instructions
+                                </h6>
+                                <p className="mb-2">
+                                  For credit card or online payment assistance,
+                                  please contact our medical store directly:
+                                </p>
+                                <div className="contact-info">
+                                  <div>
+                                    <strong>📞 Phone:</strong> +91 76989 13354 |
+                                    +91 91060 18508
+                                  </div>
+                                  <div>
+                                    <strong>📧 Email:</strong>{" "}
+                                    harekrishnamedical@gmail.com
+                                  </div>
+                                  <div>
+                                    <strong>🏠 Address:</strong> 3 Sahyog
+                                    Complex, Man Sarovar circle, Amroli, 394107
+                                  </div>
+                                </div>
+                                <p className="mb-0 mt-2 small">
+                                  <strong>Note:</strong> Our team will guide you
+                                  through the secure payment process and ensure
+                                  your transaction is completed safely.
+                                </p>
+                              </div>
+                            </div>
+                          </Alert>
+                        )}
+                      </div>
 
-                    <div className="mt-3 text-center">
-                      <small className="text-muted">
-                        <i className="bi bi-shield-check me-1"></i>
-                        Your order is secure and protected
-                      </small>
-                    </div>
-                  </Card.Body>
-                </Card>
+                      {/* Place Order Button */}
+                      <div className="d-grid gap-2">
+                        <Button
+                          type="submit"
+                          className="btn-medical-primary"
+                          size="lg"
+                        >
+                          <i className="bi bi-check-circle me-2"></i>
+                          Place Order
+                        </Button>
+                        <Button
+                          as={Link}
+                          to="/cart"
+                          variant="outline-secondary"
+                          className="btn-medical-outline"
+                        >
+                          <i className="bi bi-arrow-left me-2"></i>
+                          Back to Cart
+                        </Button>
+                      </div>
+
+                      <div className="mt-3 text-center">
+                        <small className="text-muted">
+                          <i className="bi bi-shield-check me-1"></i>
+                          Your order is secure and protected
+                        </small>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </div>
               </Col>
             </Row>
           </Form>
