@@ -252,8 +252,8 @@ const Cart = () => {
             {/* Order Summary */}
             <Col lg={4}>
               <Card
-                className="medical-card sticky-top"
-                style={{ top: "100px" }}
+                className="medical-card position-relative"
+                style={{ position: "sticky", top: "120px", zIndex: 1 }}
               >
                 <Card.Header className="bg-medical-light">
                   <h5 className="mb-0">
