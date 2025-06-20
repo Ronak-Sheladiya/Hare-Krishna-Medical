@@ -367,3 +367,31 @@
   color: var(--color-medical-red) !important;
   transform: scale(1.1);
 }
+
+/* Contact Form Styles */
+.contact-form-card {
+  background: var(--color-white);
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: none;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.contact-form-card .form-control {
+  border: 2px solid var(--color-light-2);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.contact-form-card .form-control:focus {
+  border-color: var(--color-medical-red);
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.contact-form-card .form-label {
+  color: var(--color-dark-2);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
