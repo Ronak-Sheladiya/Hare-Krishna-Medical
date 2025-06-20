@@ -2,45 +2,64 @@ import React, { useEffect } from "react";
 import { Container, Row, Col, Button, Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "../store/slices/cartSlice";
 
 const Home = () => {
   const dispatch = useDispatch();
   const { featuredProducts } = useSelector((state) => state.products);
 
-  useEffect(() => {
-    // Simulate fetching featured products
-    const mockFeaturedProducts = [
-      {
-        id: 1,
-        name: "Paracetamol Tablets",
-        company: "Hare Krishna Pharma",
-        price: 25.99,
-        image:
-          "https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+1",
-        description: "Effective pain relief and fever reducer",
-      },
-      {
-        id: 2,
-        name: "Vitamin D3 Capsules",
-        company: "Health Plus",
-        price: 45.5,
-        image:
-          "https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+2",
-        description: "Essential vitamin for bone health",
-      },
-      {
-        id: 3,
-        name: "Cough Syrup",
-        company: "Wellness Care",
-        price: 35.75,
-        image:
-          "https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+3",
-        description: "Natural cough relief formula",
-      },
-    ];
+  // Mock featured products
+  const defaultFeaturedProducts = [
+    {
+      id: 1,
+      name: "Paracetamol Tablets",
+      company: "Hare Krishna Pharma",
+      price: 25.99,
+      image:
+        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+1",
+      description: "Effective pain relief and fever reducer",
+    },
+    {
+      id: 2,
+      name: "Vitamin D3 Capsules",
+      company: "Health Plus",
+      price: 45.5,
+      image:
+        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+2",
+      description: "Essential vitamin for bone health",
+    },
+    {
+      id: 3,
+      name: "Cough Syrup",
+      company: "Wellness Care",
+      price: 35.75,
+      image:
+        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+3",
+      description: "Natural cough relief formula",
+    },
+  ];
 
-    // In a real app, this would be an API call
-    // dispatch(setFeaturedProducts(mockFeaturedProducts));
+  // Use featured products from store or fallback to default
+  const productsToShow =
+    featuredProducts.length > 0 ? featuredProducts : defaultFeaturedProducts;
+
+  const handleAddToCart = (product) => {
+    const cartItem = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      quantity: 1,
+    };
+
+    dispatch(addToCart(cartItem));
+
+    // Show success message (you can enhance this with a toast notification)
+    alert(`${product.name} added to cart!`);
+  };
+
+  useEffect(() => {
+    // In a real app, this would fetch featured products from API
   }, [dispatch]);
 
   return (
@@ -158,67 +177,46 @@ const Home = () => {
             </Col>
           </Row>
           <Row>
-            <Col lg={4} md={6} className="mb-4">
-              <Card className="product-card fade-in">
-                <Card.Img
-                  variant="top"
-                  src="https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+1"
-                  className="product-image"
-                />
-                <Card.Body>
-                  <Card.Title className="product-title">
-                    Paracetamol Tablets
-                  </Card.Title>
-                  <Card.Text>Effective pain relief and fever reducer</Card.Text>
-                  <div className="d-flex justify-content-between align-items-center">
-                    <span className="product-price">₹25.99</span>
-                    <Button className="btn-medical-primary btn-sm">
-                      Add to Cart
-                    </Button>
+            {productsToShow.map((product, index) => (
+              <Col lg={4} md={6} className="mb-4" key={product.id || index}>
+                <Card className="product-card fade-in">
+                  <div
+                    style={{ cursor: "pointer" }}
+                    onClick={() =>
+                      (window.location.href = `/products/${product.id}`)
+                    }
+                  >
+                    <Card.Img
+                      variant="top"
+                      src={product.image}
+                      className="product-image"
+                      alt={product.name}
+                    />
                   </div>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col lg={4} md={6} className="mb-4">
-              <Card className="product-card fade-in">
-                <Card.Img
-                  variant="top"
-                  src="https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+2"
-                  className="product-image"
-                />
-                <Card.Body>
-                  <Card.Title className="product-title">
-                    Vitamin D3 Capsules
-                  </Card.Title>
-                  <Card.Text>Essential vitamin for bone health</Card.Text>
-                  <div className="d-flex justify-content-between align-items-center">
-                    <span className="product-price">₹45.50</span>
-                    <Button className="btn-medical-primary btn-sm">
-                      Add to Cart
-                    </Button>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col lg={4} md={6} className="mb-4">
-              <Card className="product-card fade-in">
-                <Card.Img
-                  variant="top"
-                  src="https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+3"
-                  className="product-image"
-                />
-                <Card.Body>
-                  <Card.Title className="product-title">Cough Syrup</Card.Title>
-                  <Card.Text>Natural cough relief formula</Card.Text>
-                  <div className="d-flex justify-content-between align-items-center">
-                    <span className="product-price">₹35.75</span>
-                    <Button className="btn-medical-primary btn-sm">
-                      Add to Cart
-                    </Button>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
+                  <Card.Body>
+                    <Card.Title
+                      className="product-title"
+                      style={{ cursor: "pointer" }}
+                      onClick={() =>
+                        (window.location.href = `/products/${product.id}`)
+                      }
+                    >
+                      {product.name}
+                    </Card.Title>
+                    <Card.Text>{product.description}</Card.Text>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <span className="product-price">₹{product.price}</span>
+                      <Button
+                        className="btn-medical-primary btn-sm"
+                        onClick={() => handleAddToCart(product)}
+                      >
+                        Add to Cart
+                      </Button>
+                    </div>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
           </Row>
           <Row>
             <Col lg={12} className="text-center mt-4">
