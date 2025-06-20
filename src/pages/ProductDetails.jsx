@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Container,
   Row,
@@ -170,31 +170,36 @@ const ProductDetails = () => {
   };
 
   // Get product based on ID, or return a default "not found" product
-  const mockProduct = productDatabase[parseInt(id)] || {
-    id: parseInt(id),
-    name: "Product Not Found",
-    company: "Hare Krishna Medical",
-    price: 0,
-    originalPrice: 0,
-    images: [
-      "https://via.placeholder.com/500x400/e6e6e6/666666?text=Product+Not+Found",
-    ],
-    description:
-      "Sorry, this product was not found. Please check the product ID or browse our available products.",
-    benefits: ["Product not available"],
-    usage: ["Please contact us for assistance"],
-    weight: "N/A",
-    category: "Not Found",
-    inStock: false,
-    stockCount: 0,
-    manufacturer: "N/A",
-    batchNo: "N/A",
-    mfgDate: "N/A",
-    expDate: "N/A",
-    composition: "N/A",
-    sideEffects: ["Product not available"],
-    contraindications: ["Product not available"],
-  };
+  // Using useMemo to prevent object recreation on every render
+  const mockProduct = useMemo(() => {
+    return (
+      productDatabase[parseInt(id)] || {
+        id: parseInt(id),
+        name: "Product Not Found",
+        company: "Hare Krishna Medical",
+        price: 0,
+        originalPrice: 0,
+        images: [
+          "https://via.placeholder.com/500x400/e6e6e6/666666?text=Product+Not+Found",
+        ],
+        description:
+          "Sorry, this product was not found. Please check the product ID or browse our available products.",
+        benefits: ["Product not available"],
+        usage: ["Please contact us for assistance"],
+        weight: "N/A",
+        category: "Not Found",
+        inStock: false,
+        stockCount: 0,
+        manufacturer: "N/A",
+        batchNo: "N/A",
+        mfgDate: "N/A",
+        expDate: "N/A",
+        composition: "N/A",
+        sideEffects: ["Product not available"],
+        contraindications: ["Product not available"],
+      }
+    );
+  }, [id]);
 
   // Mock related products
   const relatedProducts = [
