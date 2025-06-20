@@ -119,8 +119,7 @@ const Login = () => {
   };
 
   const handleForgotPassword = () => {
-    // In real app, this would open forgot password modal or navigate to forgot password page
-    alert("Forgot password functionality would be implemented here");
+    navigate("/forgot-password");
   };
 
   const mockCredentials = [
@@ -291,25 +290,12 @@ const Login = () => {
                           <Card.Body className="p-3">
                             <div className="d-flex justify-content-between align-items-start mb-2">
                               <h6 className="mb-0">{cred.type} Login</h6>
-                              <Button
-                                size="sm"
-                                variant="outline-primary"
-                                className="btn-medical-outline"
-                                onClick={() => {
-                                  setFormData({
-                                    ...formData,
-                                    emailOrMobile: cred.email || cred.mobile,
-                                    password: cred.password,
-                                  });
-                                }}
+                              <Link
+                                to="/forgot-password"
+                                className="text-medical-red text-decoration-none"
                               >
-                                Use
-                              </Button>
-                            </div>
-                            <div className="small">
-                              <p className="mb-1">
-                                <strong>Email:</strong> {cred.email}
-                              </p>
+                                Forgot Password?
+                              </Link>
                               {cred.mobile && (
                                 <p className="mb-1">
                                   <strong>Mobile:</strong> {cred.mobile}
