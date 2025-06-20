@@ -243,6 +243,10 @@ const ProductDetails = () => {
   }, [id, dispatch]);
 
   const handleAddToCart = () => {
+    if (!mockProduct || !mockProduct.inStock) {
+      alert("Product is not available for purchase");
+      return;
+    }
     const productToAdd = { ...mockProduct, quantity };
     dispatch(addToCart(productToAdd));
     setShowAddedAlert(true);
@@ -251,7 +255,8 @@ const ProductDetails = () => {
 
   const handleQuantityChange = (change) => {
     const newQuantity = quantity + change;
-    if (newQuantity >= 1 && newQuantity <= mockProduct.stockCount) {
+    const maxStock = mockProduct?.stockCount || 0;
+    if (newQuantity >= 1 && newQuantity <= maxStock) {
       setQuantity(newQuantity);
     }
   };
@@ -267,13 +272,14 @@ const ProductDetails = () => {
     );
   }
 
-  const discountPercentage = mockProduct.originalPrice
-    ? Math.round(
-        ((mockProduct.originalPrice - mockProduct.price) /
-          mockProduct.originalPrice) *
-          100,
-      )
-    : 0;
+  const discountPercentage =
+    mockProduct?.originalPrice && mockProduct?.price
+      ? Math.round(
+          ((mockProduct.originalPrice - mockProduct.price) /
+            mockProduct.originalPrice) *
+            100,
+        )
+      : 0;
 
   return (
     <div className="fade-in">
