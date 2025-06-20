@@ -62,11 +62,11 @@ const Cart = () => {
           </Container>
         </section>
 
-        <section className="section-padding">
-          <Container>
-            <Row className="justify-content-center">
-              <Col lg={8} className="text-center">
-                <div className="medical-card p-5">
+      <section className="section-padding" style={{ paddingTop: "2rem" }}>
+        <Container>
+          <Row>
+            {/* Cart Items */}
+            <Col lg={8} className="mb-4">
                   <i className="bi bi-cart-x display-1 text-muted mb-4"></i>
                   <h3 className="mb-3">Your Cart is Empty</h3>
                   <p className="text-muted mb-4">

@@ -232,7 +232,7 @@ const InvoiceView = () => {
                 <Col md={8}>
                   <div className="d-flex align-items-center mb-3">
                     <img
-                      src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/invoice_hkm12345678-1-564292"
+                      src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/invoice_hkm12345678-1-0b8331"
                       alt="Hare Krishna Medical Logo"
                       style={{ height: "80px", width: "auto" }}
                       className="me-3"
