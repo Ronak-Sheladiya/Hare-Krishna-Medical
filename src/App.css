@@ -151,6 +151,57 @@ main {
   }
 }
 
+/* Modern glassmorphism and hover effects */
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+.service-card:hover {
+  transform: translateY(-5px);
+  transition: all 0.3s ease;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Modern button hover effects */
+.btn:hover {
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+/* Enhanced card shadows */
+.medical-card {
+  transition: all 0.3s ease;
+}
+
+.medical-card:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Modern color variables for consistency */
+:root {
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-success: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  --gradient-warning: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+}
+
+/* Enhanced loading spinner */
+.spinner-border {
+  animation: spin 1s linear infinite;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition: all 0.3s ease;
+}
+
 /* Contact form card styles */
 .contact-form-card {
   background: #ffffff;
