@@ -103,6 +103,7 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-conditions" element={<TermsConditions />} />
+            <Route path="/backend-docs" element={<BackendDocs />} />
             <Route path="/invoice/:orderId" element={<InvoiceView />} />
 
             {/* Auth Routes (redirect if already authenticated) */}
