@@ -62,11 +62,11 @@ const Home = () => {
 
   return (
     <div className="fade-in">
-      {/* Hero Section with Modern Background */}
+      {/* Hero Section with Professional Medical Theme */}
       <section
         className="hero-section"
         style={{
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          background: "linear-gradient(135deg, #2c5aa0 0%, #1e3f73 100%)",
           position: "relative",
           overflow: "hidden",
         }}
@@ -79,9 +79,19 @@ const Home = () => {
             right: 0,
             bottom: 0,
             background:
-              "linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%), linear-gradient(-45deg, rgba(255,255,255,0.1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.1) 75%), linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.1) 75%)",
-            backgroundSize: "30px 30px",
-            backgroundPosition: "0 0, 0 15px, 15px -15px, -15px 0px",
+              "radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.08) 0%, transparent 50%)",
+          }}
+        ></div>
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background:
+              'url(\'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="medical-pattern" width="50" height="50" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><path d="M20 25h10M25 20v10" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23medical-pattern)"/></svg>\')',
+            opacity: 0.3,
           }}
         ></div>
         <Container style={{ position: "relative", zIndex: 2 }}>
@@ -89,14 +99,22 @@ const Home = () => {
             <Col lg={6} className="slide-in-left">
               <h1
                 className="hero-title text-white"
-                style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.3)" }}
+                style={{
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                  fontSize: "3.5rem",
+                  fontWeight: "700",
+                }}
               >
                 Your Health, <br />
-                <span className="text-warning">Our Priority</span>
+                <span style={{ color: "#a8d8f0" }}>Our Priority</span>
               </h1>
               <p
                 className="hero-subtitle text-white"
-                style={{ textShadow: "1px 1px 2px rgba(0,0,0,0.2)" }}
+                style={{
+                  textShadow: "1px 1px 2px rgba(0,0,0,0.2)",
+                  fontSize: "1.2rem",
+                  opacity: "0.95",
+                }}
               >
                 Welcome to Hare Krishna Medical - your trusted partner in health
                 and wellness. We provide quality medical products with a
@@ -106,12 +124,16 @@ const Home = () => {
                 <Button
                   as={Link}
                   to="/products"
-                  className="btn-medical-primary"
                   size="lg"
                   style={{
-                    background: "linear-gradient(45deg, #ff6b6b, #ee5a24)",
+                    background: "linear-gradient(45deg, #28a745, #20c997)",
                     border: "none",
-                    boxShadow: "0 4px 15px rgba(255,107,107,0.4)",
+                    borderRadius: "25px",
+                    padding: "12px 30px",
+                    boxShadow: "0 4px 15px rgba(40,167,69,0.4)",
+                    fontWeight: "600",
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
                   }}
                 >
                   Shop Products
@@ -126,6 +148,9 @@ const Home = () => {
                     color: "white",
                     backdropFilter: "blur(10px)",
                     background: "rgba(255,255,255,0.1)",
+                    borderRadius: "25px",
+                    padding: "12px 30px",
+                    fontWeight: "600",
                   }}
                 >
                   Learn More
@@ -136,18 +161,19 @@ const Home = () => {
               <div className="text-center">
                 <div
                   style={{
-                    background: "rgba(255,255,255,0.1)",
-                    backdropFilter: "blur(10px)",
-                    borderRadius: "20px",
-                    padding: "30px",
+                    background: "rgba(255,255,255,0.15)",
+                    backdropFilter: "blur(15px)",
+                    borderRadius: "30px",
+                    padding: "40px",
                     border: "1px solid rgba(255,255,255,0.2)",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
                   }}
                 >
                   <img
                     src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
                     alt="Hare Krishna Medical"
                     className="img-fluid"
-                    style={{ maxHeight: "400px" }}
+                    style={{ maxHeight: "350px", filter: "brightness(1.1)" }}
                   />
                 </div>
               </div>
@@ -156,11 +182,11 @@ const Home = () => {
         </Container>
       </section>
 
-      {/* Features Section with Modern Background */}
+      {/* Features Section with Professional Theme */}
       <section
         className="section-padding"
         style={{
-          background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+          background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
           position: "relative",
         }}
       >
@@ -172,21 +198,31 @@ const Home = () => {
             right: 0,
             bottom: 0,
             background:
-              "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.2) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)",
+              "repeating-linear-gradient(45deg, transparent, transparent 50px, rgba(44, 90, 160, 0.03) 50px, rgba(44, 90, 160, 0.03) 100px)",
           }}
         ></div>
         <Container style={{ position: "relative", zIndex: 2 }}>
           <Row>
             <Col lg={12} className="text-center mb-5">
               <h2
-                className="section-title text-white"
-                style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.3)" }}
+                className="section-title"
+                style={{
+                  color: "#2c5aa0",
+                  fontWeight: "700",
+                  fontSize: "2.5rem",
+                  marginBottom: "1rem",
+                }}
               >
                 Why Choose Us?
               </h2>
               <p
-                className="section-subtitle text-white"
-                style={{ textShadow: "1px 1px 2px rgba(0,0,0,0.2)" }}
+                className="section-subtitle"
+                style={{
+                  color: "#6c757d",
+                  fontSize: "1.1rem",
+                  maxWidth: "600px",
+                  margin: "0 auto",
+                }}
               >
                 We are committed to providing the best healthcare solutions with
                 quality products and exceptional service.
@@ -198,33 +234,45 @@ const Home = () => {
               <div
                 className="service-card fade-in"
                 style={{
-                  background: "rgba(255,255,255,0.95)",
+                  background:
+                    "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
                   backdropFilter: "blur(10px)",
-                  borderRadius: "15px",
-                  padding: "30px",
-                  border: "1px solid rgba(255,255,255,0.3)",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+                  borderRadius: "20px",
+                  padding: "40px 30px",
+                  border: "1px solid rgba(44, 90, 160, 0.1)",
+                  boxShadow: "0 10px 40px rgba(44, 90, 160, 0.08)",
+                  height: "100%",
+                  transition: "all 0.3s ease",
                 }}
               >
                 <div
                   className="feature-icon"
                   style={{
-                    background: "linear-gradient(45deg, #667eea, #764ba2)",
+                    background: "linear-gradient(135deg, #2c5aa0, #4a73b8)",
                     color: "white",
                     borderRadius: "50%",
-                    width: "60px",
-                    height: "60px",
+                    width: "70px",
+                    height: "70px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    margin: "0 auto 20px",
-                    fontSize: "24px",
+                    margin: "0 auto 25px",
+                    fontSize: "28px",
+                    boxShadow: "0 8px 25px rgba(44, 90, 160, 0.3)",
                   }}
                 >
                   <i className="bi bi-shield-check"></i>
                 </div>
-                <h4>Quality Assured</h4>
-                <p>
+                <h4
+                  style={{
+                    color: "#2c5aa0",
+                    fontWeight: "600",
+                    marginBottom: "15px",
+                  }}
+                >
+                  Quality Assured
+                </h4>
+                <p style={{ color: "#6c757d", lineHeight: "1.6" }}>
                   All our products are sourced from trusted manufacturers and
                   undergo strict quality checks to ensure safety and efficacy.
                 </p>
@@ -234,33 +282,45 @@ const Home = () => {
               <div
                 className="service-card fade-in"
                 style={{
-                  background: "rgba(255,255,255,0.95)",
+                  background:
+                    "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
                   backdropFilter: "blur(10px)",
-                  borderRadius: "15px",
-                  padding: "30px",
-                  border: "1px solid rgba(255,255,255,0.3)",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+                  borderRadius: "20px",
+                  padding: "40px 30px",
+                  border: "1px solid rgba(40, 167, 69, 0.1)",
+                  boxShadow: "0 10px 40px rgba(40, 167, 69, 0.08)",
+                  height: "100%",
+                  transition: "all 0.3s ease",
                 }}
               >
                 <div
                   className="feature-icon"
                   style={{
-                    background: "linear-gradient(45deg, #f093fb, #f5576c)",
+                    background: "linear-gradient(135deg, #28a745, #20c997)",
                     color: "white",
                     borderRadius: "50%",
-                    width: "60px",
-                    height: "60px",
+                    width: "70px",
+                    height: "70px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    margin: "0 auto 20px",
-                    fontSize: "24px",
+                    margin: "0 auto 25px",
+                    fontSize: "28px",
+                    boxShadow: "0 8px 25px rgba(40, 167, 69, 0.3)",
                   }}
                 >
                   <i className="bi bi-truck"></i>
                 </div>
-                <h4>Fast Delivery</h4>
-                <p>
+                <h4
+                  style={{
+                    color: "#28a745",
+                    fontWeight: "600",
+                    marginBottom: "15px",
+                  }}
+                >
+                  Fast Delivery
+                </h4>
+                <p style={{ color: "#6c757d", lineHeight: "1.6" }}>
                   Quick and reliable delivery service to ensure you get your
                   medical needs fulfilled on time, every time.
                 </p>
@@ -270,33 +330,45 @@ const Home = () => {
               <div
                 className="service-card fade-in"
                 style={{
-                  background: "rgba(255,255,255,0.95)",
+                  background:
+                    "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
                   backdropFilter: "blur(10px)",
-                  borderRadius: "15px",
-                  padding: "30px",
-                  border: "1px solid rgba(255,255,255,0.3)",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+                  borderRadius: "20px",
+                  padding: "40px 30px",
+                  border: "1px solid rgba(108, 117, 125, 0.1)",
+                  boxShadow: "0 10px 40px rgba(108, 117, 125, 0.08)",
+                  height: "100%",
+                  transition: "all 0.3s ease",
                 }}
               >
                 <div
                   className="feature-icon"
                   style={{
-                    background: "linear-gradient(45deg, #ff6b6b, #ee5a24)",
+                    background: "linear-gradient(135deg, #6c757d, #495057)",
                     color: "white",
                     borderRadius: "50%",
-                    width: "60px",
-                    height: "60px",
+                    width: "70px",
+                    height: "70px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    margin: "0 auto 20px",
-                    fontSize: "24px",
+                    margin: "0 auto 25px",
+                    fontSize: "28px",
+                    boxShadow: "0 8px 25px rgba(108, 117, 125, 0.3)",
                   }}
                 >
                   <i className="bi bi-headset"></i>
                 </div>
-                <h4>Expert Support</h4>
-                <p>
+                <h4
+                  style={{
+                    color: "#6c757d",
+                    fontWeight: "600",
+                    marginBottom: "15px",
+                  }}
+                >
+                  Expert Support
+                </h4>
+                <p style={{ color: "#6c757d", lineHeight: "1.6" }}>
                   Our knowledgeable team is always ready to help you with
                   product information and health-related queries.
                 </p>
@@ -306,11 +378,11 @@ const Home = () => {
         </Container>
       </section>
 
-      {/* Featured Products Section with Modern Background */}
+      {/* Featured Products Section with Medical Theme */}
       <section
         className="section-padding"
         style={{
-          background: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
+          background: "linear-gradient(135deg, #2c5aa0 0%, #1e3f73 100%)",
           position: "relative",
         }}
       >
@@ -322,23 +394,32 @@ const Home = () => {
             right: 0,
             bottom: 0,
             background:
-              'url(\'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>\')',
-            opacity: 0.5,
+              "linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%), linear-gradient(-45deg, rgba(255,255,255,0.05) 25%, transparent 25%)",
+            backgroundSize: "60px 60px",
           }}
         ></div>
         <Container style={{ position: "relative", zIndex: 2 }}>
           <Row>
             <Col lg={12} className="text-center mb-5">
               <h2
-                className="section-title"
+                className="section-title text-white"
                 style={{
-                  color: "#2c3e50",
-                  textShadow: "1px 1px 2px rgba(255,255,255,0.5)",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                  fontWeight: "700",
+                  fontSize: "2.5rem",
+                  marginBottom: "1rem",
                 }}
               >
                 Featured Products
               </h2>
-              <p className="section-subtitle" style={{ color: "#34495e" }}>
+              <p
+                className="section-subtitle text-white"
+                style={{
+                  textShadow: "1px 1px 2px rgba(0,0,0,0.2)",
+                  opacity: "0.9",
+                  fontSize: "1.1rem",
+                }}
+              >
                 Discover our most popular and trusted medical products
               </p>
             </Col>
@@ -349,13 +430,15 @@ const Home = () => {
                 <Card
                   className="product-card fade-in"
                   style={{
-                    background: "rgba(255,255,255,0.9)",
-                    backdropFilter: "blur(10px)",
-                    borderRadius: "15px",
-                    border: "1px solid rgba(255,255,255,0.3)",
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+                    background:
+                      "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
+                    backdropFilter: "blur(15px)",
+                    borderRadius: "20px",
+                    border: "1px solid rgba(255,255,255,0.8)",
+                    boxShadow: "0 15px 45px rgba(0,0,0,0.1)",
                     transition: "all 0.3s ease",
                     height: "100%",
+                    overflow: "hidden",
                   }}
                 >
                   <Link
@@ -367,25 +450,49 @@ const Home = () => {
                       src={product.image}
                       className="product-image"
                       alt={product.name}
-                      style={{ borderRadius: "15px 15px 0 0" }}
+                      style={{
+                        borderRadius: "20px 20px 0 0",
+                        height: "200px",
+                        objectFit: "cover",
+                      }}
                     />
                   </Link>
-                  <Card.Body className="d-flex flex-column">
+                  <Card.Body
+                    className="d-flex flex-column"
+                    style={{ padding: "25px" }}
+                  >
                     <Link
                       to={`/products/${product.id}`}
                       className="text-decoration-none"
                     >
-                      <Card.Title className="product-title text-dark">
+                      <Card.Title
+                        className="product-title"
+                        style={{
+                          color: "#2c5aa0",
+                          fontWeight: "600",
+                          fontSize: "1.2rem",
+                        }}
+                      >
                         {product.name}
                       </Card.Title>
                     </Link>
-                    <Card.Text className="flex-grow-1">
+                    <Card.Text
+                      className="flex-grow-1"
+                      style={{
+                        color: "#6c757d",
+                        lineHeight: "1.5",
+                      }}
+                    >
                       {product.description}
                     </Card.Text>
                     <div className="d-flex justify-content-between align-items-center mt-auto">
                       <span
                         className="product-price fw-bold"
-                        style={{ color: "#e74c3c", fontSize: "18px" }}
+                        style={{
+                          color: "#28a745",
+                          fontSize: "1.4rem",
+                          fontWeight: "700",
+                        }}
                       >
                         ₹{product.price}
                       </span>
@@ -397,22 +504,23 @@ const Home = () => {
                         }}
                         style={{
                           background:
-                            "linear-gradient(45deg, #667eea, #764ba2)",
+                            "linear-gradient(135deg, #2c5aa0, #4a73b8)",
                           border: "none",
                           borderRadius: "25px",
-                          padding: "8px 20px",
-                          boxShadow: "0 4px 15px rgba(102,126,234,0.4)",
+                          padding: "10px 20px",
+                          boxShadow: "0 4px 15px rgba(44, 90, 160, 0.4)",
                           transition: "all 0.3s ease",
+                          fontWeight: "600",
                         }}
                         onMouseOver={(e) => {
                           e.target.style.transform = "translateY(-2px)";
                           e.target.style.boxShadow =
-                            "0 6px 20px rgba(102,126,234,0.6)";
+                            "0 6px 20px rgba(44, 90, 160, 0.6)";
                         }}
                         onMouseOut={(e) => {
                           e.target.style.transform = "translateY(0)";
                           e.target.style.boxShadow =
-                            "0 4px 15px rgba(102,126,234,0.4)";
+                            "0 4px 15px rgba(44, 90, 160, 0.4)";
                         }}
                       >
                         <i className="bi bi-cart-plus me-1"></i>
@@ -431,11 +539,14 @@ const Home = () => {
                 to="/products"
                 size="lg"
                 style={{
-                  background: "linear-gradient(45deg, #667eea, #764ba2)",
+                  background: "linear-gradient(135deg, #28a745, #20c997)",
                   border: "none",
                   borderRadius: "25px",
-                  padding: "12px 30px",
-                  boxShadow: "0 6px 20px rgba(102,126,234,0.4)",
+                  padding: "15px 40px",
+                  boxShadow: "0 6px 20px rgba(40, 167, 69, 0.4)",
+                  fontWeight: "600",
+                  textTransform: "uppercase",
+                  letterSpacing: "1px",
                 }}
               >
                 View All Products
@@ -445,11 +556,11 @@ const Home = () => {
         </Container>
       </section>
 
-      {/* Stats Section with Modern Background */}
+      {/* Stats Section with Professional Theme */}
       <section
         className="stats-section section-padding"
         style={{
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          background: "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)",
           position: "relative",
         }}
       >
@@ -461,8 +572,7 @@ const Home = () => {
             right: 0,
             bottom: 0,
             background:
-              "linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%), linear-gradient(-45deg, rgba(255,255,255,0.05) 25%, transparent 25%)",
-            backgroundSize: "60px 60px",
+              "radial-gradient(circle at 25% 25%, rgba(44, 90, 160, 0.05) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(40, 167, 69, 0.05) 0%, transparent 50%)",
           }}
         ></div>
         <Container style={{ position: "relative", zIndex: 2 }}>
@@ -471,26 +581,35 @@ const Home = () => {
               <div
                 className="stat-item fade-in text-center"
                 style={{
-                  background: "rgba(255,255,255,0.1)",
+                  background:
+                    "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
                   backdropFilter: "blur(10px)",
-                  borderRadius: "15px",
-                  padding: "30px",
-                  border: "1px solid rgba(255,255,255,0.2)",
+                  borderRadius: "20px",
+                  padding: "40px 20px",
+                  border: "1px solid rgba(44, 90, 160, 0.1)",
+                  boxShadow: "0 10px 30px rgba(44, 90, 160, 0.1)",
+                  transition: "all 0.3s ease",
                 }}
               >
                 <span
-                  className="stat-number text-white"
+                  className="stat-number"
                   style={{
-                    fontSize: "3rem",
-                    fontWeight: "bold",
-                    textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                    fontSize: "3.5rem",
+                    fontWeight: "800",
+                    color: "#2c5aa0",
+                    display: "block",
+                    marginBottom: "10px",
                   }}
                 >
                   500+
                 </span>
                 <div
-                  className="stat-label text-white"
-                  style={{ textShadow: "1px 1px 2px rgba(0,0,0,0.2)" }}
+                  className="stat-label"
+                  style={{
+                    color: "#6c757d",
+                    fontWeight: "600",
+                    fontSize: "1.1rem",
+                  }}
                 >
                   Happy Customers
                 </div>
@@ -500,26 +619,35 @@ const Home = () => {
               <div
                 className="stat-item fade-in text-center"
                 style={{
-                  background: "rgba(255,255,255,0.1)",
+                  background:
+                    "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
                   backdropFilter: "blur(10px)",
-                  borderRadius: "15px",
-                  padding: "30px",
-                  border: "1px solid rgba(255,255,255,0.2)",
+                  borderRadius: "20px",
+                  padding: "40px 20px",
+                  border: "1px solid rgba(40, 167, 69, 0.1)",
+                  boxShadow: "0 10px 30px rgba(40, 167, 69, 0.1)",
+                  transition: "all 0.3s ease",
                 }}
               >
                 <span
-                  className="stat-number text-white"
+                  className="stat-number"
                   style={{
-                    fontSize: "3rem",
-                    fontWeight: "bold",
-                    textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                    fontSize: "3.5rem",
+                    fontWeight: "800",
+                    color: "#28a745",
+                    display: "block",
+                    marginBottom: "10px",
                   }}
                 >
                   1000+
                 </span>
                 <div
-                  className="stat-label text-white"
-                  style={{ textShadow: "1px 1px 2px rgba(0,0,0,0.2)" }}
+                  className="stat-label"
+                  style={{
+                    color: "#6c757d",
+                    fontWeight: "600",
+                    fontSize: "1.1rem",
+                  }}
                 >
                   Products Available
                 </div>
@@ -529,26 +657,35 @@ const Home = () => {
               <div
                 className="stat-item fade-in text-center"
                 style={{
-                  background: "rgba(255,255,255,0.1)",
+                  background:
+                    "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
                   backdropFilter: "blur(10px)",
-                  borderRadius: "15px",
-                  padding: "30px",
-                  border: "1px solid rgba(255,255,255,0.2)",
+                  borderRadius: "20px",
+                  padding: "40px 20px",
+                  border: "1px solid rgba(108, 117, 125, 0.1)",
+                  boxShadow: "0 10px 30px rgba(108, 117, 125, 0.1)",
+                  transition: "all 0.3s ease",
                 }}
               >
                 <span
-                  className="stat-number text-white"
+                  className="stat-number"
                   style={{
-                    fontSize: "3rem",
-                    fontWeight: "bold",
-                    textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                    fontSize: "3.5rem",
+                    fontWeight: "800",
+                    color: "#6c757d",
+                    display: "block",
+                    marginBottom: "10px",
                   }}
                 >
                   5+
                 </span>
                 <div
-                  className="stat-label text-white"
-                  style={{ textShadow: "1px 1px 2px rgba(0,0,0,0.2)" }}
+                  className="stat-label"
+                  style={{
+                    color: "#6c757d",
+                    fontWeight: "600",
+                    fontSize: "1.1rem",
+                  }}
                 >
                   Years of Experience
                 </div>
@@ -558,26 +695,35 @@ const Home = () => {
               <div
                 className="stat-item fade-in text-center"
                 style={{
-                  background: "rgba(255,255,255,0.1)",
+                  background:
+                    "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
                   backdropFilter: "blur(10px)",
-                  borderRadius: "15px",
-                  padding: "30px",
-                  border: "1px solid rgba(255,255,255,0.2)",
+                  borderRadius: "20px",
+                  padding: "40px 20px",
+                  border: "1px solid rgba(44, 90, 160, 0.1)",
+                  boxShadow: "0 10px 30px rgba(44, 90, 160, 0.1)",
+                  transition: "all 0.3s ease",
                 }}
               >
                 <span
-                  className="stat-number text-white"
+                  className="stat-number"
                   style={{
-                    fontSize: "3rem",
-                    fontWeight: "bold",
-                    textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                    fontSize: "3.5rem",
+                    fontWeight: "800",
+                    color: "#2c5aa0",
+                    display: "block",
+                    marginBottom: "10px",
                   }}
                 >
                   24/7
                 </span>
                 <div
-                  className="stat-label text-white"
-                  style={{ textShadow: "1px 1px 2px rgba(0,0,0,0.2)" }}
+                  className="stat-label"
+                  style={{
+                    color: "#6c757d",
+                    fontWeight: "600",
+                    fontSize: "1.1rem",
+                  }}
                 >
                   Customer Support
                 </div>
@@ -587,11 +733,11 @@ const Home = () => {
         </Container>
       </section>
 
-      {/* CTA Section with Modern Background */}
+      {/* CTA Section with Professional Medical Theme */}
       <section
         className="cta-section section-padding"
         style={{
-          background: "linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)",
+          background: "linear-gradient(135deg, #28a745 0%, #20c997 100%)",
           position: "relative",
         }}
       >
@@ -603,7 +749,7 @@ const Home = () => {
             right: 0,
             bottom: 0,
             background:
-              "radial-gradient(circle at 30% 40%, rgba(255,255,255,0.2) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(255,255,255,0.1) 0%, transparent 50%)",
+              "radial-gradient(circle at 30% 40%, rgba(255,255,255,0.15) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(255,255,255,0.1) 0%, transparent 50%)",
           }}
         ></div>
         <Container style={{ position: "relative", zIndex: 2 }}>
@@ -611,13 +757,24 @@ const Home = () => {
             <Col lg={12} className="text-center">
               <h2
                 className="cta-title text-white"
-                style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.3)" }}
+                style={{
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                  fontWeight: "700",
+                  fontSize: "2.8rem",
+                  marginBottom: "1.5rem",
+                }}
               >
                 Ready to Take Care of Your Health?
               </h2>
               <p
                 className="cta-subtitle text-white"
-                style={{ textShadow: "1px 1px 2px rgba(0,0,0,0.2)" }}
+                style={{
+                  textShadow: "1px 1px 2px rgba(0,0,0,0.2)",
+                  fontSize: "1.2rem",
+                  opacity: "0.95",
+                  maxWidth: "600px",
+                  margin: "0 auto 2rem auto",
+                }}
               >
                 Join thousands of satisfied customers who trust us with their
                 healthcare needs.
@@ -628,12 +785,14 @@ const Home = () => {
                   to="/products"
                   size="lg"
                   style={{
-                    background: "rgba(255,255,255,0.9)",
-                    color: "#ff6b6b",
+                    background: "rgba(255,255,255,0.95)",
+                    color: "#28a745",
                     border: "none",
                     borderRadius: "25px",
-                    padding: "12px 30px",
-                    fontWeight: "bold",
+                    padding: "15px 40px",
+                    fontWeight: "700",
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
                     boxShadow: "0 6px 20px rgba(255,255,255,0.3)",
                   }}
                 >
@@ -648,9 +807,12 @@ const Home = () => {
                     borderColor: "rgba(255,255,255,0.8)",
                     color: "white",
                     borderRadius: "25px",
-                    padding: "12px 30px",
+                    padding: "15px 40px",
                     backdropFilter: "blur(10px)",
-                    background: "rgba(255,255,255,0.1)",
+                    background: "rgba(255,255,255,0.15)",
+                    fontWeight: "600",
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
                   }}
                 >
                   Contact Us
