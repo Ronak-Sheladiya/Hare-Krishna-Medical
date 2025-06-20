@@ -294,15 +294,28 @@ const AdminDashboard = () => {
                     <Col lg={3} md={6} className="mb-3">
                       <Button
                         as={Link}
-                        to="/admin/users"
-                        variant="outline-success"
-                        className="w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3"
+                        to="/admin/messages"
+                        variant={
+                          dashboardStats.unreadMessages > 0
+                            ? "outline-danger"
+                            : "outline-info"
+                        }
+                        className="w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 position-relative"
                       >
-                        <i className="bi bi-people mb-2 fs-1"></i>
+                        <i className="bi bi-envelope mb-2 fs-1"></i>
                         <span className="fw-bold">
-                          {dashboardStats.newUsersToday}
+                          {dashboardStats.unreadMessages}
                         </span>
-                        <small>New Users Today</small>
+                        <small>Unread Messages</small>
+                        {dashboardStats.unreadMessages > 0 && (
+                          <Badge
+                            bg="danger"
+                            className="position-absolute top-0 end-0"
+                            style={{ transform: "translate(25%, -25%)" }}
+                          >
+                            !
+                          </Badge>
+                        )}
                       </Button>
                     </Col>
                   </Row>
