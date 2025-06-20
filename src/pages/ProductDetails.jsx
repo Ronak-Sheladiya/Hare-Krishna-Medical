@@ -64,6 +64,16 @@ const ProductDetails = () => {
       mfgDate: "Jan 2024",
       expDate: "Dec 2026",
       composition: "Each tablet contains: Paracetamol IP 500mg",
+      sideEffects: [
+        "Rare: skin rash or allergic reactions",
+        "Very rare: liver damage with overdose",
+        "If any adverse reaction occurs, discontinue use",
+      ],
+      contraindications: [
+        "Known hypersensitivity to paracetamol",
+        "Severe liver or kidney disease",
+        "Chronic alcoholism",
+      ],
     },
     2: {
       id: 2,
@@ -101,6 +111,16 @@ const ProductDetails = () => {
       mfgDate: "Feb 2024",
       expDate: "Jan 2027",
       composition: "Each capsule contains: Vitamin D3 1000 IU",
+      sideEffects: [
+        "Rare: nausea or vomiting with high doses",
+        "Very rare: hypercalcemia with excessive use",
+        "Consult doctor if you experience any adverse effects",
+      ],
+      contraindications: [
+        "Hypercalcemia or hypercalciuria",
+        "Kidney stones",
+        "Kidney disease",
+      ],
     },
     3: {
       id: 3,
@@ -138,6 +158,16 @@ const ProductDetails = () => {
       mfgDate: "Mar 2024",
       expDate: "Feb 2027",
       composition: "Honey, Tulsi extract, Ginger extract, Mulethi extract",
+      sideEffects: [
+        "Generally well tolerated",
+        "Rare: allergic reactions to herbal ingredients",
+        "May cause drowsiness in sensitive individuals",
+      ],
+      contraindications: [
+        "Known allergy to honey or herbal ingredients",
+        "Children under 6 years",
+        "Diabetes (due to honey content)",
+      ],
     },
   };
 
@@ -164,6 +194,8 @@ const ProductDetails = () => {
     mfgDate: "N/A",
     expDate: "N/A",
     composition: "N/A",
+    sideEffects: ["Product not available"],
+    contraindications: ["Product not available"],
   };
 
   // Mock related products
