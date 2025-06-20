@@ -228,7 +228,7 @@ const InvoiceView = () => {
               </div>
             </div>
 
-            {/* Invoice Content - Exact PDF Design */}
+            {/* Colorful Invoice Content - Exact PDF Design */}
             <div
               id="invoice-content"
               className="invoice-section p-4"
@@ -239,319 +239,439 @@ const InvoiceView = () => {
                 margin: "0 auto",
               }}
             >
-              {/* Header Section - Exact PDF Layout */}
+              {/* Header Section - Colorful Design */}
               <div
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  marginBottom: "30px",
-                  borderBottom: "2px solid #000",
-                  paddingBottom: "20px",
+                  background:
+                    "linear-gradient(135deg, #ff6b6b 0%, #e74c3c 100%)",
+                  color: "white",
+                  padding: "25px",
+                  borderRadius: "15px 15px 0 0",
+                  marginBottom: "0",
                 }}
               >
-                {/* Left Side - Company Info */}
-                <div style={{ flex: "1" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginBottom: "15px",
-                    }}
-                  >
-                    <img
-                      src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/invoice_hkm12345678-1-e0e726"
-                      alt="Hare Krishna Medical Logo"
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  {/* Left Side - Company Info */}
+                  <div style={{ flex: "1" }}>
+                    <div
                       style={{
-                        height: "60px",
-                        width: "auto",
-                        marginRight: "15px",
+                        display: "flex",
+                        alignItems: "center",
+                        marginBottom: "15px",
                       }}
-                      onError={(e) => {
-                        e.target.src =
-                          "https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800";
+                    >
+                      <img
+                        src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/invoice_hkm12345678-1-e0e726"
+                        alt="Hare Krishna Medical Logo"
+                        style={{
+                          height: "70px",
+                          width: "auto",
+                          marginRight: "20px",
+                          backgroundColor: "white",
+                          padding: "10px",
+                          borderRadius: "10px",
+                        }}
+                        onError={(e) => {
+                          e.target.src =
+                            "https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800";
+                        }}
+                      />
+                      <div>
+                        <h1
+                          style={{
+                            fontSize: "28px",
+                            fontWeight: "bold",
+                            margin: "0",
+                            lineHeight: "1.2",
+                            textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                          }}
+                        >
+                          HARE KRISHNA MEDICAL
+                        </h1>
+                        <p
+                          style={{
+                            fontSize: "14px",
+                            margin: "5px 0",
+                            opacity: "0.9",
+                          }}
+                        >
+                          Your Trusted Health Partner
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        lineHeight: "1.6",
+                        opacity: "0.95",
                       }}
-                    />
-                    <div>
-                      <h1
-                        style={{
-                          fontSize: "24px",
-                          fontWeight: "bold",
-                          color: "#000",
-                          margin: "0",
-                          lineHeight: "1.2",
-                        }}
-                      >
-                        HARE KRISHNA MEDICAL
-                      </h1>
-                      <p
-                        style={{
-                          fontSize: "12px",
-                          color: "#666",
-                          margin: "2px 0",
-                        }}
-                      >
-                        Your Trusted Health Partner
-                      </p>
+                    >
+                      <div>📍 3 Sahyog Complex, Man Sarovar circle</div>
+                      <div>🏙️ Amroli, 394107, Gujarat, India</div>
+                      <div>📞 +91 76989 13354 | +91 91060 18508</div>
+                      <div>📧 harekrishnamedical@gmail.com</div>
                     </div>
                   </div>
-                  <div
-                    style={{
-                      fontSize: "11px",
-                      color: "#000",
-                      lineHeight: "1.4",
-                    }}
-                  >
-                    <div>3 Sahyog Complex, Man Sarovar circle</div>
-                    <div>Amroli, 394107, Gujarat, India</div>
-                    <div>Phone: +91 76989 13354 | +91 91060 18508</div>
-                    <div>Email: harekrishnamedical@gmail.com</div>
-                  </div>
-                </div>
 
-                {/* Right Side - Invoice Info */}
-                <div style={{ textAlign: "right", minWidth: "200px" }}>
-                  <h1
-                    style={{
-                      fontSize: "36px",
-                      fontWeight: "bold",
-                      color: "#000",
-                      margin: "0 0 15px 0",
-                    }}
-                  >
-                    INVOICE
-                  </h1>
-                  <div
-                    style={{
-                      backgroundColor: "#f5f5f5",
-                      border: "1px solid #000",
-                      padding: "15px",
-                      fontSize: "12px",
-                      textAlign: "left",
-                    }}
-                  >
-                    <div style={{ marginBottom: "5px" }}>
-                      <strong>Invoice No:</strong> {invoice.invoiceId}
-                    </div>
-                    <div style={{ marginBottom: "5px" }}>
-                      <strong>Order No:</strong> {invoice.orderId}
-                    </div>
-                    <div style={{ marginBottom: "5px" }}>
-                      <strong>Date:</strong> {invoice.orderDate}
-                    </div>
-                    <div style={{ marginBottom: "5px" }}>
-                      <strong>Time:</strong> {invoice.orderTime}
-                    </div>
-                    <div>
-                      <strong>Status:</strong> {invoice.status}
+                  {/* Right Side - Invoice Info */}
+                  <div style={{ textAlign: "right", minWidth: "250px" }}>
+                    <h1
+                      style={{
+                        fontSize: "42px",
+                        fontWeight: "bold",
+                        margin: "0 0 20px 0",
+                        textShadow: "3px 3px 6px rgba(0,0,0,0.3)",
+                      }}
+                    >
+                      INVOICE
+                    </h1>
+                    <div
+                      style={{
+                        backgroundColor: "rgba(255,255,255,0.95)",
+                        color: "#333",
+                        padding: "20px",
+                        borderRadius: "10px",
+                        fontSize: "13px",
+                        textAlign: "left",
+                        boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                      }}
+                    >
+                      <div style={{ marginBottom: "8px" }}>
+                        <strong style={{ color: "#e74c3c" }}>
+                          Invoice No:
+                        </strong>{" "}
+                        {invoice.invoiceId}
+                      </div>
+                      <div style={{ marginBottom: "8px" }}>
+                        <strong style={{ color: "#e74c3c" }}>Order No:</strong>{" "}
+                        {invoice.orderId}
+                      </div>
+                      <div style={{ marginBottom: "8px" }}>
+                        <strong style={{ color: "#e74c3c" }}>Date:</strong>{" "}
+                        {invoice.orderDate}
+                      </div>
+                      <div style={{ marginBottom: "8px" }}>
+                        <strong style={{ color: "#e74c3c" }}>Time:</strong>{" "}
+                        {invoice.orderTime}
+                      </div>
+                      <div>
+                        <strong style={{ color: "#e74c3c" }}>Status:</strong>{" "}
+                        <span
+                          style={{
+                            background: "#27ae60",
+                            color: "white",
+                            padding: "3px 8px",
+                            borderRadius: "12px",
+                            fontSize: "11px",
+                          }}
+                        >
+                          {invoice.status}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Bill To and Ship To Section */}
+              {/* Customer Information Section - Colorful */}
               <div
                 style={{
                   display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: "30px",
-                  gap: "30px",
+                  gap: "20px",
+                  marginBottom: "25px",
+                  marginTop: "0",
                 }}
               >
-                {/* Bill To */}
+                {/* Bill To - Blue Theme */}
                 <div
                   style={{
                     flex: "1",
-                    border: "1px solid #000",
-                    padding: "15px",
+                    background:
+                      "linear-gradient(135deg, #3498db 0%, #2980b9 100%)",
+                    color: "white",
+                    padding: "20px",
+                    borderRadius: "0 0 0 15px",
                   }}
                 >
                   <h3
                     style={{
-                      fontSize: "14px",
+                      fontSize: "16px",
                       fontWeight: "bold",
-                      margin: "0 0 10px 0",
+                      margin: "0 0 15px 0",
                       textTransform: "uppercase",
+                      textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
                     }}
                   >
-                    BILL TO:
+                    📍 BILL TO:
                   </h3>
-                  <div style={{ fontSize: "12px", lineHeight: "1.5" }}>
-                    <div style={{ fontWeight: "bold", marginBottom: "5px" }}>
+                  <div style={{ fontSize: "13px", lineHeight: "1.8" }}>
+                    <div
+                      style={{
+                        fontWeight: "bold",
+                        marginBottom: "8px",
+                        fontSize: "15px",
+                      }}
+                    >
                       {invoice.customerDetails.fullName}
                     </div>
-                    <div>{invoice.customerDetails.email}</div>
-                    <div>{invoice.customerDetails.mobile}</div>
-                    <div>{invoice.customerDetails.address}</div>
+                    <div>📧 {invoice.customerDetails.email}</div>
+                    <div>📱 {invoice.customerDetails.mobile}</div>
+                    <div>🏠 {invoice.customerDetails.address}</div>
                     <div>
-                      {invoice.customerDetails.city},{" "}
+                      🏙️ {invoice.customerDetails.city},{" "}
                       {invoice.customerDetails.state}{" "}
                       {invoice.customerDetails.pincode}
                     </div>
                   </div>
                 </div>
 
-                {/* Ship To */}
+                {/* Ship To - Green Theme */}
                 <div
                   style={{
                     flex: "1",
-                    border: "1px solid #000",
-                    padding: "15px",
+                    background:
+                      "linear-gradient(135deg, #27ae60 0%, #229954 100%)",
+                    color: "white",
+                    padding: "20px",
+                    borderRadius: "0 0 15px 0",
                   }}
                 >
                   <h3
                     style={{
-                      fontSize: "14px",
+                      fontSize: "16px",
                       fontWeight: "bold",
-                      margin: "0 0 10px 0",
+                      margin: "0 0 15px 0",
                       textTransform: "uppercase",
+                      textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
                     }}
                   >
-                    SHIP TO:
+                    🚚 SHIP TO:
                   </h3>
-                  <div style={{ fontSize: "12px", lineHeight: "1.5" }}>
-                    <div style={{ fontWeight: "bold", marginBottom: "5px" }}>
+                  <div style={{ fontSize: "13px", lineHeight: "1.8" }}>
+                    <div
+                      style={{
+                        fontWeight: "bold",
+                        marginBottom: "8px",
+                        fontSize: "15px",
+                      }}
+                    >
                       {invoice.customerDetails.fullName}
                     </div>
-                    <div>{invoice.customerDetails.address}</div>
+                    <div>🏠 {invoice.customerDetails.address}</div>
                     <div>
-                      {invoice.customerDetails.city},{" "}
+                      🏙️ {invoice.customerDetails.city},{" "}
                       {invoice.customerDetails.state}{" "}
                       {invoice.customerDetails.pincode}
                     </div>
-                    <div style={{ marginTop: "10px" }}>
-                      <strong>Payment Method:</strong> {invoice.paymentMethod}
+                    <div style={{ marginTop: "12px" }}>
+                      <strong>💳 Payment:</strong> {invoice.paymentMethod}
                     </div>
                     <div>
-                      <strong>Payment Status:</strong> {invoice.paymentStatus}
+                      <strong>✅ Status:</strong>{" "}
+                      <span
+                        style={{
+                          background: "rgba(255,255,255,0.2)",
+                          padding: "2px 6px",
+                          borderRadius: "8px",
+                        }}
+                      >
+                        {invoice.paymentStatus}
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Items Table */}
-              <div style={{ marginBottom: "30px" }}>
+              {/* Items Table - Colorful Design */}
+              <div style={{ marginBottom: "25px" }}>
+                <div
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%)",
+                    color: "white",
+                    padding: "15px 25px",
+                    fontSize: "18px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
+                  }}
+                >
+                  🛒 ORDERED ITEMS
+                </div>
                 <table
                   style={{
                     width: "100%",
                     borderCollapse: "collapse",
-                    border: "2px solid #000",
+                    border: "3px solid #9b59b6",
                   }}
                 >
                   <thead>
-                    <tr style={{ backgroundColor: "#f5f5f5" }}>
+                    <tr
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #f39c12 0%, #e67e22 100%)",
+                        color: "white",
+                      }}
+                    >
                       <th
                         style={{
-                          border: "1px solid #000",
-                          padding: "12px 8px",
-                          fontSize: "12px",
+                          border: "2px solid #e67e22",
+                          padding: "15px 10px",
+                          fontSize: "13px",
                           fontWeight: "bold",
-                          textAlign: "left",
+                          textAlign: "center",
+                          textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
                         }}
                       >
                         S.No
                       </th>
                       <th
                         style={{
-                          border: "1px solid #000",
-                          padding: "12px 8px",
-                          fontSize: "12px",
+                          border: "2px solid #e67e22",
+                          padding: "15px 10px",
+                          fontSize: "13px",
                           fontWeight: "bold",
                           textAlign: "left",
+                          textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
                         }}
                       >
-                        Description
+                        🏥 Description
                       </th>
                       <th
                         style={{
-                          border: "1px solid #000",
-                          padding: "12px 8px",
-                          fontSize: "12px",
+                          border: "2px solid #e67e22",
+                          padding: "15px 10px",
+                          fontSize: "13px",
                           fontWeight: "bold",
                           textAlign: "center",
+                          textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
                         }}
                       >
                         Qty
                       </th>
                       <th
                         style={{
-                          border: "1px solid #000",
-                          padding: "12px 8px",
-                          fontSize: "12px",
+                          border: "2px solid #e67e22",
+                          padding: "15px 10px",
+                          fontSize: "13px",
                           fontWeight: "bold",
                           textAlign: "right",
+                          textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
                         }}
                       >
-                        Price (₹)
+                        💰 Price (₹)
                       </th>
                       <th
                         style={{
-                          border: "1px solid #000",
-                          padding: "12px 8px",
-                          fontSize: "12px",
+                          border: "2px solid #e67e22",
+                          padding: "15px 10px",
+                          fontSize: "13px",
                           fontWeight: "bold",
                           textAlign: "right",
+                          textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
                         }}
                       >
-                        Amount (₹)
+                        💵 Amount (₹)
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     {invoice.items.map((item, index) => (
-                      <tr key={item.id}>
+                      <tr
+                        key={item.id}
+                        style={{
+                          backgroundColor:
+                            index % 2 === 0 ? "#f8f9fa" : "white",
+                        }}
+                      >
                         <td
                           style={{
-                            border: "1px solid #000",
-                            padding: "8px",
-                            fontSize: "11px",
+                            border: "1px solid #ddd",
+                            padding: "12px 8px",
+                            fontSize: "12px",
                             textAlign: "center",
+                            fontWeight: "bold",
+                            color: "#9b59b6",
                           }}
                         >
                           {index + 1}
                         </td>
                         <td
                           style={{
-                            border: "1px solid #000",
-                            padding: "8px",
-                            fontSize: "11px",
+                            border: "1px solid #ddd",
+                            padding: "12px 8px",
+                            fontSize: "12px",
                           }}
                         >
-                          <div style={{ fontWeight: "bold" }}>{item.name}</div>
-                          <div style={{ color: "#666", fontSize: "10px" }}>
-                            {item.company}
+                          <div
+                            style={{
+                              fontWeight: "bold",
+                              color: "#2c3e50",
+                              marginBottom: "4px",
+                            }}
+                          >
+                            {item.name}
+                          </div>
+                          <div
+                            style={{
+                              color: "#7f8c8d",
+                              fontSize: "11px",
+                              fontStyle: "italic",
+                            }}
+                          >
+                            🏢 {item.company}
                           </div>
                         </td>
                         <td
                           style={{
-                            border: "1px solid #000",
-                            padding: "8px",
-                            fontSize: "11px",
+                            border: "1px solid #ddd",
+                            padding: "12px 8px",
+                            fontSize: "12px",
                             textAlign: "center",
                           }}
                         >
-                          {item.quantity}
+                          <span
+                            style={{
+                              background: "#3498db",
+                              color: "white",
+                              padding: "4px 8px",
+                              borderRadius: "12px",
+                              fontSize: "11px",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            {item.quantity}
+                          </span>
                         </td>
                         <td
                           style={{
-                            border: "1px solid #000",
-                            padding: "8px",
-                            fontSize: "11px",
+                            border: "1px solid #ddd",
+                            padding: "12px 8px",
+                            fontSize: "12px",
                             textAlign: "right",
-                          }}
-                        >
-                          {item.price.toFixed(2)}
-                        </td>
-                        <td
-                          style={{
-                            border: "1px solid #000",
-                            padding: "8px",
-                            fontSize: "11px",
-                            textAlign: "right",
+                            color: "#27ae60",
                             fontWeight: "bold",
                           }}
                         >
-                          {item.total.toFixed(2)}
+                          ₹{item.price.toFixed(2)}
+                        </td>
+                        <td
+                          style={{
+                            border: "1px solid #ddd",
+                            padding: "12px 8px",
+                            fontSize: "13px",
+                            textAlign: "right",
+                            fontWeight: "bold",
+                            color: "#e74c3c",
+                          }}
+                        >
+                          ₹{item.total.toFixed(2)}
                         </td>
                       </tr>
                     ))}
@@ -559,41 +679,48 @@ const InvoiceView = () => {
                 </table>
               </div>
 
-              {/* Totals Section */}
+              {/* Totals Section - Colorful */}
               <div
                 style={{
                   display: "flex",
                   justifyContent: "flex-end",
-                  marginBottom: "30px",
+                  marginBottom: "25px",
                 }}
               >
-                <div style={{ minWidth: "300px" }}>
+                <div style={{ minWidth: "350px" }}>
                   <table
                     style={{
                       width: "100%",
                       borderCollapse: "collapse",
-                      border: "2px solid #000",
+                      border: "3px solid #e74c3c",
+                      borderRadius: "10px",
+                      overflow: "hidden",
                     }}
                   >
                     <tbody>
                       <tr>
                         <td
                           style={{
-                            border: "1px solid #000",
-                            padding: "8px 12px",
-                            fontSize: "12px",
+                            background:
+                              "linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%)",
+                            border: "1px solid #bdc3c7",
+                            padding: "12px 15px",
+                            fontSize: "13px",
                             fontWeight: "bold",
-                            backgroundColor: "#f5f5f5",
+                            color: "#2c3e50",
                           }}
                         >
-                          Subtotal:
+                          📊 Subtotal:
                         </td>
                         <td
                           style={{
-                            border: "1px solid #000",
-                            padding: "8px 12px",
-                            fontSize: "12px",
+                            background: "#ecf0f1",
+                            border: "1px solid #bdc3c7",
+                            padding: "12px 15px",
+                            fontSize: "13px",
                             textAlign: "right",
+                            color: "#2c3e50",
+                            fontWeight: "bold",
                           }}
                         >
                           ₹{invoice.subtotal.toFixed(2)}
@@ -602,46 +729,56 @@ const InvoiceView = () => {
                       <tr>
                         <td
                           style={{
-                            border: "1px solid #000",
-                            padding: "8px 12px",
-                            fontSize: "12px",
+                            background:
+                              "linear-gradient(135deg, #d5f4e6 0%, #a2d9ce 100%)",
+                            border: "1px solid #a2d9ce",
+                            padding: "12px 15px",
+                            fontSize: "13px",
                             fontWeight: "bold",
-                            backgroundColor: "#f5f5f5",
+                            color: "#27ae60",
                           }}
                         >
-                          Shipping:
+                          🚚 Shipping:
                         </td>
                         <td
                           style={{
-                            border: "1px solid #000",
-                            padding: "8px 12px",
-                            fontSize: "12px",
+                            background: "#d5f4e6",
+                            border: "1px solid #a2d9ce",
+                            padding: "12px 15px",
+                            fontSize: "13px",
                             textAlign: "right",
+                            color: "#27ae60",
+                            fontWeight: "bold",
                           }}
                         >
                           {invoice.shipping === 0
-                            ? "FREE"
+                            ? "FREE 🎉"
                             : `₹${invoice.shipping.toFixed(2)}`}
                         </td>
                       </tr>
                       <tr>
                         <td
                           style={{
-                            border: "1px solid #000",
-                            padding: "8px 12px",
-                            fontSize: "12px",
+                            background:
+                              "linear-gradient(135deg, #fdeaa7 0%, #f39c12 100%)",
+                            border: "1px solid #f39c12",
+                            padding: "12px 15px",
+                            fontSize: "13px",
                             fontWeight: "bold",
-                            backgroundColor: "#f5f5f5",
+                            color: "#f39c12",
                           }}
                         >
-                          Tax (5%):
+                          📋 Tax (5%):
                         </td>
                         <td
                           style={{
-                            border: "1px solid #000",
-                            padding: "8px 12px",
-                            fontSize: "12px",
+                            background: "#fdeaa7",
+                            border: "1px solid #f39c12",
+                            padding: "12px 15px",
+                            fontSize: "13px",
                             textAlign: "right",
+                            color: "#f39c12",
+                            fontWeight: "bold",
                           }}
                         >
                           ₹{invoice.tax.toFixed(2)}
@@ -650,25 +787,29 @@ const InvoiceView = () => {
                       <tr>
                         <td
                           style={{
-                            border: "2px solid #000",
-                            padding: "12px",
-                            fontSize: "14px",
+                            background:
+                              "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)",
+                            border: "3px solid #c0392b",
+                            padding: "18px 15px",
+                            fontSize: "16px",
                             fontWeight: "bold",
-                            backgroundColor: "#000",
                             color: "#fff",
+                            textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
                           }}
                         >
-                          TOTAL:
+                          💎 TOTAL:
                         </td>
                         <td
                           style={{
-                            border: "2px solid #000",
-                            padding: "12px",
-                            fontSize: "14px",
+                            background:
+                              "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)",
+                            border: "3px solid #c0392b",
+                            padding: "18px 15px",
+                            fontSize: "18px",
                             textAlign: "right",
                             fontWeight: "bold",
-                            backgroundColor: "#000",
                             color: "#fff",
+                            textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
                           }}
                         >
                           ₹{invoice.total.toFixed(2)}
@@ -679,123 +820,168 @@ const InvoiceView = () => {
                 </div>
               </div>
 
-              {/* QR Code and Footer */}
+              {/* Footer Section - Colorful */}
               <div
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-end",
-                  borderTop: "2px solid #000",
-                  paddingTop: "20px",
+                  background:
+                    "linear-gradient(135deg, #34495e 0%, #2c3e50 100%)",
+                  color: "white",
+                  padding: "25px",
+                  borderRadius: "15px",
+                  marginBottom: "20px",
                 }}
               >
-                <div style={{ flex: "1" }}>
-                  <h4
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: "bold",
-                      margin: "0 0 15px 0",
-                    }}
-                  >
-                    Thank You for Your Business!
-                  </h4>
-                  <div style={{ fontSize: "11px", lineHeight: "1.6" }}>
-                    <div>
-                      <strong>Terms & Conditions:</strong>
-                    </div>
-                    <div>• Payment due within 30 days</div>
-                    <div>• Goods once sold will not be taken back</div>
-                    <div>• Subject to Gujarat jurisdiction only</div>
-                    <div style={{ marginTop: "10px" }}>
-                      <strong>Contact:</strong> harekrishnamedical@gmail.com |
-                      +91 76989 13354
-                    </div>
-                  </div>
-                </div>
-
-                {qrCode && (
-                  <div style={{ textAlign: "center", marginLeft: "20px" }}>
-                    <img
-                      src={qrCode}
-                      alt="QR Code"
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <div style={{ flex: "1" }}>
+                    <h4
                       style={{
-                        width: "80px",
-                        height: "80px",
-                        border: "1px solid #000",
+                        fontSize: "18px",
+                        fontWeight: "bold",
+                        margin: "0 0 15px 0",
+                        textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
                       }}
-                    />
-                    <div style={{ fontSize: "10px", marginTop: "5px" }}>
-                      Scan for Online Verification
+                    >
+                      🙏 Thank You for Your Business! 🙏
+                    </h4>
+                    <div style={{ fontSize: "12px", lineHeight: "1.8" }}>
+                      <div style={{ marginBottom: "10px" }}>
+                        <strong style={{ color: "#f39c12" }}>
+                          📋 Terms & Conditions:
+                        </strong>
+                      </div>
+                      <div>✅ Payment due within 30 days</div>
+                      <div>❌ Goods once sold will not be taken back</div>
+                      <div>⚖️ Subject to Gujarat jurisdiction only</div>
+                      <div style={{ marginTop: "12px" }}>
+                        <strong style={{ color: "#3498db" }}>
+                          📞 Contact:
+                        </strong>{" "}
+                        harekrishnamedical@gmail.com | +91 76989 13354
+                      </div>
                     </div>
                   </div>
-                )}
+
+                  {qrCode && (
+                    <div style={{ textAlign: "center", marginLeft: "25px" }}>
+                      <img
+                        src={qrCode}
+                        alt="QR Code"
+                        style={{
+                          width: "90px",
+                          height: "90px",
+                          border: "3px solid #3498db",
+                          borderRadius: "10px",
+                          padding: "5px",
+                          backgroundColor: "white",
+                        }}
+                      />
+                      <div
+                        style={{
+                          fontSize: "11px",
+                          marginTop: "8px",
+                          color: "#ecf0f1",
+                        }}
+                      >
+                        📱 Scan for Online Verification
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Authorization Section */}
+              {/* Signature Section - Colorful */}
               <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  marginTop: "40px",
-                  fontSize: "12px",
+                  marginTop: "30px",
+                  fontSize: "13px",
                 }}
               >
-                <div>
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "15px",
+                    background:
+                      "linear-gradient(135deg, #3498db 0%, #2980b9 100%)",
+                    color: "white",
+                    borderRadius: "10px",
+                    minWidth: "150px",
+                  }}
+                >
+                  <div style={{ marginBottom: "30px", fontWeight: "bold" }}>
+                    ✍️ Customer Signature
+                  </div>
                   <div
                     style={{
-                      borderTop: "1px solid #000",
-                      paddingTop: "5px",
-                      marginTop: "30px",
+                      borderTop: "2px solid rgba(255,255,255,0.5)",
+                      paddingTop: "8px",
                     }}
                   >
-                    <strong>Customer Signature</strong>
+                    Sign Here
                   </div>
                 </div>
-                <div style={{ textAlign: "right" }}>
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "15px",
+                    background:
+                      "linear-gradient(135deg, #27ae60 0%, #229954 100%)",
+                    color: "white",
+                    borderRadius: "10px",
+                    minWidth: "150px",
+                  }}
+                >
+                  <div style={{ marginBottom: "30px", fontWeight: "bold" }}>
+                    🏥 Authorized Signatory
+                  </div>
                   <div
                     style={{
-                      borderTop: "1px solid #000",
-                      paddingTop: "5px",
-                      marginTop: "30px",
+                      borderTop: "2px solid rgba(255,255,255,0.5)",
+                      paddingTop: "8px",
                     }}
                   >
-                    <strong>Authorized Signatory</strong>
-                    <br />
-                    <small>Hare Krishna Medical</small>
+                    Hare Krishna Medical
                   </div>
                 </div>
               </div>
 
-              {/* Footer Note */}
+              {/* Computer Generated Note */}
               <div
                 style={{
                   textAlign: "center",
-                  marginTop: "20px",
-                  fontSize: "10px",
-                  color: "#666",
-                  borderTop: "1px solid #ccc",
-                  paddingTop: "10px",
+                  marginTop: "25px",
+                  fontSize: "11px",
+                  color: "#7f8c8d",
+                  background: "#ecf0f1",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  border: "1px solid #bdc3c7",
                 }}
               >
-                This is a computer generated invoice. No physical signature
+                🖥️ This is a computer generated invoice. No physical signature
                 required.
                 <br />
-                Generated on: {new Date().toLocaleString()}
+                📅 Generated on: {new Date().toLocaleString()}
               </div>
             </div>
           </Card.Body>
         </Card>
       </Container>
 
-      {/* Print-only CSS */}
+      {/* Print-optimized CSS */}
       <style>{`
         @media print {
-          /* Hide everything except invoice content */
           .no-print {
             display: none !important;
           }
           
-          /* Hide header, footer, and navigation */
           .medical-header,
           .medical-footer,
           nav,
@@ -803,48 +989,38 @@ const InvoiceView = () => {
             display: none !important;
           }
           
-          /* Make invoice full width for print */
           .container {
             max-width: 100% !important;
             padding: 0 !important;
             margin: 0 !important;
           }
           
-          /* Remove shadows and borders for print */
           .card,
           .medical-card {
             box-shadow: none !important;
             border: none !important;
           }
           
-          /* Ensure good contrast for print */
           body {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            color-adjust: exact !important;
             background: white !important;
           }
           
-          /* Page breaks */
           .invoice-section {
             page-break-inside: avoid;
           }
           
-          /* Remove margins for full page print */
           @page {
             margin: 0.5in;
             size: A4;
           }
 
-          /* Ensure all text prints in black */
           * {
-            color: black !important;
-          }
-          
-          /* Preserve background colors for table headers */
-          .invoice-section table th,
-          .invoice-section table td {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            color-adjust: exact !important;
           }
         }
       `}</style>
