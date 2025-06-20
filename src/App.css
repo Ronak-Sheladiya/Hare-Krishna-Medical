@@ -345,3 +345,25 @@
     gap: 1.5rem;
   }
 }
+
+/* Message Link Styles */
+.message-link {
+  color: var(--color-dark-1) !important;
+  transition: all 0.3s ease;
+}
+
+.message-link:hover {
+  color: var(--color-medical-red) !important;
+  transform: scale(1.1);
+}
+
+/* Cart Link Styles */
+.cart-link {
+  color: var(--color-dark-1) !important;
+  transition: all 0.3s ease;
+}
+
+.cart-link:hover {
+  color: var(--color-medical-red) !important;
+  transform: scale(1.1);
+}
