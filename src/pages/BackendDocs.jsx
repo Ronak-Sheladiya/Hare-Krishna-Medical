@@ -605,6 +605,255 @@ This documentation provides a comprehensive guide for implementing the backend s
                       </div>
                     </Tab.Pane>
 
+                    <Tab.Pane eventKey="structure">
+                      <h3 className="text-medical-red mb-4">
+                        Project File Structure
+                      </h3>
+
+                      <div className="structure-section">
+                        <h5>Frontend (React.js) Structure</h5>
+                        <div className="code-block">
+                          <pre>{`src/
+├── components/
+│   ├── common/
+│   │   ├── LoadingSpinner.jsx          # Loading animations
+│   │   └── PaymentOptions.jsx          # Payment method selection
+│   ├── layout/
+│   │   ├── Footer.jsx                  # Site footer
+│   │   └── Header.jsx                  # Navigation header
+│   ├── products/
+│   │   ├── ProductCard.jsx             # Product display cards
+│   │   └── ProductFilters.jsx          # Product filtering
+│   └── ui/                             # Shadcn UI components
+├── hooks/
+│   ├── use-mobile.tsx                  # Mobile detection hook
+│   └── use-toast.ts                    # Toast notifications
+├── lib/
+│   └── utils.ts                        # Utility functions
+├── pages/
+│   ├── admin/
+│   │   ├── AddProduct.jsx              # Product creation form
+│   │   ├── AdminAnalytics.jsx          # Charts & analytics
+│   │   ├── AdminInvoices.jsx           # Invoice management
+│   │   ├── AdminMessages.jsx           # Customer messages
+│   │   ├── AdminOrders.jsx             # Order management
+│   │   ├── AdminProducts.jsx           # Product management
+│   │   └── AdminUsers.jsx              # User management
+│   ├── user/
+│   │   ├── UserInvoices.jsx            # User invoice history
+│   │   ├── UserOrders.jsx              # User order history
+│   │   └── UserProfile.jsx             # Profile editing
+│   ├── About.jsx                       # About page
+│   ├── AdminDashboard.jsx              # Admin dashboard
+│   ├── BackendDocs.jsx                 # This documentation
+│   ├── Cart.jsx                        # Shopping cart
+│   ├── Contact.jsx                     # Contact form
+│   ├── ForgotPassword.jsx              # Password reset
+│   ├── Home.jsx                        # Homepage
+│   ├── InvoiceView.jsx                 # Invoice display
+│   ├── Login.jsx                       # User login
+│   ├── NotFound.jsx                    # 404 page
+│   ├── Order.jsx                       # Order placement
+│   ├── PrivacyPolicy.jsx               # Privacy policy
+│   ├── ProductDetails.jsx              # Product details
+│   ├── Products.jsx                    # Product catalog
+│   ├── Register.jsx                    # User registration
+│   ├── TermsConditions.jsx             # Terms & conditions
+│   └── UserDashboard.jsx               # User dashboard
+├── store/
+│   ├── slices/
+│   │   ├── authSlice.js                # Authentication state
+│   │   ├── cartSlice.js                # Shopping cart state
+│   │   ├── messageSlice.js             # Messages state
+│   │   └── productsSlice.js            # Products state
+│   └── store.js                        # Redux store config
+├── App.css                             # Global styles
+├── App.jsx                             # Main app component
+├── index.css                           # Base styles
+└── main.jsx                            # React entry point`}</pre>
+                        </div>
+                      </div>
+
+                      <div className="structure-section">
+                        <h5>Backend (Node.js) Structure</h5>
+                        <div className="code-block">
+                          <pre>{`backend/
+├── controllers/
+│   ├── authController.js               # Authentication logic
+│   ├── orderController.js              # Order management
+│   ├── productController.js            # Product operations
+│   ├── messageController.js            # Contact messages
+│   └── userController.js               # User management
+├── middleware/
+│   ├── auth.js                         # JWT authentication
+│   ├── validation.js                   # Input validation
+│   ├── upload.js                       # File upload handling
+│   └── rateLimiter.js                  # Rate limiting
+├── models/
+│   ├── User.js                         # User schema
+│   ├── Product.js                      # Product schema
+│   ├── Order.js                        # Order schema
+│   ├── Message.js                      # Message schema
+│   └── Category.js                     # Category schema
+├── routes/
+│   ├── auth.js                         # Authentication routes
+│   ├── products.js                     # Product routes
+│   ├── orders.js                       # Order routes
+│   ├── messages.js                     # Message routes
+│   └── users.js                        # User routes
+├── utils/
+│   ├── email.js                        # Email sending
+│   ├── sms.js                          # SMS sending
+│   ├── payment.js                      # Payment processing
+│   └── pdf.js                          # PDF generation
+├── config/
+│   ├── database.js                     # MongoDB connection
+│   ├── cloudinary.js                   # Image storage
+│   └── payment.js                      # Payment gateway
+├── uploads/                            # Temporary file storage
+├── .env                               # Environment variables
+├── app.js                             # Express app setup
+└── server.js                         # Server entry point`}</pre>
+                        </div>
+                      </div>
+
+                      <div className="structure-section">
+                        <h5>Key File Descriptions</h5>
+                        <div className="file-descriptions">
+                          <h6 className="text-medical-blue mb-3">
+                            Frontend Files:
+                          </h6>
+                          <ul className="file-list">
+                            <li>
+                              <strong>App.jsx:</strong> Main application
+                              component with routing
+                            </li>
+                            <li>
+                              <strong>store/store.js:</strong> Redux store
+                              configuration
+                            </li>
+                            <li>
+                              <strong>pages/Home.jsx:</strong> Homepage with
+                              featured products
+                            </li>
+                            <li>
+                              <strong>pages/ProductDetails.jsx:</strong> Product
+                              detail view with cart
+                            </li>
+                            <li>
+                              <strong>pages/Cart.jsx:</strong> Shopping cart
+                              management
+                            </li>
+                            <li>
+                              <strong>pages/Order.jsx:</strong> Order placement
+                              with payment
+                            </li>
+                            <li>
+                              <strong>pages/InvoiceView.jsx:</strong> Invoice
+                              display and download
+                            </li>
+                            <li>
+                              <strong>
+                                components/common/PaymentOptions.jsx:
+                              </strong>{" "}
+                              Payment method selection
+                            </li>
+                            <li>
+                              <strong>pages/admin/*:</strong> Admin panel pages
+                            </li>
+                            <li>
+                              <strong>pages/user/*:</strong> User dashboard
+                              pages
+                            </li>
+                          </ul>
+
+                          <h6 className="text-medical-blue mb-3 mt-4">
+                            Backend Files:
+                          </h6>
+                          <ul className="file-list">
+                            <li>
+                              <strong>server.js:</strong> Express server
+                              initialization
+                            </li>
+                            <li>
+                              <strong>models/User.js:</strong> User data schema
+                              and methods
+                            </li>
+                            <li>
+                              <strong>models/Product.js:</strong> Product data
+                              schema
+                            </li>
+                            <li>
+                              <strong>models/Order.js:</strong> Order data
+                              schema with payment info
+                            </li>
+                            <li>
+                              <strong>controllers/authController.js:</strong>{" "}
+                              Login, register, JWT handling
+                            </li>
+                            <li>
+                              <strong>controllers/orderController.js:</strong>{" "}
+                              Order CRUD operations
+                            </li>
+                            <li>
+                              <strong>controllers/productController.js:</strong>{" "}
+                              Product management
+                            </li>
+                            <li>
+                              <strong>middleware/auth.js:</strong> JWT
+                              verification middleware
+                            </li>
+                            <li>
+                              <strong>routes/*:</strong> API endpoint
+                              definitions
+                            </li>
+                            <li>
+                              <strong>utils/email.js:</strong> Email
+                              notification system
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="structure-section">
+                        <h5>Environment Configuration</h5>
+                        <div className="code-block">
+                          <pre>{`.env file contents:
+# Database
+MONGODB_URI=mongodb://localhost:27017/hare-krishna-medical
+DB_NAME=hare_krishna_medical
+
+# JWT
+JWT_SECRET=your_jwt_secret_key
+JWT_REFRESH_SECRET=your_refresh_secret
+JWT_EXPIRE=15m
+JWT_REFRESH_EXPIRE=7d
+
+# Email
+EMAIL_SERVICE=gmail
+EMAIL_USER=harekrishnamedical@gmail.com
+EMAIL_PASS=your_app_password
+
+# SMS
+SMS_API_KEY=your_sms_api_key
+SMS_SENDER_ID=HKMED
+
+# Payment
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_secret
+
+# File Storage
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+# Server
+PORT=5000
+NODE_ENV=production`}</pre>
+                        </div>
+                      </div>
+                    </Tab.Pane>
+
                     <Tab.Pane eventKey="database">
                       <h3 className="text-medical-red mb-4">
                         Database Schema Design
