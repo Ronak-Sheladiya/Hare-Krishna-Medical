@@ -16,6 +16,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { clearCart } from "../store/slices/cartSlice.js";
 import PaymentOptions from "../components/common/PaymentOptions.jsx";
+import ProfessionalInvoice from "../components/common/ProfessionalInvoice.jsx";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import QRCode from "qrcode";
