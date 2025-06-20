@@ -238,11 +238,8 @@ const ProductDetails = () => {
     },
   ];
 
-  useEffect(() => {
-    if (mockProduct) {
-      dispatch(setSelectedProduct(mockProduct));
-    }
-  }, [id, dispatch]);
+  // Removed useEffect that was causing infinite loop
+  // We don't need to dispatch setSelectedProduct since we're using mockProduct directly
 
   // Early return if no product found
   if (!mockProduct) {
@@ -367,7 +364,7 @@ const ProductDetails = () => {
                 <div className="price-section mb-4">
                   <div className="d-flex align-items-center mb-2">
                     <span className="product-price me-3">
-                      ₹{mockProduct.price}
+                      ���{mockProduct.price}
                     </span>
                     {mockProduct.originalPrice && (
                       <>
