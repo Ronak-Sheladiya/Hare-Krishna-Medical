@@ -6,6 +6,7 @@ const ProductCard = ({ product, onAddToCart }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const handleAddToCart = () => {
+    // Direct add to cart without confirmation
     onAddToCart(product);
   };
 
