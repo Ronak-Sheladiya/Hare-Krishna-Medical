@@ -10,8 +10,11 @@ import {
   ProgressBar,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const AdminDashboard = () => {
+  const { unreadCount } = useSelector((state) => state.messages);
+
   // Mock data for admin dashboard
   const dashboardStats = {
     totalOrders: 156,
@@ -22,6 +25,7 @@ const AdminDashboard = () => {
     pendingOrders: 23,
     lowStockProducts: 8,
     newUsersToday: 12,
+    unreadMessages: unreadCount,
   };
 
   const recentOrders = [
