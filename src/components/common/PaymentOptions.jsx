@@ -1,0 +1,190 @@
+import React, { useState } from "react";
+import { Card, Form, Row, Col, Alert, Badge } from "react-bootstrap";
+
+const PaymentOptions = ({ onPaymentMethodChange, selectedMethod = "cod" }) => {
+  const [paymentMethod, setPaymentMethod] = useState(selectedMethod);
+
+  const handleMethodChange = (method) => {
+    setPaymentMethod(method);
+    if (onPaymentMethodChange) {
+      onPaymentMethodChange(method);
+    }
+  };
+
+  const paymentMethods = [
+    {
+      id: "cod",
+      name: "Cash on Delivery (COD)",
+      description: "Pay when your order is delivered",
+      icon: "bi-cash-coin",
+      badge: "Most Popular",
+      badgeColor: "success",
+      fee: 0,
+      note: "No additional charges. Payment due upon delivery.",
+    },
+    {
+      id: "online",
+      name: "Online Payment",
+      description: "Pay now using UPI, Cards, or Net Banking",
+      icon: "bi-credit-card",
+      badge: "Instant",
+      badgeColor: "primary",
+      fee: 0,
+      note: "Secure payment through Razorpay gateway.",
+    },
+    {
+      id: "upi",
+      name: "UPI Payment",
+      description: "Pay using Google Pay, PhonePe, Paytm, etc.",
+      icon: "bi-phone",
+      badge: "Quick",
+      badgeColor: "info",
+      fee: 0,
+      note: "Instant payment confirmation.",
+    },
+  ];
+
+  return (
+    <div>
+      <h5 className="mb-3">
+        <i className="bi bi-credit-card-2-front me-2"></i>
+        Choose Payment Method
+      </h5>
+
+      {paymentMethods.map((method) => (
+        <Card
+          key={method.id}
+          className={`mb-3 payment-option ${
+            paymentMethod === method.id ? "selected" : ""
+          }`}
+          style={{ cursor: "pointer" }}
+          onClick={() => handleMethodChange(method.id)}
+        >
+          <Card.Body>
+            <Row>
+              <Col md={1} className="text-center">
+                <Form.Check
+                  type="radio"
+                  name="paymentMethod"
+                  value={method.id}
+                  checked={paymentMethod === method.id}
+                  onChange={() => handleMethodChange(method.id)}
+                />
+              </Col>
+              <Col md={11}>
+                <div className="d-flex justify-content-between align-items-start mb-2">
+                  <div className="d-flex align-items-center">
+                    <i
+                      className={`${method.icon} fs-4 text-medical-blue me-3`}
+                    ></i>
+                    <div>
+                      <h6 className="mb-0 d-flex align-items-center">
+                        {method.name}
+                        {method.badge && (
+                          <Badge
+                            bg={method.badgeColor}
+                            className="ms-2"
+                            style={{ fontSize: "10px" }}
+                          >
+                            {method.badge}
+                          </Badge>
+                        )}
+                      </h6>
+                      <small className="text-muted">{method.description}</small>
+                    </div>
+                  </div>
+                  <div className="text-end">
+                    {method.fee > 0 ? (
+                      <span className="text-danger">+₹{method.fee}</span>
+                    ) : (
+                      <span className="text-success">Free</span>
+                    )}
+                  </div>
+                </div>
+                <div className="payment-note">
+                  <small className="text-muted">
+                    <i className="bi bi-info-circle me-1"></i>
+                    {method.note}
+                  </small>
+                </div>
+              </Col>
+            </Row>
+          </Card.Body>
+        </Card>
+      ))}
+
+      {/* Payment Security Notice */}
+      <Alert variant="light" className="mt-3">
+        <Alert.Heading className="h6">
+          <i className="bi bi-shield-check text-success me-2"></i>
+          Secure Payment
+        </Alert.Heading>
+        <p className="mb-0 small">
+          All online payments are processed through encrypted and secure
+          channels. Your financial information is protected with
+          industry-standard security measures.
+        </p>
+      </Alert>
+
+      {/* COD Information */}
+      {paymentMethod === "cod" && (
+        <Alert variant="warning" className="mt-3">
+          <Alert.Heading className="h6">
+            <i className="bi bi-exclamation-triangle me-2"></i>
+            Cash on Delivery Information
+          </Alert.Heading>
+          <ul className="mb-0 small">
+            <li>Payment will be collected at the time of delivery</li>
+            <li>
+              Order status will show as "Unpaid" until payment is received
+            </li>
+            <li>Please have exact change ready for faster delivery</li>
+            <li>COD is available for orders up to ₹5,000</li>
+          </ul>
+        </Alert>
+      )}
+
+      {/* Online Payment Information */}
+      {(paymentMethod === "online" || paymentMethod === "upi") && (
+        <Alert variant="info" className="mt-3">
+          <Alert.Heading className="h6">
+            <i className="bi bi-info-circle me-2"></i>
+            Online Payment Benefits
+          </Alert.Heading>
+          <ul className="mb-0 small">
+            <li>Instant payment confirmation</li>
+            <li>Faster order processing</li>
+            <li>Secure transaction with payment gateway</li>
+            <li>Digital receipt and payment proof</li>
+          </ul>
+        </Alert>
+      )}
+
+      <style>{`
+        .payment-option {
+          border: 2px solid #e9ecef;
+          transition: all 0.3s ease;
+        }
+        
+        .payment-option:hover {
+          border-color: #dee2e6;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .payment-option.selected {
+          border-color: var(--medical-red);
+          background-color: #fff5f5;
+        }
+        
+        .payment-note {
+          margin-top: 8px;
+          padding: 8px 12px;
+          background-color: #f8f9fa;
+          border-radius: 4px;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default PaymentOptions;
