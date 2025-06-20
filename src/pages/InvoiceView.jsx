@@ -110,15 +110,18 @@ const InvoiceView = () => {
 
       const element = document.getElementById("invoice-content");
       const canvas = await html2canvas(element, {
-        scale: 2,
+        scale: 3,
         logging: false,
         useCORS: true,
+        backgroundColor: "#ffffff",
+        width: element.scrollWidth,
+        height: element.scrollHeight,
       });
 
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
       const imgWidth = 210;
-      const pageHeight = 295;
+      const pageHeight = 297;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
 
@@ -190,8 +193,8 @@ const InvoiceView = () => {
         )}
 
         <Card className="medical-card shadow-lg">
-          <Card.Body className="p-4">
-            <div className="d-flex justify-content-between align-items-center mb-4 no-print">
+          <Card.Body className="p-0">
+            <div className="d-flex justify-content-between align-items-center mb-4 no-print p-4">
               <h3 className="mb-0">
                 <i className="bi bi-receipt me-2"></i>
                 Invoice Details
@@ -225,17 +228,45 @@ const InvoiceView = () => {
               </div>
             </div>
 
-            {/* Invoice Content - This will be printed */}
-            <div id="invoice-content" className="invoice-section">
-              {/* Header */}
-              <Row className="mb-4">
-                <Col md={8}>
-                  <div className="d-flex align-items-center mb-3">
+            {/* Invoice Content - Exact PDF Design */}
+            <div
+              id="invoice-content"
+              className="invoice-section p-4"
+              style={{
+                backgroundColor: "#ffffff",
+                fontFamily: "Arial, sans-serif",
+                maxWidth: "210mm",
+                margin: "0 auto",
+              }}
+            >
+              {/* Header Section - Exact PDF Layout */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  marginBottom: "30px",
+                  borderBottom: "2px solid #000",
+                  paddingBottom: "20px",
+                }}
+              >
+                {/* Left Side - Company Info */}
+                <div style={{ flex: "1" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: "15px",
+                    }}
+                  >
                     <img
-                      src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/invoice_hkm12345678-1-0b8331"
+                      src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/invoice_hkm12345678-1-e0e726"
                       alt="Hare Krishna Medical Logo"
-                      style={{ height: "80px", width: "auto" }}
-                      className="me-3"
+                      style={{
+                        height: "60px",
+                        width: "auto",
+                        marginRight: "15px",
+                      }}
                       onError={(e) => {
                         e.target.src =
                           "https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800";
@@ -243,452 +274,514 @@ const InvoiceView = () => {
                     />
                     <div>
                       <h1
-                        className="mb-1"
                         style={{
-                          color: "#dc3545",
-                          fontSize: "2rem",
+                          fontSize: "24px",
                           fontWeight: "bold",
+                          color: "#000",
+                          margin: "0",
+                          lineHeight: "1.2",
                         }}
                       >
                         HARE KRISHNA MEDICAL
                       </h1>
                       <p
-                        className="text-muted mb-1"
-                        style={{ fontSize: "0.9rem" }}
+                        style={{
+                          fontSize: "12px",
+                          color: "#666",
+                          margin: "2px 0",
+                        }}
                       >
                         Your Trusted Health Partner
                       </p>
-                      <div
-                        className="text-muted"
-                        style={{ fontSize: "0.85rem" }}
-                      >
-                        <div>
-                          3 Sahyog Complex, Man Sarovar circle, Amroli, 394107
-                        </div>
-                        <div>
-                          📞 +91 76989 13354 | 📧 harekrishnamedical@gmail.com
-                        </div>
-                      </div>
                     </div>
                   </div>
-                </Col>
-                <Col md={4} className="text-md-end">
-                  <div className="invoice-header-right">
-                    <h2
-                      className="text-medical-red mb-3"
-                      style={{ fontSize: "1.8rem", fontWeight: "bold" }}
-                    >
-                      INVOICE
-                    </h2>
-                    <div
-                      className="invoice-details p-3"
-                      style={{
-                        backgroundColor: "#f8f9fa",
-                        border: "2px solid #dc3545",
-                        borderRadius: "8px",
-                      }}
-                    >
-                      <div className="mb-2">
-                        <strong>Invoice #:</strong> {invoice.invoiceId}
-                      </div>
-                      <div className="mb-2">
-                        <strong>Order #:</strong> {invoice.orderId}
-                      </div>
-                      <div className="mb-2">
-                        <strong>Date:</strong> {invoice.orderDate}
-                      </div>
-                      <div className="mb-2">
-                        <strong>Time:</strong> {invoice.orderTime}
-                      </div>
-                      <div>
-                        <strong>Status:</strong>{" "}
-                        <Badge bg="success" className="ms-1">
-                          {invoice.status}
-                        </Badge>
-                      </div>
-                    </div>
-                    {qrCode && (
-                      <div className="mt-3 text-center">
-                        <img
-                          src={qrCode}
-                          alt="QR Code"
-                          style={{ width: "80px", height: "80px" }}
-                        />
-                        <br />
-                        <small className="text-muted">Scan to verify</small>
-                      </div>
-                    )}
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "#000",
+                      lineHeight: "1.4",
+                    }}
+                  >
+                    <div>3 Sahyog Complex, Man Sarovar circle</div>
+                    <div>Amroli, 394107, Gujarat, India</div>
+                    <div>Phone: +91 76989 13354 | +91 91060 18508</div>
+                    <div>Email: harekrishnamedical@gmail.com</div>
                   </div>
-                </Col>
-              </Row>
+                </div>
 
-              {/* Customer Details */}
-              <Row className="mb-4">
-                <Col md={6}>
-                  <div
-                    className="customer-section p-3"
+                {/* Right Side - Invoice Info */}
+                <div style={{ textAlign: "right", minWidth: "200px" }}>
+                  <h1
                     style={{
-                      border: "2px solid #dc3545",
-                      borderRadius: "8px",
-                      backgroundColor: "#fff",
+                      fontSize: "36px",
+                      fontWeight: "bold",
+                      color: "#000",
+                      margin: "0 0 15px 0",
                     }}
                   >
-                    <h5
-                      className="text-medical-red mb-3"
-                      style={{
-                        borderBottom: "2px solid #dc3545",
-                        paddingBottom: "8px",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      📍 BILL TO:
-                    </h5>
-                    <div className="customer-info">
-                      <p className="mb-2" style={{ fontSize: "1.1rem" }}>
-                        <strong>{invoice.customerDetails.fullName}</strong>
-                      </p>
-                      <p className="mb-1">📧 {invoice.customerDetails.email}</p>
-                      <p className="mb-1">
-                        📱 {invoice.customerDetails.mobile}
-                      </p>
-                      <p className="mb-1">
-                        🏠 {invoice.customerDetails.address}
-                      </p>
-                      <p className="mb-0">
-                        📍 {invoice.customerDetails.city},{" "}
-                        {invoice.customerDetails.state}{" "}
-                        {invoice.customerDetails.pincode}
-                      </p>
-                    </div>
-                  </div>
-                </Col>
-                <Col md={6}>
+                    INVOICE
+                  </h1>
                   <div
-                    className="payment-section p-3"
                     style={{
-                      border: "2px solid #17a2b8",
-                      borderRadius: "8px",
-                      backgroundColor: "#fff",
+                      backgroundColor: "#f5f5f5",
+                      border: "1px solid #000",
+                      padding: "15px",
+                      fontSize: "12px",
+                      textAlign: "left",
                     }}
                   >
-                    <h5
-                      className="text-info mb-3"
-                      style={{
-                        borderBottom: "2px solid #17a2b8",
-                        paddingBottom: "8px",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      💳 PAYMENT DETAILS:
-                    </h5>
-                    <div className="payment-info">
-                      <p className="mb-2">
-                        <strong>Method:</strong>
-                        <Badge bg="info" className="ms-2">
-                          {invoice.paymentMethod}
-                        </Badge>
-                      </p>
-                      <p className="mb-2">
-                        <strong>Status:</strong>{" "}
-                        <Badge
-                          bg={
-                            invoice.paymentStatus === "Paid"
-                              ? "success"
-                              : "warning"
-                          }
-                          className="ms-2"
-                        >
-                          {invoice.paymentStatus}
-                        </Badge>
-                      </p>
-                      <p className="mb-2">
-                        <strong>Invoice Total:</strong>
-                        <span className="fs-5 text-success ms-2">
-                          ₹{invoice.total.toFixed(2)}
-                        </span>
-                      </p>
-                      <p className="mb-0 text-muted small">
-                        Payment processed securely
-                      </p>
+                    <div style={{ marginBottom: "5px" }}>
+                      <strong>Invoice No:</strong> {invoice.invoiceId}
+                    </div>
+                    <div style={{ marginBottom: "5px" }}>
+                      <strong>Order No:</strong> {invoice.orderId}
+                    </div>
+                    <div style={{ marginBottom: "5px" }}>
+                      <strong>Date:</strong> {invoice.orderDate}
+                    </div>
+                    <div style={{ marginBottom: "5px" }}>
+                      <strong>Time:</strong> {invoice.orderTime}
+                    </div>
+                    <div>
+                      <strong>Status:</strong> {invoice.status}
                     </div>
                   </div>
-                </Col>
-              </Row>
+                </div>
+              </div>
+
+              {/* Bill To and Ship To Section */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: "30px",
+                  gap: "30px",
+                }}
+              >
+                {/* Bill To */}
+                <div
+                  style={{
+                    flex: "1",
+                    border: "1px solid #000",
+                    padding: "15px",
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                      margin: "0 0 10px 0",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    BILL TO:
+                  </h3>
+                  <div style={{ fontSize: "12px", lineHeight: "1.5" }}>
+                    <div style={{ fontWeight: "bold", marginBottom: "5px" }}>
+                      {invoice.customerDetails.fullName}
+                    </div>
+                    <div>{invoice.customerDetails.email}</div>
+                    <div>{invoice.customerDetails.mobile}</div>
+                    <div>{invoice.customerDetails.address}</div>
+                    <div>
+                      {invoice.customerDetails.city},{" "}
+                      {invoice.customerDetails.state}{" "}
+                      {invoice.customerDetails.pincode}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ship To */}
+                <div
+                  style={{
+                    flex: "1",
+                    border: "1px solid #000",
+                    padding: "15px",
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                      margin: "0 0 10px 0",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    SHIP TO:
+                  </h3>
+                  <div style={{ fontSize: "12px", lineHeight: "1.5" }}>
+                    <div style={{ fontWeight: "bold", marginBottom: "5px" }}>
+                      {invoice.customerDetails.fullName}
+                    </div>
+                    <div>{invoice.customerDetails.address}</div>
+                    <div>
+                      {invoice.customerDetails.city},{" "}
+                      {invoice.customerDetails.state}{" "}
+                      {invoice.customerDetails.pincode}
+                    </div>
+                    <div style={{ marginTop: "10px" }}>
+                      <strong>Payment Method:</strong> {invoice.paymentMethod}
+                    </div>
+                    <div>
+                      <strong>Payment Status:</strong> {invoice.paymentStatus}
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {/* Items Table */}
-              <Row className="mb-4">
-                <Col lg={12}>
-                  <div className="items-section">
-                    <h5
-                      className="text-medical-red mb-3"
-                      style={{
-                        borderBottom: "3px solid #dc3545",
-                        paddingBottom: "8px",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      🛒 ORDERED ITEMS:
-                    </h5>
-                    <div
-                      style={{
-                        border: "2px solid #dc3545",
-                        borderRadius: "8px",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <Table
-                        className="mb-0"
-                        style={{ backgroundColor: "#fff" }}
+              <div style={{ marginBottom: "30px" }}>
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    border: "2px solid #000",
+                  }}
+                >
+                  <thead>
+                    <tr style={{ backgroundColor: "#f5f5f5" }}>
+                      <th
+                        style={{
+                          border: "1px solid #000",
+                          padding: "12px 8px",
+                          fontSize: "12px",
+                          fontWeight: "bold",
+                          textAlign: "left",
+                        }}
                       >
-                        <thead
-                          style={{ backgroundColor: "#dc3545", color: "white" }}
+                        S.No
+                      </th>
+                      <th
+                        style={{
+                          border: "1px solid #000",
+                          padding: "12px 8px",
+                          fontSize: "12px",
+                          fontWeight: "bold",
+                          textAlign: "left",
+                        }}
+                      >
+                        Description
+                      </th>
+                      <th
+                        style={{
+                          border: "1px solid #000",
+                          padding: "12px 8px",
+                          fontSize: "12px",
+                          fontWeight: "bold",
+                          textAlign: "center",
+                        }}
+                      >
+                        Qty
+                      </th>
+                      <th
+                        style={{
+                          border: "1px solid #000",
+                          padding: "12px 8px",
+                          fontSize: "12px",
+                          fontWeight: "bold",
+                          textAlign: "right",
+                        }}
+                      >
+                        Price (₹)
+                      </th>
+                      <th
+                        style={{
+                          border: "1px solid #000",
+                          padding: "12px 8px",
+                          fontSize: "12px",
+                          fontWeight: "bold",
+                          textAlign: "right",
+                        }}
+                      >
+                        Amount (₹)
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invoice.items.map((item, index) => (
+                      <tr key={item.id}>
+                        <td
+                          style={{
+                            border: "1px solid #000",
+                            padding: "8px",
+                            fontSize: "11px",
+                            textAlign: "center",
+                          }}
                         >
-                          <tr>
-                            <th
-                              style={{
-                                border: "none",
-                                padding: "12px",
-                                fontWeight: "bold",
-                              }}
-                            >
-                              S.No
-                            </th>
-                            <th
-                              style={{
-                                border: "none",
-                                padding: "12px",
-                                fontWeight: "bold",
-                              }}
-                            >
-                              Item Description
-                            </th>
-                            <th
-                              style={{
-                                border: "none",
-                                padding: "12px",
-                                fontWeight: "bold",
-                              }}
-                            >
-                              Company
-                            </th>
-                            <th
-                              style={{
-                                border: "none",
-                                padding: "12px",
-                                fontWeight: "bold",
-                                textAlign: "center",
-                              }}
-                            >
-                              Qty
-                            </th>
-                            <th
-                              style={{
-                                border: "none",
-                                padding: "12px",
-                                fontWeight: "bold",
-                                textAlign: "right",
-                              }}
-                            >
-                              Price
-                            </th>
-                            <th
-                              style={{
-                                border: "none",
-                                padding: "12px",
-                                fontWeight: "bold",
-                                textAlign: "right",
-                              }}
-                            >
-                              Amount
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {invoice.items.map((item, index) => (
-                            <tr
-                              key={item.id}
-                              style={{
-                                borderBottom: "1px solid #e0e0e0",
-                                backgroundColor:
-                                  index % 2 === 0 ? "#f8f9fa" : "#fff",
-                              }}
-                            >
-                              <td
-                                style={{ padding: "12px", fontWeight: "bold" }}
-                              >
-                                {index + 1}
-                              </td>
-                              <td style={{ padding: "12px" }}>
-                                <div
-                                  style={{ fontWeight: "bold", color: "#333" }}
-                                >
-                                  {item.name}
-                                </div>
-                                <small className="text-muted">
-                                  Medical Product
-                                </small>
-                              </td>
-                              <td style={{ padding: "12px" }}>
-                                {item.company}
-                              </td>
-                              <td
-                                style={{ padding: "12px", textAlign: "center" }}
-                              >
-                                <Badge bg="secondary">{item.quantity}</Badge>
-                              </td>
-                              <td
-                                style={{ padding: "12px", textAlign: "right" }}
-                              >
-                                ₹{item.price.toFixed(2)}
-                              </td>
-                              <td
-                                style={{
-                                  padding: "12px",
-                                  textAlign: "right",
-                                  fontWeight: "bold",
-                                  color: "#dc3545",
-                                }}
-                              >
-                                ₹{item.total.toFixed(2)}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </Table>
-                    </div>
-                  </div>
-                </Col>
-              </Row>
+                          {index + 1}
+                        </td>
+                        <td
+                          style={{
+                            border: "1px solid #000",
+                            padding: "8px",
+                            fontSize: "11px",
+                          }}
+                        >
+                          <div style={{ fontWeight: "bold" }}>{item.name}</div>
+                          <div style={{ color: "#666", fontSize: "10px" }}>
+                            {item.company}
+                          </div>
+                        </td>
+                        <td
+                          style={{
+                            border: "1px solid #000",
+                            padding: "8px",
+                            fontSize: "11px",
+                            textAlign: "center",
+                          }}
+                        >
+                          {item.quantity}
+                        </td>
+                        <td
+                          style={{
+                            border: "1px solid #000",
+                            padding: "8px",
+                            fontSize: "11px",
+                            textAlign: "right",
+                          }}
+                        >
+                          {item.price.toFixed(2)}
+                        </td>
+                        <td
+                          style={{
+                            border: "1px solid #000",
+                            padding: "8px",
+                            fontSize: "11px",
+                            textAlign: "right",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {item.total.toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-              {/* Totals */}
-              <Row className="mb-4">
-                <Col md={6}></Col>
-                <Col md={6}>
-                  <div
-                    className="totals-section p-3"
+              {/* Totals Section */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  marginBottom: "30px",
+                }}
+              >
+                <div style={{ minWidth: "300px" }}>
+                  <table
                     style={{
-                      border: "2px solid #28a745",
-                      borderRadius: "8px",
-                      backgroundColor: "#f8f9fa",
+                      width: "100%",
+                      borderCollapse: "collapse",
+                      border: "2px solid #000",
                     }}
                   >
-                    <h6
-                      className="text-success mb-3"
-                      style={{
-                        borderBottom: "2px solid #28a745",
-                        paddingBottom: "5px",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      💰 INVOICE SUMMARY:
-                    </h6>
-                    <div className="calculation-rows">
-                      <div
-                        className="d-flex justify-content-between py-2"
-                        style={{ borderBottom: "1px solid #e0e0e0" }}
-                      >
-                        <span>
-                          <strong>Subtotal:</strong>
-                        </span>
-                        <span>₹{invoice.subtotal.toFixed(2)}</span>
-                      </div>
-                      <div
-                        className="d-flex justify-content-between py-2"
-                        style={{ borderBottom: "1px solid #e0e0e0" }}
-                      >
-                        <span>
-                          <strong>Shipping:</strong>
-                        </span>
-                        <span className="text-success">
+                    <tbody>
+                      <tr>
+                        <td
+                          style={{
+                            border: "1px solid #000",
+                            padding: "8px 12px",
+                            fontSize: "12px",
+                            fontWeight: "bold",
+                            backgroundColor: "#f5f5f5",
+                          }}
+                        >
+                          Subtotal:
+                        </td>
+                        <td
+                          style={{
+                            border: "1px solid #000",
+                            padding: "8px 12px",
+                            fontSize: "12px",
+                            textAlign: "right",
+                          }}
+                        >
+                          ₹{invoice.subtotal.toFixed(2)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td
+                          style={{
+                            border: "1px solid #000",
+                            padding: "8px 12px",
+                            fontSize: "12px",
+                            fontWeight: "bold",
+                            backgroundColor: "#f5f5f5",
+                          }}
+                        >
+                          Shipping:
+                        </td>
+                        <td
+                          style={{
+                            border: "1px solid #000",
+                            padding: "8px 12px",
+                            fontSize: "12px",
+                            textAlign: "right",
+                          }}
+                        >
                           {invoice.shipping === 0
                             ? "FREE"
                             : `₹${invoice.shipping.toFixed(2)}`}
-                        </span>
-                      </div>
-                      <div
-                        className="d-flex justify-content-between py-2"
-                        style={{ borderBottom: "1px solid #e0e0e0" }}
-                      >
-                        <span>
-                          <strong>Tax (5%):</strong>
-                        </span>
-                        <span>₹{invoice.tax.toFixed(2)}</span>
-                      </div>
-                      <div
-                        className="d-flex justify-content-between py-3 mt-2"
-                        style={{
-                          backgroundColor: "#28a745",
-                          color: "white",
-                          marginLeft: "-12px",
-                          marginRight: "-12px",
-                          paddingLeft: "12px",
-                          paddingRight: "12px",
-                          borderRadius: "5px",
-                          fontSize: "1.2rem",
-                        }}
-                      >
-                        <span>
-                          <strong>TOTAL AMOUNT:</strong>
-                        </span>
-                        <span>
-                          <strong>₹{invoice.total.toFixed(2)}</strong>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Col>
-              </Row>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td
+                          style={{
+                            border: "1px solid #000",
+                            padding: "8px 12px",
+                            fontSize: "12px",
+                            fontWeight: "bold",
+                            backgroundColor: "#f5f5f5",
+                          }}
+                        >
+                          Tax (5%):
+                        </td>
+                        <td
+                          style={{
+                            border: "1px solid #000",
+                            padding: "8px 12px",
+                            fontSize: "12px",
+                            textAlign: "right",
+                          }}
+                        >
+                          ₹{invoice.tax.toFixed(2)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td
+                          style={{
+                            border: "2px solid #000",
+                            padding: "12px",
+                            fontSize: "14px",
+                            fontWeight: "bold",
+                            backgroundColor: "#000",
+                            color: "#fff",
+                          }}
+                        >
+                          TOTAL:
+                        </td>
+                        <td
+                          style={{
+                            border: "2px solid #000",
+                            padding: "12px",
+                            fontSize: "14px",
+                            textAlign: "right",
+                            fontWeight: "bold",
+                            backgroundColor: "#000",
+                            color: "#fff",
+                          }}
+                        >
+                          ₹{invoice.total.toFixed(2)}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
-              {/* Footer */}
-              <Row>
-                <Col lg={12}>
-                  <div
-                    className="invoice-footer p-4 mt-4"
+              {/* QR Code and Footer */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-end",
+                  borderTop: "2px solid #000",
+                  paddingTop: "20px",
+                }}
+              >
+                <div style={{ flex: "1" }}>
+                  <h4
                     style={{
-                      borderTop: "3px solid #dc3545",
-                      backgroundColor: "#f8f9fa",
-                      borderRadius: "8px",
+                      fontSize: "16px",
+                      fontWeight: "bold",
+                      margin: "0 0 15px 0",
                     }}
                   >
-                    <div className="text-center">
-                      <h5 className="text-medical-red mb-3">
-                        🙏 Thank You for Choosing Hare Krishna Medical! 🙏
-                      </h5>
-                      <div className="row">
-                        <div className="col-md-4">
-                          <h6 className="text-info">📞 Contact Us</h6>
-                          <p className="mb-0 small">+91 76989 13354</p>
-                          <p className="mb-0 small">+91 91060 18508</p>
-                        </div>
-                        <div className="col-md-4">
-                          <h6 className="text-info">📧 Email Support</h6>
-                          <p className="mb-0 small">
-                            harekrishnamedical@gmail.com
-                          </p>
-                        </div>
-                        <div className="col-md-4">
-                          <h6 className="text-info">🏠 Visit Our Store</h6>
-                          <p className="mb-0 small">3 Sahyog Complex, Amroli</p>
-                        </div>
-                      </div>
-                      <hr className="my-3" />
-                      <div className="row">
-                        <div className="col-md-6 text-md-start">
-                          <small className="text-muted">
-                            <strong>Note:</strong> This is a computer generated
-                            invoice. No signature required.
-                          </small>
-                        </div>
-                        <div className="col-md-6 text-md-end">
-                          <small className="text-muted">
-                            Generated on {new Date().toLocaleString()}
-                          </small>
-                        </div>
-                      </div>
+                    Thank You for Your Business!
+                  </h4>
+                  <div style={{ fontSize: "11px", lineHeight: "1.6" }}>
+                    <div>
+                      <strong>Terms & Conditions:</strong>
+                    </div>
+                    <div>• Payment due within 30 days</div>
+                    <div>• Goods once sold will not be taken back</div>
+                    <div>• Subject to Gujarat jurisdiction only</div>
+                    <div style={{ marginTop: "10px" }}>
+                      <strong>Contact:</strong> harekrishnamedical@gmail.com |
+                      +91 76989 13354
                     </div>
                   </div>
-                </Col>
-              </Row>
+                </div>
+
+                {qrCode && (
+                  <div style={{ textAlign: "center", marginLeft: "20px" }}>
+                    <img
+                      src={qrCode}
+                      alt="QR Code"
+                      style={{
+                        width: "80px",
+                        height: "80px",
+                        border: "1px solid #000",
+                      }}
+                    />
+                    <div style={{ fontSize: "10px", marginTop: "5px" }}>
+                      Scan for Online Verification
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Authorization Section */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginTop: "40px",
+                  fontSize: "12px",
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      borderTop: "1px solid #000",
+                      paddingTop: "5px",
+                      marginTop: "30px",
+                    }}
+                  >
+                    <strong>Customer Signature</strong>
+                  </div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div
+                    style={{
+                      borderTop: "1px solid #000",
+                      paddingTop: "5px",
+                      marginTop: "30px",
+                    }}
+                  >
+                    <strong>Authorized Signatory</strong>
+                    <br />
+                    <small>Hare Krishna Medical</small>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Note */}
+              <div
+                style={{
+                  textAlign: "center",
+                  marginTop: "20px",
+                  fontSize: "10px",
+                  color: "#666",
+                  borderTop: "1px solid #ccc",
+                  paddingTop: "10px",
+                }}
+              >
+                This is a computer generated invoice. No physical signature
+                required.
+                <br />
+                Generated on: {new Date().toLocaleString()}
+              </div>
             </div>
           </Card.Body>
         </Card>
@@ -701,7 +794,7 @@ const InvoiceView = () => {
           .no-print {
             display: none !important;
           }
-
+          
           /* Hide header, footer, and navigation */
           .medical-header,
           .medical-footer,
@@ -709,45 +802,49 @@ const InvoiceView = () => {
           .navbar {
             display: none !important;
           }
-
+          
           /* Make invoice full width for print */
           .container {
             max-width: 100% !important;
             padding: 0 !important;
+            margin: 0 !important;
           }
-
+          
           /* Remove shadows and borders for print */
           .card,
           .medical-card {
             box-shadow: none !important;
-            border: 1px solid #ccc !important;
+            border: none !important;
           }
-
+          
           /* Ensure good contrast for print */
           body {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            background: white !important;
           }
-
+          
           /* Page breaks */
           .invoice-section {
             page-break-inside: avoid;
           }
-
+          
           /* Remove margins for full page print */
           @page {
             margin: 0.5in;
+            size: A4;
           }
 
-          /* Print-specific table styling */
-          .table {
-            border-collapse: collapse !important;
+          /* Ensure all text prints in black */
+          * {
+            color: black !important;
           }
-
-          .table th,
-          .table td {
-            border: 1px solid #000 !important;
-            padding: 8px !important;
+          
+          /* Preserve background colors for table headers */
+          .invoice-section table th,
+          .invoice-section table td {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
         }
       `}</style>
