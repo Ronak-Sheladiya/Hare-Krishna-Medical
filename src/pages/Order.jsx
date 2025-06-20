@@ -200,143 +200,50 @@ const Order = () => {
 
     setPdfGenerating(true);
     try {
+      // Create a temporary div with colorful invoice content
+      const invoiceElement = document.createElement("div");
+      invoiceElement.innerHTML = createColorfulInvoiceHTML();
+      invoiceElement.style.position = "absolute";
+      invoiceElement.style.left = "-9999px";
+      invoiceElement.style.top = "0";
+      invoiceElement.style.width = "210mm";
+      invoiceElement.style.backgroundColor = "white";
+      document.body.appendChild(invoiceElement);
+
+      // Wait for any images to load
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Generate PDF with high quality
+      const canvas = await html2canvas(invoiceElement, {
+        scale: 3,
+        logging: false,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
+
+      const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 20;
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
 
-      // Colors
-      const primaryColor = [220, 53, 69]; // Medical red
-      const darkColor = [26, 26, 26]; // Dark gray
-      const lightColor = [102, 102, 102]; // Light gray
+      let position = 0;
 
-      // Header with logo placeholder and company info
-      pdf.setFillColor(...primaryColor);
-      pdf.rect(0, 0, pageWidth, 35, "F");
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
 
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(22);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("HARE KRISHNA MEDICAL", margin, 22);
-
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      pdf.text("Your Trusted Health Partner", margin, 30);
-
-      // Company details
-      pdf.setTextColor(...darkColor);
-      pdf.setFontSize(9);
-      const companyDetails = [
-        "3 Sahyog Complex, Man Sarovar circle, Amroli, 394107",
-        "Phone: +91 76989 13354 | Email: harekrishnamedical@gmail.com",
-      ];
-      companyDetails.forEach((line, index) => {
-        pdf.text(line, margin, 45 + index * 5);
-      });
-
-      // Invoice title and details
-      pdf.setTextColor(...primaryColor);
-      pdf.setFontSize(24);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("INVOICE", pageWidth - 60, 22);
-
-      pdf.setTextColor(...darkColor);
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      const invoiceDetails = [
-        `Invoice #: ${orderDetails.invoiceId}`,
-        `Order #: ${orderDetails.orderId}`,
-        `Date: ${orderDetails.orderDate}`,
-        `Time: ${orderDetails.orderTime}`,
-      ];
-      invoiceDetails.forEach((line, index) => {
-        pdf.text(line, pageWidth - 80, 35 + index * 5);
-      });
-
-      // QR Code
-      if (qrCode) {
-        try {
-          pdf.addImage(qrCode, "PNG", pageWidth - 60, 55, 30, 30);
-          pdf.setFontSize(7);
-          pdf.text("Scan for online invoice", pageWidth - 55, 90);
-        } catch (e) {
-          console.log("QR code could not be added to PDF");
-        }
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
       }
 
-      // Customer details section
-      let yPosition = 70;
-      pdf.setFillColor(240, 240, 240);
-      pdf.rect(margin, yPosition, pageWidth - 2 * margin, 30, "F");
+      pdf.save(`Invoice-${orderDetails.invoiceId}.pdf`);
 
-      pdf.setTextColor(...darkColor);
-      pdf.setFontSize(12);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("BILL TO:", margin + 5, yPosition + 10);
-
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      const customerInfo = [
-        orderDetails.customerDetails.fullName,
-        orderDetails.customerDetails.email,
-        orderDetails.customerDetails.mobile,
-        orderDetails.customerDetails.address,
-        `${orderDetails.customerDetails.city}, ${orderDetails.customerDetails.state} ${orderDetails.customerDetails.pincode}`,
-      ];
-
-      customerInfo.forEach((line, index) => {
-        pdf.text(line, margin + 5, yPosition + 18 + index * 4);
-      });
-
-      // Items table
-      yPosition = 115;
-      pdf.setFontSize(12);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("ITEMS ORDERED:", margin, yPosition);
-
-      yPosition += 10;
-
-      // Table header
-      pdf.setFillColor(...primaryColor);
-      pdf.rect(margin, yPosition, pageWidth - 2 * margin, 8, "F");
-
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Item Description", margin + 2, yPosition + 5);
-      pdf.text("Qty", margin + 100, yPosition + 5);
-      pdf.text("Price", margin + 120, yPosition + 5);
-      pdf.text("Total", margin + 145, yPosition + 5);
-
-      yPosition += 8;
-
-      // Table rows
-      pdf.setTextColor(...darkColor);
-      pdf.setFont("helvetica", "normal");
-
-      orderDetails.items.forEach((item, index) => {
-        const rowColor = index % 2 === 0 ? [255, 255, 255] : [250, 250, 250];
-        pdf.setFillColor(...rowColor);
-        pdf.rect(margin, yPosition, pageWidth - 2 * margin, 8, "F");
-
-        pdf.text(item.name, margin + 2, yPosition + 5);
-        pdf.text(item.quantity.toString(), margin + 102, yPosition + 5);
-        pdf.text(`₹${item.price.toFixed(2)}`, margin + 122, yPosition + 5);
-        pdf.text(
-          `₹${(item.price * item.quantity).toFixed(2)}`,
-          margin + 147,
-          yPosition + 5,
-        );
-
-        yPosition += 8;
-      });
-
-      // Summary section
-      yPosition += 10;
-      const summaryX = pageWidth - 80;
-
-      pdf.setDrawColor(...lightColor);
-      pdf.line(summaryX, yPosition, pageWidth - margin, yPosition);
+      // Clean up
+      document.body.removeChild(invoiceElement);
 
       yPosition += 5;
       pdf.setFont("helvetica", "normal");
