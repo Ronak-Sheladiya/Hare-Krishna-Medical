@@ -201,9 +201,38 @@ const Order = () => {
 
     setPdfGenerating(true);
     try {
-      // Create a temporary div with colorful invoice content
+      // Create invoice data for the professional component
+      const invoiceData = {
+        invoiceId: orderDetails.invoiceId,
+        orderId: orderDetails.orderId,
+        orderDate: orderDetails.orderDate,
+        orderTime: orderDetails.orderTime,
+        customerDetails: {
+          fullName: formData.fullName,
+          email: formData.email,
+          mobile: formData.mobile,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.pincode,
+        },
+        items: items,
+        subtotal: totalAmount,
+        shipping: shippingCost,
+        tax: taxAmount,
+        total: finalTotal,
+        paymentMethod:
+          paymentMethod === "cod"
+            ? "Cash on Delivery"
+            : paymentMethod === "online"
+              ? "Online Payment"
+              : "UPI Payment",
+        paymentStatus: "Paid",
+        status: "Confirmed",
+      };
+
+      // Create a temporary div and render the professional invoice
       const invoiceElement = document.createElement("div");
-      invoiceElement.innerHTML = createColorfulInvoiceHTML();
       invoiceElement.style.position = "absolute";
       invoiceElement.style.left = "-9999px";
       invoiceElement.style.top = "0";
@@ -211,15 +240,29 @@ const Order = () => {
       invoiceElement.style.backgroundColor = "white";
       document.body.appendChild(invoiceElement);
 
-      // Wait for any images to load
+      // Create React element and render it
+      const React = await import("react");
+      const { createRoot } = await import("react-dom/client");
+
+      const root = createRoot(invoiceElement);
+      root.render(
+        React.createElement(ProfessionalInvoice, {
+          invoiceData,
+          forPrint: true,
+        }),
+      );
+
+      // Wait for rendering
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Generate PDF with high quality
+      // Generate PDF with high quality, optimized for A4 single page
       const canvas = await html2canvas(invoiceElement, {
-        scale: 3,
+        scale: 2.5,
         logging: false,
         useCORS: true,
         backgroundColor: "#ffffff",
+        width: invoiceElement.scrollWidth,
+        height: invoiceElement.scrollHeight,
       });
 
       const imgData = canvas.toDataURL("image/png");
@@ -227,82 +270,24 @@ const Order = () => {
       const imgWidth = 210;
       const pageHeight = 297;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
 
-      let position = 0;
-
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      // Always ensure single page - scale down if necessary
+      if (imgHeight > pageHeight) {
+        const scaleFactor = (pageHeight - 5) / imgHeight; // 5mm margin for safety
+        const scaledWidth = imgWidth * scaleFactor;
+        const scaledHeight = pageHeight - 5;
+        const xOffset = (imgWidth - scaledWidth) / 2;
+        pdf.addImage(imgData, "PNG", xOffset, 2.5, scaledWidth, scaledHeight);
+      } else {
+        const yOffset = (pageHeight - imgHeight) / 2;
+        pdf.addImage(imgData, "PNG", 0, yOffset, imgWidth, imgHeight);
       }
 
       pdf.save(`Invoice-${orderDetails.invoiceId}.pdf`);
 
       // Clean up
+      root.unmount();
       document.body.removeChild(invoiceElement);
-
-      yPosition += 5;
-      pdf.setFont("helvetica", "normal");
-      pdf.text(
-        `Subtotal: ₹${orderDetails.orderSummary.subtotal.toFixed(2)}`,
-        summaryX,
-        yPosition,
-      );
-
-      yPosition += 5;
-      pdf.text(
-        `Shipping: ${orderDetails.orderSummary.shipping === 0 ? "FREE" : `₹${orderDetails.orderSummary.shipping.toFixed(2)}`}`,
-        summaryX,
-        yPosition,
-      );
-
-      yPosition += 5;
-      pdf.text(
-        `Tax (5%): ₹${orderDetails.orderSummary.tax.toFixed(2)}`,
-        summaryX,
-        yPosition,
-      );
-
-      yPosition += 8;
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(12);
-      pdf.setTextColor(...primaryColor);
-      pdf.text(
-        `TOTAL: ₹${orderDetails.orderSummary.total.toFixed(2)}`,
-        summaryX,
-        yPosition,
-      );
-
-      // Footer
-      yPosition = pageHeight - 30;
-      pdf.setTextColor(...lightColor);
-      pdf.setFontSize(8);
-      pdf.setFont("helvetica", "normal");
-      pdf.text(
-        "Thank you for choosing Hare Krishna Medical!",
-        margin,
-        yPosition,
-      );
-      pdf.text(
-        "For any queries, contact: harekrishnamedical@gmail.com",
-        margin,
-        yPosition + 5,
-      );
-
-      // Terms
-      pdf.text(
-        "Terms: All sales are final. Returns accepted within 7 days.",
-        margin,
-        yPosition + 15,
-      );
-
-      // Save the PDF
-      pdf.save(`Invoice_${orderDetails.orderId}.pdf`);
     } catch (error) {
       console.error("Error generating PDF:", error);
       alert("Error generating PDF. Please try again.");
@@ -364,7 +349,7 @@ const Order = () => {
           </div>
           <!-- Ship To - Green Theme -->
           <div style="flex: 1; background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; padding: 20px; border-radius: 0 0 15px 0;">
-            <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 15px 0; text-transform: uppercase; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">🚚 SHIP TO:</h3>
+            <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 15px 0; text-transform: uppercase; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">�� SHIP TO:</h3>
             <div style="font-size: 13px; line-height: 1.8;">
               <div style="font-weight: bold; margin-bottom: 8px; font-size: 15px;">${formData.fullName}</div>
               <div>🏠 ${formData.address}</div>
