@@ -278,16 +278,7 @@ const ProductDetails = () => {
     }
   };
 
-  if (!selectedProduct) {
-    return (
-      <Container className="section-padding">
-        <div className="text-center">
-          <div className="loading-spinner"></div>
-          <p>Loading product details...</p>
-        </div>
-      </Container>
-    );
-  }
+  // Remove the selectedProduct loading check since we're using mockProduct directly
 
   const discountPercentage =
     mockProduct?.originalPrice && mockProduct?.price
