@@ -402,6 +402,53 @@ const InvoiceView = () => {
           </div>
         </Container>
       </section>
+
+      {/* Print-only CSS */}
+      <style jsx>{`
+        @media print {
+          /* Hide everything except invoice content */
+          .no-print {
+            display: none !important;
+          }
+
+          /* Hide header, footer, and navigation */
+          .medical-header,
+          .medical-footer,
+          nav,
+          .navbar {
+            display: none !important;
+          }
+
+          /* Make invoice full width for print */
+          .container {
+            max-width: 100% !important;
+            padding: 0 !important;
+          }
+
+          /* Remove shadows and borders for print */
+          .card,
+          .medical-card {
+            box-shadow: none !important;
+            border: 1px solid #ccc !important;
+          }
+
+          /* Ensure good contrast for print */
+          body {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          /* Page breaks */
+          .invoice-section {
+            page-break-inside: avoid;
+          }
+
+          /* Remove margins for full page print */
+          @page {
+            margin: 0.5in;
+          }
+        }
+      `}</style>
     </div>
   );
 };
