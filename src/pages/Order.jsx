@@ -15,6 +15,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { clearCart } from "../store/slices/cartSlice.js";
+import PaymentOptions from "../components/common/PaymentOptions.jsx";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import QRCode from "qrcode";
@@ -43,6 +44,7 @@ const Order = () => {
   const [errors, setErrors] = useState({});
   const [qrCode, setQrCode] = useState("");
   const [pdfGenerating, setPdfGenerating] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("cod");
 
   const shippingCost = totalAmount > 500 ? 0 : 50;
   const taxRate = 0.05;
