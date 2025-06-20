@@ -24,19 +24,132 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [showAddedAlert, setShowAddedAlert] = useState(false);
 
-  // Mock product data (In real app, this would come from API)
-  const mockProduct = {
+  // Mock product database
+  const productDatabase = {
+    1: {
+      id: 1,
+      name: "Paracetamol Tablets 500mg",
+      company: "Hare Krishna Pharma",
+      price: 25.99,
+      originalPrice: 30.99,
+      images: [
+        "https://via.placeholder.com/500x400/e6e6e6/666666?text=Paracetamol+Front",
+        "https://via.placeholder.com/500x400/cccccc/666666?text=Paracetamol+Back",
+        "https://via.placeholder.com/500x400/b3b3b3/666666?text=Paracetamol+Side",
+        "https://via.placeholder.com/500x400/999999/666666?text=Paracetamol+Pack",
+        "https://via.placeholder.com/500x400/808080/666666?text=Paracetamol+Details",
+      ],
+      description:
+        "Effective pain relief and fever reducer for adults and children. Fast-acting formula provides quick relief from headaches, body aches, and fever.",
+      benefits: [
+        "Quick and effective pain relief",
+        "Reduces fever within 30 minutes",
+        "Gentle on stomach when taken as directed",
+        "Suitable for adults and children over 12 years",
+        "Non-drowsy formula",
+      ],
+      usage: [
+        "Adults and children over 12 years: 1-2 tablets every 4-6 hours",
+        "Maximum 8 tablets in 24 hours",
+        "Take with water, preferably after food",
+        "Do not exceed recommended dose",
+        "Consult doctor if symptoms persist beyond 3 days",
+      ],
+      weight: "50 tablets per pack",
+      category: "Pain Relief",
+      inStock: true,
+      stockCount: 50,
+      manufacturer: "Hare Krishna Pharmaceuticals Ltd.",
+      batchNo: "HKP2024001",
+      mfgDate: "Jan 2024",
+      expDate: "Dec 2026",
+      composition: "Each tablet contains: Paracetamol IP 500mg",
+    },
+    2: {
+      id: 2,
+      name: "Vitamin D3 Capsules",
+      company: "Health Plus",
+      price: 45.5,
+      originalPrice: 52.0,
+      images: [
+        "https://via.placeholder.com/500x400/e6e6e6/666666?text=Vitamin+D3+Front",
+        "https://via.placeholder.com/500x400/cccccc/666666?text=Vitamin+D3+Back",
+        "https://via.placeholder.com/500x400/b3b3b3/666666?text=Vitamin+D3+Side",
+        "https://via.placeholder.com/500x400/999999/666666?text=Vitamin+D3+Pack",
+      ],
+      description:
+        "Essential vitamin for bone health and immune system support. High-potency vitamin D3 for better calcium absorption.",
+      benefits: [
+        "Supports bone health and strength",
+        "Boosts immune system function",
+        "Improves calcium absorption",
+        "Supports muscle function",
+        "May improve mood and energy",
+      ],
+      usage: [
+        "Adults: 1 capsule daily with food",
+        "Take with a meal containing fat for better absorption",
+        "Do not exceed recommended dose",
+        "Consult doctor before use if pregnant or nursing",
+      ],
+      weight: "60 capsules per bottle",
+      category: "Vitamins",
+      inStock: true,
+      stockCount: 30,
+      manufacturer: "Health Plus Pharmaceuticals",
+      batchNo: "HP2024002",
+      mfgDate: "Feb 2024",
+      expDate: "Jan 2027",
+      composition: "Each capsule contains: Vitamin D3 1000 IU",
+    },
+    3: {
+      id: 3,
+      name: "Cough Syrup",
+      company: "Wellness Care",
+      price: 35.75,
+      originalPrice: 40.0,
+      images: [
+        "https://via.placeholder.com/500x400/e6e6e6/666666?text=Cough+Syrup+Front",
+        "https://via.placeholder.com/500x400/cccccc/666666?text=Cough+Syrup+Back",
+        "https://via.placeholder.com/500x400/b3b3b3/666666?text=Cough+Syrup+Label",
+      ],
+      description:
+        "Natural cough relief formula with honey and herbal extracts. Soothes throat irritation and reduces cough.",
+      benefits: [
+        "Naturally soothes cough and throat irritation",
+        "Contains honey and herbal extracts",
+        "Non-drowsy formula",
+        "Pleasant taste",
+        "Suitable for adults and children over 6 years",
+      ],
+      usage: [
+        "Adults: 10ml (2 teaspoons) 3-4 times daily",
+        "Children 6-12 years: 5ml (1 teaspoon) 3 times daily",
+        "Take after meals",
+        "Shake well before use",
+        "Do not exceed recommended dose",
+      ],
+      weight: "100ml bottle",
+      category: "Cough & Cold",
+      inStock: true,
+      stockCount: 25,
+      manufacturer: "Wellness Care Ltd.",
+      batchNo: "WC2024003",
+      mfgDate: "Mar 2024",
+      expDate: "Feb 2027",
+      composition: "Honey, Tulsi extract, Ginger extract, Mulethi extract",
+    },
+  };
+
+  // Get product based on ID
+  const mockProduct = productDatabase[parseInt(id)] || {
     id: parseInt(id),
-    name: "Paracetamol Tablets 500mg",
-    company: "Hare Krishna Pharma",
-    price: 25.99,
-    originalPrice: 30.99,
+    name: "Product Not Found",
+    company: "Hare Krishna Medical",
+    price: 0,
+    originalPrice: 0,
     images: [
-      "https://via.placeholder.com/500x400/e6e6e6/666666?text=Paracetamol+Front",
-      "https://via.placeholder.com/500x400/cccccc/666666?text=Paracetamol+Back",
-      "https://via.placeholder.com/500x400/b3b3b3/666666?text=Paracetamol+Side",
-      "https://via.placeholder.com/500x400/999999/666666?text=Paracetamol+Pack",
-      "https://via.placeholder.com/500x400/808080/666666?text=Paracetamol+Details",
+      "https://via.placeholder.com/500x400/e6e6e6/666666?text=Product+Not+Found",
     ],
     description:
       "Effective pain relief and fever reducer for adults and children. Fast-acting formula provides quick relief from headaches, body aches, and fever.",
