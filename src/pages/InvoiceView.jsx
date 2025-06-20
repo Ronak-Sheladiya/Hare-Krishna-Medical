@@ -9,16 +9,25 @@ import {
   Badge,
   Alert,
 } from "react-bootstrap";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import QRCode from "qrcode";
 
 const InvoiceView = () => {
   const { orderId } = useParams();
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [qrCode, setQrCode] = useState("");
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <Navigate to="/login" state={{ from: `/invoice/${orderId}` }} replace />
+    );
+  }
 
   // Mock invoice data - in real app, this would be fetched from API
   useEffect(() => {

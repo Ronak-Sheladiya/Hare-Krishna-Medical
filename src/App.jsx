@@ -28,9 +28,15 @@ import AdminProducts from "./pages/admin/AdminProducts.jsx";
 import AdminOrders from "./pages/admin/AdminOrders.jsx";
 import AdminUsers from "./pages/admin/AdminUsers.jsx";
 import AdminAnalytics from "./pages/admin/AdminAnalytics.jsx";
+import AdminMessages from "./pages/admin/AdminMessages.jsx";
 import UserDashboard from "./pages/UserDashboard.jsx";
 import UserOrders from "./pages/user/UserOrders.jsx";
 import UserInvoices from "./pages/user/UserInvoices.jsx";
+import UserProfile from "./pages/user/UserProfile.jsx";
+import ForgotPassword from "./pages/ForgotPassword.jsx";
+import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
+import TermsConditions from "./pages/TermsConditions.jsx";
+import BackendDocs from "./pages/BackendDocs.jsx";
 import InvoiceView from "./pages/InvoiceView.jsx";
 import NotFound from "./pages/NotFound.jsx";
 
@@ -95,6 +101,8 @@ function App() {
             <Route path="/order" element={<Order />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-conditions" element={<TermsConditions />} />
             <Route path="/invoice/:orderId" element={<InvoiceView />} />
 
             {/* Auth Routes (redirect if already authenticated) */}
@@ -111,6 +119,14 @@ function App() {
               element={
                 <AuthRoute>
                   <Register />
+                </AuthRoute>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <AuthRoute>
+                  <ForgotPassword />
                 </AuthRoute>
               }
             />
@@ -156,6 +172,22 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/admin/messages"
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminMessages />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/backend-docs"
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <BackendDocs />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Protected User Routes */}
             <Route
@@ -179,6 +211,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <UserInvoices />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/user/profile"
+              element={
+                <ProtectedRoute>
+                  <UserProfile />
                 </ProtectedRoute>
               }
             />
