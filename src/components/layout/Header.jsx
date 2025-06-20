@@ -135,6 +135,37 @@ const Header = () => {
                 )}
               </Nav.Link>
 
+              {/* Messages Icon for Admin */}
+              {isAuthenticated && user?.role === 1 && (
+                <Nav.Link
+                  as={Link}
+                  to="/admin/messages"
+                  className="position-relative me-3 message-link"
+                  title="Messages"
+                >
+                  <i className="bi bi-envelope fs-5"></i>
+                  {unreadCount > 0 && (
+                    <Badge
+                      bg="danger"
+                      className="position-absolute"
+                      style={{
+                        top: "-8px",
+                        right: "-8px",
+                        fontSize: "0.75rem",
+                        minWidth: "20px",
+                        height: "20px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: "50%",
+                      }}
+                    >
+                      {unreadCount}
+                    </Badge>
+                  )}
+                </Nav.Link>
+              )}
+
               {/* Authentication Buttons/User Menu */}
               {isAuthenticated ? (
                 <Dropdown align="end">
