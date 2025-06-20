@@ -667,6 +667,7 @@ const Order = () => {
                       <PaymentOptions
                         selectedMethod={paymentMethod}
                         onPaymentMethodChange={setPaymentMethod}
+                        compact={true}
                       />
                     </div>
 
