@@ -239,8 +239,25 @@ const ProductDetails = () => {
   ];
 
   useEffect(() => {
-    dispatch(setSelectedProduct(mockProduct));
-  }, [id, dispatch]);
+    if (mockProduct) {
+      dispatch(setSelectedProduct(mockProduct));
+    }
+  }, [id, dispatch, mockProduct]);
+
+  // Early return if no product found
+  if (!mockProduct) {
+    return (
+      <Container className="section-padding">
+        <div className="text-center">
+          <h3>Product Not Found</h3>
+          <p>The requested product could not be found.</p>
+          <Link to="/products" className="btn btn-primary">
+            Browse Products
+          </Link>
+        </div>
+      </Container>
+    );
+  }
 
   const handleAddToCart = () => {
     if (!mockProduct || !mockProduct.inStock) {
