@@ -1,475 +1,601 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Row,
   Col,
   Card,
-  Button,
   Form,
+  Button,
   Alert,
+  Tab,
+  Nav,
   Modal,
-  InputGroup,
+  Spinner,
 } from "react-bootstrap";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 const UserProfile = () => {
   const { user } = useSelector((state) => state.auth);
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [activeTab, setActiveTab] = useState("personal");
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState({ show: false, message: "", variant: "" });
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [profileImage, setProfileImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(user?.profileImage || null);
 
-  const [formData, setFormData] = useState({
-    fullName: user?.name || "",
-    email: user?.email || "",
-    mobile: user?.mobile || "",
-    gender: user?.gender || "",
-    age: user?.age || "",
-    address: user?.address || "",
-    city: user?.city || "",
-    state: user?.state || "",
-    pincode: user?.pincode || "",
-    landmark: user?.landmark || "",
+  // Personal Information State
+  const [personalInfo, setPersonalInfo] = useState({
+    fullName: "",
+    email: "",
+    mobile: "",
+    dateOfBirth: "",
+    gender: "",
+    profileImage: "",
   });
 
+  // Address Information State
+  const [addressInfo, setAddressInfo] = useState({
+    street: "",
+    city: "",
+    state: "",
+    pincode: "",
+    landmark: "",
+  });
+
+  // Password Change State
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
 
-  const [errors, setErrors] = useState({});
-  const [passwordErrors, setPasswordErrors] = useState({});
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // Initialize form data
+  useEffect(() => {
+    if (user) {
+      setPersonalInfo({
+        fullName: user.fullName || "",
+        email: user.email || "",
+        mobile: user.mobile || "",
+        dateOfBirth: user.dateOfBirth || "",
+        gender: user.gender || "",
+        profileImage: user.profileImage || "",
+      });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+      setAddressInfo({
+        street: user.address?.street || "",
+        city: user.address?.city || "",
+        state: user.address?.state || "",
+        pincode: user.address?.pincode || "",
+        landmark: user.address?.landmark || "",
+      });
     }
+  }, [user]);
+
+  const showAlert = (message, variant) => {
+    setAlert({ show: true, message, variant });
+    setTimeout(() => setAlert({ show: false, message: "", variant: "" }), 5000);
+  };
+
+  const handlePersonalInfoChange = (e) => {
+    const { name, value } = e.target;
+    setPersonalInfo((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target;
+    setAddressInfo((prev) => ({ ...prev, [name]: value }));
   };
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
     setPasswordData((prev) => ({ ...prev, [name]: value }));
+  };
 
-    // Clear error when user starts typing
-    if (passwordErrors[name]) {
-      setPasswordErrors((prev) => ({ ...prev, [name]: "" }));
+  const handlePersonalInfoSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // In real app, this would update the user in Redux store and backend
+      showAlert("Personal information updated successfully!", "success");
+    } catch (error) {
+      showAlert(
+        "Failed to update personal information. Please try again.",
+        "danger",
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleImageUpload = (e) => {
+  const handleAddressSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      showAlert("Address updated successfully!", "success");
+    } catch (error) {
+      showAlert("Failed to update address. Please try again.", "danger");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validation
+    if (passwordData.newPassword.length < 6) {
+      showAlert("New password must be at least 6 characters long.", "danger");
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      showAlert("New passwords do not match.", "danger");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Reset form
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setShowPasswordModal(false);
+
+      showAlert("Password changed successfully!", "success");
+    } catch (error) {
+      showAlert(
+        "Failed to change password. Please check your current password.",
+        "danger",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setProfileImage(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+    if (!file) return;
 
-  const removeImage = () => {
-    setProfileImage(null);
-    setImagePreview(null);
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = "Full name is required";
-    }
-    if (!formData.mobile.trim()) {
-      newErrors.mobile = "Mobile number is required";
-    } else if (!/^\d{10}$/.test(formData.mobile.replace(/\s+/g, ""))) {
-      newErrors.mobile = "Mobile number must be 10 digits";
-    }
-    if (
-      formData.age &&
-      (parseInt(formData.age) < 18 || parseInt(formData.age) > 120)
-    ) {
-      newErrors.age = "Age must be between 18 and 120";
-    }
-    if (formData.pincode && !/^\d{6}$/.test(formData.pincode)) {
-      newErrors.pincode = "Pincode must be 6 digits";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const validatePasswordForm = () => {
-    const newErrors = {};
-
-    if (!passwordData.currentPassword) {
-      newErrors.currentPassword = "Current password is required";
-    }
-    if (!passwordData.newPassword) {
-      newErrors.newPassword = "New password is required";
-    } else if (passwordData.newPassword.length < 8) {
-      newErrors.newPassword = "Password must be at least 8 characters";
-    }
-    if (!passwordData.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password";
-    } else if (passwordData.newPassword !== passwordData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
-
-    setPasswordErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      showAlert("Please select a valid image file.", "danger");
       return;
     }
 
-    // In a real app, this would be an API call
-    console.log("Profile update data:", formData);
-    if (profileImage) {
-      console.log("Profile image:", profileImage);
-    }
-
-    // Show success message
-    setShowSuccessAlert(true);
-    setTimeout(() => setShowSuccessAlert(false), 5000);
-  };
-
-  const handlePasswordSubmit = (e) => {
-    e.preventDefault();
-
-    if (!validatePasswordForm()) {
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showAlert("Image size should be less than 5MB.", "danger");
       return;
     }
 
-    // In a real app, this would be an API call
-    console.log("Password change data:", {
-      currentPassword: passwordData.currentPassword,
-      newPassword: passwordData.newPassword,
-    });
+    setLoading(true);
 
-    // Reset password form and close modal
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-    setShowPasswordModal(false);
+    try {
+      // Simulate image upload
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    // Show success message
-    setShowSuccessAlert(true);
-    setTimeout(() => setShowSuccessAlert(false), 5000);
+      // Create temporary URL for preview
+      const imageUrl = URL.createObjectURL(file);
+      setPersonalInfo((prev) => ({ ...prev, profileImage: imageUrl }));
+
+      showAlert("Profile image uploaded successfully!", "success");
+    } catch (error) {
+      showAlert("Failed to upload image. Please try again.", "danger");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="fade-in">
-      <section className="section-padding-sm">
-        <Container>
-          {/* Header */}
-          <Row className="mb-4">
-            <Col lg={12}>
-              <h2>Edit Profile</h2>
+    <div className="section-padding">
+      <Container>
+        <Row>
+          <Col lg={12}>
+            <div className="text-center mb-4">
+              <h2 className="section-title">My Profile</h2>
               <p className="text-muted">
-                Update your personal information and account settings
+                Manage your account settings and personal information
               </p>
+            </div>
+          </Col>
+        </Row>
+
+        {alert.show && (
+          <Row>
+            <Col lg={12}>
+              <Alert variant={alert.variant} className="mb-4">
+                <i
+                  className={`bi bi-${alert.variant === "success" ? "check-circle" : "exclamation-triangle"} me-2`}
+                ></i>
+                {alert.message}
+              </Alert>
             </Col>
           </Row>
+        )}
 
-          {showSuccessAlert && (
-            <Alert
-              variant="success"
-              className="mb-4"
-              dismissible
-              onClose={() => setShowSuccessAlert(false)}
-            >
-              <i className="bi bi-check-circle me-2"></i>
-              Profile updated successfully!
-            </Alert>
-          )}
+        <Row>
+          <Col lg={12}>
+            <Card className="medical-card">
+              <Card.Body className="p-0">
+                <Tab.Container activeKey={activeTab} onSelect={setActiveTab}>
+                  <Nav variant="tabs" className="border-bottom">
+                    <Nav.Item>
+                      <Nav.Link eventKey="personal">
+                        <i className="bi bi-person me-2"></i>
+                        Personal Information
+                      </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                      <Nav.Link eventKey="address">
+                        <i className="bi bi-geo-alt me-2"></i>
+                        Address
+                      </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                      <Nav.Link eventKey="security">
+                        <i className="bi bi-shield-lock me-2"></i>
+                        Security
+                      </Nav.Link>
+                    </Nav.Item>
+                  </Nav>
 
-          <Form onSubmit={handleSubmit}>
-            <Row>
-              {/* Profile Information */}
-              <Col lg={8}>
-                <Card className="medical-card mb-4">
-                  <Card.Header className="bg-medical-light">
-                    <h5 className="mb-0">
-                      <i className="bi bi-person me-2"></i>
-                      Personal Information
-                    </h5>
-                  </Card.Header>
-                  <Card.Body>
-                    <Row>
-                      <Col md={6} className="mb-3">
-                        <Form.Label>
-                          Full Name <span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="fullName"
-                          value={formData.fullName}
-                          onChange={handleInputChange}
-                          isInvalid={!!errors.fullName}
-                          placeholder="Enter your full name"
-                        />
-                        <Form.Control.Feedback type="invalid">
-                          {errors.fullName}
-                        </Form.Control.Feedback>
-                      </Col>
-                      <Col md={6} className="mb-3">
-                        <Form.Label>Email Address</Form.Label>
-                        <Form.Control
-                          type="email"
-                          name="email"
-                          value={formData.email}
-                          readOnly
-                          className="bg-light"
-                        />
-                        <Form.Text className="text-muted">
-                          Email cannot be changed for security reasons
-                        </Form.Text>
-                      </Col>
-                      <Col md={6} className="mb-3">
-                        <Form.Label>
-                          Mobile Number <span className="text-danger">*</span>
-                        </Form.Label>
-                        <InputGroup>
-                          <InputGroup.Text>+91</InputGroup.Text>
-                          <Form.Control
-                            type="tel"
-                            name="mobile"
-                            value={formData.mobile}
-                            onChange={handleInputChange}
-                            isInvalid={!!errors.mobile}
-                            placeholder="Enter mobile number"
-                            maxLength={10}
-                          />
-                        </InputGroup>
-                        <Form.Control.Feedback type="invalid">
-                          {errors.mobile}
-                        </Form.Control.Feedback>
-                        <Form.Text className="text-muted">
-                          Mobile number cannot be changed for security reasons
-                        </Form.Text>
-                      </Col>
-                      <Col md={3} className="mb-3">
-                        <Form.Label>Gender</Form.Label>
-                        <Form.Select
-                          name="gender"
-                          value={formData.gender}
-                          onChange={handleInputChange}
-                        >
-                          <option value="">Select Gender</option>
-                          <option value="male">Male</option>
-                          <option value="female">Female</option>
-                          <option value="other">Other</option>
-                        </Form.Select>
-                      </Col>
-                      <Col md={3} className="mb-3">
-                        <Form.Label>Age</Form.Label>
-                        <Form.Control
-                          type="number"
-                          name="age"
-                          value={formData.age}
-                          onChange={handleInputChange}
-                          isInvalid={!!errors.age}
-                          placeholder="Age"
-                          min="18"
-                          max="120"
-                        />
-                        <Form.Control.Feedback type="invalid">
-                          {errors.age}
-                        </Form.Control.Feedback>
-                      </Col>
-                    </Row>
-                  </Card.Body>
-                </Card>
+                  <Tab.Content className="p-4">
+                    {/* Personal Information Tab */}
+                    <Tab.Pane eventKey="personal">
+                      <Form onSubmit={handlePersonalInfoSubmit}>
+                        <Row>
+                          <Col lg={12} className="text-center mb-4">
+                            <div className="profile-image-container">
+                              <div className="profile-image-wrapper">
+                                <img
+                                  src={
+                                    personalInfo.profileImage ||
+                                    "https://via.placeholder.com/150x150/e6e6e6/666666?text=User"
+                                  }
+                                  alt="Profile"
+                                  className="profile-image"
+                                />
+                                <div className="profile-image-overlay">
+                                  <label
+                                    htmlFor="profileImageInput"
+                                    className="btn btn-sm btn-light"
+                                  >
+                                    <i className="bi bi-camera"></i>
+                                  </label>
+                                  <input
+                                    type="file"
+                                    id="profileImageInput"
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                    style={{ display: "none" }}
+                                  />
+                                </div>
+                              </div>
+                              <p className="text-muted mt-2">
+                                Click to change profile picture
+                              </p>
+                            </div>
+                          </Col>
+                        </Row>
 
-                {/* Address Information */}
-                <Card className="medical-card mb-4">
-                  <Card.Header className="bg-medical-light">
-                    <h5 className="mb-0">
-                      <i className="bi bi-geo-alt me-2"></i>
-                      Address Information
-                    </h5>
-                  </Card.Header>
-                  <Card.Body>
-                    <Row>
-                      <Col md={12} className="mb-3">
-                        <Form.Label>Address</Form.Label>
-                        <Form.Control
-                          as="textarea"
-                          rows={3}
-                          name="address"
-                          value={formData.address}
-                          onChange={handleInputChange}
-                          placeholder="Enter your complete address"
-                        />
-                      </Col>
-                      <Col md={6} className="mb-3">
-                        <Form.Label>City</Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="city"
-                          value={formData.city}
-                          onChange={handleInputChange}
-                          placeholder="Enter city"
-                        />
-                      </Col>
-                      <Col md={6} className="mb-3">
-                        <Form.Label>State</Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="state"
-                          value={formData.state}
-                          onChange={handleInputChange}
-                          placeholder="Enter state"
-                        />
-                      </Col>
-                      <Col md={6} className="mb-3">
-                        <Form.Label>Pincode</Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="pincode"
-                          value={formData.pincode}
-                          onChange={handleInputChange}
-                          isInvalid={!!errors.pincode}
-                          placeholder="Enter pincode"
-                          maxLength={6}
-                        />
-                        <Form.Control.Feedback type="invalid">
-                          {errors.pincode}
-                        </Form.Control.Feedback>
-                      </Col>
-                      <Col md={6} className="mb-3">
-                        <Form.Label>Landmark</Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="landmark"
-                          value={formData.landmark}
-                          onChange={handleInputChange}
-                          placeholder="Nearby landmark"
-                        />
-                      </Col>
-                    </Row>
-                  </Card.Body>
-                </Card>
-              </Col>
+                        <Row>
+                          <Col md={6}>
+                            <Form.Group className="mb-3">
+                              <Form.Label>Full Name *</Form.Label>
+                              <Form.Control
+                                type="text"
+                                name="fullName"
+                                value={personalInfo.fullName}
+                                onChange={handlePersonalInfoChange}
+                                required
+                                placeholder="Enter your full name"
+                              />
+                            </Form.Group>
+                          </Col>
+                          <Col md={6}>
+                            <Form.Group className="mb-3">
+                              <Form.Label>Email Address</Form.Label>
+                              <Form.Control
+                                type="email"
+                                name="email"
+                                value={personalInfo.email}
+                                disabled
+                                className="bg-light"
+                              />
+                              <Form.Text className="text-muted">
+                                Email cannot be changed for security reasons
+                              </Form.Text>
+                            </Form.Group>
+                          </Col>
+                        </Row>
 
-              {/* Profile Image and Actions */}
-              <Col lg={4}>
-                <Card className="medical-card mb-4">
-                  <Card.Header className="bg-medical-light">
-                    <h5 className="mb-0">
-                      <i className="bi bi-image me-2"></i>
-                      Profile Picture
-                    </h5>
-                  </Card.Header>
-                  <Card.Body className="text-center">
-                    <div className="mb-3">
-                      {imagePreview ? (
-                        <div className="position-relative d-inline-block">
-                          <img
-                            src={imagePreview}
-                            alt="Profile Preview"
-                            style={{
-                              width: "150px",
-                              height: "150px",
-                              objectFit: "cover",
-                              borderRadius: "50%",
-                            }}
-                            className="border"
-                          />
+                        <Row>
+                          <Col md={6}>
+                            <Form.Group className="mb-3">
+                              <Form.Label>Mobile Number</Form.Label>
+                              <Form.Control
+                                type="tel"
+                                name="mobile"
+                                value={personalInfo.mobile}
+                                disabled
+                                className="bg-light"
+                              />
+                              <Form.Text className="text-muted">
+                                Mobile number cannot be changed for security
+                                reasons
+                              </Form.Text>
+                            </Form.Group>
+                          </Col>
+                          <Col md={6}>
+                            <Form.Group className="mb-3">
+                              <Form.Label>Date of Birth</Form.Label>
+                              <Form.Control
+                                type="date"
+                                name="dateOfBirth"
+                                value={personalInfo.dateOfBirth}
+                                onChange={handlePersonalInfoChange}
+                              />
+                            </Form.Group>
+                          </Col>
+                        </Row>
+
+                        <Row>
+                          <Col md={6}>
+                            <Form.Group className="mb-3">
+                              <Form.Label>Gender</Form.Label>
+                              <Form.Select
+                                name="gender"
+                                value={personalInfo.gender}
+                                onChange={handlePersonalInfoChange}
+                              >
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                                <option value="prefer_not_to_say">
+                                  Prefer not to say
+                                </option>
+                              </Form.Select>
+                            </Form.Group>
+                          </Col>
+                        </Row>
+
+                        <div className="text-end">
                           <Button
-                            size="sm"
-                            variant="danger"
-                            className="position-absolute top-0 end-0 rounded-circle"
-                            style={{ width: "30px", height: "30px" }}
-                            onClick={removeImage}
+                            type="submit"
+                            className="btn-medical-primary"
+                            disabled={loading}
                           >
-                            <i className="bi bi-x"></i>
+                            {loading ? (
+                              <>
+                                <Spinner size="sm" className="me-2" />
+                                Updating...
+                              </>
+                            ) : (
+                              <>
+                                <i className="bi bi-check me-2"></i>
+                                Update Personal Information
+                              </>
+                            )}
                           </Button>
                         </div>
-                      ) : (
-                        <div
-                          className="bg-light border rounded-circle d-flex align-items-center justify-content-center mx-auto"
-                          style={{ width: "150px", height: "150px" }}
-                        >
-                          <i className="bi bi-person display-4 text-muted"></i>
+                      </Form>
+                    </Tab.Pane>
+
+                    {/* Address Tab */}
+                    <Tab.Pane eventKey="address">
+                      <Form onSubmit={handleAddressSubmit}>
+                        <Row>
+                          <Col lg={12}>
+                            <Form.Group className="mb-3">
+                              <Form.Label>Street Address *</Form.Label>
+                              <Form.Control
+                                as="textarea"
+                                rows={3}
+                                name="street"
+                                value={addressInfo.street}
+                                onChange={handleAddressChange}
+                                required
+                                placeholder="Enter your complete street address"
+                              />
+                            </Form.Group>
+                          </Col>
+                        </Row>
+
+                        <Row>
+                          <Col md={6}>
+                            <Form.Group className="mb-3">
+                              <Form.Label>City *</Form.Label>
+                              <Form.Control
+                                type="text"
+                                name="city"
+                                value={addressInfo.city}
+                                onChange={handleAddressChange}
+                                required
+                                placeholder="Enter city"
+                              />
+                            </Form.Group>
+                          </Col>
+                          <Col md={6}>
+                            <Form.Group className="mb-3">
+                              <Form.Label>State *</Form.Label>
+                              <Form.Select
+                                name="state"
+                                value={addressInfo.state}
+                                onChange={handleAddressChange}
+                                required
+                              >
+                                <option value="">Select State</option>
+                                <option value="gujarat">Gujarat</option>
+                                <option value="maharashtra">Maharashtra</option>
+                                <option value="rajasthan">Rajasthan</option>
+                                <option value="madhya_pradesh">
+                                  Madhya Pradesh
+                                </option>
+                                <option value="other">Other</option>
+                              </Form.Select>
+                            </Form.Group>
+                          </Col>
+                        </Row>
+
+                        <Row>
+                          <Col md={6}>
+                            <Form.Group className="mb-3">
+                              <Form.Label>PIN Code *</Form.Label>
+                              <Form.Control
+                                type="text"
+                                name="pincode"
+                                value={addressInfo.pincode}
+                                onChange={handleAddressChange}
+                                required
+                                placeholder="Enter PIN code"
+                                maxLength={6}
+                              />
+                            </Form.Group>
+                          </Col>
+                          <Col md={6}>
+                            <Form.Group className="mb-3">
+                              <Form.Label>Landmark</Form.Label>
+                              <Form.Control
+                                type="text"
+                                name="landmark"
+                                value={addressInfo.landmark}
+                                onChange={handleAddressChange}
+                                placeholder="Enter nearby landmark (optional)"
+                              />
+                            </Form.Group>
+                          </Col>
+                        </Row>
+
+                        <div className="text-end">
+                          <Button
+                            type="submit"
+                            className="btn-medical-primary"
+                            disabled={loading}
+                          >
+                            {loading ? (
+                              <>
+                                <Spinner size="sm" className="me-2" />
+                                Updating...
+                              </>
+                            ) : (
+                              <>
+                                <i className="bi bi-check me-2"></i>
+                                Update Address
+                              </>
+                            )}
+                          </Button>
                         </div>
-                      )}
-                    </div>
+                      </Form>
+                    </Tab.Pane>
 
-                    <Form.Group className="mb-3">
-                      <Form.Control
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                      />
-                      <Form.Text className="text-muted">
-                        Upload a profile picture (optional)
-                      </Form.Text>
-                    </Form.Group>
-                  </Card.Body>
-                </Card>
+                    {/* Security Tab */}
+                    <Tab.Pane eventKey="security">
+                      <div className="security-section">
+                        <h5 className="text-medical-red mb-4">
+                          Account Security
+                        </h5>
 
-                {/* Action Buttons */}
-                <Card className="medical-card">
-                  <Card.Header className="bg-medical-light">
-                    <h5 className="mb-0">
-                      <i className="bi bi-gear me-2"></i>
-                      Account Actions
-                    </h5>
-                  </Card.Header>
-                  <Card.Body>
-                    <div className="d-grid gap-2 mb-3">
-                      <Button
-                        type="submit"
-                        className="btn-medical-primary"
-                        size="lg"
-                      >
-                        <i className="bi bi-check-circle me-2"></i>
-                        Update Profile
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline-warning"
-                        onClick={() => setShowPasswordModal(true)}
-                        className="btn-medical-outline"
-                      >
-                        <i className="bi bi-lock me-2"></i>
-                        Change Password
-                      </Button>
-                    </div>
-                    <div className="text-center">
-                      <small className="text-muted">
-                        <i className="bi bi-info-circle me-1"></i>
-                        Email and mobile number cannot be changed
-                      </small>
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-          </Form>
-        </Container>
-      </section>
+                        <Row>
+                          <Col lg={8}>
+                            <Card className="border-0 bg-light">
+                              <Card.Body>
+                                <div className="d-flex justify-content-between align-items-center">
+                                  <div>
+                                    <h6 className="mb-1">Password</h6>
+                                    <p className="text-muted mb-0">
+                                      Last changed: Never (or show actual date)
+                                    </p>
+                                  </div>
+                                  <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    onClick={() => setShowPasswordModal(true)}
+                                  >
+                                    <i className="bi bi-key me-1"></i>
+                                    Change Password
+                                  </Button>
+                                </div>
+                              </Card.Body>
+                            </Card>
 
-      {/* Change Password Modal */}
+                            <Card className="border-0 bg-light mt-3">
+                              <Card.Body>
+                                <div className="d-flex justify-content-between align-items-center">
+                                  <div>
+                                    <h6 className="mb-1">Email Verification</h6>
+                                    <p className="text-muted mb-0">
+                                      {personalInfo.email}
+                                      <span className="badge bg-success ms-2">
+                                        Verified
+                                      </span>
+                                    </p>
+                                  </div>
+                                </div>
+                              </Card.Body>
+                            </Card>
+
+                            <Card className="border-0 bg-light mt-3">
+                              <Card.Body>
+                                <div className="d-flex justify-content-between align-items-center">
+                                  <div>
+                                    <h6 className="mb-1">
+                                      Mobile Verification
+                                    </h6>
+                                    <p className="text-muted mb-0">
+                                      {personalInfo.mobile}
+                                      <span className="badge bg-success ms-2">
+                                        Verified
+                                      </span>
+                                    </p>
+                                  </div>
+                                </div>
+                              </Card.Body>
+                            </Card>
+                          </Col>
+                        </Row>
+
+                        <div className="mt-4">
+                          <h6 className="text-muted">Security Tips</h6>
+                          <ul className="security-tips">
+                            <li>
+                              Use a strong password with at least 8 characters
+                            </li>
+                            <li>
+                              Include uppercase, lowercase, numbers, and special
+                              characters
+                            </li>
+                            <li>Don't share your password with anyone</li>
+                            <li>Change your password regularly</li>
+                            <li>Log out from shared devices</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </Tab.Pane>
+                  </Tab.Content>
+                </Tab.Container>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+
+      {/* Password Change Modal */}
       <Modal
         show={showPasswordModal}
         onHide={() => setShowPasswordModal(false)}
-        centered
       >
         <Modal.Header closeButton>
           <Modal.Title>Change Password</Modal.Title>
@@ -477,84 +603,44 @@ const UserProfile = () => {
         <Form onSubmit={handlePasswordSubmit}>
           <Modal.Body>
             <Form.Group className="mb-3">
-              <Form.Label>
-                Current Password <span className="text-danger">*</span>
-              </Form.Label>
-              <InputGroup>
-                <Form.Control
-                  type={showCurrentPassword ? "text" : "password"}
-                  name="currentPassword"
-                  value={passwordData.currentPassword}
-                  onChange={handlePasswordChange}
-                  isInvalid={!!passwordErrors.currentPassword}
-                  placeholder="Enter current password"
-                />
-                <Button
-                  variant="outline-secondary"
-                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                >
-                  <i
-                    className={`bi ${showCurrentPassword ? "bi-eye-slash" : "bi-eye"}`}
-                  ></i>
-                </Button>
-              </InputGroup>
-              <Form.Control.Feedback type="invalid">
-                {passwordErrors.currentPassword}
-              </Form.Control.Feedback>
+              <Form.Label>Current Password *</Form.Label>
+              <Form.Control
+                type="password"
+                name="currentPassword"
+                value={passwordData.currentPassword}
+                onChange={handlePasswordChange}
+                required
+                placeholder="Enter current password"
+              />
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>
-                New Password <span className="text-danger">*</span>
-              </Form.Label>
-              <InputGroup>
-                <Form.Control
-                  type={showNewPassword ? "text" : "password"}
-                  name="newPassword"
-                  value={passwordData.newPassword}
-                  onChange={handlePasswordChange}
-                  isInvalid={!!passwordErrors.newPassword}
-                  placeholder="Enter new password"
-                />
-                <Button
-                  variant="outline-secondary"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                >
-                  <i
-                    className={`bi ${showNewPassword ? "bi-eye-slash" : "bi-eye"}`}
-                  ></i>
-                </Button>
-              </InputGroup>
-              <Form.Control.Feedback type="invalid">
-                {passwordErrors.newPassword}
-              </Form.Control.Feedback>
+              <Form.Label>New Password *</Form.Label>
+              <Form.Control
+                type="password"
+                name="newPassword"
+                value={passwordData.newPassword}
+                onChange={handlePasswordChange}
+                required
+                placeholder="Enter new password"
+                minLength={6}
+              />
+              <Form.Text className="text-muted">
+                Password must be at least 6 characters long
+              </Form.Text>
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>
-                Confirm New Password <span className="text-danger">*</span>
-              </Form.Label>
-              <InputGroup>
-                <Form.Control
-                  type={showConfirmPassword ? "text" : "password"}
-                  name="confirmPassword"
-                  value={passwordData.confirmPassword}
-                  onChange={handlePasswordChange}
-                  isInvalid={!!passwordErrors.confirmPassword}
-                  placeholder="Confirm new password"
-                />
-                <Button
-                  variant="outline-secondary"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  <i
-                    className={`bi ${showConfirmPassword ? "bi-eye-slash" : "bi-eye"}`}
-                  ></i>
-                </Button>
-              </InputGroup>
-              <Form.Control.Feedback type="invalid">
-                {passwordErrors.confirmPassword}
-              </Form.Control.Feedback>
+              <Form.Label>Confirm New Password *</Form.Label>
+              <Form.Control
+                type="password"
+                name="confirmPassword"
+                value={passwordData.confirmPassword}
+                onChange={handlePasswordChange}
+                required
+                placeholder="Confirm new password"
+                minLength={6}
+              />
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
@@ -564,13 +650,77 @@ const UserProfile = () => {
             >
               Cancel
             </Button>
-            <Button type="submit" className="btn-medical-primary">
-              <i className="bi bi-check-circle me-2"></i>
-              Change Password
+            <Button type="submit" variant="primary" disabled={loading}>
+              {loading ? (
+                <>
+                  <Spinner size="sm" className="me-2" />
+                  Changing...
+                </>
+              ) : (
+                "Change Password"
+              )}
             </Button>
           </Modal.Footer>
         </Form>
       </Modal>
+
+      <style>{`
+        .profile-image-container {
+          position: relative;
+          display: inline-block;
+        }
+        
+        .profile-image-wrapper {
+          position: relative;
+          display: inline-block;
+        }
+        
+        .profile-image {
+          width: 150px;
+          height: 150px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 4px solid #e9ecef;
+        }
+        
+        .profile-image-overlay {
+          position: absolute;
+          bottom: 10px;
+          right: 10px;
+          background: rgba(0, 0, 0, 0.7);
+          border-radius: 50%;
+          width: 35px;
+          height: 35px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .profile-image-overlay label {
+          margin: 0;
+          cursor: pointer;
+          color: white;
+        }
+        
+        .security-tips {
+          list-style: none;
+          padding-left: 0;
+        }
+        
+        .security-tips li {
+          padding: 5px 0;
+          position: relative;
+          padding-left: 20px;
+        }
+        
+        .security-tips li:before {
+          content: "✓";
+          position: absolute;
+          left: 0;
+          color: var(--medical-red);
+          font-weight: bold;
+        }
+      `}</style>
     </div>
   );
 };
