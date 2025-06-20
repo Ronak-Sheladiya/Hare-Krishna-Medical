@@ -176,28 +176,6 @@ const AdminDashboard = () => {
                 <Card.Body>
                   <div className="d-flex justify-content-between align-items-start">
                     <div>
-                      <h3 className="text-medical-green">
-                        {dashboardStats.totalUsers}
-                      </h3>
-                      <p className="text-muted mb-0">Total Users</p>
-                      <small className="text-success">
-                        <i className="bi bi-person-plus"></i> +
-                        {dashboardStats.newUsersToday} today
-                      </small>
-                    </div>
-                    <div className="bg-medical-green text-white rounded-circle p-3">
-                      <i className="bi bi-people fs-4"></i>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-
-            <Col lg={3} md={6} className="mb-4">
-              <Card className="medical-card h-100">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
                       <h3 className="text-success">
                         ₹{dashboardStats.totalRevenue.toLocaleString()}
                       </h3>
@@ -209,6 +187,51 @@ const AdminDashboard = () => {
                     </div>
                     <div className="bg-success text-white rounded-circle p-3">
                       <i className="bi bi-currency-rupee fs-4"></i>
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+
+            <Col lg={3} md={6} className="mb-4">
+              <Card
+                className="medical-card h-100"
+                style={{ cursor: "pointer" }}
+                onClick={() => (window.location.href = "/admin/messages")}
+              >
+                <Card.Body>
+                  <div className="d-flex justify-content-between align-items-start">
+                    <div>
+                      <h3 className="text-warning">
+                        {dashboardStats.unreadMessages}
+                        {dashboardStats.unreadMessages > 0 && (
+                          <Badge
+                            bg="danger"
+                            className="ms-2"
+                            style={{ fontSize: "12px" }}
+                          >
+                            NEW
+                          </Badge>
+                        )}
+                      </h3>
+                      <p className="text-muted mb-0">Unread Messages</p>
+                      <small
+                        className={
+                          dashboardStats.unreadMessages > 0
+                            ? "text-danger"
+                            : "text-muted"
+                        }
+                      >
+                        <i
+                          className={`bi bi-${dashboardStats.unreadMessages > 0 ? "exclamation-circle" : "check-circle"}`}
+                        ></i>
+                        {dashboardStats.unreadMessages > 0
+                          ? " Requires attention"
+                          : " All caught up"}
+                      </small>
+                    </div>
+                    <div className="bg-warning text-white rounded-circle p-3">
+                      <i className="bi bi-envelope fs-4"></i>
                     </div>
                   </div>
                 </Card.Body>
