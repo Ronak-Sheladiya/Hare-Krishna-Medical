@@ -65,10 +65,10 @@ const Footer = () => {
                 <Link to="/cart">Shopping Cart</Link>
               </li>
               <li className="mb-2">
-                <a href="#privacy">Privacy Policy</a>
+                <Link to="/privacy-policy">Privacy Policy</Link>
               </li>
               <li className="mb-2">
-                <a href="#terms">Terms & Conditions</a>
+                <Link to="/terms-conditions">Terms & Conditions</Link>
               </li>
             </ul>
           </Col>
