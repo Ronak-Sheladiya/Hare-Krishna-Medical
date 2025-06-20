@@ -308,7 +308,7 @@ const ProductDetails = () => {
             <Col lg={6} className="mb-4">
               <Card className="medical-card">
                 <Carousel interval={null} className="product-image-carousel">
-                  {mockProduct.images.map((image, index) => (
+                  {(mockProduct.images || []).map((image, index) => (
                     <Carousel.Item key={index}>
                       <img
                         className="d-block w-100"
@@ -478,7 +478,7 @@ const ProductDetails = () => {
                   </Accordion.Header>
                   <Accordion.Body>
                     <ul className="list-unstyled">
-                      {mockProduct.benefits.map((benefit, index) => (
+                      {(mockProduct.benefits || []).map((benefit, index) => (
                         <li key={index} className="mb-2">
                           <i className="bi bi-check-circle-fill text-medical-green me-2"></i>
                           {benefit}
@@ -495,7 +495,7 @@ const ProductDetails = () => {
                   </Accordion.Header>
                   <Accordion.Body>
                     <ul className="list-unstyled">
-                      {mockProduct.usage.map((instruction, index) => (
+                      {(mockProduct.usage || []).map((instruction, index) => (
                         <li key={index} className="mb-2">
                           <i className="bi bi-arrow-right-circle text-medical-blue me-2"></i>
                           {instruction}
@@ -514,17 +514,21 @@ const ProductDetails = () => {
                     <div className="mb-3">
                       <h6>Possible Side Effects:</h6>
                       <ul>
-                        {mockProduct.sideEffects.map((effect, index) => (
-                          <li key={index}>{effect}</li>
-                        ))}
+                        {(mockProduct.sideEffects || []).map(
+                          (effect, index) => (
+                            <li key={index}>{effect}</li>
+                          ),
+                        )}
                       </ul>
                     </div>
                     <div>
                       <h6>Contraindications:</h6>
                       <ul>
-                        {mockProduct.contraindications.map((contra, index) => (
-                          <li key={index}>{contra}</li>
-                        ))}
+                        {(mockProduct.contraindications || []).map(
+                          (contra, index) => (
+                            <li key={index}>{contra}</li>
+                          ),
+                        )}
                       </ul>
                     </div>
                   </Accordion.Body>
@@ -538,7 +542,7 @@ const ProductDetails = () => {
             <Col lg={12}>
               <h3 className="mb-4">Related Products</h3>
               <Row>
-                {relatedProducts.map((product) => (
+                {(relatedProducts || []).map((product) => (
                   <Col lg={4} md={6} className="mb-4" key={product.id}>
                     <ProductCard
                       product={product}
