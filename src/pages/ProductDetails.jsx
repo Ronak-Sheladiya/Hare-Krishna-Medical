@@ -141,7 +141,7 @@ const ProductDetails = () => {
     },
   };
 
-  // Get product based on ID
+  // Get product based on ID, or return a default "not found" product
   const mockProduct = productDatabase[parseInt(id)] || {
     id: parseInt(id),
     name: "Product Not Found",
@@ -152,40 +152,18 @@ const ProductDetails = () => {
       "https://via.placeholder.com/500x400/e6e6e6/666666?text=Product+Not+Found",
     ],
     description:
-      "Effective pain relief and fever reducer for adults and children. Fast-acting formula provides quick relief from headaches, body aches, and fever.",
-    benefits: [
-      "Quick and effective pain relief",
-      "Reduces fever within 30 minutes",
-      "Gentle on stomach when taken as directed",
-      "Suitable for adults and children over 12 years",
-      "Non-drowsy formula",
-    ],
-    usage: [
-      "Adults and children over 12 years: 1-2 tablets every 4-6 hours",
-      "Maximum 8 tablets in 24 hours",
-      "Take with water, preferably after food",
-      "Do not exceed recommended dose",
-      "Consult doctor if symptoms persist beyond 3 days",
-    ],
-    weight: "50 tablets per pack",
-    category: "Pain Relief",
-    inStock: true,
-    stockCount: 50,
-    manufacturer: "Hare Krishna Pharmaceuticals Ltd.",
-    batchNo: "HKP2024001",
-    mfgDate: "Jan 2024",
-    expDate: "Dec 2026",
-    composition: "Each tablet contains: Paracetamol IP 500mg",
-    sideEffects: [
-      "Rare: skin rash or allergic reactions",
-      "Very rare: liver damage with overdose",
-      "If any adverse reaction occurs, discontinue use",
-    ],
-    contraindications: [
-      "Known hypersensitivity to paracetamol",
-      "Severe liver or kidney disease",
-      "Chronic alcoholism",
-    ],
+      "Sorry, this product was not found. Please check the product ID or browse our available products.",
+    benefits: ["Product not available"],
+    usage: ["Please contact us for assistance"],
+    weight: "N/A",
+    category: "Not Found",
+    inStock: false,
+    stockCount: 0,
+    manufacturer: "N/A",
+    batchNo: "N/A",
+    mfgDate: "N/A",
+    expDate: "N/A",
+    composition: "N/A",
   };
 
   // Mock related products
