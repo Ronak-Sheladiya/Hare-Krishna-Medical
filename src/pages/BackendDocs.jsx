@@ -482,6 +482,9 @@ This documentation provides a comprehensive guide for implementing the backend s
                       <Nav.Link eventKey="overview">Overview</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
+                      <Nav.Link eventKey="structure">File Structure</Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
                       <Nav.Link eventKey="database">Database Schema</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
