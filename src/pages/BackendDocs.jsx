@@ -498,7 +498,7 @@ This documentation provides a comprehensive guide for implementing the backend s
                     </Nav.Item>
                   </Nav>
 
-                  <Tab.Content className="p-4">
+                  <Tab.Content className="p-4" id="documentation-content">
                     <Tab.Pane eventKey="overview">
                       <h3 className="text-medical-red mb-4">
                         Technology Stack & Architecture
