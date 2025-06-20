@@ -242,7 +242,7 @@ const ProductDetails = () => {
     if (mockProduct) {
       dispatch(setSelectedProduct(mockProduct));
     }
-  }, [id, dispatch, mockProduct]);
+  }, [id, dispatch]);
 
   // Early return if no product found
   if (!mockProduct) {
