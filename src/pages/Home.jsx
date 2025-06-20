@@ -62,13 +62,14 @@ const Home = () => {
 
   return (
     <div className="fade-in">
-      {/* Hero Section with Professional Medical Theme */}
+      {/* Hero Section with Official Color Palette */}
       <section
         className="hero-section"
         style={{
-          background: "linear-gradient(135deg, #2c5aa0 0%, #1e3f73 100%)",
+          background: `linear-gradient(135deg, #343a40 0%, #495057 100%)`,
           position: "relative",
           overflow: "hidden",
+          minHeight: "100vh",
         }}
       >
         <div
@@ -78,8 +79,13 @@ const Home = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            background:
-              "radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.08) 0%, transparent 50%)",
+            background: `repeating-linear-gradient(
+              45deg,
+              transparent,
+              transparent 100px,
+              rgba(230, 57, 70, 0.03) 100px,
+              rgba(230, 57, 70, 0.03) 200px
+            )`,
           }}
         ></div>
         <div
@@ -89,31 +95,43 @@ const Home = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            background:
-              'url(\'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="medical-pattern" width="50" height="50" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><path d="M20 25h10M25 20v10" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23medical-pattern)"/></svg>\')',
-            opacity: 0.3,
+            background: `radial-gradient(circle at 20% 30%, rgba(230, 57, 70, 0.1) 0%, transparent 50%), 
+                         radial-gradient(circle at 80% 70%, rgba(220, 53, 69, 0.08) 0%, transparent 50%)`,
           }}
         ></div>
-        <Container style={{ position: "relative", zIndex: 2 }}>
+        <Container
+          style={{
+            position: "relative",
+            zIndex: 2,
+            paddingTop: "100px",
+            paddingBottom: "100px",
+          }}
+        >
           <Row className="align-items-center min-vh-75">
             <Col lg={6} className="slide-in-left">
               <h1
-                className="hero-title text-white"
+                className="hero-title"
                 style={{
-                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
-                  fontSize: "3.5rem",
-                  fontWeight: "700",
+                  color: "#ffffff",
+                  fontSize: "4rem",
+                  fontWeight: "800",
+                  lineHeight: "1.1",
+                  marginBottom: "2rem",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
                 }}
               >
                 Your Health, <br />
-                <span style={{ color: "#a8d8f0" }}>Our Priority</span>
+                <span style={{ color: "#e63946" }}>Our Priority</span>
               </h1>
               <p
-                className="hero-subtitle text-white"
+                className="hero-subtitle"
                 style={{
-                  textShadow: "1px 1px 2px rgba(0,0,0,0.2)",
-                  fontSize: "1.2rem",
+                  color: "#ffffff",
+                  fontSize: "1.3rem",
+                  lineHeight: "1.6",
+                  marginBottom: "3rem",
                   opacity: "0.95",
+                  textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
                 }}
               >
                 Welcome to Hare Krishna Medical - your trusted partner in health
@@ -126,14 +144,28 @@ const Home = () => {
                   to="/products"
                   size="lg"
                   style={{
-                    background: "linear-gradient(45deg, #28a745, #20c997)",
+                    background: "#e63946",
                     border: "none",
-                    borderRadius: "25px",
-                    padding: "12px 30px",
-                    boxShadow: "0 4px 15px rgba(40,167,69,0.4)",
-                    fontWeight: "600",
+                    borderRadius: "8px",
+                    padding: "16px 32px",
+                    fontSize: "1.1rem",
+                    fontWeight: "700",
                     textTransform: "uppercase",
                     letterSpacing: "1px",
+                    boxShadow: "0 8px 25px rgba(230, 57, 70, 0.3)",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = "#dc3545";
+                    e.target.style.transform = "translateY(-2px)";
+                    e.target.style.boxShadow =
+                      "0 12px 35px rgba(220, 53, 69, 0.4)";
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = "#e63946";
+                    e.target.style.transform = "translateY(0)";
+                    e.target.style.boxShadow =
+                      "0 8px 25px rgba(230, 57, 70, 0.3)";
                   }}
                 >
                   Shop Products
@@ -141,16 +173,26 @@ const Home = () => {
                 <Button
                   as={Link}
                   to="/about"
-                  variant="outline-light"
                   size="lg"
                   style={{
-                    borderColor: "rgba(255,255,255,0.8)",
-                    color: "white",
-                    backdropFilter: "blur(10px)",
-                    background: "rgba(255,255,255,0.1)",
-                    borderRadius: "25px",
-                    padding: "12px 30px",
-                    fontWeight: "600",
+                    background: "transparent",
+                    color: "#ffffff",
+                    border: "2px solid #ffffff",
+                    borderRadius: "8px",
+                    padding: "16px 32px",
+                    fontSize: "1.1rem",
+                    fontWeight: "700",
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = "#ffffff";
+                    e.target.style.color = "#343a40";
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = "transparent";
+                    e.target.style.color = "#ffffff";
                   }}
                 >
                   Learn More
@@ -161,19 +203,22 @@ const Home = () => {
               <div className="text-center">
                 <div
                   style={{
-                    background: "rgba(255,255,255,0.15)",
+                    background: "rgba(255, 255, 255, 0.1)",
                     backdropFilter: "blur(15px)",
-                    borderRadius: "30px",
-                    padding: "40px",
-                    border: "1px solid rgba(255,255,255,0.2)",
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+                    borderRadius: "20px",
+                    padding: "50px",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    boxShadow: "0 25px 50px rgba(0, 0, 0, 0.2)",
                   }}
                 >
                   <img
                     src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
                     alt="Hare Krishna Medical"
                     className="img-fluid"
-                    style={{ maxHeight: "350px", filter: "brightness(1.1)" }}
+                    style={{
+                      maxHeight: "350px",
+                      filter: "brightness(1.2) contrast(1.1)",
+                    }}
                   />
                 </div>
               </div>
@@ -182,12 +227,14 @@ const Home = () => {
         </Container>
       </section>
 
-      {/* Features Section with Professional Theme */}
+      {/* Features Section with Professional Gray Background */}
       <section
         className="section-padding"
         style={{
-          background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+          background: "#ffffff",
           position: "relative",
+          paddingTop: "100px",
+          paddingBottom: "100px",
         }}
       >
         <div
@@ -197,8 +244,13 @@ const Home = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            background:
-              "repeating-linear-gradient(45deg, transparent, transparent 50px, rgba(44, 90, 160, 0.03) 50px, rgba(44, 90, 160, 0.03) 100px)",
+            background: `linear-gradient(45deg, 
+              rgba(52, 58, 64, 0.02) 25%, 
+              transparent 25%), 
+            linear-gradient(-45deg, 
+              rgba(52, 58, 64, 0.02) 25%, 
+              transparent 25%)`,
+            backgroundSize: "60px 60px",
           }}
         ></div>
         <Container style={{ position: "relative", zIndex: 2 }}>
@@ -207,21 +259,35 @@ const Home = () => {
               <h2
                 className="section-title"
                 style={{
-                  color: "#2c5aa0",
-                  fontWeight: "700",
-                  fontSize: "2.5rem",
-                  marginBottom: "1rem",
+                  color: "#333333",
+                  fontSize: "3rem",
+                  fontWeight: "800",
+                  marginBottom: "1.5rem",
+                  position: "relative",
                 }}
               >
                 Why Choose Us?
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "-10px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: "80px",
+                    height: "4px",
+                    background: "#e63946",
+                    borderRadius: "2px",
+                  }}
+                ></div>
               </h2>
               <p
                 className="section-subtitle"
                 style={{
-                  color: "#6c757d",
-                  fontSize: "1.1rem",
-                  maxWidth: "600px",
-                  margin: "0 auto",
+                  color: "#495057",
+                  fontSize: "1.2rem",
+                  maxWidth: "700px",
+                  margin: "2rem auto 0",
+                  lineHeight: "1.6",
                 }}
               >
                 We are committed to providing the best healthcare solutions with
@@ -229,146 +295,236 @@ const Home = () => {
               </p>
             </Col>
           </Row>
-          <Row>
-            <Col lg={4} md={6} className="mb-4">
+          <Row className="mt-5">
+            <Col lg={4} md={6} className="mb-5">
               <div
                 className="service-card fade-in"
                 style={{
-                  background:
-                    "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
-                  backdropFilter: "blur(10px)",
-                  borderRadius: "20px",
-                  padding: "40px 30px",
-                  border: "1px solid rgba(44, 90, 160, 0.1)",
-                  boxShadow: "0 10px 40px rgba(44, 90, 160, 0.08)",
+                  background: "#ffffff",
+                  borderRadius: "15px",
+                  padding: "50px 30px",
+                  border: `2px solid #f8f9fa`,
+                  boxShadow: "0 15px 50px rgba(52, 58, 64, 0.08)",
                   height: "100%",
                   transition: "all 0.3s ease",
+                  textAlign: "center",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "translateY(-10px)";
+                  e.currentTarget.style.borderColor = "#e63946";
+                  e.currentTarget.style.boxShadow =
+                    "0 25px 60px rgba(230, 57, 70, 0.15)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.borderColor = "#f8f9fa";
+                  e.currentTarget.style.boxShadow =
+                    "0 15px 50px rgba(52, 58, 64, 0.08)";
                 }}
               >
                 <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: "5px",
+                    background: "#e63946",
+                  }}
+                ></div>
+                <div
                   className="feature-icon"
                   style={{
-                    background: "linear-gradient(135deg, #2c5aa0, #4a73b8)",
+                    background: `linear-gradient(135deg, #e63946, #dc3545)`,
                     color: "white",
                     borderRadius: "50%",
-                    width: "70px",
-                    height: "70px",
+                    width: "80px",
+                    height: "80px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    margin: "0 auto 25px",
-                    fontSize: "28px",
-                    boxShadow: "0 8px 25px rgba(44, 90, 160, 0.3)",
+                    margin: "0 auto 30px",
+                    fontSize: "32px",
+                    boxShadow: "0 10px 30px rgba(230, 57, 70, 0.3)",
                   }}
                 >
                   <i className="bi bi-shield-check"></i>
                 </div>
                 <h4
                   style={{
-                    color: "#2c5aa0",
-                    fontWeight: "600",
-                    marginBottom: "15px",
+                    color: "#333333",
+                    fontWeight: "700",
+                    fontSize: "1.4rem",
+                    marginBottom: "20px",
                   }}
                 >
                   Quality Assured
                 </h4>
-                <p style={{ color: "#6c757d", lineHeight: "1.6" }}>
+                <p
+                  style={{
+                    color: "#495057",
+                    lineHeight: "1.6",
+                    fontSize: "1rem",
+                  }}
+                >
                   All our products are sourced from trusted manufacturers and
                   undergo strict quality checks to ensure safety and efficacy.
                 </p>
               </div>
             </Col>
-            <Col lg={4} md={6} className="mb-4">
+            <Col lg={4} md={6} className="mb-5">
               <div
                 className="service-card fade-in"
                 style={{
-                  background:
-                    "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
-                  backdropFilter: "blur(10px)",
-                  borderRadius: "20px",
-                  padding: "40px 30px",
-                  border: "1px solid rgba(40, 167, 69, 0.1)",
-                  boxShadow: "0 10px 40px rgba(40, 167, 69, 0.08)",
+                  background: "#ffffff",
+                  borderRadius: "15px",
+                  padding: "50px 30px",
+                  border: `2px solid #f8f9fa`,
+                  boxShadow: "0 15px 50px rgba(52, 58, 64, 0.08)",
                   height: "100%",
                   transition: "all 0.3s ease",
+                  textAlign: "center",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "translateY(-10px)";
+                  e.currentTarget.style.borderColor = "#e63946";
+                  e.currentTarget.style.boxShadow =
+                    "0 25px 60px rgba(230, 57, 70, 0.15)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.borderColor = "#f8f9fa";
+                  e.currentTarget.style.boxShadow =
+                    "0 15px 50px rgba(52, 58, 64, 0.08)";
                 }}
               >
                 <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: "5px",
+                    background: "#dc3545",
+                  }}
+                ></div>
+                <div
                   className="feature-icon"
                   style={{
-                    background: "linear-gradient(135deg, #28a745, #20c997)",
+                    background: `linear-gradient(135deg, #dc3545, #e63946)`,
                     color: "white",
                     borderRadius: "50%",
-                    width: "70px",
-                    height: "70px",
+                    width: "80px",
+                    height: "80px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    margin: "0 auto 25px",
-                    fontSize: "28px",
-                    boxShadow: "0 8px 25px rgba(40, 167, 69, 0.3)",
+                    margin: "0 auto 30px",
+                    fontSize: "32px",
+                    boxShadow: "0 10px 30px rgba(220, 53, 69, 0.3)",
                   }}
                 >
                   <i className="bi bi-truck"></i>
                 </div>
                 <h4
                   style={{
-                    color: "#28a745",
-                    fontWeight: "600",
-                    marginBottom: "15px",
+                    color: "#333333",
+                    fontWeight: "700",
+                    fontSize: "1.4rem",
+                    marginBottom: "20px",
                   }}
                 >
                   Fast Delivery
                 </h4>
-                <p style={{ color: "#6c757d", lineHeight: "1.6" }}>
+                <p
+                  style={{
+                    color: "#495057",
+                    lineHeight: "1.6",
+                    fontSize: "1rem",
+                  }}
+                >
                   Quick and reliable delivery service to ensure you get your
                   medical needs fulfilled on time, every time.
                 </p>
               </div>
             </Col>
-            <Col lg={4} md={6} className="mb-4">
+            <Col lg={4} md={6} className="mb-5">
               <div
                 className="service-card fade-in"
                 style={{
-                  background:
-                    "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
-                  backdropFilter: "blur(10px)",
-                  borderRadius: "20px",
-                  padding: "40px 30px",
-                  border: "1px solid rgba(108, 117, 125, 0.1)",
-                  boxShadow: "0 10px 40px rgba(108, 117, 125, 0.08)",
+                  background: "#ffffff",
+                  borderRadius: "15px",
+                  padding: "50px 30px",
+                  border: `2px solid #f8f9fa`,
+                  boxShadow: "0 15px 50px rgba(52, 58, 64, 0.08)",
                   height: "100%",
                   transition: "all 0.3s ease",
+                  textAlign: "center",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "translateY(-10px)";
+                  e.currentTarget.style.borderColor = "#e63946";
+                  e.currentTarget.style.boxShadow =
+                    "0 25px 60px rgba(230, 57, 70, 0.15)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.borderColor = "#f8f9fa";
+                  e.currentTarget.style.boxShadow =
+                    "0 15px 50px rgba(52, 58, 64, 0.08)";
                 }}
               >
                 <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: "5px",
+                    background: "#495057",
+                  }}
+                ></div>
+                <div
                   className="feature-icon"
                   style={{
-                    background: "linear-gradient(135deg, #6c757d, #495057)",
+                    background: `linear-gradient(135deg, #495057, #343a40)`,
                     color: "white",
                     borderRadius: "50%",
-                    width: "70px",
-                    height: "70px",
+                    width: "80px",
+                    height: "80px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    margin: "0 auto 25px",
-                    fontSize: "28px",
-                    boxShadow: "0 8px 25px rgba(108, 117, 125, 0.3)",
+                    margin: "0 auto 30px",
+                    fontSize: "32px",
+                    boxShadow: "0 10px 30px rgba(73, 80, 87, 0.3)",
                   }}
                 >
                   <i className="bi bi-headset"></i>
                 </div>
                 <h4
                   style={{
-                    color: "#6c757d",
-                    fontWeight: "600",
-                    marginBottom: "15px",
+                    color: "#333333",
+                    fontWeight: "700",
+                    fontSize: "1.4rem",
+                    marginBottom: "20px",
                   }}
                 >
                   Expert Support
                 </h4>
-                <p style={{ color: "#6c757d", lineHeight: "1.6" }}>
+                <p
+                  style={{
+                    color: "#495057",
+                    lineHeight: "1.6",
+                    fontSize: "1rem",
+                  }}
+                >
                   Our knowledgeable team is always ready to help you with
                   product information and health-related queries.
                 </p>
@@ -378,12 +534,14 @@ const Home = () => {
         </Container>
       </section>
 
-      {/* Featured Products Section with Medical Theme */}
+      {/* Featured Products Section with Dark Background */}
       <section
         className="section-padding"
         style={{
-          background: "linear-gradient(135deg, #2c5aa0 0%, #1e3f73 100%)",
+          background: `linear-gradient(135deg, #343a40 0%, #495057 100%)`,
           position: "relative",
+          paddingTop: "100px",
+          paddingBottom: "100px",
         }}
       >
         <div
@@ -393,73 +551,114 @@ const Home = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            background:
-              "linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%), linear-gradient(-45deg, rgba(255,255,255,0.05) 25%, transparent 25%)",
-            backgroundSize: "60px 60px",
+            background: `repeating-linear-gradient(
+              90deg,
+              transparent,
+              transparent 200px,
+              rgba(230, 57, 70, 0.03) 200px,
+              rgba(230, 57, 70, 0.03) 400px
+            )`,
           }}
         ></div>
         <Container style={{ position: "relative", zIndex: 2 }}>
           <Row>
             <Col lg={12} className="text-center mb-5">
               <h2
-                className="section-title text-white"
+                className="section-title"
                 style={{
+                  color: "#ffffff",
+                  fontSize: "3rem",
+                  fontWeight: "800",
+                  marginBottom: "1.5rem",
                   textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
-                  fontWeight: "700",
-                  fontSize: "2.5rem",
-                  marginBottom: "1rem",
+                  position: "relative",
                 }}
               >
                 Featured Products
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "-10px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: "80px",
+                    height: "4px",
+                    background: "#e63946",
+                    borderRadius: "2px",
+                  }}
+                ></div>
               </h2>
               <p
-                className="section-subtitle text-white"
+                className="section-subtitle"
                 style={{
-                  textShadow: "1px 1px 2px rgba(0,0,0,0.2)",
+                  color: "#ffffff",
+                  fontSize: "1.2rem",
                   opacity: "0.9",
-                  fontSize: "1.1rem",
+                  maxWidth: "700px",
+                  margin: "2rem auto 0",
+                  textShadow: "1px 1px 2px rgba(0,0,0,0.2)",
                 }}
               >
                 Discover our most popular and trusted medical products
               </p>
             </Col>
           </Row>
-          <Row>
+          <Row className="mt-5">
             {productsToShow.map((product, index) => (
               <Col lg={4} md={6} className="mb-4" key={product.id || index}>
                 <Card
                   className="product-card fade-in"
                   style={{
-                    background:
-                      "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
-                    backdropFilter: "blur(15px)",
-                    borderRadius: "20px",
-                    border: "1px solid rgba(255,255,255,0.8)",
-                    boxShadow: "0 15px 45px rgba(0,0,0,0.1)",
+                    background: "#ffffff",
+                    borderRadius: "15px",
+                    border: "none",
+                    boxShadow: "0 20px 60px rgba(0, 0, 0, 0.15)",
                     transition: "all 0.3s ease",
                     height: "100%",
                     overflow: "hidden",
                   }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = "translateY(-10px)";
+                    e.currentTarget.style.boxShadow =
+                      "0 30px 80px rgba(230, 57, 70, 0.2)";
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow =
+                      "0 20px 60px rgba(0, 0, 0, 0.15)";
+                  }}
                 >
-                  <Link
-                    to={`/products/${product.id}`}
-                    className="text-decoration-none"
-                  >
-                    <Card.Img
-                      variant="top"
-                      src={product.image}
-                      className="product-image"
-                      alt={product.name}
+                  <div style={{ position: "relative", overflow: "hidden" }}>
+                    <Link
+                      to={`/products/${product.id}`}
+                      className="text-decoration-none"
+                    >
+                      <Card.Img
+                        variant="top"
+                        src={product.image}
+                        className="product-image"
+                        alt={product.name}
+                        style={{
+                          height: "220px",
+                          objectFit: "cover",
+                          transition: "all 0.3s ease",
+                        }}
+                      />
+                    </Link>
+                    <div
                       style={{
-                        borderRadius: "20px 20px 0 0",
-                        height: "200px",
-                        objectFit: "cover",
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: "5px",
+                        background: `linear-gradient(90deg, #e63946, #dc3545)`,
                       }}
-                    />
-                  </Link>
+                    ></div>
+                  </div>
                   <Card.Body
                     className="d-flex flex-column"
-                    style={{ padding: "25px" }}
+                    style={{ padding: "30px" }}
                   >
                     <Link
                       to={`/products/${product.id}`}
@@ -468,19 +667,30 @@ const Home = () => {
                       <Card.Title
                         className="product-title"
                         style={{
-                          color: "#2c5aa0",
-                          fontWeight: "600",
-                          fontSize: "1.2rem",
+                          color: "#333333",
+                          fontWeight: "700",
+                          fontSize: "1.3rem",
+                          marginBottom: "10px",
                         }}
                       >
                         {product.name}
                       </Card.Title>
                     </Link>
+                    <p
+                      style={{
+                        color: "#495057",
+                        fontSize: "0.9rem",
+                        marginBottom: "15px",
+                      }}
+                    >
+                      {product.company}
+                    </p>
                     <Card.Text
                       className="flex-grow-1"
                       style={{
-                        color: "#6c757d",
+                        color: "#495057",
                         lineHeight: "1.5",
+                        marginBottom: "25px",
                       }}
                     >
                       {product.description}
@@ -489,9 +699,9 @@ const Home = () => {
                       <span
                         className="product-price fw-bold"
                         style={{
-                          color: "#28a745",
-                          fontSize: "1.4rem",
-                          fontWeight: "700",
+                          color: "#e63946",
+                          fontSize: "1.6rem",
+                          fontWeight: "800",
                         }}
                       >
                         ₹{product.price}
@@ -503,27 +713,26 @@ const Home = () => {
                           handleAddToCart(product);
                         }}
                         style={{
-                          background:
-                            "linear-gradient(135deg, #2c5aa0, #4a73b8)",
+                          background: "#e63946",
                           border: "none",
-                          borderRadius: "25px",
-                          padding: "10px 20px",
-                          boxShadow: "0 4px 15px rgba(44, 90, 160, 0.4)",
-                          transition: "all 0.3s ease",
+                          borderRadius: "8px",
+                          padding: "12px 24px",
                           fontWeight: "600",
+                          fontSize: "0.9rem",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.5px",
+                          transition: "all 0.3s ease",
                         }}
                         onMouseOver={(e) => {
+                          e.target.style.background = "#dc3545";
                           e.target.style.transform = "translateY(-2px)";
-                          e.target.style.boxShadow =
-                            "0 6px 20px rgba(44, 90, 160, 0.6)";
                         }}
                         onMouseOut={(e) => {
+                          e.target.style.background = "#e63946";
                           e.target.style.transform = "translateY(0)";
-                          e.target.style.boxShadow =
-                            "0 4px 15px rgba(44, 90, 160, 0.4)";
                         }}
                       >
-                        <i className="bi bi-cart-plus me-1"></i>
+                        <i className="bi bi-cart-plus me-2"></i>
                         Add to Cart
                       </Button>
                     </div>
@@ -533,20 +742,34 @@ const Home = () => {
             ))}
           </Row>
           <Row>
-            <Col lg={12} className="text-center mt-4">
+            <Col lg={12} className="text-center mt-5">
               <Button
                 as={Link}
                 to="/products"
                 size="lg"
                 style={{
-                  background: "linear-gradient(135deg, #28a745, #20c997)",
+                  background: "#e63946",
                   border: "none",
-                  borderRadius: "25px",
-                  padding: "15px 40px",
-                  boxShadow: "0 6px 20px rgba(40, 167, 69, 0.4)",
-                  fontWeight: "600",
+                  borderRadius: "8px",
+                  padding: "16px 40px",
+                  fontSize: "1.1rem",
+                  fontWeight: "700",
                   textTransform: "uppercase",
                   letterSpacing: "1px",
+                  boxShadow: "0 8px 25px rgba(230, 57, 70, 0.3)",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.background = "#dc3545";
+                  e.target.style.transform = "translateY(-2px)";
+                  e.target.style.boxShadow =
+                    "0 12px 35px rgba(220, 53, 69, 0.4)";
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.background = "#e63946";
+                  e.target.style.transform = "translateY(0)";
+                  e.target.style.boxShadow =
+                    "0 8px 25px rgba(230, 57, 70, 0.3)";
                 }}
               >
                 View All Products
@@ -556,49 +779,62 @@ const Home = () => {
         </Container>
       </section>
 
-      {/* Stats Section with Professional Theme */}
+      {/* Stats Section with Light Background */}
       <section
         className="stats-section section-padding"
         style={{
-          background: "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)",
-          position: "relative",
+          background: "#ffffff",
+          paddingTop: "100px",
+          paddingBottom: "100px",
         }}
       >
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background:
-              "radial-gradient(circle at 25% 25%, rgba(44, 90, 160, 0.05) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(40, 167, 69, 0.05) 0%, transparent 50%)",
-          }}
-        ></div>
-        <Container style={{ position: "relative", zIndex: 2 }}>
+        <Container>
           <Row>
             <Col lg={3} md={6} className="mb-4">
               <div
                 className="stat-item fade-in text-center"
                 style={{
-                  background:
-                    "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
-                  backdropFilter: "blur(10px)",
-                  borderRadius: "20px",
-                  padding: "40px 20px",
-                  border: "1px solid rgba(44, 90, 160, 0.1)",
-                  boxShadow: "0 10px 30px rgba(44, 90, 160, 0.1)",
+                  background: "#ffffff",
+                  borderRadius: "15px",
+                  padding: "50px 30px",
+                  border: `2px solid #f8f9fa`,
+                  boxShadow: "0 15px 50px rgba(52, 58, 64, 0.08)",
                   transition: "all 0.3s ease",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "translateY(-5px)";
+                  e.currentTarget.style.borderColor = "#e63946";
+                  e.currentTarget.style.boxShadow =
+                    "0 25px 60px rgba(230, 57, 70, 0.15)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.borderColor = "#f8f9fa";
+                  e.currentTarget.style.boxShadow =
+                    "0 15px 50px rgba(52, 58, 64, 0.08)";
                 }}
               >
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: "5px",
+                    background: "#e63946",
+                  }}
+                ></div>
                 <span
                   className="stat-number"
                   style={{
-                    fontSize: "3.5rem",
-                    fontWeight: "800",
-                    color: "#2c5aa0",
+                    fontSize: "4rem",
+                    fontWeight: "900",
+                    color: "#e63946",
                     display: "block",
-                    marginBottom: "10px",
+                    marginBottom: "15px",
+                    lineHeight: "1",
                   }}
                 >
                   500+
@@ -606,9 +842,11 @@ const Home = () => {
                 <div
                   className="stat-label"
                   style={{
-                    color: "#6c757d",
+                    color: "#333333",
                     fontWeight: "600",
-                    fontSize: "1.1rem",
+                    fontSize: "1.2rem",
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
                   }}
                 >
                   Happy Customers
@@ -619,24 +857,47 @@ const Home = () => {
               <div
                 className="stat-item fade-in text-center"
                 style={{
-                  background:
-                    "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
-                  backdropFilter: "blur(10px)",
-                  borderRadius: "20px",
-                  padding: "40px 20px",
-                  border: "1px solid rgba(40, 167, 69, 0.1)",
-                  boxShadow: "0 10px 30px rgba(40, 167, 69, 0.1)",
+                  background: "#ffffff",
+                  borderRadius: "15px",
+                  padding: "50px 30px",
+                  border: `2px solid #f8f9fa`,
+                  boxShadow: "0 15px 50px rgba(52, 58, 64, 0.08)",
                   transition: "all 0.3s ease",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "translateY(-5px)";
+                  e.currentTarget.style.borderColor = "#dc3545";
+                  e.currentTarget.style.boxShadow =
+                    "0 25px 60px rgba(220, 53, 69, 0.15)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.borderColor = "#f8f9fa";
+                  e.currentTarget.style.boxShadow =
+                    "0 15px 50px rgba(52, 58, 64, 0.08)";
                 }}
               >
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: "5px",
+                    background: "#dc3545",
+                  }}
+                ></div>
                 <span
                   className="stat-number"
                   style={{
-                    fontSize: "3.5rem",
-                    fontWeight: "800",
-                    color: "#28a745",
+                    fontSize: "4rem",
+                    fontWeight: "900",
+                    color: "#dc3545",
                     display: "block",
-                    marginBottom: "10px",
+                    marginBottom: "15px",
+                    lineHeight: "1",
                   }}
                 >
                   1000+
@@ -644,9 +905,11 @@ const Home = () => {
                 <div
                   className="stat-label"
                   style={{
-                    color: "#6c757d",
+                    color: "#333333",
                     fontWeight: "600",
-                    fontSize: "1.1rem",
+                    fontSize: "1.2rem",
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
                   }}
                 >
                   Products Available
@@ -657,24 +920,47 @@ const Home = () => {
               <div
                 className="stat-item fade-in text-center"
                 style={{
-                  background:
-                    "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
-                  backdropFilter: "blur(10px)",
-                  borderRadius: "20px",
-                  padding: "40px 20px",
-                  border: "1px solid rgba(108, 117, 125, 0.1)",
-                  boxShadow: "0 10px 30px rgba(108, 117, 125, 0.1)",
+                  background: "#ffffff",
+                  borderRadius: "15px",
+                  padding: "50px 30px",
+                  border: `2px solid #f8f9fa`,
+                  boxShadow: "0 15px 50px rgba(52, 58, 64, 0.08)",
                   transition: "all 0.3s ease",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "translateY(-5px)";
+                  e.currentTarget.style.borderColor = "#495057";
+                  e.currentTarget.style.boxShadow =
+                    "0 25px 60px rgba(73, 80, 87, 0.15)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.borderColor = "#f8f9fa";
+                  e.currentTarget.style.boxShadow =
+                    "0 15px 50px rgba(52, 58, 64, 0.08)";
                 }}
               >
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: "5px",
+                    background: "#495057",
+                  }}
+                ></div>
                 <span
                   className="stat-number"
                   style={{
-                    fontSize: "3.5rem",
-                    fontWeight: "800",
-                    color: "#6c757d",
+                    fontSize: "4rem",
+                    fontWeight: "900",
+                    color: "#495057",
                     display: "block",
-                    marginBottom: "10px",
+                    marginBottom: "15px",
+                    lineHeight: "1",
                   }}
                 >
                   5+
@@ -682,9 +968,11 @@ const Home = () => {
                 <div
                   className="stat-label"
                   style={{
-                    color: "#6c757d",
+                    color: "#333333",
                     fontWeight: "600",
-                    fontSize: "1.1rem",
+                    fontSize: "1.2rem",
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
                   }}
                 >
                   Years of Experience
@@ -695,24 +983,47 @@ const Home = () => {
               <div
                 className="stat-item fade-in text-center"
                 style={{
-                  background:
-                    "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
-                  backdropFilter: "blur(10px)",
-                  borderRadius: "20px",
-                  padding: "40px 20px",
-                  border: "1px solid rgba(44, 90, 160, 0.1)",
-                  boxShadow: "0 10px 30px rgba(44, 90, 160, 0.1)",
+                  background: "#ffffff",
+                  borderRadius: "15px",
+                  padding: "50px 30px",
+                  border: `2px solid #f8f9fa`,
+                  boxShadow: "0 15px 50px rgba(52, 58, 64, 0.08)",
                   transition: "all 0.3s ease",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "translateY(-5px)";
+                  e.currentTarget.style.borderColor = "#343a40";
+                  e.currentTarget.style.boxShadow =
+                    "0 25px 60px rgba(52, 58, 64, 0.15)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.borderColor = "#f8f9fa";
+                  e.currentTarget.style.boxShadow =
+                    "0 15px 50px rgba(52, 58, 64, 0.08)";
                 }}
               >
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: "5px",
+                    background: "#343a40",
+                  }}
+                ></div>
                 <span
                   className="stat-number"
                   style={{
-                    fontSize: "3.5rem",
-                    fontWeight: "800",
-                    color: "#2c5aa0",
+                    fontSize: "4rem",
+                    fontWeight: "900",
+                    color: "#343a40",
                     display: "block",
-                    marginBottom: "10px",
+                    marginBottom: "15px",
+                    lineHeight: "1",
                   }}
                 >
                   24/7
@@ -720,9 +1031,11 @@ const Home = () => {
                 <div
                   className="stat-label"
                   style={{
-                    color: "#6c757d",
+                    color: "#333333",
                     fontWeight: "600",
-                    fontSize: "1.1rem",
+                    fontSize: "1.2rem",
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
                   }}
                 >
                   Customer Support
@@ -733,12 +1046,14 @@ const Home = () => {
         </Container>
       </section>
 
-      {/* CTA Section with Professional Medical Theme */}
+      {/* CTA Section with Red Gradient */}
       <section
         className="cta-section section-padding"
         style={{
-          background: "linear-gradient(135deg, #28a745 0%, #20c997 100%)",
+          background: `linear-gradient(135deg, #e63946 0%, #dc3545 100%)`,
           position: "relative",
+          paddingTop: "100px",
+          paddingBottom: "100px",
         }}
       >
         <div
@@ -748,52 +1063,70 @@ const Home = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            background:
-              "radial-gradient(circle at 30% 40%, rgba(255,255,255,0.15) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(255,255,255,0.1) 0%, transparent 50%)",
+            background: `radial-gradient(circle at 30% 40%, rgba(255,255,255,0.1) 0%, transparent 50%), 
+                         radial-gradient(circle at 70% 60%, rgba(255,255,255,0.05) 0%, transparent 50%)`,
           }}
         ></div>
         <Container style={{ position: "relative", zIndex: 2 }}>
           <Row>
             <Col lg={12} className="text-center">
               <h2
-                className="cta-title text-white"
+                className="cta-title"
                 style={{
+                  color: "#ffffff",
+                  fontSize: "3.5rem",
+                  fontWeight: "900",
+                  marginBottom: "2rem",
                   textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
-                  fontWeight: "700",
-                  fontSize: "2.8rem",
-                  marginBottom: "1.5rem",
+                  lineHeight: "1.2",
                 }}
               >
                 Ready to Take Care of Your Health?
               </h2>
               <p
-                className="cta-subtitle text-white"
+                className="cta-subtitle"
                 style={{
-                  textShadow: "1px 1px 2px rgba(0,0,0,0.2)",
-                  fontSize: "1.2rem",
+                  color: "#ffffff",
+                  fontSize: "1.3rem",
                   opacity: "0.95",
-                  maxWidth: "600px",
-                  margin: "0 auto 2rem auto",
+                  maxWidth: "700px",
+                  margin: "0 auto 3rem auto",
+                  textShadow: "1px 1px 2px rgba(0,0,0,0.2)",
+                  lineHeight: "1.6",
                 }}
               >
                 Join thousands of satisfied customers who trust us with their
                 healthcare needs.
               </p>
-              <div className="d-flex gap-3 justify-content-center flex-wrap">
+              <div className="d-flex gap-4 justify-content-center flex-wrap">
                 <Button
                   as={Link}
                   to="/products"
                   size="lg"
                   style={{
-                    background: "rgba(255,255,255,0.95)",
-                    color: "#28a745",
+                    background: "#ffffff",
+                    color: "#e63946",
                     border: "none",
-                    borderRadius: "25px",
-                    padding: "15px 40px",
+                    borderRadius: "8px",
+                    padding: "18px 40px",
+                    fontSize: "1.1rem",
                     fontWeight: "700",
                     textTransform: "uppercase",
                     letterSpacing: "1px",
-                    boxShadow: "0 6px 20px rgba(255,255,255,0.3)",
+                    boxShadow: "0 8px 25px rgba(255,255,255,0.2)",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = "#f8f9fa";
+                    e.target.style.transform = "translateY(-3px)";
+                    e.target.style.boxShadow =
+                      "0 12px 35px rgba(255,255,255,0.3)";
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = "#ffffff";
+                    e.target.style.transform = "translateY(0)";
+                    e.target.style.boxShadow =
+                      "0 8px 25px rgba(255,255,255,0.2)";
                   }}
                 >
                   Start Shopping
@@ -801,18 +1134,28 @@ const Home = () => {
                 <Button
                   as={Link}
                   to="/contact"
-                  variant="outline-light"
                   size="lg"
                   style={{
-                    borderColor: "rgba(255,255,255,0.8)",
-                    color: "white",
-                    borderRadius: "25px",
-                    padding: "15px 40px",
-                    backdropFilter: "blur(10px)",
-                    background: "rgba(255,255,255,0.15)",
-                    fontWeight: "600",
+                    background: "transparent",
+                    color: "#ffffff",
+                    border: "3px solid #ffffff",
+                    borderRadius: "8px",
+                    padding: "18px 40px",
+                    fontSize: "1.1rem",
+                    fontWeight: "700",
                     textTransform: "uppercase",
                     letterSpacing: "1px",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = "#ffffff";
+                    e.target.style.color = "#e63946";
+                    e.target.style.transform = "translateY(-3px)";
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = "transparent";
+                    e.target.style.color = "#ffffff";
+                    e.target.style.transform = "translateY(0)";
                   }}
                 >
                   Contact Us
