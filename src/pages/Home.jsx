@@ -180,11 +180,9 @@ const Home = () => {
             {productsToShow.map((product, index) => (
               <Col lg={4} md={6} className="mb-4" key={product.id || index}>
                 <Card className="product-card fade-in">
-                  <div
-                    style={{ cursor: "pointer" }}
-                    onClick={() =>
-                      (window.location.href = `/products/${product.id}`)
-                    }
+                  <Link
+                    to={`/products/${product.id}`}
+                    className="text-decoration-none"
                   >
                     <Card.Img
                       variant="top"
@@ -192,23 +190,26 @@ const Home = () => {
                       className="product-image"
                       alt={product.name}
                     />
-                  </div>
+                  </Link>
                   <Card.Body>
-                    <Card.Title
-                      className="product-title"
-                      style={{ cursor: "pointer" }}
-                      onClick={() =>
-                        (window.location.href = `/products/${product.id}`)
-                      }
+                    <Link
+                      to={`/products/${product.id}`}
+                      className="text-decoration-none"
                     >
-                      {product.name}
-                    </Card.Title>
+                      <Card.Title className="product-title text-dark">
+                        {product.name}
+                      </Card.Title>
+                    </Link>
                     <Card.Text>{product.description}</Card.Text>
                     <div className="d-flex justify-content-between align-items-center">
                       <span className="product-price">₹{product.price}</span>
                       <Button
                         className="btn-medical-primary btn-sm"
-                        onClick={() => handleAddToCart(product)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleAddToCart(product);
+                        }}
                       >
                         Add to Cart
                       </Button>
