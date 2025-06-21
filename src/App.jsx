@@ -276,12 +276,13 @@ function App() {
             />
 
             {/* Fallback Routes */}
-            <Route path="*" element={<NotFound />} />
+            <Route path="/user-guide" element={<UserGuide />} />
           </Routes>
         </main>
+        <ScrollToTop />
+        {/* Footer displayed on all pages */}
         <Footer />
       </div>
-    </Router>
   );
 }
 
