@@ -120,6 +120,15 @@ const AdminDashboard = () => {
                   </Button>
                   <Button
                     as={Link}
+                    to="/admin/messages"
+                    variant="outline-primary"
+                    className="btn-medical-outline"
+                  >
+                    <i className="bi bi-envelope me-2"></i>
+                    Messages
+                  </Button>
+                  <Button
+                    as={Link}
                     to="/admin/analytics"
                     variant="outline-primary"
                     className="btn-medical-outline"
