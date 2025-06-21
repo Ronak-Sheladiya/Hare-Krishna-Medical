@@ -36,19 +36,24 @@ const ProfessionalInvoice = ({
       maxWidth: "210mm",
       height: forPrint ? "297mm" : "auto",
       margin: "0 auto",
-      padding: "15mm",
+      padding: "20mm",
       fontFamily: "'Segoe UI', Arial, sans-serif",
       fontSize: "11px",
       lineHeight: "1.4",
-      color: "#333",
-      backgroundColor: "#fff",
+      color: "#333333",
+      backgroundColor: "#ffffff",
       boxSizing: "border-box",
       position: "relative",
+      border: forPrint ? "none" : "2px solid #f8f9fa",
+      borderRadius: forPrint ? "0" : "12px",
+      boxShadow: forPrint ? "none" : "0 8px 32px rgba(0,0,0,0.08)",
     },
     header: {
-      borderBottom: "3px solid #2c5aa0",
-      paddingBottom: "15px",
-      marginBottom: "20px",
+      background: "linear-gradient(135deg, #e63946, #dc3545)",
+      color: "#ffffff",
+      padding: "24px",
+      marginBottom: "32px",
+      borderRadius: "8px",
       display: "flex",
       justifyContent: "space-between",
       alignItems: "flex-start",
@@ -57,158 +62,215 @@ const ProfessionalInvoice = ({
       flex: "1",
     },
     companyLogo: {
-      width: "60px",
-      height: "60px",
-      marginBottom: "10px",
-      borderRadius: "5px",
+      width: "70px",
+      height: "70px",
+      marginBottom: "16px",
+      borderRadius: "8px",
+      background: "#ffffff",
+      padding: "8px",
     },
     companyName: {
-      fontSize: "22px",
-      fontWeight: "bold",
-      color: "#2c5aa0",
-      margin: "0 0 5px 0",
+      fontSize: "28px",
+      fontWeight: "800",
+      color: "#ffffff",
+      margin: "0 0 8px 0",
       lineHeight: "1.2",
+      textShadow: "0 2px 4px rgba(0,0,0,0.2)",
     },
     companyTagline: {
-      fontSize: "12px",
-      color: "#666",
-      marginBottom: "10px",
+      fontSize: "14px",
+      color: "#ffffff",
+      marginBottom: "16px",
+      opacity: "0.9",
     },
     companyAddress: {
-      fontSize: "10px",
-      color: "#666",
-      lineHeight: "1.3",
+      fontSize: "12px",
+      color: "#ffffff",
+      lineHeight: "1.4",
+      opacity: "0.9",
     },
     invoiceTitle: {
       textAlign: "right",
       flex: "0 0 auto",
     },
     invoiceTitleText: {
-      fontSize: "32px",
-      fontWeight: "bold",
-      color: "#2c5aa0",
-      margin: "0 0 15px 0",
+      fontSize: "36px",
+      fontWeight: "900",
+      color: "#ffffff",
+      margin: "0 0 16px 0",
+      textShadow: "0 2px 4px rgba(0,0,0,0.2)",
     },
     invoiceDetails: {
-      backgroundColor: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      padding: "12px",
-      borderRadius: "5px",
-      fontSize: "10px",
+      background: "rgba(255,255,255,0.15)",
+      backdropFilter: "blur(10px)",
+      border: "1px solid rgba(255,255,255,0.2)",
+      padding: "16px",
+      borderRadius: "8px",
+      fontSize: "12px",
+      color: "#ffffff",
     },
     customerSection: {
       display: "flex",
-      gap: "20px",
-      marginBottom: "25px",
+      gap: "24px",
+      marginBottom: "32px",
     },
     customerBox: {
       flex: "1",
-      border: "1px solid #dee2e6",
-      borderRadius: "5px",
-      padding: "15px",
-      backgroundColor: "#f8f9fa",
+      background: "#f8f9fa",
+      border: "2px solid #ffffff",
+      borderRadius: "12px",
+      padding: "24px",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
     },
     customerTitle: {
+      fontSize: "14px",
+      fontWeight: "700",
+      color: "#e63946",
+      marginBottom: "16px",
+      textTransform: "uppercase",
+      letterSpacing: "1px",
+      borderBottom: "2px solid #e63946",
+      paddingBottom: "8px",
+    },
+    customerText: {
+      color: "#333333",
       fontSize: "12px",
-      fontWeight: "bold",
-      color: "#2c5aa0",
-      marginBottom: "10px",
-      borderBottom: "1px solid #dee2e6",
-      paddingBottom: "5px",
+      lineHeight: "1.5",
     },
     itemsTable: {
       width: "100%",
       borderCollapse: "collapse",
-      marginBottom: "20px",
-      border: "1px solid #dee2e6",
+      marginBottom: "32px",
+      border: "2px solid #f8f9fa",
+      borderRadius: "12px",
+      overflow: "hidden",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
     },
     tableHeader: {
-      backgroundColor: "#2c5aa0",
-      color: "white",
+      background: "linear-gradient(135deg, #343a40, #495057)",
+      color: "#ffffff",
     },
     tableHeaderCell: {
-      padding: "10px 8px",
-      fontSize: "11px",
-      fontWeight: "bold",
-      border: "1px solid #fff",
+      padding: "16px 12px",
+      fontSize: "12px",
+      fontWeight: "700",
       textAlign: "left",
+      textTransform: "uppercase",
+      letterSpacing: "0.5px",
     },
     tableRow: {
-      borderBottom: "1px solid #dee2e6",
+      borderBottom: "1px solid #f8f9fa",
+      background: "#ffffff",
     },
     tableRowAlt: {
-      backgroundColor: "#f8f9fa",
-      borderBottom: "1px solid #dee2e6",
+      background: "#f8f9fa",
+      borderBottom: "1px solid #e9ecef",
     },
     tableCell: {
-      padding: "8px",
-      fontSize: "10px",
-      border: "1px solid #dee2e6",
+      padding: "16px 12px",
+      fontSize: "11px",
+      color: "#333333",
       verticalAlign: "top",
+      borderRight: "1px solid #f8f9fa",
     },
     totalsSection: {
       display: "flex",
       justifyContent: "flex-end",
-      marginBottom: "25px",
+      marginBottom: "40px",
     },
     totalsTable: {
-      width: "250px",
+      width: "320px",
       borderCollapse: "collapse",
-      border: "1px solid #dee2e6",
+      border: "2px solid #f8f9fa",
+      borderRadius: "12px",
+      overflow: "hidden",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
     },
     totalRow: {
-      backgroundColor: "#2c5aa0",
-      color: "white",
-      fontWeight: "bold",
+      background: "linear-gradient(135deg, #e63946, #dc3545)",
+      color: "#ffffff",
+      fontWeight: "700",
+    },
+    totalRowRegular: {
+      background: "#f8f9fa",
+      color: "#333333",
+    },
+    totalCell: {
+      padding: "12px 16px",
+      fontSize: "12px",
+      fontWeight: "600",
     },
     footer: {
-      marginTop: "30px",
-      borderTop: "2px solid #2c5aa0",
-      paddingTop: "15px",
+      marginTop: "40px",
+      borderTop: "3px solid #e63946",
+      paddingTop: "24px",
       display: "flex",
       justifyContent: "space-between",
-      alignItems: "flex-end",
+      alignItems: "flex-start",
+      background: "#f8f9fa",
+      padding: "24px",
+      borderRadius: "12px",
+      marginLeft: "-20mm",
+      marginRight: "-20mm",
+      marginBottom: "-20mm",
     },
     footerLeft: {
       flex: "1",
     },
     footerTitle: {
-      fontSize: "14px",
-      fontWeight: "bold",
-      color: "#2c5aa0",
-      marginBottom: "10px",
+      fontSize: "16px",
+      fontWeight: "700",
+      color: "#e63946",
+      marginBottom: "16px",
     },
     termsText: {
-      fontSize: "9px",
-      color: "#666",
-      lineHeight: "1.3",
+      fontSize: "10px",
+      color: "#495057",
+      lineHeight: "1.4",
     },
     qrSection: {
       textAlign: "center",
-      marginLeft: "20px",
+      marginLeft: "32px",
     },
     qrCode: {
-      width: "70px",
-      height: "70px",
-      border: "1px solid #dee2e6",
-      borderRadius: "5px",
+      width: "80px",
+      height: "80px",
+      border: "2px solid #e9ecef",
+      borderRadius: "12px",
+      padding: "8px",
+      background: "#ffffff",
     },
-    footerNote: {
-      position: "absolute",
-      bottom: "10mm",
-      left: "15mm",
-      right: "15mm",
-      textAlign: "center",
-      fontSize: "8px",
-      color: "#999",
-      borderTop: "1px solid #eee",
-      paddingTop: "5px",
+    statusBadge: {
+      background:
+        status === "Delivered"
+          ? "#28a745"
+          : status === "Pending"
+            ? "#ffc107"
+            : status === "Processing"
+              ? "#17a2b8"
+              : "#6c757d",
+      color: "#ffffff",
+      padding: "6px 12px",
+      borderRadius: "6px",
+      fontSize: "10px",
+      fontWeight: "600",
+      textTransform: "uppercase",
+      letterSpacing: "0.5px",
+    },
+    paymentBadge: {
+      background: paymentStatus === "Paid" ? "#28a745" : "#dc3545",
+      color: "#ffffff",
+      padding: "4px 8px",
+      borderRadius: "4px",
+      fontSize: "10px",
+      fontWeight: "600",
+      marginLeft: "8px",
     },
   };
 
   return (
     <div style={invoiceStyles.container}>
-      {/* Header Section */}
+      {/* Modern Header Section */}
       <div style={invoiceStyles.header}>
         <div style={invoiceStyles.companyInfo}>
           <img
@@ -224,30 +286,31 @@ const ProfessionalInvoice = ({
             Your Trusted Health Partner
           </p>
           <div style={invoiceStyles.companyAddress}>
-            <div>3 Sahyog Complex, Man Sarovar Circle</div>
+            <div>📍 3 Sahyog Complex, Man Sarovar Circle</div>
             <div>Amroli, 394107, Gujarat, India</div>
-            <div>Phone: +91 76989 13354 | +91 91060 18508</div>
-            <div>Email: harekrishnamedical@gmail.com</div>
+            <div>📞 +91 76989 13354 | +91 91060 18508</div>
+            <div>✉️ harekrishnamedical@gmail.com</div>
           </div>
         </div>
 
         <div style={invoiceStyles.invoiceTitle}>
           <h1 style={invoiceStyles.invoiceTitleText}>INVOICE</h1>
           <div style={invoiceStyles.invoiceDetails}>
-            <div>
-              <strong>Invoice No:</strong> {invoiceId}
+            <div style={{ marginBottom: "8px" }}>
+              <strong>Invoice:</strong> {invoiceId}
             </div>
-            <div>
-              <strong>Order No:</strong> {orderId}
+            <div style={{ marginBottom: "8px" }}>
+              <strong>Order:</strong> {orderId}
             </div>
-            <div>
+            <div style={{ marginBottom: "8px" }}>
               <strong>Date:</strong> {orderDate}
             </div>
-            <div>
+            <div style={{ marginBottom: "8px" }}>
               <strong>Time:</strong> {orderTime}
             </div>
             <div>
-              <strong>Status:</strong> {status}
+              <strong>Status:</strong>
+              <span style={invoiceStyles.statusBadge}>{status}</span>
             </div>
           </div>
         </div>
@@ -256,37 +319,53 @@ const ProfessionalInvoice = ({
       {/* Customer Information */}
       <div style={invoiceStyles.customerSection}>
         <div style={invoiceStyles.customerBox}>
-          <div style={invoiceStyles.customerTitle}>BILL TO</div>
-          <div>
-            <div style={{ fontWeight: "bold", marginBottom: "5px" }}>
+          <div style={invoiceStyles.customerTitle}>Bill To</div>
+          <div style={invoiceStyles.customerText}>
+            <div
+              style={{
+                fontWeight: "700",
+                marginBottom: "8px",
+                fontSize: "14px",
+                color: "#e63946",
+              }}
+            >
               {customerDetails.fullName}
             </div>
-            <div>{customerDetails.email}</div>
-            <div>{customerDetails.mobile}</div>
-            <div>{customerDetails.address}</div>
+            <div style={{ marginBottom: "4px" }}>
+              📧 {customerDetails.email}
+            </div>
+            <div style={{ marginBottom: "4px" }}>
+              📱 {customerDetails.mobile}
+            </div>
+            <div style={{ marginBottom: "4px" }}>
+              🏠 {customerDetails.address}
+            </div>
             <div>
-              {customerDetails.city}, {customerDetails.state}{" "}
+              📍 {customerDetails.city}, {customerDetails.state}{" "}
               {customerDetails.pincode}
             </div>
           </div>
         </div>
 
         <div style={invoiceStyles.customerBox}>
-          <div style={invoiceStyles.customerTitle}>SHIP TO</div>
-          <div>
-            <div style={{ fontWeight: "bold", marginBottom: "5px" }}>
-              {customerDetails.fullName}
+          <div style={invoiceStyles.customerTitle}>Payment Details</div>
+          <div style={invoiceStyles.customerText}>
+            <div style={{ marginBottom: "8px" }}>
+              <strong>Payment Method:</strong>
+              <br />
+              {paymentMethod}
             </div>
-            <div>{customerDetails.address}</div>
-            <div>
+            <div style={{ marginBottom: "8px" }}>
+              <strong>Payment Status:</strong>
+              <span style={invoiceStyles.paymentBadge}>{paymentStatus}</span>
+            </div>
+            <div style={{ marginBottom: "8px" }}>
+              <strong>Shipping Address:</strong>
+              <br />
+              {customerDetails.address}
+              <br />
               {customerDetails.city}, {customerDetails.state}{" "}
               {customerDetails.pincode}
-            </div>
-            <div style={{ marginTop: "10px" }}>
-              <strong>Payment Method:</strong> {paymentMethod}
-            </div>
-            <div>
-              <strong>Payment Status:</strong> {paymentStatus}
             </div>
           </div>
         </div>
@@ -300,19 +379,19 @@ const ProfessionalInvoice = ({
               style={{
                 ...invoiceStyles.tableHeaderCell,
                 textAlign: "center",
-                width: "40px",
+                width: "50px",
               }}
             >
-              S.No
+              #
             </th>
             <th style={{ ...invoiceStyles.tableHeaderCell, width: "45%" }}>
-              Description
+              Product Description
             </th>
             <th
               style={{
                 ...invoiceStyles.tableHeaderCell,
                 textAlign: "center",
-                width: "60px",
+                width: "80px",
               }}
             >
               Qty
@@ -321,19 +400,19 @@ const ProfessionalInvoice = ({
               style={{
                 ...invoiceStyles.tableHeaderCell,
                 textAlign: "right",
-                width: "80px",
+                width: "100px",
               }}
             >
-              Price (₹)
+              Unit Price (₹)
             </th>
             <th
               style={{
                 ...invoiceStyles.tableHeaderCell,
                 textAlign: "right",
-                width: "80px",
+                width: "100px",
               }}
             >
-              Amount (₹)
+              Total (₹)
             </th>
           </tr>
         </thead>
@@ -351,33 +430,53 @@ const ProfessionalInvoice = ({
                 style={{
                   ...invoiceStyles.tableCell,
                   textAlign: "center",
-                  fontWeight: "bold",
+                  fontWeight: "700",
+                  color: "#e63946",
                 }}
               >
                 {index + 1}
               </td>
               <td style={invoiceStyles.tableCell}>
-                <div style={{ fontWeight: "bold", marginBottom: "2px" }}>
+                <div
+                  style={{
+                    fontWeight: "700",
+                    marginBottom: "4px",
+                    color: "#333333",
+                  }}
+                >
                   {item.name}
                 </div>
-                <div style={{ fontSize: "9px", color: "#666" }}>
-                  {item.company || "Medical Product"}
+                <div style={{ fontSize: "10px", color: "#495057" }}>
+                  by {item.company || "Medical Product"}
                 </div>
               </td>
-              <td style={{ ...invoiceStyles.tableCell, textAlign: "center" }}>
+              <td
+                style={{
+                  ...invoiceStyles.tableCell,
+                  textAlign: "center",
+                  fontWeight: "600",
+                }}
+              >
                 {item.quantity}
-              </td>
-              <td style={{ ...invoiceStyles.tableCell, textAlign: "right" }}>
-                {item.price?.toFixed(2) || "0.00"}
               </td>
               <td
                 style={{
                   ...invoiceStyles.tableCell,
                   textAlign: "right",
-                  fontWeight: "bold",
+                  fontWeight: "600",
                 }}
               >
-                {((item.price || 0) * (item.quantity || 0)).toFixed(2)}
+                ₹{item.price?.toFixed(2) || "0.00"}
+              </td>
+              <td
+                style={{
+                  ...invoiceStyles.tableCell,
+                  textAlign: "right",
+                  fontWeight: "700",
+                  color: "#e63946",
+                }}
+              >
+                ₹{((item.price || 0) * (item.quantity || 0)).toFixed(2)}
               </td>
             </tr>
           ))}
@@ -388,57 +487,64 @@ const ProfessionalInvoice = ({
       <div style={invoiceStyles.totalsSection}>
         <table style={invoiceStyles.totalsTable}>
           <tbody>
-            <tr>
-              <td
-                style={{
-                  ...invoiceStyles.tableCell,
-                  fontWeight: "bold",
-                  backgroundColor: "#f8f9fa",
-                }}
-              >
+            <tr style={invoiceStyles.totalRowRegular}>
+              <td style={{ ...invoiceStyles.totalCell, fontWeight: "600" }}>
                 Subtotal:
               </td>
-              <td style={{ ...invoiceStyles.tableCell, textAlign: "right" }}>
+              <td
+                style={{
+                  ...invoiceStyles.totalCell,
+                  textAlign: "right",
+                  fontWeight: "700",
+                }}
+              >
                 ₹{calculatedSubtotal.toFixed(2)}
               </td>
             </tr>
-            <tr>
-              <td
-                style={{
-                  ...invoiceStyles.tableCell,
-                  fontWeight: "bold",
-                  backgroundColor: "#f8f9fa",
-                }}
-              >
+            <tr style={invoiceStyles.totalRowRegular}>
+              <td style={{ ...invoiceStyles.totalCell, fontWeight: "600" }}>
                 Shipping:
               </td>
-              <td style={{ ...invoiceStyles.tableCell, textAlign: "right" }}>
+              <td
+                style={{
+                  ...invoiceStyles.totalCell,
+                  textAlign: "right",
+                  fontWeight: "700",
+                }}
+              >
                 {shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}
               </td>
             </tr>
-            <tr>
-              <td
-                style={{
-                  ...invoiceStyles.tableCell,
-                  fontWeight: "bold",
-                  backgroundColor: "#f8f9fa",
-                }}
-              >
+            <tr style={invoiceStyles.totalRowRegular}>
+              <td style={{ ...invoiceStyles.totalCell, fontWeight: "600" }}>
                 Tax (5%):
               </td>
-              <td style={{ ...invoiceStyles.tableCell, textAlign: "right" }}>
+              <td
+                style={{
+                  ...invoiceStyles.totalCell,
+                  textAlign: "right",
+                  fontWeight: "700",
+                }}
+              >
                 ₹{calculatedTax.toFixed(2)}
               </td>
             </tr>
             <tr style={invoiceStyles.totalRow}>
-              <td style={{ ...invoiceStyles.tableCell, fontSize: "12px" }}>
-                TOTAL:
+              <td
+                style={{
+                  ...invoiceStyles.totalCell,
+                  fontSize: "14px",
+                  fontWeight: "800",
+                }}
+              >
+                GRAND TOTAL:
               </td>
               <td
                 style={{
-                  ...invoiceStyles.tableCell,
+                  ...invoiceStyles.totalCell,
                   textAlign: "right",
-                  fontSize: "12px",
+                  fontSize: "16px",
+                  fontWeight: "800",
                 }}
               >
                 ₹{calculatedTotal.toFixed(2)}
@@ -448,22 +554,31 @@ const ProfessionalInvoice = ({
         </table>
       </div>
 
-      {/* Footer */}
+      {/* Modern Footer */}
       <div style={invoiceStyles.footer}>
         <div style={invoiceStyles.footerLeft}>
           <div style={invoiceStyles.footerTitle}>
-            Thank You for Your Business!
+            Thank You for Your Business! 🙏
           </div>
           <div style={invoiceStyles.termsText}>
-            <div>
+            <div style={{ marginBottom: "8px" }}>
               <strong>Terms & Conditions:</strong>
             </div>
-            <div>• Payment due within 30 days</div>
-            <div>• Goods once sold will not be taken back</div>
-            <div>• Subject to Gujarat jurisdiction only</div>
-            <div style={{ marginTop: "8px" }}>
-              <strong>Contact:</strong> harekrishnamedical@gmail.com | +91 76989
-              13354
+            <div style={{ marginBottom: "4px" }}>
+              • Payment due within 30 days
+            </div>
+            <div style={{ marginBottom: "4px" }}>
+              • Goods once sold will not be taken back
+            </div>
+            <div style={{ marginBottom: "4px" }}>
+              • Subject to Gujarat jurisdiction only
+            </div>
+            <div style={{ marginTop: "12px", fontSize: "11px" }}>
+              <strong>Contact Us:</strong>
+              <br />
+              📧 harekrishnamedical@gmail.com
+              <br />
+              📞 +91 76989 13354 | +91 91060 18508
             </div>
           </div>
         </div>
@@ -471,17 +586,38 @@ const ProfessionalInvoice = ({
         {qrCode && (
           <div style={invoiceStyles.qrSection}>
             <img src={qrCode} alt="QR Code" style={invoiceStyles.qrCode} />
-            <div style={{ fontSize: "8px", marginTop: "5px", color: "#666" }}>
-              Scan for Online Verification
+            <div
+              style={{
+                fontSize: "9px",
+                marginTop: "8px",
+                color: "#495057",
+                fontWeight: "600",
+              }}
+            >
+              📱 Scan for Online Verification
             </div>
           </div>
         )}
       </div>
 
-      {/* Footer Note */}
-      <div style={invoiceStyles.footerNote}>
-        This is a computer generated invoice. No physical signature required. |
-        Generated on: {new Date().toLocaleString()}
+      {/* Bottom Note */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "10mm",
+          left: "20mm",
+          right: "20mm",
+          textAlign: "center",
+          fontSize: "8px",
+          color: "#495057",
+          borderTop: "1px solid #e9ecef",
+          paddingTop: "8px",
+          background: "#ffffff",
+        }}
+      >
+        🏥 This is a computer generated invoice. No physical signature required.
+        | Generated on: {new Date().toLocaleString()} | Powered by Hare Krishna
+        Medical System
       </div>
     </div>
   );

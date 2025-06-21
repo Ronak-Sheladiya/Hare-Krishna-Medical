@@ -1,12 +1,15 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Row,
   Col,
-  Breadcrumb,
-  Button,
   Card,
+  Button,
   Badge,
+  Breadcrumb,
+  Tab,
+  Tabs,
+  ListGroup,
   Accordion,
   Carousel,
   Alert,
@@ -14,329 +17,329 @@ import {
 import { useParams, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../store/slices/cartSlice.js";
-import ProductCard from "../components/products/ProductCard.jsx";
 
 const ProductDetails = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  const [showAddedAlert, setShowAddedAlert] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-  // Mock product database
-  const productDatabase = {
-    1: {
-      id: 1,
-      name: "Paracetamol Tablets 500mg",
-      company: "Hare Krishna Pharma",
-      price: 25.99,
-      originalPrice: 30.99,
-      images: [
-        "https://via.placeholder.com/500x400/e6e6e6/666666?text=Paracetamol+Front",
-        "https://via.placeholder.com/500x400/cccccc/666666?text=Paracetamol+Back",
-        "https://via.placeholder.com/500x400/b3b3b3/666666?text=Paracetamol+Side",
-        "https://via.placeholder.com/500x400/999999/666666?text=Paracetamol+Pack",
-        "https://via.placeholder.com/500x400/808080/666666?text=Paracetamol+Details",
-      ],
-      description:
-        "Effective pain relief and fever reducer for adults and children. Fast-acting formula provides quick relief from headaches, body aches, and fever.",
-      benefits: [
-        "Quick and effective pain relief",
-        "Reduces fever within 30 minutes",
-        "Gentle on stomach when taken as directed",
-        "Suitable for adults and children over 12 years",
-        "Non-drowsy formula",
-      ],
-      usage: [
-        "Adults and children over 12 years: 1-2 tablets every 4-6 hours",
-        "Maximum 8 tablets in 24 hours",
-        "Take with water, preferably after food",
-        "Do not exceed recommended dose",
-        "Consult doctor if symptoms persist beyond 3 days",
-      ],
-      weight: "50 tablets per pack",
-      category: "Pain Relief",
-      inStock: true,
-      stockCount: 50,
-      manufacturer: "Hare Krishna Pharmaceuticals Ltd.",
-      batchNo: "HKP2024001",
-      mfgDate: "Jan 2024",
-      expDate: "Dec 2026",
-      composition: "Each tablet contains: Paracetamol IP 500mg",
-      sideEffects: [
-        "Rare: skin rash or allergic reactions",
-        "Very rare: liver damage with overdose",
-        "If any adverse reaction occurs, discontinue use",
-      ],
-      contraindications: [
-        "Known hypersensitivity to paracetamol",
-        "Severe liver or kidney disease",
-        "Chronic alcoholism",
-      ],
-    },
-    2: {
-      id: 2,
-      name: "Vitamin D3 Capsules",
-      company: "Health Plus",
-      price: 45.5,
-      originalPrice: 52.0,
-      images: [
-        "https://via.placeholder.com/500x400/e6e6e6/666666?text=Vitamin+D3+Front",
-        "https://via.placeholder.com/500x400/cccccc/666666?text=Vitamin+D3+Back",
-        "https://via.placeholder.com/500x400/b3b3b3/666666?text=Vitamin+D3+Side",
-        "https://via.placeholder.com/500x400/999999/666666?text=Vitamin+D3+Pack",
-      ],
-      description:
-        "Essential vitamin for bone health and immune system support. High-potency vitamin D3 for better calcium absorption.",
-      benefits: [
-        "Supports bone health and strength",
-        "Boosts immune system function",
-        "Improves calcium absorption",
-        "Supports muscle function",
-        "May improve mood and energy",
-      ],
-      usage: [
-        "Adults: 1 capsule daily with food",
-        "Take with a meal containing fat for better absorption",
-        "Do not exceed recommended dose",
-        "Consult doctor before use if pregnant or nursing",
-      ],
-      weight: "60 capsules per bottle",
-      category: "Vitamins",
-      inStock: true,
-      stockCount: 30,
-      manufacturer: "Health Plus Pharmaceuticals",
-      batchNo: "HP2024002",
-      mfgDate: "Feb 2024",
-      expDate: "Jan 2027",
-      composition: "Each capsule contains: Vitamin D3 1000 IU",
-      sideEffects: [
-        "Rare: nausea or vomiting with high doses",
-        "Very rare: hypercalcemia with excessive use",
-        "Consult doctor if you experience any adverse effects",
-      ],
-      contraindications: [
-        "Hypercalcemia or hypercalciuria",
-        "Kidney stones",
-        "Kidney disease",
-      ],
-    },
-    3: {
-      id: 3,
-      name: "Cough Syrup",
-      company: "Wellness Care",
-      price: 35.75,
-      originalPrice: 40.0,
-      images: [
-        "https://via.placeholder.com/500x400/e6e6e6/666666?text=Cough+Syrup+Front",
-        "https://via.placeholder.com/500x400/cccccc/666666?text=Cough+Syrup+Back",
-        "https://via.placeholder.com/500x400/b3b3b3/666666?text=Cough+Syrup+Label",
-      ],
-      description:
-        "Natural cough relief formula with honey and herbal extracts. Soothes throat irritation and reduces cough.",
-      benefits: [
-        "Naturally soothes cough and throat irritation",
-        "Contains honey and herbal extracts",
-        "Non-drowsy formula",
-        "Pleasant taste",
-        "Suitable for adults and children over 6 years",
-      ],
-      usage: [
-        "Adults: 10ml (2 teaspoons) 3-4 times daily",
-        "Children 6-12 years: 5ml (1 teaspoon) 3 times daily",
-        "Take after meals",
-        "Shake well before use",
-        "Do not exceed recommended dose",
-      ],
-      weight: "100ml bottle",
-      category: "Cough & Cold",
-      inStock: true,
-      stockCount: 25,
-      manufacturer: "Wellness Care Ltd.",
-      batchNo: "WC2024003",
-      mfgDate: "Mar 2024",
-      expDate: "Feb 2027",
-      composition: "Honey, Tulsi extract, Ginger extract, Mulethi extract",
-      sideEffects: [
-        "Generally well tolerated",
-        "Rare: allergic reactions to herbal ingredients",
-        "May cause drowsiness in sensitive individuals",
-      ],
-      contraindications: [
-        "Known allergy to honey or herbal ingredients",
-        "Children under 6 years",
-        "Diabetes (due to honey content)",
-      ],
-    },
+  // Mock product data
+  const mockProduct = {
+    id: parseInt(id),
+    name: "Paracetamol Tablets 500mg",
+    company: "Hare Krishna Pharma",
+    price: 25.99,
+    originalPrice: 30.99,
+    images: [
+      "https://via.placeholder.com/500x400/e6e6e6/666666?text=Paracetamol+Main",
+      "https://via.placeholder.com/500x400/cccccc/666666?text=Paracetamol+Side",
+      "https://via.placeholder.com/500x400/b3b3b3/666666?text=Paracetamol+Back",
+      "https://via.placeholder.com/500x400/999999/666666?text=Paracetamol+Pack",
+    ],
+    description:
+      "Effective pain relief and fever reducer for adults and children. Fast-acting formula that provides quick relief from headaches, body aches, and fever.",
+    benefits: [
+      "Quick pain relief within 30 minutes",
+      "Reduces fever effectively",
+      "Gentle on stomach",
+      "Suitable for adults and children",
+      "Non-drowsy formula",
+    ],
+    usage:
+      "Adults: Take 1-2 tablets every 4-6 hours as needed. Do not exceed 8 tablets in 24 hours. Children: Consult healthcare provider for appropriate dosage.",
+    weight: "50 tablets (500mg each)",
+    category: "Pain Relief",
+    inStock: true,
+    stockCount: 45,
+    ingredients: [
+      "Paracetamol 500mg",
+      "Microcrystalline Cellulose",
+      "Starch",
+      "Magnesium Stearate",
+    ],
+    warnings: [
+      "Do not exceed recommended dosage",
+      "Consult doctor if symptoms persist",
+      "Keep out of reach of children",
+      "Store in cool, dry place",
+    ],
+    reviews: [
+      {
+        id: 1,
+        name: "John D.",
+        rating: 5,
+        comment: "Very effective for headaches. Works quickly.",
+        date: "2024-01-10",
+      },
+      {
+        id: 2,
+        name: "Sarah M.",
+        rating: 4,
+        comment: "Good quality product. Gentle on stomach.",
+        date: "2024-01-08",
+      },
+    ],
   };
 
-  // Get product based on ID, or return a default "not found" product
-  // Using useMemo to prevent object recreation on every render
-  const mockProduct = useMemo(() => {
-    return (
-      productDatabase[parseInt(id)] || {
-        id: parseInt(id),
-        name: "Product Not Found",
-        company: "Hare Krishna Medical",
-        price: 0,
-        originalPrice: 0,
-        images: [
-          "https://via.placeholder.com/500x400/e6e6e6/666666?text=Product+Not+Found",
-        ],
-        description:
-          "Sorry, this product was not found. Please check the product ID or browse our available products.",
-        benefits: ["Product not available"],
-        usage: ["Please contact us for assistance"],
-        weight: "N/A",
-        category: "Not Found",
-        inStock: false,
-        stockCount: 0,
-        manufacturer: "N/A",
-        batchNo: "N/A",
-        mfgDate: "N/A",
-        expDate: "N/A",
-        composition: "N/A",
-        sideEffects: ["Product not available"],
-        contraindications: ["Product not available"],
-      }
-    );
+  useEffect(() => {
+    // Simulate API call
+    setTimeout(() => {
+      setProduct(mockProduct);
+      setLoading(false);
+    }, 1000);
   }, [id]);
 
-  // Mock related products
-  const relatedProducts = [
-    {
-      id: 2,
-      name: "Ibuprofen Tablets 400mg",
-      company: "Pain Relief Co.",
-      price: 32.5,
-      images: [
-        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Ibuprofen",
-      ],
-      description: "Anti-inflammatory pain reliever",
-      category: "Pain Relief",
-      inStock: true,
-    },
-    {
-      id: 3,
-      name: "Aspirin Tablets 75mg",
-      company: "Heart Care",
-      price: 18.75,
-      images: [
-        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Aspirin",
-      ],
-      description: "Low-dose aspirin for heart health",
-      category: "Pain Relief",
-      inStock: true,
-    },
-    {
-      id: 4,
-      name: "Digital Thermometer",
-      company: "Med Tech",
-      price: 45.0,
-      images: [
-        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Thermometer",
-      ],
-      description: "Accurate fever measurement",
-      category: "Medical Devices",
-      inStock: true,
-    },
-  ];
+  const handleAddToCart = () => {
+    if (product) {
+      dispatch(
+        addToCart({
+          ...product,
+          quantity: quantity,
+        }),
+      );
+    }
+  };
 
-  // Removed useEffect that was causing infinite loop
-  // We don't need to dispatch setSelectedProduct since we're using mockProduct directly
+  const handleQuantityChange = (increment) => {
+    setQuantity((prev) => Math.max(1, prev + increment));
+  };
 
-  // Early return if no product found
-  if (!mockProduct) {
+  if (loading) {
     return (
-      <Container className="section-padding">
-        <div className="text-center">
-          <h3>Product Not Found</h3>
-          <p>The requested product could not be found.</p>
-          <Link to="/products" className="btn btn-primary">
-            Browse Products
-          </Link>
-        </div>
-      </Container>
+      <div className="fade-in">
+        <Container className="section-padding">
+          <div className="text-center">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <p className="mt-3">Loading product details...</p>
+          </div>
+        </Container>
+      </div>
     );
   }
 
-  const handleAddToCart = () => {
-    if (!mockProduct || !mockProduct.inStock) {
-      alert("Product is not available for purchase");
-      return;
-    }
-    const productToAdd = { ...mockProduct, quantity };
-    dispatch(addToCart(productToAdd));
-    setShowAddedAlert(true);
-    setTimeout(() => setShowAddedAlert(false), 3000);
-  };
+  if (!product) {
+    return (
+      <div className="fade-in">
+        <Container className="section-padding">
+          <Alert variant="danger">
+            <h4>Product Not Found</h4>
+            <p>The product you're looking for doesn't exist.</p>
+            <Button as={Link} to="/products" variant="outline-danger">
+              Back to Products
+            </Button>
+          </Alert>
+        </Container>
+      </div>
+    );
+  }
 
-  const handleQuantityChange = (change) => {
-    const newQuantity = quantity + change;
-    const maxStock = mockProduct?.stockCount || 0;
-    if (newQuantity >= 1 && newQuantity <= maxStock) {
-      setQuantity(newQuantity);
-    }
-  };
-
-  // Remove the selectedProduct loading check since we're using mockProduct directly
-
-  const discountPercentage =
-    mockProduct?.originalPrice && mockProduct?.price
-      ? Math.round(
-          ((mockProduct.originalPrice - mockProduct.price) /
-            mockProduct.originalPrice) *
-            100,
-        )
-      : 0;
+  const discountPercentage = product.originalPrice
+    ? Math.round(
+        ((product.originalPrice - product.price) / product.originalPrice) * 100,
+      )
+    : 0;
 
   return (
     <div className="fade-in">
       {/* Breadcrumb */}
-      <section className="medical-breadcrumb">
+      <section
+        style={{
+          background: "#f8f9fa",
+          paddingTop: "20px",
+          paddingBottom: "20px",
+        }}
+      >
         <Container>
           <Breadcrumb>
-            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-            <Breadcrumb.Item href="/products">Products</Breadcrumb.Item>
-            <Breadcrumb.Item active>{mockProduct.name}</Breadcrumb.Item>
+            <Breadcrumb.Item as={Link} to="/">
+              Home
+            </Breadcrumb.Item>
+            <Breadcrumb.Item as={Link} to="/products">
+              Products
+            </Breadcrumb.Item>
+            <Breadcrumb.Item active>{product.name}</Breadcrumb.Item>
           </Breadcrumb>
         </Container>
       </section>
 
       {/* Product Details */}
-      <section className="section-padding">
+      <section style={{ padding: "60px 0", background: "#ffffff" }}>
         <Container>
-          {showAddedAlert && (
-            <Alert
-              variant="success"
-              className="mb-4"
-              dismissible
-              onClose={() => setShowAddedAlert(false)}
-            >
-              <i className="bi bi-check-circle me-2"></i>
-              Product added to cart successfully!
-            </Alert>
-          )}
-
           <Row>
-            {/* Product Images */}
+            {/* Modern Product Image Carousel */}
             <Col lg={6} className="mb-4">
-              <Card className="medical-card">
-                <Carousel interval={null} className="product-image-carousel">
-                  {(mockProduct.images || []).map((image, index) => (
-                    <Carousel.Item key={index}>
-                      <img
-                        className="d-block w-100"
-                        src={image}
-                        alt={`${mockProduct.name} - Image ${index + 1}`}
-                        style={{ height: "400px", objectFit: "cover" }}
+              <Card
+                style={{
+                  border: "2px solid #f8f9fa",
+                  borderRadius: "16px",
+                  overflow: "hidden",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                }}
+              >
+                {/* Main Carousel */}
+                <div style={{ position: "relative" }}>
+                  <Carousel
+                    interval={null}
+                    activeIndex={activeImageIndex}
+                    onSelect={(selectedIndex) =>
+                      setActiveImageIndex(selectedIndex)
+                    }
+                    style={{
+                      borderRadius: "16px 16px 0 0",
+                      overflow: "hidden",
+                    }}
+                    indicators={false}
+                    prevIcon={
+                      <div
+                        style={{
+                          background: "rgba(0,0,0,0.7)",
+                          borderRadius: "50%",
+                          width: "50px",
+                          height: "50px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backdropFilter: "blur(10px)",
+                        }}
+                      >
+                        <i
+                          className="bi bi-chevron-left"
+                          style={{ color: "#ffffff", fontSize: "20px" }}
+                        ></i>
+                      </div>
+                    }
+                    nextIcon={
+                      <div
+                        style={{
+                          background: "rgba(0,0,0,0.7)",
+                          borderRadius: "50%",
+                          width: "50px",
+                          height: "50px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backdropFilter: "blur(10px)",
+                        }}
+                      >
+                        <i
+                          className="bi bi-chevron-right"
+                          style={{ color: "#ffffff", fontSize: "20px" }}
+                        ></i>
+                      </div>
+                    }
+                  >
+                    {product.images.map((image, index) => (
+                      <Carousel.Item key={index}>
+                        <img
+                          className="d-block w-100"
+                          src={image}
+                          alt={`${product.name} - Image ${index + 1}`}
+                          style={{
+                            height: "450px",
+                            objectFit: "cover",
+                            cursor: "zoom-in",
+                          }}
+                        />
+                      </Carousel.Item>
+                    ))}
+                  </Carousel>
+
+                  {/* Custom Indicators */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: "20px",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      display: "flex",
+                      gap: "8px",
+                      background: "rgba(0,0,0,0.5)",
+                      padding: "8px 16px",
+                      borderRadius: "20px",
+                      backdropFilter: "blur(10px)",
+                    }}
+                  >
+                    {product.images.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setActiveImageIndex(index)}
+                        style={{
+                          width: "12px",
+                          height: "12px",
+                          borderRadius: "50%",
+                          border: "none",
+                          background:
+                            activeImageIndex === index
+                              ? "#e63946"
+                              : "rgba(255,255,255,0.5)",
+                          cursor: "pointer",
+                          transition: "all 0.3s ease",
+                        }}
                       />
-                    </Carousel.Item>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Thumbnail Navigation */}
+                <div
+                  style={{
+                    padding: "20px",
+                    background: "#f8f9fa",
+                    display: "flex",
+                    gap: "12px",
+                    overflowX: "auto",
+                    scrollbarWidth: "thin",
+                  }}
+                >
+                  {product.images.map((image, index) => (
+                    <div
+                      key={index}
+                      onClick={() => setActiveImageIndex(index)}
+                      style={{
+                        minWidth: "80px",
+                        height: "80px",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        cursor: "pointer",
+                        border:
+                          activeImageIndex === index
+                            ? "3px solid #e63946"
+                            : "2px solid #e9ecef",
+                        transition: "all 0.3s ease",
+                        transform:
+                          activeImageIndex === index
+                            ? "scale(1.05)"
+                            : "scale(1)",
+                      }}
+                    >
+                      <img
+                        src={image}
+                        alt={`Thumbnail ${index + 1}`}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    </div>
                   ))}
-                </Carousel>
-                <div className="text-center mt-3 p-3">
-                  <small className="text-muted">
-                    {mockProduct.images.length} images available • Use arrows to
-                    navigate
+                </div>
+
+                <div
+                  style={{
+                    padding: "20px",
+                    textAlign: "center",
+                    background: "#f8f9fa",
+                  }}
+                >
+                  <small style={{ color: "#495057", fontWeight: "600" }}>
+                    <i className="bi bi-images me-2"></i>
+                    {product.images.length} High-Quality Images • Click to zoom
                   </small>
                 </div>
               </Card>
@@ -346,225 +349,452 @@ const ProductDetails = () => {
             <Col lg={6} className="mb-4">
               <div className="product-info">
                 <div className="mb-3">
-                  <Badge bg="secondary" className="mb-2">
-                    {mockProduct.category}
+                  <Badge
+                    style={{
+                      background: "#e63946",
+                      fontSize: "12px",
+                      padding: "8px 16px",
+                      borderRadius: "6px",
+                    }}
+                    className="mb-2"
+                  >
+                    {product.category}
                   </Badge>
-                  {mockProduct.inStock ? (
-                    <Badge bg="success" className="ms-2">
+                  {product.inStock ? (
+                    <Badge
+                      bg="success"
+                      style={{
+                        fontSize: "12px",
+                        padding: "8px 16px",
+                        borderRadius: "6px",
+                      }}
+                      className="ms-2"
+                    >
                       <i className="bi bi-check-circle me-1"></i>
-                      In Stock ({mockProduct.stockCount} available)
+                      In Stock ({product.stockCount} available)
                     </Badge>
                   ) : (
                     <Badge bg="danger" className="ms-2">
+                      <i className="bi bi-x-circle me-1"></i>
                       Out of Stock
+                    </Badge>
+                  )}
+                  {discountPercentage > 0 && (
+                    <Badge
+                      style={{
+                        background: "#28a745",
+                        fontSize: "12px",
+                        padding: "8px 16px",
+                        borderRadius: "6px",
+                      }}
+                      className="ms-2"
+                    >
+                      {discountPercentage}% OFF
                     </Badge>
                   )}
                 </div>
 
-                <h1 className="product-title mb-2">{mockProduct.name}</h1>
-                <p className="text-muted mb-3">by {mockProduct.company}</p>
+                <h1
+                  style={{
+                    color: "#333333",
+                    fontSize: "2.5rem",
+                    fontWeight: "700",
+                    marginBottom: "12px",
+                  }}
+                >
+                  {product.name}
+                </h1>
+
+                <p
+                  style={{
+                    color: "#495057",
+                    fontSize: "16px",
+                    marginBottom: "24px",
+                  }}
+                >
+                  by <strong>{product.company}</strong>
+                </p>
 
                 <div className="price-section mb-4">
-                  <div className="d-flex align-items-center mb-2">
-                    <span className="product-price me-3">
-                      ₹{mockProduct.price}
+                  <div className="d-flex align-items-center gap-3 mb-2">
+                    <span
+                      style={{
+                        color: "#e63946",
+                        fontSize: "2.5rem",
+                        fontWeight: "800",
+                      }}
+                    >
+                      ₹{product.price}
                     </span>
-                    {mockProduct.originalPrice && (
-                      <>
-                        <span className="text-muted text-decoration-line-through me-2">
-                          ₹{mockProduct.originalPrice}
-                        </span>
-                        <Badge bg="success">{discountPercentage}% OFF</Badge>
-                      </>
+                    {product.originalPrice && (
+                      <span
+                        style={{
+                          color: "#495057",
+                          fontSize: "1.5rem",
+                          textDecoration: "line-through",
+                        }}
+                      >
+                        ₹{product.originalPrice}
+                      </span>
                     )}
                   </div>
-                  <small className="text-muted">
-                    <i className="bi bi-truck me-1"></i>
-                    Free delivery on orders above ₹500
-                  </small>
+                  {discountPercentage > 0 && (
+                    <p
+                      style={{
+                        color: "#28a745",
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        margin: "0",
+                      }}
+                    >
+                      You save ₹
+                      {(product.originalPrice - product.price).toFixed(2)} (
+                      {discountPercentage}% off)
+                    </p>
+                  )}
                 </div>
 
-                <div className="product-details mb-4">
-                  <p className="text-muted">{mockProduct.description}</p>
-
-                  <div className="row">
-                    <div className="col-6">
-                      <small className="text-muted d-block">
-                        <strong>Weight:</strong> {mockProduct.weight}
-                      </small>
-                      <small className="text-muted d-block">
-                        <strong>Manufacturer:</strong>{" "}
-                        {mockProduct.manufacturer}
-                      </small>
-                    </div>
-                    <div className="col-6">
-                      <small className="text-muted d-block">
-                        <strong>Batch No:</strong> {mockProduct.batchNo}
-                      </small>
-                      <small className="text-muted d-block">
-                        <strong>Exp Date:</strong> {mockProduct.expDate}
-                      </small>
-                    </div>
-                  </div>
-                </div>
+                <p
+                  style={{
+                    color: "#333333",
+                    fontSize: "16px",
+                    lineHeight: "1.6",
+                    marginBottom: "32px",
+                  }}
+                >
+                  {product.description}
+                </p>
 
                 {/* Quantity Selector */}
                 <div className="quantity-section mb-4">
-                  <label className="form-label">Quantity:</label>
-                  <div className="d-flex align-items-center">
-                    <Button
-                      variant="outline-secondary"
-                      size="sm"
-                      onClick={() => handleQuantityChange(-1)}
-                      disabled={quantity <= 1}
+                  <label
+                    style={{
+                      color: "#333333",
+                      fontWeight: "600",
+                      marginBottom: "12px",
+                      display: "block",
+                    }}
+                  >
+                    Quantity:
+                  </label>
+                  <div className="d-flex align-items-center gap-3">
+                    <div
+                      className="d-flex align-items-center"
+                      style={{
+                        border: "2px solid #e9ecef",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                      }}
                     >
-                      <i className="bi bi-dash"></i>
-                    </Button>
-                    <span className="mx-3 fw-bold">{quantity}</span>
-                    <Button
-                      variant="outline-secondary"
-                      size="sm"
-                      onClick={() => handleQuantityChange(1)}
-                      disabled={quantity >= mockProduct.stockCount}
-                    >
-                      <i className="bi bi-plus"></i>
-                    </Button>
+                      <Button
+                        onClick={() => handleQuantityChange(-1)}
+                        style={{
+                          background: "#f8f9fa",
+                          border: "none",
+                          color: "#333333",
+                          padding: "8px 16px",
+                          borderRadius: "0",
+                        }}
+                      >
+                        <i className="bi bi-dash"></i>
+                      </Button>
+                      <span
+                        style={{
+                          padding: "8px 20px",
+                          fontSize: "16px",
+                          fontWeight: "600",
+                          minWidth: "60px",
+                          textAlign: "center",
+                          background: "#ffffff",
+                          color: "#333333",
+                        }}
+                      >
+                        {quantity}
+                      </span>
+                      <Button
+                        onClick={() => handleQuantityChange(1)}
+                        style={{
+                          background: "#f8f9fa",
+                          border: "none",
+                          color: "#333333",
+                          padding: "8px 16px",
+                          borderRadius: "0",
+                        }}
+                      >
+                        <i className="bi bi-plus"></i>
+                      </Button>
+                    </div>
+                    <span style={{ color: "#495057", fontSize: "14px" }}>
+                      {product.stockCount} available
+                    </span>
                   </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="action-buttons">
-                  <Row>
-                    <Col sm={8} className="mb-2">
-                      <Button
-                        className="btn-medical-primary w-100"
-                        onClick={handleAddToCart}
-                        disabled={!mockProduct.inStock}
-                      >
-                        <i className="bi bi-cart-plus me-2"></i>
-                        Add to Cart (₹
-                        {(mockProduct.price * quantity).toFixed(2)})
-                      </Button>
-                    </Col>
-                    <Col sm={4} className="mb-2">
-                      <Button
-                        as={Link}
-                        to="/cart"
-                        variant="outline-primary"
-                        className="btn-medical-outline w-100"
-                      >
-                        <i className="bi bi-cart"></i>
-                      </Button>
-                    </Col>
-                  </Row>
+                <div className="action-buttons d-flex gap-3 mb-4">
+                  <Button
+                    onClick={handleAddToCart}
+                    disabled={!product.inStock}
+                    size="lg"
+                    style={{
+                      background: "#e63946",
+                      border: "none",
+                      borderRadius: "8px",
+                      padding: "16px 32px",
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      flex: "1",
+                      boxShadow: "0 4px 12px rgba(230, 57, 70, 0.3)",
+                    }}
+                  >
+                    <i className="bi bi-cart-plus me-2"></i>
+                    {product.inStock ? "Add to Cart" : "Out of Stock"}
+                  </Button>
+                  <Button
+                    variant="outline-secondary"
+                    size="lg"
+                    style={{
+                      borderColor: "#343a40",
+                      color: "#343a40",
+                      borderRadius: "8px",
+                      padding: "16px 20px",
+                      fontSize: "16px",
+                      fontWeight: "600",
+                    }}
+                  >
+                    <i className="bi bi-heart"></i>
+                  </Button>
+                  <Button
+                    variant="outline-secondary"
+                    size="lg"
+                    style={{
+                      borderColor: "#343a40",
+                      color: "#343a40",
+                      borderRadius: "8px",
+                      padding: "16px 20px",
+                      fontSize: "16px",
+                      fontWeight: "600",
+                    }}
+                  >
+                    <i className="bi bi-share"></i>
+                  </Button>
+                </div>
+
+                {/* Product Info Pills */}
+                <div className="product-pills d-flex flex-wrap gap-2">
+                  <Badge
+                    style={{
+                      background: "#343a40",
+                      padding: "8px 12px",
+                      borderRadius: "20px",
+                    }}
+                  >
+                    <i className="bi bi-box-seam me-1"></i>
+                    {product.weight}
+                  </Badge>
+                  <Badge
+                    style={{
+                      background: "#495057",
+                      padding: "8px 12px",
+                      borderRadius: "20px",
+                    }}
+                  >
+                    <i className="bi bi-truck me-1"></i>
+                    Free Delivery
+                  </Badge>
+                  <Badge
+                    style={{
+                      background: "#6c757d",
+                      padding: "8px 12px",
+                      borderRadius: "20px",
+                    }}
+                  >
+                    <i className="bi bi-shield-check me-1"></i>
+                    Authentic
+                  </Badge>
                 </div>
               </div>
             </Col>
           </Row>
 
-          {/* Product Details Accordion */}
+          {/* Product Details Tabs */}
           <Row className="mt-5">
             <Col lg={12}>
-              <h3 className="mb-4">Product Information</h3>
-              <Accordion defaultActiveKey="0">
-                <Accordion.Item eventKey="0">
-                  <Accordion.Header>
-                    <i className="bi bi-info-circle me-2"></i>
-                    Description & Composition
-                  </Accordion.Header>
-                  <Accordion.Body>
-                    <p>
-                      <strong>Description:</strong> {mockProduct.description}
+              <Tabs
+                defaultActiveKey="description"
+                className="mb-4"
+                style={{
+                  borderBottom: "2px solid #f8f9fa",
+                }}
+              >
+                <Tab eventKey="description" title="Description & Benefits">
+                  <div
+                    style={{
+                      padding: "32px",
+                      background: "#f8f9fa",
+                      borderRadius: "12px",
+                    }}
+                  >
+                    <h4 style={{ color: "#333333", marginBottom: "20px" }}>
+                      Product Description
+                    </h4>
+                    <p
+                      style={{
+                        color: "#495057",
+                        lineHeight: "1.6",
+                        marginBottom: "24px",
+                      }}
+                    >
+                      {product.description}
                     </p>
-                    <p>
-                      <strong>Composition:</strong> {mockProduct.composition}
-                    </p>
-                    <p>
-                      <strong>Manufacturer:</strong> {mockProduct.manufacturer}
-                    </p>
-                  </Accordion.Body>
-                </Accordion.Item>
 
-                <Accordion.Item eventKey="1">
-                  <Accordion.Header>
-                    <i className="bi bi-heart-pulse me-2"></i>
-                    Benefits
-                  </Accordion.Header>
-                  <Accordion.Body>
-                    <ul className="list-unstyled">
-                      {(mockProduct.benefits || []).map((benefit, index) => (
-                        <li key={index} className="mb-2">
-                          <i className="bi bi-check-circle-fill text-medical-green me-2"></i>
+                    <h5 style={{ color: "#e63946", marginBottom: "16px" }}>
+                      Key Benefits:
+                    </h5>
+                    <ul style={{ color: "#495057", lineHeight: "1.8" }}>
+                      {product.benefits.map((benefit, index) => (
+                        <li key={index} style={{ marginBottom: "8px" }}>
+                          <i
+                            className="bi bi-check-circle-fill me-2"
+                            style={{ color: "#28a745" }}
+                          ></i>
                           {benefit}
                         </li>
                       ))}
                     </ul>
-                  </Accordion.Body>
-                </Accordion.Item>
+                  </div>
+                </Tab>
 
-                <Accordion.Item eventKey="2">
-                  <Accordion.Header>
-                    <i className="bi bi-prescription2 me-2"></i>
-                    Usage & Dosage
-                  </Accordion.Header>
-                  <Accordion.Body>
-                    <ul className="list-unstyled">
-                      {(mockProduct.usage || []).map((instruction, index) => (
-                        <li key={index} className="mb-2">
-                          <i className="bi bi-arrow-right-circle text-medical-blue me-2"></i>
-                          {instruction}
+                <Tab eventKey="usage" title="Usage & Dosage">
+                  <div
+                    style={{
+                      padding: "32px",
+                      background: "#f8f9fa",
+                      borderRadius: "12px",
+                    }}
+                  >
+                    <h4 style={{ color: "#333333", marginBottom: "20px" }}>
+                      How to Use
+                    </h4>
+                    <p
+                      style={{
+                        color: "#495057",
+                        lineHeight: "1.6",
+                        marginBottom: "24px",
+                      }}
+                    >
+                      {product.usage}
+                    </p>
+
+                    <h5 style={{ color: "#e63946", marginBottom: "16px" }}>
+                      Important Warnings:
+                    </h5>
+                    <ul style={{ color: "#dc3545", lineHeight: "1.8" }}>
+                      {product.warnings.map((warning, index) => (
+                        <li key={index} style={{ marginBottom: "8px" }}>
+                          <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                          {warning}
                         </li>
                       ))}
                     </ul>
-                  </Accordion.Body>
-                </Accordion.Item>
+                  </div>
+                </Tab>
 
-                <Accordion.Item eventKey="3">
-                  <Accordion.Header>
-                    <i className="bi bi-exclamation-triangle me-2"></i>
-                    Side Effects & Precautions
-                  </Accordion.Header>
-                  <Accordion.Body>
-                    <div className="mb-3">
-                      <h6>Possible Side Effects:</h6>
-                      <ul>
-                        {(mockProduct.sideEffects || []).map(
-                          (effect, index) => (
-                            <li key={index}>{effect}</li>
-                          ),
-                        )}
-                      </ul>
-                    </div>
-                    <div>
-                      <h6>Contraindications:</h6>
-                      <ul>
-                        {(mockProduct.contraindications || []).map(
-                          (contra, index) => (
-                            <li key={index}>{contra}</li>
-                          ),
-                        )}
-                      </ul>
-                    </div>
-                  </Accordion.Body>
-                </Accordion.Item>
-              </Accordion>
-            </Col>
-          </Row>
+                <Tab eventKey="ingredients" title="Ingredients">
+                  <div
+                    style={{
+                      padding: "32px",
+                      background: "#f8f9fa",
+                      borderRadius: "12px",
+                    }}
+                  >
+                    <h4 style={{ color: "#333333", marginBottom: "20px" }}>
+                      Active Ingredients
+                    </h4>
+                    <ListGroup>
+                      {product.ingredients.map((ingredient, index) => (
+                        <ListGroup.Item
+                          key={index}
+                          style={{
+                            border: "none",
+                            background: "#ffffff",
+                            marginBottom: "8px",
+                            borderRadius: "8px",
+                            padding: "16px",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                          }}
+                        >
+                          <i
+                            className="bi bi-capsule me-2"
+                            style={{ color: "#e63946" }}
+                          ></i>
+                          {ingredient}
+                        </ListGroup.Item>
+                      ))}
+                    </ListGroup>
+                  </div>
+                </Tab>
 
-          {/* Related Products */}
-          <Row className="mt-5">
-            <Col lg={12}>
-              <h3 className="mb-4">Related Products</h3>
-              <Row>
-                {(relatedProducts || []).map((product) => (
-                  <Col lg={4} md={6} className="mb-4" key={product.id}>
-                    <ProductCard
-                      product={product}
-                      onAddToCart={(p) => dispatch(addToCart(p))}
-                    />
-                  </Col>
-                ))}
-              </Row>
+                <Tab
+                  eventKey="reviews"
+                  title={`Reviews (${product.reviews.length})`}
+                >
+                  <div
+                    style={{
+                      padding: "32px",
+                      background: "#f8f9fa",
+                      borderRadius: "12px",
+                    }}
+                  >
+                    <h4 style={{ color: "#333333", marginBottom: "20px" }}>
+                      Customer Reviews
+                    </h4>
+                    {product.reviews.map((review) => (
+                      <Card
+                        key={review.id}
+                        className="mb-3"
+                        style={{ border: "none", borderRadius: "12px" }}
+                      >
+                        <Card.Body>
+                          <div className="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                              <h6
+                                style={{
+                                  color: "#333333",
+                                  marginBottom: "4px",
+                                }}
+                              >
+                                {review.name}
+                              </h6>
+                              <div>
+                                {[...Array(5)].map((_, i) => (
+                                  <i
+                                    key={i}
+                                    className={`bi bi-star${i < review.rating ? "-fill" : ""}`}
+                                    style={{
+                                      color:
+                                        i < review.rating
+                                          ? "#ffc107"
+                                          : "#e9ecef",
+                                      marginRight: "2px",
+                                    }}
+                                  ></i>
+                                ))}
+                              </div>
+                            </div>
+                            <small style={{ color: "#495057" }}>
+                              {review.date}
+                            </small>
+                          </div>
+                          <p style={{ color: "#495057", margin: "0" }}>
+                            {review.comment}
+                          </p>
+                        </Card.Body>
+                      </Card>
+                    ))}
+                  </div>
+                </Tab>
+              </Tabs>
             </Col>
           </Row>
         </Container>

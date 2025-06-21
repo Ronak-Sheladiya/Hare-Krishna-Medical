@@ -90,8 +90,12 @@ const AdminDashboard = () => {
   return (
     <div className="fade-in">
       <section
-        className="section-padding-sm"
-        style={{ paddingTop: "2rem", minHeight: "100vh" }}
+        style={{
+          paddingTop: "2rem",
+          paddingBottom: "2rem",
+          minHeight: "100vh",
+          background: "#f8f9fa",
+        }}
       >
         <Container>
           {/* Header */}
