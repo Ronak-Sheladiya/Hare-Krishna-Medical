@@ -35,6 +35,22 @@ const messageSlice = createSlice({
         state.unreadCount -= 1;
       }
     },
+    markMessageAsRead: (state, action) => {
+      const messageId = action.payload;
+      const message = state.messages.find((msg) => msg.id === messageId);
+      if (message && !message.isRead) {
+        message.isRead = true;
+        state.unreadCount -= 1;
+      }
+    },
+    markMessageAsUnread: (state, action) => {
+      const messageId = action.payload;
+      const message = state.messages.find((msg) => msg.id === messageId);
+      if (message && message.isRead) {
+        message.isRead = false;
+        state.unreadCount += 1;
+      }
+    },
     markAllAsRead: (state) => {
       state.messages.forEach((msg) => {
         msg.isRead = true;
@@ -54,6 +70,25 @@ const messageSlice = createSlice({
         state.messages.splice(messageIndex, 1);
       }
     },
+    replyToMessage: (state, action) => {
+      const { messageId, reply, repliedAt } = action.payload;
+      const message = state.messages.find((msg) => msg.id === messageId);
+      if (message) {
+        message.reply = reply;
+        message.repliedAt = repliedAt;
+        message.isRead = true;
+        if (!message.isRead) {
+          state.unreadCount -= 1;
+        }
+      }
+    },
+    updateMessageStatus: (state, action) => {
+      const { messageId, status } = action.payload;
+      const message = state.messages.find((msg) => msg.id === messageId);
+      if (message) {
+        message.status = status;
+      }
+    },
   },
 });
 
@@ -63,8 +98,12 @@ export const {
   setMessages,
   addMessage,
   markAsRead,
+  markMessageAsRead,
+  markMessageAsUnread,
   markAllAsRead,
   deleteMessage,
+  replyToMessage,
+  updateMessageStatus,
 } = messageSlice.actions;
 
 export default messageSlice.reducer;
