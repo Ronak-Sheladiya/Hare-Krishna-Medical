@@ -222,7 +222,7 @@ const NotificationSystem = () => {
         style={{ zIndex: 9999 }}
       >
         <Toast
-          show={showToast && lastNotification}
+          show={showToast && !!lastNotification}
           onClose={() => dispatch(hideToast())}
           delay={4000}
           autohide
