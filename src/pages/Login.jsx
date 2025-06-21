@@ -9,7 +9,7 @@ import {
   Alert,
   InputGroup,
 } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   loginStart,
@@ -19,8 +19,12 @@ import {
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.auth);
+
+  // Get the intended redirect URL from state
+  const from = location.state?.from || null;
 
   const [formData, setFormData] = useState({
     emailOrMobile: "",
@@ -88,7 +92,8 @@ const Login = () => {
           profileImage: null,
         };
         dispatch(loginSuccess(adminUser));
-        navigate("/admin/dashboard");
+        // Redirect to intended URL or default admin dashboard
+        navigate(from || "/admin/dashboard", { replace: true });
         return;
       }
 
@@ -107,7 +112,8 @@ const Login = () => {
           profileImage: null,
         };
         dispatch(loginSuccess(user));
-        navigate("/user/dashboard");
+        // Redirect to intended URL or default user dashboard
+        navigate(from || "/user/dashboard", { replace: true });
         return;
       }
 

@@ -61,9 +61,11 @@ const ScrollToTop = () => {
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const location = useLocation();
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    // Store the current location for redirect after login
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
   if (adminOnly && user?.role !== 1) {
