@@ -156,12 +156,8 @@ const ProductDetails = () => {
       >
         <Container>
           <Breadcrumb>
-            <Breadcrumb.Item as={Link} to="/">
-              Home
-            </Breadcrumb.Item>
-            <Breadcrumb.Item as={Link} to="/products">
-              Products
-            </Breadcrumb.Item>
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/products">Products</Breadcrumb.Item>
             <Breadcrumb.Item active>{product.name}</Breadcrumb.Item>
           </Breadcrumb>
         </Container>
