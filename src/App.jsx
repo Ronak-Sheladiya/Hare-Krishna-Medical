@@ -5,6 +5,7 @@ import {
   Route,
   Navigate,
   useLocation,
+  useLocation,
 } from "react-router-dom";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { useSelector } from "react-redux";
