@@ -13,11 +13,13 @@ import {
 import { useDispatch } from "react-redux";
 import { addMessage } from "../store/slices/messageSlice";
 
-const ContactForm = () => {
+const Contact = () => {
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    mobile: "",
+    subject: "",
     message: "",
   });
   const [loading, setLoading] = useState(false);
@@ -52,7 +54,7 @@ const ContactForm = () => {
         return;
       }
 
-      // Simulate API call to save to database
+      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Create message object for admin
@@ -60,8 +62,8 @@ const ContactForm = () => {
         id: Date.now(),
         name: formData.name,
         email: formData.email,
-        mobile: "",
-        subject: "Contact Form Inquiry",
+        mobile: formData.mobile,
+        subject: formData.subject || "Contact Form Inquiry",
         message: formData.message,
         priority: "Medium",
         status: "Open",
@@ -71,13 +73,15 @@ const ContactForm = () => {
         repliedAt: null,
       };
 
-      // Add to Redux store (this simulates saving to database)
+      // Add to Redux store
       dispatch(addMessage(newMessage));
 
       // Reset form and show success
       setFormData({
         name: "",
         email: "",
+        mobile: "",
+        subject: "",
         message: "",
       });
       setSubmitted(true);
@@ -90,98 +94,15 @@ const ContactForm = () => {
   };
 
   return (
-    <Card className="contact-form-card">
-      <Card.Body className="p-4">
-        <div className="text-center mb-4">
-          <h4 className="text-medical-red">
-            <i className="bi bi-envelope me-2"></i>
-            Contact Us
-          </h4>
-          <p className="text-muted">
-            Send us a message and we'll respond quickly
-          </p>
-        </div>
-
-        {submitted && (
-          <Alert variant="success" className="mb-4">
-            <i className="bi bi-check-circle me-2"></i>
-            Thank you! Your message has been sent successfully. We'll get back
-            to you soon.
-          </Alert>
-        )}
-
-        <Form onSubmit={handleSubmit}>
-          <Form.Group className="mb-3">
-            <Form.Label>Name *</Form.Label>
-            <Form.Control
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Your full name"
-              required
-              disabled={loading}
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Email *</Form.Label>
-            <Form.Control
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Your email address"
-              required
-              disabled={loading}
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-4">
-            <Form.Label>Message *</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={4}
-              name="message"
-              value={formData.message}
-              onChange={handleInputChange}
-              placeholder="How can we help you?"
-              required
-              disabled={loading}
-            />
-          </Form.Group>
-
-          <div className="d-grid">
-            <Button
-              type="submit"
-              className="btn-medical-primary"
-              disabled={loading}
-              size="lg"
-            >
-              {loading ? (
-                <>
-                  <Spinner size="sm" className="me-2" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  <i className="bi bi-send me-2"></i>
-                  Send Message
-                </>
-              )}
-            </Button>
-          </div>
-        </Form>
-      </Card.Body>
-    </Card>
-  );
-};
-
-const Contact = () => {
-  return (
     <div className="fade-in">
       {/* Breadcrumb */}
-      <section className="medical-breadcrumb">
+      <section
+        style={{
+          background: "#f8f9fa",
+          paddingTop: "20px",
+          paddingBottom: "20px",
+        }}
+      >
         <Container>
           <Breadcrumb>
             <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
@@ -190,180 +111,583 @@ const Contact = () => {
         </Container>
       </section>
 
-      {/* Contact Content */}
-      <section className="section-padding">
+      {/* Hero Section */}
+      <section
+        style={{
+          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+          color: "white",
+        }}
+      >
         <Container>
-          <Row>
-            <Col lg={12} className="text-center mb-5">
-              <h1 className="section-title">Contact Us</h1>
-              <p className="section-subtitle">
-                Get in touch with us for any medical needs or inquiries
+          <Row className="text-center">
+            <Col lg={12}>
+              <h1
+                style={{
+                  fontSize: "3rem",
+                  fontWeight: "800",
+                  marginBottom: "20px",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                }}
+              >
+                Get in Touch
+              </h1>
+              <p
+                style={{
+                  fontSize: "1.2rem",
+                  opacity: "0.9",
+                  maxWidth: "600px",
+                  margin: "0 auto",
+                }}
+              >
+                We're here to help with all your medical needs. Reach out to us
+                anytime!
               </p>
             </Col>
           </Row>
+        </Container>
+      </section>
 
+      {/* Contact Cards */}
+      <section
+        style={{
+          background: "#ffffff",
+          paddingTop: "80px",
+          paddingBottom: "40px",
+        }}
+      >
+        <Container>
           <Row>
-            {/* Address Card */}
             <Col lg={4} md={6} className="mb-4">
-              <Card className="contact-card h-100">
-                <Card.Body className="text-center">
-                  <div className="contact-icon">
-                    <i className="bi bi-geo-alt-fill"></i>
-                  </div>
-                  <h5>Our Location</h5>
-                  <p className="text-muted">
-                    3 Sahyog Complex, Man Sarovar circle,
-                    <br />
-                    Amroli, 394107
-                  </p>
-                  <Button
-                    variant="outline-primary"
-                    size="sm"
-                    href="https://maps.google.com?q=3+Sahyog+Complex+Man+Sarovar+circle+Amroli+394107"
-                    target="_blank"
-                    className="btn-medical-outline"
-                  >
-                    View on Map
-                  </Button>
-                </Card.Body>
+              <Card
+                style={{
+                  border: "2px solid #f8f9fa",
+                  borderRadius: "16px",
+                  padding: "30px",
+                  textAlign: "center",
+                  height: "100%",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.borderColor = "#e63946";
+                  e.currentTarget.style.transform = "translateY(-8px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 12px 30px rgba(230, 57, 70, 0.15)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.borderColor = "#f8f9fa";
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+              >
+                <div
+                  style={{
+                    width: "80px",
+                    height: "80px",
+                    background: "linear-gradient(135deg, #e63946, #dc3545)",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "0 auto 24px",
+                    color: "white",
+                    fontSize: "32px",
+                  }}
+                >
+                  <i className="bi bi-geo-alt-fill"></i>
+                </div>
+                <h5 style={{ color: "#333333", marginBottom: "16px" }}>
+                  Our Location
+                </h5>
+                <p style={{ color: "#495057", marginBottom: "20px" }}>
+                  3 Sahyog Complex, Man Sarovar Circle
+                  <br />
+                  Amroli, 394107, Gujarat, India
+                </p>
+                <Button
+                  href="https://maps.google.com?q=3+Sahyog+Complex+Man+Sarovar+circle+Amroli+394107"
+                  target="_blank"
+                  style={{
+                    background: "#e63946",
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "10px 20px",
+                  }}
+                >
+                  <i className="bi bi-map me-2"></i>
+                  View on Map
+                </Button>
               </Card>
             </Col>
 
-            {/* Phone Card */}
             <Col lg={4} md={6} className="mb-4">
-              <Card className="contact-card h-100">
-                <Card.Body className="text-center">
-                  <div className="contact-icon">
-                    <i className="bi bi-telephone-fill"></i>
-                  </div>
-                  <h5>Phone Numbers</h5>
-                  <p className="text-muted mb-2">
-                    <a
-                      href="tel:+917698913354"
-                      className="text-decoration-none"
-                    >
-                      +91 76989 13354
-                    </a>
-                  </p>
-                  <p className="text-muted">
-                    <a
-                      href="tel:+919106018508"
-                      className="text-decoration-none"
-                    >
-                      +91 91060 18508
-                    </a>
-                  </p>
-                  <Button
-                    variant="outline-primary"
-                    size="sm"
+              <Card
+                style={{
+                  border: "2px solid #f8f9fa",
+                  borderRadius: "16px",
+                  padding: "30px",
+                  textAlign: "center",
+                  height: "100%",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.borderColor = "#dc3545";
+                  e.currentTarget.style.transform = "translateY(-8px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 12px 30px rgba(220, 53, 69, 0.15)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.borderColor = "#f8f9fa";
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+              >
+                <div
+                  style={{
+                    width: "80px",
+                    height: "80px",
+                    background: "linear-gradient(135deg, #dc3545, #e63946)",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "0 auto 24px",
+                    color: "white",
+                    fontSize: "32px",
+                  }}
+                >
+                  <i className="bi bi-telephone-fill"></i>
+                </div>
+                <h5 style={{ color: "#333333", marginBottom: "16px" }}>
+                  Phone Numbers
+                </h5>
+                <p style={{ color: "#495057", marginBottom: "8px" }}>
+                  <a
                     href="tel:+917698913354"
-                    className="btn-medical-outline"
+                    style={{ textDecoration: "none", color: "#495057" }}
                   >
-                    Call Now
-                  </Button>
-                </Card.Body>
+                    +91 76989 13354
+                  </a>
+                </p>
+                <p style={{ color: "#495057", marginBottom: "20px" }}>
+                  <a
+                    href="tel:+919106018508"
+                    style={{ textDecoration: "none", color: "#495057" }}
+                  >
+                    +91 91060 18508
+                  </a>
+                </p>
+                <Button
+                  href="tel:+917698913354"
+                  style={{
+                    background: "#dc3545",
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "10px 20px",
+                  }}
+                >
+                  <i className="bi bi-telephone me-2"></i>
+                  Call Now
+                </Button>
               </Card>
             </Col>
 
-            {/* Email Card */}
             <Col lg={4} md={6} className="mb-4">
-              <Card className="contact-card h-100">
-                <Card.Body className="text-center">
-                  <div className="contact-icon">
-                    <i className="bi bi-envelope-fill"></i>
-                  </div>
-                  <h5>Email Address</h5>
-                  <p className="text-muted">
-                    <a
-                      href="mailto:harekrishnamedical@gmail.com"
-                      className="text-decoration-none"
-                    >
-                      harekrishnamedical@gmail.com
-                    </a>
-                  </p>
-                  <Button
-                    variant="outline-primary"
-                    size="sm"
+              <Card
+                style={{
+                  border: "2px solid #f8f9fa",
+                  borderRadius: "16px",
+                  padding: "30px",
+                  textAlign: "center",
+                  height: "100%",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.borderColor = "#343a40";
+                  e.currentTarget.style.transform = "translateY(-8px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 12px 30px rgba(52, 58, 64, 0.15)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.borderColor = "#f8f9fa";
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+              >
+                <div
+                  style={{
+                    width: "80px",
+                    height: "80px",
+                    background: "linear-gradient(135deg, #343a40, #495057)",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "0 auto 24px",
+                    color: "white",
+                    fontSize: "32px",
+                  }}
+                >
+                  <i className="bi bi-envelope-fill"></i>
+                </div>
+                <h5 style={{ color: "#333333", marginBottom: "16px" }}>
+                  Email Address
+                </h5>
+                <p style={{ color: "#495057", marginBottom: "20px" }}>
+                  <a
                     href="mailto:harekrishnamedical@gmail.com"
-                    className="btn-medical-outline"
+                    style={{ textDecoration: "none", color: "#495057" }}
                   >
-                    Send Email
-                  </Button>
-                </Card.Body>
+                    harekrishnamedical@gmail.com
+                  </a>
+                </p>
+                <Button
+                  href="mailto:harekrishnamedical@gmail.com"
+                  style={{
+                    background: "#343a40",
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "10px 20px",
+                  }}
+                >
+                  <i className="bi bi-envelope me-2"></i>
+                  Send Email
+                </Button>
               </Card>
             </Col>
           </Row>
+        </Container>
+      </section>
 
-          {/* Social Media & Hours */}
-          <Row className="mt-5">
-            <Col lg={6} className="mb-4">
-              <Card className="medical-card h-100">
-                <Card.Body>
-                  <h5 className="mb-3">
-                    <i className="bi bi-clock-fill text-medical-red me-2"></i>
-                    Business Hours
-                  </h5>
-                  <div className="row">
-                    <div className="col-6">
-                      <p className="mb-1">
-                        <strong>Monday - Saturday:</strong>
-                      </p>
-                      <p className="text-muted">9:00 AM - 9:00 PM</p>
-                    </div>
-                    <div className="col-6">
-                      <p className="mb-1">
-                        <strong>Sunday:</strong>
-                      </p>
-                      <p className="text-muted">10:00 AM - 6:00 PM</p>
-                    </div>
-                  </div>
-                  <p className="text-muted small">
-                    <i className="bi bi-info-circle me-1"></i>
-                    Emergency services available 24/7
+      {/* Contact Form & Info Section */}
+      <section
+        style={{
+          background: "#f8f9fa",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+        }}
+      >
+        <Container>
+          <Row>
+            {/* Contact Form */}
+            <Col lg={8} className="mb-5">
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    background: "linear-gradient(135deg, #e63946, #dc3545)",
+                    padding: "40px",
+                    color: "white",
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontSize: "2rem",
+                      fontWeight: "700",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    Send us a Message
+                  </h3>
+                  <p style={{ opacity: "0.9", marginBottom: "0" }}>
+                    Fill out the form below and we'll get back to you as soon as
+                    possible
                   </p>
+                </div>
+
+                <Card.Body style={{ padding: "40px" }}>
+                  {submitted && (
+                    <Alert
+                      variant="success"
+                      style={{
+                        marginBottom: "30px",
+                        borderRadius: "8px",
+                        border: "none",
+                      }}
+                    >
+                      <i className="bi bi-check-circle me-2"></i>
+                      Thank you! Your message has been sent successfully. We'll
+                      get back to you soon.
+                    </Alert>
+                  )}
+
+                  <Form onSubmit={handleSubmit}>
+                    <Row>
+                      <Col md={6} className="mb-3">
+                        <Form.Label style={{ fontWeight: "600" }}>
+                          Full Name *
+                        </Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleInputChange}
+                          placeholder="Enter your full name"
+                          required
+                          disabled={loading}
+                          style={{
+                            borderRadius: "8px",
+                            padding: "12px 16px",
+                            border: "2px solid #e9ecef",
+                          }}
+                        />
+                      </Col>
+                      <Col md={6} className="mb-3">
+                        <Form.Label style={{ fontWeight: "600" }}>
+                          Email Address *
+                        </Form.Label>
+                        <Form.Control
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          placeholder="Enter your email"
+                          required
+                          disabled={loading}
+                          style={{
+                            borderRadius: "8px",
+                            padding: "12px 16px",
+                            border: "2px solid #e9ecef",
+                          }}
+                        />
+                      </Col>
+                    </Row>
+
+                    <Row>
+                      <Col md={6} className="mb-3">
+                        <Form.Label style={{ fontWeight: "600" }}>
+                          Mobile Number
+                        </Form.Label>
+                        <Form.Control
+                          type="tel"
+                          name="mobile"
+                          value={formData.mobile}
+                          onChange={handleInputChange}
+                          placeholder="Enter your mobile number"
+                          disabled={loading}
+                          style={{
+                            borderRadius: "8px",
+                            padding: "12px 16px",
+                            border: "2px solid #e9ecef",
+                          }}
+                        />
+                      </Col>
+                      <Col md={6} className="mb-3">
+                        <Form.Label style={{ fontWeight: "600" }}>
+                          Subject
+                        </Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="subject"
+                          value={formData.subject}
+                          onChange={handleInputChange}
+                          placeholder="Subject of your message"
+                          disabled={loading}
+                          style={{
+                            borderRadius: "8px",
+                            padding: "12px 16px",
+                            border: "2px solid #e9ecef",
+                          }}
+                        />
+                      </Col>
+                    </Row>
+
+                    <Form.Group className="mb-4">
+                      <Form.Label style={{ fontWeight: "600" }}>
+                        Message *
+                      </Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={5}
+                        name="message"
+                        value={formData.message}
+                        onChange={handleInputChange}
+                        placeholder="How can we help you?"
+                        required
+                        disabled={loading}
+                        style={{
+                          borderRadius: "8px",
+                          padding: "12px 16px",
+                          border: "2px solid #e9ecef",
+                        }}
+                      />
+                    </Form.Group>
+
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      size="lg"
+                      style={{
+                        background: "#e63946",
+                        border: "none",
+                        borderRadius: "8px",
+                        padding: "14px 40px",
+                        fontSize: "16px",
+                        fontWeight: "600",
+                        width: "100%",
+                      }}
+                    >
+                      {loading ? (
+                        <>
+                          <Spinner size="sm" className="me-2" />
+                          Sending Message...
+                        </>
+                      ) : (
+                        <>
+                          <i className="bi bi-send me-2"></i>
+                          Send Message
+                        </>
+                      )}
+                    </Button>
+                  </Form>
                 </Card.Body>
               </Card>
             </Col>
 
-            <Col lg={6} className="mb-4">
-              <Card className="medical-card h-100">
-                <Card.Body>
-                  <h5 className="mb-3">
-                    <i className="bi bi-share-fill text-medical-red me-2"></i>
+            {/* Additional Info */}
+            <Col lg={4}>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  marginBottom: "24px",
+                  overflow: "hidden",
+                }}
+              >
+                <Card.Body style={{ padding: "30px" }}>
+                  <h5
+                    style={{
+                      color: "#e63946",
+                      marginBottom: "20px",
+                      fontSize: "1.3rem",
+                      fontWeight: "700",
+                    }}
+                  >
+                    <i className="bi bi-clock me-2"></i>
+                    Business Hours
+                  </h5>
+                  <div style={{ color: "#495057" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginBottom: "12px",
+                      }}
+                    >
+                      <span style={{ fontWeight: "600" }}>
+                        Monday - Saturday:
+                      </span>
+                      <span>9:00 AM - 9:00 PM</span>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginBottom: "16px",
+                      }}
+                    >
+                      <span style={{ fontWeight: "600" }}>Sunday:</span>
+                      <span>10:00 AM - 6:00 PM</span>
+                    </div>
+                    <div
+                      style={{
+                        padding: "12px",
+                        background: "#f8f9fa",
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <i className="bi bi-info-circle me-2 text-primary"></i>
+                      Emergency services available 24/7
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  overflow: "hidden",
+                }}
+              >
+                <Card.Body style={{ padding: "30px" }}>
+                  <h5
+                    style={{
+                      color: "#e63946",
+                      marginBottom: "20px",
+                      fontSize: "1.3rem",
+                      fontWeight: "700",
+                    }}
+                  >
+                    <i className="bi bi-share me-2"></i>
                     Follow Us
                   </h5>
-                  <p className="text-muted mb-3">
+                  <p style={{ color: "#495057", marginBottom: "20px" }}>
                     Stay connected with us on social media for health tips and
                     updates.
                   </p>
-                  <div className="social-icons justify-content-start">
+                  <div className="d-flex gap-3">
                     <a
                       href="https://www.instagram.com/harekrishna_medical/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="social-icon instagram"
+                      style={{
+                        width: "50px",
+                        height: "50px",
+                        background: "linear-gradient(135deg, #e63946, #dc3545)",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "white",
+                        textDecoration: "none",
+                        fontSize: "20px",
+                        transition: "all 0.3s ease",
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.transform = "translateY(-2px)";
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.transform = "translateY(0)";
+                      }}
                     >
                       <i className="bi bi-instagram"></i>
                     </a>
-                    <a href="#" className="social-icon facebook">
-                      <i className="bi bi-facebook"></i>
-                    </a>
                     <a
                       href="mailto:harekrishnamedical@gmail.com"
-                      className="social-icon email"
+                      style={{
+                        width: "50px",
+                        height: "50px",
+                        background: "linear-gradient(135deg, #343a40, #495057)",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "white",
+                        textDecoration: "none",
+                        fontSize: "20px",
+                        transition: "all 0.3s ease",
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.transform = "translateY(-2px)";
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.transform = "translateY(0)";
+                      }}
                     >
                       <i className="bi bi-envelope"></i>
                     </a>
                   </div>
                 </Card.Body>
               </Card>
-            </Col>
-          </Row>
-
-          {/* Enhanced Contact Form Section */}
-          <Row className="mt-5">
-            <Col lg={8} className="mx-auto">
-              <ContactForm />
             </Col>
           </Row>
         </Container>
