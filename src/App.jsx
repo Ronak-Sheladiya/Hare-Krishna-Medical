@@ -5,7 +5,6 @@ import {
   Route,
   Navigate,
   useLocation,
-  useLocation,
 } from "react-router-dom";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { useSelector } from "react-redux";
@@ -276,13 +275,13 @@ function App() {
             />
 
             {/* Fallback Routes */}
-            <Route path="/user-guide" element={<UserGuide />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
-        <ScrollToTop />
         {/* Footer displayed on all pages */}
         <Footer />
       </div>
+    </Router>
   );
 }
 
