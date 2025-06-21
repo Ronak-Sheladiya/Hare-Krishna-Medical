@@ -222,20 +222,16 @@ const Header = () => {
                           Manage Products
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/orders">
-                          <i className="bi bi-list-check me-2"></i>
-                          Manage Orders
+                          <i className="bi bi-bag-check me-2"></i>
+                          Orders
                         </Dropdown.Item>
-                        <Dropdown.Item as={Link} to="/admin/invoices">
-                          <i className="bi bi-receipt me-2"></i>
-                          Manage Invoices
+                        <Dropdown.Item as={Link} to="/admin/products">
+                          <i className="bi bi-box-seam me-2"></i>
+                          Products
                         </Dropdown.Item>
-                        <Dropdown.Item as={Link} to="/admin/users">
-                          <i className="bi bi-people me-2"></i>
-                          Manage Users
-                        </Dropdown.Item>
-                        <Dropdown.Item as={Link} to="/admin/analytics">
-                          <i className="bi bi-graph-up me-2"></i>
-                          Analytics
+                        <Dropdown.Item as={Link} to="/admin/messages">
+                          <i className="bi bi-envelope me-2"></i>
+                          Manage Messages
                         </Dropdown.Item>
                       </>
                     )}
