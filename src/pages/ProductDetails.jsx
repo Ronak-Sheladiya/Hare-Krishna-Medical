@@ -10,7 +10,6 @@ import {
   Tab,
   Tabs,
   ListGroup,
-  Accordion,
   Carousel,
   Alert,
 } from "react-bootstrap";
@@ -51,7 +50,6 @@ const ProductDetails = () => {
     usage:
       "Adults: Take 1-2 tablets every 4-6 hours as needed. Do not exceed 8 tablets in 24 hours. Children: Consult healthcare provider for appropriate dosage.",
     weight: "50 tablets (500mg each)",
-    category: "Pain Relief",
     inStock: true,
     stockCount: 45,
     ingredients: [
@@ -107,6 +105,32 @@ const ProductDetails = () => {
     setQuantity((prev) => Math.max(1, prev + increment));
   };
 
+  const handleShare = async () => {
+    const url = window.location.href;
+    const text = `Check out ${product.name} at Hare Krishna Medical`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: product.name,
+          text: text,
+          url: url,
+        });
+      } catch (error) {
+        // Fallback to clipboard
+        navigator.clipboard.writeText(url);
+        alert("Product link copied to clipboard!");
+      }
+    } else {
+      // Fallback for browsers without native sharing
+      navigator.clipboard.writeText(url);
+      alert("Product link copied to clipboard!");
+    }
+  };
+
+  // Calculate total price based on quantity
+  const totalPrice = product ? (product.price * quantity).toFixed(2) : "0.00";
+
   if (loading) {
     return (
       <div className="fade-in">
@@ -137,12 +161,6 @@ const ProductDetails = () => {
       </div>
     );
   }
-
-  const discountPercentage = product.originalPrice
-    ? Math.round(
-        ((product.originalPrice - product.price) / product.originalPrice) * 100,
-      )
-    : 0;
 
   return (
     <div className="fade-in">
@@ -193,7 +211,8 @@ const ProductDetails = () => {
                     prevIcon={
                       <div
                         style={{
-                          background: "rgba(0,0,0,0.7)",
+                          background:
+                            "linear-gradient(135deg, #e63946, #dc3545)",
                           borderRadius: "50%",
                           width: "50px",
                           height: "50px",
@@ -212,7 +231,8 @@ const ProductDetails = () => {
                     nextIcon={
                       <div
                         style={{
-                          background: "rgba(0,0,0,0.7)",
+                          background:
+                            "linear-gradient(135deg, #e63946, #dc3545)",
                           borderRadius: "50%",
                           width: "50px",
                           height: "50px",
@@ -245,7 +265,7 @@ const ProductDetails = () => {
                     ))}
                   </Carousel>
 
-                  {/* Custom Indicators */}
+                  {/* Colorful Custom Indicators */}
                   <div
                     style={{
                       position: "absolute",
@@ -271,17 +291,32 @@ const ProductDetails = () => {
                           border: "none",
                           background:
                             activeImageIndex === index
-                              ? "#e63946"
+                              ? "linear-gradient(135deg, #e63946, #dc3545)"
                               : "rgba(255,255,255,0.5)",
                           cursor: "pointer",
                           transition: "all 0.3s ease",
+                          transform:
+                            activeImageIndex === index
+                              ? "scale(1.2)"
+                              : "scale(1)",
+                        }}
+                        onMouseOver={(e) => {
+                          if (activeImageIndex !== index) {
+                            e.target.style.background =
+                              "linear-gradient(135deg, #343a40, #495057)";
+                          }
+                        }}
+                        onMouseOut={(e) => {
+                          if (activeImageIndex !== index) {
+                            e.target.style.background = "rgba(255,255,255,0.5)";
+                          }
                         }}
                       />
                     ))}
                   </div>
                 </div>
 
-                {/* Thumbnail Navigation */}
+                {/* Colorful Thumbnail Navigation */}
                 <div
                   style={{
                     padding: "20px",
@@ -311,6 +346,22 @@ const ProductDetails = () => {
                           activeImageIndex === index
                             ? "scale(1.05)"
                             : "scale(1)",
+                        boxShadow:
+                          activeImageIndex === index
+                            ? "0 4px 12px rgba(230, 57, 70, 0.3)"
+                            : "none",
+                      }}
+                      onMouseOver={(e) => {
+                        if (activeImageIndex !== index) {
+                          e.currentTarget.style.borderColor = "#343a40";
+                          e.currentTarget.style.transform = "scale(1.02)";
+                        }
+                      }}
+                      onMouseOut={(e) => {
+                        if (activeImageIndex !== index) {
+                          e.currentTarget.style.borderColor = "#e9ecef";
+                          e.currentTarget.style.transform = "scale(1)";
+                        }
                       }}
                     >
                       <img
@@ -344,52 +395,6 @@ const ProductDetails = () => {
             {/* Product Information */}
             <Col lg={6} className="mb-4">
               <div className="product-info">
-                <div className="mb-3">
-                  <Badge
-                    style={{
-                      background: "#e63946",
-                      fontSize: "12px",
-                      padding: "8px 16px",
-                      borderRadius: "6px",
-                    }}
-                    className="mb-2"
-                  >
-                    {product.category}
-                  </Badge>
-                  {product.inStock ? (
-                    <Badge
-                      bg="success"
-                      style={{
-                        fontSize: "12px",
-                        padding: "8px 16px",
-                        borderRadius: "6px",
-                      }}
-                      className="ms-2"
-                    >
-                      <i className="bi bi-check-circle me-1"></i>
-                      In Stock ({product.stockCount} available)
-                    </Badge>
-                  ) : (
-                    <Badge bg="danger" className="ms-2">
-                      <i className="bi bi-x-circle me-1"></i>
-                      Out of Stock
-                    </Badge>
-                  )}
-                  {discountPercentage > 0 && (
-                    <Badge
-                      style={{
-                        background: "#28a745",
-                        fontSize: "12px",
-                        padding: "8px 16px",
-                        borderRadius: "6px",
-                      }}
-                      className="ms-2"
-                    >
-                      {discountPercentage}% OFF
-                    </Badge>
-                  )}
-                </div>
-
                 <h1
                   style={{
                     color: "#333333",
@@ -434,20 +439,6 @@ const ProductDetails = () => {
                       </span>
                     )}
                   </div>
-                  {discountPercentage > 0 && (
-                    <p
-                      style={{
-                        color: "#28a745",
-                        fontSize: "14px",
-                        fontWeight: "600",
-                        margin: "0",
-                      }}
-                    >
-                      You save ₹
-                      {(product.originalPrice - product.price).toFixed(2)} (
-                      {discountPercentage}% off)
-                    </p>
-                  )}
                 </div>
 
                 <p
@@ -524,6 +515,37 @@ const ProductDetails = () => {
                       {product.stockCount} available
                     </span>
                   </div>
+
+                  {/* Dynamic Total Price */}
+                  <div style={{ marginTop: "16px" }}>
+                    <div
+                      style={{
+                        background: "#f8f9fa",
+                        padding: "16px",
+                        borderRadius: "8px",
+                        border: "2px solid #e9ecef",
+                      }}
+                    >
+                      <div className="d-flex justify-content-between align-items-center">
+                        <span style={{ color: "#495057", fontWeight: "600" }}>
+                          Total Price:
+                        </span>
+                        <span
+                          style={{
+                            color: "#e63946",
+                            fontSize: "1.8rem",
+                            fontWeight: "800",
+                          }}
+                        >
+                          ₹{totalPrice}
+                        </span>
+                      </div>
+                      <small style={{ color: "#6c757d" }}>
+                        ₹{product.price} × {quantity}{" "}
+                        {quantity > 1 ? "items" : "item"}
+                      </small>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Action Buttons */}
@@ -547,20 +569,7 @@ const ProductDetails = () => {
                     {product.inStock ? "Add to Cart" : "Out of Stock"}
                   </Button>
                   <Button
-                    variant="outline-secondary"
-                    size="lg"
-                    style={{
-                      borderColor: "#343a40",
-                      color: "#343a40",
-                      borderRadius: "8px",
-                      padding: "16px 20px",
-                      fontSize: "16px",
-                      fontWeight: "600",
-                    }}
-                  >
-                    <i className="bi bi-heart"></i>
-                  </Button>
-                  <Button
+                    onClick={handleShare}
                     variant="outline-secondary"
                     size="lg"
                     style={{

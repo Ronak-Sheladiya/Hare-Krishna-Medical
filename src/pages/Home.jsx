@@ -334,53 +334,6 @@ const Home = () => {
                       src={product.image}
                       style={{ height: "200px", objectFit: "cover" }}
                     />
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "12px",
-                        right: "12px",
-                      }}
-                    >
-                      {product.inStock ? (
-                        <Badge
-                          bg="success"
-                          style={{ fontSize: "12px", padding: "6px 12px" }}
-                        >
-                          In Stock
-                        </Badge>
-                      ) : (
-                        <Badge
-                          bg="danger"
-                          style={{ fontSize: "12px", padding: "6px 12px" }}
-                        >
-                          Out of Stock
-                        </Badge>
-                      )}
-                    </div>
-                    {product.originalPrice && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "12px",
-                          left: "12px",
-                        }}
-                      >
-                        <Badge
-                          style={{
-                            background: "#28a745",
-                            fontSize: "12px",
-                            padding: "6px 12px",
-                          }}
-                        >
-                          {Math.round(
-                            ((product.originalPrice - product.price) /
-                              product.originalPrice) *
-                              100,
-                          )}
-                          % OFF
-                        </Badge>
-                      </div>
-                    )}
                   </div>
 
                   <Card.Body style={{ padding: "24px" }}>
