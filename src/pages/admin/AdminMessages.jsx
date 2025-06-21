@@ -7,187 +7,127 @@ import {
   Table,
   Badge,
   Button,
-  Modal,
   Form,
+  Modal,
   Alert,
-  Dropdown,
   InputGroup,
+  Dropdown,
+  Spinner,
 } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
-  setMessages,
-  markAsRead,
-  markAllAsRead,
+  markMessageAsRead,
+  markMessageAsUnread,
   deleteMessage,
+  replyToMessage,
+  updateMessageStatus,
 } from "../../store/slices/messageSlice";
 
 const AdminMessages = () => {
   const dispatch = useDispatch();
-  const { messages, unreadCount, loading } = useSelector(
-    (state) => state.messages,
-  );
-
+  const { messages } = useSelector((state) => state.messages);
+  const [filteredMessages, setFilteredMessages] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState("");
   const [showReplyModal, setShowReplyModal] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [replyText, setReplyText] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [filterPriority, setFilterPriority] = useState("all");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [alert, setAlert] = useState({ show: false, message: "", variant: "" });
+  const [sending, setSending] = useState(false);
 
-  // Mock messages data - in real app, this would come from API
   useEffect(() => {
-    const mockMessages = [
-      {
-        id: 1,
-        name: "John Doe",
-        email: "john.doe@example.com",
-        mobile: "+91 9876543210",
-        subject: "Product Inquiry",
-        message:
-          "I need information about availability of insulin pens. Do you have them in stock?",
-        isRead: false,
-        priority: "High",
-        status: "Open",
-        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-        reply: "",
-        repliedAt: null,
-      },
-      {
-        id: 2,
-        name: "Mary Smith",
-        email: "mary.smith@example.com",
-        mobile: "+91 8765432109",
-        subject: "Order Delivery Issue",
-        message:
-          "My order HKM12345678 was supposed to be delivered today but I haven't received it yet. Can you please check the status?",
-        isRead: true,
-        priority: "Medium",
-        status: "In Progress",
-        createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
-        reply:
-          "Hello Mary, I've checked your order status. It's out for delivery and should reach you by 6 PM today. Thank you for your patience.",
-        repliedAt: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
-      },
-      {
-        id: 3,
-        name: "Raj Patel",
-        email: "raj.patel@example.com",
-        mobile: "+91 7654321098",
-        subject: "Prescription Upload",
-        message:
-          "How can I upload my prescription for online order? I couldn't find the option on the website.",
-        isRead: false,
-        priority: "Low",
-        status: "Open",
-        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
-        reply: "",
-        repliedAt: null,
-      },
-      {
-        id: 4,
-        name: "Priya Sharma",
-        email: "priya.sharma@example.com",
-        mobile: "+91 6543210987",
-        subject: "Payment Issue",
-        message:
-          "I made payment for order HKM87654321 but it's still showing as unpaid. Please help resolve this issue.",
-        isRead: true,
-        priority: "High",
-        status: "Resolved",
-        createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-        reply:
-          "Hi Priya, we've verified your payment and updated the order status. You should receive a confirmation email shortly.",
-        repliedAt: new Date(Date.now() - 23 * 60 * 60 * 1000), // 23 hours ago
-      },
-      {
-        id: 5,
-        name: "Anonymous User",
-        email: "user@example.com",
-        mobile: "",
-        subject: "General Inquiry",
-        message:
-          "What are your store timings? Also, do you provide home delivery for emergency medicines?",
-        isRead: false,
-        priority: "Medium",
-        status: "Open",
-        createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000), // 8 hours ago
-        reply: "",
-        repliedAt: null,
-      },
-    ];
+    let filtered = [...messages];
 
-    dispatch(setMessages(mockMessages));
-  }, [dispatch]);
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (message) =>
+          message.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          message.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          message.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          message.message.toLowerCase().includes(searchTerm.toLowerCase()),
+      );
+    }
 
-  const filteredMessages = messages.filter((message) => {
-    const matchesStatus =
-      filterStatus === "all" || message.status.toLowerCase() === filterStatus;
-    const matchesPriority =
-      filterPriority === "all" ||
-      message.priority.toLowerCase() === filterPriority;
-    const matchesSearch =
-      searchTerm === "" ||
-      message.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      message.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      message.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      message.message.toLowerCase().includes(searchTerm.toLowerCase());
+    // Apply status filter
+    if (statusFilter) {
+      filtered = filtered.filter((message) => message.status === statusFilter);
+    }
 
-    return matchesStatus && matchesPriority && matchesSearch;
-  });
+    // Apply priority filter
+    if (priorityFilter) {
+      filtered = filtered.filter(
+        (message) => message.priority === priorityFilter,
+      );
+    }
+
+    // Sort by date (newest first)
+    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    setFilteredMessages(filtered);
+  }, [messages, searchTerm, statusFilter, priorityFilter]);
 
   const handleMarkAsRead = (messageId) => {
-    dispatch(markAsRead(messageId));
-    showAlert("Message marked as read", "success");
+    dispatch(markMessageAsRead(messageId));
   };
 
-  const handleMarkAllAsRead = () => {
-    dispatch(markAllAsRead());
-    showAlert("All messages marked as read", "success");
+  const handleMarkAsUnread = (messageId) => {
+    dispatch(markMessageAsUnread(messageId));
   };
 
   const handleDeleteMessage = (messageId) => {
     if (window.confirm("Are you sure you want to delete this message?")) {
       dispatch(deleteMessage(messageId));
-      showAlert("Message deleted successfully", "success");
     }
   };
 
-  const handleReplyMessage = (message) => {
-    setSelectedMessage(message);
-    setReplyText(message.reply || "");
-    setShowReplyModal(true);
+  const handleStatusChange = (messageId, newStatus) => {
+    dispatch(updateMessageStatus({ messageId, status: newStatus }));
   };
 
-  const handleSendReply = () => {
+  const handleReply = (message) => {
+    setSelectedMessage(message);
+    setReplyText("");
+    setShowReplyModal(true);
+    if (!message.isRead) {
+      dispatch(markMessageAsRead(message.id));
+    }
+  };
+
+  const handleSendReply = async () => {
     if (!replyText.trim()) {
-      showAlert("Please enter a reply message", "danger");
+      alert("Please enter a reply message");
       return;
     }
 
-    // In real app, this would be an API call
-    const updatedMessages = messages.map((msg) =>
-      msg.id === selectedMessage.id
-        ? {
-            ...msg,
-            reply: replyText,
-            repliedAt: new Date(),
-            status: "Resolved",
-            isRead: true,
-          }
-        : msg,
-    );
+    setSending(true);
+    try {
+      // Simulate sending email
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    dispatch(setMessages(updatedMessages));
-    setShowReplyModal(false);
-    setSelectedMessage(null);
-    setReplyText("");
-    showAlert("Reply sent successfully", "success");
-  };
+      dispatch(
+        replyToMessage({
+          messageId: selectedMessage.id,
+          reply: replyText,
+          repliedAt: new Date(),
+        }),
+      );
 
-  const showAlert = (message, variant) => {
-    setAlert({ show: true, message, variant });
-    setTimeout(() => setAlert({ show: false, message: "", variant: "" }), 3000);
+      dispatch(
+        updateMessageStatus({
+          messageId: selectedMessage.id,
+          status: "Replied",
+        }),
+      );
+
+      setShowReplyModal(false);
+      setSelectedMessage(null);
+      setReplyText("");
+    } catch (error) {
+      alert("Failed to send reply. Please try again.");
+    } finally {
+      setSending(false);
+    }
   };
 
   const getPriorityBadge = (priority) => {
@@ -202,306 +142,391 @@ const AdminMessages = () => {
   const getStatusBadge = (status) => {
     const variants = {
       Open: "primary",
-      "In Progress": "warning",
-      Resolved: "success",
+      "In Progress": "info",
+      Replied: "success",
+      Closed: "secondary",
     };
     return <Badge bg={variants[status] || "secondary"}>{status}</Badge>;
   };
 
   const formatDate = (date) => {
-    const now = new Date();
-    const diffInHours = Math.floor((now - new Date(date)) / (1000 * 60 * 60));
-
-    if (diffInHours < 1) {
-      return "Just now";
-    } else if (diffInHours < 24) {
-      return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
-    } else {
-      const diffInDays = Math.floor(diffInHours / 24);
-      return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
-    }
+    return new Date(date).toLocaleString();
   };
 
-  return (
-    <div className="section-padding">
-      <Container>
-        <Row>
-          <Col lg={12}>
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <div>
-                <h2 className="section-title mb-1">Message Management</h2>
-                <p className="text-muted">
-                  Manage customer inquiries and support messages
-                </p>
-              </div>
-              <div className="d-flex gap-2">
-                <Badge bg="danger" className="fs-6">
-                  {unreadCount} Unread
-                </Badge>
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  onClick={handleMarkAllAsRead}
-                  disabled={unreadCount === 0}
-                >
-                  <i className="bi bi-check-all me-1"></i>
-                  Mark All Read
-                </Button>
-              </div>
-            </div>
-          </Col>
-        </Row>
+  const unreadCount = messages.filter((m) => !m.isRead).length;
+  const totalMessages = messages.length;
 
-        {alert.show && (
-          <Row>
-            <Col lg={12}>
-              <Alert variant={alert.variant} className="mb-3">
-                {alert.message}
-              </Alert>
+  return (
+    <div className="fade-in">
+      <section
+        style={{
+          paddingTop: "2rem",
+          paddingBottom: "2rem",
+          minHeight: "100vh",
+          background: "#f8f9fa",
+        }}
+      >
+        <Container>
+          {/* Header */}
+          <Row className="mb-4">
+            <Col lg={8}>
+              <h2 style={{ color: "#333333", fontWeight: "700" }}>
+                Message Management
+              </h2>
+              <p style={{ color: "#495057" }}>
+                Manage customer inquiries from the contact form
+              </p>
+            </Col>
+            <Col lg={4} className="text-end">
+              <div className="d-flex gap-3 align-items-center justify-content-end">
+                <div className="text-center">
+                  <div
+                    style={{
+                      fontSize: "1.5rem",
+                      fontWeight: "700",
+                      color: "#e63946",
+                    }}
+                  >
+                    {unreadCount}
+                  </div>
+                  <small style={{ color: "#495057" }}>Unread</small>
+                </div>
+                <div className="text-center">
+                  <div
+                    style={{
+                      fontSize: "1.5rem",
+                      fontWeight: "700",
+                      color: "#343a40",
+                    }}
+                  >
+                    {totalMessages}
+                  </div>
+                  <small style={{ color: "#495057" }}>Total</small>
+                </div>
+              </div>
             </Col>
           </Row>
-        )}
 
-        {/* Filters */}
-        <Row className="mb-4">
-          <Col lg={12}>
-            <Card className="medical-card">
-              <Card.Body>
-                <Row>
-                  <Col md={3}>
-                    <Form.Group>
-                      <Form.Label>Search Messages</Form.Label>
-                      <InputGroup>
-                        <Form.Control
-                          type="text"
-                          placeholder="Search by name, email, subject..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <InputGroup.Text>
-                          <i className="bi bi-search"></i>
-                        </InputGroup.Text>
-                      </InputGroup>
-                    </Form.Group>
-                  </Col>
-                  <Col md={3}>
-                    <Form.Group>
-                      <Form.Label>Filter by Status</Form.Label>
-                      <Form.Select
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                      >
-                        <option value="all">All Status</option>
-                        <option value="open">Open</option>
-                        <option value="in progress">In Progress</option>
-                        <option value="resolved">Resolved</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                  <Col md={3}>
-                    <Form.Group>
-                      <Form.Label>Filter by Priority</Form.Label>
-                      <Form.Select
-                        value={filterPriority}
-                        onChange={(e) => setFilterPriority(e.target.value)}
-                      >
-                        <option value="all">All Priority</option>
-                        <option value="high">High</option>
-                        <option value="medium">Medium</option>
-                        <option value="low">Low</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                  <Col md={3} className="d-flex align-items-end">
-                    <div className="w-100">
-                      <Button
-                        variant="outline-secondary"
-                        className="w-100"
-                        onClick={() => {
-                          setSearchTerm("");
-                          setFilterStatus("all");
-                          setFilterPriority("all");
-                        }}
-                      >
-                        <i className="bi bi-arrow-clockwise me-1"></i>
-                        Reset Filters
-                      </Button>
+          {/* Filters */}
+          <Row className="mb-4">
+            <Col lg={4} className="mb-3">
+              <InputGroup>
+                <InputGroup.Text>
+                  <i className="bi bi-search"></i>
+                </InputGroup.Text>
+                <Form.Control
+                  type="text"
+                  placeholder="Search messages..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </InputGroup>
+            </Col>
+            <Col lg={2} className="mb-3">
+              <Form.Select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="">All Status</option>
+                <option value="Open">Open</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Replied">Replied</option>
+                <option value="Closed">Closed</option>
+              </Form.Select>
+            </Col>
+            <Col lg={2} className="mb-3">
+              <Form.Select
+                value={priorityFilter}
+                onChange={(e) => setPriorityFilter(e.target.value)}
+              >
+                <option value="">All Priority</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </Form.Select>
+            </Col>
+            <Col lg={4} className="mb-3">
+              <div className="d-flex gap-2">
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setStatusFilter("");
+                    setPriorityFilter("");
+                  }}
+                >
+                  <i className="bi bi-arrow-clockwise me-1"></i>
+                  Clear Filters
+                </Button>
+                <Button
+                  variant="outline-primary"
+                  style={{ color: "#e63946", borderColor: "#e63946" }}
+                >
+                  <i className="bi bi-download me-1"></i>
+                  Export
+                </Button>
+              </div>
+            </Col>
+          </Row>
+
+          {/* Messages Table */}
+          <Row>
+            <Col lg={12}>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                }}
+              >
+                <Card.Body style={{ padding: "0" }}>
+                  {filteredMessages.length === 0 ? (
+                    <div
+                      className="text-center"
+                      style={{ padding: "60px 20px" }}
+                    >
+                      <i
+                        className="bi bi-inbox display-1 mb-3"
+                        style={{ color: "#e9ecef" }}
+                      ></i>
+                      <h4 style={{ color: "#495057" }}>No messages found</h4>
+                      <p style={{ color: "#6c757d" }}>
+                        {searchTerm || statusFilter || priorityFilter
+                          ? "Try adjusting your search criteria"
+                          : "Customer messages will appear here"}
+                      </p>
                     </div>
-                  </Col>
-                </Row>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-
-        {/* Messages Table */}
-        <Row>
-          <Col lg={12}>
-            <Card className="medical-card">
-              <Card.Body className="p-0">
-                <div className="table-responsive">
-                  <Table hover className="mb-0">
-                    <thead className="table-light">
-                      <tr>
-                        <th>Customer</th>
-                        <th>Subject</th>
-                        <th>Priority</th>
-                        <th>Status</th>
-                        <th>Received</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredMessages.length === 0 ? (
-                        <tr>
-                          <td colSpan="6" className="text-center py-4">
-                            <i className="bi bi-inbox display-4 text-muted mb-3 d-block"></i>
-                            <h5 className="text-muted">No messages found</h5>
-                            <p className="text-muted">
-                              Try adjusting your filters or search criteria
-                            </p>
-                          </td>
-                        </tr>
-                      ) : (
-                        filteredMessages.map((message) => (
-                          <tr
-                            key={message.id}
-                            className={!message.isRead ? "table-warning" : ""}
-                          >
-                            <td>
-                              <div>
-                                <div className="fw-bold d-flex align-items-center">
-                                  {message.name}
-                                  {!message.isRead && (
-                                    <Badge
-                                      bg="danger"
-                                      className="ms-2"
-                                      style={{ fontSize: "10px" }}
+                  ) : (
+                    <div className="table-responsive">
+                      <Table className="mb-0">
+                        <thead
+                          style={{
+                            background: "#f8f9fa",
+                            borderBottom: "2px solid #e9ecef",
+                          }}
+                        >
+                          <tr>
+                            <th style={{ padding: "16px", fontWeight: "600" }}>
+                              Customer
+                            </th>
+                            <th style={{ padding: "16px", fontWeight: "600" }}>
+                              Subject
+                            </th>
+                            <th style={{ padding: "16px", fontWeight: "600" }}>
+                              Priority
+                            </th>
+                            <th style={{ padding: "16px", fontWeight: "600" }}>
+                              Status
+                            </th>
+                            <th style={{ padding: "16px", fontWeight: "600" }}>
+                              Date
+                            </th>
+                            <th style={{ padding: "16px", fontWeight: "600" }}>
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredMessages.map((message) => (
+                            <tr
+                              key={message.id}
+                              style={{
+                                backgroundColor: message.isRead
+                                  ? "#ffffff"
+                                  : "#f8f9fa",
+                                borderBottom: "1px solid #e9ecef",
+                              }}
+                            >
+                              <td style={{ padding: "16px" }}>
+                                <div>
+                                  <div
+                                    style={{
+                                      fontWeight: message.isRead
+                                        ? "500"
+                                        : "700",
+                                      color: "#333333",
+                                      marginBottom: "4px",
+                                    }}
+                                  >
+                                    {message.name}
+                                    {!message.isRead && (
+                                      <Badge
+                                        bg="primary"
+                                        className="ms-2"
+                                        style={{
+                                          fontSize: "8px",
+                                          padding: "2px 6px",
+                                        }}
+                                      >
+                                        NEW
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <div
+                                    style={{
+                                      fontSize: "12px",
+                                      color: "#6c757d",
+                                    }}
+                                  >
+                                    {message.email}
+                                  </div>
+                                  {message.mobile && (
+                                    <div
+                                      style={{
+                                        fontSize: "12px",
+                                        color: "#6c757d",
+                                      }}
                                     >
-                                      NEW
-                                    </Badge>
+                                      📱 {message.mobile}
+                                    </div>
                                   )}
                                 </div>
-                                <small className="text-muted">
-                                  {message.email}
-                                </small>
-                                {message.mobile && (
-                                  <div>
-                                    <small className="text-muted">
-                                      {message.mobile}
-                                    </small>
-                                  </div>
-                                )}
-                              </div>
-                            </td>
-                            <td>
-                              <div>
-                                <div className="fw-bold">{message.subject}</div>
-                                <small className="text-muted">
-                                  {message.message.length > 100
-                                    ? `${message.message.substring(0, 100)}...`
-                                    : message.message}
-                                </small>
-                              </div>
-                            </td>
-                            <td>{getPriorityBadge(message.priority)}</td>
-                            <td>{getStatusBadge(message.status)}</td>
-                            <td>
-                              <small>{formatDate(message.createdAt)}</small>
-                            </td>
-                            <td>
-                              <Dropdown>
-                                <Dropdown.Toggle
-                                  variant="outline-secondary"
-                                  size="sm"
-                                  id={`dropdown-${message.id}`}
+                              </td>
+                              <td style={{ padding: "16px" }}>
+                                <div
+                                  style={{
+                                    fontWeight: "500",
+                                    color: "#333333",
+                                    marginBottom: "4px",
+                                  }}
                                 >
-                                  <i className="bi bi-three-dots-vertical"></i>
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu>
-                                  <Dropdown.Item
-                                    onClick={() => handleReplyMessage(message)}
+                                  {message.subject}
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: "12px",
+                                    color: "#6c757d",
+                                    maxWidth: "200px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  {message.message}
+                                </div>
+                              </td>
+                              <td style={{ padding: "16px" }}>
+                                {getPriorityBadge(message.priority)}
+                              </td>
+                              <td style={{ padding: "16px" }}>
+                                <Dropdown>
+                                  <Dropdown.Toggle
+                                    as="div"
+                                    style={{ cursor: "pointer" }}
                                   >
-                                    <i className="bi bi-reply me-2"></i>
-                                    {message.reply ? "Edit Reply" : "Reply"}
-                                  </Dropdown.Item>
-                                  {!message.isRead && (
+                                    {getStatusBadge(message.status)}
+                                  </Dropdown.Toggle>
+                                  <Dropdown.Menu>
                                     <Dropdown.Item
                                       onClick={() =>
-                                        handleMarkAsRead(message.id)
+                                        handleStatusChange(message.id, "Open")
                                       }
                                     >
-                                      <i className="bi bi-check me-2"></i>
-                                      Mark as Read
+                                      Open
                                     </Dropdown.Item>
-                                  )}
-                                  <Dropdown.Divider />
-                                  <Dropdown.Item
-                                    className="text-danger"
+                                    <Dropdown.Item
+                                      onClick={() =>
+                                        handleStatusChange(
+                                          message.id,
+                                          "In Progress",
+                                        )
+                                      }
+                                    >
+                                      In Progress
+                                    </Dropdown.Item>
+                                    <Dropdown.Item
+                                      onClick={() =>
+                                        handleStatusChange(
+                                          message.id,
+                                          "Replied",
+                                        )
+                                      }
+                                    >
+                                      Replied
+                                    </Dropdown.Item>
+                                    <Dropdown.Item
+                                      onClick={() =>
+                                        handleStatusChange(message.id, "Closed")
+                                      }
+                                    >
+                                      Closed
+                                    </Dropdown.Item>
+                                  </Dropdown.Menu>
+                                </Dropdown>
+                              </td>
+                              <td
+                                style={{
+                                  padding: "16px",
+                                  fontSize: "12px",
+                                  color: "#6c757d",
+                                }}
+                              >
+                                {formatDate(message.createdAt)}
+                              </td>
+                              <td style={{ padding: "16px" }}>
+                                <div className="d-flex gap-1">
+                                  <Button
+                                    size="sm"
+                                    variant="outline-primary"
+                                    onClick={() => handleReply(message)}
+                                    title="Reply"
+                                    style={{
+                                      borderColor: "#e63946",
+                                      color: "#e63946",
+                                    }}
+                                  >
+                                    <i className="bi bi-reply"></i>
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant={
+                                      message.isRead
+                                        ? "outline-secondary"
+                                        : "outline-info"
+                                    }
+                                    onClick={() =>
+                                      message.isRead
+                                        ? handleMarkAsUnread(message.id)
+                                        : handleMarkAsRead(message.id)
+                                    }
+                                    title={
+                                      message.isRead
+                                        ? "Mark as Unread"
+                                        : "Mark as Read"
+                                    }
+                                  >
+                                    <i
+                                      className={
+                                        message.isRead
+                                          ? "bi bi-envelope"
+                                          : "bi bi-envelope-open"
+                                      }
+                                    ></i>
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline-danger"
                                     onClick={() =>
                                       handleDeleteMessage(message.id)
                                     }
+                                    title="Delete"
                                   >
-                                    <i className="bi bi-trash me-2"></i>
-                                    Delete
-                                  </Dropdown.Item>
-                                </Dropdown.Menu>
-                              </Dropdown>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </Table>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-
-        {/* Statistics */}
-        <Row className="mt-4">
-          <Col md={3}>
-            <Card className="medical-card text-center">
-              <Card.Body>
-                <h4 className="text-primary">{messages.length}</h4>
-                <p className="text-muted mb-0">Total Messages</p>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={3}>
-            <Card className="medical-card text-center">
-              <Card.Body>
-                <h4 className="text-danger">{unreadCount}</h4>
-                <p className="text-muted mb-0">Unread Messages</p>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={3}>
-            <Card className="medical-card text-center">
-              <Card.Body>
-                <h4 className="text-warning">
-                  {
-                    messages.filter((msg) => msg.status === "In Progress")
-                      .length
-                  }
-                </h4>
-                <p className="text-muted mb-0">In Progress</p>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={3}>
-            <Card className="medical-card text-center">
-              <Card.Body>
-                <h4 className="text-success">
-                  {messages.filter((msg) => msg.status === "Resolved").length}
-                </h4>
-                <p className="text-muted mb-0">Resolved</p>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
+                                    <i className="bi bi-trash"></i>
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Table>
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
+      </section>
 
       {/* Reply Modal */}
       <Modal
@@ -509,55 +534,74 @@ const AdminMessages = () => {
         onHide={() => setShowReplyModal(false)}
         size="lg"
       >
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {selectedMessage?.reply ? "Edit Reply" : "Reply to Message"}
+        <Modal.Header
+          closeButton
+          style={{ background: "linear-gradient(135deg, #e63946, #dc3545)" }}
+        >
+          <Modal.Title style={{ color: "#ffffff" }}>
+            <i className="bi bi-reply me-2"></i>
+            Reply to {selectedMessage?.name}
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body style={{ padding: "30px" }}>
           {selectedMessage && (
-            <>
-              <div className="mb-4 p-3 bg-light rounded">
-                <h6>Original Message:</h6>
-                <p>
-                  <strong>From:</strong> {selectedMessage.name} (
-                  {selectedMessage.email})
-                </p>
-                <p>
-                  <strong>Subject:</strong> {selectedMessage.subject}
-                </p>
-                <p>
-                  <strong>Message:</strong> {selectedMessage.message}
-                </p>
-              </div>
-
-              <Form.Group>
-                <Form.Label>Your Reply:</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={6}
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  placeholder="Type your reply here..."
-                />
-                <Form.Text className="text-muted">
-                  This reply will be sent to the customer's email address.
-                </Form.Text>
-              </Form.Group>
-            </>
+            <div style={{ marginBottom: "20px" }}>
+              <Card style={{ background: "#f8f9fa", border: "none" }}>
+                <Card.Body>
+                  <h6 style={{ color: "#e63946", marginBottom: "10px" }}>
+                    Original Message:
+                  </h6>
+                  <p style={{ marginBottom: "10px" }}>
+                    <strong>Subject:</strong> {selectedMessage.subject}
+                  </p>
+                  <p style={{ marginBottom: "0", fontSize: "14px" }}>
+                    {selectedMessage.message}
+                  </p>
+                </Card.Body>
+              </Card>
+            </div>
           )}
+
+          <Form.Group>
+            <Form.Label style={{ fontWeight: "600" }}>Your Reply:</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={6}
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              placeholder="Type your reply here..."
+              style={{
+                borderRadius: "8px",
+                border: "2px solid #e9ecef",
+                padding: "12px",
+              }}
+            />
+          </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowReplyModal(false)}>
+          <Button
+            variant="outline-secondary"
+            onClick={() => setShowReplyModal(false)}
+            disabled={sending}
+          >
             Cancel
           </Button>
           <Button
-            variant="primary"
+            style={{ background: "#e63946", border: "none" }}
             onClick={handleSendReply}
-            disabled={!replyText.trim()}
+            disabled={sending}
           >
-            <i className="bi bi-send me-2"></i>
-            Send Reply
+            {sending ? (
+              <>
+                <Spinner size="sm" className="me-2" />
+                Sending...
+              </>
+            ) : (
+              <>
+                <i className="bi bi-send me-2"></i>
+                Send Reply
+              </>
+            )}
           </Button>
         </Modal.Footer>
       </Modal>
