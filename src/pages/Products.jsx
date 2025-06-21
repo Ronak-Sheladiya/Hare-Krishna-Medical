@@ -15,7 +15,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../store/slices/cartSlice.js";
 import { setProducts, updateFilters } from "../store/slices/productsSlice.js";
 import ProductCard from "../components/products/ProductCard.jsx";
-import ProductFilters from "../components/products/ProductFilters.jsx";
 
 const Products = () => {
   const dispatch = useDispatch();
@@ -40,7 +39,6 @@ const Products = () => {
       benefits: ["Quick pain relief", "Reduces fever", "Gentle on stomach"],
       usage: "Take 1-2 tablets every 4-6 hours as needed",
       weight: "50 tablets",
-      category: "Pain Relief",
       inStock: true,
     },
     {
@@ -57,7 +55,6 @@ const Products = () => {
       benefits: ["Stronger bones", "Better immunity", "Improved mood"],
       usage: "One capsule weekly or as directed by physician",
       weight: "4 capsules",
-      category: "Vitamins",
       inStock: true,
     },
     {
@@ -74,7 +71,6 @@ const Products = () => {
       benefits: ["Soothes throat", "Reduces cough", "Natural ingredients"],
       usage: "2 teaspoons 3 times daily after meals",
       weight: "100ml",
-      category: "Cough & Cold",
       inStock: true,
     },
     {
@@ -90,7 +86,6 @@ const Products = () => {
       benefits: ["Kills 99.9% germs", "Prevents infection", "Multipurpose use"],
       usage: "Dilute with water and apply to affected area",
       weight: "500ml",
-      category: "First Aid",
       inStock: true,
     },
     {
@@ -107,7 +102,6 @@ const Products = () => {
       benefits: ["Easy to use", "Memory storage", "Large display"],
       usage: "Place cuff on arm and press start button",
       weight: "500g",
-      category: "Medical Devices",
       inStock: true,
     },
     {
@@ -123,7 +117,6 @@ const Products = () => {
       benefits: ["Muscle growth", "Post-workout recovery", "Great taste"],
       usage: "Mix 1 scoop with 250ml water or milk",
       weight: "1kg",
-      category: "Supplements",
       inStock: false,
     },
   ];
@@ -143,14 +136,9 @@ const Products = () => {
           product.company
             .toLowerCase()
             .includes(filters.search.toLowerCase()) ||
-          product.category.toLowerCase().includes(filters.search.toLowerCase()),
-      );
-    }
-
-    // Apply category filter
-    if (filters.category) {
-      filtered = filtered.filter(
-        (product) => product.category === filters.category,
+          product.description
+            .toLowerCase()
+            .includes(filters.search.toLowerCase()),
       );
     }
 
@@ -175,8 +163,6 @@ const Products = () => {
   const handleFilterChange = (filterType, value) => {
     dispatch(updateFilters({ [filterType]: value }));
   };
-
-  const categories = [...new Set(products.map((product) => product.category))];
 
   return (
     <div className="fade-in">
@@ -204,50 +190,31 @@ const Products = () => {
 
           {/* Search and Filters */}
           <Row className="mb-4">
-            <Col lg={6} md={8} className="mb-3">
+            <Col lg={8} md={8} className="mb-3">
               <InputGroup className="search-container">
                 <InputGroup.Text className="bg-white border-end-0">
                   <i className="bi bi-search text-muted"></i>
                 </InputGroup.Text>
                 <Form.Control
                   type="text"
-                  placeholder="Search products, brands, categories..."
+                  placeholder="Search products, brands..."
                   value={filters.search}
                   onChange={handleSearchChange}
                   className="border-start-0 search-input"
                 />
               </InputGroup>
             </Col>
-            <Col lg={6} md={4} className="mb-3">
-              <Row>
-                <Col sm={6} className="mb-2">
-                  <Form.Select
-                    value={filters.category}
-                    onChange={(e) =>
-                      handleFilterChange("category", e.target.value)
-                    }
-                  >
-                    <option value="">All Categories</option>
-                    {categories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Col>
-                <Col sm={6} className="mb-2">
-                  <Form.Select
-                    value={filters.priceSort}
-                    onChange={(e) =>
-                      handleFilterChange("priceSort", e.target.value)
-                    }
-                  >
-                    <option value="">Sort by Price</option>
-                    <option value="low-to-high">Low to High</option>
-                    <option value="high-to-low">High to Low</option>
-                  </Form.Select>
-                </Col>
-              </Row>
+            <Col lg={4} md={4} className="mb-3">
+              <Form.Select
+                value={filters.priceSort}
+                onChange={(e) =>
+                  handleFilterChange("priceSort", e.target.value)
+                }
+              >
+                <option value="">Sort by Price</option>
+                <option value="low-to-high">Low to High</option>
+                <option value="high-to-low">High to Low</option>
+              </Form.Select>
             </Col>
           </Row>
 
@@ -296,7 +263,7 @@ const Products = () => {
         </Container>
       </section>
 
-      {/* Products Grid/List */}
+      {/* Products Grid/List - 2 Cards Per Row */}
       <section className="section-padding-sm">
         <Container>
           {filteredProducts.length === 0 ? (
@@ -306,7 +273,7 @@ const Products = () => {
                   <i className="bi bi-search display-1 text-muted mb-3"></i>
                   <h4>No products found</h4>
                   <p className="text-muted">
-                    Try adjusting your search or filter criteria
+                    Try adjusting your search criteria
                   </p>
                   <Button
                     variant="outline-primary"
@@ -314,7 +281,6 @@ const Products = () => {
                       dispatch(
                         updateFilters({
                           search: "",
-                          category: "",
                           priceSort: "",
                         }),
                       )
@@ -329,7 +295,7 @@ const Products = () => {
           ) : filters.viewMode === "card" ? (
             <Row>
               {filteredProducts.map((product) => (
-                <Col lg={4} md={6} className="mb-4" key={product.id}>
+                <Col lg={6} md={6} className="mb-4" key={product.id}>
                   <ProductCard
                     product={product}
                     onAddToCart={handleAddToCart}
@@ -363,9 +329,6 @@ const Products = () => {
                                 {product.description}
                               </p>
                               <div className="mb-2">
-                                <Badge bg="secondary" className="me-2">
-                                  {product.category}
-                                </Badge>
                                 {product.inStock ? (
                                   <Badge bg="success">In Stock</Badge>
                                 ) : (

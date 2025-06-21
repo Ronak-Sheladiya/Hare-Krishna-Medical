@@ -9,15 +9,16 @@ import {
   InputGroup,
   Form,
 } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../store/slices/cartSlice";
 
 const Home = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { featuredProducts } = useSelector((state) => state.products);
 
-  // Mock featured products
+  // Mock featured products - 4 products for single line
   const defaultFeaturedProducts = [
     {
       id: 1,
@@ -28,7 +29,6 @@ const Home = () => {
       image:
         "https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+1",
       description: "Effective pain relief and fever reducer",
-      category: "Pain Relief",
       inStock: true,
     },
     {
@@ -40,7 +40,6 @@ const Home = () => {
       image:
         "https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+2",
       description: "Essential vitamin for bone health",
-      category: "Vitamins",
       inStock: true,
     },
     {
@@ -52,7 +51,17 @@ const Home = () => {
       image:
         "https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+3",
       description: "Natural cough relief formula",
-      category: "Cough & Cold",
+      inStock: true,
+    },
+    {
+      id: 4,
+      name: "Antiseptic Liquid",
+      company: "Safe Guard",
+      price: 28.0,
+      originalPrice: 35.0,
+      image:
+        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+4",
+      description: "Multipurpose antiseptic for wound care",
       inStock: true,
     },
   ];
@@ -60,7 +69,8 @@ const Home = () => {
   const productsToShow =
     featuredProducts.length > 0 ? featuredProducts : defaultFeaturedProducts;
 
-  const handleAddToCart = (product) => {
+  const handleAddToCart = (e, product) => {
+    e.stopPropagation(); // Prevent card click navigation
     const cartItem = {
       id: product.id,
       name: product.name,
@@ -69,6 +79,10 @@ const Home = () => {
       quantity: 1,
     };
     dispatch(addToCart(cartItem));
+  };
+
+  const handleCardClick = (productId) => {
+    navigate(`/products/${productId}`);
   };
 
   useEffect(() => {
@@ -239,101 +253,7 @@ const Home = () => {
         </Container>
       </section>
 
-      {/* Quick Categories Section */}
-      <section
-        className="section-padding-sm"
-        style={{
-          background: "#ffffff",
-          paddingTop: "60px",
-          paddingBottom: "60px",
-        }}
-      >
-        <Container>
-          <Row className="mb-4">
-            <Col lg={12} className="text-center">
-              <h2
-                style={{
-                  color: "#333333",
-                  fontSize: "2.5rem",
-                  fontWeight: "700",
-                  marginBottom: "16px",
-                }}
-              >
-                Shop by Category
-              </h2>
-              <p
-                style={{
-                  color: "#495057",
-                  fontSize: "18px",
-                  maxWidth: "600px",
-                  margin: "0 auto",
-                }}
-              >
-                Find the right products for your health needs
-              </p>
-            </Col>
-          </Row>
-
-          <Row>
-            {[
-              { name: "Pain Relief", icon: "bi-heart-pulse", color: "#e63946" },
-              { name: "Vitamins", icon: "bi-capsule", color: "#dc3545" },
-              { name: "First Aid", icon: "bi-bandaid", color: "#343a40" },
-              {
-                name: "Medical Devices",
-                icon: "bi-thermometer",
-                color: "#495057",
-              },
-            ].map((category, index) => (
-              <Col lg={3} md={6} className="mb-4" key={index}>
-                <Card
-                  className="text-center h-100"
-                  style={{
-                    border: "2px solid #f8f9fa",
-                    borderRadius: "12px",
-                    transition: "all 0.3s ease",
-                    cursor: "pointer",
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.borderColor = category.color;
-                    e.currentTarget.style.transform = "translateY(-4px)";
-                    e.currentTarget.style.boxShadow = `0 8px 25px ${category.color}20`;
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.borderColor = "#f8f9fa";
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
-                >
-                  <Card.Body style={{ padding: "40px 20px" }}>
-                    <div
-                      style={{
-                        width: "80px",
-                        height: "80px",
-                        background: `linear-gradient(135deg, ${category.color}, ${category.color}dd)`,
-                        borderRadius: "50%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        margin: "0 auto 20px",
-                        color: "white",
-                        fontSize: "32px",
-                      }}
-                    >
-                      <i className={category.icon}></i>
-                    </div>
-                    <h5 style={{ color: "#333333", fontWeight: "600" }}>
-                      {category.name}
-                    </h5>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        </Container>
-      </section>
-
-      {/* Featured Products Section with Product Page Theme */}
+      {/* Featured Products Section - 4 Cards in Single Line */}
       <section
         className="section-padding"
         style={{
@@ -384,7 +304,7 @@ const Home = () => {
 
           <Row>
             {productsToShow.map((product, index) => (
-              <Col lg={4} md={6} className="mb-4" key={product.id || index}>
+              <Col lg={3} md={6} className="mb-4" key={product.id || index}>
                 <Card
                   className="h-100"
                   style={{
@@ -393,7 +313,9 @@ const Home = () => {
                     boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                     transition: "all 0.3s ease",
                     overflow: "hidden",
+                    cursor: "pointer",
                   }}
+                  onClick={() => handleCardClick(product.id)}
                   onMouseOver={(e) => {
                     e.currentTarget.style.transform = "translateY(-8px)";
                     e.currentTarget.style.boxShadow =
@@ -417,23 +339,6 @@ const Home = () => {
                       style={{
                         position: "absolute",
                         top: "12px",
-                        left: "12px",
-                      }}
-                    >
-                      <Badge
-                        style={{
-                          background: "#e63946",
-                          fontSize: "12px",
-                          padding: "6px 12px",
-                        }}
-                      >
-                        {product.category}
-                      </Badge>
-                    </div>
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "12px",
                         right: "12px",
                       }}
                     >
@@ -453,6 +358,30 @@ const Home = () => {
                         </Badge>
                       )}
                     </div>
+                    {product.originalPrice && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "12px",
+                          left: "12px",
+                        }}
+                      >
+                        <Badge
+                          style={{
+                            background: "#28a745",
+                            fontSize: "12px",
+                            padding: "6px 12px",
+                          }}
+                        >
+                          {Math.round(
+                            ((product.originalPrice - product.price) /
+                              product.originalPrice) *
+                              100,
+                          )}
+                          % OFF
+                        </Badge>
+                      </div>
+                    )}
                   </div>
 
                   <Card.Body style={{ padding: "24px" }}>
@@ -511,7 +440,7 @@ const Home = () => {
                         )}
                       </div>
                       <Button
-                        onClick={() => handleAddToCart(product)}
+                        onClick={(e) => handleAddToCart(e, product)}
                         disabled={!product.inStock}
                         style={{
                           background: product.inStock ? "#e63946" : "#495057",
