@@ -14,33 +14,48 @@
   .medical-header,
   .medical-footer,
   nav,
-  .navbar {
+  .navbar,
+  header,
+  footer {
     display: none !important;
   }
 
-  /* Make invoice full width for print */
+  /* Remove all margins and padding from body */
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background: white !important;
+  }
+
+  /* A4 page setup */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  /* Make invoice container take full page */
   .container {
     max-width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
   }
 
-  /* Remove shadows and borders for print */
-  .card,
-  .medical-card {
+  /* Remove all shadows and unnecessary styling for print */
+  * {
     box-shadow: none !important;
-    border: 1px solid #000 !important;
-    margin: 0 !important;
+    text-shadow: none !important;
   }
 
-  /* Ensure good contrast for print */
-  body {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    font-size: 12px !important;
-    line-height: 1.4 !important;
-    color: #000 !important;
-    background: white !important;
+  /* Ensure invoice takes full width */
+  .invoice-content,
+  .professional-invoice {
+    width: 210mm !important;
+    max-width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   /* Page breaks */
@@ -48,54 +63,56 @@
     page-break-inside: avoid;
   }
 
-  /* Remove margins for full page print */
-  @page {
-    margin: 0.5in;
-    size: A4;
+  .page-break {
+    page-break-before: always;
   }
 
   /* Print-specific table styling */
-  .table {
+  table {
     border-collapse: collapse !important;
-    font-size: 11px !important;
+    width: 100% !important;
   }
 
-  .table th,
-  .table td {
-    border: 1px solid #000 !important;
-    padding: 6px !important;
+  table th,
+  table td {
+    border: 1px solid #333 !important;
+    padding: 8px !important;
     word-wrap: break-word !important;
   }
 
-  /* Ensure colors print correctly */
-  .text-medical-red {
-    color: #dc3545 !important;
+  /* Ensure text is visible */
+  .text-white {
+    color: white !important;
   }
 
-  .text-success {
-    color: #28a745 !important;
+  /* Preserve background colors */
+  .bg-primary,
+  .bg-danger,
+  .bg-success,
+  .bg-warning,
+  .bg-info {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
-  .text-info {
-    color: #17a2b8 !important;
+  /* Force page break after invoice */
+  .professional-invoice {
+    page-break-after: always;
   }
 
-  /* Invoice specific print styles */
-  .invoice-header-right {
-    page-break-inside: avoid;
+  /* Prevent elements from breaking across pages */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    page-break-after: avoid;
   }
 
-  .customer-section,
-  .payment-section,
-  .items-section,
-  .totals-section {
-    page-break-inside: avoid;
-    margin-bottom: 20px !important;
-  }
-
-  /* Safe print spacing */
+  /* Print-specific adjustments */
   .invoice-content {
-    padding: 20px !important;
+    padding: 0 !important;
     max-width: 100% !important;
   }
 }
