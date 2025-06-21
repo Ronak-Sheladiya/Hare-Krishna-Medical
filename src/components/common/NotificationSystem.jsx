@@ -64,11 +64,11 @@ const NotificationSystem = () => {
   };
 
   const getNotificationIcon = (notification) => {
-    return notification.icon || "bi-bell";
+    return notification?.icon || "bi-bell";
   };
 
   const getNotificationColor = (notification) => {
-    return notification.color || "primary";
+    return notification?.color || "primary";
   };
 
   return (
@@ -228,32 +228,36 @@ const NotificationSystem = () => {
           autohide
           className="border-0 shadow"
         >
-          <Toast.Header closeButton={true}>
-            <div
-              className={`bg-${getNotificationColor(lastNotification)} text-white rounded-circle d-flex align-items-center justify-content-center me-2`}
-              style={{ width: "20px", height: "20px" }}
-            >
-              <i
-                className={`${getNotificationIcon(lastNotification)} fs-6`}
-              ></i>
-            </div>
-            <strong className="me-auto">{lastNotification?.title}</strong>
-            <small>Now</small>
-          </Toast.Header>
-          <Toast.Body>
-            {lastNotification?.message}
-            {lastNotification?.actionUrl && (
-              <div className="mt-2">
-                <Link
-                  to={lastNotification.actionUrl}
-                  className="btn btn-sm btn-primary"
-                  onClick={() => dispatch(hideToast())}
-                >
-                  View Details
-                </Link>
+          {lastNotification && (
+            <Toast.Header closeButton={true}>
+              <div
+                className={`bg-${getNotificationColor(lastNotification)} text-white rounded-circle d-flex align-items-center justify-content-center me-2`}
+                style={{ width: "20px", height: "20px" }}
+              >
+                <i
+                  className={`${getNotificationIcon(lastNotification)} fs-6`}
+                ></i>
               </div>
-            )}
-          </Toast.Body>
+              <strong className="me-auto">{lastNotification?.title}</strong>
+              <small>Now</small>
+            </Toast.Header>
+          )}
+          {lastNotification && (
+            <Toast.Body>
+              {lastNotification?.message}
+              {lastNotification?.actionUrl && (
+                <div className="mt-2">
+                  <Link
+                    to={lastNotification.actionUrl}
+                    className="btn btn-sm btn-primary"
+                    onClick={() => dispatch(hideToast())}
+                  >
+                    View Details
+                  </Link>
+                </div>
+              )}
+            </Toast.Body>
+          )}
         </Toast>
       </ToastContainer>
     </>
