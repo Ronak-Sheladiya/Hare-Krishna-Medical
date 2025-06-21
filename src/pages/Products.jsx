@@ -295,7 +295,7 @@ const Products = () => {
           ) : filters.viewMode === "card" ? (
             <Row>
               {filteredProducts.map((product) => (
-                <Col lg={6} md={6} className="mb-4" key={product.id}>
+                <Col lg={3} md={6} className="mb-4" key={product.id}>
                   <ProductCard
                     product={product}
                     onAddToCart={handleAddToCart}

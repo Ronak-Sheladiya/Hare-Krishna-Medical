@@ -234,17 +234,16 @@ const Home = () => {
               <div className="hero-image text-center">
                 <div
                   style={{
-                    background: "linear-gradient(135deg, #e63946, #dc3545)",
+                    background: "transparent",
                     borderRadius: "20px",
                     padding: "40px",
-                    boxShadow: "0 20px 40px rgba(230, 57, 70, 0.2)",
                   }}
                 >
                   <img
                     src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
                     alt="Hare Krishna Medical"
                     className="img-fluid"
-                    style={{ maxHeight: "300px", filter: "brightness(1.2)" }}
+                    style={{ maxHeight: "300px" }}
                   />
                 </div>
               </div>

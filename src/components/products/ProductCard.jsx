@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Button, Badge, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Card, Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
 const ProductCard = ({ product, onAddToCart }) => {
@@ -9,12 +9,6 @@ const ProductCard = ({ product, onAddToCart }) => {
     // Direct add to cart without confirmation
     onAddToCart(product);
   };
-
-  const discountPercentage = product.originalPrice
-    ? Math.round(
-        ((product.originalPrice - product.price) / product.originalPrice) * 100,
-      )
-    : 0;
 
   const nextImage = () => {
     setCurrentImageIndex((prev) =>
@@ -74,20 +68,6 @@ const ProductCard = ({ product, onAddToCart }) => {
           </>
         )}
 
-        {/* Badges */}
-        <div className="position-absolute top-0 start-0 m-2">
-          {!product.inStock && (
-            <Badge bg="danger" className="mb-1 d-block">
-              Out of Stock
-            </Badge>
-          )}
-          {discountPercentage > 0 && (
-            <Badge bg="success" className="d-block">
-              {discountPercentage}% OFF
-            </Badge>
-          )}
-        </div>
-
         {/* Quick Actions */}
         <div className="position-absolute top-0 end-0 m-2">
           <OverlayTrigger
@@ -109,12 +89,6 @@ const ProductCard = ({ product, onAddToCart }) => {
       </div>
 
       <Card.Body className="d-flex flex-column">
-        <div className="mb-2">
-          <Badge bg="secondary" className="mb-2">
-            {product.category}
-          </Badge>
-        </div>
-
         <Card.Title className="product-title">{product.name}</Card.Title>
         <Card.Text className="text-muted small mb-1">
           by {product.company}
@@ -140,12 +114,6 @@ const ProductCard = ({ product, onAddToCart }) => {
                 </span>
               )}
             </div>
-            {product.inStock && (
-              <Badge bg="success" className="small">
-                <i className="bi bi-check-circle me-1"></i>
-                In Stock
-              </Badge>
-            )}
           </div>
         </div>
 
