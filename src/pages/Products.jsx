@@ -3,12 +3,10 @@ import {
   Container,
   Row,
   Col,
-  Breadcrumb,
   Form,
   Button,
   Card,
   InputGroup,
-  Dropdown,
   Badge,
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
@@ -212,21 +210,27 @@ const Products = () => {
         }}
       >
         <Container>
-          <Row>
-
-          {/* Search and Filters */}
           <Row className="mb-4">
             <Col lg={8} md={8} className="mb-3">
               <InputGroup className="search-container">
-                <InputGroup.Text className="bg-white border-end-0">
-                  <i className="bi bi-search text-muted"></i>
+                <InputGroup.Text
+                  style={{
+                    background: "white",
+                    borderColor: "#e63946",
+                    color: "#e63946",
+                  }}
+                >
+                  <i className="bi bi-search"></i>
                 </InputGroup.Text>
                 <Form.Control
                   type="text"
                   placeholder="Search products, brands..."
                   value={filters.search}
                   onChange={handleSearchChange}
-                  className="border-start-0 search-input"
+                  style={{
+                    borderColor: "#e63946",
+                    borderLeft: "none",
+                  }}
                 />
               </InputGroup>
             </Col>
@@ -236,6 +240,9 @@ const Products = () => {
                 onChange={(e) =>
                   handleFilterChange("priceSort", e.target.value)
                 }
+                style={{
+                  borderColor: "#e63946",
+                }}
               >
                 <option value="">Sort by Price</option>
                 <option value="low-to-high">Low to High</option>
@@ -260,11 +267,12 @@ const Products = () => {
                       : "outline-secondary"
                   }
                   onClick={() => handleFilterChange("viewMode", "card")}
-                  className={
-                    filters.viewMode === "card"
-                      ? "btn-medical-primary"
-                      : "btn-medical-outline"
-                  }
+                  style={{
+                    backgroundColor:
+                      filters.viewMode === "card" ? "#e63946" : "transparent",
+                    borderColor: "#e63946",
+                    color: filters.viewMode === "card" ? "white" : "#e63946",
+                  }}
                   title="Grid View"
                 >
                   <i className="bi bi-grid3x3-gap me-1"></i>
@@ -277,11 +285,12 @@ const Products = () => {
                       : "outline-secondary"
                   }
                   onClick={() => handleFilterChange("viewMode", "list")}
-                  className={
-                    filters.viewMode === "list"
-                      ? "btn-medical-primary"
-                      : "btn-medical-outline"
-                  }
+                  style={{
+                    backgroundColor:
+                      filters.viewMode === "list" ? "#e63946" : "transparent",
+                    borderColor: "#e63946",
+                    color: filters.viewMode === "list" ? "white" : "#e63946",
+                  }}
                   title="List View"
                 >
                   <i className="bi bi-list me-1"></i>
@@ -293,17 +302,36 @@ const Products = () => {
         </Container>
       </section>
 
+      {/* Products Grid/List */}
+      <section
+        style={{
+          background: "#f8f9fa",
+          paddingTop: "60px",
+          paddingBottom: "80px",
+        }}
+      >
+        <Container>
           {filteredProducts.length === 0 ? (
             <Row>
               <Col lg={12} className="text-center">
-                <div className="medical-card p-5">
-                  <i className="bi bi-search display-1 text-muted mb-3"></i>
-                  <h4>No products found</h4>
-                  <p className="text-muted">
+                <Card
+                  style={{
+                    border: "2px solid #f8f9fa",
+                    borderRadius: "16px",
+                    padding: "50px",
+                    textAlign: "center",
+                    boxShadow: "0 8px 25px rgba(0,0,0,0.05)",
+                  }}
+                >
+                  <i
+                    className="bi bi-search display-1 mb-3"
+                    style={{ color: "#e9ecef" }}
+                  ></i>
+                  <h4 style={{ color: "#495057" }}>No products found</h4>
+                  <p style={{ color: "#6c757d" }}>
                     Try adjusting your search criteria
                   </p>
                   <Button
-                    variant="outline-primary"
                     onClick={() =>
                       dispatch(
                         updateFilters({
@@ -312,11 +340,16 @@ const Products = () => {
                         }),
                       )
                     }
-                    className="btn-medical-outline"
+                    style={{
+                      background: "#e63946",
+                      border: "none",
+                      borderRadius: "8px",
+                      padding: "12px 24px",
+                    }}
                   >
                     Clear Filters
                   </Button>
-                </div>
+                </Card>
               </Col>
             </Row>
           ) : filters.viewMode === "card" ? (
@@ -334,51 +367,133 @@ const Products = () => {
             <Row>
               <Col lg={12}>
                 {filteredProducts.map((product) => (
-                  <Card key={product.id} className="medical-card mb-3">
+                  <Card
+                    key={product.id}
+                    style={{
+                      border: "2px solid #f8f9fa",
+                      borderRadius: "16px",
+                      marginBottom: "20px",
+                      boxShadow: "0 8px 25px rgba(0,0,0,0.05)",
+                      transition: "all 0.3s ease",
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.borderColor = "#e63946";
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.boxShadow =
+                        "0 12px 35px rgba(230, 57, 70, 0.15)";
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.borderColor = "#f8f9fa";
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow =
+                        "0 8px 25px rgba(0,0,0,0.05)";
+                    }}
+                  >
                     <Row className="g-0">
                       <Col md={3}>
                         <Card.Img
                           variant="top"
                           src={product.images[0]}
                           className="h-100"
-                          style={{ objectFit: "cover" }}
+                          style={{
+                            objectFit: "cover",
+                            borderRadius: "16px 0 0 16px",
+                          }}
                         />
                       </Col>
                       <Col md={9}>
-                        <Card.Body>
+                        <Card.Body style={{ padding: "30px" }}>
                           <Row>
                             <Col md={8}>
-                              <h5 className="product-title">{product.name}</h5>
-                              <p className="text-muted mb-1">
+                              <h5
+                                style={{
+                                  color: "#333333",
+                                  fontWeight: "700",
+                                  marginBottom: "8px",
+                                }}
+                              >
+                                {product.name}
+                              </h5>
+                              <p
+                                style={{
+                                  color: "#6c757d",
+                                  marginBottom: "8px",
+                                  fontSize: "14px",
+                                }}
+                              >
                                 by {product.company}
                               </p>
-                              <p className="text-muted small mb-2">
+                              <p
+                                style={{
+                                  color: "#495057",
+                                  marginBottom: "12px",
+                                  fontSize: "13px",
+                                }}
+                              >
                                 {product.description}
                               </p>
                               <div className="mb-2">
                                 {product.inStock ? (
-                                  <Badge bg="success">In Stock</Badge>
+                                  <Badge
+                                    style={{
+                                      background: "#38a169",
+                                      color: "white",
+                                      padding: "6px 12px",
+                                      borderRadius: "20px",
+                                    }}
+                                  >
+                                    In Stock
+                                  </Badge>
                                 ) : (
-                                  <Badge bg="danger">Out of Stock</Badge>
+                                  <Badge
+                                    style={{
+                                      background: "#e63946",
+                                      color: "white",
+                                      padding: "6px 12px",
+                                      borderRadius: "20px",
+                                    }}
+                                  >
+                                    Out of Stock
+                                  </Badge>
                                 )}
                               </div>
                             </Col>
                             <Col md={4} className="text-end">
-                              <div className="mb-2">
-                                <span className="product-price">
+                              <div className="mb-3">
+                                <span
+                                  style={{
+                                    fontSize: "1.5rem",
+                                    fontWeight: "700",
+                                    color: "#e63946",
+                                  }}
+                                >
                                   ₹{product.price}
                                 </span>
                                 {product.originalPrice && (
-                                  <span className="text-muted text-decoration-line-through ms-2">
+                                  <span
+                                    style={{
+                                      color: "#6c757d",
+                                      textDecoration: "line-through",
+                                      marginLeft: "8px",
+                                    }}
+                                  >
                                     ₹{product.originalPrice}
                                   </span>
                                 )}
                               </div>
                               <div className="d-grid gap-2">
                                 <Button
-                                  className="btn-medical-primary"
                                   onClick={() => handleAddToCart(product)}
                                   disabled={!product.inStock}
+                                  style={{
+                                    background: product.inStock
+                                      ? "#e63946"
+                                      : "#6c757d",
+                                    border: "none",
+                                    borderRadius: "8px",
+                                    padding: "12px 24px",
+                                    fontWeight: "600",
+                                  }}
                                 >
                                   {product.inStock
                                     ? "Add to Cart"
@@ -388,7 +503,11 @@ const Products = () => {
                                   variant="outline-secondary"
                                   size="sm"
                                   href={`/products/${product.id}`}
-                                  className="btn-medical-outline"
+                                  style={{
+                                    borderColor: "#e63946",
+                                    color: "#e63946",
+                                    borderRadius: "8px",
+                                  }}
                                 >
                                   View Details
                                 </Button>
