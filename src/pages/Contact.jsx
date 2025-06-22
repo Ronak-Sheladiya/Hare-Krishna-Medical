@@ -218,9 +218,15 @@ const Contact = () => {
                   }}
                   onMouseOver={(e) => {
                     e.target.style.background = "#343a40";
+                    e.target.style.color = "white";
+                    const icon = e.target.querySelector("i");
+                    if (icon) icon.style.color = "white";
                   }}
                   onMouseOut={(e) => {
                     e.target.style.background = "#e63946";
+                    e.target.style.color = "white";
+                    const icon = e.target.querySelector("i");
+                    if (icon) icon.style.color = "white";
                   }}
                 >
                   <i className="bi bi-map me-2"></i>
