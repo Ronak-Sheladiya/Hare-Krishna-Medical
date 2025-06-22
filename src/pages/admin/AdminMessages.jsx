@@ -73,7 +73,7 @@ const AdminMessages = () => {
     }
 
     // Sort by date (newest first)
-    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    filtered = sortByDateDesc(filtered, "createdAt");
 
     setFilteredMessages(filtered);
   }, [messages, searchTerm, statusFilter, priorityFilter]);
