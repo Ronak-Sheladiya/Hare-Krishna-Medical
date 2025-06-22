@@ -45,7 +45,7 @@ const initialState = {
       priority: "High",
       status: "Open",
       isRead: false,
-      createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(), // 6 hours ago
+      createdAt: createDateOffset(6), // 6 hours ago
       reply: "",
       repliedAt: null,
     },
