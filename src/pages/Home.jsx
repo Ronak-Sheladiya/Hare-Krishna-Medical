@@ -117,18 +117,6 @@ const Home = () => {
           <Row className="align-items-center">
             <Col lg={6} className="mb-4">
               <div className="hero-content">
-                <Badge
-                  style={{
-                    background: "#e63946",
-                    fontSize: "14px",
-                    padding: "8px 16px",
-                    marginBottom: "20px",
-                    borderRadius: "6px",
-                  }}
-                  className="mb-3"
-                >
-                  🏥 Trusted Medical Store
-                </Badge>
                 <h1
                   style={{
                     color: "#333333",
@@ -154,44 +142,6 @@ const Home = () => {
                   authentic medicines and healthcare products delivered to your
                   doorstep.
                 </p>
-
-                {/* Search Bar */}
-                <div className="hero-search mb-4">
-                  <InputGroup size="lg" style={{ maxWidth: "500px" }}>
-                    <InputGroup.Text
-                      style={{
-                        background: "#ffffff",
-                        border: "2px solid #e9ecef",
-                        borderRight: "none",
-                      }}
-                    >
-                      <i
-                        className="bi bi-search"
-                        style={{ color: "#495057" }}
-                      ></i>
-                    </InputGroup.Text>
-                    <Form.Control
-                      type="text"
-                      placeholder="Search medicines, healthcare products..."
-                      style={{
-                        border: "2px solid #e9ecef",
-                        borderLeft: "none",
-                        fontSize: "16px",
-                        padding: "12px 16px",
-                      }}
-                    />
-                    <Button
-                      style={{
-                        background: "#e63946",
-                        border: "2px solid #e63946",
-                        padding: "12px 24px",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Search
-                    </Button>
-                  </InputGroup>
-                </div>
 
                 <div className="hero-actions d-flex gap-3 flex-wrap">
                   <Button
