@@ -102,7 +102,7 @@ const InvoiceView = () => {
 
       const element = document.getElementById("invoice-content");
       const canvas = await html2canvas(element, {
-        scale: 3,
+        scale: 2,
         logging: false,
         useCORS: true,
         backgroundColor: "#ffffff",
@@ -112,27 +112,37 @@ const InvoiceView = () => {
 
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 210;
+
+      // A4 dimensions: 210mm x 297mm
+      // Add 20px (about 7mm) margin on all sides
+      const pageWidth = 210;
       const pageHeight = 297;
+      const margin = 7; // 20px ≈ 7mm
+      const contentWidth = pageWidth - margin * 2;
+      const contentHeight = pageHeight - margin * 2;
+
+      const imgWidth = contentWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      // If content exceeds one page, scale it down to fit
-      if (imgHeight > pageHeight) {
-        const scaleFactor = pageHeight / imgHeight;
+      // If content exceeds available height, scale it down to fit
+      if (imgHeight > contentHeight) {
+        const scaleFactor = contentHeight / imgHeight;
         const scaledWidth = imgWidth * scaleFactor;
-        const scaledHeight = pageHeight;
+        const scaledHeight = contentHeight;
+        const xOffset = margin + (contentWidth - scaledWidth) / 2;
         pdf.addImage(
           imgData,
           "PNG",
-          (imgWidth - scaledWidth) / 2,
-          0,
+          xOffset,
+          margin,
           scaledWidth,
           scaledHeight,
         );
       } else {
-        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+        pdf.addImage(imgData, "PNG", margin, margin, imgWidth, imgHeight);
       }
 
+      // Directly download without showing print dialog
       pdf.save(`Invoice-${invoice.invoiceId}.pdf`);
 
       // Show elements again
@@ -242,33 +252,33 @@ const InvoiceView = () => {
           .no-print {
             display: none !important;
           }
-          
+
           .medical-header,
           .medical-footer,
           nav,
           .navbar {
             display: none !important;
           }
-          
+
           .container {
             max-width: 100% !important;
             padding: 0 !important;
             margin: 0 !important;
           }
-          
+
           .card,
           .medical-card {
             box-shadow: none !important;
             border: none !important;
           }
-          
+
           body {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
             color-adjust: exact !important;
             background: white !important;
           }
-          
+
           @page {
             margin: 0;
             size: A4;

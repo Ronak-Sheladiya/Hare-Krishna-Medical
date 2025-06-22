@@ -229,8 +229,10 @@ const Products = () => {
                       ? "btn-medical-primary"
                       : "btn-medical-outline"
                   }
+                  title="Grid View"
                 >
-                  <i className="bi bi-grid3x3-gap"></i>
+                  <i className="bi bi-grid3x3-gap me-1"></i>
+                  <i className="bi bi-folder2-open"></i>
                 </Button>
                 <Button
                   variant={
@@ -244,8 +246,10 @@ const Products = () => {
                       ? "btn-medical-primary"
                       : "btn-medical-outline"
                   }
+                  title="List View"
                 >
-                  <i className="bi bi-list"></i>
+                  <i className="bi bi-list me-1"></i>
+                  <i className="bi bi-folder-symlink"></i>
                 </Button>
               </div>
             </Col>
