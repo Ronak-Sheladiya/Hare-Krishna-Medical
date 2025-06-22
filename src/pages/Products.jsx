@@ -293,18 +293,6 @@ const Products = () => {
         </Container>
       </section>
 
-        </Container>
-      </section>
-
-      {/* Products Grid/List */}
-      <section
-        style={{
-          background: "#f8f9fa",
-          paddingTop: "60px",
-          paddingBottom: "80px",
-        }}
-      >
-        <Container>
           {filteredProducts.length === 0 ? (
             <Row>
               <Col lg={12} className="text-center">
