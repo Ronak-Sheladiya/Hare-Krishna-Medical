@@ -199,9 +199,54 @@ const UserProfile = () => {
   };
 
   return (
-    <div className="section-padding">
-      <Container>
-        <Row>
+    <div className="fade-in user-page-content" data-page="user">
+      {/* Hero Section - About Us Red Theme */}
+      <section
+        style={{
+          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+          color: "white",
+        }}
+      >
+        <Container>
+          <Row className="text-center">
+            <Col lg={12}>
+              <h1
+                style={{
+                  fontSize: "3rem",
+                  fontWeight: "800",
+                  marginBottom: "20px",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                }}
+              >
+                Edit Profile
+              </h1>
+              <p
+                style={{
+                  fontSize: "1.2rem",
+                  opacity: "0.9",
+                  maxWidth: "600px",
+                  margin: "0 auto",
+                }}
+              >
+                Update your personal information and account settings
+              </p>
+            </Col>
+          </Row>
+        </Container>
+      </section>
+
+      {/* Profile Content */}
+      <section
+        style={{
+          background: "#f8f9fa",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+          minHeight: "60vh",
+        }}
+      >
+        <Container>
           <Col lg={12}>
             <div className="text-center mb-4">
               <h2 className="section-title">My Profile</h2>
