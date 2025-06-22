@@ -466,17 +466,6 @@ const Order = () => {
 
   return (
     <div className="fade-in">
-      {/* Breadcrumb */}
-      <section className="medical-breadcrumb" style={{ marginTop: "20px" }}>
-        <Container>
-          <Breadcrumb>
-            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-            <Breadcrumb.Item href="/cart">Cart</Breadcrumb.Item>
-            <Breadcrumb.Item active>Place Order</Breadcrumb.Item>
-          </Breadcrumb>
-        </Container>
-      </section>
-
       {/* Order Form */}
       <section className="section-padding">
         <Container>
