@@ -11,9 +11,10 @@ import {
   Form,
   InputGroup,
 } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const UserOrders = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -370,9 +371,7 @@ const UserOrders = () => {
                             <Button
                               size="sm"
                               variant="outline-success"
-                              onClick={() =>
-                                (window.location.href = `/invoice/${order.id}`)
-                              }
+                              onClick={() => navigate(`/invoice/${order.id}`)}
                               className="btn-medical-outline"
                             >
                               <i className="bi bi-receipt"></i>
