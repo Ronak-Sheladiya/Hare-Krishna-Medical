@@ -258,7 +258,39 @@ const AdminInvoices = () => {
   };
 
   const handlePrintInvoice = () => {
-    window.print();
+    // Create a new window for printing
+    const printWindow = window.open("", "_blank", "width=800,height=600");
+    const invoiceContent = document.querySelector(".invoice-preview").innerHTML;
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Invoice ${selectedInvoice?.invoiceId}</title>
+          <style>
+            body {
+              margin: 0;
+              padding: 0;
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+            @media print {
+              body { margin: 0; padding: 0; }
+              @page { size: A4; margin: 0.5in; }
+            }
+          </style>
+        </head>
+        <body>
+          ${invoiceContent}
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
   };
 
   const getStatusVariant = (status) => {
