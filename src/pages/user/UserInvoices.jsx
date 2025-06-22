@@ -11,18 +11,73 @@ import {
   InputGroup,
   Modal,
   ProgressBar,
+  Alert,
 } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
 const UserInvoices = () => {
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
   const [invoices, setInvoices] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [bulkDownloading, setBulkDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [showBulkModal, setShowBulkModal] = useState(false);
+
+  // Redirect admin to admin invoices page
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: "/user/invoices" }} replace />;
+  }
+
+  if (user?.role === 1) {
+    return (
+      <div className="fade-in">
+        <section
+          style={{
+            background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
+            paddingTop: "80px",
+            paddingBottom: "80px",
+            color: "white",
+          }}
+        >
+          <Container>
+            <Row className="text-center">
+              <Col lg={12}>
+                <Alert variant="warning" className="bg-white text-dark">
+                  <h4>Access Restricted</h4>
+                  <p>
+                    This page is for regular users only. As an admin, please use
+                    the admin invoice management system.
+                  </p>
+                  <div className="d-flex gap-2 justify-content-center">
+                    <Button
+                      as={Link}
+                      to="/admin/invoices"
+                      className="btn-medical-primary"
+                    >
+                      <i className="bi bi-gear me-2"></i>
+                      Go to Admin Invoices
+                    </Button>
+                    <Button
+                      as={Link}
+                      to="/admin/dashboard"
+                      variant="outline-secondary"
+                    >
+                      <i className="bi bi-house me-2"></i>
+                      Admin Dashboard
+                    </Button>
+                  </div>
+                </Alert>
+              </Col>
+            </Row>
+          </Container>
+        </section>
+      </div>
+    );
+  }
 
   // Mock invoices data
   const mockInvoices = [
@@ -197,8 +252,10 @@ const UserInvoices = () => {
         pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
       }
 
-      // Download the combined PDF
-      pdf.save(`All_Invoices_${new Date().toISOString().split("T")[0]}.pdf`);
+      // Download the combined PDF with official name
+      pdf.save(
+        `Official_Invoices_Combined_${new Date().toISOString().split("T")[0]}.pdf`,
+      );
     } catch (error) {
       console.error("Error generating bulk PDF:", error);
       alert(
