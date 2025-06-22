@@ -23,7 +23,7 @@
   /* A4 page setup */
   @page {
     size: A4;
-    margin: 0;
+    margin: 10px;
     padding: 0;
   }
 
@@ -37,7 +37,7 @@
   /* Force single page */
   html,
   body {
-    height: 297mm;
+    height: 287mm;
     overflow: hidden;
   }
 
