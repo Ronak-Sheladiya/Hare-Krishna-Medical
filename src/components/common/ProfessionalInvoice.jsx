@@ -159,7 +159,7 @@ const ProfessionalInvoice = ({
       background: "#ffffff",
     },
     tableHeader: {
-      background: "linear-gradient(135deg, #343a40, #495057)",
+      background: "linear-gradient(135deg, #2d3748 0%, #4a5568 100%)",
       color: "#ffffff",
     },
     tableHeaderCell: {
