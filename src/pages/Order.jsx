@@ -504,7 +504,6 @@ const Order = () => {
 
   const handleInvoiceClose = () => {
     setShowInvoiceModal(false);
-    dispatch(clearCart());
     navigate("/");
   };
 
