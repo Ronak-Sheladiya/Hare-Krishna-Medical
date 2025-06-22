@@ -35,36 +35,76 @@ const AdminDashboard = () => {
     {
       id: "HKM12345678",
       customer: "John Doe",
+      customerEmail: "john.doe@email.com",
+      customerPhone: "+91 9876543210",
+      address: "123 Main Street, Surat, Gujarat 395007",
       amount: 235.5,
       status: "Pending",
       date: "2024-01-15",
+      time: "10:30 AM",
       items: 3,
+      paymentMethod: "Online",
+      orderItems: [
+        { name: "Paracetamol Tablets", quantity: 2, price: 25.99 },
+        { name: "Vitamin D3", quantity: 1, price: 45.5 },
+        { name: "Cough Syrup", quantity: 1, price: 35.75 },
+      ],
     },
     {
       id: "HKM12345679",
       customer: "Jane Smith",
+      customerEmail: "jane.smith@email.com",
+      customerPhone: "+91 9123456789",
+      address: "456 Oak Avenue, Ahmedabad, Gujarat 380001",
       amount: 156.75,
       status: "Confirmed",
       date: "2024-01-15",
+      time: "02:15 PM",
       items: 2,
+      paymentMethod: "COD",
+      orderItems: [
+        { name: "Antiseptic Liquid", quantity: 2, price: 28.0 },
+        { name: "Digital Thermometer", quantity: 1, price: 100.75 },
+      ],
     },
     {
       id: "HKM12345680",
       customer: "Mike Johnson",
+      customerEmail: "mike.j@company.com",
+      customerPhone: "+91 9988776655",
+      address: "789 Business District, Vadodara, Gujarat 390001",
       amount: 89.25,
       status: "Delivered",
       date: "2024-01-14",
+      time: "11:45 AM",
       items: 1,
+      paymentMethod: "Online",
+      orderItems: [{ name: "BP Monitor", quantity: 1, price: 89.25 }],
     },
     {
       id: "HKM12345681",
       customer: "Sarah Wilson",
+      customerEmail: "sarah.w@email.com",
+      customerPhone: "+91 9876512345",
+      address: "321 Health Care Lane, Rajkot, Gujarat 360001",
       amount: 345.0,
       status: "Processing",
       date: "2024-01-14",
+      time: "04:20 PM",
       items: 5,
+      paymentMethod: "Online",
+      orderItems: [
+        { name: "Medicine Kit", quantity: 1, price: 150.0 },
+        { name: "First Aid Box", quantity: 1, price: 89.0 },
+        { name: "Hand Sanitizer", quantity: 3, price: 35.33 },
+      ],
     },
   ];
+
+  const handleViewOrder = (order) => {
+    setSelectedOrder(order);
+    setShowOrderModal(true);
+  };
 
   const lowStockProducts = [
     { id: 1, name: "Paracetamol Tablets", stock: 5, threshold: 20 },
