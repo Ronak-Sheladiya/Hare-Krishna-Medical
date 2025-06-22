@@ -48,43 +48,68 @@ const GlobalSecurity = () => {
         return false;
       }
 
-      // Ctrl+A - Select All
-      if (e.ctrlKey && e.keyCode === 65) {
+      // Ctrl+A - Select All (allow on contact, invoice, admin, and user pages)
+      if (
+        e.ctrlKey &&
+        e.keyCode === 65 &&
+        !window.location.pathname.includes("contact") &&
+        !window.location.pathname.includes("invoice") &&
+        !window.location.pathname.includes("/admin") &&
+        !window.location.pathname.includes("/user")
+      ) {
         e.preventDefault();
         setWarningType("Select all");
         setShowWarning(true);
         return false;
       }
 
-      // Ctrl+C - Copy
-      if (e.ctrlKey && e.keyCode === 67) {
+      // Ctrl+C - Copy (allow on contact, invoice, admin, and user pages)
+      if (
+        e.ctrlKey &&
+        e.keyCode === 67 &&
+        !window.location.pathname.includes("contact") &&
+        !window.location.pathname.includes("invoice") &&
+        !window.location.pathname.includes("/admin") &&
+        !window.location.pathname.includes("/user")
+      ) {
         e.preventDefault();
         setWarningType("Copy");
         setShowWarning(true);
         return false;
       }
 
-      // Ctrl+V - Paste
-      if (e.ctrlKey && e.keyCode === 86) {
+      // Ctrl+V - Paste (allow on admin and user pages)
+      if (
+        e.ctrlKey &&
+        e.keyCode === 86 &&
+        !window.location.pathname.includes("/admin") &&
+        !window.location.pathname.includes("/user")
+      ) {
         e.preventDefault();
         setWarningType("Paste");
         setShowWarning(true);
         return false;
       }
 
-      // Ctrl+X - Cut
-      if (e.ctrlKey && e.keyCode === 88) {
+      // Ctrl+X - Cut (allow on admin and user pages)
+      if (
+        e.ctrlKey &&
+        e.keyCode === 88 &&
+        !window.location.pathname.includes("/admin") &&
+        !window.location.pathname.includes("/user")
+      ) {
         e.preventDefault();
         setWarningType("Cut");
         setShowWarning(true);
         return false;
       }
 
-      // Ctrl+P - Print (except for invoice pages)
+      // Ctrl+P - Print (allow for invoice and contact pages)
       if (
         e.ctrlKey &&
         e.keyCode === 80 &&
-        !window.location.pathname.includes("invoice")
+        !window.location.pathname.includes("invoice") &&
+        !window.location.pathname.includes("contact")
       ) {
         e.preventDefault();
         setWarningType("Print");
@@ -101,8 +126,16 @@ const GlobalSecurity = () => {
       return false;
     };
 
-    // Disable text selection
+    // Disable text selection (allow on invoice, contact, admin, and user pages)
     const handleSelectStart = (e) => {
+      if (
+        window.location.pathname.includes("invoice") ||
+        window.location.pathname.includes("contact") ||
+        window.location.pathname.includes("/admin") ||
+        window.location.pathname.includes("/user")
+      ) {
+        return true; // Allow selection
+      }
       e.preventDefault();
       return false;
     };
@@ -135,7 +168,7 @@ const GlobalSecurity = () => {
         -webkit-touch-callout: none !important;
         -webkit-tap-highlight-color: transparent !important;
       }
-      
+
       /* Disable drag and drop */
       img, a {
         -webkit-user-drag: none !important;
@@ -145,7 +178,7 @@ const GlobalSecurity = () => {
         user-drag: none !important;
         pointer-events: auto !important;
       }
-      
+
       /* Allow input fields to be selectable for forms */
       input, textarea, select, [contenteditable="true"] {
         -webkit-user-select: text !important;
@@ -153,34 +186,121 @@ const GlobalSecurity = () => {
         -ms-user-select: text !important;
         user-select: text !important;
       }
-      
+
+      /* Allow text selection on contact, invoice, admin, and user pages */
+      .contact-page-content, .contact-page-content *,
+      .invoice-container, .invoice-container *,
+      .admin-page-content, .admin-page-content *,
+      .user-page-content, .user-page-content *,
+      [data-page="contact"] *, [data-page="invoice"] *,
+      [data-page="admin"] *, [data-page="user"] *,
+      [class*="admin-"] *, [class*="user-"] *,
+      body[data-path*="/admin"] *, body[data-path*="/user"] *,
+      .contact-page-content a, .contact-page-content button, .contact-page-content span, .contact-page-content div, .contact-page-content p, .contact-page-content h1, .contact-page-content h2, .contact-page-content h3, .contact-page-content h4, .contact-page-content h5, .contact-page-content h6, .contact-page-content li {
+        -webkit-user-select: text !important;
+        -moz-user-select: text !important;
+        -ms-user-select: text !important;
+        user-select: text !important;
+      }
+
+      /* Red selection theme for contact page */
+      .contact-page-content ::selection {
+        background: #e63946 !important;
+        color: white !important;
+      }
+
+      .contact-page-content ::-moz-selection {
+        background: #e63946 !important;
+        color: white !important;
+      }
+
+      /* Specific selection for contact info elements */
+      .contact-info-selectable,
+      .contact-info-selectable *,
+      .contact-address,
+      .contact-phone,
+      .contact-email,
+      [data-contact-info] {
+        -webkit-user-select: text !important;
+        -moz-user-select: text !important;
+        -ms-user-select: text !important;
+        user-select: text !important;
+        cursor: text !important;
+      }
+
+      .contact-info-selectable::selection,
+      .contact-address::selection,
+      .contact-phone::selection,
+      .contact-email::selection {
+        background: #e63946 !important;
+        color: white !important;
+      }
+
+      .contact-info-selectable::-moz-selection,
+      .contact-address::-moz-selection,
+      .contact-phone::-moz-selection,
+      .contact-email::-moz-selection {
+        background: #e63946 !important;
+        color: white !important;
+      }
+
+      /* Red selection theme for admin pages (About Us theme) */
+      .admin-page-content ::selection,
+      [data-page="admin"] ::selection,
+      [class*="admin-"] ::selection {
+        background: #e63946 !important;
+        color: white !important;
+      }
+
+      .admin-page-content ::-moz-selection,
+      [data-page="admin"] ::-moz-selection,
+      [class*="admin-"] ::-moz-selection {
+        background: #e63946 !important;
+        color: white !important;
+      }
+
+      /* Red selection theme for user pages (About Us theme) */
+      .user-page-content ::selection,
+      [data-page="user"] ::selection,
+      [class*="user-"] ::selection {
+        background: #e63946 !important;
+        color: white !important;
+      }
+
+      .user-page-content ::-moz-selection,
+      [data-page="user"] ::-moz-selection,
+      [class*="user-"] ::-moz-selection {
+        background: #e63946 !important;
+        color: white !important;
+      }
+
       /* Hide scrollbars in developer tools */
       ::-webkit-scrollbar {
         width: 8px;
       }
-      
+
       ::-webkit-scrollbar-track {
         background: #f1f1f1;
       }
-      
+
       ::-webkit-scrollbar-thumb {
         background: #c1c1c1;
         border-radius: 4px;
       }
-      
+
       ::-webkit-scrollbar-thumb:hover {
         background: #a1a1a1;
       }
-      
+
       /* Disable highlighting */
       ::selection {
         background: transparent !important;
       }
-      
+
       ::-moz-selection {
         background: transparent !important;
       }
-      
+
       /* Security watermark for print */
       @media print {
         body::before {
@@ -262,31 +382,6 @@ const GlobalSecurity = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-
-      {/* Security Badge */}
-      <div
-        style={{
-          position: "fixed",
-          bottom: "20px",
-          left: "20px",
-          zIndex: 9999,
-          background: "rgba(220, 53, 69, 0.9)",
-          color: "white",
-          padding: "8px 12px",
-          borderRadius: "20px",
-          fontSize: "11px",
-          fontWeight: "600",
-          boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
-          display: "flex",
-          alignItems: "center",
-          gap: "5px",
-          userSelect: "none",
-          pointerEvents: "none",
-        }}
-      >
-        <i className="bi bi-shield-lock-fill"></i>
-        <span>PROTECTED CONTENT</span>
-      </div>
     </>
   );
 };

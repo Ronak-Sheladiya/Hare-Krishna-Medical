@@ -56,7 +56,21 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    // Force scroll to top immediately and smoothly
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+
+    // Also ensure document element is scrolled to top
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    // Additional timeout to ensure scroll happens after DOM update
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 10);
   }, [pathname]);
 
   return null;
@@ -163,105 +177,21 @@ function App() {
               }
             />
 
-            {/* Protected Admin Routes */}
-            <Route
-              path="/admin/dashboard"
-              element={
-                <ProtectedRoute adminOnly={true}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/products"
-              element={
-                <ProtectedRoute adminOnly={true}>
-                  <AdminProducts />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/orders"
-              element={
-                <ProtectedRoute adminOnly={true}>
-                  <AdminOrders />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/users"
-              element={
-                <ProtectedRoute adminOnly={true}>
-                  <AdminUsers />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/analytics"
-              element={
-                <ProtectedRoute adminOnly={true}>
-                  <AdminAnalytics />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/messages"
-              element={
-                <ProtectedRoute adminOnly={true}>
-                  <AdminMessages />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/invoices"
-              element={
-                <ProtectedRoute adminOnly={true}>
-                  <AdminInvoices />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/backend-docs"
-              element={
-                <ProtectedRoute adminOnly={true}>
-                  <BackendDocs />
-                </ProtectedRoute>
-              }
-            />
+            {/* Admin Routes */}
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/products" element={<AdminProducts />} />
+            <Route path="/admin/orders" element={<AdminOrders />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/analytics" element={<AdminAnalytics />} />
+            <Route path="/admin/messages" element={<AdminMessages />} />
+            <Route path="/admin/invoices" element={<AdminInvoices />} />
+            <Route path="/admin/backend-docs" element={<BackendDocs />} />
 
-            {/* Protected User Routes */}
-            <Route
-              path="/user/dashboard"
-              element={
-                <ProtectedRoute>
-                  <UserDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/user/orders"
-              element={
-                <ProtectedRoute>
-                  <UserOrders />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/user/invoices"
-              element={
-                <ProtectedRoute>
-                  <UserInvoices />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/user/profile"
-              element={
-                <ProtectedRoute>
-                  <UserProfile />
-                </ProtectedRoute>
-              }
-            />
+            {/* User Routes */}
+            <Route path="/user/dashboard" element={<UserDashboard />} />
+            <Route path="/user/orders" element={<UserOrders />} />
+            <Route path="/user/invoices" element={<UserInvoices />} />
+            <Route path="/user/profile" element={<UserProfile />} />
             <Route
               path="/user/*"
               element={

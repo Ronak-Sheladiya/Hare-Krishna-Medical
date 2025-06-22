@@ -55,7 +55,51 @@ const Order = () => {
   if (items.length === 0) {
     return (
       <div className="fade-in">
-        <section className="section-padding">
+        {/* Hero Section - Matching About Us */}
+        <section
+          style={{
+            background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
+            paddingTop: "80px",
+            paddingBottom: "80px",
+            color: "white",
+          }}
+        >
+          <Container>
+            <Row className="text-center">
+              <Col lg={12}>
+                <h1
+                  style={{
+                    fontSize: "3rem",
+                    fontWeight: "800",
+                    marginBottom: "20px",
+                    textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                  }}
+                >
+                  Place Your Order
+                </h1>
+                <p
+                  style={{
+                    fontSize: "1.2rem",
+                    opacity: "0.9",
+                    maxWidth: "600px",
+                    margin: "0 auto",
+                  }}
+                >
+                  Complete your medical product purchase
+                </p>
+              </Col>
+            </Row>
+          </Container>
+        </section>
+
+        {/* Order Form Section */}
+        <section
+          style={{
+            background: "#f8f9fa",
+            paddingTop: "80px",
+            paddingBottom: "80px",
+          }}
+        >
           <Container>
             <Row className="justify-content-center">
               <Col lg={8} className="text-center">
@@ -246,7 +290,8 @@ const Order = () => {
       const root = createRoot(invoiceElement);
       root.render(
         React.createElement(ProfessionalInvoice, {
-          invoiceData,
+          invoiceData: { ...invoiceData, qrCode: qrCode },
+          qrCode: qrCode,
           forPrint: true,
         }),
       );
@@ -453,7 +498,7 @@ const Order = () => {
   const handleViewOnlineInvoice = () => {
     if (orderDetails) {
       const invoiceUrl = `/invoice/${orderDetails.orderId}`;
-      window.open(invoiceUrl, "_blank");
+      window.location.href = invoiceUrl;
     }
   };
 

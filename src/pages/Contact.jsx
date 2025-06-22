@@ -95,7 +95,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="fade-in">
+    <div className="fade-in contact-page-content" data-page="contact">
       {/* Hero Section */}
       <section
         style={{
@@ -201,7 +201,11 @@ const Contact = () => {
                 <h5 style={{ color: "#333333", marginBottom: "16px" }}>
                   Our Location
                 </h5>
-                <p style={{ color: "#495057", marginBottom: "20px" }}>
+                <p
+                  style={{ color: "#495057", marginBottom: "20px" }}
+                  className="contact-address contact-info-selectable"
+                  data-contact-info="address"
+                >
                   3 Sahyog Complex, Man Sarovar Circle
                   <br />
                   Amroli, 394107, Gujarat, India
@@ -292,18 +296,28 @@ const Contact = () => {
                 <h5 style={{ color: "#333333", marginBottom: "16px" }}>
                   Phone Numbers
                 </h5>
-                <p style={{ color: "#495057", marginBottom: "8px" }}>
+                <p
+                  style={{ color: "#495057", marginBottom: "8px" }}
+                  className="contact-phone contact-info-selectable"
+                  data-contact-info="phone"
+                >
                   <a
                     href="tel:+917698913354"
                     style={{ textDecoration: "none", color: "#495057" }}
+                    className="contact-info-selectable"
                   >
                     +91 76989 13354
                   </a>
                 </p>
-                <p style={{ color: "#495057", marginBottom: "20px" }}>
+                <p
+                  style={{ color: "#495057", marginBottom: "20px" }}
+                  className="contact-phone contact-info-selectable"
+                  data-contact-info="phone"
+                >
                   <a
                     href="tel:+919106018508"
                     style={{ textDecoration: "none", color: "#495057" }}
+                    className="contact-info-selectable"
                   >
                     +91 91060 18508
                   </a>
@@ -396,10 +410,15 @@ const Contact = () => {
                 <h5 style={{ color: "#333333", marginBottom: "16px" }}>
                   Email Address
                 </h5>
-                <p style={{ color: "#495057", marginBottom: "20px" }}>
+                <p
+                  style={{ color: "#495057", marginBottom: "20px" }}
+                  className="contact-email contact-info-selectable"
+                  data-contact-info="email"
+                >
                   <a
                     href="mailto:harekrishnamedical@gmail.com"
                     style={{ textDecoration: "none", color: "#495057" }}
+                    className="contact-info-selectable"
                   >
                     harekrishnamedical@gmail.com
                   </a>

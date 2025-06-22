@@ -93,8 +93,13 @@ const UserInvoices = () => {
   });
 
   const handleDownloadPDF = (invoice) => {
-    // This will navigate to the invoice view page which has PDF download functionality
-    window.open(`/invoice/${invoice.orderId}`, "_blank");
+    // Navigate to the invoice view page which has PDF download functionality
+    window.location.href = `/invoice/${invoice.orderId}`;
+  };
+
+  const handlePrintInvoice = (invoice) => {
+    // Navigate to invoice page
+    window.location.href = `/invoice/${invoice.orderId}`;
   };
 
   const getStatusBadge = (status) => {
@@ -272,8 +277,53 @@ const UserInvoices = () => {
   };
 
   return (
-    <div className="fade-in">
-      <section className="section-padding-sm">
+    <div className="fade-in user-page-content" data-page="user">
+      {/* Hero Section - About Us Red Theme */}
+      <section
+        style={{
+          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+          color: "white",
+        }}
+      >
+        <Container>
+          <Row className="text-center">
+            <Col lg={12}>
+              <h1
+                style={{
+                  fontSize: "3rem",
+                  fontWeight: "800",
+                  marginBottom: "20px",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                }}
+              >
+                My Invoices
+              </h1>
+              <p
+                style={{
+                  fontSize: "1.2rem",
+                  opacity: "0.9",
+                  maxWidth: "600px",
+                  margin: "0 auto",
+                }}
+              >
+                View and download your purchase invoices
+              </p>
+            </Col>
+          </Row>
+        </Container>
+      </section>
+
+      {/* Invoices Content */}
+      <section
+        style={{
+          background: "#f8f9fa",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+          minHeight: "60vh",
+        }}
+      >
         <Container>
           {/* Header */}
           <Row className="mb-4">
@@ -435,9 +485,19 @@ const UserInvoices = () => {
                               variant="outline-primary"
                               onClick={() => handleDownloadPDF(invoice)}
                               className="btn-medical-outline"
+                              title="Download PDF"
                             >
                               <i className="bi bi-download me-1"></i>
                               PDF
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline-success"
+                              onClick={() => handlePrintInvoice(invoice)}
+                              className="btn-medical-outline"
+                              title="Print Invoice"
+                            >
+                              <i className="bi bi-printer"></i>
                             </Button>
                             <Button
                               size="sm"
@@ -445,6 +505,7 @@ const UserInvoices = () => {
                               as={Link}
                               to={`/invoice/${invoice.orderId}`}
                               className="btn-medical-outline"
+                              title="View Invoice"
                             >
                               <i className="bi bi-eye"></i>
                             </Button>

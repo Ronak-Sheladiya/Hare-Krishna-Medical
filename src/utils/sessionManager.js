@@ -66,11 +66,11 @@ class SessionManager {
       }
 
       const elapsed = Date.now() - parseInt(loginTime);
-      const maxAge = rememberMe ? 24 * 60 * 60 * 1000 : 2 * 60 * 60 * 1000; // 24h or 2h
+      const maxAge = rememberMe ? 7 * 24 * 60 * 60 * 1000 : 4 * 60 * 60 * 1000; // 7 days or 4h
       const warningTime = maxAge - 15 * 60 * 1000; // 15 minutes before expiry
 
-      // Check if user has been inactive for too long
-      const inactivityLimit = 30 * 60 * 1000; // 30 minutes
+      // Check if user has been inactive for too long (only for session storage)
+      const inactivityLimit = 2 * 60 * 60 * 1000; // 2 hours
       const timeSinceActivity = Date.now() - this.lastActivity;
 
       if (
