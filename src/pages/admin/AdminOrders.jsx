@@ -603,9 +603,9 @@ const AdminOrders = () => {
                                   <Button
                                     size="sm"
                                     variant="outline-success"
-                                    title="View Invoice"
+                                    title="View Invoice in Popup"
                                     onClick={() =>
-                                      navigate(`/invoice/${order.orderId}`)
+                                      handleViewInvoicePopup(order)
                                     }
                                   >
                                     <i className="bi bi-receipt"></i>
@@ -613,10 +613,8 @@ const AdminOrders = () => {
                                   <Button
                                     size="sm"
                                     variant="outline-info"
-                                    title="Print"
-                                    onClick={() =>
-                                      navigate(`/invoice/${order.orderId}`)
-                                    }
+                                    title="Print Invoice Directly"
+                                    onClick={() => handleDirectPrint(order)}
                                   >
                                     <i className="bi bi-printer"></i>
                                   </Button>
