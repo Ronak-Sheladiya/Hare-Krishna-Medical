@@ -181,6 +181,7 @@ const Contact = () => {
                 }}
               >
                 <div
+                  className="contact-icon"
                   style={{
                     width: "80px",
                     height: "80px",
@@ -192,6 +193,7 @@ const Contact = () => {
                     margin: "0 auto 24px",
                     color: "white",
                     fontSize: "32px",
+                    transition: "all 0.3s ease",
                   }}
                 >
                   <i className="bi bi-geo-alt-fill"></i>
