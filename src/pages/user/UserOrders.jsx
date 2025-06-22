@@ -370,8 +370,9 @@ const UserOrders = () => {
                             <Button
                               size="sm"
                               variant="outline-success"
-                              as={Link}
-                              to={`/invoice/${order.id}`}
+                              onClick={() =>
+                                (window.location.href = `/invoice/${order.id}`)
+                              }
                               className="btn-medical-outline"
                             >
                               <i className="bi bi-receipt"></i>

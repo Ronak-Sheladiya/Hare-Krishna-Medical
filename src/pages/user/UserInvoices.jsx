@@ -93,16 +93,13 @@ const UserInvoices = () => {
   });
 
   const handleDownloadPDF = (invoice) => {
-    // This will navigate to the invoice view page which has PDF download functionality
-    window.open(`/invoice/${invoice.orderId}`, "_blank");
+    // Navigate to the invoice view page which has PDF download functionality
+    window.location.href = `/invoice/${invoice.orderId}`;
   };
 
   const handlePrintInvoice = (invoice) => {
-    // Open invoice in new window and print
-    const printWindow = window.open(`/invoice/${invoice.orderId}`, "_blank");
-    printWindow.onload = () => {
-      printWindow.print();
-    };
+    // Navigate to invoice page
+    window.location.href = `/invoice/${invoice.orderId}`;
   };
 
   const getStatusBadge = (status) => {

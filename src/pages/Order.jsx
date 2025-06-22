@@ -498,7 +498,7 @@ const Order = () => {
   const handleViewOnlineInvoice = () => {
     if (orderDetails) {
       const invoiceUrl = `/invoice/${orderDetails.orderId}`;
-      window.open(invoiceUrl, "_blank");
+      window.location.href = invoiceUrl;
     }
   };
 
