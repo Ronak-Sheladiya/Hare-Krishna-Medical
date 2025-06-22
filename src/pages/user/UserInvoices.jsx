@@ -409,7 +409,7 @@ const UserInvoices = () => {
     const root = createRoot(tempDiv);
     await new Promise((resolve) => {
       root.render(
-        React.createElement(ProfessionalInvoice, {
+        React.createElement(OfficialInvoiceDesign, {
           invoiceData,
           forPrint: true,
         }),

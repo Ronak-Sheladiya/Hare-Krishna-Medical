@@ -259,13 +259,13 @@ const AdminInvoices = () => {
       tempDiv.style.backgroundColor = "white";
       document.body.appendChild(tempDiv);
 
-      // Import and render ProfessionalInvoice component
+      // Import and render OfficialInvoiceDesign component
       const React = (await import("react")).default;
       const { createRoot } = await import("react-dom/client");
 
       const root = createRoot(tempDiv);
       root.render(
-        React.createElement(ProfessionalInvoice, {
+        React.createElement(OfficialInvoiceDesign, {
           invoiceData,
           qrCode: qrDataURL,
           forPrint: true,
@@ -799,7 +799,7 @@ const AdminInvoices = () => {
               style={{ maxHeight: "70vh", overflowY: "auto" }}
             >
               <div id="admin-invoice-content">
-                <ProfessionalInvoice
+                <OfficialInvoiceDesign
                   invoiceData={{
                     invoiceId: selectedInvoice.invoiceId,
                     orderId: selectedInvoice.orderId,
