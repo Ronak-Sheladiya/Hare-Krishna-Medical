@@ -507,6 +507,71 @@ const AdminOrders = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {/* Invoice View Modal */}
+      <Modal
+        show={showInvoiceModal}
+        onHide={() => setShowInvoiceModal(false)}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <i className="bi bi-receipt me-2"></i>
+            Order Invoice
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="p-0">
+          {selectedOrder && (
+            <div
+              className="invoice-preview"
+              style={{ maxHeight: "70vh", overflowY: "auto" }}
+            >
+              <ProfessionalInvoice
+                invoiceData={{
+                  invoiceId: `HKM-INV-${selectedOrder.id}`,
+                  orderId: selectedOrder.id,
+                  orderDate: selectedOrder.orderDate,
+                  orderTime: selectedOrder.orderTime,
+                  customerDetails: {
+                    fullName: selectedOrder.customerName,
+                    email: selectedOrder.customerEmail,
+                    mobile: selectedOrder.customerPhone,
+                    address: selectedOrder.customerAddress,
+                    city: "Surat",
+                    state: "Gujarat",
+                    pincode: "395007",
+                  },
+                  items: selectedOrder.items,
+                  subtotal: selectedOrder.subtotal,
+                  shipping: selectedOrder.shipping,
+                  total: selectedOrder.total,
+                  paymentMethod: selectedOrder.paymentMethod,
+                  paymentStatus: selectedOrder.paymentStatus,
+                  status: selectedOrder.status,
+                }}
+                forPrint={false}
+              />
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="outline-secondary"
+            onClick={() => setShowInvoiceModal(false)}
+          >
+            Close
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => window.print()}
+            className="btn-medical-primary"
+          >
+            <i className="bi bi-printer me-2"></i>
+            Print Invoice
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
