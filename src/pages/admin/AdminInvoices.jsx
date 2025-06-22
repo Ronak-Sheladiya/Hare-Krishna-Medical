@@ -16,6 +16,9 @@ import {
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import QRCode from "qrcode";
 import ProfessionalInvoice from "../../components/common/ProfessionalInvoice";
 import { formatDateTime, getRelativeTime } from "../../utils/dateUtils";
 
@@ -185,9 +188,131 @@ const AdminInvoices = () => {
     setFilteredInvoices(filtered);
   }, [invoices, searchTerm, statusFilter, paymentFilter]);
 
-  const handleViewInvoice = (invoice) => {
-    setSelectedInvoice(invoice);
-    setShowInvoiceModal(true);
+  const handleViewInvoice = async (invoice) => {
+    try {
+      // Generate QR code for the invoice
+      const verifyUrl = `${window.location.origin}/invoice/${invoice.orderId}`;
+      const qrDataURL = await QRCode.toDataURL(verifyUrl, {
+        width: 120,
+        margin: 2,
+        color: {
+          dark: "#1a202c",
+          light: "#ffffff",
+        },
+        errorCorrectionLevel: "M",
+      });
+
+      // Add QR code to invoice data
+      const invoiceWithQR = {
+        ...invoice,
+        qrCode: qrDataURL,
+      };
+
+      setSelectedInvoice(invoiceWithQR);
+      setShowInvoiceModal(true);
+    } catch (error) {
+      console.error("Error generating QR code:", error);
+      setSelectedInvoice(invoice);
+      setShowInvoiceModal(true);
+    }
+  };
+
+  const handleDownloadInvoice = async (invoice) => {
+    try {
+      // Generate QR code for verification
+      const verifyUrl = `${window.location.origin}/invoice/${invoice.orderId}`;
+      const qrDataURL = await QRCode.toDataURL(verifyUrl, {
+        width: 120,
+        margin: 2,
+        color: {
+          dark: "#1a202c",
+          light: "#ffffff",
+        },
+        errorCorrectionLevel: "M",
+      });
+
+      // Create invoice data
+      const invoiceData = {
+        invoiceId: invoice.invoiceId,
+        orderId: invoice.orderId,
+        orderDate: invoice.orderDate,
+        orderTime: invoice.orderTime,
+        customerDetails: invoice.customerDetails,
+        items: invoice.items,
+        subtotal: invoice.items.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0,
+        ),
+        shipping: 0,
+        total: invoice.totalAmount,
+        paymentMethod: invoice.paymentMethod,
+        paymentStatus: invoice.status,
+        status: "Delivered",
+        qrCode: qrDataURL,
+      };
+
+      // Create temporary element with invoice
+      const tempDiv = document.createElement("div");
+      tempDiv.style.position = "absolute";
+      tempDiv.style.left = "-9999px";
+      tempDiv.style.width = "210mm";
+      tempDiv.style.backgroundColor = "white";
+      document.body.appendChild(tempDiv);
+
+      // Import and render ProfessionalInvoice component
+      const React = (await import("react")).default;
+      const { createRoot } = await import("react-dom/client");
+
+      const root = createRoot(tempDiv);
+      root.render(
+        React.createElement(ProfessionalInvoice, {
+          invoiceData,
+          qrCode: qrDataURL,
+          forPrint: true,
+        }),
+      );
+
+      // Wait for rendering
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      // Generate PDF
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2.5,
+        logging: false,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      if (imgHeight > pageHeight) {
+        const scaleFactor = (pageHeight - 5) / imgHeight;
+        const scaledWidth = imgWidth * scaleFactor;
+        const scaledHeight = pageHeight - 5;
+        const xOffset = (imgWidth - scaledWidth) / 2;
+        pdf.addImage(imgData, "PNG", xOffset, 2.5, scaledWidth, scaledHeight);
+      } else {
+        const yOffset = (pageHeight - imgHeight) / 2;
+        pdf.addImage(imgData, "PNG", 0, yOffset, imgWidth, imgHeight);
+      }
+
+      // Download with invoice ID as filename
+      pdf.save(`${invoice.invoiceId}.pdf`);
+
+      // Clean up
+      root.unmount();
+      document.body.removeChild(tempDiv);
+
+      // Show success message
+      alert("Official Invoice downloaded successfully!");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Error generating PDF. Please try again.");
+    }
   };
 
   const handleExportExcel = async () => {
@@ -258,24 +383,31 @@ const AdminInvoices = () => {
   };
 
   const handlePrintInvoice = () => {
-    // Create a new window for printing
-    const printWindow = window.open("", "_blank", "width=800,height=600");
-    const invoiceContent = document.querySelector(".invoice-preview").innerHTML;
+    if (!selectedInvoice) return;
 
-    printWindow.document.write(`
+    const invoiceContent = document.getElementById(
+      "admin-invoice-content",
+    ).innerHTML;
+
+    // Create print-specific HTML content
+    const printContent = `
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Invoice ${selectedInvoice?.invoiceId}</title>
+          <title>Official Invoice ${selectedInvoice.invoiceId}</title>
           <style>
+            @page { size: A4; margin: 0.5in; }
             body {
               margin: 0;
               padding: 0;
               font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
             }
-            @media print {
-              body { margin: 0; padding: 0; }
-              @page { size: A4; margin: 0.5in; }
+            * {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
             }
           </style>
         </head>
@@ -283,14 +415,27 @@ const AdminInvoices = () => {
           ${invoiceContent}
         </body>
       </html>
-    `);
+    `;
 
-    printWindow.document.close();
-    printWindow.focus();
+    // Create temporary iframe for printing
+    const printFrame = document.createElement("iframe");
+    printFrame.style.position = "absolute";
+    printFrame.style.top = "-10000px";
+    printFrame.style.left = "-10000px";
+    document.body.appendChild(printFrame);
+
+    printFrame.contentDocument.write(printContent);
+    printFrame.contentDocument.close();
+
+    // Wait for content to load then print
     setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 250);
+      printFrame.contentWindow.focus();
+      printFrame.contentWindow.print();
+      // Clean up after printing
+      setTimeout(() => {
+        document.body.removeChild(printFrame);
+      }, 1000);
+    }, 500);
   };
 
   const getStatusVariant = (status) => {
@@ -594,6 +739,7 @@ const AdminInvoices = () => {
                                     size="sm"
                                     variant="outline-primary"
                                     onClick={() => handleViewInvoice(invoice)}
+                                    title="View in popup"
                                   >
                                     <i className="bi bi-eye me-1"></i>
                                     View
@@ -601,7 +747,10 @@ const AdminInvoices = () => {
                                   <Button
                                     size="sm"
                                     variant="outline-success"
-                                    onClick={() => handleViewInvoice(invoice)}
+                                    onClick={() =>
+                                      handleDownloadInvoice(invoice)
+                                    }
+                                    title="Download PDF directly"
                                   >
                                     <i className="bi bi-download me-1"></i>
                                     Download
@@ -649,26 +798,29 @@ const AdminInvoices = () => {
               className="invoice-preview"
               style={{ maxHeight: "70vh", overflowY: "auto" }}
             >
-              <ProfessionalInvoice
-                invoiceData={{
-                  invoiceId: selectedInvoice.invoiceId,
-                  orderId: selectedInvoice.orderId,
-                  orderDate: selectedInvoice.orderDate,
-                  orderTime: selectedInvoice.orderTime,
-                  customerDetails: selectedInvoice.customerDetails,
-                  items: selectedInvoice.items,
-                  subtotal: selectedInvoice.items.reduce(
-                    (sum, item) => sum + item.price * item.quantity,
-                    0,
-                  ),
-                  shipping: 0,
-                  total: selectedInvoice.totalAmount,
-                  paymentMethod: selectedInvoice.paymentMethod,
-                  paymentStatus: selectedInvoice.status,
-                  status: "Delivered",
-                }}
-                forPrint={false}
-              />
+              <div id="admin-invoice-content">
+                <ProfessionalInvoice
+                  invoiceData={{
+                    invoiceId: selectedInvoice.invoiceId,
+                    orderId: selectedInvoice.orderId,
+                    orderDate: selectedInvoice.orderDate,
+                    orderTime: selectedInvoice.orderTime,
+                    customerDetails: selectedInvoice.customerDetails,
+                    items: selectedInvoice.items,
+                    subtotal: selectedInvoice.items.reduce(
+                      (sum, item) => sum + item.price * item.quantity,
+                      0,
+                    ),
+                    shipping: 0,
+                    total: selectedInvoice.totalAmount,
+                    paymentMethod: selectedInvoice.paymentMethod,
+                    paymentStatus: selectedInvoice.status,
+                    status: "Delivered",
+                  }}
+                  qrCode={selectedInvoice.qrCode}
+                  forPrint={false}
+                />
+              </div>
             </div>
           )}
         </Modal.Body>

@@ -11,13 +11,21 @@ import {
   Form,
   InputGroup,
 } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import ProfessionalInvoice from "../../components/common/ProfessionalInvoice";
+import OfficialInvoiceDesign from "../../components/common/OfficialInvoiceDesign";
+import {
+  viewInvoice,
+  printInvoice,
+  downloadInvoice,
+  createInvoiceData,
+} from "../../utils/invoiceUtils.js";
 
 const AdminOrders = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
@@ -105,6 +113,26 @@ const AdminOrders = () => {
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
     setShowDetailsModal(true);
+  };
+
+  const handleViewInvoicePopup = async (order) => {
+    try {
+      const invoiceData = createInvoiceData(order);
+      await viewInvoice(invoiceData);
+    } catch (error) {
+      console.error("Error viewing invoice:", error);
+      alert("Error viewing invoice. Please try again.");
+    }
+  };
+
+  const handleDirectPrint = async (order) => {
+    try {
+      const invoiceData = createInvoiceData(order);
+      await printInvoice(invoiceData);
+    } catch (error) {
+      console.error("Error printing invoice:", error);
+      alert("Error printing invoice. Please try again.");
+    }
   };
 
   const getStatusVariant = (status) => {
@@ -434,9 +462,9 @@ const AdminOrders = () => {
                                   <Button
                                     size="sm"
                                     variant="outline-success"
-                                    title="View Invoice"
+                                    title="View Invoice in Popup"
                                     onClick={() =>
-                                      (window.location.href = `/invoice/${order.orderId}`)
+                                      handleViewInvoicePopup(order)
                                     }
                                   >
                                     <i className="bi bi-receipt"></i>
@@ -444,10 +472,8 @@ const AdminOrders = () => {
                                   <Button
                                     size="sm"
                                     variant="outline-info"
-                                    title="Print"
-                                    onClick={() => {
-                                      window.location.href = `/invoice/${order.orderId}`;
-                                    }}
+                                    title="Print Invoice Directly"
+                                    onClick={() => handleDirectPrint(order)}
                                   >
                                     <i className="bi bi-printer"></i>
                                   </Button>

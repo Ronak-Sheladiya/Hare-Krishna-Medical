@@ -2,10 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Card, Button, Alert } from "react-bootstrap";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
-import QRCode from "qrcode";
-import ProfessionalInvoice from "../components/common/ProfessionalInvoice.jsx";
+import OfficialInvoiceDesign from "../components/common/OfficialInvoiceDesign.jsx";
+import {
+  viewInvoice,
+  printInvoice,
+  downloadInvoice,
+  generateInvoiceQR,
+  createInvoiceData,
+} from "../utils/invoiceUtils.js";
 
 const InvoiceView = () => {
   const { orderId } = useParams();
@@ -15,12 +19,8 @@ const InvoiceView = () => {
   const [qrCode, setQrCode] = useState("");
   const [showAlert, setShowAlert] = useState(false);
 
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
-    return (
-      <Navigate to="/login" state={{ from: `/invoice/${orderId}` }} replace />
-    );
-  }
+  // Remove authentication check to allow QR verification by anyone
+  // Anyone can verify invoice by scanning QR without login
 
   // Mock invoice data - in real app, this would be fetched from API
   useEffect(() => {
@@ -92,109 +92,19 @@ const InvoiceView = () => {
     fetchInvoice();
   }, [orderId]);
 
-  const downloadPDF = async () => {
+  const handlePrintInvoice = async () => {
     if (!invoice) return;
+    const invoiceData = createInvoiceData(invoice);
+    await printInvoice(invoiceData, qrCode);
+  };
 
-    try {
-      // Create invoice data for the professional component
-      const invoiceData = {
-        invoiceId: invoice.invoiceId,
-        orderId: invoice.orderId,
-        orderDate: invoice.orderDate,
-        orderTime: invoice.orderTime,
-        customerDetails: {
-          fullName: invoice.customerDetails.fullName,
-          email: invoice.customerDetails.email,
-          mobile: invoice.customerDetails.mobile,
-          address: invoice.customerDetails.address,
-          city: invoice.customerDetails.city,
-          state: invoice.customerDetails.state,
-          pincode: invoice.customerDetails.pincode,
-        },
-        items: invoice.items,
-        subtotal: invoice.subtotal,
-        shipping: invoice.shipping,
-        tax: invoice.tax,
-        total: invoice.total,
-        paymentMethod: invoice.paymentMethod,
-        paymentStatus: invoice.paymentStatus,
-        status: invoice.status,
-        qrCode: qrCode, // Use the generated QR code
-      };
-
-      // Create a temporary div and render the professional invoice
-      const invoiceElement = document.createElement("div");
-      invoiceElement.style.position = "absolute";
-      invoiceElement.style.left = "-9999px";
-      invoiceElement.style.top = "0";
-      invoiceElement.style.width = "210mm";
-      invoiceElement.style.backgroundColor = "white";
-      document.body.appendChild(invoiceElement);
-
-      // Create React element and render it
-      const React = await import("react");
-      const { createRoot } = await import("react-dom/client");
-
-      const root = createRoot(invoiceElement);
-      root.render(
-        React.createElement(ProfessionalInvoice, {
-          invoiceData,
-          qrCode: qrCode,
-          forPrint: true,
-        }),
-      );
-
-      // Wait for rendering
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Generate PDF with high quality
-      const canvas = await html2canvas(invoiceElement, {
-        scale: 2.5,
-        logging: false,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        width: invoiceElement.scrollWidth,
-        height: invoiceElement.scrollHeight,
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      // Always ensure single page - scale down if necessary
-      if (imgHeight > pageHeight) {
-        const scaleFactor = (pageHeight - 5) / imgHeight;
-        const scaledWidth = imgWidth * scaleFactor;
-        const scaledHeight = pageHeight - 5;
-        const xOffset = (imgWidth - scaledWidth) / 2;
-        pdf.addImage(imgData, "PNG", xOffset, 2.5, scaledWidth, scaledHeight);
-      } else {
-        const yOffset = (pageHeight - imgHeight) / 2;
-        pdf.addImage(imgData, "PNG", 0, yOffset, imgWidth, imgHeight);
-      }
-
-      // Create a temporary link and click it to download directly
-      const pdfBlob = pdf.output("blob");
-      const url = URL.createObjectURL(pdfBlob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `Invoice-${invoice.invoiceId}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      // Clean up
-      root.unmount();
-      document.body.removeChild(invoiceElement);
-
+  const handleDownloadPDF = async () => {
+    if (!invoice) return;
+    const invoiceData = createInvoiceData(invoice);
+    const success = await downloadInvoice(invoiceData, qrCode);
+    if (success) {
       setShowAlert(true);
       setTimeout(() => setShowAlert(false), 3000);
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      alert("Error generating PDF. Please try again.");
     }
   };
 
@@ -273,7 +183,7 @@ const InvoiceView = () => {
                 <th style="border: 2px solid #e67e22; padding: 15px 10px; font-size: 13px; font-weight: bold; text-align: left; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">🏥 Description</th>
                 <th style="border: 2px solid #e67e22; padding: 15px 10px; font-size: 13px; font-weight: bold; text-align: center; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">Qty</th>
                 <th style="border: 2px solid #e67e22; padding: 15px 10px; font-size: 13px; font-weight: bold; text-align: right; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">💰 Price (₹)</th>
-                <th style="border: 2px solid #e67e22; padding: 15px 10px; font-size: 13px; font-weight: bold; text-align: right; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">💵 Amount (₹)</th>
+                <th style="border: 2px solid #e67e22; padding: 15px 10px; font-size: 13px; font-weight: bold; text-align: right; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">💵 Amount (��)</th>
               </tr>
             </thead>
             <tbody>
@@ -446,7 +356,7 @@ const InvoiceView = () => {
             <Col lg={12} className="text-center">
               <div className="d-flex gap-3 justify-content-center flex-wrap">
                 <Button
-                  onClick={downloadPDF}
+                  onClick={handleDownloadPDF}
                   className="btn-medical-primary"
                   size="lg"
                   disabled={!invoice}
@@ -455,7 +365,7 @@ const InvoiceView = () => {
                   Download PDF
                 </Button>
                 <Button
-                  onClick={() => window.print()}
+                  onClick={() => handlePrintInvoice()}
                   variant="outline-primary"
                   className="btn-medical-outline"
                   size="lg"
@@ -477,7 +387,7 @@ const InvoiceView = () => {
             </Col>
           </Row>
 
-          {/* Professional Invoice Display - Same style as Order.jsx */}
+          {/* Official Invoice Display */}
           <Row>
             <Col lg={12}>
               <Card
@@ -489,12 +399,26 @@ const InvoiceView = () => {
                 }}
               >
                 <Card.Body style={{ padding: "0" }}>
-                  <div
-                    id="invoice-content"
-                    dangerouslySetInnerHTML={{
-                      __html: createColorfulInvoiceHTML(),
-                    }}
-                  />
+                  <div id="invoice-content">
+                    <OfficialInvoiceDesign
+                      invoiceData={{
+                        invoiceId: invoice.invoiceId,
+                        orderId: invoice.orderId,
+                        orderDate: invoice.orderDate,
+                        orderTime: invoice.orderTime,
+                        customerDetails: invoice.customerDetails,
+                        items: invoice.items,
+                        subtotal: invoice.subtotal,
+                        shipping: invoice.shipping,
+                        total: invoice.total,
+                        paymentMethod: invoice.paymentMethod,
+                        paymentStatus: invoice.paymentStatus,
+                        status: invoice.status,
+                      }}
+                      qrCode={qrCode}
+                      forPrint={false}
+                    />
+                  </div>
                 </Card.Body>
               </Card>
             </Col>

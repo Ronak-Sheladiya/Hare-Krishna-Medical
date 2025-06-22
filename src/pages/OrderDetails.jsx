@@ -169,9 +169,110 @@ const OrderDetails = () => {
     return (completedSteps / totalSteps) * 100;
   };
 
-  const downloadInvoice = () => {
-    // Open invoice in new tab for download
-    window.open(`/invoice/${orderId}`, "_blank");
+  const downloadInvoice = async () => {
+    if (!order) return;
+
+    try {
+      // Import required libraries dynamically
+      const jsPDF = (await import("jspdf")).default;
+      const html2canvas = (await import("html2canvas")).default;
+      const QRCode = (await import("qrcode")).default;
+
+      // Generate QR code for verification
+      const verifyUrl = `${window.location.origin}/invoice/${orderId}`;
+      const qrDataURL = await QRCode.toDataURL(verifyUrl, {
+        width: 120,
+        margin: 2,
+        color: {
+          dark: "#1a202c",
+          light: "#ffffff",
+        },
+        errorCorrectionLevel: "M",
+      });
+
+      // Create invoice data
+      const invoiceData = {
+        invoiceId: order.invoiceId,
+        orderId: order.orderId,
+        orderDate: order.orderDate,
+        orderTime: order.orderTime,
+        customerDetails: order.customerDetails,
+        items: order.items,
+        subtotal: order.subtotal,
+        shipping: order.shipping,
+        tax: order.tax,
+        total: order.total,
+        paymentMethod: order.paymentMethod,
+        paymentStatus: order.paymentStatus,
+        status: order.status,
+        qrCode: qrDataURL,
+      };
+
+      // Create temporary element with invoice
+      const tempDiv = document.createElement("div");
+      tempDiv.style.position = "absolute";
+      tempDiv.style.left = "-9999px";
+      tempDiv.style.width = "210mm";
+      tempDiv.style.backgroundColor = "white";
+      document.body.appendChild(tempDiv);
+
+      // Import and render ProfessionalInvoice component
+      const ProfessionalInvoice = (
+        await import("../components/common/ProfessionalInvoice.jsx")
+      ).default;
+      const React = (await import("react")).default;
+      const { createRoot } = await import("react-dom/client");
+
+      const root = createRoot(tempDiv);
+      root.render(
+        React.createElement(ProfessionalInvoice, {
+          invoiceData,
+          qrCode: qrDataURL,
+          forPrint: true,
+        }),
+      );
+
+      // Wait for rendering
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      // Generate PDF
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2.5,
+        logging: false,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      if (imgHeight > pageHeight) {
+        const scaleFactor = (pageHeight - 5) / imgHeight;
+        const scaledWidth = imgWidth * scaleFactor;
+        const scaledHeight = pageHeight - 5;
+        const xOffset = (imgWidth - scaledWidth) / 2;
+        pdf.addImage(imgData, "PNG", xOffset, 2.5, scaledWidth, scaledHeight);
+      } else {
+        const yOffset = (pageHeight - imgHeight) / 2;
+        pdf.addImage(imgData, "PNG", 0, yOffset, imgWidth, imgHeight);
+      }
+
+      // Download with invoice ID as filename
+      pdf.save(`${order.invoiceId}.pdf`);
+
+      // Clean up
+      root.unmount();
+      document.body.removeChild(tempDiv);
+
+      // Show success message
+      alert("Official Invoice downloaded successfully!");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Error generating PDF. Please try again.");
+    }
   };
 
   if (loading) {

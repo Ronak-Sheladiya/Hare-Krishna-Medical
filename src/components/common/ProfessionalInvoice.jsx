@@ -140,12 +140,13 @@ const ProfessionalInvoice = ({
         padding: 20px;
       }
 
-      /* Clean Header */
+      /* Clean Header - About Us Color Palette */
       .invoice-header {
-        background: #e63946;
+        background: linear-gradient(135deg, #e63946 0%, #dc3545 100%);
         margin: -20px -20px 30px -20px;
         padding: 30px;
         color: white;
+        box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
       }
 
       .header-flex {
@@ -219,6 +220,7 @@ const ProfessionalInvoice = ({
         color: #e63946;
         margin-bottom: 10px;
         text-transform: uppercase;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
       }
 
       .customer-name {
@@ -247,7 +249,8 @@ const ProfessionalInvoice = ({
         margin-bottom: 15px;
         padding-bottom: 5px;
         border-bottom: 2px solid #e63946;
-        color: #333;
+        color: #343a40;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
       }
 
       .items-table {
@@ -257,13 +260,14 @@ const ProfessionalInvoice = ({
       }
 
       .items-table th {
-        background: #333;
+        background: linear-gradient(135deg, #343a40 0%, #495057 100%);
         color: white;
         padding: 12px 8px;
         font-size: 11px;
         font-weight: bold;
         text-transform: uppercase;
-        border: 1px solid #333;
+        border: 1px solid #343a40;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
       }
 
       .items-table td {
@@ -309,10 +313,12 @@ const ProfessionalInvoice = ({
       }
 
       .total-row.grand-total td {
-        background: #e63946;
+        background: linear-gradient(135deg, #e63946 0%, #dc3545 100%);
         color: white;
         font-weight: bold;
         font-size: 14px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        box-shadow: 0 2px 8px rgba(230, 57, 70, 0.3);
       }
 
       .total-label {
@@ -342,6 +348,7 @@ const ProfessionalInvoice = ({
         font-weight: bold;
         margin-bottom: 10px;
         color: #e63946;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
       }
 
       .terms-list {
@@ -492,7 +499,7 @@ const ProfessionalInvoice = ({
                   </div>
                   <div class="meta-row">
                     <span>Status:</span>
-                    <span>${status}</span>
+                    <span style="background: #27ae60; color: white; padding: 4px 12px; border-radius: 15px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">${status}</span>
                   </div>
                 </div>
               </div>

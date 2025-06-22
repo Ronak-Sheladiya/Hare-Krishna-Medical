@@ -11,18 +11,111 @@ import {
   InputGroup,
   Modal,
   ProgressBar,
+  Alert,
 } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import { Link, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import {
+  viewInvoice,
+  printInvoice,
+  downloadInvoice,
+  createInvoiceData,
+} from "../../utils/invoiceUtils.js";
 
 const UserInvoices = () => {
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
   const [invoices, setInvoices] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [bulkDownloading, setBulkDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [showBulkModal, setShowBulkModal] = useState(false);
+
+  // Redirect admin to admin invoices page
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: "/user/invoices" }} replace />;
+  }
+
+  if (user?.role === 1) {
+    return (
+      <div className="fade-in">
+        <section
+          style={{
+            background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
+            paddingTop: "80px",
+            paddingBottom: "80px",
+            color: "white",
+          }}
+        >
+          <Container>
+            <Row className="text-center">
+              <Col lg={12}>
+                <Alert variant="warning" className="bg-white text-dark">
+                  <h4>Access Restricted</h4>
+                  <p>
+                    This page is for regular users only. As an admin, please use
+                    the admin invoice management system.
+                  </p>
+                  <div className="d-flex gap-2 justify-content-center">
+                    <Button
+                      as={Link}
+                      to="/admin/invoices"
+                      className="btn-medical-primary"
+                    >
+                      <i className="bi bi-gear me-2"></i>
+                      Go to Admin Invoices
+                    </Button>
+                    <Button
+                      as={Link}
+                      to="/admin/dashboard"
+                      variant="outline-secondary"
+                    >
+                      <i className="bi bi-house me-2"></i>
+                      Admin Dashboard
+                    </Button>
+                  </div>
+                </Alert>
+              </Col>
+            </Row>
+          </Container>
+        </section>
+      </div>
+    );
+  }
+
+  // Helper function to create invoice data from user invoice
+  const createInvoiceDataFromInvoice = (invoice) => {
+    return {
+      invoiceId: invoice.id,
+      orderId: invoice.orderId,
+      orderDate: invoice.date,
+      orderTime: "14:30:25",
+      customerDetails: {
+        fullName: invoice.customerName,
+        email: "john.doe@example.com",
+        mobile: "+91 9876543210",
+        address: "123 Medical Street",
+        city: "Surat",
+        state: "Gujarat",
+        pincode: "395007",
+      },
+      items: [
+        {
+          id: 1,
+          name: "Medical Products",
+          company: "Various Brands",
+          quantity: invoice.items,
+          price: invoice.amount / invoice.items,
+        },
+      ],
+      subtotal: invoice.amount * 0.95,
+      shipping: 0,
+      total: invoice.amount,
+      paymentMethod: "Cash on Delivery",
+      paymentStatus: "Paid",
+      status: "Delivered",
+    };
+  };
 
   // Mock invoices data
   const mockInvoices = [
@@ -92,14 +185,68 @@ const UserInvoices = () => {
     return matchesSearch && matchesDate;
   });
 
-  const handleDownloadPDF = (invoice) => {
-    // Navigate to the invoice view page which has PDF download functionality
-    window.location.href = `/invoice/${invoice.orderId}`;
+  const handleDownloadPDF = async (invoice) => {
+    try {
+      const invoiceData = createInvoiceDataFromInvoice(invoice);
+      const success = await downloadInvoice(invoiceData);
+      if (success) {
+        alert("Invoice downloaded successfully!");
+      }
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+      alert("Error generating PDF. Please try again.");
+    }
   };
 
-  const handlePrintInvoice = (invoice) => {
-    // Navigate to invoice page
-    window.location.href = `/invoice/${invoice.orderId}`;
+  const handlePrintInvoice = async (invoice) => {
+    try {
+      const invoiceData = createInvoiceDataFromInvoice(invoice);
+      await printInvoice(invoiceData);
+    } catch (error) {
+      console.error("Error printing invoice:", error);
+      alert("Error printing invoice. Please try again.");
+    }
+  };
+
+  const handleViewInvoice = async (invoice) => {
+    try {
+      // Create basic invoice data for viewing
+      const invoiceData = {
+        invoiceId: invoice.id,
+        orderId: invoice.orderId,
+        orderDate: invoice.date,
+        orderTime: "14:30:25",
+        customerDetails: {
+          fullName: invoice.customerName,
+          email: "john.doe@example.com",
+          mobile: "+91 9876543210",
+          address: "123 Medical Street",
+          city: "Surat",
+          state: "Gujarat",
+          pincode: "395007",
+        },
+        items: [
+          {
+            id: 1,
+            name: "Medical Products",
+            company: "Various Brands",
+            quantity: invoice.items,
+            price: invoice.amount / invoice.items,
+          },
+        ],
+        subtotal: invoice.amount * 0.95,
+        shipping: 0,
+        total: invoice.amount,
+        paymentMethod: "Cash on Delivery",
+        paymentStatus: "Paid",
+        status: "Delivered",
+      };
+
+      await viewInvoice(invoiceData);
+    } catch (error) {
+      console.error("Error viewing invoice:", error);
+      alert("Error viewing invoice. Please try again.");
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -198,7 +345,9 @@ const UserInvoices = () => {
       }
 
       // Download the combined PDF
-      pdf.save(`All_Invoices_${new Date().toISOString().split("T")[0]}.pdf`);
+      pdf.save(
+        `Invoices_Combined_${new Date().toISOString().split("T")[0]}.pdf`,
+      );
     } catch (error) {
       console.error("Error generating bulk PDF:", error);
       alert(
@@ -485,27 +634,26 @@ const UserInvoices = () => {
                               variant="outline-primary"
                               onClick={() => handleDownloadPDF(invoice)}
                               className="btn-medical-outline"
-                              title="Download PDF"
+                              title="Download PDF directly"
                             >
                               <i className="bi bi-download me-1"></i>
-                              PDF
+                              Download
                             </Button>
                             <Button
                               size="sm"
                               variant="outline-success"
                               onClick={() => handlePrintInvoice(invoice)}
                               className="btn-medical-outline"
-                              title="Print Invoice"
+                              title="Print Invoice directly"
                             >
                               <i className="bi bi-printer"></i>
                             </Button>
                             <Button
                               size="sm"
                               variant="outline-info"
-                              as={Link}
-                              to={`/invoice/${invoice.orderId}`}
+                              onClick={() => handleViewInvoice(invoice)}
                               className="btn-medical-outline"
-                              title="View Invoice"
+                              title="View in new tab"
                             >
                               <i className="bi bi-eye"></i>
                             </Button>
