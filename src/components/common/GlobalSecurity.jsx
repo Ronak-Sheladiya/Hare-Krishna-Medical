@@ -80,11 +80,12 @@ const GlobalSecurity = () => {
         return false;
       }
 
-      // Ctrl+P - Print (except for invoice pages)
+      // Ctrl+P - Print (allow for invoice and contact pages)
       if (
         e.ctrlKey &&
         e.keyCode === 80 &&
-        !window.location.pathname.includes("invoice")
+        !window.location.pathname.includes("invoice") &&
+        !window.location.pathname.includes("contact")
       ) {
         e.preventDefault();
         setWarningType("Print");
@@ -101,8 +102,14 @@ const GlobalSecurity = () => {
       return false;
     };
 
-    // Disable text selection
+    // Disable text selection (except on invoice and contact pages)
     const handleSelectStart = (e) => {
+      if (
+        window.location.pathname.includes("invoice") ||
+        window.location.pathname.includes("contact")
+      ) {
+        return true; // Allow selection
+      }
       e.preventDefault();
       return false;
     };
@@ -154,12 +161,25 @@ const GlobalSecurity = () => {
         user-select: text !important;
       }
 
-      /* Allow text selection on contact page */
-      .contact-page-content, .contact-page-content * {
+      /* Allow text selection on contact and invoice pages */
+      .contact-page-content, .contact-page-content *,
+      .invoice-container, .invoice-container *,
+      [data-page="contact"] *, [data-page="invoice"] * {
         -webkit-user-select: text !important;
         -moz-user-select: text !important;
         -ms-user-select: text !important;
         user-select: text !important;
+      }
+
+      /* Red selection theme for contact page */
+      .contact-page-content ::selection {
+        background: #e63946 !important;
+        color: white !important;
+      }
+
+      .contact-page-content ::-moz-selection {
+        background: #e63946 !important;
+        color: white !important;
       }
 
       /* Hide scrollbars in developer tools */
