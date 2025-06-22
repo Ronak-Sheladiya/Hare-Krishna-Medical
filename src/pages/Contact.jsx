@@ -241,14 +241,28 @@ const Contact = () => {
                 }}
                 onMouseOver={(e) => {
                   e.currentTarget.style.borderColor = "#343a40";
-                  e.currentTarget.style.transform = "translateY(-8px)";
+                  e.currentTarget.style.transform = "translateY(-4px)";
                   e.currentTarget.style.boxShadow =
-                    "0 12px 30px rgba(52, 58, 64, 0.15)";
+                    "0 8px 25px rgba(52, 58, 64, 0.2)";
+                  // Change icon background color on hover
+                  const iconDiv =
+                    e.currentTarget.querySelector(".contact-icon");
+                  if (iconDiv) {
+                    iconDiv.style.background =
+                      "linear-gradient(135deg, #343a40, #495057)";
+                  }
                 }}
                 onMouseOut={(e) => {
                   e.currentTarget.style.borderColor = "#f8f9fa";
                   e.currentTarget.style.transform = "translateY(0)";
                   e.currentTarget.style.boxShadow = "none";
+                  // Restore icon background color
+                  const iconDiv =
+                    e.currentTarget.querySelector(".contact-icon");
+                  if (iconDiv) {
+                    iconDiv.style.background =
+                      "linear-gradient(135deg, #e63946, #dc3545)";
+                  }
                 }}
               >
                 <div
