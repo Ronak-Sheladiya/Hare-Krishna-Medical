@@ -60,10 +60,10 @@ const initialState = {
       priority: "Medium",
       status: "Replied",
       isRead: true,
-      createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(), // 12 hours ago
+      createdAt: createDateOffset(12), // 12 hours ago
       reply:
         "Yes, the BP monitor is in stock. We provide home delivery across the city. Your order will be delivered within 2-3 hours.",
-      repliedAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(), // 8 hours ago
+      repliedAt: createDateOffset(8), // 8 hours ago
     },
     {
       id: 5,
