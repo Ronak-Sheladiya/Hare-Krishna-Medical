@@ -164,8 +164,51 @@ const ProductDetails = () => {
 
   return (
     <div className="fade-in">
+      {/* Hero Section - Matching About Us */}
+      <section
+        style={{
+          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+          color: "white",
+        }}
+      >
+        <Container>
+          <Row className="text-center">
+            <Col lg={12}>
+              <h1
+                style={{
+                  fontSize: "3rem",
+                  fontWeight: "800",
+                  marginBottom: "20px",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                }}
+              >
+                Product Details
+              </h1>
+              <p
+                style={{
+                  fontSize: "1.2rem",
+                  opacity: "0.9",
+                  maxWidth: "600px",
+                  margin: "0 auto",
+                }}
+              >
+                Detailed information about your selected medical product
+              </p>
+            </Col>
+          </Row>
+        </Container>
+      </section>
+
       {/* Product Details */}
-      <section style={{ padding: "60px 0", background: "#ffffff" }}>
+      <section
+        style={{
+          background: "#f8f9fa",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+        }}
+      >
         <Container>
           <Row>
             {/* Modern Product Image Carousel */}
