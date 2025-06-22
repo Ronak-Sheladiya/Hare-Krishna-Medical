@@ -271,26 +271,26 @@ const UserOrders = () => {
           {/* Filters */}
           <Row className="mb-4">
             <Col lg={6}>
-              <h1
-                style={{
-                  fontSize: "3rem",
-                  fontWeight: "800",
-                  marginBottom: "20px",
-                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
-                }}
+              <InputGroup>
+                <InputGroup.Text>
+                  <i className="bi bi-search"></i>
+                </InputGroup.Text>
+                <Form.Control
+                  type="text"
+                  placeholder="Search orders..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </InputGroup>
+            </Col>
+            <Col lg={3}>
+              <Form.Select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
               >
-                My Orders
-              </h1>
-              <p
-                style={{
-                  fontSize: "1.2rem",
-                  opacity: "0.9",
-                  maxWidth: "600px",
-                  margin: "0 auto",
-                }}
-              >
-                View and track your order history
-              </p>
+                <option value="">All Status</option>
+                {statusOptions.map((status) => (
+                  <option key={status} value={status}>
                     {status}
                   </option>
                 ))}
