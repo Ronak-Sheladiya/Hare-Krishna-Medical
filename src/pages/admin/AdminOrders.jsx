@@ -126,6 +126,21 @@ const AdminOrders = () => {
     setShowDetailsModal(true);
   };
 
+  const handleViewInvoice = (order) => {
+    setSelectedOrder(order);
+    setShowInvoiceModal(true);
+  };
+
+  const handleDownloadInvoice = (order) => {
+    // Create invoice and trigger print/download
+    setSelectedOrder(order);
+    setShowInvoiceModal(true);
+    // Auto-trigger print after a short delay to allow modal to render
+    setTimeout(() => {
+      window.print();
+    }, 500);
+  };
+
   const getStatusVariant = (status) => {
     switch (status) {
       case "Pending":
