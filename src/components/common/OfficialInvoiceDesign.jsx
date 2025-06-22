@@ -25,7 +25,7 @@ const OfficialInvoiceDesign = ({ invoiceData, qrCode, forPrint = false }) => {
 
   const createOfficialInvoiceHTML = () => {
     return `
-      <div style="font-family: Arial, sans-serif; padding: 20px; background: white; max-width: 210mm; margin: 0 auto; ${forPrint ? "height: auto; min-height: auto;" : ""}">
+      <div style="font-family: Arial, sans-serif; padding: ${forPrint ? "10px" : "20px"}; background: white; max-width: 210mm; margin: 0 auto; ${forPrint ? "height: auto; min-height: auto; transform: scale(0.95); transform-origin: top;" : ""}">
         <!-- Header Section - Official Design -->
         <div style="background: linear-gradient(135deg, #e63946 0%, #dc3545 100%); color: white; padding: 25px; border-radius: 15px 15px 0 0; margin-bottom: 0;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -42,7 +42,7 @@ const OfficialInvoiceDesign = ({ invoiceData, qrCode, forPrint = false }) => {
                 <div>📍 3 Sahyog Complex, Man Sarovar circle</div>
                 <div>🏙️ Amroli, 394107, Gujarat, India</div>
                 <div>📞 +91 76989 13354 | +91 91060 18508</div>
-                <div>📧 harekrishnamedical@gmail.com</div>
+                <div>�� harekrishnamedical@gmail.com</div>
               </div>
             </div>
             <!-- Right Side - Invoice Info -->
