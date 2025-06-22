@@ -38,15 +38,17 @@ const ProfessionalInvoice = ({
       minHeight: "297mm",
       maxWidth: "210mm",
       margin: "0 auto",
-      padding: "20mm",
-      fontFamily: "'Segoe UI', Arial, sans-serif",
-      fontSize: "12px",
-      lineHeight: "1.4",
-      color: "#333333",
+      padding: "15mm",
+      fontFamily: "'Inter', 'Segoe UI', Arial, sans-serif",
+      fontSize: "11px",
+      lineHeight: "1.5",
+      color: "#2d3748",
       backgroundColor: "#ffffff",
       boxSizing: "border-box",
       position: "relative",
-      border: forPrint ? "none" : "1px solid #e9ecef",
+      border: forPrint ? "none" : "2px solid #e2e8f0",
+      borderRadius: forPrint ? "0" : "12px",
+      boxShadow: forPrint ? "none" : "0 20px 40px rgba(0,0,0,0.1)",
       pageBreakAfter: "always",
     },
     header: {
@@ -403,7 +405,7 @@ const ProfessionalInvoice = ({
               {customerDetails.fullName}
             </div>
             <div style={{ marginBottom: "4mm" }}>
-              📧 {customerDetails.email}
+              ���� {customerDetails.email}
             </div>
             <div style={{ marginBottom: "4mm" }}>
               📱 {customerDetails.mobile}
