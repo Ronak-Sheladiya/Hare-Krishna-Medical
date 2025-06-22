@@ -111,7 +111,12 @@ const Login = () => {
           role: 0, // User role
           profileImage: null,
         };
-        dispatch(loginSuccess(user));
+        dispatch(
+          loginSuccess({
+            user,
+            rememberMe: formData.rememberMe,
+          }),
+        );
         // Redirect to intended URL or default user dashboard
         navigate(from || "/user/dashboard", { replace: true });
         return;
