@@ -29,10 +29,10 @@ const initialState = {
       priority: "High",
       status: "In Progress",
       isRead: true,
-      createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
+      createdAt: createDateOffset(4), // 4 hours ago
       reply:
         "Thank you for contacting us. Your order has been processed and will be shipped within 24 hours.",
-      repliedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), // 1 hour ago
+      repliedAt: createDateOffset(1), // 1 hour ago
     },
     {
       id: 3,
