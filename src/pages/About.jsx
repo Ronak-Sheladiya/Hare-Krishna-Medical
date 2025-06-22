@@ -4,16 +4,6 @@ import { Container, Row, Col, Breadcrumb } from "react-bootstrap";
 const About = () => {
   return (
     <div className="fade-in">
-      {/* Breadcrumb */}
-      <section className="medical-breadcrumb">
-        <Container>
-          <Breadcrumb>
-            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-            <Breadcrumb.Item active>About Us</Breadcrumb.Item>
-          </Breadcrumb>
-        </Container>
-      </section>
-
       {/* About Content */}
       <section className="section-padding">
         <Container>
