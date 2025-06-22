@@ -84,16 +84,6 @@ const Cart = () => {
 
   return (
     <div className="fade-in">
-      {/* Breadcrumb */}
-      <section className="medical-breadcrumb">
-        <Container>
-          <Breadcrumb>
-            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-            <Breadcrumb.Item active>Shopping Cart</Breadcrumb.Item>
-          </Breadcrumb>
-        </Container>
-      </section>
-
       {/* Cart Content */}
       <section className="section-padding" style={{ paddingTop: "2rem" }}>
         <Container>
