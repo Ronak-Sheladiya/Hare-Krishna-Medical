@@ -12,13 +12,40 @@ export const getCurrentISOString = () => {
 };
 
 /**
- * Format date string for display
+ * Format date string for display in dd/mm/yyyy format
  * @param {string} dateString - ISO date string
- * @returns {string} Formatted date string
+ * @returns {string} Formatted date string in dd/mm/yyyy format
  */
 export const formatDate = (dateString) => {
   if (!dateString) return "";
-  return new Date(dateString).toLocaleDateString();
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
+/**
+ * Convert date string from yyyy-mm-dd to dd/mm/yyyy format for input fields
+ * @param {string} dateString - Date string in yyyy-mm-dd format
+ * @returns {string} Date string in dd/mm/yyyy format
+ */
+export const convertToDisplayDate = (dateString) => {
+  if (!dateString) return "";
+  return formatDate(dateString);
+};
+
+/**
+ * Convert date string from dd/mm/yyyy to yyyy-mm-dd format for input fields
+ * @param {string} displayDate - Date string in dd/mm/yyyy format
+ * @returns {string} Date string in yyyy-mm-dd format
+ */
+export const convertToInputDate = (displayDate) => {
+  if (!displayDate) return "";
+  const parts = displayDate.split("/");
+  if (parts.length !== 3) return "";
+  const [day, month, year] = parts;
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 };
 
 /**
