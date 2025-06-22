@@ -68,7 +68,7 @@ const Contact = () => {
         priority: "Medium",
         status: "Open",
         isRead: false,
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
         reply: "",
         repliedAt: null,
       };
