@@ -360,12 +360,31 @@ const AdminDashboard = () => {
                             : "outline-info"
                         }
                         className="w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 position-relative"
+                        style={{
+                          transition: "all 0.3s ease",
+                        }}
+                        onMouseOver={(e) => {
+                          e.target.style.background = "#e63946";
+                          e.target.style.borderColor = "#e63946";
+                          e.target.style.color = "white";
+                        }}
+                        onMouseOut={(e) => {
+                          e.target.style.background = "transparent";
+                          e.target.style.borderColor =
+                            dashboardStats.unreadMessages > 0
+                              ? "#dc3545"
+                              : "#0dcaf0";
+                          e.target.style.color =
+                            dashboardStats.unreadMessages > 0
+                              ? "#dc3545"
+                              : "#0dcaf0";
+                        }}
                       >
                         <i className="bi bi-envelope mb-2 fs-1"></i>
                         <span className="fw-bold">
                           {dashboardStats.unreadMessages}
                         </span>
-                        <small>Unread Messages</small>
+                        <small>Manage Messages</small>
                         {dashboardStats.unreadMessages > 0 && (
                           <Badge
                             bg="danger"
