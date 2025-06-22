@@ -1,291 +1,541 @@
 import React from "react";
-import { Container, Row, Col, Card, Breadcrumb } from "react-bootstrap";
+import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 const PrivacyPolicy = () => {
   return (
     <div className="fade-in">
-      {/* Privacy Policy Content */}
-      <section className="section-padding">
+      {/* Hero Section - Matching Contact Us */}
+      <section
+        style={{
+          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+          color: "white",
+        }}
+      >
         <Container>
-          <Row>
+          <Row className="text-center">
             <Col lg={12}>
-              <div className="text-center mb-5">
-                <h1 className="section-title">Privacy Policy</h1>
-                <p className="section-subtitle">
-                  Your privacy is important to us. This policy explains how we
-                  collect, use, and protect your information.
-                </p>
-                <p className="text-muted">
-                  <small>
-                    Last updated: {new Date().toLocaleDateString("en-GB")}
-                  </small>
-                </p>
-              </div>
+              <h1
+                style={{
+                  fontSize: "3rem",
+                  fontWeight: "800",
+                  marginBottom: "20px",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                }}
+              >
+                Privacy Policy
+              </h1>
+              <p
+                style={{
+                  fontSize: "1.2rem",
+                  opacity: "0.9",
+                  maxWidth: "600px",
+                  margin: "0 auto 20px",
+                }}
+              >
+                Your privacy is important to us. This policy explains how we
+                collect, use, and protect your information.
+              </p>
+              <p
+                style={{
+                  fontSize: "1rem",
+                  opacity: "0.8",
+                  fontWeight: "500",
+                }}
+              >
+                Last updated: {new Date().toLocaleDateString("en-GB")}
+              </p>
             </Col>
           </Row>
+        </Container>
+      </section>
 
+      {/* Privacy Sections Cards */}
+      <section
+        style={{
+          background: "#ffffff",
+          paddingTop: "80px",
+          paddingBottom: "40px",
+        }}
+      >
+        <Container>
           <Row>
-            <Col lg={12}>
-              <Card className="medical-card">
-                <Card.Body className="p-5">
-                  <div className="privacy-section mb-5">
-                    <h3 className="text-medical-red mb-3">
-                      <i className="bi bi-info-circle me-2"></i>
-                      Information We Collect
-                    </h3>
-                    <p>
-                      We collect information to provide better services to our
-                      customers:
-                    </p>
-                    <ul className="privacy-list">
-                      <li>
-                        <strong>Personal Information:</strong> Name, email
-                        address, phone number, shipping address
-                      </li>
-                      <li>
-                        <strong>Medical Information:</strong> Prescription
-                        details, medical history (when provided)
-                      </li>
-                      <li>
-                        <strong>Payment Information:</strong> Credit card
-                        details, billing address (securely processed)
-                      </li>
-                      <li>
-                        <strong>Usage Data:</strong> Website interactions,
-                        preferences, search history
-                      </li>
-                      <li>
-                        <strong>Device Information:</strong> IP address, browser
-                        type, operating system
-                      </li>
-                    </ul>
-                  </div>
+            <Col lg={4} md={6} className="mb-4">
+              <Card
+                style={{
+                  border: "2px solid #f8f9fa",
+                  borderRadius: "16px",
+                  padding: "30px",
+                  textAlign: "center",
+                  height: "100%",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.borderColor = "#343a40";
+                  e.currentTarget.style.transform = "translateY(-4px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 8px 25px rgba(52, 58, 64, 0.2)";
+                  const iconDiv =
+                    e.currentTarget.querySelector(".privacy-icon");
+                  if (iconDiv) {
+                    iconDiv.style.background =
+                      "linear-gradient(135deg, #343a40, #495057)";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.borderColor = "#f8f9fa";
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "none";
+                  const iconDiv =
+                    e.currentTarget.querySelector(".privacy-icon");
+                  if (iconDiv) {
+                    iconDiv.style.background =
+                      "linear-gradient(135deg, #e63946, #dc3545)";
+                  }
+                }}
+              >
+                <div
+                  className="privacy-icon"
+                  style={{
+                    width: "80px",
+                    height: "80px",
+                    background: "linear-gradient(135deg, #e63946, #dc3545)",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "0 auto 24px",
+                    color: "white",
+                    fontSize: "32px",
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  <i className="bi bi-shield-lock-fill"></i>
+                </div>
+                <h5 style={{ color: "#333333", marginBottom: "16px" }}>
+                  Data Protection
+                </h5>
+                <p style={{ color: "#495057", marginBottom: "0" }}>
+                  We implement industry-standard security measures to protect
+                  your personal information from unauthorized access,
+                  disclosure, or misuse.
+                </p>
+              </Card>
+            </Col>
 
-                  <div className="privacy-section mb-5">
-                    <h3 className="text-medical-red mb-3">
-                      <i className="bi bi-gear me-2"></i>
-                      How We Use Your Information
-                    </h3>
-                    <p>
-                      Your information helps us provide and improve our
-                      services:
-                    </p>
-                    <ul className="privacy-list">
-                      <li>Process and fulfill your orders</li>
-                      <li>Provide customer support and respond to inquiries</li>
-                      <li>
-                        Send order confirmations, shipping updates, and receipts
-                      </li>
-                      <li>Improve our website and services</li>
-                      <li>Send promotional emails (with your consent)</li>
-                      <li>Comply with legal obligations and regulations</li>
-                      <li>Prevent fraud and ensure account security</li>
-                    </ul>
-                  </div>
+            <Col lg={4} md={6} className="mb-4">
+              <Card
+                style={{
+                  border: "2px solid #f8f9fa",
+                  borderRadius: "16px",
+                  padding: "30px",
+                  textAlign: "center",
+                  height: "100%",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.borderColor = "#343a40";
+                  e.currentTarget.style.transform = "translateY(-4px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 8px 25px rgba(52, 58, 64, 0.2)";
+                  const iconDiv =
+                    e.currentTarget.querySelector(".privacy-icon");
+                  if (iconDiv) {
+                    iconDiv.style.background =
+                      "linear-gradient(135deg, #343a40, #495057)";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.borderColor = "#f8f9fa";
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "none";
+                  const iconDiv =
+                    e.currentTarget.querySelector(".privacy-icon");
+                  if (iconDiv) {
+                    iconDiv.style.background =
+                      "linear-gradient(135deg, #e63946, #dc3545)";
+                  }
+                }}
+              >
+                <div
+                  className="privacy-icon"
+                  style={{
+                    width: "80px",
+                    height: "80px",
+                    background: "linear-gradient(135deg, #e63946, #dc3545)",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "0 auto 24px",
+                    color: "white",
+                    fontSize: "32px",
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  <i className="bi bi-eye-slash-fill"></i>
+                </div>
+                <h5 style={{ color: "#333333", marginBottom: "16px" }}>
+                  Privacy Control
+                </h5>
+                <p style={{ color: "#495057", marginBottom: "0" }}>
+                  You have full control over your personal data. You can request
+                  access, modification, or deletion of your information at any
+                  time.
+                </p>
+              </Card>
+            </Col>
 
-                  <div className="privacy-section mb-5">
-                    <h3 className="text-medical-red mb-3">
-                      <i className="bi bi-share me-2"></i>
-                      Information Sharing
-                    </h3>
-                    <p>
-                      We respect your privacy and do not sell your personal
-                      information. We may share information only in these
-                      circumstances:
-                    </p>
-                    <ul className="privacy-list">
-                      <li>
-                        <strong>Service Providers:</strong> Trusted partners who
-                        help us operate our business (payment processors,
-                        shipping companies)
-                      </li>
-                      <li>
-                        <strong>Legal Requirements:</strong> When required by
-                        law or to protect our rights
-                      </li>
-                      <li>
-                        <strong>Business Transfers:</strong> In case of merger,
-                        acquisition, or sale of our business
-                      </li>
-                      <li>
-                        <strong>With Your Consent:</strong> When you explicitly
-                        agree to share your information
-                      </li>
-                    </ul>
-                  </div>
+            <Col lg={4} md={6} className="mb-4">
+              <Card
+                style={{
+                  border: "2px solid #f8f9fa",
+                  borderRadius: "16px",
+                  padding: "30px",
+                  textAlign: "center",
+                  height: "100%",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.borderColor = "#343a40";
+                  e.currentTarget.style.transform = "translateY(-4px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 8px 25px rgba(52, 58, 64, 0.2)";
+                  const iconDiv =
+                    e.currentTarget.querySelector(".privacy-icon");
+                  if (iconDiv) {
+                    iconDiv.style.background =
+                      "linear-gradient(135deg, #343a40, #495057)";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.borderColor = "#f8f9fa";
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "none";
+                  const iconDiv =
+                    e.currentTarget.querySelector(".privacy-icon");
+                  if (iconDiv) {
+                    iconDiv.style.background =
+                      "linear-gradient(135deg, #e63946, #dc3545)";
+                  }
+                }}
+              >
+                <div
+                  className="privacy-icon"
+                  style={{
+                    width: "80px",
+                    height: "80px",
+                    background: "linear-gradient(135deg, #e63946, #dc3545)",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "0 auto 24px",
+                    color: "white",
+                    fontSize: "32px",
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  <i className="bi bi-check-circle-fill"></i>
+                </div>
+                <h5 style={{ color: "#333333", marginBottom: "16px" }}>
+                  Transparency
+                </h5>
+                <p style={{ color: "#495057", marginBottom: "0" }}>
+                  We are transparent about what data we collect, how we use it,
+                  and with whom we share it. No hidden practices or unclear
+                  terms.
+                </p>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
+      </section>
 
-                  <div className="privacy-section mb-5">
-                    <h3 className="text-medical-red mb-3">
-                      <i className="bi bi-shield-check me-2"></i>
-                      Data Security
-                    </h3>
-                    <p>
-                      We implement appropriate security measures to protect your
-                      information:
-                    </p>
-                    <ul className="privacy-list">
-                      <li>SSL encryption for all data transmission</li>
-                      <li>Secure servers with regular security updates</li>
-                      <li>Access controls and employee training</li>
-                      <li>Regular security audits and monitoring</li>
-                      <li>PCI DSS compliance for payment processing</li>
-                    </ul>
-                  </div>
+      {/* Privacy Policy Content */}
+      <section
+        style={{
+          background: "#f8f9fa",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+        }}
+      >
+        <Container>
+          <Row>
+            <Col lg={8} className="mb-5">
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    background: "linear-gradient(135deg, #e63946, #dc3545)",
+                    padding: "40px",
+                    color: "white",
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontSize: "2rem",
+                      fontWeight: "700",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    Privacy Policy Details
+                  </h3>
+                  <p style={{ opacity: "0.9", marginBottom: "0" }}>
+                    Comprehensive privacy protection for your peace of mind
+                  </p>
+                </div>
 
-                  <div className="privacy-section mb-5">
-                    <h3 className="text-medical-red mb-3">
-                      <i className="bi bi-person-check me-2"></i>
-                      Your Rights
-                    </h3>
-                    <p>
-                      You have the following rights regarding your personal
-                      information:
-                    </p>
-                    <ul className="privacy-list">
-                      <li>
-                        <strong>Access:</strong> Request a copy of your personal
-                        data
-                      </li>
-                      <li>
-                        <strong>Correction:</strong> Update or correct
-                        inaccurate information
-                      </li>
-                      <li>
-                        <strong>Deletion:</strong> Request deletion of your
-                        personal data
-                      </li>
-                      <li>
-                        <strong>Portability:</strong> Receive your data in a
-                        commonly used format
-                      </li>
-                      <li>
-                        <strong>Opt-out:</strong> Unsubscribe from marketing
-                        communications
-                      </li>
-                      <li>
-                        <strong>Restriction:</strong> Limit how we process your
-                        information
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="privacy-section mb-5">
-                    <h3 className="text-medical-red mb-3">
-                      <i className="bi bi-cookie me-2"></i>
-                      Cookies and Tracking
-                    </h3>
-                    <p>
-                      We use cookies and similar technologies to enhance your
-                      experience:
-                    </p>
-                    <ul className="privacy-list">
-                      <li>
-                        <strong>Essential Cookies:</strong> Required for website
-                        functionality
-                      </li>
-                      <li>
-                        <strong>Analytics Cookies:</strong> Help us understand
-                        how you use our site
-                      </li>
-                      <li>
-                        <strong>Marketing Cookies:</strong> Used to show
-                        relevant advertisements
-                      </li>
-                      <li>
-                        <strong>Preference Cookies:</strong> Remember your
-                        settings and preferences
-                      </li>
-                    </ul>
-                    <p>
-                      You can control cookies through your browser settings, but
-                      this may affect website functionality.
-                    </p>
-                  </div>
-
-                  <div className="privacy-section mb-5">
-                    <h3 className="text-medical-red mb-3">
-                      <i className="bi bi-clock me-2"></i>
-                      Data Retention
-                    </h3>
-                    <p>
-                      We retain your information for as long as necessary to:
-                    </p>
-                    <ul className="privacy-list">
-                      <li>Provide our services and support</li>
-                      <li>Comply with legal obligations</li>
-                      <li>Resolve disputes and enforce agreements</li>
-                      <li>Improve our services and prevent fraud</li>
-                    </ul>
-                    <p>
-                      Account information is typically retained for 7 years
-                      after account closure, in compliance with medical and
-                      financial regulations.
-                    </p>
-                  </div>
-
-                  <div className="privacy-section mb-5">
-                    <h3 className="text-medical-red mb-3">
-                      <i className="bi bi-people me-2"></i>
-                      Children's Privacy
-                    </h3>
-                    <p>
-                      Our services are not intended for children under 13. We do
-                      not knowingly collect personal information from children
-                      under 13. If you believe we have collected information
-                      from a child under 13, please contact us immediately.
-                    </p>
-                  </div>
-
-                  <div className="privacy-section mb-5">
-                    <h3 className="text-medical-red mb-3">
-                      <i className="bi bi-arrow-repeat me-2"></i>
-                      Policy Updates
-                    </h3>
-                    <p>
-                      We may update this Privacy Policy from time to time. We
-                      will notify you of any changes by:
-                    </p>
-                    <ul className="privacy-list">
-                      <li>Posting the new policy on this page</li>
-                      <li>Updating the "Last updated" date</li>
-                      <li>
-                        Sending email notifications for significant changes
-                      </li>
-                      <li>Displaying a notice on our website</li>
-                    </ul>
-                  </div>
-
-                  <div className="privacy-section">
-                    <h3 className="text-medical-red mb-3">
-                      <i className="bi bi-telephone me-2"></i>
-                      Contact Us
-                    </h3>
-                    <p>
-                      If you have any questions about this Privacy Policy or our
-                      data practices, please contact us:
-                    </p>
-                    <div className="contact-info">
-                      <p>
-                        <strong>Hare Krishna Medical</strong>
-                      </p>
-                      <p>
-                        <i className="bi bi-geo-alt me-2"></i>3 Sahyog Complex,
-                        Man Sarovar circle, Amroli, 394107
-                      </p>
-                      <p>
-                        <i className="bi bi-envelope me-2"></i>
-                        <a href="mailto:harekrishnamedical@gmail.com">
-                          harekrishnamedical@gmail.com
-                        </a>
-                      </p>
-                      <p>
-                        <i className="bi bi-telephone me-2"></i>
-                        <a href="tel:+917698913354">+91 76989 13354</a> |
-                        <a href="tel:+919106018508" className="ms-1">
-                          +91 91060 18508
-                        </a>
+                <Card.Body style={{ padding: "40px" }}>
+                  <div className="privacy-content">
+                    <div className="mb-4">
+                      <h5
+                        style={{
+                          color: "#e63946",
+                          marginBottom: "16px",
+                          fontWeight: "700",
+                        }}
+                      >
+                        1. Information We Collect
+                      </h5>
+                      <p style={{ color: "#495057", lineHeight: "1.8" }}>
+                        We collect information you provide directly to us, such
+                        as when you create an account, make a purchase, or
+                        contact us. This includes your name, email address,
+                        phone number, shipping address, and payment information.
                       </p>
                     </div>
+
+                    <div className="mb-4">
+                      <h5
+                        style={{
+                          color: "#e63946",
+                          marginBottom: "16px",
+                          fontWeight: "700",
+                        }}
+                      >
+                        2. How We Use Your Information
+                      </h5>
+                      <ul style={{ color: "#495057", lineHeight: "1.8" }}>
+                        <li>Process and fulfill your orders</li>
+                        <li>Send order confirmations and shipping updates</li>
+                        <li>Provide customer support</li>
+                        <li>Improve our services and user experience</li>
+                        <li>Send promotional emails (with your consent)</li>
+                      </ul>
+                    </div>
+
+                    <div className="mb-4">
+                      <h5
+                        style={{
+                          color: "#e63946",
+                          marginBottom: "16px",
+                          fontWeight: "700",
+                        }}
+                      >
+                        3. Information Sharing
+                      </h5>
+                      <p style={{ color: "#495057", lineHeight: "1.8" }}>
+                        We do not sell, trade, or rent your personal information
+                        to third parties. We may share your information only in
+                        specific circumstances such as with trusted service
+                        providers who help us operate our business.
+                      </p>
+                    </div>
+
+                    <div className="mb-4">
+                      <h5
+                        style={{
+                          color: "#e63946",
+                          marginBottom: "16px",
+                          fontWeight: "700",
+                        }}
+                      >
+                        4. Data Security
+                      </h5>
+                      <p style={{ color: "#495057", lineHeight: "1.8" }}>
+                        We implement appropriate technical and organizational
+                        security measures to protect your personal information
+                        against unauthorized access, alteration, disclosure, or
+                        destruction.
+                      </p>
+                    </div>
+
+                    <div className="mb-4">
+                      <h5
+                        style={{
+                          color: "#e63946",
+                          marginBottom: "16px",
+                          fontWeight: "700",
+                        }}
+                      >
+                        5. Your Rights
+                      </h5>
+                      <p style={{ color: "#495057", lineHeight: "1.8" }}>
+                        You have the right to access, update, or delete your
+                        personal information. You may also opt out of receiving
+                        promotional communications from us at any time.
+                      </p>
+                    </div>
+
+                    <div className="mt-4">
+                      <Button
+                        as={Link}
+                        to="/contact"
+                        size="lg"
+                        style={{
+                          background: "#e63946",
+                          border: "none",
+                          borderRadius: "8px",
+                          padding: "14px 28px",
+                          fontSize: "16px",
+                          fontWeight: "600",
+                          transition: "all 0.3s ease",
+                        }}
+                        onMouseOver={(e) => {
+                          e.target.style.background = "#343a40";
+                        }}
+                        onMouseOut={(e) => {
+                          e.target.style.background = "#e63946";
+                        }}
+                      >
+                        <i className="bi bi-envelope me-2"></i>
+                        Contact Us for Privacy Questions
+                      </Button>
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+
+            <Col lg={4}>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  marginBottom: "24px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                }}
+              >
+                <Card.Body style={{ padding: "30px", textAlign: "center" }}>
+                  <h5
+                    style={{
+                      color: "#e63946",
+                      marginBottom: "20px",
+                      fontSize: "1.3rem",
+                      fontWeight: "700",
+                    }}
+                  >
+                    <i className="bi bi-shield-check me-2"></i>
+                    Privacy Commitment
+                  </h5>
+                  <div style={{ color: "#495057", marginBottom: "20px" }}>
+                    <div style={{ marginBottom: "12px", fontWeight: "600" }}>
+                      🔒 256-bit SSL Encryption
+                    </div>
+                    <div style={{ marginBottom: "12px", fontWeight: "600" }}>
+                      🛡️ GDPR Compliant
+                    </div>
+                    <div style={{ marginBottom: "12px", fontWeight: "600" }}>
+                      🔐 Secure Data Storage
+                    </div>
+                    <div style={{ marginBottom: "12px", fontWeight: "600" }}>
+                      ✅ Regular Security Audits
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      padding: "16px",
+                      background: "linear-gradient(135deg, #f8f9fa, #e9ecef)",
+                      borderRadius: "12px",
+                      fontSize: "14px",
+                      lineHeight: "1.6",
+                    }}
+                  >
+                    <strong>Need Help?</strong>
+                    <br />
+                    If you have questions about this Privacy Policy, please
+                    contact us at:
+                    <br />
+                    <strong>harekrishnamedical@gmail.com</strong>
+                  </div>
+                </Card.Body>
+              </Card>
+
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                }}
+              >
+                <Card.Body style={{ padding: "30px" }}>
+                  <h5
+                    style={{
+                      color: "#e63946",
+                      marginBottom: "20px",
+                      fontSize: "1.3rem",
+                      fontWeight: "700",
+                    }}
+                  >
+                    <i className="bi bi-file-earmark-text me-2"></i>
+                    Related Documents
+                  </h5>
+                  <div className="d-grid gap-2">
+                    <Button
+                      as={Link}
+                      to="/terms-conditions"
+                      variant="outline-primary"
+                      style={{
+                        borderColor: "#e63946",
+                        color: "#e63946",
+                        borderRadius: "8px",
+                        padding: "12px",
+                        fontWeight: "600",
+                        transition: "all 0.3s ease",
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.background = "#e63946";
+                        e.target.style.color = "white";
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.background = "transparent";
+                        e.target.style.color = "#e63946";
+                      }}
+                    >
+                      Terms & Conditions
+                    </Button>
+                    <Button
+                      as={Link}
+                      to="/user-guide"
+                      variant="outline-primary"
+                      style={{
+                        borderColor: "#e63946",
+                        color: "#e63946",
+                        borderRadius: "8px",
+                        padding: "12px",
+                        fontWeight: "600",
+                        transition: "all 0.3s ease",
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.background = "#e63946";
+                        e.target.style.color = "white";
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.background = "transparent";
+                        e.target.style.color = "#e63946";
+                      }}
+                    >
+                      User Guide
+                    </Button>
                   </div>
                 </Card.Body>
               </Card>
@@ -293,56 +543,6 @@ const PrivacyPolicy = () => {
           </Row>
         </Container>
       </section>
-
-      <style>{`
-        .privacy-section {
-          margin-bottom: 2.5rem;
-        }
-
-        .privacy-list {
-          list-style: none;
-          padding-left: 0;
-        }
-
-        .privacy-list li {
-          padding: 8px 0;
-          border-bottom: 1px solid #f8f9fa;
-          position: relative;
-          padding-left: 25px;
-        }
-
-        .privacy-list li:before {
-          content: "✓";
-          position: absolute;
-          left: 0;
-          color: var(--medical-red);
-          font-weight: bold;
-        }
-
-        .privacy-list li:last-child {
-          border-bottom: none;
-        }
-
-        .contact-info {
-          background: #f8f9fa;
-          padding: 20px;
-          border-radius: 8px;
-          margin-top: 15px;
-        }
-
-        .contact-info p {
-          margin-bottom: 8px;
-        }
-
-        .contact-info a {
-          color: var(--medical-red);
-          text-decoration: none;
-        }
-
-        .contact-info a:hover {
-          text-decoration: underline;
-        }
-      `}</style>
     </div>
   );
 };
