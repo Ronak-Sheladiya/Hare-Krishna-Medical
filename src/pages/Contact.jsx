@@ -95,7 +95,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="fade-in">
+    <div className="fade-in contact-page-content">
       {/* Hero Section */}
       <section
         style={{

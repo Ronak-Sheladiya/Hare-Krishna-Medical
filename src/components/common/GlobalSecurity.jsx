@@ -135,7 +135,7 @@ const GlobalSecurity = () => {
         -webkit-touch-callout: none !important;
         -webkit-tap-highlight-color: transparent !important;
       }
-      
+
       /* Disable drag and drop */
       img, a {
         -webkit-user-drag: none !important;
@@ -145,7 +145,7 @@ const GlobalSecurity = () => {
         user-drag: none !important;
         pointer-events: auto !important;
       }
-      
+
       /* Allow input fields to be selectable for forms */
       input, textarea, select, [contenteditable="true"] {
         -webkit-user-select: text !important;
@@ -153,34 +153,42 @@ const GlobalSecurity = () => {
         -ms-user-select: text !important;
         user-select: text !important;
       }
-      
+
+      /* Allow text selection on contact page */
+      .contact-page-content, .contact-page-content * {
+        -webkit-user-select: text !important;
+        -moz-user-select: text !important;
+        -ms-user-select: text !important;
+        user-select: text !important;
+      }
+
       /* Hide scrollbars in developer tools */
       ::-webkit-scrollbar {
         width: 8px;
       }
-      
+
       ::-webkit-scrollbar-track {
         background: #f1f1f1;
       }
-      
+
       ::-webkit-scrollbar-thumb {
         background: #c1c1c1;
         border-radius: 4px;
       }
-      
+
       ::-webkit-scrollbar-thumb:hover {
         background: #a1a1a1;
       }
-      
+
       /* Disable highlighting */
       ::selection {
         background: transparent !important;
       }
-      
+
       ::-moz-selection {
         background: transparent !important;
       }
-      
+
       /* Security watermark for print */
       @media print {
         body::before {
@@ -262,31 +270,6 @@ const GlobalSecurity = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-
-      {/* Security Badge */}
-      <div
-        style={{
-          position: "fixed",
-          bottom: "20px",
-          left: "20px",
-          zIndex: 9999,
-          background: "rgba(220, 53, 69, 0.9)",
-          color: "white",
-          padding: "8px 12px",
-          borderRadius: "20px",
-          fontSize: "11px",
-          fontWeight: "600",
-          boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
-          display: "flex",
-          alignItems: "center",
-          gap: "5px",
-          userSelect: "none",
-          pointerEvents: "none",
-        }}
-      >
-        <i className="bi bi-shield-lock-fill"></i>
-        <span>PROTECTED CONTENT</span>
-      </div>
     </>
   );
 };

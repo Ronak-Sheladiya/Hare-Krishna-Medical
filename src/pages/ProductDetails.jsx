@@ -164,23 +164,6 @@ const ProductDetails = () => {
 
   return (
     <div className="fade-in">
-      {/* Breadcrumb */}
-      <section
-        style={{
-          background: "#f8f9fa",
-          paddingTop: "20px",
-          paddingBottom: "20px",
-        }}
-      >
-        <Container>
-          <Breadcrumb>
-            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-            <Breadcrumb.Item href="/products">Products</Breadcrumb.Item>
-            <Breadcrumb.Item active>{product.name}</Breadcrumb.Item>
-          </Breadcrumb>
-        </Container>
-      </section>
-
       {/* Product Details */}
       <section style={{ padding: "60px 0", background: "#ffffff" }}>
         <Container>
