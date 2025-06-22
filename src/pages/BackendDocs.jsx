@@ -111,7 +111,6 @@ Products Collection:
   name: String (required),
   description: String,
   company: String,
-  category: String,
   price: Number (required),
   discountPrice: Number,
   stock: Number (required),
@@ -681,7 +680,7 @@ This documentation provides a comprehensive guide for implementing the backend s
 │   │   ├── AdminOrders.jsx             # Order management
 │   │   ├── AdminProducts.jsx           # Product management
 │   │   └── AdminUsers.jsx              # User management
-│   ├── user/
+│   ├─�� user/
 │   │   ├── UserInvoices.jsx            # User invoice history
 │   │   ├── UserOrders.jsx              # User order history
 │   │   └── UserProfile.jsx             # Profile editing
