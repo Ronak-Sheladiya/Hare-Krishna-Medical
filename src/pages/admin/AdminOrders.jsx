@@ -326,25 +326,25 @@ const AdminOrders = () => {
                               variant="outline-primary"
                               onClick={() => handleViewDetails(order)}
                               className="btn-medical-outline"
-                              title="View Order Details"
                             >
-                              <i className="bi bi-eye"></i>
+                              <i className="bi bi-eye me-1"></i>
+                              View
                             </Button>
                             <Button
                               size="sm"
                               variant="outline-success"
                               onClick={() => handleViewInvoice(order)}
-                              title="View Invoice"
                             >
-                              <i className="bi bi-receipt"></i>
+                              <i className="bi bi-receipt me-1"></i>
+                              Invoice
                             </Button>
                             <Button
                               size="sm"
                               variant="outline-info"
                               onClick={() => handleDownloadInvoice(order)}
-                              title="Download Invoice"
                             >
-                              <i className="bi bi-download"></i>
+                              <i className="bi bi-download me-1"></i>
+                              Download
                             </Button>
                           </div>
                         </td>
