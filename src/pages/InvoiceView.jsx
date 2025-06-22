@@ -88,6 +88,58 @@ const InvoiceView = () => {
     fetchInvoice();
   }, [orderId]);
 
+  const handlePrintInvoice = () => {
+    if (!invoice) return;
+
+    // Create print-specific HTML content using the ProfessionalInvoice component
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Official Invoice ${invoice.invoiceId}</title>
+          <style>
+            @page { size: A4; margin: 0.5in; }
+            body {
+              margin: 0;
+              padding: 0;
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            * {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
+            }
+          </style>
+        </head>
+        <body>
+          ${document.getElementById("invoice-content").innerHTML}
+        </body>
+      </html>
+    `;
+
+    // Create temporary iframe for printing
+    const printFrame = document.createElement("iframe");
+    printFrame.style.position = "absolute";
+    printFrame.style.top = "-10000px";
+    printFrame.style.left = "-10000px";
+    document.body.appendChild(printFrame);
+
+    printFrame.contentDocument.write(printContent);
+    printFrame.contentDocument.close();
+
+    // Wait for content to load then print
+    setTimeout(() => {
+      printFrame.contentWindow.focus();
+      printFrame.contentWindow.print();
+      // Clean up after printing
+      setTimeout(() => {
+        document.body.removeChild(printFrame);
+      }, 1000);
+    }, 500);
+  };
+
   const downloadPDF = async () => {
     if (!invoice) return;
 
@@ -176,7 +228,7 @@ const InvoiceView = () => {
       const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `Official_Invoice_${invoice.invoiceId}.pdf`;
+      link.download = `${invoice.invoiceId}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -451,7 +503,7 @@ const InvoiceView = () => {
                   Download PDF
                 </Button>
                 <Button
-                  onClick={() => window.print()}
+                  onClick={() => handlePrintInvoice()}
                   variant="outline-primary"
                   className="btn-medical-outline"
                   size="lg"
