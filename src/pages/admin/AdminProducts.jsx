@@ -352,14 +352,16 @@ const AdminProducts = () => {
                                 variant="outline-primary"
                                 onClick={() => handleEditProduct(product)}
                               >
-                                <i className="bi bi-pencil"></i>
+                                <i className="bi bi-pencil me-1"></i>
+                                Edit
                               </Button>
                               <Button
                                 size="sm"
                                 variant="outline-danger"
                                 onClick={() => handleDeleteProduct(product.id)}
                               >
-                                <i className="bi bi-trash"></i>
+                                <i className="bi bi-trash me-1"></i>
+                                Delete
                               </Button>
                             </div>
                           </td>
