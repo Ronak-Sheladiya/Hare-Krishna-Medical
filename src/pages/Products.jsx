@@ -166,17 +166,53 @@ const Products = () => {
 
   return (
     <div className="fade-in">
-      {/* Page Header */}
-      <section className="section-padding-sm">
+      {/* Hero Section - Matching About Us */}
+      <section
+        style={{
+          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+          color: "white",
+        }}
+      >
         <Container>
-          <Row>
-            <Col lg={12} className="text-center mb-4">
-              <h1 className="section-title">Our Medical Products</h1>
-              <p className="section-subtitle">
+          <Row className="text-center">
+            <Col lg={12}>
+              <h1
+                style={{
+                  fontSize: "3rem",
+                  fontWeight: "800",
+                  marginBottom: "20px",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                }}
+              >
+                Our Medical Products
+              </h1>
+              <p
+                style={{
+                  fontSize: "1.2rem",
+                  opacity: "0.9",
+                  maxWidth: "600px",
+                  margin: "0 auto",
+                }}
+              >
                 Quality healthcare products for your medical needs
               </p>
             </Col>
           </Row>
+        </Container>
+      </section>
+
+      {/* Filters Section */}
+      <section
+        style={{
+          background: "#ffffff",
+          paddingTop: "60px",
+          paddingBottom: "40px",
+        }}
+      >
+        <Container>
+          <Row>
 
           {/* Search and Filters */}
           <Row className="mb-4">
@@ -257,8 +293,17 @@ const Products = () => {
         </Container>
       </section>
 
-      {/* Products Grid/List - 2 Cards Per Row */}
-      <section className="section-padding-sm">
+        </Container>
+      </section>
+
+      {/* Products Grid/List */}
+      <section
+        style={{
+          background: "#f8f9fa",
+          paddingTop: "60px",
+          paddingBottom: "80px",
+        }}
+      >
         <Container>
           {filteredProducts.length === 0 ? (
             <Row>
