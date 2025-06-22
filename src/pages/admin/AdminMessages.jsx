@@ -231,10 +231,10 @@ const AdminMessages = () => {
 
   return (
     <div className="fade-in admin-page-content" data-page="admin">
-      {/* Hero Section - Admin Theme */}
+      {/* Hero Section - About Us Red Theme */}
       <section
         style={{
-          background: "linear-gradient(135deg, #3182ce 0%, #2c5282 100%)",
+          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
           paddingTop: "80px",
           paddingBottom: "80px",
           color: "white",
