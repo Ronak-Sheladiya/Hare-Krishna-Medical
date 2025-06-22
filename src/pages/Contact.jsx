@@ -330,7 +330,10 @@ const Contact = () => {
                     if (icon) icon.style.color = "white";
                   }}
                 >
-                  <i className="bi bi-telephone me-2"></i>
+                  <i
+                    className="bi bi-telephone me-2"
+                    style={{ color: "white" }}
+                  ></i>
                   Call Now
                 </Button>
               </Card>
