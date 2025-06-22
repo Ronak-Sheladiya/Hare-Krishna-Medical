@@ -232,7 +232,7 @@ const InvoiceView = () => {
 
       const root = createRoot(invoiceElement);
       root.render(
-        React.createElement(ProfessionalInvoice, {
+        React.createElement(OfficialInvoiceDesign, {
           invoiceData,
           qrCode: qrCode,
           forPrint: true,
