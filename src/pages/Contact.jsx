@@ -553,6 +553,13 @@ const Contact = () => {
                         fontSize: "16px",
                         fontWeight: "600",
                         width: "100%",
+                        transition: "all 0.3s ease",
+                      }}
+                      onMouseOver={(e) => {
+                        if (!loading) e.target.style.background = "#343a40";
+                      }}
+                      onMouseOut={(e) => {
+                        if (!loading) e.target.style.background = "#e63946";
                       }}
                     >
                       {loading ? (
