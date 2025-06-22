@@ -462,16 +462,27 @@ const About = () => {
                   boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
                 }}
               >
-                <div style={{ position: "relative" }}>
+                <div
+                  style={{
+                    position: "relative",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "300px",
+                    background:
+                      "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+                    padding: "40px",
+                  }}
+                >
                   <img
                     src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
                     alt="Hare Krishna Medical"
                     className="img-fluid"
                     style={{
-                      width: "100%",
-                      height: "300px",
-                      objectFit: "cover",
-                      filter: "brightness(1.1) contrast(1.1)",
+                      maxWidth: "200px",
+                      maxHeight: "200px",
+                      objectFit: "contain",
+                      filter: "brightness(1.1) contrast(1.2)",
                     }}
                   />
                   <div
@@ -481,20 +492,28 @@ const About = () => {
                       left: "0",
                       right: "0",
                       background:
-                        "linear-gradient(transparent, rgba(0,0,0,0.7))",
+                        "linear-gradient(transparent, rgba(230, 57, 70, 0.9))",
                       color: "white",
-                      padding: "30px 20px 20px",
+                      padding: "40px 20px 20px",
                       textAlign: "center",
                     }}
                   >
-                    <h5 style={{ marginBottom: "8px", fontWeight: "700" }}>
+                    <h5
+                      style={{
+                        marginBottom: "8px",
+                        fontWeight: "700",
+                        textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
+                      }}
+                    >
                       Trusted Since Years
                     </h5>
                     <p
                       style={{
                         fontSize: "14px",
-                        opacity: "0.9",
+                        opacity: "1",
                         marginBottom: "0",
+                        textShadow: "1px 1px 2px rgba(0,0,0,0.5)",
+                        fontWeight: "500",
                       }}
                     >
                       Serving our community with dedication
