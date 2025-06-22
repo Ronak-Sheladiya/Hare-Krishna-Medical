@@ -237,6 +237,8 @@ const Order = () => {
   const handleOrderConfirm = () => {
     setShowOrderModal(false);
     setShowInvoiceModal(true);
+    // Clear cart when order is confirmed and QR is displayed
+    dispatch(clearCart());
   };
 
   const generatePDFInvoice = async () => {
