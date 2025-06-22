@@ -21,6 +21,18 @@ const AdminProducts = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    company: "",
+    price: "",
+    stock: "",
+    category: "",
+    description: "",
+    benefits: "",
+    usage: "",
+    weight: "",
+    images: [],
+  });
 
   // Mock products data
   const mockProducts = [
@@ -43,7 +55,7 @@ const AdminProducts = () => {
       price: 45.5,
       stock: 5,
       category: "Vitamins",
-      status: "Active",
+      status: "Low Stock",
       images: ["https://via.placeholder.com/150"],
       description: "Essential vitamin for bone health",
       lastUpdated: "2024-01-14",
@@ -61,19 +73,6 @@ const AdminProducts = () => {
       lastUpdated: "2024-01-13",
     },
   ];
-
-  const [formData, setFormData] = useState({
-    name: "",
-    company: "",
-    price: "",
-    stock: "",
-    category: "",
-    description: "",
-    benefits: "",
-    usage: "",
-    weight: "",
-    images: [],
-  });
 
   useEffect(() => {
     setProducts(mockProducts);
@@ -103,40 +102,6 @@ const AdminProducts = () => {
   };
 
   const handleAddProduct = () => {
-    // Comprehensive validation
-    const errors = {};
-
-    if (!formData.name.trim()) {
-      errors.name = "Product name is required";
-    }
-
-    if (!formData.company.trim()) {
-      errors.company = "Company name is required";
-    }
-
-    if (!formData.description.trim()) {
-      errors.description = "Description is required";
-    }
-
-    if (!formData.price || parseFloat(formData.price) <= 0) {
-      errors.price = "Valid price is required (must be greater than 0)";
-    }
-
-    if (!formData.stock || parseInt(formData.stock) < 0) {
-      errors.stock = "Valid stock quantity is required (cannot be negative)";
-    }
-
-    if (!formData.category) {
-      errors.category = "Category selection is required";
-    }
-
-    if (Object.keys(errors).length > 0) {
-      // Show validation errors
-      const errorMessages = Object.values(errors).join("\n");
-      alert(`Please fix the following errors:\n\n${errorMessages}`);
-      return;
-    }
-
     const newProduct = {
       id: Date.now(),
       ...formData,
@@ -163,50 +128,14 @@ const AdminProducts = () => {
     setShowAddModal(false);
   };
 
-  const handleEditProduct = (product) => {
-    setSelectedProduct(product);
-    setFormData({
-      name: product.name,
-      company: product.company,
-      price: product.price.toString(),
-      stock: product.stock.toString(),
-      category: product.category,
-      description: product.description,
-      benefits: product.benefits || "",
-      usage: product.usage || "",
-      weight: product.weight || "",
-      images: product.images || [],
-    });
-    setShowEditModal(true);
-  };
-
-  const handleUpdateProduct = () => {
-    const updatedProduct = {
-      ...selectedProduct,
-      ...formData,
-      price: parseFloat(formData.price),
-      stock: parseInt(formData.stock),
-      status: parseInt(formData.stock) > 0 ? "Active" : "Out of Stock",
-      lastUpdated: new Date().toISOString().split("T")[0],
-    };
-
-    setProducts((prev) =>
-      prev.map((p) => (p.id === selectedProduct.id ? updatedProduct : p)),
-    );
-    setShowEditModal(false);
-    setSelectedProduct(null);
-  };
-
-  const handleDeleteProduct = (id) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      setProducts((prev) => prev.filter((p) => p.id !== id));
+  const getStatusBadge = (status, stock) => {
+    if (stock === 0) {
+      return <Badge bg="danger">Out of Stock</Badge>;
+    } else if (stock <= 10) {
+      return <Badge bg="warning">Low Stock</Badge>;
+    } else {
+      return <Badge bg="success">Active</Badge>;
     }
-  };
-
-  const getStockStatus = (stock) => {
-    if (stock === 0) return { variant: "danger", text: "Out of Stock" };
-    if (stock <= 10) return { variant: "warning", text: "Low Stock" };
-    return { variant: "success", text: "In Stock" };
   };
 
   return (
@@ -257,24 +186,37 @@ const AdminProducts = () => {
           minHeight: "60vh",
         }}
       >
-                  <p className="text-muted">
-                    Manage your medical product inventory
-                  </p>
-                </div>
-                <Button
-                  className="btn-medical-primary"
-                  onClick={() => setShowAddModal(true)}
-                >
-                  <i className="bi bi-plus-circle me-2"></i>
-                  Add New Product
-                </Button>
-              </div>
+        <Container>
+          {/* Header */}
+          <Row className="mb-4">
+            <Col lg={8}>
+              <h2 style={{ color: "#333333", fontWeight: "700" }}>
+                Product Inventory
+              </h2>
+              <p style={{ color: "#495057" }}>
+                Manage your medical products and inventory
+              </p>
+            </Col>
+            <Col lg={4} className="text-end">
+              <Button
+                onClick={() => setShowAddModal(true)}
+                style={{
+                  background: "#3182ce",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "12px 24px",
+                  fontWeight: "600",
+                }}
+              >
+                <i className="bi bi-plus-circle me-2"></i>
+                Add New Product
+              </Button>
             </Col>
           </Row>
 
           {/* Filters */}
           <Row className="mb-4">
-            <Col lg={6}>
+            <Col lg={6} className="mb-3">
               <InputGroup>
                 <InputGroup.Text>
                   <i className="bi bi-search"></i>
@@ -287,26 +229,27 @@ const AdminProducts = () => {
                 />
               </InputGroup>
             </Col>
-            <Col lg={3}>
+            <Col lg={3} className="mb-3">
               <Form.Select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
               >
                 <option value="">All Categories</option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
                   </option>
                 ))}
               </Form.Select>
             </Col>
-            <Col lg={3}>
+            <Col lg={3} className="mb-3">
               <Button
                 variant="outline-secondary"
                 onClick={() => {
                   setSearchTerm("");
                   setCategoryFilter("");
                 }}
+                style={{ width: "100%" }}
               >
                 Clear Filters
               </Button>
@@ -314,103 +257,185 @@ const AdminProducts = () => {
           </Row>
 
           {/* Products Table */}
-          <Card className="medical-card">
-            <Card.Header className="bg-medical-light">
-              <h5 className="mb-0">
-                <i className="bi bi-box-seam me-2"></i>
-                Products ({filteredProducts.length})
-              </h5>
-            </Card.Header>
-            <Card.Body className="p-0">
-              <div className="table-responsive">
-                <Table className="mb-0">
-                  <thead className="table-light">
-                    <tr>
-                      <th>Product</th>
-                      <th>Company</th>
-                      <th>Price</th>
-                      <th>Stock</th>
-                      <th>Category</th>
-                      <th>Status</th>
-                      <th>Last Updated</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredProducts.map((product) => {
-                      const stockStatus = getStockStatus(product.stock);
-                      return (
-                        <tr key={product.id}>
-                          <td>
-                            <div className="d-flex align-items-center">
-                              <img
-                                src={product.images[0]}
-                                alt={product.name}
-                                style={{
-                                  width: "50px",
-                                  height: "50px",
-                                  objectFit: "cover",
-                                }}
-                                className="rounded me-3"
-                              />
-                              <div>
-                                <div className="fw-bold">{product.name}</div>
-                                <small className="text-muted">
-                                  {product.description}
-                                </small>
-                              </div>
-                            </div>
-                          </td>
-                          <td>{product.company}</td>
-                          <td>₹{product.price}</td>
-                          <td>
-                            <Badge bg={stockStatus.variant}>
-                              {product.stock} units
-                            </Badge>
-                          </td>
-                          <td>
-                            <Badge bg="secondary">{product.category}</Badge>
-                          </td>
-                          <td>
-                            <Badge
-                              bg={
-                                product.status === "Active"
-                                  ? "success"
-                                  : "danger"
-                              }
+          <Row>
+            <Col lg={12}>
+              <Card
+                style={{
+                  border: "2px solid #f8f9fa",
+                  borderRadius: "16px",
+                  boxShadow: "0 8px 25px rgba(0,0,0,0.05)",
+                }}
+              >
+                <Card.Header
+                  style={{
+                    background: "linear-gradient(135deg, #3182ce, #2c5282)",
+                    color: "white",
+                    borderRadius: "16px 16px 0 0",
+                    padding: "20px 30px",
+                  }}
+                >
+                  <h5 style={{ margin: 0, fontWeight: "700" }}>
+                    <i className="bi bi-box-seam me-2"></i>
+                    Products ({filteredProducts.length})
+                  </h5>
+                </Card.Header>
+                <Card.Body style={{ padding: 0 }}>
+                  {filteredProducts.length === 0 ? (
+                    <div
+                      className="text-center"
+                      style={{ padding: "60px 20px" }}
+                    >
+                      <i
+                        className="bi bi-box display-1 mb-3"
+                        style={{ color: "#e9ecef" }}
+                      ></i>
+                      <h4 style={{ color: "#495057" }}>No products found</h4>
+                      <p style={{ color: "#6c757d" }}>
+                        Try adjusting your search criteria or add some products
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="table-responsive">
+                      <Table className="mb-0">
+                        <thead style={{ background: "#f8f9fa" }}>
+                          <tr>
+                            <th style={{ padding: "16px", fontWeight: "600" }}>
+                              Product
+                            </th>
+                            <th style={{ padding: "16px", fontWeight: "600" }}>
+                              Category
+                            </th>
+                            <th style={{ padding: "16px", fontWeight: "600" }}>
+                              Price
+                            </th>
+                            <th style={{ padding: "16px", fontWeight: "600" }}>
+                              Stock
+                            </th>
+                            <th style={{ padding: "16px", fontWeight: "600" }}>
+                              Status
+                            </th>
+                            <th style={{ padding: "16px", fontWeight: "600" }}>
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredProducts.map((product) => (
+                            <tr
+                              key={product.id}
+                              style={{ borderBottom: "1px solid #e9ecef" }}
                             >
-                              {product.status}
-                            </Badge>
-                          </td>
-                          <td>{product.lastUpdated}</td>
-                          <td>
-                            <div className="d-flex gap-1">
-                              <Button
-                                size="sm"
-                                variant="outline-primary"
-                                onClick={() => handleEditProduct(product)}
-                              >
-                                <i className="bi bi-pencil me-1"></i>
-                                Edit
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline-danger"
-                                onClick={() => handleDeleteProduct(product.id)}
-                              >
-                                <i className="bi bi-trash me-1"></i>
-                                Delete
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </Table>
-              </div>
-            </Card.Body>
-          </Card>
+                              <td style={{ padding: "16px" }}>
+                                <div className="d-flex align-items-center">
+                                  <img
+                                    src={product.images[0]}
+                                    alt={product.name}
+                                    style={{
+                                      width: "50px",
+                                      height: "50px",
+                                      objectFit: "cover",
+                                      borderRadius: "8px",
+                                      marginRight: "15px",
+                                    }}
+                                  />
+                                  <div>
+                                    <div
+                                      style={{
+                                        fontWeight: "600",
+                                        color: "#333333",
+                                      }}
+                                    >
+                                      {product.name}
+                                    </div>
+                                    <div
+                                      style={{
+                                        fontSize: "12px",
+                                        color: "#6c757d",
+                                      }}
+                                    >
+                                      {product.company}
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td style={{ padding: "16px" }}>
+                                <Badge
+                                  bg="secondary"
+                                  style={{
+                                    background: "#495057",
+                                    padding: "6px 12px",
+                                    borderRadius: "20px",
+                                  }}
+                                >
+                                  {product.category}
+                                </Badge>
+                              </td>
+                              <td style={{ padding: "16px" }}>
+                                <span
+                                  style={{
+                                    fontWeight: "600",
+                                    color: "#3182ce",
+                                    fontSize: "16px",
+                                  }}
+                                >
+                                  ₹{product.price.toFixed(2)}
+                                </span>
+                              </td>
+                              <td style={{ padding: "16px" }}>
+                                <span
+                                  style={{
+                                    fontWeight: "600",
+                                    color:
+                                      product.stock === 0
+                                        ? "#dc3545"
+                                        : product.stock <= 10
+                                          ? "#f39c12"
+                                          : "#38a169",
+                                  }}
+                                >
+                                  {product.stock}
+                                </span>
+                              </td>
+                              <td style={{ padding: "16px" }}>
+                                {getStatusBadge(product.status, product.stock)}
+                              </td>
+                              <td style={{ padding: "16px" }}>
+                                <div className="d-flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline-primary"
+                                    style={{
+                                      borderColor: "#3182ce",
+                                      color: "#3182ce",
+                                    }}
+                                  >
+                                    <i className="bi bi-pencil"></i>
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline-info"
+                                    style={{
+                                      borderColor: "#0ea5e9",
+                                      color: "#0ea5e9",
+                                    }}
+                                  >
+                                    <i className="bi bi-eye"></i>
+                                  </Button>
+                                  <Button size="sm" variant="outline-danger">
+                                    <i className="bi bi-trash"></i>
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Table>
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
         </Container>
       </section>
 
@@ -420,216 +445,122 @@ const AdminProducts = () => {
         onHide={() => setShowAddModal(false)}
         size="lg"
       >
-        <Modal.Header closeButton>
-          <Modal.Title>Add New Product</Modal.Title>
+        <Modal.Header
+          closeButton
+          style={{
+            background: "linear-gradient(135deg, #3182ce, #2c5282)",
+            color: "white",
+          }}
+        >
+          <Modal.Title>
+            <i className="bi bi-plus-circle me-2"></i>
+            Add New Product
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body style={{ padding: "30px" }}>
           <Form>
             <Row>
               <Col md={6} className="mb-3">
-                <Form.Label>Product Name *</Form.Label>
+                <Form.Label style={{ fontWeight: "600" }}>
+                  Product Name *
+                </Form.Label>
                 <Form.Control
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Enter product name"
+                  style={{ borderRadius: "8px", padding: "12px" }}
                 />
               </Col>
               <Col md={6} className="mb-3">
-                <Form.Label>Company *</Form.Label>
+                <Form.Label style={{ fontWeight: "600" }}>Company *</Form.Label>
                 <Form.Control
                   type="text"
                   name="company"
                   value={formData.company}
                   onChange={handleInputChange}
                   placeholder="Enter company name"
-                />
-              </Col>
-              <Col md={6} className="mb-3">
-                <Form.Label>Price (₹) *</Form.Label>
-                <Form.Control
-                  type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleInputChange}
-                  placeholder="Enter price"
-                  step="0.01"
-                />
-              </Col>
-              <Col md={6} className="mb-3">
-                <Form.Label>Stock Quantity *</Form.Label>
-                <Form.Control
-                  type="number"
-                  name="stock"
-                  value={formData.stock}
-                  onChange={handleInputChange}
-                  placeholder="Enter stock quantity"
-                />
-              </Col>
-              <Col md={6} className="mb-3">
-                <Form.Label>Category *</Form.Label>
-                <Form.Select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Col>
-              <Col md={6} className="mb-3">
-                <Form.Label>Weight/Size</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="weight"
-                  value={formData.weight}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 500mg, 100ml"
-                />
-              </Col>
-              <Col md={12} className="mb-3">
-                <Form.Label>Description *</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={3}
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Enter product description"
-                />
-              </Col>
-              <Col md={12} className="mb-3">
-                <Form.Label>Benefits</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={2}
-                  name="benefits"
-                  value={formData.benefits}
-                  onChange={handleInputChange}
-                  placeholder="Enter product benefits (comma separated)"
-                />
-              </Col>
-              <Col md={12} className="mb-3">
-                <Form.Label>Usage Instructions</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={2}
-                  name="usage"
-                  value={formData.usage}
-                  onChange={handleInputChange}
-                  placeholder="Enter usage instructions"
+                  style={{ borderRadius: "8px", padding: "12px" }}
                 />
               </Col>
             </Row>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowAddModal(false)}>
-            Cancel
-          </Button>
-          <Button className="btn-medical-primary" onClick={handleAddProduct}>
-            Add Product
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Edit Product Modal */}
-      <Modal
-        show={showEditModal}
-        onHide={() => setShowEditModal(false)}
-        size="lg"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Product</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
             <Row>
-              <Col md={6} className="mb-3">
-                <Form.Label>Product Name *</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                />
-              </Col>
-              <Col md={6} className="mb-3">
-                <Form.Label>Company *</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="company"
-                  value={formData.company}
-                  onChange={handleInputChange}
-                />
-              </Col>
-              <Col md={6} className="mb-3">
-                <Form.Label>Price (₹) *</Form.Label>
+              <Col md={4} className="mb-3">
+                <Form.Label style={{ fontWeight: "600" }}>Price *</Form.Label>
                 <Form.Control
                   type="number"
                   name="price"
                   value={formData.price}
                   onChange={handleInputChange}
+                  placeholder="0.00"
                   step="0.01"
+                  style={{ borderRadius: "8px", padding: "12px" }}
                 />
               </Col>
-              <Col md={6} className="mb-3">
-                <Form.Label>Stock Quantity *</Form.Label>
+              <Col md={4} className="mb-3">
+                <Form.Label style={{ fontWeight: "600" }}>Stock *</Form.Label>
                 <Form.Control
                   type="number"
                   name="stock"
                   value={formData.stock}
                   onChange={handleInputChange}
+                  placeholder="0"
+                  style={{ borderRadius: "8px", padding: "12px" }}
                 />
               </Col>
-              <Col md={6} className="mb-3">
-                <Form.Label>Category *</Form.Label>
+              <Col md={4} className="mb-3">
+                <Form.Label style={{ fontWeight: "600" }}>
+                  Category *
+                </Form.Label>
                 <Form.Select
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
+                  style={{ borderRadius: "8px", padding: "12px" }}
                 >
                   <option value="">Select Category</option>
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
                     </option>
                   ))}
                 </Form.Select>
               </Col>
-              <Col md={6} className="mb-3">
-                <Form.Label>Weight/Size</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="weight"
-                  value={formData.weight}
-                  onChange={handleInputChange}
-                />
-              </Col>
-              <Col md={12} className="mb-3">
-                <Form.Label>Description *</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={3}
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                />
-              </Col>
             </Row>
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: "600" }}>
+                Description *
+              </Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="Enter product description"
+                style={{ borderRadius: "8px", padding: "12px" }}
+              />
+            </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+          <Button
+            variant="outline-secondary"
+            onClick={() => setShowAddModal(false)}
+          >
             Cancel
           </Button>
-          <Button className="btn-medical-primary" onClick={handleUpdateProduct}>
-            Update Product
+          <Button
+            onClick={handleAddProduct}
+            style={{
+              background: "#3182ce",
+              border: "none",
+              padding: "8px 20px",
+            }}
+          >
+            <i className="bi bi-plus-circle me-2"></i>
+            Add Product
           </Button>
         </Modal.Footer>
       </Modal>
