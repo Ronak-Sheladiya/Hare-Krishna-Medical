@@ -102,6 +102,40 @@ const AdminProducts = () => {
   };
 
   const handleAddProduct = () => {
+    // Comprehensive validation
+    const errors = {};
+
+    if (!formData.name.trim()) {
+      errors.name = "Product name is required";
+    }
+
+    if (!formData.company.trim()) {
+      errors.company = "Company name is required";
+    }
+
+    if (!formData.description.trim()) {
+      errors.description = "Description is required";
+    }
+
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      errors.price = "Valid price is required (must be greater than 0)";
+    }
+
+    if (!formData.stock || parseInt(formData.stock) < 0) {
+      errors.stock = "Valid stock quantity is required (cannot be negative)";
+    }
+
+    if (!formData.category) {
+      errors.category = "Category selection is required";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      // Show validation errors
+      const errorMessages = Object.values(errors).join("\n");
+      alert(`Please fill the following required fields:\n\n${errorMessages}`);
+      return;
+    }
+
     const newProduct = {
       id: Date.now(),
       ...formData,
@@ -126,6 +160,7 @@ const AdminProducts = () => {
       images: [],
     });
     setShowAddModal(false);
+    alert("Product added successfully!");
   };
 
   const getStatusBadge = (status, stock) => {
@@ -140,10 +175,10 @@ const AdminProducts = () => {
 
   return (
     <div className="fade-in admin-page-content" data-page="admin">
-      {/* Hero Section - Admin Theme */}
+      {/* Hero Section - About Us Red Theme */}
       <section
         style={{
-          background: "linear-gradient(135deg, #3182ce 0%, #2c5282 100%)",
+          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
           paddingTop: "80px",
           paddingBottom: "80px",
           color: "white",
@@ -201,7 +236,7 @@ const AdminProducts = () => {
               <Button
                 onClick={() => setShowAddModal(true)}
                 style={{
-                  background: "#3182ce",
+                  background: "#e63946",
                   border: "none",
                   borderRadius: "8px",
                   padding: "12px 24px",
@@ -268,7 +303,7 @@ const AdminProducts = () => {
               >
                 <Card.Header
                   style={{
-                    background: "linear-gradient(135deg, #3182ce, #2c5282)",
+                    background: "linear-gradient(135deg, #e63946, #dc3545)",
                     color: "white",
                     borderRadius: "16px 16px 0 0",
                     padding: "20px 30px",
@@ -448,7 +483,7 @@ const AdminProducts = () => {
         <Modal.Header
           closeButton
           style={{
-            background: "linear-gradient(135deg, #3182ce, #2c5282)",
+            background: "linear-gradient(135deg, #e63946, #dc3545)",
             color: "white",
           }}
         >
@@ -554,7 +589,7 @@ const AdminProducts = () => {
           <Button
             onClick={handleAddProduct}
             style={{
-              background: "#3182ce",
+              background: "#e63946",
               border: "none",
               padding: "8px 20px",
             }}
