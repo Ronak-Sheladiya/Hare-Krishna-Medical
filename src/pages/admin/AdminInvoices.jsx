@@ -188,9 +188,33 @@ const AdminInvoices = () => {
     setFilteredInvoices(filtered);
   }, [invoices, searchTerm, statusFilter, paymentFilter]);
 
-  const handleViewInvoice = (invoice) => {
-    setSelectedInvoice(invoice);
-    setShowInvoiceModal(true);
+  const handleViewInvoice = async (invoice) => {
+    try {
+      // Generate QR code for the invoice
+      const verifyUrl = `${window.location.origin}/invoice/${invoice.orderId}`;
+      const qrDataURL = await QRCode.toDataURL(verifyUrl, {
+        width: 120,
+        margin: 2,
+        color: {
+          dark: "#1a202c",
+          light: "#ffffff",
+        },
+        errorCorrectionLevel: "M",
+      });
+
+      // Add QR code to invoice data
+      const invoiceWithQR = {
+        ...invoice,
+        qrCode: qrDataURL,
+      };
+
+      setSelectedInvoice(invoiceWithQR);
+      setShowInvoiceModal(true);
+    } catch (error) {
+      console.error("Error generating QR code:", error);
+      setSelectedInvoice(invoice);
+      setShowInvoiceModal(true);
+    }
   };
 
   const handleDownloadInvoice = async (invoice) => {
@@ -359,24 +383,31 @@ const AdminInvoices = () => {
   };
 
   const handlePrintInvoice = () => {
-    // Create a new window for printing
-    const printWindow = window.open("", "_blank", "width=800,height=600");
-    const invoiceContent = document.querySelector(".invoice-preview").innerHTML;
+    if (!selectedInvoice) return;
 
-    printWindow.document.write(`
+    const invoiceContent = document.getElementById(
+      "admin-invoice-content",
+    ).innerHTML;
+
+    // Create print-specific HTML content
+    const printContent = `
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Invoice ${selectedInvoice?.invoiceId}</title>
+          <title>Official Invoice ${selectedInvoice.invoiceId}</title>
           <style>
+            @page { size: A4; margin: 0.5in; }
             body {
               margin: 0;
               padding: 0;
               font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
             }
-            @media print {
-              body { margin: 0; padding: 0; }
-              @page { size: A4; margin: 0.5in; }
+            * {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
             }
           </style>
         </head>
@@ -384,14 +415,27 @@ const AdminInvoices = () => {
           ${invoiceContent}
         </body>
       </html>
-    `);
+    `;
 
-    printWindow.document.close();
-    printWindow.focus();
+    // Create temporary iframe for printing
+    const printFrame = document.createElement("iframe");
+    printFrame.style.position = "absolute";
+    printFrame.style.top = "-10000px";
+    printFrame.style.left = "-10000px";
+    document.body.appendChild(printFrame);
+
+    printFrame.contentDocument.write(printContent);
+    printFrame.contentDocument.close();
+
+    // Wait for content to load then print
     setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 250);
+      printFrame.contentWindow.focus();
+      printFrame.contentWindow.print();
+      // Clean up after printing
+      setTimeout(() => {
+        document.body.removeChild(printFrame);
+      }, 1000);
+    }, 500);
   };
 
   const getStatusVariant = (status) => {
@@ -754,26 +798,29 @@ const AdminInvoices = () => {
               className="invoice-preview"
               style={{ maxHeight: "70vh", overflowY: "auto" }}
             >
-              <ProfessionalInvoice
-                invoiceData={{
-                  invoiceId: selectedInvoice.invoiceId,
-                  orderId: selectedInvoice.orderId,
-                  orderDate: selectedInvoice.orderDate,
-                  orderTime: selectedInvoice.orderTime,
-                  customerDetails: selectedInvoice.customerDetails,
-                  items: selectedInvoice.items,
-                  subtotal: selectedInvoice.items.reduce(
-                    (sum, item) => sum + item.price * item.quantity,
-                    0,
-                  ),
-                  shipping: 0,
-                  total: selectedInvoice.totalAmount,
-                  paymentMethod: selectedInvoice.paymentMethod,
-                  paymentStatus: selectedInvoice.status,
-                  status: "Delivered",
-                }}
-                forPrint={false}
-              />
+              <div id="admin-invoice-content">
+                <ProfessionalInvoice
+                  invoiceData={{
+                    invoiceId: selectedInvoice.invoiceId,
+                    orderId: selectedInvoice.orderId,
+                    orderDate: selectedInvoice.orderDate,
+                    orderTime: selectedInvoice.orderTime,
+                    customerDetails: selectedInvoice.customerDetails,
+                    items: selectedInvoice.items,
+                    subtotal: selectedInvoice.items.reduce(
+                      (sum, item) => sum + item.price * item.quantity,
+                      0,
+                    ),
+                    shipping: 0,
+                    total: selectedInvoice.totalAmount,
+                    paymentMethod: selectedInvoice.paymentMethod,
+                    paymentStatus: selectedInvoice.status,
+                    status: "Delivered",
+                  }}
+                  qrCode={selectedInvoice.qrCode}
+                  forPrint={false}
+                />
+              </div>
             </div>
           )}
         </Modal.Body>
