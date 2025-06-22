@@ -97,9 +97,12 @@ const Home = () => {
         style={{
           background:
             "linear-gradient(135deg, #e9ecef 0%, #f8f9fa 50%, #ffffff 100%)",
+          minHeight: "100vh",
           paddingTop: "60px",
           paddingBottom: "80px",
           position: "relative",
+          display: "flex",
+          alignItems: "center",
         }}
       >
         <div
