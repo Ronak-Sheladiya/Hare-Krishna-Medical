@@ -442,19 +442,19 @@ const Home = () => {
                 icon: "bi-truck",
                 title: "Fast Delivery",
                 description: "Quick and reliable delivery service",
-                color: "#dc3545",
+                color: "#e63946",
               },
               {
                 icon: "bi-headset",
                 title: "24/7 Support",
                 description: "Expert support whenever you need it",
-                color: "#343a40",
+                color: "#e63946",
               },
               {
                 icon: "bi-award",
                 title: "Trusted Brand",
                 description: "Years of experience in healthcare",
-                color: "#495057",
+                color: "#e63946",
               },
             ].map((feature, index) => (
               <Col lg={3} md={6} className="mb-4" key={index}>
