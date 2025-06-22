@@ -16,7 +16,9 @@ const TermsConditions = () => {
                   our services.
                 </p>
                 <p className="text-muted">
-                  <small>Last updated: {new Date().toLocaleDateString()}</small>
+                  <small>
+                    Last updated: {new Date().toLocaleDateString("en-GB")}
+                  </small>
                 </p>
               </div>
             </Col>
