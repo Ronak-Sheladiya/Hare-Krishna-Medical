@@ -426,7 +426,10 @@ const Contact = () => {
                     if (icon) icon.style.color = "white";
                   }}
                 >
-                  <i className="bi bi-envelope me-2"></i>
+                  <i
+                    className="bi bi-envelope me-2"
+                    style={{ color: "white" }}
+                  ></i>
                   Send Email
                 </Button>
               </Card>
