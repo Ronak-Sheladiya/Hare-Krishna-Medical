@@ -562,17 +562,17 @@ const AdminInvoices = () => {
                                     size="sm"
                                     variant="outline-primary"
                                     onClick={() => handleViewInvoice(invoice)}
-                                    title="View Invoice"
                                   >
-                                    <i className="bi bi-eye"></i>
+                                    <i className="bi bi-eye me-1"></i>
+                                    View
                                   </Button>
                                   <Button
                                     size="sm"
                                     variant="outline-success"
                                     onClick={() => handleViewInvoice(invoice)}
-                                    title="Download Invoice"
                                   >
-                                    <i className="bi bi-download"></i>
+                                    <i className="bi bi-download me-1"></i>
+                                    Download
                                   </Button>
                                 </div>
                               </td>
