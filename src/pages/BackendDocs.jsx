@@ -60,21 +60,25 @@ const BackendDocs = () => {
   };
 
   const documentationText = `
-HARE KRISHNA MEDICAL - BACKEND IMPLEMENTATION GUIDE
-==================================================
+HARE KRISHNA MEDICAL - COMPREHENSIVE BACKEND IMPLEMENTATION GUIDE
+================================================================
 
 This document provides comprehensive backend implementation requirements for the Hare Krishna Medical website.
+Updated with all security features, message handling, export functionality, and invoice management.
 
 1. TECHNOLOGY STACK
 ==================
 Backend Framework: Node.js with Express.js
 Database: MongoDB with Mongoose ODM
-Authentication: JWT (JSON Web Tokens)
+Authentication: JWT (JSON Web Tokens) + Session Management + Cookies
 File Storage: AWS S3 or Cloudinary for images
 Payment Gateway: Razorpay or Stripe
-Email Service: Nodemailer with Gmail/SendGrid
+Email Service: Nodemailer with Gmail/SendGrid (Admin Reply System)
 SMS Service: Twilio or Fast2SMS
-PDF Generation: jsPDF (client-side) or PDFKit (server-side)
+PDF Generation: PDFKit (server-side) for secure invoices
+Export: xlsx library for Excel exports
+QR Code: qrcode library for invoice QR codes
+Security: bcryptjs, helmet, express-rate-limit, express-validator
 
 2. DATABASE SCHEMA
 =================
@@ -703,7 +707,7 @@ This documentation provides a comprehensive guide for implementing the backend s
 ├── routes/
 │   ├── auth.js                         # Authentication routes
 │   ├── products.js                     # Product routes
-│   ├── orders.js                       # Order routes
+���   ├── orders.js                       # Order routes
 │   ├── messages.js                     # Message routes
 │   └── users.js                        # User routes
 ├── utils/
