@@ -27,293 +27,468 @@ const ProfessionalInvoice = ({
     items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const calculatedTotal = total || calculatedSubtotal + shipping;
 
-  // Generate QR code with invoice URL
+  // Generate QR code with invoice verification URL
   const qrCodeValue =
-    qrCode || `https://harekrishan.medical/invoice/${invoiceId}`;
+    qrCode || `https://harekrishan.medical/verify/${invoiceId}`;
 
-  const invoiceStyles = {
-    // A4 dimensions: 210mm x 297mm
+  const modernInvoiceStyles = {
+    // Modern A4 Invoice Container
     container: {
       width: "210mm",
       minHeight: "297mm",
       maxWidth: "210mm",
       margin: "0 auto",
-      padding: "15mm",
-      fontFamily: "'Inter', 'Segoe UI', Arial, sans-serif",
-      fontSize: "11px",
-      lineHeight: "1.5",
-      color: "#2d3748",
+      padding: "0",
+      fontFamily:
+        "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+      fontSize: "14px",
+      lineHeight: "1.6",
+      color: "#1a202c",
       backgroundColor: "#ffffff",
       boxSizing: "border-box",
       position: "relative",
-      border: forPrint ? "none" : "2px solid #e2e8f0",
-      borderRadius: forPrint ? "0" : "12px",
-      boxShadow: forPrint ? "none" : "0 20px 40px rgba(0,0,0,0.1)",
-      pageBreakAfter: "always",
+      border: forPrint ? "none" : "none",
+      borderRadius: forPrint ? "0" : "0",
+      boxShadow: forPrint ? "none" : "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+      overflow: "hidden",
     },
-    header: {
+
+    // Modern Header with Gradient
+    modernHeader: {
       background:
-        "linear-gradient(135deg, #1a365d 0%, #2d3748 50%, #e63946 100%)",
+        "linear-gradient(135deg, #e63946 0%, #dc3545 25%, #c53030 50%, #e63946 75%, #2d3748 100%)",
       color: "#ffffff",
-      padding: "25mm 20mm",
-      margin: "-15mm -15mm 20mm -15mm",
+      padding: "40px 40px 60px 40px",
+      position: "relative",
+      overflow: "hidden",
+    },
+
+    // Geometric Background Pattern
+    headerPattern: {
+      position: "absolute",
+      top: "0",
+      left: "0",
+      right: "0",
+      bottom: "0",
+      background: `
+        radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+        linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.05) 50%, transparent 60%)
+      `,
+      zIndex: 1,
+    },
+
+    // Header Content
+    headerContent: {
+      position: "relative",
+      zIndex: 2,
       display: "flex",
       justifyContent: "space-between",
       alignItems: "flex-start",
-      borderRadius: forPrint ? "0" : "12px 12px 0 0",
-      position: "relative",
-      overflow: "hidden",
+      gap: "40px",
     },
-    companyInfo: {
+
+    // Company Info Section
+    companySection: {
       flex: "1",
     },
+
     companyLogo: {
-      width: "80px",
-      height: "80px",
-      marginBottom: "15mm",
-      borderRadius: "8px",
-      background: "#ffffff",
-      padding: "8px",
+      width: "120px",
+      height: "120px",
+      background: "rgba(255,255,255,0.15)",
+      borderRadius: "20px",
+      padding: "15px",
+      marginBottom: "25px",
+      backdropFilter: "blur(10px)",
+      border: "2px solid rgba(255,255,255,0.2)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
     },
+
     companyName: {
+      fontSize: "32px",
+      fontWeight: "800",
+      color: "#ffffff",
+      margin: "0 0 8px 0",
+      letterSpacing: "-0.02em",
+      textShadow: "0 4px 8px rgba(0,0,0,0.3)",
+    },
+
+    companyTagline: {
+      fontSize: "16px",
+      color: "rgba(255,255,255,0.9)",
+      marginBottom: "20px",
+      fontWeight: "500",
+    },
+
+    companyContact: {
+      fontSize: "14px",
+      color: "rgba(255,255,255,0.8)",
+      lineHeight: "1.8",
+    },
+
+    // Invoice Details Card
+    invoiceCard: {
+      background: "rgba(255,255,255,0.15)",
+      backdropFilter: "blur(15px)",
+      border: "2px solid rgba(255,255,255,0.2)",
+      borderRadius: "20px",
+      padding: "30px",
+      minWidth: "280px",
+      boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+    },
+
+    invoiceTitle: {
       fontSize: "28px",
       fontWeight: "900",
       color: "#ffffff",
-      margin: "0 0 8mm 0",
-      lineHeight: "1.1",
+      margin: "0 0 20px 0",
+      textAlign: "center",
+      letterSpacing: "2px",
       textShadow: "0 2px 4px rgba(0,0,0,0.3)",
     },
-    companyTagline: {
-      fontSize: "16px",
-      color: "#ffffff",
-      marginBottom: "15mm",
-      opacity: "0.95",
+
+    invoiceDetails: {
+      display: "grid",
+      gap: "12px",
+    },
+
+    invoiceDetailRow: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      fontSize: "14px",
+    },
+
+    invoiceLabel: {
+      color: "rgba(255,255,255,0.8)",
       fontWeight: "500",
     },
-    companyAddress: {
-      fontSize: "14px",
+
+    invoiceValue: {
       color: "#ffffff",
-      lineHeight: "1.5",
-      opacity: "0.9",
+      fontWeight: "700",
+      fontSize: "15px",
     },
-    invoiceTitle: {
-      textAlign: "right",
-      flex: "0 0 auto",
-    },
-    invoiceTitleText: {
-      fontSize: "42px",
-      fontWeight: "900",
-      color: "#ffffff",
-      margin: "0 0 15mm 0",
-      textShadow: "0 3px 6px rgba(0,0,0,0.3)",
-      letterSpacing: "2px",
-    },
-    invoiceDetails: {
-      background: "rgba(255,255,255,0.15)",
-      backdropFilter: "blur(15px)",
-      border: "1px solid rgba(255,255,255,0.2)",
-      padding: "15mm",
+
+    // Status Badge
+    statusBadge: {
+      display: "inline-block",
+      padding: "8px 16px",
       borderRadius: "12px",
-      fontSize: "13px",
-      color: "#ffffff",
-      minWidth: "220px",
-      boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-    },
-    customerSection: {
-      display: "flex",
-      gap: "25mm",
-      marginBottom: "25mm",
-    },
-    customerBox: {
-      flex: "1",
-      background: "linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%)",
-      border: "1px solid #e2e8f0",
-      borderRadius: "16px",
-      padding: "20mm",
-      boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
-      position: "relative",
-    },
-    customerTitle: {
-      fontSize: "16px",
-      fontWeight: "800",
-      color: "#e63946",
-      marginBottom: "15mm",
+      fontSize: "12px",
+      fontWeight: "700",
       textTransform: "uppercase",
       letterSpacing: "1px",
-      borderBottom: "3px solid #e63946",
-      paddingBottom: "8mm",
-    },
-    customerText: {
-      color: "#333333",
-      fontSize: "14px",
-      lineHeight: "1.6",
-    },
-    itemsTable: {
+      background:
+        status === "Delivered"
+          ? "#10b981"
+          : status === "Pending"
+            ? "#f59e0b"
+            : status === "Processing"
+              ? "#3b82f6"
+              : "#6b7280",
+      color: "#ffffff",
+      marginTop: "10px",
+      textAlign: "center",
       width: "100%",
-      borderCollapse: "collapse",
-      marginBottom: "25mm",
-      border: "1px solid #e2e8f0",
-      borderRadius: "16px",
-      overflow: "hidden",
-      boxShadow: "0 8px 25px rgba(0,0,0,0.08)",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+    },
+
+    // Main Content Area
+    mainContent: {
+      padding: "50px 40px 40px 40px",
       background: "#ffffff",
     },
+
+    // Customer Information Section
+    customerSection: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: "30px",
+      marginBottom: "40px",
+    },
+
+    customerCard: {
+      background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
+      border: "2px solid #e2e8f0",
+      borderRadius: "20px",
+      padding: "30px",
+      position: "relative",
+      overflow: "hidden",
+    },
+
+    customerCardPattern: {
+      position: "absolute",
+      top: "0",
+      right: "0",
+      width: "100px",
+      height: "100px",
+      background: "linear-gradient(135deg, #e63946, #dc3545)",
+      opacity: "0.05",
+      borderRadius: "0 20px 0 100px",
+    },
+
+    customerTitle: {
+      fontSize: "18px",
+      fontWeight: "800",
+      color: "#e63946",
+      marginBottom: "20px",
+      textTransform: "uppercase",
+      letterSpacing: "1px",
+      position: "relative",
+      zIndex: 2,
+    },
+
+    customerInfo: {
+      position: "relative",
+      zIndex: 2,
+    },
+
+    customerName: {
+      fontSize: "20px",
+      fontWeight: "700",
+      color: "#1a202c",
+      marginBottom: "15px",
+    },
+
+    customerDetail: {
+      fontSize: "14px",
+      color: "#4a5568",
+      marginBottom: "8px",
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+    },
+
+    // Items Table
+    itemsSection: {
+      marginBottom: "40px",
+    },
+
+    sectionTitle: {
+      fontSize: "20px",
+      fontWeight: "700",
+      color: "#1a202c",
+      marginBottom: "25px",
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+    },
+
+    modernTable: {
+      width: "100%",
+      borderCollapse: "collapse",
+      borderRadius: "16px",
+      overflow: "hidden",
+      boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+      background: "#ffffff",
+    },
+
     tableHeader: {
       background: "linear-gradient(135deg, #2d3748 0%, #4a5568 100%)",
       color: "#ffffff",
     },
+
     tableHeaderCell: {
-      padding: "15mm 12mm",
+      padding: "20px 15px",
       fontSize: "14px",
-      fontWeight: "800",
+      fontWeight: "700",
       textAlign: "left",
       textTransform: "uppercase",
       letterSpacing: "1px",
+      border: "none",
     },
+
     tableRow: {
-      borderBottom: "2px solid #f8f9fa",
-      background: "#ffffff",
+      borderBottom: "1px solid #f7fafc",
+      transition: "background-color 0.2s ease",
     },
+
     tableRowAlt: {
-      background: "#f8f9fa",
-      borderBottom: "2px solid #e9ecef",
+      background: "#f8fafc",
     },
+
     tableCell: {
-      padding: "12mm 12mm",
-      fontSize: "13px",
-      color: "#333333",
-      verticalAlign: "top",
-      borderRight: "2px solid #f8f9fa",
+      padding: "20px 15px",
+      fontSize: "14px",
+      color: "#2d3748",
+      border: "none",
+      verticalAlign: "middle",
     },
-    totalsSection: {
+
+    // Summary Section
+    summarySection: {
       display: "flex",
       justifyContent: "flex-end",
-      marginBottom: "25mm",
+      marginBottom: "40px",
     },
-    totalsTable: {
-      width: "350px",
-      borderCollapse: "collapse",
-      border: "3px solid #f8f9fa",
-      borderRadius: "12px",
+
+    summaryCard: {
+      background: "linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%)",
+      border: "2px solid #e2e8f0",
+      borderRadius: "20px",
+      padding: "30px",
+      minWidth: "400px",
+      position: "relative",
       overflow: "hidden",
-      boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
     },
-    totalRow: {
+
+    summaryPattern: {
+      position: "absolute",
+      top: "-50px",
+      right: "-50px",
+      width: "150px",
+      height: "150px",
+      background: "linear-gradient(135deg, #e63946, #dc3545)",
+      opacity: "0.05",
+      borderRadius: "50%",
+    },
+
+    summaryContent: {
+      position: "relative",
+      zIndex: 2,
+    },
+
+    summaryRow: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "12px 0",
+      borderBottom: "1px solid #e2e8f0",
+      fontSize: "14px",
+    },
+
+    summaryRowTotal: {
       background: "linear-gradient(135deg, #e63946, #dc3545)",
       color: "#ffffff",
+      padding: "20px",
+      borderRadius: "12px",
+      marginTop: "15px",
+      fontSize: "18px",
       fontWeight: "800",
+      boxShadow: "0 4px 15px rgba(230, 57, 70, 0.3)",
     },
-    totalRowRegular: {
-      background: "#f8f9fa",
-      color: "#333333",
-    },
-    totalCell: {
-      padding: "12mm 15mm",
-      fontSize: "14px",
-      fontWeight: "700",
-    },
-    footer: {
-      marginTop: "25mm",
-      borderTop: "4px solid #e63946",
-      paddingTop: "20mm",
+
+    // Footer Section
+    footerSection: {
+      background: "linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%)",
+      padding: "40px",
       display: "flex",
       justifyContent: "space-between",
       alignItems: "flex-start",
-      background: "#f8f9fa",
-      padding: "25mm",
-      borderRadius: "12px",
-      margin: "25mm -20mm -20mm -20mm",
+      gap: "40px",
+      borderTop: "3px solid #e63946",
     },
-    footerLeft: {
+
+    // Terms Section
+    termsSection: {
       flex: "1",
     },
-    footerTitle: {
+
+    termsTitle: {
       fontSize: "18px",
-      fontWeight: "800",
-      color: "#e63946",
-      marginBottom: "15mm",
+      fontWeight: "700",
+      color: "#1a202c",
+      marginBottom: "20px",
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
     },
-    termsText: {
-      fontSize: "12px",
-      color: "#495057",
-      lineHeight: "1.5",
+
+    termsList: {
+      fontSize: "13px",
+      color: "#4a5568",
+      lineHeight: "1.8",
+      listStyle: "none",
+      padding: "0",
+      margin: "0",
     },
+
+    termsItem: {
+      marginBottom: "8px",
+      paddingLeft: "20px",
+      position: "relative",
+    },
+
+    // QR Code Section
     qrSection: {
-      textAlign: "center",
-      marginLeft: "25mm",
-      position: "relative",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: "15px",
     },
+
     qrContainer: {
+      background: "#ffffff",
+      padding: "20px",
+      borderRadius: "16px",
+      boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+      border: "3px solid #f1f5f9",
       position: "relative",
-      display: "inline-block",
     },
+
     qrCode: {
       width: "120px",
       height: "120px",
-      border: "3px solid #e9ecef",
-      borderRadius: "12px",
-      padding: "8px",
-      background: "#ffffff",
-    },
-    qrLogo: {
-      position: "absolute",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      width: "30px",
-      height: "30px",
-      background: "#ffffff",
-      borderRadius: "50%",
-      padding: "4px",
-      border: "2px solid #e63946",
-      zIndex: 10,
-    },
-    statusBadge: {
-      background:
-        status === "Delivered"
-          ? "#28a745"
-          : status === "Pending"
-            ? "#ffc107"
-            : status === "Processing"
-              ? "#17a2b8"
-              : "#6c757d",
-      color: "#ffffff",
-      padding: "6mm 10mm",
-      borderRadius: "6px",
-      fontSize: "12px",
-      fontWeight: "700",
-      textTransform: "uppercase",
-      letterSpacing: "1px",
-    },
-    paymentBadge: {
-      background: paymentStatus === "Paid" ? "#28a745" : "#dc3545",
-      color: "#ffffff",
-      padding: "4mm 8mm",
-      borderRadius: "4px",
-      fontSize: "11px",
-      fontWeight: "700",
-      marginLeft: "8mm",
-    },
-    taxNote: {
-      background: "#fff3cd",
-      border: "2px solid #ffeaa7",
       borderRadius: "8px",
-      padding: "15mm",
-      marginBottom: "20mm",
-      color: "#856404",
+    },
+
+    qrLabel: {
+      fontSize: "13px",
+      fontWeight: "600",
+      color: "#4a5568",
+      textAlign: "center",
+      lineHeight: "1.4",
+    },
+
+    // Thank You Message
+    thankYouSection: {
+      background: "linear-gradient(135deg, #e63946, #dc3545)",
+      color: "#ffffff",
+      padding: "30px",
+      textAlign: "center",
+      margin: "40px -40px -40px -40px",
+    },
+
+    thankYouTitle: {
+      fontSize: "24px",
+      fontWeight: "700",
+      marginBottom: "10px",
+    },
+
+    thankYouMessage: {
+      fontSize: "14px",
+      opacity: "0.9",
+      lineHeight: "1.6",
+    },
+
+    // Tax Notice
+    taxNotice: {
+      background: "linear-gradient(135deg, #fed7d7, #feb2b2)",
+      border: "2px solid #fc8181",
+      borderRadius: "16px",
+      padding: "20px",
+      marginBottom: "30px",
+      color: "#742a2a",
+      textAlign: "center",
+      fontWeight: "600",
+      fontSize: "14px",
     },
   };
 
-  // QR Code Component with Logo
-  const QRCodeWithLogo = () => {
+  // QR Code Component
+  const QRCodeComponent = () => {
     const [qrDataUrl, setQrDataUrl] = React.useState("");
 
     React.useEffect(() => {
       QRCode.toDataURL(qrCodeValue, {
         width: 120,
-        margin: 1,
+        margin: 2,
         color: {
-          dark: "#333333",
+          dark: "#2d3748",
           light: "#ffffff",
         },
         errorCorrectionLevel: "M",
@@ -321,398 +496,371 @@ const ProfessionalInvoice = ({
     }, []);
 
     return (
-      <div style={invoiceStyles.qrContainer}>
+      <div style={modernInvoiceStyles.qrContainer}>
         {qrDataUrl && (
-          <img src={qrDataUrl} alt="QR Code" style={invoiceStyles.qrCode} />
+          <img
+            src={qrDataUrl}
+            alt="Invoice Verification QR Code"
+            style={modernInvoiceStyles.qrCode}
+          />
         )}
-        <img
-          src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
-          alt="Logo"
-          style={invoiceStyles.qrLogo}
-          onError={(e) => {
-            e.target.style.display = "none";
-          }}
-        />
       </div>
     );
   };
 
   return (
-    <div style={invoiceStyles.container}>
+    <div style={modernInvoiceStyles.container}>
       {/* Modern Header Section */}
-      <div style={invoiceStyles.header}>
-        <div style={invoiceStyles.companyInfo}>
-          <img
-            src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
-            alt="Hare Krishna Medical"
-            style={invoiceStyles.companyLogo}
-            onError={(e) => {
-              e.target.style.display = "none";
-            }}
-          />
-          <h1 style={invoiceStyles.companyName}>HARE KRISHNA MEDICAL</h1>
-          <p style={invoiceStyles.companyTagline}>
-            Your Trusted Health Partner
-          </p>
-          <div style={invoiceStyles.companyAddress}>
-            <div>📍 3 Sahyog Complex, Man Sarovar Circle</div>
-            <div>Amroli, 394107, Gujarat, India</div>
-            <div>📞 +91 76989 13354 | +91 91060 18508</div>
-            <div>✉️ harekrishnamedical@gmail.com</div>
-          </div>
-        </div>
-
-        <div style={invoiceStyles.invoiceTitle}>
-          <h1 style={invoiceStyles.invoiceTitleText}>INVOICE</h1>
-          <div style={invoiceStyles.invoiceDetails}>
-            <div style={{ marginBottom: "8mm" }}>
-              <strong>Invoice No:</strong> {invoiceId}
-            </div>
-            <div style={{ marginBottom: "8mm" }}>
-              <strong>Order No:</strong> {orderId}
-            </div>
-            <div style={{ marginBottom: "8mm" }}>
-              <strong>Date:</strong> {orderDate}
-            </div>
-            <div style={{ marginBottom: "8mm" }}>
-              <strong>Time:</strong> {orderTime}
-            </div>
-            <div>
-              <strong>Status:</strong>
-              <br />
-              <span style={invoiceStyles.statusBadge}>{status}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Tax Included Notice */}
-      <div style={invoiceStyles.taxNote}>
-        <div
-          style={{ textAlign: "center", fontWeight: "700", fontSize: "14px" }}
-        >
-          ⚠️ IMPORTANT: All taxes and duties are included in the product prices.
-          No additional tax will be charged.
-        </div>
-      </div>
-
-      {/* Customer Information */}
-      <div style={invoiceStyles.customerSection}>
-        <div style={invoiceStyles.customerBox}>
-          <div style={invoiceStyles.customerTitle}>Bill To</div>
-          <div style={invoiceStyles.customerText}>
-            <div
-              style={{
-                fontWeight: "800",
-                marginBottom: "8mm",
-                fontSize: "16px",
-                color: "#e63946",
-              }}
-            >
-              {customerDetails.fullName}
-            </div>
-            <div style={{ marginBottom: "4mm" }}>
-              📧 {customerDetails.email}
-            </div>
-            <div style={{ marginBottom: "4mm" }}>
-              📱 {customerDetails.mobile}
-            </div>
-            <div style={{ marginBottom: "4mm" }}>
-              🏠 {customerDetails.address}
-            </div>
-            <div>
-              📍 {customerDetails.city}, {customerDetails.state}{" "}
-              {customerDetails.pincode}
-            </div>
-          </div>
-        </div>
-
-        <div style={invoiceStyles.customerBox}>
-          <div style={invoiceStyles.customerTitle}>Payment & Shipping</div>
-          <div style={invoiceStyles.customerText}>
-            <div style={{ marginBottom: "8mm" }}>
-              <strong>Payment Method:</strong>
-              <br />
-              {paymentMethod}
-            </div>
-            <div style={{ marginBottom: "8mm" }}>
-              <strong>Payment Status:</strong>
-              <span style={invoiceStyles.paymentBadge}>{paymentStatus}</span>
-            </div>
-            <div>
-              <strong>Shipping Address:</strong>
-              <br />
-              {customerDetails.address}
-              <br />
-              {customerDetails.city}, {customerDetails.state}{" "}
-              {customerDetails.pincode}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Items Table */}
-      <table style={invoiceStyles.itemsTable}>
-        <thead style={invoiceStyles.tableHeader}>
-          <tr>
-            <th
-              style={{
-                ...invoiceStyles.tableHeaderCell,
-                textAlign: "center",
-                width: "50px",
-              }}
-            >
-              Sr.
-            </th>
-            <th style={{ ...invoiceStyles.tableHeaderCell, width: "45%" }}>
-              Product Description
-            </th>
-            <th
-              style={{
-                ...invoiceStyles.tableHeaderCell,
-                textAlign: "center",
-                width: "80px",
-              }}
-            >
-              Quantity
-            </th>
-            <th
-              style={{
-                ...invoiceStyles.tableHeaderCell,
-                textAlign: "right",
-                width: "100px",
-              }}
-            >
-              Unit Price (₹)
-            </th>
-            <th
-              style={{
-                ...invoiceStyles.tableHeaderCell,
-                textAlign: "right",
-                width: "100px",
-              }}
-            >
-              Total Amount (₹)
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((item, index) => (
-            <tr
-              key={item.id || index}
-              style={
-                index % 2 === 0
-                  ? invoiceStyles.tableRow
-                  : invoiceStyles.tableRowAlt
-              }
-            >
-              <td
+      <div style={modernInvoiceStyles.modernHeader}>
+        <div style={modernInvoiceStyles.headerPattern}></div>
+        <div style={modernInvoiceStyles.headerContent}>
+          {/* Company Information */}
+          <div style={modernInvoiceStyles.companySection}>
+            <div style={modernInvoiceStyles.companyLogo}>
+              <img
+                src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
+                alt="Hare Krishna Medical"
                 style={{
-                  ...invoiceStyles.tableCell,
-                  textAlign: "center",
-                  fontWeight: "800",
-                  color: "#e63946",
-                  fontSize: "14px",
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                  filter: "brightness(0) invert(1)",
                 }}
-              >
-                {index + 1}
-              </td>
-              <td style={invoiceStyles.tableCell}>
-                <div
+                onError={(e) => {
+                  e.target.style.display = "none";
+                }}
+              />
+            </div>
+            <h1 style={modernInvoiceStyles.companyName}>
+              HARE KRISHNA MEDICAL
+            </h1>
+            <p style={modernInvoiceStyles.companyTagline}>
+              Your Trusted Health Partner
+            </p>
+            <div style={modernInvoiceStyles.companyContact}>
+              <div>📍 3 Sahyog Complex, Man Sarovar Circle</div>
+              <div>Amroli, 394107, Gujarat, India</div>
+              <div>📞 +91 76989 13354 | +91 91060 18508</div>
+              <div>✉️ harekrishnamedical@gmail.com</div>
+            </div>
+          </div>
+
+          {/* Invoice Details Card */}
+          <div style={modernInvoiceStyles.invoiceCard}>
+            <h2 style={modernInvoiceStyles.invoiceTitle}>INVOICE</h2>
+            <div style={modernInvoiceStyles.invoiceDetails}>
+              <div style={modernInvoiceStyles.invoiceDetailRow}>
+                <span style={modernInvoiceStyles.invoiceLabel}>
+                  Invoice No:
+                </span>
+                <span style={modernInvoiceStyles.invoiceValue}>
+                  {invoiceId}
+                </span>
+              </div>
+              <div style={modernInvoiceStyles.invoiceDetailRow}>
+                <span style={modernInvoiceStyles.invoiceLabel}>Order No:</span>
+                <span style={modernInvoiceStyles.invoiceValue}>{orderId}</span>
+              </div>
+              <div style={modernInvoiceStyles.invoiceDetailRow}>
+                <span style={modernInvoiceStyles.invoiceLabel}>Date:</span>
+                <span style={modernInvoiceStyles.invoiceValue}>
+                  {orderDate}
+                </span>
+              </div>
+              <div style={modernInvoiceStyles.invoiceDetailRow}>
+                <span style={modernInvoiceStyles.invoiceLabel}>Time:</span>
+                <span style={modernInvoiceStyles.invoiceValue}>
+                  {orderTime}
+                </span>
+              </div>
+            </div>
+            <div style={modernInvoiceStyles.statusBadge}>{status}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div style={modernInvoiceStyles.mainContent}>
+        {/* Tax Notice */}
+        <div style={modernInvoiceStyles.taxNotice}>
+          ⚠️ All taxes and duties are included in product prices. No additional
+          charges apply.
+        </div>
+
+        {/* Customer Information */}
+        <div style={modernInvoiceStyles.customerSection}>
+          <div style={modernInvoiceStyles.customerCard}>
+            <div style={modernInvoiceStyles.customerCardPattern}></div>
+            <h3 style={modernInvoiceStyles.customerTitle}>Bill To</h3>
+            <div style={modernInvoiceStyles.customerInfo}>
+              <div style={modernInvoiceStyles.customerName}>
+                {customerDetails.fullName}
+              </div>
+              <div style={modernInvoiceStyles.customerDetail}>
+                <span>📧</span> {customerDetails.email}
+              </div>
+              <div style={modernInvoiceStyles.customerDetail}>
+                <span>📱</span> {customerDetails.mobile}
+              </div>
+              <div style={modernInvoiceStyles.customerDetail}>
+                <span>🏠</span> {customerDetails.address}
+              </div>
+              <div style={modernInvoiceStyles.customerDetail}>
+                <span>📍</span> {customerDetails.city}, {customerDetails.state}{" "}
+                {customerDetails.pincode}
+              </div>
+            </div>
+          </div>
+
+          <div style={modernInvoiceStyles.customerCard}>
+            <div style={modernInvoiceStyles.customerCardPattern}></div>
+            <h3 style={modernInvoiceStyles.customerTitle}>Payment Details</h3>
+            <div style={modernInvoiceStyles.customerInfo}>
+              <div style={modernInvoiceStyles.customerDetail}>
+                <span>💳</span> <strong>Method:</strong> {paymentMethod}
+              </div>
+              <div style={modernInvoiceStyles.customerDetail}>
+                <span>📊</span> <strong>Status:</strong>
+                <span
                   style={{
-                    fontWeight: "800",
-                    marginBottom: "4mm",
-                    color: "#333333",
-                    fontSize: "14px",
+                    marginLeft: "8px",
+                    padding: "4px 8px",
+                    borderRadius: "6px",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    background:
+                      paymentStatus === "Paid" ? "#10b981" : "#f59e0b",
+                    color: "#ffffff",
                   }}
                 >
-                  {item.name}
-                </div>
-                <div style={{ fontSize: "11px", color: "#495057" }}>
-                  Manufactured by: {item.company || "Medical Product"}
-                </div>
-              </td>
-              <td
-                style={{
-                  ...invoiceStyles.tableCell,
-                  textAlign: "center",
-                  fontWeight: "700",
-                  fontSize: "14px",
-                }}
-              >
-                {item.quantity}
-              </td>
-              <td
-                style={{
-                  ...invoiceStyles.tableCell,
-                  textAlign: "right",
-                  fontWeight: "700",
-                  fontSize: "14px",
-                }}
-              >
-                ₹{item.price?.toFixed(2) || "0.00"}
-              </td>
-              <td
-                style={{
-                  ...invoiceStyles.tableCell,
-                  textAlign: "right",
-                  fontWeight: "800",
-                  color: "#e63946",
-                  fontSize: "14px",
-                }}
-              >
-                ₹{((item.price || 0) * (item.quantity || 0)).toFixed(2)}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* Totals Section */}
-      <div style={invoiceStyles.totalsSection}>
-        <table style={invoiceStyles.totalsTable}>
-          <tbody>
-            <tr style={invoiceStyles.totalRowRegular}>
-              <td style={{ ...invoiceStyles.totalCell, fontWeight: "700" }}>
-                Subtotal:
-              </td>
-              <td
-                style={{
-                  ...invoiceStyles.totalCell,
-                  textAlign: "right",
-                  fontWeight: "800",
-                }}
-              >
-                ₹{calculatedSubtotal.toFixed(2)}
-              </td>
-            </tr>
-            <tr style={invoiceStyles.totalRowRegular}>
-              <td style={{ ...invoiceStyles.totalCell, fontWeight: "700" }}>
-                Shipping Charges:
-              </td>
-              <td
-                style={{
-                  ...invoiceStyles.totalCell,
-                  textAlign: "right",
-                  fontWeight: "800",
-                }}
-              >
-                {shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}
-              </td>
-            </tr>
-            <tr style={invoiceStyles.totalRowRegular}>
-              <td style={{ ...invoiceStyles.totalCell, fontWeight: "700" }}>
-                All Taxes & Duties:
-              </td>
-              <td
-                style={{
-                  ...invoiceStyles.totalCell,
-                  textAlign: "right",
-                  fontWeight: "800",
-                  color: "#28a745",
-                }}
-              >
-                INCLUDED
-              </td>
-            </tr>
-            <tr style={invoiceStyles.totalRow}>
-              <td
-                style={{
-                  ...invoiceStyles.totalCell,
-                  fontSize: "16px",
-                  fontWeight: "900",
-                }}
-              >
-                GRAND TOTAL:
-              </td>
-              <td
-                style={{
-                  ...invoiceStyles.totalCell,
-                  textAlign: "right",
-                  fontSize: "18px",
-                  fontWeight: "900",
-                }}
-              >
-                ₹{calculatedTotal.toFixed(2)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      {/* Modern Footer */}
-      <div style={invoiceStyles.footer}>
-        <div style={invoiceStyles.footerLeft}>
-          <div style={invoiceStyles.footerTitle}>
-            Thank You for Your Business! 🙏
-          </div>
-          <div style={invoiceStyles.termsText}>
-            <div style={{ marginBottom: "8mm", fontWeight: "700" }}>
-              <strong>Terms & Conditions:</strong>
-            </div>
-            <div style={{ marginBottom: "4mm" }}>
-              • Payment due within 30 days of invoice date
-            </div>
-            <div style={{ marginBottom: "4mm" }}>
-              • Goods once sold will not be taken back or exchanged
-            </div>
-            <div style={{ marginBottom: "4mm" }}>
-              • All disputes subject to Gujarat jurisdiction only
-            </div>
-            <div style={{ marginBottom: "4mm" }}>
-              • All prices include applicable taxes and duties
-            </div>
-            <div
-              style={{ marginTop: "10mm", fontSize: "13px", fontWeight: "700" }}
-            >
-              <strong>Contact Information:</strong>
-              <br />
-              📧 Email: harekrishnamedical@gmail.com
-              <br />
-              📞 Phone: +91 76989 13354 | +91 91060 18508
-              <br />
-              🌐 Website: www.harekrishnamedical.com
+                  {paymentStatus}
+                </span>
+              </div>
+              <div style={modernInvoiceStyles.customerDetail}>
+                <span>🚚</span> <strong>Shipping:</strong>{" "}
+                {customerDetails.address}
+              </div>
             </div>
           </div>
         </div>
 
-        <div style={invoiceStyles.qrSection}>
-          <QRCodeWithLogo />
-          <div
-            style={{
-              fontSize: "11px",
-              marginTop: "8mm",
-              color: "#495057",
-              fontWeight: "700",
-              lineHeight: "1.4",
-            }}
-          >
-            📱 Scan QR Code for
+        {/* Items Table */}
+        <div style={modernInvoiceStyles.itemsSection}>
+          <h3 style={modernInvoiceStyles.sectionTitle}>
+            <span>📦</span> Items Ordered
+          </h3>
+          <table style={modernInvoiceStyles.modernTable}>
+            <thead style={modernInvoiceStyles.tableHeader}>
+              <tr>
+                <th
+                  style={{
+                    ...modernInvoiceStyles.tableHeaderCell,
+                    textAlign: "center",
+                    width: "60px",
+                  }}
+                >
+                  Sr.
+                </th>
+                <th
+                  style={{
+                    ...modernInvoiceStyles.tableHeaderCell,
+                    width: "45%",
+                  }}
+                >
+                  Product Description
+                </th>
+                <th
+                  style={{
+                    ...modernInvoiceStyles.tableHeaderCell,
+                    textAlign: "center",
+                    width: "100px",
+                  }}
+                >
+                  Quantity
+                </th>
+                <th
+                  style={{
+                    ...modernInvoiceStyles.tableHeaderCell,
+                    textAlign: "right",
+                    width: "120px",
+                  }}
+                >
+                  Unit Price (₹)
+                </th>
+                <th
+                  style={{
+                    ...modernInvoiceStyles.tableHeaderCell,
+                    textAlign: "right",
+                    width: "120px",
+                  }}
+                >
+                  Total (₹)
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item, index) => (
+                <tr
+                  key={item.id || index}
+                  style={
+                    index % 2 === 0
+                      ? modernInvoiceStyles.tableRow
+                      : modernInvoiceStyles.tableRowAlt
+                  }
+                >
+                  <td
+                    style={{
+                      ...modernInvoiceStyles.tableCell,
+                      textAlign: "center",
+                      fontWeight: "700",
+                      color: "#e63946",
+                    }}
+                  >
+                    {index + 1}
+                  </td>
+                  <td style={modernInvoiceStyles.tableCell}>
+                    <div
+                      style={{
+                        fontWeight: "700",
+                        marginBottom: "5px",
+                        color: "#1a202c",
+                      }}
+                    >
+                      {item.name}
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#718096" }}>
+                      Manufactured by: {item.company || "Medical Product"}
+                    </div>
+                  </td>
+                  <td
+                    style={{
+                      ...modernInvoiceStyles.tableCell,
+                      textAlign: "center",
+                      fontWeight: "600",
+                    }}
+                  >
+                    {item.quantity}
+                  </td>
+                  <td
+                    style={{
+                      ...modernInvoiceStyles.tableCell,
+                      textAlign: "right",
+                      fontWeight: "600",
+                    }}
+                  >
+                    ₹{item.price?.toFixed(2) || "0.00"}
+                  </td>
+                  <td
+                    style={{
+                      ...modernInvoiceStyles.tableCell,
+                      textAlign: "right",
+                      fontWeight: "700",
+                      color: "#e63946",
+                    }}
+                  >
+                    ₹{((item.price || 0) * (item.quantity || 0)).toFixed(2)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Summary Section */}
+        <div style={modernInvoiceStyles.summarySection}>
+          <div style={modernInvoiceStyles.summaryCard}>
+            <div style={modernInvoiceStyles.summaryPattern}></div>
+            <div style={modernInvoiceStyles.summaryContent}>
+              <div style={modernInvoiceStyles.summaryRow}>
+                <span>Subtotal:</span>
+                <span style={{ fontWeight: "600" }}>
+                  ₹{calculatedSubtotal.toFixed(2)}
+                </span>
+              </div>
+              <div style={modernInvoiceStyles.summaryRow}>
+                <span>Shipping Charges:</span>
+                <span
+                  style={{
+                    fontWeight: "600",
+                    color: shipping === 0 ? "#10b981" : "#1a202c",
+                  }}
+                >
+                  {shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}
+                </span>
+              </div>
+              <div style={modernInvoiceStyles.summaryRow}>
+                <span>All Taxes & Duties:</span>
+                <span style={{ fontWeight: "600", color: "#10b981" }}>
+                  INCLUDED
+                </span>
+              </div>
+              <div style={modernInvoiceStyles.summaryRowTotal}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span>GRAND TOTAL:</span>
+                  <span>₹{calculatedTotal.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Section */}
+      <div style={modernInvoiceStyles.footerSection}>
+        {/* Terms and Conditions */}
+        <div style={modernInvoiceStyles.termsSection}>
+          <h3 style={modernInvoiceStyles.termsTitle}>
+            <span>📋</span> Terms & Conditions
+          </h3>
+          <ul style={modernInvoiceStyles.termsList}>
+            <li style={modernInvoiceStyles.termsItem}>
+              • Payment due within 30 days of invoice date
+            </li>
+            <li style={modernInvoiceStyles.termsItem}>
+              • All prices include applicable taxes and duties
+            </li>
+            <li style={modernInvoiceStyles.termsItem}>
+              • Goods once sold will not be taken back or exchanged
+            </li>
+            <li style={modernInvoiceStyles.termsItem}>
+              • All disputes subject to Gujarat jurisdiction only
+            </li>
+            <li style={modernInvoiceStyles.termsItem}>
+              • For queries: harekrishnamedical@gmail.com
+            </li>
+          </ul>
+        </div>
+
+        {/* QR Code Section */}
+        <div style={modernInvoiceStyles.qrSection}>
+          <QRCodeComponent />
+          <div style={modernInvoiceStyles.qrLabel}>
+            <strong>Scan to Verify</strong>
             <br />
-            Online Verification
+            Invoice Authenticity
             <br />& Order Tracking
           </div>
         </div>
       </div>
 
-      {/* Footer Note for Print */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "10mm",
-          left: "20mm",
-          right: "20mm",
-          textAlign: "center",
-          fontSize: "10px",
-          color: "#495057",
-          borderTop: "1px solid #e9ecef",
-          paddingTop: "5mm",
-          background: "#ffffff",
-        }}
-      >
-        🏥 This is a computer-generated invoice. No physical signature required.
-        | Generated on: {new Date().toLocaleString()} | Powered by Hare Krishna
-        Medical System
+      {/* Thank You Section */}
+      <div style={modernInvoiceStyles.thankYouSection}>
+        <h3 style={modernInvoiceStyles.thankYouTitle}>
+          Thank You for Your Trust! 🙏
+        </h3>
+        <p style={modernInvoiceStyles.thankYouMessage}>
+          Your health is our priority. We appreciate your business and look
+          forward to serving you again.
+          <br />
+          Generated on: {new Date().toLocaleString("en-GB")} | Powered by Hare
+          Krishna Medical System
+        </p>
       </div>
     </div>
   );
