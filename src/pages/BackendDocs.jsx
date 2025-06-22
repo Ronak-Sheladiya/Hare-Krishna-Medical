@@ -197,6 +197,18 @@ Invoices Collection:
   invoiceId: String (unique, secure),
   orderId: ObjectId (ref: Orders),
   userId: ObjectId (ref: Users),
+  qrCode: String (encoded verification URL),
+  securityHash: String (invoice verification hash),
+  isValid: Boolean (default: true),
+  downloadCount: Number (default: 0),
+  lastAccessed: Date,
+  generatedBy: ObjectId (ref: Users),
+  modificationLog: [{
+    action: String,
+    modifiedBy: ObjectId (ref: Users),
+    timestamp: Date,
+    previousData: Object
+  }],
   invoiceData: Object, // Encrypted invoice data
   qrCode: String, // QR code data
   issuedAt: Date,
@@ -680,7 +692,7 @@ This documentation provides a comprehensive guide for implementing the backend s
 │   │   ├── AdminOrders.jsx             # Order management
 │   │   ├── AdminProducts.jsx           # Product management
 │   │   └── AdminUsers.jsx              # User management
-│   ├─�� user/
+│   ├── user/
 │   │   ├── UserInvoices.jsx            # User invoice history
 │   │   ├── UserOrders.jsx              # User order history
 │   │   └── UserProfile.jsx             # Profile editing
@@ -692,7 +704,7 @@ This documentation provides a comprehensive guide for implementing the backend s
 │   ├── ForgotPassword.jsx              # Password reset
 │   ├── Home.jsx                        # Homepage
 │   ├── InvoiceView.jsx                 # Invoice display
-│   ├── Login.jsx                       # User login
+��   ├── Login.jsx                       # User login
 │   ├── NotFound.jsx                    # 404 page
 │   ├── Order.jsx                       # Order placement
 │   ├── PrivacyPolicy.jsx               # Privacy policy
