@@ -11,9 +11,11 @@ import {
   Form,
   InputGroup,
 } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import ProfessionalInvoice from "../../components/common/ProfessionalInvoice";
 
 const AdminOrders = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
