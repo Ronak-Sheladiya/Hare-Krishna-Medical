@@ -1,4 +1,4 @@
-import { store } from "../store/store.js";
+import store from "../store/store.js";
 import { refreshSession, logout } from "../store/slices/authSlice.js";
 
 class SessionManager {
@@ -118,7 +118,7 @@ class SessionManager {
           <strong>Session Warning</strong><br>
           <small>Your session will expire in ${minutes} minute${minutes > 1 ? "s" : ""}. Click anywhere to extend.</small>
         </div>
-        <button onclick="this.parentElement.parentElement.remove()" 
+        <button onclick="this.parentElement.parentElement.remove()"
                 style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; margin-left: auto;">×</button>
       </div>
     `;
@@ -213,7 +213,7 @@ class SessionManager {
       <h3 style="margin: 0 0 10px 0;">Session Expired</h3>
       <p style="margin: 0; opacity: 0.9;">You will be redirected to login page in 3 seconds...</p>
       <div style="margin-top: 15px;">
-        <button onclick="window.location.href='/login'" 
+        <button onclick="window.location.href='/login'"
                 style="background: white; color: #e74c3c; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold;">
           Login Now
         </button>
