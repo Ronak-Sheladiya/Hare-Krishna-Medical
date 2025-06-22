@@ -25,12 +25,11 @@ const ProfessionalInvoice = ({
     status = "Delivered",
   } = invoiceData;
 
-  // Generate QR Code with proper invoice data
+  // Generate QR Code with comprehensive invoice data
   useEffect(() => {
     const generateQR = async () => {
       try {
         setIsLoading(true);
-        // Create comprehensive QR data for verification
         const qrData = {
           invoice_id: invoiceId,
           order_id: orderId,
@@ -45,7 +44,7 @@ const ProfessionalInvoice = ({
 
         const qrText = JSON.stringify(qrData);
         const qrDataURL = await QRCode.toDataURL(qrText, {
-          width: 120,
+          width: 140,
           margin: 2,
           color: {
             dark: "#1a202c",
@@ -77,328 +76,688 @@ const ProfessionalInvoice = ({
     items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const calculatedTotal = total || calculatedSubtotal + shipping;
 
-  const invoiceStyle = `
+  const modernInvoiceStyle = `
     <style>
-      @media print {
-        @page {
-          size: A4;
-          margin: 20px;
-        }
-        
-        body {
-          margin: 0;
-          padding: 0;
-          font-family: 'Arial', sans-serif;
-          line-height: 1.4;
-          color: #333;
-          background: white;
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
-        }
-        
-        .no-print {
-          display: none !important;
-        }
-        
-        .invoice-container {
-          width: 100%;
-          max-width: none;
-          background: white;
-          box-shadow: none;
-          border-radius: 0;
-        }
+      @page {
+        size: A4;
+        margin: 20px;
       }
       
-      @media screen {
-        .invoice-container {
-          width: 210mm;
-          min-height: 297mm;
-          margin: 0 auto;
-          background: white;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-          padding: 20px;
-          box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
       
-      .invoice-body {
-        font-family: 'Arial', sans-serif;
-        font-size: 12px;
-        line-height: 1.4;
-        color: #333;
+      body {
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        font-size: 11px;
+        line-height: 1.5;
+        color: #2d3748;
+        background: white;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
       
-      .header-section {
-        border-bottom: 3px solid #e63946;
-        padding-bottom: 20px;
-        margin-bottom: 30px;
+      .modern-invoice {
+        width: 100%;
+        max-width: 210mm;
+        min-height: 297mm;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        position: relative;
       }
       
-      .company-info {
-        float: left;
-        width: 60%;
+      /* Header with professional gradient */
+      .invoice-header {
+        background: linear-gradient(135deg, #e63946 0%, #dc3545 100%);
+        margin: -20px -20px 30px -20px;
+        padding: 40px 30px 30px 30px;
+        color: white;
+        position: relative;
+        overflow: hidden;
       }
       
-      .invoice-meta {
-        float: right;
-        width: 35%;
-        text-align: right;
+      .invoice-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 100%;
+        height: 200%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="80" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="60" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="70" cy="30" r="1.5" fill="rgba(255,255,255,0.08)"/></svg>') repeat;
+        animation: float 20s infinite linear;
+      }
+      
+      @keyframes float {
+        0% { transform: translateX(0) translateY(0); }
+        100% { transform: translateX(-100px) translateY(-100px); }
+      }
+      
+      .header-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+      
+      .company-section {
+        flex: 1;
+      }
+      
+      .company-logo-name {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      
+      .company-logo {
+        width: 70px;
+        height: 70px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 20px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
       }
       
       .company-name {
-        font-size: 24px;
-        font-weight: bold;
-        color: #e63946;
-        margin-bottom: 5px;
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
       }
       
       .company-tagline {
         font-size: 12px;
-        color: #666;
-        margin-bottom: 15px;
+        opacity: 0.9;
+        margin-top: 5px;
+        font-weight: 500;
       }
       
       .company-details {
+        background: rgba(255,255,255,0.1);
+        padding: 15px;
+        border-radius: 8px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
         font-size: 10px;
         line-height: 1.6;
-        color: #555;
+      }
+      
+      .invoice-title-section {
+        text-align: right;
+        min-width: 250px;
       }
       
       .invoice-title {
-        font-size: 32px;
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 15px;
+        font-size: 42px;
+        font-weight: 900;
+        letter-spacing: -1px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        margin-bottom: 20px;
       }
       
-      .invoice-info {
-        background: #f8f9fa;
-        padding: 15px;
-        border: 1px solid #e63946;
-        border-radius: 5px;
+      .invoice-meta {
+        background: rgba(255,255,255,0.15);
+        padding: 20px;
+        border-radius: 12px;
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255,255,255,0.2);
         font-size: 11px;
       }
       
+      .meta-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        align-items: center;
+      }
+      
+      .meta-row:last-child {
+        margin-bottom: 0;
+      }
+      
+      .meta-label {
+        font-weight: 600;
+        opacity: 0.9;
+      }
+      
+      .meta-value {
+        font-weight: 700;
+        text-align: right;
+      }
+      
+      .status-badge {
+        background: rgba(255,255,255,0.2);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: 1px solid rgba(255,255,255,0.3);
+      }
+      
+      /* Customer Information Section */
       .customer-section {
-        width: 100%;
-        margin-bottom: 30px;
+        display: flex;
+        gap: 30px;
+        margin-bottom: 40px;
       }
       
-      .bill-to, .ship-to {
-        width: 48%;
-        float: left;
-        padding: 15px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        margin-right: 2%;
-        margin-bottom: 15px;
+      .customer-block {
+        flex: 1;
+        background: #f8fafc;
+        padding: 25px;
+        border-radius: 12px;
+        border-left: 4px solid #e63946;
+        position: relative;
       }
       
-      .ship-to {
-        margin-right: 0;
-        float: right;
+      .customer-block.ship-to {
+        border-left-color: #3182ce;
       }
       
       .customer-title {
-        font-size: 14px;
-        font-weight: bold;
+        font-size: 13px;
+        font-weight: 700;
         color: #e63946;
-        margin-bottom: 10px;
         text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+      }
+      
+      .customer-title.ship {
+        color: #3182ce;
+      }
+      
+      .customer-title i {
+        margin-right: 8px;
+        font-size: 14px;
       }
       
       .customer-name {
         font-size: 16px;
-        font-weight: bold;
-        margin-bottom: 10px;
+        font-weight: 700;
+        color: #1a202c;
+        margin-bottom: 12px;
+      }
+      
+      .customer-info {
+        font-size: 10px;
+        line-height: 1.6;
+        color: #4a5568;
+      }
+      
+      .customer-info div {
+        margin-bottom: 4px;
+      }
+      
+      /* Items Section */
+      .items-section {
+        margin-bottom: 40px;
+      }
+      
+      .section-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1a202c;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e63946;
+        display: flex;
+        align-items: center;
+      }
+      
+      .section-title i {
+        margin-right: 10px;
+        color: #e63946;
+        font-size: 18px;
       }
       
       .items-table {
         width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       }
       
       .items-table th {
-        background: #e63946;
+        background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
         color: white;
-        padding: 12px 8px;
-        font-size: 11px;
-        font-weight: bold;
+        padding: 15px 12px;
+        font-size: 10px;
+        font-weight: 700;
         text-transform: uppercase;
-        border: 1px solid #e63946;
+        letter-spacing: 0.5px;
+      }
+      
+      .items-table th:first-child {
+        border-radius: 8px 0 0 0;
+      }
+      
+      .items-table th:last-child {
+        border-radius: 0 8px 0 0;
       }
       
       .items-table td {
-        padding: 10px 8px;
-        border: 1px solid #ddd;
-        font-size: 11px;
+        padding: 15px 12px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 10px;
       }
       
-      .items-table tr:nth-child(even) {
-        background: #f9f9f9;
+      .items-table tbody tr:nth-child(even) {
+        background: #f7fafc;
+      }
+      
+      .items-table tbody tr:hover {
+        background: #edf2f7;
+      }
+      
+      .items-table tbody tr:last-child td {
+        border-bottom: none;
+      }
+      
+      .items-table tbody tr:last-child td:first-child {
+        border-radius: 0 0 0 8px;
+      }
+      
+      .items-table tbody tr:last-child td:last-child {
+        border-radius: 0 0 8px 0;
+      }
+      
+      .item-name {
+        font-weight: 600;
+        color: #1a202c;
+        margin-bottom: 2px;
+      }
+      
+      .item-company {
+        font-size: 9px;
+        color: #718096;
+        font-style: italic;
+      }
+      
+      .quantity-badge {
+        background: linear-gradient(135deg, #e63946, #dc3545);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 9px;
+        font-weight: 700;
+        min-width: 30px;
+        text-align: center;
+        display: inline-block;
       }
       
       .text-center { text-align: center; }
       .text-right { text-align: right; }
       .text-left { text-align: left; }
       
+      /* Totals Section */
       .totals-section {
-        float: right;
-        width: 300px;
-        margin-bottom: 30px;
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 40px;
+      }
+      
+      .totals-table {
+        min-width: 350px;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       }
       
       .total-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 15px;
-        border: 1px solid #ddd;
-        font-size: 12px;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      
+      .total-row:last-child {
+        border-bottom: none;
+      }
+      
+      .total-row td {
+        padding: 12px 15px;
+        font-size: 11px;
+      }
+      
+      .total-row.subtotal {
+        background: #f7fafc;
+      }
+      
+      .total-row.shipping {
+        background: #f0fff4;
+      }
+      
+      .total-row.tax {
+        background: #fffbeb;
       }
       
       .total-row.grand-total {
-        background: #e63946;
+        background: linear-gradient(135deg, #e63946, #dc3545);
         color: white;
-        font-weight: bold;
+        font-weight: 700;
         font-size: 14px;
       }
       
+      .total-row.grand-total td:first-child {
+        border-radius: 0 0 0 8px;
+      }
+      
+      .total-row.grand-total td:last-child {
+        border-radius: 0 0 8px 0;
+      }
+      
+      .total-label {
+        font-weight: 600;
+      }
+      
+      .total-value {
+        font-weight: 700;
+        text-align: right;
+      }
+      
+      /* Footer Section */
       .footer-section {
-        clear: both;
-        margin-top: 40px;
-        border-top: 2px solid #f1f1f1;
-        padding-top: 20px;
+        display: flex;
+        gap: 30px;
+        padding-top: 30px;
+        border-top: 2px solid #e2e8f0;
       }
       
-      .terms-column {
-        float: left;
-        width: 65%;
+      .terms-section {
+        flex: 2;
       }
       
-      .qr-column {
-        float: right;
-        width: 30%;
-        text-align: center;
-      }
-      
-      .terms-title {
+      .footer-title {
         font-size: 14px;
-        font-weight: bold;
+        font-weight: 700;
+        color: #1a202c;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+      }
+      
+      .footer-title i {
+        margin-right: 8px;
         color: #e63946;
-        margin-bottom: 10px;
       }
       
       .terms-list {
-        font-size: 10px;
-        line-height: 1.5;
-        color: #555;
+        font-size: 9px;
+        line-height: 1.6;
+        color: #4a5568;
+        list-style: none;
       }
       
       .terms-list li {
-        margin-bottom: 5px;
+        margin-bottom: 6px;
+        position: relative;
+        padding-left: 15px;
+      }
+      
+      .terms-list li::before {
+        content: '●';
+        color: #e63946;
+        position: absolute;
+        left: 0;
+        font-weight: bold;
+      }
+      
+      .contact-info {
+        background: #f8fafc;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+        border-left: 4px solid #3182ce;
+      }
+      
+      .contact-info-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: #3182ce;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+      }
+      
+      .contact-info-title i {
+        margin-right: 6px;
+      }
+      
+      .contact-details {
+        font-size: 9px;
+        line-height: 1.5;
+        color: #4a5568;
+      }
+      
+      .qr-section {
+        flex: 1;
+        text-align: center;
+      }
+      
+      .qr-container {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 12px;
+        border: 2px solid #e2e8f0;
       }
       
       .qr-title {
-        font-size: 12px;
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 10px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #1a202c;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .qr-title i {
+        margin-right: 6px;
+        color: #3182ce;
       }
       
       .qr-code {
-        width: 100px;
-        height: 100px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
+        width: 120px;
+        height: 120px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        margin: 0 auto 10px;
+        display: block;
       }
       
-      .clearfix::after {
-        content: "";
-        display: table;
-        clear: both;
-      }
-      
-      .bottom-note {
-        text-align: center;
+      .qr-placeholder {
+        width: 120px;
+        height: 120px;
+        border: 2px dashed #cbd5e0;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px;
+        background: #f7fafc;
+        color: #718096;
         font-size: 10px;
-        color: #666;
-        margin-top: 20px;
-        padding: 10px;
-        background: #f8f9fa;
-        border-radius: 5px;
+        font-weight: 600;
+      }
+      
+      .qr-description {
+        font-size: 8px;
+        color: #718096;
+        line-height: 1.4;
+      }
+      
+      /* Bottom signature */
+      .bottom-signature {
+        margin-top: 30px;
+        text-align: center;
+        padding: 15px;
+        background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+      }
+      
+      .signature-content {
+        font-size: 9px;
+        color: #718096;
+        line-height: 1.5;
+      }
+      
+      .signature-highlight {
+        font-weight: 700;
+        color: #1a202c;
+      }
+      
+      /* Print optimizations */
+      @media print {
+        body {
+          margin: 0;
+          padding: 0;
+        }
+        
+        .modern-invoice {
+          box-shadow: none;
+          border: none;
+          page-break-inside: avoid;
+        }
+        
+        .items-table {
+          page-break-inside: avoid;
+        }
+        
+        .footer-section {
+          page-break-inside: avoid;
+        }
+        
+        .totals-section {
+          page-break-inside: avoid;
+        }
+        
+        .invoice-header::before {
+          display: none;
+        }
       }
     </style>
   `;
 
-  const generateSimpleInvoiceHTML = () => {
+  const generateModernInvoiceHTML = () => {
     return `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="UTF-8">
         <title>Invoice ${invoiceId} - Hare Krishna Medical</title>
-        ${invoiceStyle}
+        ${modernInvoiceStyle}
       </head>
       <body>
-        <div class="invoice-container">
-          <div class="invoice-body">
-            <!-- Header Section -->
-            <div class="header-section clearfix">
-              <div class="company-info">
-                <div class="company-name">HARE KRISHNA MEDICAL</div>
-                <div class="company-tagline">Your Trusted Healthcare Partner</div>
+        <div class="modern-invoice">
+          <!-- Modern Header -->
+          <div class="invoice-header">
+            <div class="header-content">
+              <div class="company-section">
+                <div class="company-logo-name">
+                  <div class="company-logo">
+                    <i style="font-size: 32px; color: white;">🏥</i>
+                  </div>
+                  <div>
+                    <div class="company-name">HARE KRISHNA MEDICAL</div>
+                    <div class="company-tagline">Your Trusted Healthcare Partner</div>
+                  </div>
+                </div>
                 <div class="company-details">
                   📍 3 Sahyog Complex, Man Sarovar Circle, Amroli, Surat - 394107, Gujarat<br>
                   📞 +91 76989 13354 | 📱 +91 91060 18508<br>
-                  📧 harekrishnamedical@gmail.com
+                  📧 harekrishnamedical@gmail.com | 🌐 www.harekrishan.medical
                 </div>
               </div>
               
-              <div class="invoice-meta">
+              <div class="invoice-title-section">
                 <div class="invoice-title">INVOICE</div>
-                <div class="invoice-info">
-                  <div><strong>Invoice #:</strong> ${invoiceId}</div>
-                  <div><strong>Order #:</strong> ${orderId}</div>
-                  <div><strong>Date:</strong> ${orderDate}</div>
-                  <div><strong>Time:</strong> ${orderTime}</div>
-                  <div><strong>Status:</strong> ${status}</div>
+                <div class="invoice-meta">
+                  <div class="meta-row">
+                    <span class="meta-label">Invoice #</span>
+                    <span class="meta-value">${invoiceId}</span>
+                  </div>
+                  <div class="meta-row">
+                    <span class="meta-label">Order #</span>
+                    <span class="meta-value">${orderId}</span>
+                  </div>
+                  <div class="meta-row">
+                    <span class="meta-label">Date</span>
+                    <span class="meta-value">${orderDate}</span>
+                  </div>
+                  <div class="meta-row">
+                    <span class="meta-label">Time</span>
+                    <span class="meta-value">${orderTime}</span>
+                  </div>
+                  <div class="meta-row">
+                    <span class="meta-label">Status</span>
+                    <span class="status-badge">${status}</span>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- Customer Information -->
-            <div class="customer-section clearfix">
-              <div class="bill-to">
-                <div class="customer-title">📋 Bill To</div>
-                <div class="customer-name">${customerDetails.fullName}</div>
-                <div>Email: ${customerDetails.email}</div>
-                <div>Phone: ${customerDetails.mobile}</div>
-                <div>Address: ${customerDetails.address}</div>
-                <div>City: ${customerDetails.city}, ${customerDetails.state}</div>
-                <div>PIN: ${customerDetails.pincode}</div>
+          <!-- Customer Information -->
+          <div class="customer-section">
+            <div class="customer-block">
+              <div class="customer-title">
+                <i class="📋"></i>Bill To
               </div>
-              
-              <div class="ship-to">
-                <div class="customer-title">🚚 Ship To</div>
-                <div class="customer-name">${customerDetails.fullName}</div>
-                <div>Address: ${customerDetails.address}</div>
-                <div>City: ${customerDetails.city}, ${customerDetails.state}</div>
-                <div>PIN: ${customerDetails.pincode}</div>
-                <div>Payment: ${paymentMethod}</div>
-                <div>Status: ${paymentStatus}</div>
+              <div class="customer-name">${customerDetails.fullName}</div>
+              <div class="customer-info">
+                <div><strong>Email:</strong> ${customerDetails.email}</div>
+                <div><strong>Phone:</strong> ${customerDetails.mobile}</div>
+                <div><strong>Address:</strong> ${customerDetails.address}</div>
+                <div><strong>City:</strong> ${customerDetails.city}, ${customerDetails.state}</div>
+                <div><strong>PIN Code:</strong> ${customerDetails.pincode}</div>
               </div>
             </div>
+            
+            <div class="customer-block ship-to">
+              <div class="customer-title ship">
+                <i class="🚚"></i>Ship To
+              </div>
+              <div class="customer-name">${customerDetails.fullName}</div>
+              <div class="customer-info">
+                <div><strong>Address:</strong> ${customerDetails.address}</div>
+                <div><strong>City:</strong> ${customerDetails.city}, ${customerDetails.state}</div>
+                <div><strong>PIN Code:</strong> ${customerDetails.pincode}</div>
+                <div><strong>Payment:</strong> ${paymentMethod}</div>
+                <div><strong>Status:</strong> ${paymentStatus}</div>
+              </div>
+            </div>
+          </div>
 
-            <!-- Items Table -->
+          <!-- Items Section -->
+          <div class="items-section">
+            <div class="section-title">
+              <i class="🛒"></i>Medical Products & Services
+            </div>
             <table class="items-table">
               <thead>
                 <tr>
                   <th class="text-center" style="width: 40px;">#</th>
-                  <th class="text-left">Description</th>
-                  <th class="text-center" style="width: 60px;">Qty</th>
-                  <th class="text-right" style="width: 80px;">Unit Price</th>
-                  <th class="text-right" style="width: 80px;">Total</th>
+                  <th class="text-left">Product Description</th>
+                  <th class="text-center" style="width: 80px;">Quantity</th>
+                  <th class="text-right" style="width: 100px;">Unit Price</th>
+                  <th class="text-right" style="width: 100px;">Total Amount</th>
                 </tr>
               </thead>
               <tbody>
@@ -406,81 +765,103 @@ const ProfessionalInvoice = ({
                   .map(
                     (item, index) => `
                   <tr>
-                    <td class="text-center">${index + 1}</td>
+                    <td class="text-center" style="font-weight: 700; color: #e63946;">${index + 1}</td>
                     <td>
-                      <strong>${item.name}</strong><br>
-                      <small style="color: #666;">${item.company || "Medical Product"}</small>
+                      <div class="item-name">${item.name}</div>
+                      <div class="item-company">${item.company || "Medical Product"}</div>
                     </td>
-                    <td class="text-center">${item.quantity}</td>
-                    <td class="text-right">₹${item.price.toFixed(2)}</td>
-                    <td class="text-right">₹${(item.price * item.quantity).toFixed(2)}</td>
+                    <td class="text-center">
+                      <span class="quantity-badge">${item.quantity}</span>
+                    </td>
+                    <td class="text-right" style="font-weight: 600; color: #4a5568;">₹${item.price.toFixed(2)}</td>
+                    <td class="text-right" style="font-weight: 700; color: #1a202c;">₹${(item.price * item.quantity).toFixed(2)}</td>
                   </tr>
                 `,
                   )
                   .join("")}
               </tbody>
             </table>
+          </div>
 
-            <!-- Totals -->
-            <div class="totals-section">
-              <div class="total-row">
-                <span>Subtotal:</span>
-                <span>₹${calculatedSubtotal.toFixed(2)}</span>
-              </div>
-              <div class="total-row">
-                <span>Shipping:</span>
-                <span>${shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}</span>
-              </div>
-              <div class="total-row">
-                <span>Tax (GST):</span>
-                <span>Included</span>
-              </div>
-              <div class="total-row grand-total">
-                <span>TOTAL AMOUNT:</span>
-                <span>₹${calculatedTotal.toFixed(2)}</span>
-              </div>
-            </div>
+          <!-- Totals Section -->
+          <div class="totals-section">
+            <table class="totals-table">
+              <tr class="total-row subtotal">
+                <td class="total-label">Subtotal</td>
+                <td class="total-value">₹${calculatedSubtotal.toFixed(2)}</td>
+              </tr>
+              <tr class="total-row shipping">
+                <td class="total-label">Shipping & Handling</td>
+                <td class="total-value" style="${shipping === 0 ? "color: #38a169; font-weight: 700;" : ""}">
+                  ${shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}
+                </td>
+              </tr>
+              <tr class="total-row tax">
+                <td class="total-label">Tax (GST)</td>
+                <td class="total-value" style="color: #3182ce; font-weight: 700;">Included in Price</td>
+              </tr>
+              <tr class="total-row grand-total">
+                <td class="total-label">TOTAL AMOUNT</td>
+                <td class="total-value">₹${calculatedTotal.toFixed(2)}</td>
+              </tr>
+            </table>
+          </div>
 
-            <!-- Footer -->
-            <div class="footer-section clearfix">
-              <div class="terms-column">
-                <div class="terms-title">📋 Terms & Conditions</div>
-                <ul class="terms-list">
-                  <li>• Payment is due within 30 days from invoice date</li>
-                  <li>• Returns accepted only for damaged items within 7 days</li>
-                  <li>• This invoice is computer-generated and legally valid</li>
-                  <li>• Subject to Gujarat jurisdiction for legal disputes</li>
-                  <li>• All prices are inclusive of applicable taxes</li>
-                </ul>
-                
-                <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-left: 3px solid #e63946; font-size: 10px;">
-                  <strong>📞 Contact Support:</strong><br>
-                  Email: harekrishnamedical@gmail.com<br>
-                  Phone: +91 76989 13354 | Emergency: +91 91060 18508<br>
-                  Hours: Mon-Sat, 9:00 AM - 8:00 PM
+          <!-- Footer Section -->
+          <div class="footer-section">
+            <div class="terms-section">
+              <div class="footer-title">
+                <i class="📋"></i>Terms & Conditions
+              </div>
+              <ul class="terms-list">
+                <li>Payment is due within 30 days from the invoice date</li>
+                <li>All medical products are subject to proper usage guidelines</li>
+                <li>Returns are accepted only for damaged or defective items within 7 days</li>
+                <li>This invoice is computer-generated and legally valid without signature</li>
+                <li>Subject to Gujarat jurisdiction for any legal disputes or claims</li>
+                <li>Keep this invoice safe for warranty claims and return purposes</li>
+                <li>All prices are inclusive of applicable taxes and charges</li>
+              </ul>
+              
+              <div class="contact-info">
+                <div class="contact-info-title">
+                  <i class="📞"></i>Customer Support
+                </div>
+                <div class="contact-details">
+                  <strong>Email:</strong> harekrishnamedical@gmail.com<br>
+                  <strong>Phone:</strong> +91 76989 13354<br>
+                  <strong>Emergency:</strong> +91 91060 18508<br>
+                  <strong>Hours:</strong> Monday-Saturday, 9:00 AM - 8:00 PM
                 </div>
               </div>
-              
-              <div class="qr-column">
-                <div class="qr-title">📱 Verification QR</div>
+            </div>
+            
+            <div class="qr-section">
+              <div class="qr-container">
+                <div class="qr-title">
+                  <i class="📱"></i>Verification QR Code
+                </div>
                 ${
                   generatedQR
-                    ? `<img src="${generatedQR}" alt="Verification QR Code" class="qr-code" />`
-                    : '<div style="width: 100px; height: 100px; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 10px; color: #666;">QR Code</div>'
+                    ? `<img src="${generatedQR}" alt="Invoice Verification QR Code" class="qr-code" />`
+                    : '<div class="qr-placeholder">QR Code</div>'
                 }
-                <div style="font-size: 9px; color: #666; margin-top: 5px;">
-                  Scan to verify invoice<br>
-                  authenticity and access<br>
-                  online copy
+                <div class="qr-description">
+                  Scan this QR code to verify invoice<br>
+                  authenticity and access digital copy<br>
+                  Contains complete invoice data
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- Bottom Note -->
-            <div class="bottom-note">
-              🖥️ This is a computer-generated invoice - No signature required<br>
-              Generated: ${new Date().toLocaleString()} | Invoice ID: ${invoiceId}<br>
-              <strong>Hare Krishna Medical</strong> - Licensed Medical Store - Gujarat, India
+          <!-- Bottom Signature -->
+          <div class="bottom-signature">
+            <div class="signature-content">
+              <span class="signature-highlight">🖥️ This is a computer-generated invoice</span> - No manual signature required<br>
+              Generated on: ${new Date().toLocaleString()} | Invoice ID: ${invoiceId}<br>
+              <span class="signature-highlight">🔒 This document is digitally protected and verified</span><br>
+              <strong>Hare Krishna Medical</strong> - Licensed Medical Store Registration No: [License#] - Gujarat, India
             </div>
           </div>
         </div>
@@ -491,13 +872,13 @@ const ProfessionalInvoice = ({
 
   if (forPrint) {
     return (
-      <div dangerouslySetInnerHTML={{ __html: generateSimpleInvoiceHTML() }} />
+      <div dangerouslySetInnerHTML={{ __html: generateModernInvoiceHTML() }} />
     );
   }
 
   return (
     <div>
-      <div dangerouslySetInnerHTML={{ __html: generateSimpleInvoiceHTML() }} />
+      <div dangerouslySetInnerHTML={{ __html: generateModernInvoiceHTML() }} />
     </div>
   );
 };
