@@ -147,14 +147,259 @@ const UserInvoices = () => {
     return matchesSearch && matchesDate;
   });
 
-  const handleDownloadPDF = (invoice) => {
-    // Navigate to the invoice view page which has PDF download functionality
-    window.location.href = `/invoice/${invoice.orderId}`;
+  const handleDownloadPDF = async (invoice) => {
+    try {
+      // Import required libraries dynamically
+      const jsPDF = (await import("jspdf")).default;
+      const html2canvas = (await import("html2canvas")).default;
+      const QRCode = (await import("qrcode")).default;
+
+      // Generate QR code for verification
+      const verifyUrl = `${window.location.origin}/invoice/${invoice.orderId}`;
+      const qrDataURL = await QRCode.toDataURL(verifyUrl, {
+        width: 120,
+        margin: 2,
+        color: {
+          dark: "#1a202c",
+          light: "#ffffff",
+        },
+        errorCorrectionLevel: "M",
+      });
+
+      // Mock invoice data based on invoice
+      const invoiceData = {
+        invoiceId: invoice.id,
+        orderId: invoice.orderId,
+        orderDate: invoice.date,
+        orderTime: "14:30:25",
+        customerDetails: {
+          fullName: invoice.customerName,
+          email: "john.doe@example.com",
+          mobile: "+91 9876543210",
+          address: "123 Medical Street",
+          city: "Surat",
+          state: "Gujarat",
+          pincode: "395007",
+        },
+        items: [
+          {
+            id: 1,
+            name: "Medical Products",
+            company: "Various Brands",
+            quantity: invoice.items,
+            price: invoice.amount / invoice.items,
+          },
+        ],
+        subtotal: invoice.amount * 0.95,
+        shipping: 0,
+        tax: invoice.amount * 0.05,
+        total: invoice.amount,
+        paymentMethod: "Cash on Delivery",
+        paymentStatus: "Paid",
+        status: "Delivered",
+        qrCode: qrDataURL,
+      };
+
+      // Create temporary element with invoice
+      const tempDiv = document.createElement("div");
+      tempDiv.style.position = "absolute";
+      tempDiv.style.left = "-9999px";
+      tempDiv.style.width = "210mm";
+      tempDiv.style.backgroundColor = "white";
+      document.body.appendChild(tempDiv);
+
+      // Import and render ProfessionalInvoice component
+      const ProfessionalInvoice = (
+        await import("../../components/common/ProfessionalInvoice.jsx")
+      ).default;
+      const React = (await import("react")).default;
+      const { createRoot } = await import("react-dom/client");
+
+      const root = createRoot(tempDiv);
+      root.render(
+        React.createElement(ProfessionalInvoice, {
+          invoiceData,
+          qrCode: qrDataURL,
+          forPrint: true,
+        }),
+      );
+
+      // Wait for rendering
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      // Generate PDF
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2.5,
+        logging: false,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      if (imgHeight > pageHeight) {
+        const scaleFactor = (pageHeight - 5) / imgHeight;
+        const scaledWidth = imgWidth * scaleFactor;
+        const scaledHeight = pageHeight - 5;
+        const xOffset = (imgWidth - scaledWidth) / 2;
+        pdf.addImage(imgData, "PNG", xOffset, 2.5, scaledWidth, scaledHeight);
+      } else {
+        const yOffset = (pageHeight - imgHeight) / 2;
+        pdf.addImage(imgData, "PNG", 0, yOffset, imgWidth, imgHeight);
+      }
+
+      // Download with just invoice ID as filename
+      pdf.save(`${invoice.id}.pdf`);
+
+      // Clean up
+      root.unmount();
+      document.body.removeChild(tempDiv);
+
+      alert("Invoice downloaded successfully!");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Error generating PDF. Please try again.");
+    }
   };
 
-  const handlePrintInvoice = (invoice) => {
-    // Navigate to invoice page
-    window.location.href = `/invoice/${invoice.orderId}`;
+  const handlePrintInvoice = async (invoice) => {
+    try {
+      // Import required libraries dynamically
+      const QRCode = (await import("qrcode")).default;
+
+      // Generate QR code for verification
+      const verifyUrl = `${window.location.origin}/invoice/${invoice.orderId}`;
+      const qrDataURL = await QRCode.toDataURL(verifyUrl, {
+        width: 120,
+        margin: 2,
+        color: {
+          dark: "#1a202c",
+          light: "#ffffff",
+        },
+        errorCorrectionLevel: "M",
+      });
+
+      // Mock invoice data
+      const invoiceData = {
+        invoiceId: invoice.id,
+        orderId: invoice.orderId,
+        orderDate: invoice.date,
+        orderTime: "14:30:25",
+        customerDetails: {
+          fullName: invoice.customerName,
+          email: "john.doe@example.com",
+          mobile: "+91 9876543210",
+          address: "123 Medical Street",
+          city: "Surat",
+          state: "Gujarat",
+          pincode: "395007",
+        },
+        items: [
+          {
+            id: 1,
+            name: "Medical Products",
+            company: "Various Brands",
+            quantity: invoice.items,
+            price: invoice.amount / invoice.items,
+          },
+        ],
+        subtotal: invoice.amount * 0.95,
+        shipping: 0,
+        tax: invoice.amount * 0.05,
+        total: invoice.amount,
+        paymentMethod: "Cash on Delivery",
+        paymentStatus: "Paid",
+        status: "Delivered",
+      };
+
+      // Create temporary element for printing
+      const tempDiv = document.createElement("div");
+      tempDiv.style.position = "absolute";
+      tempDiv.style.left = "-9999px";
+      tempDiv.style.width = "210mm";
+      tempDiv.style.backgroundColor = "white";
+      document.body.appendChild(tempDiv);
+
+      // Import and render ProfessionalInvoice component
+      const ProfessionalInvoice = (
+        await import("../../components/common/ProfessionalInvoice.jsx")
+      ).default;
+      const React = (await import("react")).default;
+      const { createRoot } = await import("react-dom/client");
+
+      const root = createRoot(tempDiv);
+      root.render(
+        React.createElement(ProfessionalInvoice, {
+          invoiceData,
+          qrCode: qrDataURL,
+          forPrint: true,
+        }),
+      );
+
+      // Wait for rendering
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Create print content
+      const printContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Official Invoice ${invoice.id}</title>
+            <style>
+              @page { size: A4; margin: 0.5in; }
+              body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+              }
+            </style>
+          </head>
+          <body>
+            ${tempDiv.innerHTML}
+          </body>
+        </html>
+      `;
+
+      // Create temporary iframe for printing
+      const printFrame = document.createElement("iframe");
+      printFrame.style.position = "absolute";
+      printFrame.style.top = "-10000px";
+      printFrame.style.left = "-10000px";
+      document.body.appendChild(printFrame);
+
+      printFrame.contentDocument.write(printContent);
+      printFrame.contentDocument.close();
+
+      // Wait for content to load then print
+      setTimeout(() => {
+        printFrame.contentWindow.focus();
+        printFrame.contentWindow.print();
+        // Clean up after printing
+        setTimeout(() => {
+          document.body.removeChild(printFrame);
+          root.unmount();
+          document.body.removeChild(tempDiv);
+        }, 1000);
+      }, 500);
+    } catch (error) {
+      console.error("Error printing invoice:", error);
+      alert("Error printing invoice. Please try again.");
+    }
+  };
+
+  const handleViewInvoice = (invoice) => {
+    window.open(`/invoice/${invoice.orderId}`, "_blank");
   };
 
   const getStatusBadge = (status) => {
@@ -542,27 +787,26 @@ const UserInvoices = () => {
                               variant="outline-primary"
                               onClick={() => handleDownloadPDF(invoice)}
                               className="btn-medical-outline"
-                              title="Download PDF"
+                              title="Download PDF directly"
                             >
                               <i className="bi bi-download me-1"></i>
-                              PDF
+                              Download
                             </Button>
                             <Button
                               size="sm"
                               variant="outline-success"
                               onClick={() => handlePrintInvoice(invoice)}
                               className="btn-medical-outline"
-                              title="Print Invoice"
+                              title="Print Invoice directly"
                             >
                               <i className="bi bi-printer"></i>
                             </Button>
                             <Button
                               size="sm"
                               variant="outline-info"
-                              as={Link}
-                              to={`/invoice/${invoice.orderId}`}
+                              onClick={() => handleViewInvoice(invoice)}
                               className="btn-medical-outline"
-                              title="View Invoice"
+                              title="View in new tab"
                             >
                               <i className="bi bi-eye"></i>
                             </Button>
