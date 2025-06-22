@@ -189,7 +189,7 @@ const InvoiceView = () => {
   }
 
   return (
-    <div className="fade-in">
+    <div className="fade-in" data-page="invoice">
       <Container className="my-4">
         {showAlert && (
           <Alert variant="success" className="mb-4 no-print">
