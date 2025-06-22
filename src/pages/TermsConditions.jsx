@@ -4,16 +4,6 @@ import { Container, Row, Col, Card, Breadcrumb } from "react-bootstrap";
 const TermsConditions = () => {
   return (
     <div className="fade-in">
-      {/* Breadcrumb */}
-      <section className="medical-breadcrumb">
-        <Container>
-          <Breadcrumb>
-            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-            <Breadcrumb.Item active>Terms & Conditions</Breadcrumb.Item>
-          </Breadcrumb>
-        </Container>
-      </section>
-
       {/* Terms & Conditions Content */}
       <section className="section-padding">
         <Container>
@@ -375,19 +365,19 @@ const TermsConditions = () => {
         .terms-section {
           margin-bottom: 2.5rem;
         }
-        
+
         .terms-list {
           list-style: none;
           padding-left: 0;
         }
-        
+
         .terms-list li {
           padding: 8px 0;
           border-bottom: 1px solid #f8f9fa;
           position: relative;
           padding-left: 25px;
         }
-        
+
         .terms-list li:before {
           content: "•";
           position: absolute;
@@ -396,27 +386,27 @@ const TermsConditions = () => {
           font-weight: bold;
           font-size: 1.2rem;
         }
-        
+
         .terms-list li:last-child {
           border-bottom: none;
         }
-        
+
         .contact-info {
           background: #f8f9fa;
           padding: 20px;
           border-radius: 8px;
           margin-top: 15px;
         }
-        
+
         .contact-info p {
           margin-bottom: 8px;
         }
-        
+
         .contact-info a {
           color: var(--medical-red);
           text-decoration: none;
         }
-        
+
         .contact-info a:hover {
           text-decoration: underline;
         }
