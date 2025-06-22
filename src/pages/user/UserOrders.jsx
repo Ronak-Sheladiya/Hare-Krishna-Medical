@@ -140,10 +140,10 @@ const UserOrders = () => {
 
   return (
     <div className="fade-in user-page-content" data-page="user">
-      {/* Hero Section - User Theme */}
+      {/* Hero Section - About Us Red Theme */}
       <section
         style={{
-          background: "linear-gradient(135deg, #38a169 0%, #2f855a 100%)",
+          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
           paddingTop: "80px",
           paddingBottom: "80px",
           color: "white",
