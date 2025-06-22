@@ -494,6 +494,7 @@ const Home = () => {
                   }}
                 >
                   <div
+                    className="feature-icon"
                     style={{
                       width: "70px",
                       height: "70px",
@@ -505,6 +506,7 @@ const Home = () => {
                       margin: "0 auto 24px",
                       color: "white",
                       fontSize: "28px",
+                      transition: "all 0.3s ease",
                     }}
                   >
                     <i className={feature.icon}></i>
