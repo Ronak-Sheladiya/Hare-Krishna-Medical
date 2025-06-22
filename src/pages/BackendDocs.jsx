@@ -64,7 +64,15 @@ HARE KRISHNA MEDICAL - COMPREHENSIVE BACKEND IMPLEMENTATION GUIDE
 ================================================================
 
 This document provides comprehensive backend implementation requirements for the Hare Krishna Medical website.
-Updated with all security features, message handling, export functionality, and invoice management.
+Updated with enhanced invoice QR codes, A4 print optimization, and complete user guide system.
+
+LATEST UPDATES (January 2024):
+==============================
+- Enhanced QR Code generation with 180px width for better scanning
+- A4 print layout optimization with 10px margins for full page coverage
+- Comprehensive User Guide system implementation
+- Improved invoice verification and digital authentication
+- Enhanced mobile QR scanning compatibility
 
 1. TECHNOLOGY STACK
 ==================
@@ -77,8 +85,9 @@ Email Service: Nodemailer with Gmail/SendGrid (Admin Reply System)
 SMS Service: Twilio or Fast2SMS
 PDF Generation: PDFKit (server-side) for secure invoices
 Export: xlsx library for Excel exports
-QR Code: qrcode library for invoice QR codes
+QR Code: qrcode library for invoice QR codes (Enhanced with larger size)
 Security: bcryptjs, helmet, express-rate-limit, express-validator
+Print Optimization: CSS @page rules for A4 print layout
 
 2. DATABASE SCHEMA
 =================
