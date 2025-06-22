@@ -102,13 +102,13 @@ const GlobalSecurity = () => {
       return false;
     };
 
-    // Disable text selection (except on invoice, contact, admin, and user pages)
+    // Disable text selection (allow on invoice, contact, admin, and user pages)
     const handleSelectStart = (e) => {
       if (
         window.location.pathname.includes("invoice") ||
         window.location.pathname.includes("contact") ||
-        window.location.pathname.includes("/admin/") ||
-        window.location.pathname.includes("/user/")
+        window.location.pathname.includes("/admin") ||
+        window.location.pathname.includes("/user")
       ) {
         return true; // Allow selection
       }
@@ -169,7 +169,9 @@ const GlobalSecurity = () => {
       .admin-page-content, .admin-page-content *,
       .user-page-content, .user-page-content *,
       [data-page="contact"] *, [data-page="invoice"] *,
-      [data-page="admin"] *, [data-page="user"] * {
+      [data-page="admin"] *, [data-page="user"] *,
+      [class*="admin-"] *, [class*="user-"] *,
+      body[data-path*="/admin"] *, body[data-path*="/user"] * {
         -webkit-user-select: text !important;
         -moz-user-select: text !important;
         -ms-user-select: text !important;
@@ -187,25 +189,33 @@ const GlobalSecurity = () => {
         color: white !important;
       }
 
-      /* Blue selection theme for admin pages */
-      .admin-page-content ::selection {
-        background: #3182ce !important;
+      /* Red selection theme for admin pages (About Us theme) */
+      .admin-page-content ::selection,
+      [data-page="admin"] ::selection,
+      [class*="admin-"] ::selection {
+        background: #e63946 !important;
         color: white !important;
       }
 
-      .admin-page-content ::-moz-selection {
-        background: #3182ce !important;
+      .admin-page-content ::-moz-selection,
+      [data-page="admin"] ::-moz-selection,
+      [class*="admin-"] ::-moz-selection {
+        background: #e63946 !important;
         color: white !important;
       }
 
-      /* Green selection theme for user pages */
-      .user-page-content ::selection {
-        background: #38a169 !important;
+      /* Red selection theme for user pages (About Us theme) */
+      .user-page-content ::selection,
+      [data-page="user"] ::selection,
+      [class*="user-"] ::selection {
+        background: #e63946 !important;
         color: white !important;
       }
 
-      .user-page-content ::-moz-selection {
-        background: #38a169 !important;
+      .user-page-content ::-moz-selection,
+      [data-page="user"] ::-moz-selection,
+      [class*="user-"] ::-moz-selection {
+        background: #e63946 !important;
         color: white !important;
       }
 
