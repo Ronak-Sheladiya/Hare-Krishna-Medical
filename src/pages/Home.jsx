@@ -156,6 +156,13 @@ const Home = () => {
                       fontSize: "16px",
                       fontWeight: "600",
                       boxShadow: "0 4px 12px rgba(230, 57, 70, 0.3)",
+                      transition: "all 0.3s ease",
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.background = "#343a40";
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.background = "#e63946";
                     }}
                   >
                     Shop Now
@@ -166,12 +173,23 @@ const Home = () => {
                     variant="outline-secondary"
                     size="lg"
                     style={{
-                      color: "#343a40",
-                      borderColor: "#343a40",
+                      color: "#e63946",
+                      borderColor: "#e63946",
                       borderRadius: "8px",
                       padding: "14px 28px",
                       fontSize: "16px",
                       fontWeight: "600",
+                      transition: "all 0.3s ease",
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.background = "#343a40";
+                      e.target.style.borderColor = "#343a40";
+                      e.target.style.color = "white";
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.background = "transparent";
+                      e.target.style.borderColor = "#e63946";
+                      e.target.style.color = "#e63946";
                     }}
                   >
                     Learn More
