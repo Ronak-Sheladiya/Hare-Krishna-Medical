@@ -83,6 +83,40 @@ const UserInvoices = () => {
     );
   }
 
+  // Helper function to create invoice data from user invoice
+  const createInvoiceDataFromInvoice = (invoice) => {
+    return {
+      invoiceId: invoice.id,
+      orderId: invoice.orderId,
+      orderDate: invoice.date,
+      orderTime: "14:30:25",
+      customerDetails: {
+        fullName: invoice.customerName,
+        email: "john.doe@example.com",
+        mobile: "+91 9876543210",
+        address: "123 Medical Street",
+        city: "Surat",
+        state: "Gujarat",
+        pincode: "395007",
+      },
+      items: [
+        {
+          id: 1,
+          name: "Medical Products",
+          company: "Various Brands",
+          quantity: invoice.items,
+          price: invoice.amount / invoice.items,
+        },
+      ],
+      subtotal: invoice.amount * 0.95,
+      shipping: 0,
+      total: invoice.amount,
+      paymentMethod: "Cash on Delivery",
+      paymentStatus: "Paid",
+      status: "Delivered",
+    };
+  };
+
   // Mock invoices data
   const mockInvoices = [
     {
