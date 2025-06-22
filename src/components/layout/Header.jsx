@@ -229,6 +229,10 @@ const Header = () => {
                           <i className="bi bi-receipt-cutoff me-2"></i>
                           Manage Invoices
                         </Dropdown.Item>
+                        <Dropdown.Item as={Link} to="/admin/analytics">
+                          <i className="bi bi-graph-up me-2"></i>
+                          Analytics
+                        </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/messages">
                           <i className="bi bi-envelope me-2"></i>
                           Manage Messages
