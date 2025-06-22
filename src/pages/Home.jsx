@@ -199,20 +199,24 @@ const Home = () => {
               </div>
             </Col>
 
-            <Col lg={6}>
+            <Col lg={5}>
               <div className="hero-image text-center">
                 <div
                   style={{
                     background: "transparent",
                     borderRadius: "20px",
-                    padding: "40px",
+                    padding: "20px",
+                    paddingLeft: "0px",
                   }}
                 >
                   <img
                     src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
                     alt="Hare Krishna Medical"
                     className="img-fluid"
-                    style={{ maxHeight: "300px" }}
+                    style={{
+                      maxHeight: "400px",
+                      filter: "brightness(1.1) contrast(1.2)",
+                    }}
                   />
                 </div>
               </div>
