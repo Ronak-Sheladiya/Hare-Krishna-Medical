@@ -13,6 +13,8 @@ import {
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import ProfessionalInvoice from "../../components/common/ProfessionalInvoice";
+import OfficialInvoiceDesign from "../../components/common/OfficialInvoiceDesign";
+import QRCode from "qrcode";
 
 const AdminOrders = () => {
   const navigate = useNavigate();
@@ -20,6 +22,7 @@ const AdminOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [invoiceForModal, setInvoiceForModal] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
