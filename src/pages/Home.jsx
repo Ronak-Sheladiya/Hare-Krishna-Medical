@@ -95,7 +95,8 @@ const Home = () => {
       <section
         className="hero-section"
         style={{
-          background: "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)",
+          background:
+            "linear-gradient(135deg, #e9ecef 0%, #f8f9fa 50%, #ffffff 100%)",
           paddingTop: "60px",
           paddingBottom: "80px",
           position: "relative",
@@ -109,13 +110,13 @@ const Home = () => {
             right: 0,
             bottom: 0,
             background:
-              "repeating-linear-gradient(45deg, transparent, transparent 100px, rgba(230, 57, 70, 0.02) 100px, rgba(230, 57, 70, 0.02) 200px)",
+              "repeating-linear-gradient(45deg, transparent, transparent 100px, rgba(230, 57, 70, 0.05) 100px, rgba(230, 57, 70, 0.05) 200px)",
           }}
         ></div>
 
         <Container style={{ position: "relative", zIndex: 2 }}>
           <Row className="align-items-center">
-            <Col lg={6} className="mb-4">
+            <Col lg={7} className="mb-4" style={{ paddingRight: "2rem" }}>
               <div className="hero-content">
                 <h1
                   style={{
