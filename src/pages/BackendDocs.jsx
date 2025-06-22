@@ -368,7 +368,75 @@ CORS Configuration: cors middleware
 Environment Variables: dotenv
 API Security: Rate limiting, request validation
 
-10. ERROR HANDLING
+10. QR CODE ENHANCEMENT & INVOICE OPTIMIZATION
+==============================================
+
+QR Code Generation (Enhanced):
+{
+  width: 180,           // Increased from 120px for better mobile scanning
+  margin: 2,
+  color: {
+    dark: "#1a202c",
+    light: "#ffffff"
+  },
+  errorCorrectionLevel: "M",
+  data: {
+    type: "invoice_verification",
+    invoice_id: String,
+    order_id: String,
+    customer_name: String,
+    total_amount: String,
+    invoice_date: String,
+    payment_status: String,
+    verify_url: String,
+    company: "Hare Krishna Medical",
+    location: "Surat, Gujarat, India",
+    phone: "+91 76989 13354",
+    email: "harekrishnamedical@gmail.com",
+    generated_at: ISO_String
+  }
+}
+
+A4 Print Optimization:
+- Page margins: 10px (optimized for full A4 coverage)
+- Print dimensions: 287mm height (accounting for margins)
+- CSS @page rules for consistent printing
+- Enhanced QR code size: 140px x 140px in print view
+- Responsive layout for both screen and print media
+
+Invoice Verification Endpoint:
+GET /api/invoice/verify/:qrCode
+- Decodes QR code data
+- Validates invoice authenticity
+- Returns invoice details and verification status
+- Prevents fraudulent invoice creation
+
+11. USER GUIDE SYSTEM IMPLEMENTATION
+=====================================
+
+Frontend User Guide Features:
+- Interactive navigation with smooth scrolling
+- Section-based content organization
+- Responsive design matching brand aesthetics
+- Step-by-step tutorials with visual guides
+- FAQ system with collapsible sections
+- Quick action buttons for common tasks
+
+Guide Sections:
+1. Getting Started (Account creation, Product browsing, Cart management, Order placement)
+2. Shopping Guide (Product search, Details, Cart, Checkout)
+3. Account Management (Profile, Order history, Notifications, Wishlist)
+4. Order Tracking (Status explanations, Delivery updates, Issue resolution)
+5. Invoices & QR Codes (Digital access, QR verification, Print optimization)
+6. Support & FAQ (Common questions, Contact info, Troubleshooting)
+
+API Endpoints for User Guide:
+GET /api/guide/sections        - Get all guide sections
+GET /api/guide/search/:query   - Search guide content
+POST /api/guide/feedback       - Submit guide feedback
+GET /api/guide/analytics       - Track guide usage
+
+12. ERROR HANDLING
 =================
 
 Global Error Handler:
