@@ -53,15 +53,6 @@ const Cart = () => {
   if (items.length === 0) {
     return (
       <div className="fade-in">
-        <section className="medical-breadcrumb">
-          <Container>
-            <Breadcrumb>
-              <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-              <Breadcrumb.Item active>Shopping Cart</Breadcrumb.Item>
-            </Breadcrumb>
-          </Container>
-        </section>
-
         <section className="section-padding">
           <Container>
             <Row className="justify-content-center">
