@@ -402,8 +402,8 @@ const UserInvoices = () => {
 
     // Use React to render the component to HTML string
     const { createRoot } = await import("react-dom/client");
-    const ProfessionalInvoice = (
-      await import("../../components/common/ProfessionalInvoice.jsx")
+    const OfficialInvoiceDesign = (
+      await import("../../components/common/OfficialInvoiceDesign.jsx")
     ).default;
 
     const root = createRoot(tempDiv);

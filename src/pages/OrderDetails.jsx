@@ -216,9 +216,9 @@ const OrderDetails = () => {
       tempDiv.style.backgroundColor = "white";
       document.body.appendChild(tempDiv);
 
-      // Import and render ProfessionalInvoice component
-      const ProfessionalInvoice = (
-        await import("../components/common/ProfessionalInvoice.jsx")
+      // Import and render OfficialInvoiceDesign component
+      const OfficialInvoiceDesign = (
+        await import("../components/common/OfficialInvoiceDesign.jsx")
       ).default;
       const React = (await import("react")).default;
       const { createRoot } = await import("react-dom/client");
