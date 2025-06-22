@@ -172,6 +172,39 @@ Messages Collection:
   repliedAt: Date,
   priority: String (Low, Medium, High),
   status: String (Open, In Progress, Resolved),
+  emailSent: Boolean (default: false),
+  emailSentAt: Date,
+  adminEmail: String, // Email from which reply was sent
+  createdAt: Date,
+  updatedAt: Date
+}
+
+Sessions Collection:
+{
+  _id: ObjectId,
+  userId: ObjectId (ref: Users),
+  sessionToken: String (unique),
+  deviceInfo: String,
+  ipAddress: String,
+  isActive: Boolean (default: true),
+  expiresAt: Date,
+  createdAt: Date,
+  lastActivity: Date
+}
+
+Invoices Collection:
+{
+  _id: ObjectId,
+  invoiceId: String (unique, secure),
+  orderId: ObjectId (ref: Orders),
+  userId: ObjectId (ref: Users),
+  invoiceData: Object, // Encrypted invoice data
+  qrCode: String, // QR code data
+  issuedAt: Date,
+  isValid: Boolean (default: true),
+  accessCount: Number (default: 0),
+  lastAccessed: Date,
+  securityHash: String, // Security validation hash
   createdAt: Date,
   updatedAt: Date
 }
@@ -707,7 +740,7 @@ This documentation provides a comprehensive guide for implementing the backend s
 ├── routes/
 │   ├── auth.js                         # Authentication routes
 │   ├── products.js                     # Product routes
-���   ├── orders.js                       # Order routes
+│   ├── orders.js                       # Order routes
 │   ├── messages.js                     # Message routes
 │   └── users.js                        # User routes
 ├── utils/
