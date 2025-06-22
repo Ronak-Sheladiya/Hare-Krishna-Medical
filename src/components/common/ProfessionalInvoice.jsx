@@ -126,11 +126,12 @@ const ProfessionalInvoice = ({
     },
     customerBox: {
       flex: "1",
-      background: "#f8f9fa",
-      border: "3px solid #ffffff",
-      borderRadius: "12px",
+      background: "linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%)",
+      border: "1px solid #e2e8f0",
+      borderRadius: "16px",
       padding: "20mm",
-      boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+      boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
+      position: "relative",
     },
     customerTitle: {
       fontSize: "16px",
