@@ -102,11 +102,13 @@ const GlobalSecurity = () => {
       return false;
     };
 
-    // Disable text selection (except on invoice and contact pages)
+    // Disable text selection (except on invoice, contact, admin, and user pages)
     const handleSelectStart = (e) => {
       if (
         window.location.pathname.includes("invoice") ||
-        window.location.pathname.includes("contact")
+        window.location.pathname.includes("contact") ||
+        window.location.pathname.includes("/admin/") ||
+        window.location.pathname.includes("/user/")
       ) {
         return true; // Allow selection
       }
@@ -161,10 +163,13 @@ const GlobalSecurity = () => {
         user-select: text !important;
       }
 
-      /* Allow text selection on contact and invoice pages */
+      /* Allow text selection on contact, invoice, admin, and user pages */
       .contact-page-content, .contact-page-content *,
       .invoice-container, .invoice-container *,
-      [data-page="contact"] *, [data-page="invoice"] * {
+      .admin-page-content, .admin-page-content *,
+      .user-page-content, .user-page-content *,
+      [data-page="contact"] *, [data-page="invoice"] *,
+      [data-page="admin"] *, [data-page="user"] * {
         -webkit-user-select: text !important;
         -moz-user-select: text !important;
         -ms-user-select: text !important;
@@ -179,6 +184,28 @@ const GlobalSecurity = () => {
 
       .contact-page-content ::-moz-selection {
         background: #e63946 !important;
+        color: white !important;
+      }
+
+      /* Blue selection theme for admin pages */
+      .admin-page-content ::selection {
+        background: #3182ce !important;
+        color: white !important;
+      }
+
+      .admin-page-content ::-moz-selection {
+        background: #3182ce !important;
+        color: white !important;
+      }
+
+      /* Green selection theme for user pages */
+      .user-page-content ::selection {
+        background: #38a169 !important;
+        color: white !important;
+      }
+
+      .user-page-content ::-moz-selection {
+        background: #38a169 !important;
         color: white !important;
       }
 
