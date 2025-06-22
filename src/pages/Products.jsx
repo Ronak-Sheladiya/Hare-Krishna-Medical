@@ -166,16 +166,6 @@ const Products = () => {
 
   return (
     <div className="fade-in">
-      {/* Breadcrumb */}
-      <section className="medical-breadcrumb">
-        <Container>
-          <Breadcrumb>
-            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-            <Breadcrumb.Item active>Products</Breadcrumb.Item>
-          </Breadcrumb>
-        </Container>
-      </section>
-
       {/* Page Header */}
       <section className="section-padding-sm">
         <Container>
