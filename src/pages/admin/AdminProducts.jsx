@@ -103,6 +103,40 @@ const AdminProducts = () => {
   };
 
   const handleAddProduct = () => {
+    // Comprehensive validation
+    const errors = {};
+
+    if (!formData.name.trim()) {
+      errors.name = "Product name is required";
+    }
+
+    if (!formData.company.trim()) {
+      errors.company = "Company name is required";
+    }
+
+    if (!formData.description.trim()) {
+      errors.description = "Description is required";
+    }
+
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      errors.price = "Valid price is required (must be greater than 0)";
+    }
+
+    if (!formData.stock || parseInt(formData.stock) < 0) {
+      errors.stock = "Valid stock quantity is required (cannot be negative)";
+    }
+
+    if (!formData.category) {
+      errors.category = "Category selection is required";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      // Show validation errors
+      const errorMessages = Object.values(errors).join("\n");
+      alert(`Please fix the following errors:\n\n${errorMessages}`);
+      return;
+    }
+
     const newProduct = {
       id: Date.now(),
       ...formData,
