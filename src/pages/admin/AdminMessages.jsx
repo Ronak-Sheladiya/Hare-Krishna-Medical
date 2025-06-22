@@ -109,7 +109,7 @@ const AdminMessages = () => {
         replyToMessage({
           messageId: selectedMessage.id,
           reply: replyText,
-          repliedAt: new Date(),
+          repliedAt: new Date().toISOString(),
         }),
       );
 
