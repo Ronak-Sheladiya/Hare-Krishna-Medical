@@ -91,7 +91,12 @@ const Login = () => {
           role: 1, // Admin role
           profileImage: null,
         };
-        dispatch(loginSuccess(adminUser));
+        dispatch(
+          loginSuccess({
+            user: adminUser,
+            rememberMe: formData.rememberMe,
+          }),
+        );
         // Redirect to intended URL or default admin dashboard
         navigate(from || "/admin/dashboard", { replace: true });
         return;
