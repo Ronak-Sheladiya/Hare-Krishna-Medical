@@ -15,12 +15,8 @@ const InvoiceView = () => {
   const [qrCode, setQrCode] = useState("");
   const [showAlert, setShowAlert] = useState(false);
 
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
-    return (
-      <Navigate to="/login" state={{ from: `/invoice/${orderId}` }} replace />
-    );
-  }
+  // Remove authentication check to allow QR verification by anyone
+  // Anyone can verify invoice by scanning QR without login
 
   // Mock invoice data - in real app, this would be fetched from API
   useEffect(() => {
@@ -180,7 +176,7 @@ const InvoiceView = () => {
       const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `Invoice-${invoice.invoiceId}.pdf`;
+      link.download = `Official_Invoice_${invoice.invoiceId}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
