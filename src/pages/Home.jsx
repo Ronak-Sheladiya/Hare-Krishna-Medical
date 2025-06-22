@@ -262,6 +262,17 @@ const Home = () => {
                   borderRadius: "8px",
                   padding: "12px 24px",
                   fontWeight: "600",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.background = "#343a40";
+                  e.target.style.borderColor = "#343a40";
+                  e.target.style.color = "white";
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.background = "transparent";
+                  e.target.style.borderColor = "#e63946";
+                  e.target.style.color = "#e63946";
                 }}
               >
                 View All Products
