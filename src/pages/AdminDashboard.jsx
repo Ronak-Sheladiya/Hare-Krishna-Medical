@@ -15,6 +15,8 @@ import { useSelector } from "react-redux";
 
 const AdminDashboard = () => {
   const { unreadCount } = useSelector((state) => state.messages);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   // Mock data for admin dashboard
   const dashboardStats = {
