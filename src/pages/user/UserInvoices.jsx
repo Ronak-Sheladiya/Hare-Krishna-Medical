@@ -97,6 +97,14 @@ const UserInvoices = () => {
     window.open(`/invoice/${invoice.orderId}`, "_blank");
   };
 
+  const handlePrintInvoice = (invoice) => {
+    // Open invoice in new window and print
+    const printWindow = window.open(`/invoice/${invoice.orderId}`, "_blank");
+    printWindow.onload = () => {
+      printWindow.print();
+    };
+  };
+
   const getStatusBadge = (status) => {
     switch (status) {
       case "Paid":
@@ -480,9 +488,19 @@ const UserInvoices = () => {
                               variant="outline-primary"
                               onClick={() => handleDownloadPDF(invoice)}
                               className="btn-medical-outline"
+                              title="Download PDF"
                             >
                               <i className="bi bi-download me-1"></i>
                               PDF
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline-success"
+                              onClick={() => handlePrintInvoice(invoice)}
+                              className="btn-medical-outline"
+                              title="Print Invoice"
+                            >
+                              <i className="bi bi-printer"></i>
                             </Button>
                             <Button
                               size="sm"
@@ -490,6 +508,7 @@ const UserInvoices = () => {
                               as={Link}
                               to={`/invoice/${invoice.orderId}`}
                               className="btn-medical-outline"
+                              title="View Invoice"
                             >
                               <i className="bi bi-eye"></i>
                             </Button>

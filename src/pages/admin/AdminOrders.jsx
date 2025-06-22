@@ -435,6 +435,12 @@ const AdminOrders = () => {
                                     size="sm"
                                     variant="outline-success"
                                     title="View Invoice"
+                                    onClick={() =>
+                                      window.open(
+                                        `/invoice/${order.orderId}`,
+                                        "_blank",
+                                      )
+                                    }
                                   >
                                     <i className="bi bi-receipt"></i>
                                   </Button>
@@ -442,6 +448,15 @@ const AdminOrders = () => {
                                     size="sm"
                                     variant="outline-info"
                                     title="Print"
+                                    onClick={() => {
+                                      const printWindow = window.open(
+                                        `/invoice/${order.orderId}`,
+                                        "_blank",
+                                      );
+                                      printWindow.onload = () => {
+                                        printWindow.print();
+                                      };
+                                    }}
                                   >
                                     <i className="bi bi-printer"></i>
                                   </Button>

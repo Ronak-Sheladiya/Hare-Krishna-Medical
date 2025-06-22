@@ -25,6 +25,7 @@ const AdminProducts = () => {
     name: "",
     company: "",
     price: "",
+    originalPrice: "",
     stock: "",
     category: "",
     description: "",
@@ -41,11 +42,15 @@ const AdminProducts = () => {
       name: "Paracetamol Tablets 500mg",
       company: "Hare Krishna Pharma",
       price: 25.99,
+      originalPrice: 30.99,
       stock: 150,
       category: "Pain Relief",
       status: "Active",
       images: ["https://via.placeholder.com/150"],
       description: "Effective pain relief and fever reducer",
+      benefits: "Quick pain relief\nReduces fever\nGentle on stomach",
+      usage: "Adults: Take 1-2 tablets every 4-6 hours",
+      weight: "50 tablets (500mg each)",
       lastUpdated: "2024-01-15",
     },
     {
@@ -53,11 +58,15 @@ const AdminProducts = () => {
       name: "Vitamin D3 Capsules",
       company: "Health Plus",
       price: 45.5,
+      originalPrice: 50.0,
       stock: 5,
       category: "Vitamins",
       status: "Low Stock",
       images: ["https://via.placeholder.com/150"],
       description: "Essential vitamin for bone health",
+      benefits: "Bone health\nImmune support\nMuscle function",
+      usage: "Take 1 capsule daily with food",
+      weight: "60 capsules (1000 IU each)",
       lastUpdated: "2024-01-14",
     },
     {
@@ -65,11 +74,15 @@ const AdminProducts = () => {
       name: "Cough Syrup",
       company: "Wellness Care",
       price: 35.75,
+      originalPrice: 40.0,
       stock: 0,
       category: "Cough & Cold",
       status: "Out of Stock",
       images: ["https://via.placeholder.com/150"],
       description: "Natural cough relief formula",
+      benefits: "Soothes throat\nReduces cough\nNatural ingredients",
+      usage: "Adults: 2 teaspoons every 6 hours",
+      weight: "100ml bottle",
       lastUpdated: "2024-01-13",
     },
   ];
@@ -129,6 +142,10 @@ const AdminProducts = () => {
       errors.category = "Category selection is required";
     }
 
+    if (!formData.weight.trim()) {
+      errors.weight = "Weight is required";
+    }
+
     if (Object.keys(errors).length > 0) {
       // Show validation errors
       const errorMessages = Object.values(errors).join("\n");
@@ -140,6 +157,9 @@ const AdminProducts = () => {
       id: Date.now(),
       ...formData,
       price: parseFloat(formData.price),
+      originalPrice: formData.originalPrice
+        ? parseFloat(formData.originalPrice)
+        : null,
       stock: parseInt(formData.stock),
       status: parseInt(formData.stock) > 0 ? "Active" : "Out of Stock",
       lastUpdated: new Date().toISOString().split("T")[0],
@@ -151,6 +171,7 @@ const AdminProducts = () => {
       name: "",
       company: "",
       price: "",
+      originalPrice: "",
       stock: "",
       category: "",
       description: "",
@@ -161,6 +182,80 @@ const AdminProducts = () => {
     });
     setShowAddModal(false);
     alert("Product added successfully!");
+  };
+
+  const handleEditProduct = () => {
+    // Same validation as add product
+    const errors = {};
+
+    if (!formData.name.trim()) {
+      errors.name = "Product name is required";
+    }
+
+    if (!formData.company.trim()) {
+      errors.company = "Company name is required";
+    }
+
+    if (!formData.description.trim()) {
+      errors.description = "Description is required";
+    }
+
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      errors.price = "Valid price is required (must be greater than 0)";
+    }
+
+    if (!formData.stock || parseInt(formData.stock) < 0) {
+      errors.stock = "Valid stock quantity is required (cannot be negative)";
+    }
+
+    if (!formData.category) {
+      errors.category = "Category selection is required";
+    }
+
+    if (!formData.weight.trim()) {
+      errors.weight = "Weight is required";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      const errorMessages = Object.values(errors).join("\n");
+      alert(`Please fill the following required fields:\n\n${errorMessages}`);
+      return;
+    }
+
+    const updatedProduct = {
+      ...selectedProduct,
+      ...formData,
+      price: parseFloat(formData.price),
+      originalPrice: formData.originalPrice
+        ? parseFloat(formData.originalPrice)
+        : null,
+      stock: parseInt(formData.stock),
+      status: parseInt(formData.stock) > 0 ? "Active" : "Out of Stock",
+      lastUpdated: new Date().toISOString().split("T")[0],
+    };
+
+    setProducts((prev) =>
+      prev.map((product) =>
+        product.id === selectedProduct.id ? updatedProduct : product,
+      ),
+    );
+
+    setShowEditModal(false);
+    setSelectedProduct(null);
+    setFormData({
+      name: "",
+      company: "",
+      price: "",
+      originalPrice: "",
+      stock: "",
+      category: "",
+      description: "",
+      benefits: "",
+      usage: "",
+      weight: "",
+      images: [],
+    });
+    alert("Product updated successfully!");
   };
 
   const getStatusBadge = (status, stock) => {
@@ -443,6 +538,12 @@ const AdminProducts = () => {
                                       borderColor: "#3182ce",
                                       color: "#3182ce",
                                     }}
+                                    onClick={() => {
+                                      setSelectedProduct(product);
+                                      setFormData(product);
+                                      setShowEditModal(true);
+                                    }}
+                                    title="Edit Product"
                                   >
                                     <i className="bi bi-pencil"></i>
                                   </Button>
@@ -453,10 +554,35 @@ const AdminProducts = () => {
                                       borderColor: "#0ea5e9",
                                       color: "#0ea5e9",
                                     }}
+                                    onClick={() =>
+                                      window.open(
+                                        `/products/${product.id}`,
+                                        "_blank",
+                                      )
+                                    }
+                                    title="View Product"
                                   >
                                     <i className="bi bi-eye"></i>
                                   </Button>
-                                  <Button size="sm" variant="outline-danger">
+                                  <Button
+                                    size="sm"
+                                    variant="outline-danger"
+                                    onClick={() => {
+                                      if (
+                                        window.confirm(
+                                          `Are you sure you want to delete ${product.name}?`,
+                                        )
+                                      ) {
+                                        setProducts((prev) =>
+                                          prev.filter(
+                                            (p) => p.id !== product.id,
+                                          ),
+                                        );
+                                        alert("Product deleted successfully!");
+                                      }
+                                    }}
+                                    title="Delete Product"
+                                  >
                                     <i className="bi bi-trash"></i>
                                   </Button>
                                 </div>
@@ -479,6 +605,7 @@ const AdminProducts = () => {
         show={showAddModal}
         onHide={() => setShowAddModal(false)}
         size="lg"
+        backdrop="static"
       >
         <Modal.Header
           closeButton
@@ -545,6 +672,19 @@ const AdminProducts = () => {
                 />
               </Col>
               <Col md={4} className="mb-3">
+                <Form.Label style={{ fontWeight: "600" }}>Weight *</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="weight"
+                  value={formData.weight}
+                  onChange={handleInputChange}
+                  placeholder="e.g., 50 tablets (500mg each)"
+                  style={{ borderRadius: "8px", padding: "12px" }}
+                />
+              </Col>
+            </Row>
+            <Row>
+              <Col md={6} className="mb-3">
                 <Form.Label style={{ fontWeight: "600" }}>
                   Category *
                 </Form.Label>
@@ -562,6 +702,20 @@ const AdminProducts = () => {
                   ))}
                 </Form.Select>
               </Col>
+              <Col md={6} className="mb-3">
+                <Form.Label style={{ fontWeight: "600" }}>
+                  Original Price
+                </Form.Label>
+                <Form.Control
+                  type="number"
+                  name="originalPrice"
+                  value={formData.originalPrice}
+                  onChange={handleInputChange}
+                  placeholder="0.00"
+                  step="0.01"
+                  style={{ borderRadius: "8px", padding: "12px" }}
+                />
+              </Col>
             </Row>
             <Form.Group className="mb-3">
               <Form.Label style={{ fontWeight: "600" }}>
@@ -574,6 +728,32 @@ const AdminProducts = () => {
                 value={formData.description}
                 onChange={handleInputChange}
                 placeholder="Enter product description"
+                style={{ borderRadius: "8px", padding: "12px" }}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: "600" }}>Benefits</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                name="benefits"
+                value={formData.benefits}
+                onChange={handleInputChange}
+                placeholder="Enter product benefits (one per line)"
+                style={{ borderRadius: "8px", padding: "12px" }}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: "600" }}>
+                Usage Instructions
+              </Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                name="usage"
+                value={formData.usage}
+                onChange={handleInputChange}
+                placeholder="Enter usage instructions"
                 style={{ borderRadius: "8px", padding: "12px" }}
               />
             </Form.Group>
@@ -596,6 +776,202 @@ const AdminProducts = () => {
           >
             <i className="bi bi-plus-circle me-2"></i>
             Add Product
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Edit Product Modal */}
+      <Modal
+        show={showEditModal}
+        onHide={() => setShowEditModal(false)}
+        size="lg"
+        backdrop="static"
+      >
+        <Modal.Header
+          closeButton
+          style={{
+            background: "linear-gradient(135deg, #e63946, #dc3545)",
+            color: "white",
+          }}
+        >
+          <Modal.Title>
+            <i className="bi bi-pencil-square me-2"></i>
+            Edit Product
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ padding: "30px" }}>
+          <Form>
+            <Row>
+              <Col md={6} className="mb-3">
+                <Form.Label style={{ fontWeight: "600" }}>
+                  Product Name *
+                </Form.Label>
+                <Form.Control
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Enter product name"
+                  style={{ borderRadius: "8px", padding: "12px" }}
+                />
+              </Col>
+              <Col md={6} className="mb-3">
+                <Form.Label style={{ fontWeight: "600" }}>Company *</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="company"
+                  value={formData.company}
+                  onChange={handleInputChange}
+                  placeholder="Enter company name"
+                  style={{ borderRadius: "8px", padding: "12px" }}
+                />
+              </Col>
+            </Row>
+            <Row>
+              <Col md={4} className="mb-3">
+                <Form.Label style={{ fontWeight: "600" }}>Price *</Form.Label>
+                <Form.Control
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  placeholder="0.00"
+                  step="0.01"
+                  style={{ borderRadius: "8px", padding: "12px" }}
+                />
+              </Col>
+              <Col md={4} className="mb-3">
+                <Form.Label style={{ fontWeight: "600" }}>Stock *</Form.Label>
+                <Form.Control
+                  type="number"
+                  name="stock"
+                  value={formData.stock}
+                  onChange={handleInputChange}
+                  placeholder="0"
+                  style={{ borderRadius: "8px", padding: "12px" }}
+                />
+              </Col>
+              <Col md={4} className="mb-3">
+                <Form.Label style={{ fontWeight: "600" }}>Weight *</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="weight"
+                  value={formData.weight}
+                  onChange={handleInputChange}
+                  placeholder="e.g., 50 tablets (500mg each)"
+                  style={{ borderRadius: "8px", padding: "12px" }}
+                />
+              </Col>
+            </Row>
+            <Row>
+              <Col md={6} className="mb-3">
+                <Form.Label style={{ fontWeight: "600" }}>
+                  Category *
+                </Form.Label>
+                <Form.Select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                  style={{ borderRadius: "8px", padding: "12px" }}
+                >
+                  <option value="">Select Category</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Col>
+              <Col md={6} className="mb-3">
+                <Form.Label style={{ fontWeight: "600" }}>
+                  Original Price
+                </Form.Label>
+                <Form.Control
+                  type="number"
+                  name="originalPrice"
+                  value={formData.originalPrice}
+                  onChange={handleInputChange}
+                  placeholder="0.00"
+                  step="0.01"
+                  style={{ borderRadius: "8px", padding: "12px" }}
+                />
+              </Col>
+            </Row>
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: "600" }}>
+                Description *
+              </Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="Enter product description"
+                style={{ borderRadius: "8px", padding: "12px" }}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: "600" }}>Benefits</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                name="benefits"
+                value={formData.benefits}
+                onChange={handleInputChange}
+                placeholder="Enter product benefits (one per line)"
+                style={{ borderRadius: "8px", padding: "12px" }}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: "600" }}>
+                Usage Instructions
+              </Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                name="usage"
+                value={formData.usage}
+                onChange={handleInputChange}
+                placeholder="Enter usage instructions"
+                style={{ borderRadius: "8px", padding: "12px" }}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="outline-secondary"
+            onClick={() => {
+              setShowEditModal(false);
+              setSelectedProduct(null);
+              setFormData({
+                name: "",
+                company: "",
+                price: "",
+                originalPrice: "",
+                stock: "",
+                category: "",
+                description: "",
+                benefits: "",
+                usage: "",
+                weight: "",
+                images: [],
+              });
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleEditProduct}
+            style={{
+              background: "#e63946",
+              border: "none",
+              padding: "8px 20px",
+            }}
+          >
+            <i className="bi bi-save me-2"></i>
+            Update Product
           </Button>
         </Modal.Footer>
       </Modal>

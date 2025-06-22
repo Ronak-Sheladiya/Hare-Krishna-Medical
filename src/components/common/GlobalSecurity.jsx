@@ -48,16 +48,30 @@ const GlobalSecurity = () => {
         return false;
       }
 
-      // Ctrl+A - Select All
-      if (e.ctrlKey && e.keyCode === 65) {
+      // Ctrl+A - Select All (allow on contact, invoice, admin, and user pages)
+      if (
+        e.ctrlKey &&
+        e.keyCode === 65 &&
+        !window.location.pathname.includes("contact") &&
+        !window.location.pathname.includes("invoice") &&
+        !window.location.pathname.includes("/admin") &&
+        !window.location.pathname.includes("/user")
+      ) {
         e.preventDefault();
         setWarningType("Select all");
         setShowWarning(true);
         return false;
       }
 
-      // Ctrl+C - Copy
-      if (e.ctrlKey && e.keyCode === 67) {
+      // Ctrl+C - Copy (allow on contact, invoice, admin, and user pages)
+      if (
+        e.ctrlKey &&
+        e.keyCode === 67 &&
+        !window.location.pathname.includes("contact") &&
+        !window.location.pathname.includes("invoice") &&
+        !window.location.pathname.includes("/admin") &&
+        !window.location.pathname.includes("/user")
+      ) {
         e.preventDefault();
         setWarningType("Copy");
         setShowWarning(true);
@@ -171,7 +185,8 @@ const GlobalSecurity = () => {
       [data-page="contact"] *, [data-page="invoice"] *,
       [data-page="admin"] *, [data-page="user"] *,
       [class*="admin-"] *, [class*="user-"] *,
-      body[data-path*="/admin"] *, body[data-path*="/user"] * {
+      body[data-path*="/admin"] *, body[data-path*="/user"] *,
+      .contact-page-content a, .contact-page-content button, .contact-page-content span, .contact-page-content div, .contact-page-content p, .contact-page-content h1, .contact-page-content h2, .contact-page-content h3, .contact-page-content h4, .contact-page-content h5, .contact-page-content h6, .contact-page-content li {
         -webkit-user-select: text !important;
         -moz-user-select: text !important;
         -ms-user-select: text !important;

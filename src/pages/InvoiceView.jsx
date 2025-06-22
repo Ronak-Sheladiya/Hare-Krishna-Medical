@@ -142,8 +142,16 @@ const InvoiceView = () => {
         pdf.addImage(imgData, "PNG", margin, margin, imgWidth, imgHeight);
       }
 
-      // Directly download without showing print dialog
-      pdf.save(`Invoice-${invoice.invoiceId}.pdf`);
+      // Create a temporary link and click it to download directly
+      const pdfBlob = pdf.output("blob");
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Invoice-${invoice.invoiceId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
 
       // Show elements again
       noPrintElements.forEach((el) => (el.style.display = ""));

@@ -30,16 +30,21 @@ const ProfessionalInvoice = ({
     const generateQR = async () => {
       try {
         setIsLoading(true);
+        const verifyUrl = `${window.location.origin}/invoice/${orderId}`;
         const qrData = {
+          type: "invoice_verification",
           invoice_id: invoiceId,
           order_id: orderId,
-          customer: customerDetails.fullName,
-          amount: total,
-          date: orderDate,
-          status: status,
-          verify_url: `https://harekrishan.medical/verify/${invoiceId}`,
+          customer_name: customerDetails.fullName,
+          total_amount: `₹${total.toFixed(2)}`,
+          invoice_date: orderDate,
+          payment_status: status,
+          verify_url: verifyUrl,
           company: "Hare Krishna Medical",
+          location: "Surat, Gujarat, India",
           phone: "+91 76989 13354",
+          email: "harekrishnamedical@gmail.com",
+          generated_at: new Date().toISOString(),
         };
 
         const qrText = JSON.stringify(qrData);
@@ -82,13 +87,13 @@ const ProfessionalInvoice = ({
         size: A4;
         margin: 20px;
       }
-      
+
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
-      
+
       body {
         font-family: 'Arial', sans-serif;
         font-size: 12px;
@@ -98,7 +103,7 @@ const ProfessionalInvoice = ({
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
-      
+
       .simple-invoice {
         width: 100%;
         max-width: 210mm;
@@ -107,7 +112,7 @@ const ProfessionalInvoice = ({
         background: white;
         padding: 20px;
       }
-      
+
       /* Clean Header */
       .invoice-header {
         background: #e63946;
@@ -115,64 +120,64 @@ const ProfessionalInvoice = ({
         padding: 30px;
         color: white;
       }
-      
+
       .header-flex {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
       }
-      
+
       .company-info h1 {
         font-size: 24px;
         font-weight: bold;
         margin-bottom: 5px;
       }
-      
+
       .company-tagline {
         font-size: 12px;
         opacity: 0.9;
         margin-bottom: 15px;
       }
-      
+
       .company-details {
         font-size: 11px;
         line-height: 1.5;
       }
-      
+
       .invoice-title-section {
         text-align: right;
       }
-      
+
       .invoice-title {
         font-size: 36px;
         font-weight: bold;
         margin-bottom: 15px;
       }
-      
+
       .invoice-meta {
         background: rgba(255,255,255,0.1);
         padding: 15px;
         border-radius: 5px;
         font-size: 11px;
       }
-      
+
       .meta-row {
         display: flex;
         justify-content: space-between;
         margin-bottom: 5px;
       }
-      
+
       .meta-row:last-child {
         margin-bottom: 0;
       }
-      
+
       /* Customer Section */
       .customer-section {
         display: flex;
         gap: 20px;
         margin-bottom: 30px;
       }
-      
+
       .customer-block {
         flex: 1;
         padding: 20px;
@@ -180,7 +185,7 @@ const ProfessionalInvoice = ({
         border-radius: 5px;
         background: #f9f9f9;
       }
-      
+
       .customer-title {
         font-size: 14px;
         font-weight: bold;
@@ -188,27 +193,27 @@ const ProfessionalInvoice = ({
         margin-bottom: 10px;
         text-transform: uppercase;
       }
-      
+
       .customer-name {
         font-size: 16px;
         font-weight: bold;
         margin-bottom: 10px;
       }
-      
+
       .customer-info {
         font-size: 11px;
         line-height: 1.5;
       }
-      
+
       .customer-info div {
         margin-bottom: 3px;
       }
-      
+
       /* Items Table */
       .items-section {
         margin-bottom: 30px;
       }
-      
+
       .section-title {
         font-size: 16px;
         font-weight: bold;
@@ -217,13 +222,13 @@ const ProfessionalInvoice = ({
         border-bottom: 2px solid #e63946;
         color: #333;
       }
-      
+
       .items-table {
         width: 100%;
         border-collapse: collapse;
         margin-bottom: 15px;
       }
-      
+
       .items-table th {
         background: #333;
         color: white;
@@ -233,65 +238,65 @@ const ProfessionalInvoice = ({
         text-transform: uppercase;
         border: 1px solid #333;
       }
-      
+
       .items-table td {
         padding: 10px 8px;
         border: 1px solid #ddd;
         font-size: 11px;
       }
-      
+
       .items-table tr:nth-child(even) {
         background: #f9f9f9;
       }
-      
+
       .item-name {
         font-weight: bold;
         margin-bottom: 2px;
       }
-      
+
       .item-company {
         font-size: 10px;
         color: #666;
       }
-      
+
       .text-center { text-align: center; }
       .text-right { text-align: right; }
       .text-left { text-align: left; }
-      
+
       /* Totals Section */
       .totals-section {
         float: right;
         width: 300px;
         margin-bottom: 30px;
       }
-      
+
       .totals-table {
         width: 100%;
         border-collapse: collapse;
       }
-      
+
       .total-row td {
         padding: 8px 12px;
         border: 1px solid #ddd;
         font-size: 12px;
       }
-      
+
       .total-row.grand-total td {
         background: #e63946;
         color: white;
         font-weight: bold;
         font-size: 14px;
       }
-      
+
       .total-label {
         font-weight: 600;
       }
-      
+
       .total-value {
         text-align: right;
         font-weight: bold;
       }
-      
+
       /* Footer */
       .footer-section {
         clear: both;
@@ -300,30 +305,30 @@ const ProfessionalInvoice = ({
         padding-top: 20px;
         border-top: 1px solid #ddd;
       }
-      
+
       .terms-section {
         flex: 2;
       }
-      
+
       .footer-title {
         font-size: 14px;
         font-weight: bold;
         margin-bottom: 10px;
         color: #e63946;
       }
-      
+
       .terms-list {
         font-size: 10px;
         line-height: 1.5;
         list-style: none;
       }
-      
+
       .terms-list li {
         margin-bottom: 4px;
         position: relative;
         padding-left: 12px;
       }
-      
+
       .terms-list li::before {
         content: '•';
         color: #e63946;
@@ -331,7 +336,7 @@ const ProfessionalInvoice = ({
         left: 0;
         font-weight: bold;
       }
-      
+
       .contact-info {
         background: #f9f9f9;
         padding: 10px;
@@ -340,19 +345,19 @@ const ProfessionalInvoice = ({
         font-size: 10px;
         line-height: 1.4;
       }
-      
+
       .qr-section {
         flex: 1;
         text-align: center;
       }
-      
+
       .qr-title {
         font-size: 12px;
         font-weight: bold;
         margin-bottom: 10px;
         color: #333;
       }
-      
+
       .qr-code {
         width: 100px;
         height: 100px;
@@ -360,7 +365,7 @@ const ProfessionalInvoice = ({
         border-radius: 5px;
         margin-bottom: 5px;
       }
-      
+
       .qr-placeholder {
         width: 100px;
         height: 100px;
@@ -373,13 +378,13 @@ const ProfessionalInvoice = ({
         font-size: 10px;
         color: #666;
       }
-      
+
       .qr-description {
         font-size: 9px;
         color: #666;
         line-height: 1.3;
       }
-      
+
       /* Bottom Note */
       .bottom-note {
         text-align: center;
@@ -390,24 +395,24 @@ const ProfessionalInvoice = ({
         font-size: 10px;
         color: #666;
       }
-      
+
       .highlight {
         font-weight: bold;
         color: #333;
       }
-      
+
       /* Print Styles */
       @media print {
         body {
           margin: 0;
           padding: 0;
         }
-        
+
         .simple-invoice {
           box-shadow: none;
           border: none;
         }
-        
+
         .no-print {
           display: none !important;
         }
@@ -438,7 +443,7 @@ const ProfessionalInvoice = ({
                   📧 harekrishnamedical@gmail.com
                 </div>
               </div>
-              
+
               <div class="invoice-title-section">
                 <div class="invoice-title">INVOICE</div>
                 <div class="invoice-meta">
@@ -480,7 +485,7 @@ const ProfessionalInvoice = ({
                 <div><strong>PIN Code:</strong> ${customerDetails.pincode}</div>
               </div>
             </div>
-            
+
             <div class="customer-block">
               <div class="customer-title">🚚 Ship To</div>
               <div class="customer-name">${customerDetails.fullName}</div>
@@ -562,7 +567,7 @@ const ProfessionalInvoice = ({
                 <li>All prices are inclusive of applicable taxes</li>
                 <li>Keep this invoice safe for warranty and return purposes</li>
               </ul>
-              
+
               <div class="contact-info">
                 <strong>📞 Customer Support:</strong><br>
                 Email: harekrishnamedical@gmail.com<br>
@@ -570,7 +575,7 @@ const ProfessionalInvoice = ({
                 Hours: Monday-Saturday, 9:00 AM - 8:00 PM
               </div>
             </div>
-            
+
             <div class="qr-section">
               <div class="qr-title">📱 Verification QR</div>
               ${
@@ -579,9 +584,9 @@ const ProfessionalInvoice = ({
                   : '<div class="qr-placeholder">QR Code</div>'
               }
               <div class="qr-description">
-                Scan to verify invoice<br>
-                authenticity and access<br>
-                digital copy online
+                Scan or click to verify<br>
+                invoice authenticity<br>
+                and access digital copy
               </div>
             </div>
           </div>
