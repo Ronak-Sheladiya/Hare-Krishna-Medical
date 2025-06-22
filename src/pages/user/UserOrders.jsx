@@ -139,8 +139,53 @@ const UserOrders = () => {
   const statusCounts = getStatusCounts();
 
   return (
-    <div className="fade-in">
-      <section className="section-padding-sm">
+    <div className="fade-in user-page-content" data-page="user">
+      {/* Hero Section - User Theme */}
+      <section
+        style={{
+          background: "linear-gradient(135deg, #38a169 0%, #2f855a 100%)",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+          color: "white",
+        }}
+      >
+        <Container>
+          <Row className="text-center">
+            <Col lg={12}>
+              <h1
+                style={{
+                  fontSize: "3rem",
+                  fontWeight: "800",
+                  marginBottom: "20px",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                }}
+              >
+                My Orders
+              </h1>
+              <p
+                style={{
+                  fontSize: "1.2rem",
+                  opacity: "0.9",
+                  maxWidth: "600px",
+                  margin: "0 auto",
+                }}
+              >
+                Track and manage your medical product orders
+              </p>
+            </Col>
+          </Row>
+        </Container>
+      </section>
+
+      {/* Orders Content */}
+      <section
+        style={{
+          background: "#f8f9fa",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+          minHeight: "60vh",
+        }}
+      >
         <Container>
           {/* Header */}
           <Row className="mb-4">
