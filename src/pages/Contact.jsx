@@ -229,7 +229,7 @@ const Contact = () => {
                     if (icon) icon.style.color = "white";
                   }}
                 >
-                  <i className="bi bi-map me-2"></i>
+                  <i className="bi bi-map me-2" style={{ color: "white" }}></i>
                   View on Map
                 </Button>
               </Card>
