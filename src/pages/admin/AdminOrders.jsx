@@ -11,6 +11,7 @@ import {
   Form,
   InputGroup,
 } from "react-bootstrap";
+import ProfessionalInvoice from "../../components/common/ProfessionalInvoice";
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
