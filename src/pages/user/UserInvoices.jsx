@@ -15,8 +15,12 @@ import {
 } from "react-bootstrap";
 import { Link, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import {
+  viewInvoice,
+  printInvoice,
+  downloadInvoice,
+  createInvoiceData,
+} from "../../utils/invoiceUtils.js";
 
 const UserInvoices = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
@@ -398,8 +402,45 @@ const UserInvoices = () => {
     }
   };
 
-  const handleViewInvoice = (invoice) => {
-    window.open(`/invoice/${invoice.orderId}`, "_blank");
+  const handleViewInvoice = async (invoice) => {
+    try {
+      // Create basic invoice data for viewing
+      const invoiceData = {
+        invoiceId: invoice.id,
+        orderId: invoice.orderId,
+        orderDate: invoice.date,
+        orderTime: "14:30:25",
+        customerDetails: {
+          fullName: invoice.customerName,
+          email: "john.doe@example.com",
+          mobile: "+91 9876543210",
+          address: "123 Medical Street",
+          city: "Surat",
+          state: "Gujarat",
+          pincode: "395007",
+        },
+        items: [
+          {
+            id: 1,
+            name: "Medical Products",
+            company: "Various Brands",
+            quantity: invoice.items,
+            price: invoice.amount / invoice.items,
+          },
+        ],
+        subtotal: invoice.amount * 0.95,
+        shipping: 0,
+        total: invoice.amount,
+        paymentMethod: "Cash on Delivery",
+        paymentStatus: "Paid",
+        status: "Delivered",
+      };
+
+      await viewInvoice(invoiceData);
+    } catch (error) {
+      console.error("Error viewing invoice:", error);
+      alert("Error viewing invoice. Please try again.");
+    }
   };
 
   const getStatusBadge = (status) => {
