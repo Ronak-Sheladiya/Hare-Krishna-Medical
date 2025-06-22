@@ -171,15 +171,53 @@ const AdminOrders = () => {
   const statusCounts = getStatusCounts();
 
   return (
-    <div className="fade-in">
-      <section className="section-padding-sm">
+    <div className="fade-in admin-page-content" data-page="admin">
+      {/* Hero Section - About Us Red Theme */}
+      <section
+        style={{
+          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+          color: "white",
+        }}
+      >
         <Container>
-          {/* Header */}
-          <Row className="mb-4">
+          <Row className="text-center">
             <Col lg={12}>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h2>Order Management</h2>
+              <h1
+                style={{
+                  fontSize: "3rem",
+                  fontWeight: "800",
+                  marginBottom: "20px",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                }}
+              >
+                Manage Orders
+              </h1>
+              <p
+                style={{
+                  fontSize: "1.2rem",
+                  opacity: "0.9",
+                  maxWidth: "600px",
+                  margin: "0 auto",
+                }}
+              >
+                Track and manage customer orders and deliveries
+              </p>
+            </Col>
+          </Row>
+        </Container>
+      </section>
+
+      {/* Orders Management Content */}
+      <section
+        style={{
+          background: "#f8f9fa",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+          minHeight: "60vh",
+        }}
+      >
                   <p className="text-muted">
                     Monitor and manage customer orders
                   </p>
