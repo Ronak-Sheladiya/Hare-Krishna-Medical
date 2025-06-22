@@ -303,15 +303,33 @@ const AdminOrders = () => {
                           </small>
                         </td>
                         <td>
-                          <Button
-                            size="sm"
-                            variant="outline-primary"
-                            onClick={() => handleViewDetails(order)}
-                            className="btn-medical-outline"
-                          >
-                            <i className="bi bi-eye me-1"></i>
-                            View
-                          </Button>
+                          <div className="d-flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline-primary"
+                              onClick={() => handleViewDetails(order)}
+                              className="btn-medical-outline"
+                              title="View Order Details"
+                            >
+                              <i className="bi bi-eye"></i>
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline-success"
+                              onClick={() => handleViewInvoice(order)}
+                              title="View Invoice"
+                            >
+                              <i className="bi bi-receipt"></i>
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline-info"
+                              onClick={() => handleDownloadInvoice(order)}
+                              title="Download Invoice"
+                            >
+                              <i className="bi bi-download"></i>
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
