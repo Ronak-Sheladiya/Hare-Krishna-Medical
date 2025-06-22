@@ -87,6 +87,7 @@ const About = () => {
                 }}
               >
                 <div
+                  className="about-icon"
                   style={{
                     width: "80px",
                     height: "80px",
@@ -98,6 +99,7 @@ const About = () => {
                     margin: "0 auto 24px",
                     color: "white",
                     fontSize: "32px",
+                    transition: "all 0.3s ease",
                   }}
                 >
                   <i className="bi bi-heart-pulse-fill"></i>
