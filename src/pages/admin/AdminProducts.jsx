@@ -18,6 +18,7 @@ const AdminProducts = () => {
   const [products, setProducts] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
@@ -554,12 +555,10 @@ const AdminProducts = () => {
                                       borderColor: "#0ea5e9",
                                       color: "#0ea5e9",
                                     }}
-                                    onClick={() =>
-                                      window.open(
-                                        `/products/${product.id}`,
-                                        "_blank",
-                                      )
-                                    }
+                                    onClick={() => {
+                                      setSelectedProduct(product);
+                                      setShowViewModal(true);
+                                    }}
                                     title="View Product"
                                   >
                                     <i className="bi bi-eye"></i>
@@ -972,6 +971,298 @@ const AdminProducts = () => {
           >
             <i className="bi bi-save me-2"></i>
             Update Product
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* View Product Modal */}
+      <Modal
+        show={showViewModal}
+        onHide={() => setShowViewModal(false)}
+        size="xl"
+        backdrop="static"
+      >
+        <Modal.Header
+          closeButton
+          style={{
+            background: "linear-gradient(135deg, #e63946, #dc3545)",
+            color: "white",
+          }}
+        >
+          <Modal.Title>
+            <i className="bi bi-eye me-2"></i>
+            Product Details
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body
+          style={{ padding: "30px", maxHeight: "70vh", overflowY: "auto" }}
+        >
+          {selectedProduct && (
+            <div>
+              <Row>
+                <Col md={4} className="mb-4">
+                  <div style={{ textAlign: "center" }}>
+                    <img
+                      src={selectedProduct.images[0]}
+                      alt={selectedProduct.name}
+                      style={{
+                        width: "100%",
+                        maxWidth: "300px",
+                        height: "250px",
+                        objectFit: "cover",
+                        borderRadius: "15px",
+                        border: "3px solid #e63946",
+                        boxShadow: "0 8px 25px rgba(230, 57, 70, 0.2)",
+                      }}
+                    />
+                  </div>
+                </Col>
+                <Col md={8}>
+                  <div className="mb-4">
+                    <h2
+                      style={{
+                        color: "#333",
+                        fontWeight: "700",
+                        marginBottom: "10px",
+                      }}
+                    >
+                      {selectedProduct.name}
+                    </h2>
+                    <p
+                      style={{
+                        color: "#6c757d",
+                        fontSize: "16px",
+                        marginBottom: "20px",
+                      }}
+                    >
+                      by{" "}
+                      <strong style={{ color: "#e63946" }}>
+                        {selectedProduct.company}
+                      </strong>
+                    </p>
+                  </div>
+
+                  <Row className="mb-4">
+                    <Col md={6}>
+                      <div
+                        className="p-3"
+                        style={{
+                          background: "#f8f9fa",
+                          borderRadius: "10px",
+                          border: "2px solid #e9ecef",
+                        }}
+                      >
+                        <h6 style={{ color: "#e63946", marginBottom: "15px" }}>
+                          💰 Pricing
+                        </h6>
+                        <div className="d-flex align-items-center gap-3">
+                          <span
+                            style={{
+                              fontSize: "24px",
+                              fontWeight: "800",
+                              color: "#e63946",
+                            }}
+                          >
+                            ₹{selectedProduct.price.toFixed(2)}
+                          </span>
+                          {selectedProduct.originalPrice && (
+                            <span
+                              style={{
+                                fontSize: "18px",
+                                textDecoration: "line-through",
+                                color: "#6c757d",
+                              }}
+                            >
+                              ₹{selectedProduct.originalPrice.toFixed(2)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Col>
+                    <Col md={6}>
+                      <div
+                        className="p-3"
+                        style={{
+                          background: "#f8f9fa",
+                          borderRadius: "10px",
+                          border: "2px solid #e9ecef",
+                        }}
+                      >
+                        <h6 style={{ color: "#e63946", marginBottom: "15px" }}>
+                          📦 Stock Info
+                        </h6>
+                        <div>
+                          <span
+                            style={{
+                              fontSize: "20px",
+                              fontWeight: "700",
+                              color:
+                                selectedProduct.stock === 0
+                                  ? "#dc3545"
+                                  : selectedProduct.stock <= 10
+                                    ? "#f39c12"
+                                    : "#28a745",
+                            }}
+                          >
+                            {selectedProduct.stock} units
+                          </span>
+                          <div style={{ marginTop: "5px" }}>
+                            {selectedProduct.stock === 0 ? (
+                              <Badge bg="danger">Out of Stock</Badge>
+                            ) : selectedProduct.stock <= 10 ? (
+                              <Badge bg="warning">Low Stock</Badge>
+                            ) : (
+                              <Badge bg="success">In Stock</Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </Col>
+                  </Row>
+
+                  <Row className="mb-4">
+                    <Col md={6}>
+                      <div className="mb-3">
+                        <strong style={{ color: "#495057" }}>Category:</strong>
+                        <Badge
+                          bg="secondary"
+                          className="ms-2"
+                          style={{ fontSize: "12px" }}
+                        >
+                          {selectedProduct.category}
+                        </Badge>
+                      </div>
+                      <div className="mb-3">
+                        <strong style={{ color: "#495057" }}>
+                          Weight/Size:
+                        </strong>
+                        <span className="ms-2">{selectedProduct.weight}</span>
+                      </div>
+                    </Col>
+                    <Col md={6}>
+                      <div className="mb-3">
+                        <strong style={{ color: "#495057" }}>
+                          Last Updated:
+                        </strong>
+                        <span className="ms-2">
+                          {selectedProduct.lastUpdated}
+                        </span>
+                      </div>
+                      <div className="mb-3">
+                        <strong style={{ color: "#495057" }}>
+                          Product ID:
+                        </strong>
+                        <span className="ms-2">#{selectedProduct.id}</span>
+                      </div>
+                    </Col>
+                  </Row>
+                </Col>
+              </Row>
+
+              <Row className="mt-4">
+                <Col md={12}>
+                  <div className="mb-4">
+                    <h5 style={{ color: "#e63946", marginBottom: "15px" }}>
+                      📝 Description
+                    </h5>
+                    <p
+                      style={{
+                        color: "#495057",
+                        lineHeight: "1.6",
+                        fontSize: "14px",
+                      }}
+                    >
+                      {selectedProduct.description}
+                    </p>
+                  </div>
+
+                  {selectedProduct.benefits && (
+                    <div className="mb-4">
+                      <h5 style={{ color: "#e63946", marginBottom: "15px" }}>
+                        ✨ Benefits
+                      </h5>
+                      <div
+                        style={{
+                          background: "#f8f9fa",
+                          padding: "15px",
+                          borderRadius: "10px",
+                          border: "1px solid #e9ecef",
+                        }}
+                      >
+                        {selectedProduct.benefits
+                          .split("\n")
+                          .map((benefit, index) => (
+                            <div
+                              key={index}
+                              style={{
+                                marginBottom: "8px",
+                                color: "#495057",
+                                fontSize: "14px",
+                              }}
+                            >
+                              <i
+                                className="bi bi-check-circle-fill me-2"
+                                style={{ color: "#28a745" }}
+                              ></i>
+                              {benefit}
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedProduct.usage && (
+                    <div className="mb-4">
+                      <h5 style={{ color: "#e63946", marginBottom: "15px" }}>
+                        💊 Usage Instructions
+                      </h5>
+                      <div
+                        style={{
+                          background: "#fff3cd",
+                          padding: "15px",
+                          borderRadius: "10px",
+                          border: "1px solid #ffeaa7",
+                        }}
+                      >
+                        <p
+                          style={{
+                            color: "#856404",
+                            marginBottom: "0",
+                            fontSize: "14px",
+                            lineHeight: "1.6",
+                          }}
+                        >
+                          {selectedProduct.usage}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </Col>
+              </Row>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="outline-secondary"
+            onClick={() => setShowViewModal(false)}
+          >
+            Close
+          </Button>
+          <Button
+            onClick={() => {
+              setShowViewModal(false);
+              setFormData(selectedProduct);
+              setShowEditModal(true);
+            }}
+            style={{
+              background: "#e63946",
+              border: "none",
+              padding: "8px 20px",
+            }}
+          >
+            <i className="bi bi-pencil me-2"></i>
+            Edit Product
           </Button>
         </Modal.Footer>
       </Modal>

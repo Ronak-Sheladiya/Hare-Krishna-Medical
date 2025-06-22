@@ -290,7 +290,8 @@ const Order = () => {
       const root = createRoot(invoiceElement);
       root.render(
         React.createElement(ProfessionalInvoice, {
-          invoiceData,
+          invoiceData: { ...invoiceData, qrCode: qrCode },
+          qrCode: qrCode,
           forPrint: true,
         }),
       );

@@ -25,11 +25,29 @@ const ProfessionalInvoice = ({
     status = "Delivered",
   } = invoiceData;
 
-  // Generate QR Code with comprehensive invoice data
+  // Generate QR Code with comprehensive invoice data or use provided QR
   useEffect(() => {
     const generateQR = async () => {
       try {
         setIsLoading(true);
+
+        // Use provided QR code from order if available
+        if (qrCode) {
+          setGeneratedQR(qrCode);
+          setIsPrintReady(true);
+          setIsLoading(false);
+          return;
+        }
+
+        // Check if QR code is provided in invoice data
+        if (invoiceData.qrCode) {
+          setGeneratedQR(invoiceData.qrCode);
+          setIsPrintReady(true);
+          setIsLoading(false);
+          return;
+        }
+
+        // Generate new QR code if none provided
         const verifyUrl = `${window.location.origin}/invoice/${orderId}`;
         const qrData = {
           type: "invoice_verification",
@@ -73,7 +91,16 @@ const ProfessionalInvoice = ({
       setIsLoading(false);
       setIsPrintReady(true);
     }
-  }, [invoiceId, orderId, total, orderDate, status, customerDetails.fullName]);
+  }, [
+    invoiceId,
+    orderId,
+    total,
+    orderDate,
+    status,
+    customerDetails.fullName,
+    qrCode,
+    invoiceData.qrCode,
+  ]);
 
   // Calculate totals
   const calculatedSubtotal =
