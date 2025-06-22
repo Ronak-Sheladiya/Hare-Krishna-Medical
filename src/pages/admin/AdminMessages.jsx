@@ -230,13 +230,51 @@ const AdminMessages = () => {
   };
 
   return (
-    <div className="fade-in">
+    <div className="fade-in admin-page-content" data-page="admin">
+      {/* Hero Section - Admin Theme */}
       <section
         style={{
-          paddingTop: "2rem",
-          paddingBottom: "2rem",
-          minHeight: "100vh",
+          background: "linear-gradient(135deg, #3182ce 0%, #2c5282 100%)",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+          color: "white",
+        }}
+      >
+        <Container>
+          <Row className="text-center">
+            <Col lg={12}>
+              <h1
+                style={{
+                  fontSize: "3rem",
+                  fontWeight: "800",
+                  marginBottom: "20px",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                }}
+              >
+                Manage Messages
+              </h1>
+              <p
+                style={{
+                  fontSize: "1.2rem",
+                  opacity: "0.9",
+                  maxWidth: "600px",
+                  margin: "0 auto",
+                }}
+              >
+                Handle customer inquiries and support requests
+              </p>
+            </Col>
+          </Row>
+        </Container>
+      </section>
+
+      {/* Messages Management Content */}
+      <section
+        style={{
           background: "#f8f9fa",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+          minHeight: "60vh",
         }}
       >
         <Container>
