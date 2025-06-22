@@ -239,7 +239,7 @@ const Contact = () => {
                   style={{
                     width: "80px",
                     height: "80px",
-                    background: "linear-gradient(135deg, #dc3545, #e63946)",
+                    background: "linear-gradient(135deg, #e63946, #dc3545)",
                     borderRadius: "50%",
                     display: "flex",
                     alignItems: "center",
