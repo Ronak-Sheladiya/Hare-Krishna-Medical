@@ -756,21 +756,25 @@ const AdminAnalytics = () => {
                 </div>
                 <div className="d-flex gap-2 align-items-center">
                   <Button
-                    size="sm"
                     onClick={handleExportAnalytics}
                     disabled={exportLoading}
                     className="btn-medical-primary"
-                    style={{ height: "38px" }}
+                    style={{
+                      height: "38px",
+                      minWidth: "160px",
+                      fontSize: "14px",
+                      fontWeight: "600",
+                    }}
                   >
                     {exportLoading ? (
                       <>
-                        <Spinner size="sm" className="me-1" />
-                        Exporting...
+                        <Spinner size="sm" className="me-2" />
+                        Exporting Analytics...
                       </>
                     ) : (
                       <>
-                        <i className="bi bi-file-earmark-excel me-1"></i>
-                        Export
+                        <i className="bi bi-file-earmark-excel me-2"></i>
+                        Export Analytics
                       </>
                     )}
                   </Button>
