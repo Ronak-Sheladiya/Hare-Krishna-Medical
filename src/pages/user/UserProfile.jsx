@@ -247,18 +247,6 @@ const UserProfile = () => {
         }}
       >
         <Container>
-          <Col lg={12}>
-            <div className="text-center mb-4">
-              <h2 className="section-title">My Profile</h2>
-              <p className="text-muted">
-                Manage your account settings and personal information
-              </p>
-            </div>
-          </Col>
-        </Row>
-
-        {alert.show && (
-          <Row>
             <Col lg={12}>
               <Alert variant={alert.variant} className="mb-4">
                 <i
