@@ -468,9 +468,10 @@ const Home = () => {
                     transition: "all 0.3s ease",
                   }}
                   onMouseOver={(e) => {
-                    e.currentTarget.style.borderColor = feature.color;
+                    e.currentTarget.style.borderColor = "#343a40";
                     e.currentTarget.style.transform = "translateY(-4px)";
-                    e.currentTarget.style.boxShadow = `0 8px 25px ${feature.color}20`;
+                    e.currentTarget.style.boxShadow =
+                      "0 8px 25px rgba(52, 58, 64, 0.2)";
                   }}
                   onMouseOut={(e) => {
                     e.currentTarget.style.borderColor = "#f8f9fa";
