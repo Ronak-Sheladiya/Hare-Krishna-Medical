@@ -754,28 +754,31 @@ const AdminAnalytics = () => {
                     tables
                   </p>
                 </div>
-                <div className="d-flex gap-2">
+                <div className="d-flex gap-2 align-items-center">
                   <Button
+                    size="sm"
                     onClick={handleExportAnalytics}
                     disabled={exportLoading}
                     className="btn-medical-primary"
+                    style={{ height: "38px" }}
                   >
                     {exportLoading ? (
                       <>
-                        <Spinner size="sm" className="me-2" />
+                        <Spinner size="sm" className="me-1" />
                         Exporting...
                       </>
                     ) : (
                       <>
-                        <i className="bi bi-file-earmark-excel me-2"></i>
-                        Export Analytics
+                        <i className="bi bi-file-earmark-excel me-1"></i>
+                        Export
                       </>
                     )}
                   </Button>
                   <Form.Select
+                    size="sm"
                     value={dateRange}
                     onChange={(e) => setDateRange(e.target.value)}
-                    style={{ minWidth: "150px" }}
+                    style={{ minWidth: "130px", height: "38px" }}
                   >
                     <option value="7">Last 7 days</option>
                     <option value="30">Last 30 days</option>
