@@ -32,6 +32,11 @@ import {
   getRelativeTime,
   sortByDateDesc,
 } from "../../utils/dateUtils";
+
+const AdminMessages = () => {
+  const dispatch = useDispatch();
+  const { messages } = useSelector((state) => state.messages);
+
   const [filteredMessages, setFilteredMessages] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
