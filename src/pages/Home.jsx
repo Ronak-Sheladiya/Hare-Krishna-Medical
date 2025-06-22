@@ -566,6 +566,13 @@ const Home = () => {
                     padding: "16px 32px",
                     fontSize: "16px",
                     fontWeight: "600",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = "#343a40";
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = "#e63946";
                   }}
                 >
                   Start Shopping
@@ -580,6 +587,15 @@ const Home = () => {
                     padding: "16px 32px",
                     fontSize: "16px",
                     fontWeight: "600",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = "#343a40";
+                    e.target.style.borderColor = "#343a40";
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = "transparent";
+                    e.target.style.borderColor = "white";
                   }}
                 >
                   Contact Us
