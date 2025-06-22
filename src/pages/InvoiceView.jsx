@@ -6,6 +6,7 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import QRCode from "qrcode";
 import ProfessionalInvoice from "../components/common/ProfessionalInvoice.jsx";
+import OfficialInvoiceDesign from "../components/common/OfficialInvoiceDesign.jsx";
 
 const InvoiceView = () => {
   const { orderId } = useParams();
@@ -525,7 +526,7 @@ const InvoiceView = () => {
             </Col>
           </Row>
 
-          {/* Professional Invoice Display - Same style as Order.jsx */}
+          {/* Official Invoice Display */}
           <Row>
             <Col lg={12}>
               <Card
@@ -537,12 +538,26 @@ const InvoiceView = () => {
                 }}
               >
                 <Card.Body style={{ padding: "0" }}>
-                  <div
-                    id="invoice-content"
-                    dangerouslySetInnerHTML={{
-                      __html: createColorfulInvoiceHTML(),
-                    }}
-                  />
+                  <div id="invoice-content">
+                    <OfficialInvoiceDesign
+                      invoiceData={{
+                        invoiceId: invoice.invoiceId,
+                        orderId: invoice.orderId,
+                        orderDate: invoice.orderDate,
+                        orderTime: invoice.orderTime,
+                        customerDetails: invoice.customerDetails,
+                        items: invoice.items,
+                        subtotal: invoice.subtotal,
+                        shipping: invoice.shipping,
+                        total: invoice.total,
+                        paymentMethod: invoice.paymentMethod,
+                        paymentStatus: invoice.paymentStatus,
+                        status: invoice.status,
+                      }}
+                      qrCode={qrCode}
+                      forPrint={false}
+                    />
+                  </div>
                 </Card.Body>
               </Card>
             </Col>
