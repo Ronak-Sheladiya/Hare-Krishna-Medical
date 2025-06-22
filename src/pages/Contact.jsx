@@ -213,6 +213,13 @@ const Contact = () => {
                     border: "none",
                     borderRadius: "8px",
                     padding: "10px 20px",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = "#343a40";
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = "#e63946";
                   }}
                 >
                   <i className="bi bi-map me-2"></i>
