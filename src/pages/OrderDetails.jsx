@@ -260,8 +260,8 @@ const OrderDetails = () => {
         pdf.addImage(imgData, "PNG", 0, yOffset, imgWidth, imgHeight);
       }
 
-      // Download with official name
-      pdf.save(`Official_Invoice_${order.invoiceId}.pdf`);
+      // Download with invoice ID as filename
+      pdf.save(`${order.invoiceId}.pdf`);
 
       // Clean up
       root.unmount();

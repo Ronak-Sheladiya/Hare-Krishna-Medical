@@ -497,9 +497,9 @@ const UserInvoices = () => {
         pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
       }
 
-      // Download the combined PDF with official name
+      // Download the combined PDF
       pdf.save(
-        `Official_Invoices_Combined_${new Date().toISOString().split("T")[0]}.pdf`,
+        `Invoices_Combined_${new Date().toISOString().split("T")[0]}.pdf`,
       );
     } catch (error) {
       console.error("Error generating bulk PDF:", error);

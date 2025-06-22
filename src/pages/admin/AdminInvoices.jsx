@@ -300,8 +300,8 @@ const AdminInvoices = () => {
         pdf.addImage(imgData, "PNG", 0, yOffset, imgWidth, imgHeight);
       }
 
-      // Download with official name
-      pdf.save(`Official_Invoice_${invoice.invoiceId}.pdf`);
+      // Download with invoice ID as filename
+      pdf.save(`${invoice.invoiceId}.pdf`);
 
       // Clean up
       root.unmount();
