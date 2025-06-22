@@ -514,6 +514,130 @@ const AdminDashboard = () => {
           </Row>
         </Container>
       </section>
+
+      {/* Order Details Modal */}
+      <Modal
+        show={showOrderModal}
+        onHide={() => setShowOrderModal(false)}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <i className="bi bi-bag-check me-2"></i>
+            Order Details
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedOrder && (
+            <div>
+              {/* Order Information */}
+              <Row className="mb-4">
+                <Col md={6}>
+                  <Card className="h-100">
+                    <Card.Header className="bg-light">
+                      <h6 className="mb-0">Order Information</h6>
+                    </Card.Header>
+                    <Card.Body>
+                      <div className="mb-2">
+                        <strong>Order ID:</strong> {selectedOrder.id}
+                      </div>
+                      <div className="mb-2">
+                        <strong>Date:</strong> {selectedOrder.date}
+                      </div>
+                      <div className="mb-2">
+                        <strong>Time:</strong> {selectedOrder.time}
+                      </div>
+                      <div className="mb-2">
+                        <strong>Status:</strong>{" "}
+                        <Badge bg={getStatusVariant(selectedOrder.status)}>
+                          {selectedOrder.status}
+                        </Badge>
+                      </div>
+                      <div className="mb-2">
+                        <strong>Payment:</strong> {selectedOrder.paymentMethod}
+                      </div>
+                      <div>
+                        <strong>Total Amount:</strong>{" "}
+                        <span className="fw-bold text-success">
+                          ₹{selectedOrder.amount}
+                        </span>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col md={6}>
+                  <Card className="h-100">
+                    <Card.Header className="bg-light">
+                      <h6 className="mb-0">Customer Details</h6>
+                    </Card.Header>
+                    <Card.Body>
+                      <div className="mb-2">
+                        <strong>Name:</strong> {selectedOrder.customer}
+                      </div>
+                      <div className="mb-2">
+                        <strong>Email:</strong> {selectedOrder.customerEmail}
+                      </div>
+                      <div className="mb-2">
+                        <strong>Phone:</strong> {selectedOrder.customerPhone}
+                      </div>
+                      <div>
+                        <strong>Address:</strong> {selectedOrder.address}
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              </Row>
+
+              {/* Order Items */}
+              <Card>
+                <Card.Header className="bg-light">
+                  <h6 className="mb-0">Order Items ({selectedOrder.items})</h6>
+                </Card.Header>
+                <Card.Body>
+                  <Table responsive>
+                    <thead>
+                      <tr>
+                        <th>Item</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedOrder.orderItems.map((item, index) => (
+                        <tr key={index}>
+                          <td>{item.name}</td>
+                          <td>{item.quantity}</td>
+                          <td>₹{item.price.toFixed(2)}</td>
+                          <td>₹{(item.price * item.quantity).toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                  <div className="text-end">
+                    <strong>Order Total: ₹{selectedOrder.amount}</strong>
+                  </div>
+                </Card.Body>
+              </Card>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowOrderModal(false)}>
+            Close
+          </Button>
+          <Button
+            as={Link}
+            to={`/admin/orders/${selectedOrder?.id}`}
+            variant="primary"
+            className="btn-medical-primary"
+          >
+            <i className="bi bi-arrow-right me-2"></i>
+            Go to Full Order Details
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
