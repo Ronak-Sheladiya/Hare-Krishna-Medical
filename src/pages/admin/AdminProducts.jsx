@@ -210,15 +210,53 @@ const AdminProducts = () => {
   };
 
   return (
-    <div className="fade-in">
-      <section className="section-padding-sm">
+    <div className="fade-in admin-page-content" data-page="admin">
+      {/* Hero Section - Admin Theme */}
+      <section
+        style={{
+          background: "linear-gradient(135deg, #3182ce 0%, #2c5282 100%)",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+          color: "white",
+        }}
+      >
         <Container>
-          {/* Header */}
-          <Row className="mb-4">
+          <Row className="text-center">
             <Col lg={12}>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h2>Product Management</h2>
+              <h1
+                style={{
+                  fontSize: "3rem",
+                  fontWeight: "800",
+                  marginBottom: "20px",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                }}
+              >
+                Manage Products
+              </h1>
+              <p
+                style={{
+                  fontSize: "1.2rem",
+                  opacity: "0.9",
+                  maxWidth: "600px",
+                  margin: "0 auto",
+                }}
+              >
+                Add, edit, and manage your medical product inventory
+              </p>
+            </Col>
+          </Row>
+        </Container>
+      </section>
+
+      {/* Products Management Content */}
+      <section
+        style={{
+          background: "#f8f9fa",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+          minHeight: "60vh",
+        }}
+      >
                   <p className="text-muted">
                     Manage your medical product inventory
                   </p>
