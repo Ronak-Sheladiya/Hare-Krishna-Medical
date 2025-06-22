@@ -32,6 +32,7 @@ import {
   getRelativeTime,
   sortByDateDesc,
 } from "../../utils/dateUtils";
+import * as XLSX from "xlsx";
 
 const AdminMessages = () => {
   const dispatch = useDispatch();
@@ -167,6 +168,67 @@ const AdminMessages = () => {
   const unreadCount = messages.filter((m) => !m.isRead).length;
   const totalMessages = messages.length;
 
+  const handleExportToExcel = () => {
+    try {
+      // Prepare data for export
+      const exportData = filteredMessages.map((message, index) => ({
+        "Sr. No.": index + 1,
+        "Customer Name": message.name,
+        Email: message.email,
+        Mobile: message.mobile || "N/A",
+        Subject: message.subject,
+        Message: message.message,
+        Priority: message.priority,
+        Status: message.status,
+        "Read Status": message.isRead ? "Read" : "Unread",
+        "Created Date": formatDateTime(message.createdAt),
+        Reply: message.reply || "No reply yet",
+        "Replied Date": message.repliedAt
+          ? formatDateTime(message.repliedAt)
+          : "Not replied",
+      }));
+
+      // Create workbook and worksheet
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+      // Set column widths
+      const columnWidths = [
+        { wch: 8 }, // Sr. No.
+        { wch: 20 }, // Customer Name
+        { wch: 30 }, // Email
+        { wch: 15 }, // Mobile
+        { wch: 25 }, // Subject
+        { wch: 50 }, // Message
+        { wch: 10 }, // Priority
+        { wch: 12 }, // Status
+        { wch: 12 }, // Read Status
+        { wch: 18 }, // Created Date
+        { wch: 40 }, // Reply
+        { wch: 18 }, // Replied Date
+      ];
+      worksheet["!cols"] = columnWidths;
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Messages");
+
+      // Generate filename with current date
+      const currentDate = new Date().toISOString().split("T")[0];
+      const filename = `HKM-Messages-${currentDate}.xlsx`;
+
+      // Save file
+      XLSX.writeFile(workbook, filename);
+
+      // Show success notification
+      alert(
+        `Messages exported successfully!\nFile: ${filename}\nTotal records: ${exportData.length}`,
+      );
+    } catch (error) {
+      console.error("Export error:", error);
+      alert("Failed to export messages. Please try again.");
+    }
+  };
+
   return (
     <div className="fade-in">
       <section
@@ -272,9 +334,11 @@ const AdminMessages = () => {
                 <Button
                   variant="outline-primary"
                   style={{ color: "#e63946", borderColor: "#e63946" }}
+                  onClick={handleExportToExcel}
+                  title="Export messages to Excel"
                 >
                   <i className="bi bi-download me-1"></i>
-                  Export
+                  Export to Excel
                 </Button>
               </div>
             </Col>
