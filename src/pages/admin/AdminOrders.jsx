@@ -13,7 +13,6 @@ import {
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import OfficialInvoiceDesign from "../../components/common/OfficialInvoiceDesign";
-import OfficialInvoiceDesign from "../../components/common/OfficialInvoiceDesign";
 import {
   viewInvoice,
   printInvoice,
