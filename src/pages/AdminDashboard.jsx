@@ -648,9 +648,20 @@ const AdminDashboard = () => {
           </Button>
           <Button
             as={Link}
-            to={`/admin/orders/${selectedOrder?.id}`}
+            to={`/order/${selectedOrder?.id}`}
             variant="primary"
             className="btn-medical-primary"
+            style={{
+              transition: "all 0.3s ease",
+            }}
+            onMouseOver={(e) => {
+              e.target.style.background = "#343a40";
+              e.target.style.borderColor = "#343a40";
+            }}
+            onMouseOut={(e) => {
+              e.target.style.background = "#e63946";
+              e.target.style.borderColor = "#e63946";
+            }}
           >
             <i className="bi bi-arrow-right me-2"></i>
             Go to Full Order Details

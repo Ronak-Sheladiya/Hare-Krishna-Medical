@@ -171,7 +171,7 @@ const TermsConditions = () => {
                     transition: "all 0.3s ease",
                   }}
                 >
-                  <i className="bi bi-shield-check-fill"></i>
+                  <i className="bi bi-person-check-fill"></i>
                 </div>
                 <h5 style={{ color: "#333333", marginBottom: "16px" }}>
                   User Responsibilities
