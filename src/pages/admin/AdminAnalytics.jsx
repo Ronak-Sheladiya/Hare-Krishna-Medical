@@ -558,111 +558,173 @@ const AdminAnalytics = () => {
 
       // 1. Summary Sheet
       const summaryData = [
-        { Metric: "Total Revenue", Value: `₹${salesData.totalRevenue.toLocaleString()}`, Growth: `+${salesData.monthlyGrowth}%` },
-        { Metric: "Total Orders", Value: salesData.totalOrders, Growth: "+8.2%" },
-        { Metric: "Total Products", Value: salesData.totalProducts, Growth: "+2.1%" },
-        { Metric: "Total Customers", Value: salesData.totalCustomers, Growth: "+15.3%" },
-        { Metric: "Average Order Value", Value: `₹${salesData.avgOrderValue}`, Growth: "+5.1%" },
-        { Metric: "Conversion Rate", Value: `${salesData.conversionRate}%`, Growth: "+1.8%" },
-        { Metric: "Repeat Customer Rate", Value: `${salesData.repeatCustomerRate}%`, Growth: "+3.2%" },
+        {
+          Metric: "Total Revenue",
+          Value: `₹${salesData.totalRevenue.toLocaleString()}`,
+          Growth: `+${salesData.monthlyGrowth}%`,
+        },
+        {
+          Metric: "Total Orders",
+          Value: salesData.totalOrders,
+          Growth: "+8.2%",
+        },
+        {
+          Metric: "Total Products",
+          Value: salesData.totalProducts,
+          Growth: "+2.1%",
+        },
+        {
+          Metric: "Total Customers",
+          Value: salesData.totalCustomers,
+          Growth: "+15.3%",
+        },
+        {
+          Metric: "Average Order Value",
+          Value: `₹${salesData.avgOrderValue}`,
+          Growth: "+5.1%",
+        },
+        {
+          Metric: "Conversion Rate",
+          Value: `${salesData.conversionRate}%`,
+          Growth: "+1.8%",
+        },
+        {
+          Metric: "Repeat Customer Rate",
+          Value: `${salesData.repeatCustomerRate}%`,
+          Growth: "+3.2%",
+        },
       ];
       const summarySheet = XLSX.utils.json_to_sheet(summaryData);
       XLSX.utils.book_append_sheet(workbook, summarySheet, "Summary");
 
       // 2. Monthly Revenue Data
-      const revenueData = monthlyRevenueData.map(item => ({
+      const revenueData = monthlyRevenueData.map((item) => ({
         Month: item.month,
         Revenue: item.revenue,
         Orders: item.orders,
         Customers: item.customers,
         "Avg Order Value": (item.revenue / item.orders).toFixed(2),
-        "Growth %": item.month === "Jan" ? "0%" : `+${((item.revenue / monthlyRevenueData[monthlyRevenueData.indexOf(item) - 1]?.revenue || 1) - 1) * 100).toFixed(1)}%`
+        "Growth %":
+          item.month === "Jan"
+            ? "0%"
+            : `+${((item.revenue / (monthlyRevenueData[monthlyRevenueData.indexOf(item) - 1]?.revenue || 1) - 1) * 100).toFixed(1)}%`,
       }));
       const revenueSheet = XLSX.utils.json_to_sheet(revenueData);
       XLSX.utils.book_append_sheet(workbook, revenueSheet, "Monthly Revenue");
 
       // 3. Category Performance
-      const categoryExportData = categoryData.map(item => ({
+      const categoryExportData = categoryData.map((item) => ({
         Category: item.name,
         "Market Share %": item.value,
         Revenue: item.revenue,
         "Revenue ₹": `₹${item.revenue.toLocaleString()}`,
-        Color: item.color
+        Color: item.color,
       }));
       const categorySheet = XLSX.utils.json_to_sheet(categoryExportData);
-      XLSX.utils.book_append_sheet(workbook, categorySheet, "Category Performance");
+      XLSX.utils.book_append_sheet(
+        workbook,
+        categorySheet,
+        "Category Performance",
+      );
 
       // 4. Payment Status Analysis
-      const paymentExportData = paymentStatusData.map(item => ({
+      const paymentExportData = paymentStatusData.map((item) => ({
         "Payment Status": item.name,
         "Order Count": item.count,
         "Percentage %": item.value,
         "Estimated Amount": `₹${(item.count * 293).toLocaleString()}`,
-        Notes: item.name === "Paid" ? "Complete payment received" : item.name === "Unpaid (COD)" ? "Cash on delivery orders" : "Partial payment received"
+        Notes:
+          item.name === "Paid"
+            ? "Complete payment received"
+            : item.name === "Unpaid (COD)"
+              ? "Cash on delivery orders"
+              : "Partial payment received",
       }));
       const paymentSheet = XLSX.utils.json_to_sheet(paymentExportData);
       XLSX.utils.book_append_sheet(workbook, paymentSheet, "Payment Analysis");
 
       // 5. Product Performance
-      const productExportData = productPerformanceData.map(item => ({
+      const productExportData = productPerformanceData.map((item) => ({
         Product: item.name,
         "Units Sold": item.sales,
         "Revenue ₹": item.revenue,
         "Profit ₹": item.profit,
         "Profit Margin %": ((item.profit / item.revenue) * 100).toFixed(1),
-        "Avg Price": (item.revenue / item.sales).toFixed(2)
+        "Avg Price": (item.revenue / item.sales).toFixed(2),
       }));
       const productSheet = XLSX.utils.json_to_sheet(productExportData);
-      XLSX.utils.book_append_sheet(workbook, productSheet, "Product Performance");
+      XLSX.utils.book_append_sheet(
+        workbook,
+        productSheet,
+        "Product Performance",
+      );
 
       // 6. Weekly Orders Analysis
-      const weeklyExportData = weeklyOrdersData.map(item => ({
+      const weeklyExportData = weeklyOrdersData.map((item) => ({
         Day: item.day,
         Orders: item.orders,
         "Revenue ₹": item.revenue,
-        "Avg Order Value": (item.revenue / item.orders).toFixed(2)
+        "Avg Order Value": (item.revenue / item.orders).toFixed(2),
       }));
       const weeklySheet = XLSX.utils.json_to_sheet(weeklyExportData);
       XLSX.utils.book_append_sheet(workbook, weeklySheet, "Weekly Analysis");
 
       // Try to capture chart as image and include in Excel (if possible)
       try {
-        const chartElement = document.querySelector('.recharts-wrapper');
+        const chartElement = document.querySelector(".recharts-wrapper");
         if (chartElement) {
           const chartCanvas = await html2canvas(chartElement, {
-            backgroundColor: '#ffffff',
-            scale: 2
+            backgroundColor: "#ffffff",
+            scale: 2,
           });
 
           // Convert to base64 and add to a separate sheet with notes
           const chartData = [
-            { Note: "Chart Image", Description: "Current chart view captured", Timestamp: new Date().toLocaleString() },
+            {
+              Note: "Chart Image",
+              Description: "Current chart view captured",
+              Timestamp: new Date().toLocaleString(),
+            },
             { Note: "Chart Type", Description: chartType, Timestamp: "" },
             { Note: "Active View", Description: activeView, Timestamp: "" },
-            { Note: "Date Range", Description: `Last ${dateRange} days`, Timestamp: "" }
+            {
+              Note: "Date Range",
+              Description: `Last ${dateRange} days`,
+              Timestamp: "",
+            },
           ];
           const chartSheet = XLSX.utils.json_to_sheet(chartData);
           XLSX.utils.book_append_sheet(workbook, chartSheet, "Chart Info");
         }
       } catch (chartError) {
-        console.log("Chart capture failed, continuing with data export:", chartError);
+        console.log(
+          "Chart capture failed, continuing with data export:",
+          chartError,
+        );
       }
 
       // Set column widths for better readability
-      const worksheets = ['Summary', 'Monthly Revenue', 'Category Performance', 'Payment Analysis', 'Product Performance', 'Weekly Analysis'];
-      worksheets.forEach(sheetName => {
+      const worksheets = [
+        "Summary",
+        "Monthly Revenue",
+        "Category Performance",
+        "Payment Analysis",
+        "Product Performance",
+        "Weekly Analysis",
+      ];
+      worksheets.forEach((sheetName) => {
         if (workbook.Sheets[sheetName]) {
           const worksheet = workbook.Sheets[sheetName];
           const cols = [];
           for (let i = 0; i < 10; i++) {
             cols.push({ wch: 15 });
           }
-          worksheet['!cols'] = cols;
+          worksheet["!cols"] = cols;
         }
       });
 
       // Generate filename with current date and view
-      const currentDate = new Date().toISOString().split('T')[0];
+      const currentDate = new Date().toISOString().split("T")[0];
       const fileName = `Hare_Krishna_Medical_Analytics_${activeView}_${currentDate}.xlsx`;
 
       // Export file
