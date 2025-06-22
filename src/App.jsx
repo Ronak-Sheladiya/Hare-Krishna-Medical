@@ -56,7 +56,21 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    // Force scroll to top immediately and smoothly
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+
+    // Also ensure document element is scrolled to top
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    // Additional timeout to ensure scroll happens after DOM update
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 10);
   }, [pathname]);
 
   return null;
