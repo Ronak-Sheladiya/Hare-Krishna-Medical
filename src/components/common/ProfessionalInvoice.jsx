@@ -52,13 +52,17 @@ const ProfessionalInvoice = ({
       pageBreakAfter: "always",
     },
     header: {
-      background: "linear-gradient(135deg, #e63946, #dc3545)",
+      background:
+        "linear-gradient(135deg, #1a365d 0%, #2d3748 50%, #e63946 100%)",
       color: "#ffffff",
       padding: "25mm 20mm",
-      margin: "-20mm -20mm 20mm -20mm",
+      margin: "-15mm -15mm 20mm -15mm",
       display: "flex",
       justifyContent: "space-between",
       alignItems: "flex-start",
+      borderRadius: forPrint ? "0" : "12px 12px 0 0",
+      position: "relative",
+      overflow: "hidden",
     },
     companyInfo: {
       flex: "1",
@@ -405,7 +409,7 @@ const ProfessionalInvoice = ({
               {customerDetails.fullName}
             </div>
             <div style={{ marginBottom: "4mm" }}>
-              ���� {customerDetails.email}
+              📧 {customerDetails.email}
             </div>
             <div style={{ marginBottom: "4mm" }}>
               📱 {customerDetails.mobile}
