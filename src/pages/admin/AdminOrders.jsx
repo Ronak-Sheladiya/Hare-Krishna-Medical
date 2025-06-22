@@ -14,7 +14,12 @@ import {
 import { useNavigate } from "react-router-dom";
 import ProfessionalInvoice from "../../components/common/ProfessionalInvoice";
 import OfficialInvoiceDesign from "../../components/common/OfficialInvoiceDesign";
-import QRCode from "qrcode";
+import {
+  viewInvoice,
+  printInvoice,
+  downloadInvoice,
+  createInvoiceData,
+} from "../../utils/invoiceUtils.js";
 
 const AdminOrders = () => {
   const navigate = useNavigate();
@@ -114,162 +119,18 @@ const AdminOrders = () => {
 
   const handleViewInvoicePopup = async (order) => {
     try {
-      // Generate QR code for the invoice
-      const verifyUrl = `${window.location.origin}/invoice/${order.orderId}`;
-      const qrDataURL = await QRCode.toDataURL(verifyUrl, {
-        width: 120,
-        margin: 2,
-        color: {
-          dark: "#1a202c",
-          light: "#ffffff",
-        },
-        errorCorrectionLevel: "M",
-      });
-
-      // Create invoice data for popup
-      const invoiceData = {
-        invoiceId: `INV${order.id.slice(-6)}`,
-        orderId: order.id,
-        orderDate: order.date,
-        orderTime: order.time,
-        customerDetails: {
-          fullName: order.customerName,
-          email: order.customerEmail,
-          mobile: order.customerPhone,
-          address: order.customerAddress,
-          city: "Surat",
-          state: "Gujarat",
-          pincode: "395007",
-        },
-        items: order.items,
-        subtotal: order.subtotal,
-        shipping: order.shipping,
-        total: order.total,
-        paymentMethod: order.paymentMethod,
-        paymentStatus: order.status === "Delivered" ? "Paid" : "Pending",
-        status: order.status,
-        qrCode: qrDataURL,
-      };
-
-      setInvoiceForModal(invoiceData);
-      setShowInvoiceModal(true);
+      const invoiceData = createInvoiceData(order);
+      await viewInvoice(invoiceData);
     } catch (error) {
-      console.error("Error generating invoice popup:", error);
-      alert("Error loading invoice. Please try again.");
+      console.error("Error viewing invoice:", error);
+      alert("Error viewing invoice. Please try again.");
     }
   };
 
   const handleDirectPrint = async (order) => {
     try {
-      // Generate QR code
-      const verifyUrl = `${window.location.origin}/invoice/${order.orderId}`;
-      const qrDataURL = await QRCode.toDataURL(verifyUrl, {
-        width: 120,
-        margin: 2,
-        color: {
-          dark: "#1a202c",
-          light: "#ffffff",
-        },
-        errorCorrectionLevel: "M",
-      });
-
-      // Create invoice data
-      const invoiceData = {
-        invoiceId: `INV${order.id.slice(-6)}`,
-        orderId: order.id,
-        orderDate: order.date,
-        orderTime: order.time,
-        customerDetails: {
-          fullName: order.customerName,
-          email: order.customerEmail,
-          mobile: order.customerPhone,
-          address: order.customerAddress,
-          city: "Surat",
-          state: "Gujarat",
-          pincode: "395007",
-        },
-        items: order.items,
-        subtotal: order.subtotal,
-        shipping: order.shipping,
-        total: order.total,
-        paymentMethod: order.paymentMethod,
-        paymentStatus: order.status === "Delivered" ? "Paid" : "Pending",
-        status: order.status,
-      };
-
-      // Create temporary element for printing
-      const tempDiv = document.createElement("div");
-      tempDiv.style.position = "absolute";
-      tempDiv.style.left = "-9999px";
-      tempDiv.style.width = "210mm";
-      tempDiv.style.backgroundColor = "white";
-      document.body.appendChild(tempDiv);
-
-      // Import and render OfficialInvoiceDesign
-      const React = (await import("react")).default;
-      const { createRoot } = await import("react-dom/client");
-
-      const root = createRoot(tempDiv);
-      root.render(
-        React.createElement(OfficialInvoiceDesign, {
-          invoiceData,
-          qrCode: qrDataURL,
-          forPrint: true,
-        }),
-      );
-
-      // Wait for rendering
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Create print content
-      const printContent = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Official Invoice ${invoiceData.invoiceId}</title>
-            <style>
-              @page { size: A4; margin: 0.3in; }
-              body {
-                margin: 0;
-                padding: 0;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                color-adjust: exact !important;
-              }
-            </style>
-          </head>
-          <body>
-            ${tempDiv.innerHTML}
-          </body>
-        </html>
-      `;
-
-      // Create temporary iframe for printing
-      const printFrame = document.createElement("iframe");
-      printFrame.style.position = "absolute";
-      printFrame.style.top = "-10000px";
-      printFrame.style.left = "-10000px";
-      document.body.appendChild(printFrame);
-
-      printFrame.contentDocument.write(printContent);
-      printFrame.contentDocument.close();
-
-      // Wait for content to load then print
-      setTimeout(() => {
-        printFrame.contentWindow.focus();
-        printFrame.contentWindow.print();
-        // Clean up after printing
-        setTimeout(() => {
-          document.body.removeChild(printFrame);
-          root.unmount();
-          document.body.removeChild(tempDiv);
-        }, 1000);
-      }, 500);
+      const invoiceData = createInvoiceData(order);
+      await printInvoice(invoiceData);
     } catch (error) {
       console.error("Error printing invoice:", error);
       alert("Error printing invoice. Please try again.");
