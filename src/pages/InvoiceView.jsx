@@ -89,56 +89,102 @@ const InvoiceView = () => {
     fetchInvoice();
   }, [orderId]);
 
-  const handlePrintInvoice = () => {
+  const handlePrintInvoice = async () => {
     if (!invoice) return;
 
-    // Create print-specific HTML content using the ProfessionalInvoice component
-    const printContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Official Invoice ${invoice.invoiceId}</title>
-          <style>
-            @page { size: A4; margin: 0.5in; }
-            body {
-              margin: 0;
-              padding: 0;
-              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            * {
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-              color-adjust: exact !important;
-            }
-          </style>
-        </head>
-        <body>
-          ${document.getElementById("invoice-content").innerHTML}
-        </body>
-      </html>
-    `;
+    try {
+      // Create temporary element for print-optimized invoice
+      const tempDiv = document.createElement("div");
+      tempDiv.style.position = "absolute";
+      tempDiv.style.left = "-9999px";
+      tempDiv.style.width = "210mm";
+      tempDiv.style.backgroundColor = "white";
+      document.body.appendChild(tempDiv);
 
-    // Create temporary iframe for printing
-    const printFrame = document.createElement("iframe");
-    printFrame.style.position = "absolute";
-    printFrame.style.top = "-10000px";
-    printFrame.style.left = "-10000px";
-    document.body.appendChild(printFrame);
+      // Import and render OfficialInvoiceDesign for print
+      const React = (await import("react")).default;
+      const { createRoot } = await import("react-dom/client");
 
-    printFrame.contentDocument.write(printContent);
-    printFrame.contentDocument.close();
+      const root = createRoot(tempDiv);
+      root.render(
+        React.createElement(OfficialInvoiceDesign, {
+          invoiceData: {
+            invoiceId: invoice.invoiceId,
+            orderId: invoice.orderId,
+            orderDate: invoice.orderDate,
+            orderTime: invoice.orderTime,
+            customerDetails: invoice.customerDetails,
+            items: invoice.items,
+            subtotal: invoice.subtotal,
+            shipping: invoice.shipping,
+            total: invoice.total,
+            paymentMethod: invoice.paymentMethod,
+            paymentStatus: invoice.paymentStatus,
+            status: invoice.status,
+          },
+          qrCode: qrCode,
+          forPrint: true,
+        }),
+      );
 
-    // Wait for content to load then print
-    setTimeout(() => {
-      printFrame.contentWindow.focus();
-      printFrame.contentWindow.print();
-      // Clean up after printing
+      // Wait for rendering
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Create print content with reduced height
+      const printContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Official Invoice ${invoice.invoiceId}</title>
+            <style>
+              @page { size: A4; margin: 0.3in; }
+              body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                transform: scale(0.9);
+                transform-origin: top left;
+              }
+              * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+              }
+            </style>
+          </head>
+          <body>
+            ${tempDiv.innerHTML}
+          </body>
+        </html>
+      `;
+
+      // Create temporary iframe for printing
+      const printFrame = document.createElement("iframe");
+      printFrame.style.position = "absolute";
+      printFrame.style.top = "-10000px";
+      printFrame.style.left = "-10000px";
+      document.body.appendChild(printFrame);
+
+      printFrame.contentDocument.write(printContent);
+      printFrame.contentDocument.close();
+
+      // Wait for content to load then print
       setTimeout(() => {
-        document.body.removeChild(printFrame);
-      }, 1000);
-    }, 500);
+        printFrame.contentWindow.focus();
+        printFrame.contentWindow.print();
+        // Clean up after printing
+        setTimeout(() => {
+          document.body.removeChild(printFrame);
+          root.unmount();
+          document.body.removeChild(tempDiv);
+        }, 1000);
+      }, 500);
+    } catch (error) {
+      console.error("Error printing invoice:", error);
+      alert("Error printing invoice. Please try again.");
+    }
   };
 
   const downloadPDF = async () => {
