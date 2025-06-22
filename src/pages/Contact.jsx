@@ -95,22 +95,6 @@ const Contact = () => {
 
   return (
     <div className="fade-in">
-      {/* Breadcrumb */}
-      <section
-        style={{
-          background: "#f8f9fa",
-          paddingTop: "20px",
-          paddingBottom: "20px",
-        }}
-      >
-        <Container>
-          <Breadcrumb>
-            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-            <Breadcrumb.Item active>Contact Us</Breadcrumb.Item>
-          </Breadcrumb>
-        </Container>
-      </section>
-
       {/* Hero Section */}
       <section
         style={{
