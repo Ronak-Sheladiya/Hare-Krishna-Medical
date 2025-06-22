@@ -60,21 +60,25 @@ const BackendDocs = () => {
   };
 
   const documentationText = `
-HARE KRISHNA MEDICAL - BACKEND IMPLEMENTATION GUIDE
-==================================================
+HARE KRISHNA MEDICAL - COMPREHENSIVE BACKEND IMPLEMENTATION GUIDE
+================================================================
 
 This document provides comprehensive backend implementation requirements for the Hare Krishna Medical website.
+Updated with all security features, message handling, export functionality, and invoice management.
 
 1. TECHNOLOGY STACK
 ==================
 Backend Framework: Node.js with Express.js
 Database: MongoDB with Mongoose ODM
-Authentication: JWT (JSON Web Tokens)
+Authentication: JWT (JSON Web Tokens) + Session Management + Cookies
 File Storage: AWS S3 or Cloudinary for images
 Payment Gateway: Razorpay or Stripe
-Email Service: Nodemailer with Gmail/SendGrid
+Email Service: Nodemailer with Gmail/SendGrid (Admin Reply System)
 SMS Service: Twilio or Fast2SMS
-PDF Generation: jsPDF (client-side) or PDFKit (server-side)
+PDF Generation: PDFKit (server-side) for secure invoices
+Export: xlsx library for Excel exports
+QR Code: qrcode library for invoice QR codes
+Security: bcryptjs, helmet, express-rate-limit, express-validator
 
 2. DATABASE SCHEMA
 =================
@@ -107,7 +111,6 @@ Products Collection:
   name: String (required),
   description: String,
   company: String,
-  category: String,
   price: Number (required),
   discountPrice: Number,
   stock: Number (required),
@@ -168,6 +171,51 @@ Messages Collection:
   repliedAt: Date,
   priority: String (Low, Medium, High),
   status: String (Open, In Progress, Resolved),
+  emailSent: Boolean (default: false),
+  emailSentAt: Date,
+  adminEmail: String, // Email from which reply was sent
+  createdAt: Date,
+  updatedAt: Date
+}
+
+Sessions Collection:
+{
+  _id: ObjectId,
+  userId: ObjectId (ref: Users),
+  sessionToken: String (unique),
+  deviceInfo: String,
+  ipAddress: String,
+  isActive: Boolean (default: true),
+  expiresAt: Date,
+  createdAt: Date,
+  lastActivity: Date
+}
+
+Invoices Collection:
+{
+  _id: ObjectId,
+  invoiceId: String (unique, secure),
+  orderId: ObjectId (ref: Orders),
+  userId: ObjectId (ref: Users),
+  qrCode: String (encoded verification URL),
+  securityHash: String (invoice verification hash),
+  isValid: Boolean (default: true),
+  downloadCount: Number (default: 0),
+  lastAccessed: Date,
+  generatedBy: ObjectId (ref: Users),
+  modificationLog: [{
+    action: String,
+    modifiedBy: ObjectId (ref: Users),
+    timestamp: Date,
+    previousData: Object
+  }],
+  invoiceData: Object, // Encrypted invoice data
+  qrCode: String, // QR code data
+  issuedAt: Date,
+  isValid: Boolean (default: true),
+  accessCount: Number (default: 0),
+  lastAccessed: Date,
+  securityHash: String, // Security validation hash
   createdAt: Date,
   updatedAt: Date
 }
@@ -360,7 +408,218 @@ Backup Strategy:
 - File storage backups
 - Recovery procedures
 
-13. TESTING REQUIREMENTS
+13. ENHANCED SECURITY FEATURES (NEW REQUIREMENTS)
+================================================
+
+Invoice Security:
+- Server-side invoice generation only
+- Encrypted invoice data storage
+- Digital signature verification
+- QR code verification system
+- Invoice access logging
+- Modification audit trail
+- Print attempts logging
+- Unauthorized access prevention
+
+Frontend Security Measures:
+- Disable right-click context menu on invoices
+- Prevent keyboard shortcuts (F12, Ctrl+Shift+I, Ctrl+U)
+- Disable text selection on sensitive documents
+- Watermark protected documents
+- Session-based access control
+
+Data Protection:
+- Encrypt sensitive customer data
+- Secure payment information handling
+- GDPR compliance measures
+- Data retention policies
+- Secure data deletion
+
+API Security:
+- Request signature validation
+- IP whitelisting for admin operations
+- Captcha integration for contact forms
+- Brute force protection
+- Session hijacking prevention
+
+14. MESSAGE MANAGEMENT SYSTEM (NEW REQUIREMENTS)
+==============================================
+
+Enhanced Message Features:
+- Priority levels (Low, Medium, High, Critical)
+- Message categories (General, Support, Complaint, Inquiry)
+- Auto-reply system
+- Email integration for replies
+- Message templates
+- Bulk operations
+- Export to Excel functionality
+- Advanced filtering and search
+
+Admin Reply System:
+- Rich text editor for replies
+- Email notification to customer
+- Reply templates
+- Internal notes
+- Message status tracking
+- Response time analytics
+
+15. EXPORT FUNCTIONALITY (NEW REQUIREMENTS)
+==========================================
+
+Excel Export Features:
+- Messages export with filters
+- Orders export with date range
+- Products export with stock levels
+- Customer data export
+- Analytics data export
+- Custom report generation
+
+Export Security:
+- Admin-only access
+- Export attempt logging
+- Data sanitization before export
+- Password-protected exports
+- Expiring download links
+
+16. INVOICE MANAGEMENT SYSTEM (NEW REQUIREMENTS)
+==============================================
+
+Secure Invoice Generation:
+- Server-side PDF generation
+- Unique invoice IDs with security hashes
+- QR code verification URLs
+- Digital watermarks
+- Tamper-proof design
+
+Invoice API Endpoints:
+POST /api/invoices/generate
+GET /api/invoices/:id/verify
+GET /api/invoices/:id/download
+PUT /api/invoices/:id/invalidate
+GET /api/invoices/list (Admin only)
+DELETE /api/invoices/:id (Admin only)
+
+Invoice Verification:
+- QR code scanning verification
+- Hash-based integrity checking
+- Access logging and monitoring
+- Invalid invoice detection
+- Fraud prevention measures
+
+17. ORDER SECURITY ENHANCEMENTS (NEW REQUIREMENTS)
+==============================================
+
+Order Protection:
+- Order modification audit trail
+- Admin-only order editing
+- Status change logging
+- Payment verification
+- Secure order ID generation
+
+Order Verification:
+- Cross-reference with invoice data
+- Payment status validation
+- Delivery confirmation
+- Customer verification
+
+18. CART AND PRICING UPDATES (NEW REQUIREMENTS)
+=============================================
+
+Updated Pricing Structure:
+- Free shipping on all orders
+- Tax included in product prices
+- No additional charges
+- Transparent pricing display
+
+Cart API Updates:
+POST /api/cart/add
+GET /api/cart
+PUT /api/cart/update
+DELETE /api/cart/remove
+POST /api/cart/checkout (with new pricing)
+
+19. ANALYTICS AND MONITORING (NEW REQUIREMENTS)
+==============================================
+
+Security Analytics:
+- Failed login attempts tracking
+- Suspicious activity detection
+- Invoice access patterns
+- Admin action logging
+- Security incident reporting
+
+Business Analytics:
+- Sales reports with tax breakdown
+- Customer behavior analysis
+- Product performance metrics
+- Order fulfillment analytics
+- Revenue tracking
+
+20. NOTIFICATION SYSTEM ENHANCEMENTS (NEW REQUIREMENTS)
+=======================================================
+
+Admin Notifications:
+- New message alerts
+- Security incident alerts
+- Low stock notifications
+- Payment confirmations
+- Order status updates
+
+Customer Notifications:
+- Order confirmations
+- Invoice generation alerts
+- Shipping updates
+- Delivery confirmations
+- Security alerts (if applicable)
+
+21. BACKUP AND RECOVERY (NEW REQUIREMENTS)
+==========================================
+
+Data Backup:
+- Automated daily backups
+- Encrypted backup storage
+- Point-in-time recovery
+- Customer data protection
+- Invoice archive system
+
+Security Backup:
+- Audit log backups
+- Security event logs
+- Access pattern backups
+- Recovery procedures
+
+22. COMPLIANCE AND LEGAL (NEW REQUIREMENTS)
+===========================================
+
+Healthcare Compliance:
+- Medical product regulations
+- Prescription handling
+- Patient data protection
+- Regulatory reporting
+
+Legal Requirements:
+- Terms and conditions enforcement
+- Privacy policy compliance
+- Data protection laws
+- Invoice legal requirements
+- Tax compliance
+
+23. PERFORMANCE OPTIMIZATION (NEW REQUIREMENTS)
+==============================================
+
+Database Optimization:
+- Index optimization for security queries
+- Query performance monitoring
+- Connection pooling
+- Cache invalidation strategies
+
+Security Performance:
+- Fast authentication
+- Quick invoice generation
+- Efficient QR code processing
+- Optimized security checks
+
+24. TESTING REQUIREMENTS
 ========================
 
 Unit Testing:

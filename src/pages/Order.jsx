@@ -47,10 +47,9 @@ const Order = () => {
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("cod");
 
-  const shippingCost = totalAmount > 500 ? 0 : 50;
-  const taxRate = 0.05;
-  const taxAmount = totalAmount * taxRate;
-  const finalTotal = totalAmount + shippingCost + taxAmount;
+  const shippingCost = 0; // Free shipping for all orders
+  const taxAmount = 0; // Tax included in product price
+  const finalTotal = totalAmount + shippingCost;
 
   // Redirect if cart is empty
   if (items.length === 0) {
@@ -466,17 +465,6 @@ const Order = () => {
 
   return (
     <div className="fade-in">
-      {/* Breadcrumb */}
-      <section className="medical-breadcrumb" style={{ marginTop: "20px" }}>
-        <Container>
-          <Breadcrumb>
-            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-            <Breadcrumb.Item href="/cart">Cart</Breadcrumb.Item>
-            <Breadcrumb.Item active>Place Order</Breadcrumb.Item>
-          </Breadcrumb>
-        </Container>
-      </section>
-
       {/* Order Form */}
       <section className="section-padding">
         <Container>
@@ -691,13 +679,13 @@ const Order = () => {
                         </div>
                         <div className="d-flex justify-content-between mb-2">
                           <span>Shipping</span>
-                          <span>
-                            {shippingCost === 0 ? "FREE" : `₹${shippingCost}`}
-                          </span>
+                          <span className="text-success fw-bold">FREE</span>
                         </div>
                         <div className="d-flex justify-content-between mb-2">
-                          <span>Tax (5%)</span>
-                          <span>₹{taxAmount.toFixed(2)}</span>
+                          <span>Tax</span>
+                          <span className="text-success fw-bold">
+                            Included in price
+                          </span>
                         </div>
                         <hr />
                         <div className="d-flex justify-content-between mb-3">

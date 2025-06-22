@@ -7,25 +7,36 @@ import {
   Table,
   Badge,
   Button,
-  Form,
   Modal,
+  Form,
   Alert,
-  InputGroup,
   Dropdown,
+  InputGroup,
   Spinner,
+  Toast,
+  ToastContainer,
 } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
 import {
+  setMessages,
   markMessageAsRead,
   markMessageAsUnread,
+  markAllAsRead,
   deleteMessage,
   replyToMessage,
   updateMessageStatus,
 } from "../../store/slices/messageSlice";
+import {
+  getCurrentISOString,
+  formatDateTime,
+  getRelativeTime,
+  sortByDateDesc,
+} from "../../utils/dateUtils";
 
 const AdminMessages = () => {
   const dispatch = useDispatch();
   const { messages } = useSelector((state) => state.messages);
+
   const [filteredMessages, setFilteredMessages] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -62,7 +73,7 @@ const AdminMessages = () => {
     }
 
     // Sort by date (newest first)
-    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    filtered = sortByDateDesc(filtered, "createdAt");
 
     setFilteredMessages(filtered);
   }, [messages, searchTerm, statusFilter, priorityFilter]);
@@ -109,7 +120,7 @@ const AdminMessages = () => {
         replyToMessage({
           messageId: selectedMessage.id,
           reply: replyText,
-          repliedAt: new Date(),
+          repliedAt: getCurrentISOString(),
         }),
       );
 
@@ -150,7 +161,7 @@ const AdminMessages = () => {
   };
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleString();
+    return formatDateTime(date);
   };
 
   const unreadCount = messages.filter((m) => !m.isRead).length;

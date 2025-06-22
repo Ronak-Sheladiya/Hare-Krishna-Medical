@@ -95,10 +95,14 @@ const Home = () => {
       <section
         className="hero-section"
         style={{
-          background: "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)",
+          background:
+            "linear-gradient(135deg, #e9ecef 0%, #f8f9fa 50%, #ffffff 100%)",
+          minHeight: "100vh",
           paddingTop: "60px",
           paddingBottom: "80px",
           position: "relative",
+          display: "flex",
+          alignItems: "center",
         }}
       >
         <div
@@ -109,26 +113,14 @@ const Home = () => {
             right: 0,
             bottom: 0,
             background:
-              "repeating-linear-gradient(45deg, transparent, transparent 100px, rgba(230, 57, 70, 0.02) 100px, rgba(230, 57, 70, 0.02) 200px)",
+              "repeating-linear-gradient(45deg, transparent, transparent 100px, rgba(230, 57, 70, 0.05) 100px, rgba(230, 57, 70, 0.05) 200px)",
           }}
         ></div>
 
         <Container style={{ position: "relative", zIndex: 2 }}>
           <Row className="align-items-center">
-            <Col lg={6} className="mb-4">
+            <Col lg={7} className="mb-4" style={{ paddingRight: "2rem" }}>
               <div className="hero-content">
-                <Badge
-                  style={{
-                    background: "#e63946",
-                    fontSize: "14px",
-                    padding: "8px 16px",
-                    marginBottom: "20px",
-                    borderRadius: "6px",
-                  }}
-                  className="mb-3"
-                >
-                  🏥 Trusted Medical Store
-                </Badge>
                 <h1
                   style={{
                     color: "#333333",
@@ -155,44 +147,6 @@ const Home = () => {
                   doorstep.
                 </p>
 
-                {/* Search Bar */}
-                <div className="hero-search mb-4">
-                  <InputGroup size="lg" style={{ maxWidth: "500px" }}>
-                    <InputGroup.Text
-                      style={{
-                        background: "#ffffff",
-                        border: "2px solid #e9ecef",
-                        borderRight: "none",
-                      }}
-                    >
-                      <i
-                        className="bi bi-search"
-                        style={{ color: "#495057" }}
-                      ></i>
-                    </InputGroup.Text>
-                    <Form.Control
-                      type="text"
-                      placeholder="Search medicines, healthcare products..."
-                      style={{
-                        border: "2px solid #e9ecef",
-                        borderLeft: "none",
-                        fontSize: "16px",
-                        padding: "12px 16px",
-                      }}
-                    />
-                    <Button
-                      style={{
-                        background: "#e63946",
-                        border: "2px solid #e63946",
-                        padding: "12px 24px",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Search
-                    </Button>
-                  </InputGroup>
-                </div>
-
                 <div className="hero-actions d-flex gap-3 flex-wrap">
                   <Button
                     as={Link}
@@ -206,6 +160,13 @@ const Home = () => {
                       fontSize: "16px",
                       fontWeight: "600",
                       boxShadow: "0 4px 12px rgba(230, 57, 70, 0.3)",
+                      transition: "all 0.3s ease",
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.background = "#343a40";
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.background = "#e63946";
                     }}
                   >
                     Shop Now
@@ -216,12 +177,23 @@ const Home = () => {
                     variant="outline-secondary"
                     size="lg"
                     style={{
-                      color: "#343a40",
-                      borderColor: "#343a40",
+                      color: "#e63946",
+                      borderColor: "#e63946",
                       borderRadius: "8px",
                       padding: "14px 28px",
                       fontSize: "16px",
                       fontWeight: "600",
+                      transition: "all 0.3s ease",
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.background = "#343a40";
+                      e.target.style.borderColor = "#343a40";
+                      e.target.style.color = "white";
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.background = "transparent";
+                      e.target.style.borderColor = "#e63946";
+                      e.target.style.color = "#e63946";
                     }}
                   >
                     Learn More
@@ -230,20 +202,24 @@ const Home = () => {
               </div>
             </Col>
 
-            <Col lg={6}>
+            <Col lg={5}>
               <div className="hero-image text-center">
                 <div
                   style={{
                     background: "transparent",
                     borderRadius: "20px",
-                    padding: "40px",
+                    padding: "20px",
+                    paddingLeft: "0px",
                   }}
                 >
                   <img
                     src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
                     alt="Hare Krishna Medical"
                     className="img-fluid"
-                    style={{ maxHeight: "300px" }}
+                    style={{
+                      maxHeight: "400px",
+                      filter: "brightness(1.1) contrast(1.2)",
+                    }}
                   />
                 </div>
               </div>
@@ -294,6 +270,17 @@ const Home = () => {
                   borderRadius: "8px",
                   padding: "12px 24px",
                   fontWeight: "600",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.background = "#343a40";
+                  e.target.style.borderColor = "#343a40";
+                  e.target.style.color = "white";
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.background = "transparent";
+                  e.target.style.borderColor = "#e63946";
+                  e.target.style.color = "#e63946";
                 }}
               >
                 View All Products
@@ -463,19 +450,19 @@ const Home = () => {
                 icon: "bi-truck",
                 title: "Fast Delivery",
                 description: "Quick and reliable delivery service",
-                color: "#dc3545",
+                color: "#e63946",
               },
               {
                 icon: "bi-headset",
                 title: "24/7 Support",
                 description: "Expert support whenever you need it",
-                color: "#343a40",
+                color: "#e63946",
               },
               {
                 icon: "bi-award",
                 title: "Trusted Brand",
                 description: "Years of experience in healthcare",
-                color: "#495057",
+                color: "#e63946",
               },
             ].map((feature, index) => (
               <Col lg={3} md={6} className="mb-4" key={index}>
@@ -489,17 +476,33 @@ const Home = () => {
                     transition: "all 0.3s ease",
                   }}
                   onMouseOver={(e) => {
-                    e.currentTarget.style.borderColor = feature.color;
+                    e.currentTarget.style.borderColor = "#343a40";
                     e.currentTarget.style.transform = "translateY(-4px)";
-                    e.currentTarget.style.boxShadow = `0 8px 25px ${feature.color}20`;
+                    e.currentTarget.style.boxShadow =
+                      "0 8px 25px rgba(52, 58, 64, 0.2)";
+                    // Change icon background color on hover
+                    const iconDiv =
+                      e.currentTarget.querySelector(".feature-icon");
+                    if (iconDiv) {
+                      iconDiv.style.background =
+                        "linear-gradient(135deg, #343a40, #495057)";
+                    }
                   }}
                   onMouseOut={(e) => {
                     e.currentTarget.style.borderColor = "#f8f9fa";
                     e.currentTarget.style.transform = "translateY(0)";
                     e.currentTarget.style.boxShadow = "none";
+                    // Restore icon background color
+                    const iconDiv =
+                      e.currentTarget.querySelector(".feature-icon");
+                    if (iconDiv) {
+                      iconDiv.style.background =
+                        "linear-gradient(135deg, #e63946, #dc3545)";
+                    }
                   }}
                 >
                   <div
+                    className="feature-icon"
                     style={{
                       width: "70px",
                       height: "70px",
@@ -511,6 +514,7 @@ const Home = () => {
                       margin: "0 auto 24px",
                       color: "white",
                       fontSize: "28px",
+                      transition: "all 0.3s ease",
                     }}
                   >
                     <i className={feature.icon}></i>
@@ -587,6 +591,13 @@ const Home = () => {
                     padding: "16px 32px",
                     fontSize: "16px",
                     fontWeight: "600",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = "#343a40";
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = "#e63946";
                   }}
                 >
                   Start Shopping
@@ -601,6 +612,15 @@ const Home = () => {
                     padding: "16px 32px",
                     fontSize: "16px",
                     fontWeight: "600",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = "#343a40";
+                    e.target.style.borderColor = "#343a40";
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = "transparent";
+                    e.target.style.borderColor = "white";
                   }}
                 >
                   Contact Us

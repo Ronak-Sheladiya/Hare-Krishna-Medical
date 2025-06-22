@@ -340,12 +340,17 @@ const UserProfile = () => {
                           </Col>
                           <Col md={6}>
                             <Form.Group className="mb-3">
-                              <Form.Label>Date of Birth</Form.Label>
+                              <Form.Label>
+                                Date of Birth (DD/MM/YYYY)
+                              </Form.Label>
                               <Form.Control
-                                type="date"
+                                type="text"
                                 name="dateOfBirth"
                                 value={personalInfo.dateOfBirth}
                                 onChange={handlePersonalInfoChange}
+                                placeholder="DD/MM/YYYY"
+                                pattern="\d{2}/\d{2}/\d{4}"
+                                maxLength="10"
                               />
                             </Form.Group>
                           </Col>
@@ -669,12 +674,12 @@ const UserProfile = () => {
           position: relative;
           display: inline-block;
         }
-        
+
         .profile-image-wrapper {
           position: relative;
           display: inline-block;
         }
-        
+
         .profile-image {
           width: 150px;
           height: 150px;
@@ -682,7 +687,7 @@ const UserProfile = () => {
           object-fit: cover;
           border: 4px solid #e9ecef;
         }
-        
+
         .profile-image-overlay {
           position: absolute;
           bottom: 10px;
@@ -695,24 +700,24 @@ const UserProfile = () => {
           align-items: center;
           justify-content: center;
         }
-        
+
         .profile-image-overlay label {
           margin: 0;
           cursor: pointer;
           color: white;
         }
-        
+
         .security-tips {
           list-style: none;
           padding-left: 0;
         }
-        
+
         .security-tips li {
           padding: 5px 0;
           position: relative;
           padding-left: 20px;
         }
-        
+
         .security-tips li:before {
           content: "✓";
           position: absolute;

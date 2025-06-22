@@ -45,23 +45,13 @@ const Cart = () => {
     return (price * quantity).toFixed(2);
   };
 
-  const shippingCost = totalAmount > 500 ? 0 : 50;
-  const taxRate = 0.05; // 5% tax
-  const taxAmount = totalAmount * taxRate;
-  const finalTotal = totalAmount + shippingCost + taxAmount;
+  const shippingCost = 0; // Free shipping for all orders
+  const taxAmount = 0; // Tax included in product price
+  const finalTotal = totalAmount + shippingCost;
 
   if (items.length === 0) {
     return (
       <div className="fade-in">
-        <section className="medical-breadcrumb">
-          <Container>
-            <Breadcrumb>
-              <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-              <Breadcrumb.Item active>Shopping Cart</Breadcrumb.Item>
-            </Breadcrumb>
-          </Container>
-        </section>
-
         <section className="section-padding">
           <Container>
             <Row className="justify-content-center">
@@ -93,16 +83,6 @@ const Cart = () => {
 
   return (
     <div className="fade-in">
-      {/* Breadcrumb */}
-      <section className="medical-breadcrumb">
-        <Container>
-          <Breadcrumb>
-            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-            <Breadcrumb.Item active>Shopping Cart</Breadcrumb.Item>
-          </Breadcrumb>
-        </Container>
-      </section>
-
       {/* Cart Content */}
       <section className="section-padding" style={{ paddingTop: "2rem" }}>
         <Container>
@@ -255,20 +235,18 @@ const Cart = () => {
                       <div className="d-flex justify-content-between mb-2">
                         <span>
                           Shipping{" "}
-                          {totalAmount > 500 && (
-                            <Badge bg="success" className="ms-1 small">
-                              FREE
-                            </Badge>
-                          )}
+                          <Badge bg="success" className="ms-1 small">
+                            FREE
+                          </Badge>
                         </span>
-                        <span>
-                          {shippingCost === 0 ? "FREE" : `₹${shippingCost}`}
-                        </span>
+                        <span className="text-success fw-bold">FREE</span>
                       </div>
 
                       <div className="d-flex justify-content-between mb-2">
-                        <span>Tax (5%)</span>
-                        <span>₹{taxAmount.toFixed(2)}</span>
+                        <span>Tax</span>
+                        <span className="text-success fw-bold">
+                          Included in product price
+                        </span>
                       </div>
 
                       <hr />
@@ -280,13 +258,11 @@ const Cart = () => {
                         </strong>
                       </div>
 
-                      {totalAmount <= 500 && (
-                        <Alert variant="info" className="small mb-3">
-                          <i className="bi bi-info-circle me-1"></i>
-                          Add ₹{(500 - totalAmount).toFixed(2)} more for free
-                          shipping!
-                        </Alert>
-                      )}
+                      <Alert variant="success" className="small mb-3">
+                        <i className="bi bi-check-circle me-1"></i>
+                        <strong>Free shipping on all orders!</strong> Tax is
+                        included in product prices.
+                      </Alert>
 
                       <div className="d-grid">
                         <Button
@@ -312,8 +288,16 @@ const Cart = () => {
                     </h6>
                     <div className="shipping-info">
                       <div className="d-flex align-items-center mb-2">
-                        <i className="bi bi-check-circle text-success me-2"></i>
-                        <small>Free shipping on orders above ₹500</small>
+                        <i className="bi bi-truck text-success me-2"></i>
+                        <small>
+                          <strong>Free shipping on all orders</strong>
+                        </small>
+                      </div>
+                      <div className="d-flex align-items-center mb-2">
+                        <i className="bi bi-receipt text-info me-2"></i>
+                        <small>
+                          <strong>Tax included in product prices</strong>
+                        </small>
                       </div>
                       <div className="d-flex align-items-center mb-2">
                         <i className="bi bi-clock text-primary me-2"></i>

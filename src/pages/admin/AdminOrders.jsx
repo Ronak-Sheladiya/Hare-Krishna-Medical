@@ -11,11 +11,13 @@ import {
   Form,
   InputGroup,
 } from "react-bootstrap";
+import ProfessionalInvoice from "../../components/common/ProfessionalInvoice";
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
@@ -122,6 +124,21 @@ const AdminOrders = () => {
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
     setShowDetailsModal(true);
+  };
+
+  const handleViewInvoice = (order) => {
+    setSelectedOrder(order);
+    setShowInvoiceModal(true);
+  };
+
+  const handleDownloadInvoice = (order) => {
+    // Create invoice and trigger print/download
+    setSelectedOrder(order);
+    setShowInvoiceModal(true);
+    // Auto-trigger print after a short delay to allow modal to render
+    setTimeout(() => {
+      window.print();
+    }, 500);
   };
 
   const getStatusVariant = (status) => {
@@ -303,15 +320,33 @@ const AdminOrders = () => {
                           </small>
                         </td>
                         <td>
-                          <Button
-                            size="sm"
-                            variant="outline-primary"
-                            onClick={() => handleViewDetails(order)}
-                            className="btn-medical-outline"
-                          >
-                            <i className="bi bi-eye me-1"></i>
-                            View
-                          </Button>
+                          <div className="d-flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline-primary"
+                              onClick={() => handleViewDetails(order)}
+                              className="btn-medical-outline"
+                            >
+                              <i className="bi bi-eye me-1"></i>
+                              View
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline-success"
+                              onClick={() => handleViewInvoice(order)}
+                            >
+                              <i className="bi bi-receipt me-1"></i>
+                              Invoice
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline-info"
+                              onClick={() => handleDownloadInvoice(order)}
+                            >
+                              <i className="bi bi-download me-1"></i>
+                              Download
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -469,6 +504,110 @@ const AdminOrders = () => {
             onClick={() => setShowDetailsModal(false)}
           >
             Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Invoice View Modal */}
+      <Modal
+        show={showInvoiceModal}
+        onHide={() => setShowInvoiceModal(false)}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <i className="bi bi-receipt me-2"></i>
+            Order Invoice
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="p-0">
+          {selectedOrder && (
+            <div
+              className="invoice-preview"
+              style={{ maxHeight: "70vh", overflowY: "auto" }}
+            >
+              <ProfessionalInvoice
+                invoiceData={{
+                  invoiceId: `HKM-INV-${selectedOrder.id}`,
+                  orderId: selectedOrder.id,
+                  orderDate: selectedOrder.orderDate,
+                  orderTime: selectedOrder.orderTime,
+                  customerDetails: {
+                    fullName: selectedOrder.customerName,
+                    email: selectedOrder.customerEmail,
+                    mobile: selectedOrder.customerPhone,
+                    address: selectedOrder.customerAddress,
+                    city: "Surat",
+                    state: "Gujarat",
+                    pincode: "395007",
+                  },
+                  items: selectedOrder.items,
+                  subtotal: selectedOrder.subtotal,
+                  shipping: selectedOrder.shipping,
+                  total: selectedOrder.total,
+                  paymentMethod: selectedOrder.paymentMethod,
+                  paymentStatus: selectedOrder.paymentStatus,
+                  status: selectedOrder.status,
+                }}
+                forPrint={false}
+              />
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="outline-secondary"
+            onClick={() => setShowInvoiceModal(false)}
+          >
+            Close
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              // Create a new window for printing
+              const printWindow = window.open(
+                "",
+                "_blank",
+                "width=800,height=600",
+              );
+              const invoiceContent =
+                document.querySelector(".invoice-preview").innerHTML;
+
+              printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                  <head>
+                    <title>Invoice ${selectedOrder?.id}</title>
+                    <style>
+                      body {
+                        margin: 0;
+                        padding: 0;
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                      }
+                      @media print {
+                        body { margin: 0; padding: 0; }
+                        @page { size: A4; margin: 0.5in; }
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    ${invoiceContent}
+                  </body>
+                </html>
+              `);
+
+              printWindow.document.close();
+              printWindow.focus();
+              setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+              }, 250);
+            }}
+            className="btn-medical-primary"
+          >
+            <i className="bi bi-printer me-2"></i>
+            Print Invoice
           </Button>
         </Modal.Footer>
       </Modal>

@@ -9,10 +9,14 @@ import {
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { useSelector } from "react-redux";
 
+// Session management
+import sessionManager from "./utils/sessionManager.js";
+
 // Components
 import Header from "./components/layout/Header.jsx";
 import Footer from "./components/layout/Footer.jsx";
 import LoadingSpinner from "./components/common/LoadingSpinner.jsx";
+import GlobalSecurity from "./components/common/GlobalSecurity.jsx";
 
 // Pages
 import Home from "./pages/Home.jsx";
@@ -97,7 +101,13 @@ function App() {
       setLoading(false);
     }, 2000);
 
-    return () => clearTimeout(timer);
+    // Initialize session manager
+    sessionManager; // This initializes the session manager
+
+    return () => {
+      clearTimeout(timer);
+      // Session manager cleanup is handled by its own destructor
+    };
   }, []);
 
   if (loading) {
@@ -108,6 +118,7 @@ function App() {
     <Router>
       <div className="App">
         <ScrollToTop />
+        <GlobalSecurity />
         <Header />
         <main>
           <Routes>

@@ -12,6 +12,7 @@ import {
 } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { addMessage } from "../store/slices/messageSlice";
+import { getCurrentISOString } from "../utils/dateUtils";
 
 const Contact = () => {
   const dispatch = useDispatch();
@@ -68,7 +69,7 @@ const Contact = () => {
         priority: "Medium",
         status: "Open",
         isRead: false,
-        createdAt: new Date(),
+        createdAt: getCurrentISOString(),
         reply: "",
         repliedAt: null,
       };
@@ -95,22 +96,6 @@ const Contact = () => {
 
   return (
     <div className="fade-in">
-      {/* Breadcrumb */}
-      <section
-        style={{
-          background: "#f8f9fa",
-          paddingTop: "20px",
-          paddingBottom: "20px",
-        }}
-      >
-        <Container>
-          <Breadcrumb>
-            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-            <Breadcrumb.Item active>Contact Us</Breadcrumb.Item>
-          </Breadcrumb>
-        </Container>
-      </section>
-
       {/* Hero Section */}
       <section
         style={{
@@ -170,18 +155,33 @@ const Contact = () => {
                   transition: "all 0.3s ease",
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.borderColor = "#e63946";
-                  e.currentTarget.style.transform = "translateY(-8px)";
+                  e.currentTarget.style.borderColor = "#343a40";
+                  e.currentTarget.style.transform = "translateY(-4px)";
                   e.currentTarget.style.boxShadow =
-                    "0 12px 30px rgba(230, 57, 70, 0.15)";
+                    "0 8px 25px rgba(52, 58, 64, 0.2)";
+                  // Change icon background color on hover
+                  const iconDiv =
+                    e.currentTarget.querySelector(".contact-icon");
+                  if (iconDiv) {
+                    iconDiv.style.background =
+                      "linear-gradient(135deg, #343a40, #495057)";
+                  }
                 }}
                 onMouseOut={(e) => {
                   e.currentTarget.style.borderColor = "#f8f9fa";
                   e.currentTarget.style.transform = "translateY(0)";
                   e.currentTarget.style.boxShadow = "none";
+                  // Restore icon background color
+                  const iconDiv =
+                    e.currentTarget.querySelector(".contact-icon");
+                  if (iconDiv) {
+                    iconDiv.style.background =
+                      "linear-gradient(135deg, #e63946, #dc3545)";
+                  }
                 }}
               >
                 <div
+                  className="contact-icon"
                   style={{
                     width: "80px",
                     height: "80px",
@@ -193,6 +193,7 @@ const Contact = () => {
                     margin: "0 auto 24px",
                     color: "white",
                     fontSize: "32px",
+                    transition: "all 0.3s ease",
                   }}
                 >
                   <i className="bi bi-geo-alt-fill"></i>
@@ -213,9 +214,22 @@ const Contact = () => {
                     border: "none",
                     borderRadius: "8px",
                     padding: "10px 20px",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = "#343a40";
+                    e.target.style.color = "white";
+                    const icon = e.target.querySelector("i");
+                    if (icon) icon.style.color = "white";
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = "#e63946";
+                    e.target.style.color = "white";
+                    const icon = e.target.querySelector("i");
+                    if (icon) icon.style.color = "white";
                   }}
                 >
-                  <i className="bi bi-map me-2"></i>
+                  <i className="bi bi-map me-2" style={{ color: "white" }}></i>
                   View on Map
                 </Button>
               </Card>
@@ -232,22 +246,37 @@ const Contact = () => {
                   transition: "all 0.3s ease",
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.borderColor = "#dc3545";
-                  e.currentTarget.style.transform = "translateY(-8px)";
+                  e.currentTarget.style.borderColor = "#343a40";
+                  e.currentTarget.style.transform = "translateY(-4px)";
                   e.currentTarget.style.boxShadow =
-                    "0 12px 30px rgba(220, 53, 69, 0.15)";
+                    "0 8px 25px rgba(52, 58, 64, 0.2)";
+                  // Change icon background color on hover
+                  const iconDiv =
+                    e.currentTarget.querySelector(".contact-icon");
+                  if (iconDiv) {
+                    iconDiv.style.background =
+                      "linear-gradient(135deg, #343a40, #495057)";
+                  }
                 }}
                 onMouseOut={(e) => {
                   e.currentTarget.style.borderColor = "#f8f9fa";
                   e.currentTarget.style.transform = "translateY(0)";
                   e.currentTarget.style.boxShadow = "none";
+                  // Restore icon background color
+                  const iconDiv =
+                    e.currentTarget.querySelector(".contact-icon");
+                  if (iconDiv) {
+                    iconDiv.style.background =
+                      "linear-gradient(135deg, #e63946, #dc3545)";
+                  }
                 }}
               >
                 <div
+                  className="contact-icon"
                   style={{
                     width: "80px",
                     height: "80px",
-                    background: "linear-gradient(135deg, #dc3545, #e63946)",
+                    background: "linear-gradient(135deg, #e63946, #dc3545)",
                     borderRadius: "50%",
                     display: "flex",
                     alignItems: "center",
@@ -255,6 +284,7 @@ const Contact = () => {
                     margin: "0 auto 24px",
                     color: "white",
                     fontSize: "32px",
+                    transition: "all 0.3s ease",
                   }}
                 >
                   <i className="bi bi-telephone-fill"></i>
@@ -281,13 +311,29 @@ const Contact = () => {
                 <Button
                   href="tel:+917698913354"
                   style={{
-                    background: "#dc3545",
+                    background: "#e63946",
                     border: "none",
                     borderRadius: "8px",
                     padding: "10px 20px",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = "#343a40";
+                    e.target.style.color = "white";
+                    const icon = e.target.querySelector("i");
+                    if (icon) icon.style.color = "white";
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = "#e63946";
+                    e.target.style.color = "white";
+                    const icon = e.target.querySelector("i");
+                    if (icon) icon.style.color = "white";
                   }}
                 >
-                  <i className="bi bi-telephone me-2"></i>
+                  <i
+                    className="bi bi-telephone me-2"
+                    style={{ color: "white" }}
+                  ></i>
                   Call Now
                 </Button>
               </Card>
@@ -305,21 +351,36 @@ const Contact = () => {
                 }}
                 onMouseOver={(e) => {
                   e.currentTarget.style.borderColor = "#343a40";
-                  e.currentTarget.style.transform = "translateY(-8px)";
+                  e.currentTarget.style.transform = "translateY(-4px)";
                   e.currentTarget.style.boxShadow =
-                    "0 12px 30px rgba(52, 58, 64, 0.15)";
+                    "0 8px 25px rgba(52, 58, 64, 0.2)";
+                  // Change icon background color on hover
+                  const iconDiv =
+                    e.currentTarget.querySelector(".contact-icon");
+                  if (iconDiv) {
+                    iconDiv.style.background =
+                      "linear-gradient(135deg, #343a40, #495057)";
+                  }
                 }}
                 onMouseOut={(e) => {
                   e.currentTarget.style.borderColor = "#f8f9fa";
                   e.currentTarget.style.transform = "translateY(0)";
                   e.currentTarget.style.boxShadow = "none";
+                  // Restore icon background color
+                  const iconDiv =
+                    e.currentTarget.querySelector(".contact-icon");
+                  if (iconDiv) {
+                    iconDiv.style.background =
+                      "linear-gradient(135deg, #e63946, #dc3545)";
+                  }
                 }}
               >
                 <div
+                  className="contact-icon"
                   style={{
                     width: "80px",
                     height: "80px",
-                    background: "linear-gradient(135deg, #343a40, #495057)",
+                    background: "linear-gradient(135deg, #e63946, #dc3545)",
                     borderRadius: "50%",
                     display: "flex",
                     alignItems: "center",
@@ -327,6 +388,7 @@ const Contact = () => {
                     margin: "0 auto 24px",
                     color: "white",
                     fontSize: "32px",
+                    transition: "all 0.3s ease",
                   }}
                 >
                   <i className="bi bi-envelope-fill"></i>
@@ -345,13 +407,29 @@ const Contact = () => {
                 <Button
                   href="mailto:harekrishnamedical@gmail.com"
                   style={{
-                    background: "#343a40",
+                    background: "#e63946",
                     border: "none",
                     borderRadius: "8px",
                     padding: "10px 20px",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = "#343a40";
+                    e.target.style.color = "white";
+                    const icon = e.target.querySelector("i");
+                    if (icon) icon.style.color = "white";
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = "#e63946";
+                    e.target.style.color = "white";
+                    const icon = e.target.querySelector("i");
+                    if (icon) icon.style.color = "white";
                   }}
                 >
-                  <i className="bi bi-envelope me-2"></i>
+                  <i
+                    className="bi bi-envelope me-2"
+                    style={{ color: "white" }}
+                  ></i>
                   Send Email
                 </Button>
               </Card>
@@ -532,6 +610,13 @@ const Contact = () => {
                         fontSize: "16px",
                         fontWeight: "600",
                         width: "100%",
+                        transition: "all 0.3s ease",
+                      }}
+                      onMouseOver={(e) => {
+                        if (!loading) e.target.style.background = "#343a40";
+                      }}
+                      onMouseOut={(e) => {
+                        if (!loading) e.target.style.background = "#e63946";
                       }}
                     >
                       {loading ? (

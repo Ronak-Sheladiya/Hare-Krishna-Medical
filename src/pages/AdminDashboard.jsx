@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Container,
   Row,
@@ -8,12 +8,15 @@ import {
   Table,
   Badge,
   ProgressBar,
+  Modal,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 const AdminDashboard = () => {
   const { unreadCount } = useSelector((state) => state.messages);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   // Mock data for admin dashboard
   const dashboardStats = {
@@ -32,36 +35,76 @@ const AdminDashboard = () => {
     {
       id: "HKM12345678",
       customer: "John Doe",
+      customerEmail: "john.doe@email.com",
+      customerPhone: "+91 9876543210",
+      address: "123 Main Street, Surat, Gujarat 395007",
       amount: 235.5,
       status: "Pending",
       date: "2024-01-15",
+      time: "10:30 AM",
       items: 3,
+      paymentMethod: "Online",
+      orderItems: [
+        { name: "Paracetamol Tablets", quantity: 2, price: 25.99 },
+        { name: "Vitamin D3", quantity: 1, price: 45.5 },
+        { name: "Cough Syrup", quantity: 1, price: 35.75 },
+      ],
     },
     {
       id: "HKM12345679",
       customer: "Jane Smith",
+      customerEmail: "jane.smith@email.com",
+      customerPhone: "+91 9123456789",
+      address: "456 Oak Avenue, Ahmedabad, Gujarat 380001",
       amount: 156.75,
       status: "Confirmed",
       date: "2024-01-15",
+      time: "02:15 PM",
       items: 2,
+      paymentMethod: "COD",
+      orderItems: [
+        { name: "Antiseptic Liquid", quantity: 2, price: 28.0 },
+        { name: "Digital Thermometer", quantity: 1, price: 100.75 },
+      ],
     },
     {
       id: "HKM12345680",
       customer: "Mike Johnson",
+      customerEmail: "mike.j@company.com",
+      customerPhone: "+91 9988776655",
+      address: "789 Business District, Vadodara, Gujarat 390001",
       amount: 89.25,
       status: "Delivered",
       date: "2024-01-14",
+      time: "11:45 AM",
       items: 1,
+      paymentMethod: "Online",
+      orderItems: [{ name: "BP Monitor", quantity: 1, price: 89.25 }],
     },
     {
       id: "HKM12345681",
       customer: "Sarah Wilson",
+      customerEmail: "sarah.w@email.com",
+      customerPhone: "+91 9876512345",
+      address: "321 Health Care Lane, Rajkot, Gujarat 360001",
       amount: 345.0,
       status: "Processing",
       date: "2024-01-14",
+      time: "04:20 PM",
       items: 5,
+      paymentMethod: "Online",
+      orderItems: [
+        { name: "Medicine Kit", quantity: 1, price: 150.0 },
+        { name: "First Aid Box", quantity: 1, price: 89.0 },
+        { name: "Hand Sanitizer", quantity: 3, price: 35.33 },
+      ],
     },
   ];
+
+  const handleViewOrder = (order) => {
+    setSelectedOrder(order);
+    setShowOrderModal(true);
+  };
 
   const lowStockProducts = [
     { id: 1, name: "Paracetamol Tablets", stock: 5, threshold: 20 },
@@ -317,12 +360,31 @@ const AdminDashboard = () => {
                             : "outline-info"
                         }
                         className="w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 position-relative"
+                        style={{
+                          transition: "all 0.3s ease",
+                        }}
+                        onMouseOver={(e) => {
+                          e.target.style.background = "#e63946";
+                          e.target.style.borderColor = "#e63946";
+                          e.target.style.color = "white";
+                        }}
+                        onMouseOut={(e) => {
+                          e.target.style.background = "transparent";
+                          e.target.style.borderColor =
+                            dashboardStats.unreadMessages > 0
+                              ? "#dc3545"
+                              : "#0dcaf0";
+                          e.target.style.color =
+                            dashboardStats.unreadMessages > 0
+                              ? "#dc3545"
+                              : "#0dcaf0";
+                        }}
                       >
                         <i className="bi bi-envelope mb-2 fs-1"></i>
                         <span className="fw-bold">
                           {dashboardStats.unreadMessages}
                         </span>
-                        <small>Unread Messages</small>
+                        <small>Manage Messages</small>
                         {dashboardStats.unreadMessages > 0 && (
                           <Badge
                             bg="danger"
@@ -400,12 +462,25 @@ const AdminDashboard = () => {
                             </td>
                             <td>
                               <Button
-                                as={Link}
-                                to={`/admin/orders/${order.id}`}
                                 size="sm"
                                 variant="outline-primary"
                                 className="btn-medical-outline"
+                                onClick={() => handleViewOrder(order)}
+                                style={{
+                                  transition: "all 0.3s ease",
+                                }}
+                                onMouseOver={(e) => {
+                                  e.target.style.background = "#e63946";
+                                  e.target.style.borderColor = "#e63946";
+                                  e.target.style.color = "white";
+                                }}
+                                onMouseOut={(e) => {
+                                  e.target.style.background = "transparent";
+                                  e.target.style.borderColor = "#e63946";
+                                  e.target.style.color = "#e63946";
+                                }}
                               >
+                                <i className="bi bi-eye me-1"></i>
                                 View
                               </Button>
                             </td>
@@ -458,6 +533,141 @@ const AdminDashboard = () => {
           </Row>
         </Container>
       </section>
+
+      {/* Order Details Modal */}
+      <Modal
+        show={showOrderModal}
+        onHide={() => setShowOrderModal(false)}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <i className="bi bi-bag-check me-2"></i>
+            Order Details
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedOrder && (
+            <div>
+              {/* Order Information */}
+              <Row className="mb-4">
+                <Col md={6}>
+                  <Card className="h-100">
+                    <Card.Header className="bg-light">
+                      <h6 className="mb-0">Order Information</h6>
+                    </Card.Header>
+                    <Card.Body>
+                      <div className="mb-2">
+                        <strong>Order ID:</strong> {selectedOrder.id}
+                      </div>
+                      <div className="mb-2">
+                        <strong>Date:</strong> {selectedOrder.date}
+                      </div>
+                      <div className="mb-2">
+                        <strong>Time:</strong> {selectedOrder.time}
+                      </div>
+                      <div className="mb-2">
+                        <strong>Status:</strong>{" "}
+                        <Badge bg={getStatusVariant(selectedOrder.status)}>
+                          {selectedOrder.status}
+                        </Badge>
+                      </div>
+                      <div className="mb-2">
+                        <strong>Payment:</strong> {selectedOrder.paymentMethod}
+                      </div>
+                      <div>
+                        <strong>Total Amount:</strong>{" "}
+                        <span className="fw-bold text-success">
+                          ₹{selectedOrder.amount}
+                        </span>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col md={6}>
+                  <Card className="h-100">
+                    <Card.Header className="bg-light">
+                      <h6 className="mb-0">Customer Details</h6>
+                    </Card.Header>
+                    <Card.Body>
+                      <div className="mb-2">
+                        <strong>Name:</strong> {selectedOrder.customer}
+                      </div>
+                      <div className="mb-2">
+                        <strong>Email:</strong> {selectedOrder.customerEmail}
+                      </div>
+                      <div className="mb-2">
+                        <strong>Phone:</strong> {selectedOrder.customerPhone}
+                      </div>
+                      <div>
+                        <strong>Address:</strong> {selectedOrder.address}
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              </Row>
+
+              {/* Order Items */}
+              <Card>
+                <Card.Header className="bg-light">
+                  <h6 className="mb-0">Order Items ({selectedOrder.items})</h6>
+                </Card.Header>
+                <Card.Body>
+                  <Table responsive>
+                    <thead>
+                      <tr>
+                        <th>Item</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedOrder.orderItems.map((item, index) => (
+                        <tr key={index}>
+                          <td>{item.name}</td>
+                          <td>{item.quantity}</td>
+                          <td>₹{item.price.toFixed(2)}</td>
+                          <td>₹{(item.price * item.quantity).toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                  <div className="text-end">
+                    <strong>Order Total: ₹{selectedOrder.amount}</strong>
+                  </div>
+                </Card.Body>
+              </Card>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowOrderModal(false)}>
+            Close
+          </Button>
+          <Button
+            as={Link}
+            to={`/order/${selectedOrder?.id}`}
+            variant="primary"
+            className="btn-medical-primary"
+            style={{
+              transition: "all 0.3s ease",
+            }}
+            onMouseOver={(e) => {
+              e.target.style.background = "#343a40";
+              e.target.style.borderColor = "#343a40";
+            }}
+            onMouseOut={(e) => {
+              e.target.style.background = "#e63946";
+              e.target.style.borderColor = "#e63946";
+            }}
+          >
+            <i className="bi bi-arrow-right me-2"></i>
+            Go to Full Order Details
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

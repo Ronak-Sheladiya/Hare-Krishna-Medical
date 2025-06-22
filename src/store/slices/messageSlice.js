@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { createDateOffset } from "../../utils/dateUtils";
 
 const initialState = {
   messages: [
@@ -13,7 +14,7 @@ const initialState = {
       priority: "Medium",
       status: "Open",
       isRead: false,
-      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+      createdAt: createDateOffset(2), // 2 hours ago
       reply: "",
       repliedAt: null,
     },
@@ -28,10 +29,10 @@ const initialState = {
       priority: "High",
       status: "In Progress",
       isRead: true,
-      createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
+      createdAt: createDateOffset(4), // 4 hours ago
       reply:
         "Thank you for contacting us. Your order has been processed and will be shipped within 24 hours.",
-      repliedAt: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
+      repliedAt: createDateOffset(1), // 1 hour ago
     },
     {
       id: 3,
@@ -44,7 +45,7 @@ const initialState = {
       priority: "High",
       status: "Open",
       isRead: false,
-      createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
+      createdAt: createDateOffset(6), // 6 hours ago
       reply: "",
       repliedAt: null,
     },
@@ -59,10 +60,10 @@ const initialState = {
       priority: "Medium",
       status: "Replied",
       isRead: true,
-      createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000), // 12 hours ago
+      createdAt: createDateOffset(12), // 12 hours ago
       reply:
         "Yes, the BP monitor is in stock. We provide home delivery across the city. Your order will be delivered within 2-3 hours.",
-      repliedAt: new Date(Date.now() - 8 * 60 * 60 * 1000), // 8 hours ago
+      repliedAt: createDateOffset(8), // 8 hours ago
     },
     {
       id: 5,
@@ -75,10 +76,10 @@ const initialState = {
       priority: "Low",
       status: "Closed",
       isRead: true,
-      createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+      createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
       reply:
         "Thank you for your feedback! We're working on adding more payment options including UPI and digital wallets.",
-      repliedAt: new Date(Date.now() - 20 * 60 * 60 * 1000), // 20 hours ago
+      repliedAt: new Date(Date.now() - 20 * 60 * 60 * 1000).toISOString(), // 20 hours ago
     },
     {
       id: 6,
@@ -91,7 +92,7 @@ const initialState = {
       priority: "Medium",
       status: "Open",
       isRead: false,
-      createdAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+      createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
       reply: "",
       repliedAt: null,
     },

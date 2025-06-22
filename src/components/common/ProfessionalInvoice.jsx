@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import QRCode from "qrcode";
 
 const ProfessionalInvoice = ({
@@ -6,6 +6,10 @@ const ProfessionalInvoice = ({
   qrCode = null,
   forPrint = false,
 }) => {
+  const [generatedQR, setGeneratedQR] = useState("");
+  const [isPrintReady, setIsPrintReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
   const {
     invoiceId,
     orderId,
@@ -21,690 +25,1097 @@ const ProfessionalInvoice = ({
     status = "Delivered",
   } = invoiceData;
 
-  // Calculate totals without tax (all taxes included in product price)
+  // Generate QR Code
+  useEffect(() => {
+    const generateQR = async () => {
+      try {
+        setIsLoading(true);
+        const qrText = `Invoice: ${invoiceId}\nOrder: ${orderId}\nAmount: ₹${total}\nVerify: https://harekrishan.medical/verify/${invoiceId}`;
+        const qrDataURL = await QRCode.toDataURL(qrText, {
+          width: 100,
+          margin: 1,
+          color: {
+            dark: "#1a202c",
+            light: "#ffffff",
+          },
+        });
+        setGeneratedQR(qrDataURL);
+        setIsPrintReady(true);
+      } catch (error) {
+        console.error("QR generation error:", error);
+        setIsPrintReady(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (invoiceId && orderId) {
+      generateQR();
+    } else {
+      setIsLoading(false);
+      setIsPrintReady(true);
+    }
+  }, [invoiceId, orderId, total]);
+
+  // Calculate totals
   const calculatedSubtotal =
     subtotal ||
     items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const calculatedTotal = total || calculatedSubtotal + shipping;
 
-  // Generate QR code with invoice URL
-  const qrCodeValue =
-    qrCode || `https://harekrishan.medical/invoice/${invoiceId}`;
+  // Enhanced print function
+  const handlePrint = async () => {
+    if (!isPrintReady || isLoading) {
+      alert("Please wait, invoice is still loading...");
+      return;
+    }
 
-  const invoiceStyles = {
-    // A4 dimensions: 210mm x 297mm
-    container: {
-      width: "210mm",
-      minHeight: "297mm",
-      maxWidth: "210mm",
-      margin: "0 auto",
-      padding: "20mm",
-      fontFamily: "'Segoe UI', Arial, sans-serif",
-      fontSize: "12px",
-      lineHeight: "1.4",
-      color: "#333333",
-      backgroundColor: "#ffffff",
-      boxSizing: "border-box",
-      position: "relative",
-      border: forPrint ? "none" : "1px solid #e9ecef",
-      pageBreakAfter: "always",
-    },
-    header: {
-      background: "linear-gradient(135deg, #e63946, #dc3545)",
-      color: "#ffffff",
-      padding: "25mm 20mm",
-      margin: "-20mm -20mm 20mm -20mm",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "flex-start",
-    },
-    companyInfo: {
-      flex: "1",
-    },
-    companyLogo: {
-      width: "80px",
-      height: "80px",
-      marginBottom: "15mm",
-      borderRadius: "8px",
-      background: "#ffffff",
-      padding: "8px",
-    },
-    companyName: {
-      fontSize: "28px",
-      fontWeight: "900",
-      color: "#ffffff",
-      margin: "0 0 8mm 0",
-      lineHeight: "1.1",
-      textShadow: "0 2px 4px rgba(0,0,0,0.3)",
-    },
-    companyTagline: {
-      fontSize: "16px",
-      color: "#ffffff",
-      marginBottom: "15mm",
-      opacity: "0.95",
-      fontWeight: "500",
-    },
-    companyAddress: {
-      fontSize: "14px",
-      color: "#ffffff",
-      lineHeight: "1.5",
-      opacity: "0.9",
-    },
-    invoiceTitle: {
-      textAlign: "right",
-      flex: "0 0 auto",
-    },
-    invoiceTitleText: {
-      fontSize: "42px",
-      fontWeight: "900",
-      color: "#ffffff",
-      margin: "0 0 15mm 0",
-      textShadow: "0 3px 6px rgba(0,0,0,0.3)",
-      letterSpacing: "2px",
-    },
-    invoiceDetails: {
-      background: "rgba(255,255,255,0.2)",
-      backdropFilter: "blur(10px)",
-      border: "2px solid rgba(255,255,255,0.3)",
-      padding: "15mm",
-      borderRadius: "10px",
-      fontSize: "14px",
-      color: "#ffffff",
-      minWidth: "200px",
-    },
-    customerSection: {
-      display: "flex",
-      gap: "25mm",
-      marginBottom: "25mm",
-    },
-    customerBox: {
-      flex: "1",
-      background: "#f8f9fa",
-      border: "3px solid #ffffff",
-      borderRadius: "12px",
-      padding: "20mm",
-      boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
-    },
-    customerTitle: {
-      fontSize: "16px",
-      fontWeight: "800",
-      color: "#e63946",
-      marginBottom: "15mm",
-      textTransform: "uppercase",
-      letterSpacing: "1px",
-      borderBottom: "3px solid #e63946",
-      paddingBottom: "8mm",
-    },
-    customerText: {
-      color: "#333333",
-      fontSize: "14px",
-      lineHeight: "1.6",
-    },
-    itemsTable: {
-      width: "100%",
-      borderCollapse: "collapse",
-      marginBottom: "25mm",
-      border: "3px solid #f8f9fa",
-      borderRadius: "12px",
-      overflow: "hidden",
-      boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
-    },
-    tableHeader: {
-      background: "linear-gradient(135deg, #343a40, #495057)",
-      color: "#ffffff",
-    },
-    tableHeaderCell: {
-      padding: "15mm 12mm",
-      fontSize: "14px",
-      fontWeight: "800",
-      textAlign: "left",
-      textTransform: "uppercase",
-      letterSpacing: "1px",
-    },
-    tableRow: {
-      borderBottom: "2px solid #f8f9fa",
-      background: "#ffffff",
-    },
-    tableRowAlt: {
-      background: "#f8f9fa",
-      borderBottom: "2px solid #e9ecef",
-    },
-    tableCell: {
-      padding: "12mm 12mm",
-      fontSize: "13px",
-      color: "#333333",
-      verticalAlign: "top",
-      borderRight: "2px solid #f8f9fa",
-    },
-    totalsSection: {
-      display: "flex",
-      justifyContent: "flex-end",
-      marginBottom: "25mm",
-    },
-    totalsTable: {
-      width: "350px",
-      borderCollapse: "collapse",
-      border: "3px solid #f8f9fa",
-      borderRadius: "12px",
-      overflow: "hidden",
-      boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
-    },
-    totalRow: {
-      background: "linear-gradient(135deg, #e63946, #dc3545)",
-      color: "#ffffff",
-      fontWeight: "800",
-    },
-    totalRowRegular: {
-      background: "#f8f9fa",
-      color: "#333333",
-    },
-    totalCell: {
-      padding: "12mm 15mm",
-      fontSize: "14px",
-      fontWeight: "700",
-    },
-    footer: {
-      marginTop: "25mm",
-      borderTop: "4px solid #e63946",
-      paddingTop: "20mm",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "flex-start",
-      background: "#f8f9fa",
-      padding: "25mm",
-      borderRadius: "12px",
-      margin: "25mm -20mm -20mm -20mm",
-    },
-    footerLeft: {
-      flex: "1",
-    },
-    footerTitle: {
-      fontSize: "18px",
-      fontWeight: "800",
-      color: "#e63946",
-      marginBottom: "15mm",
-    },
-    termsText: {
-      fontSize: "12px",
-      color: "#495057",
-      lineHeight: "1.5",
-    },
-    qrSection: {
-      textAlign: "center",
-      marginLeft: "25mm",
-      position: "relative",
-    },
-    qrContainer: {
-      position: "relative",
-      display: "inline-block",
-    },
-    qrCode: {
-      width: "120px",
-      height: "120px",
-      border: "3px solid #e9ecef",
-      borderRadius: "12px",
-      padding: "8px",
-      background: "#ffffff",
-    },
-    qrLogo: {
-      position: "absolute",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      width: "30px",
-      height: "30px",
-      background: "#ffffff",
-      borderRadius: "50%",
-      padding: "4px",
-      border: "2px solid #e63946",
-      zIndex: 10,
-    },
-    statusBadge: {
-      background:
-        status === "Delivered"
-          ? "#28a745"
-          : status === "Pending"
-            ? "#ffc107"
-            : status === "Processing"
-              ? "#17a2b8"
-              : "#6c757d",
-      color: "#ffffff",
-      padding: "6mm 10mm",
-      borderRadius: "6px",
-      fontSize: "12px",
-      fontWeight: "700",
-      textTransform: "uppercase",
-      letterSpacing: "1px",
-    },
-    paymentBadge: {
-      background: paymentStatus === "Paid" ? "#28a745" : "#dc3545",
-      color: "#ffffff",
-      padding: "4mm 8mm",
-      borderRadius: "4px",
-      fontSize: "11px",
-      fontWeight: "700",
-      marginLeft: "8mm",
-    },
-    taxNote: {
-      background: "#fff3cd",
-      border: "2px solid #ffeaa7",
-      borderRadius: "8px",
-      padding: "15mm",
-      marginBottom: "20mm",
-      color: "#856404",
-    },
+    try {
+      // Create print window with better configuration
+      const printWindow = window.open(
+        "",
+        "PRINT",
+        "height=800,width=1000,toolbar=no,menubar=no,scrollbars=yes,resizable=yes",
+      );
+
+      if (!printWindow) {
+        alert("Please allow popups for printing functionality");
+        return;
+      }
+
+      // Generate complete HTML for printing
+      const printHTML = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Invoice ${invoiceId} - Hare Krishna Medical</title>
+          <style>
+            ${getPrintCSS()}
+          </style>
+        </head>
+        <body onload="window.print(); window.close();">
+          ${generateInvoiceHTML()}
+        </body>
+        </html>
+      `;
+
+      // Write HTML content
+      printWindow.document.write(printHTML);
+      printWindow.document.close();
+
+      // Focus on print window
+      printWindow.focus();
+    } catch (error) {
+      console.error("Print error:", error);
+      alert("An error occurred while printing. Please try again.");
+    }
   };
 
-  // QR Code Component with Logo
-  const QRCodeWithLogo = () => {
-    const [qrDataUrl, setQrDataUrl] = React.useState("");
+  const getPrintCSS = () => {
+    return `
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+      
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-    React.useEffect(() => {
-      QRCode.toDataURL(qrCodeValue, {
-        width: 120,
-        margin: 1,
-        color: {
-          dark: "#333333",
-          light: "#ffffff",
-        },
-        errorCorrectionLevel: "M",
-      }).then(setQrDataUrl);
-    }, []);
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
 
+      body {
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.4;
+        color: #1a202c;
+        background: white;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        font-size: 12px;
+      }
+
+      .professional-invoice {
+        width: 100%;
+        max-width: 210mm;
+        margin: 0 auto;
+        background: white;
+        position: relative;
+      }
+
+      /* Header Section - Professional */
+      .invoice-header {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 40px;
+        margin-bottom: 50px;
+        padding-bottom: 25px;
+        border-bottom: 4px solid #e53e3e;
+        position: relative;
+      }
+
+      .company-section {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .company-brand {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .company-logo {
+        width: 90px;
+        height: 90px;
+        object-fit: contain;
+        margin-right: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      }
+
+      .brand-text {
+        flex: 1;
+      }
+
+      .company-name {
+        font-size: 32px;
+        font-weight: 700;
+        color: #e53e3e;
+        margin-bottom: 8px;
+        letter-spacing: -0.8px;
+        line-height: 1.1;
+      }
+
+      .company-tagline {
+        font-size: 14px;
+        color: #718096;
+        font-weight: 500;
+        margin-bottom: 20px;
+        font-style: italic;
+      }
+
+      .company-details {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 12px;
+        border-left: 5px solid #3182ce;
+      }
+
+      .detail-group {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        font-size: 11px;
+        line-height: 1.6;
+      }
+
+      .detail-item {
+        display: flex;
+        align-items: center;
+        color: #4a5568;
+      }
+
+      .detail-icon {
+        margin-right: 8px;
+        font-size: 12px;
+        color: #e53e3e;
+        font-weight: bold;
+        width: 14px;
+      }
+
+      .invoice-meta {
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .invoice-title {
+        font-size: 48px;
+        font-weight: 800;
+        color: #1a202c;
+        margin-bottom: 25px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        letter-spacing: -1px;
+      }
+
+      .invoice-info {
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        padding: 25px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 12px;
+        align-items: center;
+      }
+
+      .info-row:last-child {
+        margin-bottom: 0;
+      }
+
+      .info-label {
+        font-weight: 600;
+        color: #2d3748;
+      }
+
+      .info-value {
+        font-weight: 500;
+        color: #4a5568;
+      }
+
+      .status-badge {
+        background: linear-gradient(135deg, #48bb78, #38a169);
+        color: white;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 4px rgba(72, 187, 120, 0.3);
+      }
+
+      /* Customer Section - Modern Grid */
+      .customer-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 50px;
+      }
+
+      .customer-block {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 30px;
+        position: relative;
+        transition: all 0.3s ease;
+      }
+
+      .customer-block::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        border-radius: 12px 12px 0 0;
+      }
+
+      .bill-to::before {
+        background: linear-gradient(90deg, #3182ce, #2c5282);
+      }
+
+      .ship-to::before {
+        background: linear-gradient(90deg, #38a169, #2f855a);
+      }
+
+      .customer-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #f1f5f9;
+      }
+
+      .customer-icon {
+        font-size: 18px;
+        margin-right: 10px;
+        color: #4a5568;
+      }
+
+      .customer-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #2d3748;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .customer-name {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a202c;
+        margin-bottom: 15px;
+        letter-spacing: -0.2px;
+      }
+
+      .customer-details {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .detail-row {
+        display: flex;
+        align-items: flex-start;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .detail-label {
+        font-weight: 600;
+        color: #4a5568;
+        min-width: 80px;
+        margin-right: 10px;
+      }
+
+      .detail-value {
+        color: #2d3748;
+        font-weight: 500;
+        flex: 1;
+      }
+
+      /* Items Section - Professional Table */
+      .items-section {
+        margin-bottom: 50px;
+      }
+
+      .section-header {
+        background: linear-gradient(135deg, #2d3748, #1a202c);
+        color: white;
+        padding: 20px 30px;
+        margin-bottom: 0;
+        border-radius: 12px 12px 0 0;
+        text-align: center;
+      }
+
+      .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .items-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 2px solid #e2e8f0;
+        border-radius: 0 0 12px 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      }
+
+      .items-table th {
+        background: linear-gradient(135deg, #f7fafc, #edf2f7);
+        color: #2d3748;
+        padding: 18px 15px;
+        text-align: left;
+        font-weight: 700;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e2e8f0;
+      }
+
+      .items-table th:first-child { text-align: center; width: 60px; }
+      .items-table th:nth-child(3) { text-align: center; width: 80px; }
+      .items-table th:nth-child(4),
+      .items-table th:nth-child(5) { text-align: right; width: 120px; }
+
+      .items-table td {
+        padding: 20px 15px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 12px;
+        vertical-align: top;
+      }
+
+      .items-table tbody tr:nth-child(even) {
+        background: #fafbfc;
+      }
+
+      .items-table tbody tr:hover {
+        background: #f0f9ff;
+      }
+
+      .item-number {
+        text-align: center;
+        font-weight: 700;
+        color: #3182ce;
+        font-size: 14px;
+      }
+
+      .item-description {
+        font-weight: 600;
+        color: #1a202c;
+        margin-bottom: 6px;
+        font-size: 13px;
+        line-height: 1.3;
+      }
+
+      .item-company {
+        font-size: 10px;
+        color: #718096;
+        font-style: italic;
+        font-weight: 500;
+      }
+
+      .quantity-cell {
+        text-align: center;
+      }
+
+      .quantity-badge {
+        background: linear-gradient(135deg, #3182ce, #2c5282);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-size: 11px;
+        font-weight: 700;
+        display: inline-block;
+        min-width: 35px;
+        box-shadow: 0 2px 4px rgba(49, 130, 206, 0.3);
+      }
+
+      .price-cell,
+      .amount-cell {
+        text-align: right;
+        font-weight: 600;
+        font-size: 12px;
+      }
+
+      .price-cell {
+        color: #4a5568;
+      }
+
+      .amount-cell {
+        color: #38a169;
+        font-weight: 700;
+      }
+
+      /* Totals Section - Professional */
+      .totals-section {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 50px;
+      }
+
+      .totals-container {
+        min-width: 400px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      }
+
+      .total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 25px;
+        font-size: 13px;
+        border-bottom: 1px solid #f1f5f9;
+        transition: all 0.2s ease;
+      }
+
+      .total-row:last-child {
+        border-bottom: none;
+      }
+
+      .total-row.subtotal {
+        background: linear-gradient(135deg, #f7fafc, #edf2f7);
+      }
+
+      .total-row.shipping {
+        background: linear-gradient(135deg, #f0fff4, #dcfce7);
+      }
+
+      .total-row.tax {
+        background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      }
+
+      .total-row.grand-total {
+        background: linear-gradient(135deg, #e53e3e, #c53030);
+        color: white;
+        font-weight: 700;
+        font-size: 16px;
+        padding: 20px 25px;
+      }
+
+      .total-label {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .total-value {
+        font-weight: 700;
+      }
+
+      .free-text {
+        color: #38a169;
+        font-weight: 700;
+      }
+
+      .included-text {
+        color: #3182ce;
+        font-weight: 700;
+      }
+
+      /* Footer Section - Professional */
+      .invoice-footer {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 40px;
+        margin-top: 50px;
+        padding-top: 30px;
+        border-top: 3px solid #f1f5f9;
+      }
+
+      .footer-content {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .footer-section {
+        margin-bottom: 30px;
+      }
+
+      .footer-section:last-child {
+        margin-bottom: 0;
+      }
+
+      .footer-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1a202c;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .terms-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .terms-list li {
+        margin-bottom: 8px;
+        font-size: 11px;
+        line-height: 1.5;
+        color: #4a5568;
+        position: relative;
+        padding-left: 20px;
+      }
+
+      .terms-list li::before {
+        content: '●';
+        color: #e53e3e;
+        font-weight: bold;
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+
+      .contact-box {
+        background: linear-gradient(135deg, #f7fafc, #edf2f7);
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 4px solid #3182ce;
+        margin-top: 20px;
+      }
+
+      .contact-title {
+        font-weight: 700;
+        color: #2d3748;
+        font-size: 12px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .contact-details {
+        font-size: 10px;
+        color: #4a5568;
+        line-height: 1.6;
+      }
+
+      .qr-section {
+        text-align: center;
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 25px;
+        height: fit-content;
+      }
+
+      .qr-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+
+      .qr-code {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 15px;
+        border: 2px solid #f1f5f9;
+        border-radius: 8px;
+        display: block;
+      }
+
+      .qr-placeholder {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 15px;
+        border: 2px dashed #cbd5e0;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f7fafc;
+        color: #718096;
+        font-size: 10px;
+        font-weight: 600;
+      }
+
+      .qr-description {
+        font-size: 9px;
+        color: #718096;
+        line-height: 1.4;
+        font-weight: 500;
+      }
+
+      /* Bottom Notes */
+      .invoice-notes {
+        margin-top: 40px;
+        text-align: center;
+        padding: 20px;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+      }
+
+      .notes-content {
+        font-size: 10px;
+        color: #718096;
+        line-height: 1.6;
+      }
+
+      .notes-highlight {
+        font-weight: 700;
+        color: #2d3748;
+      }
+
+      /* Print Optimizations */
+      @media print {
+        body { 
+          margin: 0;
+          padding: 0;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        
+        .professional-invoice {
+          box-shadow: none;
+          border: none;
+          page-break-inside: avoid;
+        }
+        
+        .items-table {
+          page-break-inside: avoid;
+        }
+        
+        .invoice-footer {
+          page-break-inside: avoid;
+        }
+
+        .totals-section {
+          page-break-inside: avoid;
+        }
+      }
+    `;
+  };
+
+  const generateInvoiceHTML = () => {
+    return `
+      <div class="professional-invoice">
+        <!-- Header Section -->
+        <div class="invoice-header">
+          <div class="company-section">
+            <div class="company-brand">
+              <img src="https://cdn.builder.io/api/v1/assets/139c2ae6a3bb4d7a819ea70b65921f45/invoice_hkm12345678-321076" 
+                   alt="Hare Krishna Medical" 
+                   class="company-logo"
+                   onerror="this.style.display='none';" />
+              <div class="brand-text">
+                <div class="company-name">HARE KRISHNA MEDICAL</div>
+                <div class="company-tagline">Your Trusted Healthcare Partner</div>
+              </div>
+            </div>
+            
+            <div class="company-details">
+              <div class="detail-group">
+                <div class="detail-item">
+                  <span class="detail-icon">📍</span>
+                  <span>3 Sahyog Complex, Man Sarovar Circle</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-icon">🏙️</span>
+                  <span>Amroli, Surat - 394107, Gujarat</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-icon">📞</span>
+                  <span>+91 76989 13354</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-icon">📱</span>
+                  <span>+91 91060 18508</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-icon">📧</span>
+                  <span>harekrishnamedical@gmail.com</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-icon">🌐</span>
+                  <span>www.harekrishan.medical</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="invoice-meta">
+            <div class="invoice-title">INVOICE</div>
+            <div class="invoice-info">
+              <div class="info-row">
+                <span class="info-label">Invoice Number:</span>
+                <span class="info-value">${invoiceId}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Order Number:</span>
+                <span class="info-value">${orderId}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Invoice Date:</span>
+                <span class="info-value">${orderDate}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Invoice Time:</span>
+                <span class="info-value">${orderTime}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Status:</span>
+                <span class="status-badge">${status}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer Information -->
+        <div class="customer-section">
+          <div class="customer-block bill-to">
+            <div class="customer-header">
+              <span class="customer-icon">📋</span>
+              <span class="customer-title">Bill To</span>
+            </div>
+            <div class="customer-name">${customerDetails.fullName}</div>
+            <div class="customer-details">
+              <div class="detail-row">
+                <span class="detail-label">Email:</span>
+                <span class="detail-value">${customerDetails.email}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Phone:</span>
+                <span class="detail-value">${customerDetails.mobile}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Address:</span>
+                <span class="detail-value">${customerDetails.address}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">City:</span>
+                <span class="detail-value">${customerDetails.city}, ${customerDetails.state}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">PIN Code:</span>
+                <span class="detail-value">${customerDetails.pincode}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="customer-block ship-to">
+            <div class="customer-header">
+              <span class="customer-icon">🚚</span>
+              <span class="customer-title">Ship To</span>
+            </div>
+            <div class="customer-name">${customerDetails.fullName}</div>
+            <div class="customer-details">
+              <div class="detail-row">
+                <span class="detail-label">Address:</span>
+                <span class="detail-value">${customerDetails.address}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">City:</span>
+                <span class="detail-value">${customerDetails.city}, ${customerDetails.state}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">PIN Code:</span>
+                <span class="detail-value">${customerDetails.pincode}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Payment:</span>
+                <span class="detail-value">${paymentMethod}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Status:</span>
+                <span class="status-badge">${paymentStatus}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Items Section -->
+        <div class="items-section">
+          <div class="section-header">
+            <div class="section-title">
+              <span>🛒</span>
+              <span>Medical Products & Services</span>
+            </div>
+          </div>
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Description</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th>Total Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${items
+                .map(
+                  (item, index) => `
+                <tr>
+                  <td class="item-number">${index + 1}</td>
+                  <td>
+                    <div class="item-description">${item.name}</div>
+                    <div class="item-company">${item.company || "Medical Product"}</div>
+                  </td>
+                  <td class="quantity-cell">
+                    <span class="quantity-badge">${item.quantity}</span>
+                  </td>
+                  <td class="price-cell">₹${item.price.toFixed(2)}</td>
+                  <td class="amount-cell">₹${(item.price * item.quantity).toFixed(2)}</td>
+                </tr>
+              `,
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Totals Section -->
+        <div class="totals-section">
+          <div class="totals-container">
+            <div class="total-row subtotal">
+              <span class="total-label">
+                <span>📊</span>
+                <span>Subtotal</span>
+              </span>
+              <span class="total-value">₹${calculatedSubtotal.toFixed(2)}</span>
+            </div>
+            <div class="total-row shipping">
+              <span class="total-label">
+                <span>🚚</span>
+                <span>Shipping & Handling</span>
+              </span>
+              <span class="total-value ${shipping === 0 ? "free-text" : ""}">
+                ${shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}
+              </span>
+            </div>
+            <div class="total-row tax">
+              <span class="total-label">
+                <span>📋</span>
+                <span>Tax (GST)</span>
+              </span>
+              <span class="total-value included-text">Included in Price</span>
+            </div>
+            <div class="total-row grand-total">
+              <span class="total-label">
+                <span>💎</span>
+                <span>TOTAL AMOUNT</span>
+              </span>
+              <span class="total-value">₹${calculatedTotal.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Section -->
+        <div class="invoice-footer">
+          <div class="footer-content">
+            <div class="footer-section">
+              <div class="footer-title">
+                <span>📋</span>
+                <span>Terms & Conditions</span>
+              </div>
+              <ul class="terms-list">
+                <li>Payment is due within 30 days from the invoice date</li>
+                <li>All medical products are subject to proper usage guidelines and prescriptions</li>
+                <li>Returns are accepted only for damaged or defective items within 7 days of delivery</li>
+                <li>This invoice is computer-generated and legally valid without physical signature</li>
+                <li>Subject to Gujarat jurisdiction for any legal disputes or claims</li>
+                <li>Keep this invoice safe for warranty claims and return purposes</li>
+                <li>All prices are inclusive of applicable taxes and charges</li>
+              </ul>
+            </div>
+            
+            <div class="footer-section">
+              <div class="contact-box">
+                <div class="contact-title">
+                  <span>📞</span>
+                  <span>Contact Information</span>
+                </div>
+                <div class="contact-details">
+                  <strong>Customer Support:</strong> harekrishnamedical@gmail.com<br>
+                  <strong>Phone Support:</strong> +91 76989 13354<br>
+                  <strong>Emergency Contact:</strong> +91 91060 18508<br>
+                  <strong>Business Hours:</strong> Mon-Sat, 9:00 AM - 8:00 PM
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="qr-section">
+            <div class="qr-title">
+              <span>📱</span>
+              <span>Verification QR</span>
+            </div>
+            ${generatedQR ? `<img src="${generatedQR}" alt="QR Code" class="qr-code" />` : '<div class="qr-placeholder">QR Code</div>'}
+            <div class="qr-description">
+              Scan this QR code to verify<br>
+              invoice authenticity and<br>
+              access online copy
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Notes -->
+        <div class="invoice-notes">
+          <div class="notes-content">
+            <span class="notes-highlight">🖥️ This is a computer-generated invoice - No signature required</span><br>
+            Generated on: ${new Date().toLocaleString()} | 
+            Invoice ID: ${invoiceId} | 
+            <span class="notes-highlight">🔒 This document is protected and verified</span><br>
+            <strong>Hare Krishna Medical</strong> - Licensed Medical Store - Gujarat, India
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  if (forPrint) {
     return (
-      <div style={invoiceStyles.qrContainer}>
-        {qrDataUrl && (
-          <img src={qrDataUrl} alt="QR Code" style={invoiceStyles.qrCode} />
-        )}
-        <img
-          src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
-          alt="Logo"
-          style={invoiceStyles.qrLogo}
-          onError={(e) => {
-            e.target.style.display = "none";
-          }}
-        />
+      <div style={{ width: "100%", height: "100%" }}>
+        <div dangerouslySetInnerHTML={{ __html: generateInvoiceHTML() }} />
       </div>
     );
-  };
+  }
 
   return (
-    <div style={invoiceStyles.container}>
-      {/* Modern Header Section */}
-      <div style={invoiceStyles.header}>
-        <div style={invoiceStyles.companyInfo}>
-          <img
-            src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
-            alt="Hare Krishna Medical"
-            style={invoiceStyles.companyLogo}
-            onError={(e) => {
-              e.target.style.display = "none";
-            }}
-          />
-          <h1 style={invoiceStyles.companyName}>HARE KRISHNA MEDICAL</h1>
-          <p style={invoiceStyles.companyTagline}>
-            Your Trusted Health Partner
-          </p>
-          <div style={invoiceStyles.companyAddress}>
-            <div>📍 3 Sahyog Complex, Man Sarovar Circle</div>
-            <div>Amroli, 394107, Gujarat, India</div>
-            <div>📞 +91 76989 13354 | +91 91060 18508</div>
-            <div>✉️ harekrishnamedical@gmail.com</div>
-          </div>
-        </div>
-
-        <div style={invoiceStyles.invoiceTitle}>
-          <h1 style={invoiceStyles.invoiceTitleText}>INVOICE</h1>
-          <div style={invoiceStyles.invoiceDetails}>
-            <div style={{ marginBottom: "8mm" }}>
-              <strong>Invoice No:</strong> {invoiceId}
-            </div>
-            <div style={{ marginBottom: "8mm" }}>
-              <strong>Order No:</strong> {orderId}
-            </div>
-            <div style={{ marginBottom: "8mm" }}>
-              <strong>Date:</strong> {orderDate}
-            </div>
-            <div style={{ marginBottom: "8mm" }}>
-              <strong>Time:</strong> {orderTime}
-            </div>
-            <div>
-              <strong>Status:</strong>
-              <br />
-              <span style={invoiceStyles.statusBadge}>{status}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Tax Included Notice */}
-      <div style={invoiceStyles.taxNote}>
-        <div
-          style={{ textAlign: "center", fontWeight: "700", fontSize: "14px" }}
-        >
-          ⚠️ IMPORTANT: All taxes and duties are included in the product prices.
-          No additional tax will be charged.
-        </div>
-      </div>
-
-      {/* Customer Information */}
-      <div style={invoiceStyles.customerSection}>
-        <div style={invoiceStyles.customerBox}>
-          <div style={invoiceStyles.customerTitle}>Bill To</div>
-          <div style={invoiceStyles.customerText}>
-            <div
-              style={{
-                fontWeight: "800",
-                marginBottom: "8mm",
-                fontSize: "16px",
-                color: "#e63946",
-              }}
-            >
-              {customerDetails.fullName}
-            </div>
-            <div style={{ marginBottom: "4mm" }}>
-              📧 {customerDetails.email}
-            </div>
-            <div style={{ marginBottom: "4mm" }}>
-              📱 {customerDetails.mobile}
-            </div>
-            <div style={{ marginBottom: "4mm" }}>
-              🏠 {customerDetails.address}
-            </div>
-            <div>
-              📍 {customerDetails.city}, {customerDetails.state}{" "}
-              {customerDetails.pincode}
-            </div>
-          </div>
-        </div>
-
-        <div style={invoiceStyles.customerBox}>
-          <div style={invoiceStyles.customerTitle}>Payment & Shipping</div>
-          <div style={invoiceStyles.customerText}>
-            <div style={{ marginBottom: "8mm" }}>
-              <strong>Payment Method:</strong>
-              <br />
-              {paymentMethod}
-            </div>
-            <div style={{ marginBottom: "8mm" }}>
-              <strong>Payment Status:</strong>
-              <span style={invoiceStyles.paymentBadge}>{paymentStatus}</span>
-            </div>
-            <div>
-              <strong>Shipping Address:</strong>
-              <br />
-              {customerDetails.address}
-              <br />
-              {customerDetails.city}, {customerDetails.state}{" "}
-              {customerDetails.pincode}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Items Table */}
-      <table style={invoiceStyles.itemsTable}>
-        <thead style={invoiceStyles.tableHeader}>
-          <tr>
-            <th
-              style={{
-                ...invoiceStyles.tableHeaderCell,
-                textAlign: "center",
-                width: "50px",
-              }}
-            >
-              Sr.
-            </th>
-            <th style={{ ...invoiceStyles.tableHeaderCell, width: "45%" }}>
-              Product Description
-            </th>
-            <th
-              style={{
-                ...invoiceStyles.tableHeaderCell,
-                textAlign: "center",
-                width: "80px",
-              }}
-            >
-              Quantity
-            </th>
-            <th
-              style={{
-                ...invoiceStyles.tableHeaderCell,
-                textAlign: "right",
-                width: "100px",
-              }}
-            >
-              Unit Price (₹)
-            </th>
-            <th
-              style={{
-                ...invoiceStyles.tableHeaderCell,
-                textAlign: "right",
-                width: "100px",
-              }}
-            >
-              Total Amount (₹)
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((item, index) => (
-            <tr
-              key={item.id || index}
-              style={
-                index % 2 === 0
-                  ? invoiceStyles.tableRow
-                  : invoiceStyles.tableRowAlt
-              }
-            >
-              <td
-                style={{
-                  ...invoiceStyles.tableCell,
-                  textAlign: "center",
-                  fontWeight: "800",
-                  color: "#e63946",
-                  fontSize: "14px",
-                }}
-              >
-                {index + 1}
-              </td>
-              <td style={invoiceStyles.tableCell}>
-                <div
-                  style={{
-                    fontWeight: "800",
-                    marginBottom: "4mm",
-                    color: "#333333",
-                    fontSize: "14px",
-                  }}
-                >
-                  {item.name}
-                </div>
-                <div style={{ fontSize: "11px", color: "#495057" }}>
-                  Manufactured by: {item.company || "Medical Product"}
-                </div>
-              </td>
-              <td
-                style={{
-                  ...invoiceStyles.tableCell,
-                  textAlign: "center",
-                  fontWeight: "700",
-                  fontSize: "14px",
-                }}
-              >
-                {item.quantity}
-              </td>
-              <td
-                style={{
-                  ...invoiceStyles.tableCell,
-                  textAlign: "right",
-                  fontWeight: "700",
-                  fontSize: "14px",
-                }}
-              >
-                ₹{item.price?.toFixed(2) || "0.00"}
-              </td>
-              <td
-                style={{
-                  ...invoiceStyles.tableCell,
-                  textAlign: "right",
-                  fontWeight: "800",
-                  color: "#e63946",
-                  fontSize: "14px",
-                }}
-              >
-                ₹{((item.price || 0) * (item.quantity || 0)).toFixed(2)}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* Totals Section */}
-      <div style={invoiceStyles.totalsSection}>
-        <table style={invoiceStyles.totalsTable}>
-          <tbody>
-            <tr style={invoiceStyles.totalRowRegular}>
-              <td style={{ ...invoiceStyles.totalCell, fontWeight: "700" }}>
-                Subtotal:
-              </td>
-              <td
-                style={{
-                  ...invoiceStyles.totalCell,
-                  textAlign: "right",
-                  fontWeight: "800",
-                }}
-              >
-                ₹{calculatedSubtotal.toFixed(2)}
-              </td>
-            </tr>
-            <tr style={invoiceStyles.totalRowRegular}>
-              <td style={{ ...invoiceStyles.totalCell, fontWeight: "700" }}>
-                Shipping Charges:
-              </td>
-              <td
-                style={{
-                  ...invoiceStyles.totalCell,
-                  textAlign: "right",
-                  fontWeight: "800",
-                }}
-              >
-                {shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}
-              </td>
-            </tr>
-            <tr style={invoiceStyles.totalRowRegular}>
-              <td style={{ ...invoiceStyles.totalCell, fontWeight: "700" }}>
-                All Taxes & Duties:
-              </td>
-              <td
-                style={{
-                  ...invoiceStyles.totalCell,
-                  textAlign: "right",
-                  fontWeight: "800",
-                  color: "#28a745",
-                }}
-              >
-                INCLUDED
-              </td>
-            </tr>
-            <tr style={invoiceStyles.totalRow}>
-              <td
-                style={{
-                  ...invoiceStyles.totalCell,
-                  fontSize: "16px",
-                  fontWeight: "900",
-                }}
-              >
-                GRAND TOTAL:
-              </td>
-              <td
-                style={{
-                  ...invoiceStyles.totalCell,
-                  textAlign: "right",
-                  fontSize: "18px",
-                  fontWeight: "900",
-                }}
-              >
-                ₹{calculatedTotal.toFixed(2)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      {/* Modern Footer */}
-      <div style={invoiceStyles.footer}>
-        <div style={invoiceStyles.footerLeft}>
-          <div style={invoiceStyles.footerTitle}>
-            Thank You for Your Business! 🙏
-          </div>
-          <div style={invoiceStyles.termsText}>
-            <div style={{ marginBottom: "8mm", fontWeight: "700" }}>
-              <strong>Terms & Conditions:</strong>
-            </div>
-            <div style={{ marginBottom: "4mm" }}>
-              • Payment due within 30 days of invoice date
-            </div>
-            <div style={{ marginBottom: "4mm" }}>
-              • Goods once sold will not be taken back or exchanged
-            </div>
-            <div style={{ marginBottom: "4mm" }}>
-              • All disputes subject to Gujarat jurisdiction only
-            </div>
-            <div style={{ marginBottom: "4mm" }}>
-              • All prices include applicable taxes and duties
-            </div>
-            <div
-              style={{ marginTop: "10mm", fontSize: "13px", fontWeight: "700" }}
-            >
-              <strong>Contact Information:</strong>
-              <br />
-              📧 Email: harekrishnamedical@gmail.com
-              <br />
-              📞 Phone: +91 76989 13354 | +91 91060 18508
-              <br />
-              🌐 Website: www.harekrishnamedical.com
-            </div>
-          </div>
-        </div>
-
-        <div style={invoiceStyles.qrSection}>
-          <QRCodeWithLogo />
-          <div
-            style={{
-              fontSize: "11px",
-              marginTop: "8mm",
-              color: "#495057",
-              fontWeight: "700",
-              lineHeight: "1.4",
-            }}
-          >
-            📱 Scan QR Code for
-            <br />
-            Online Verification
-            <br />& Order Tracking
-          </div>
-        </div>
-      </div>
-
-      {/* Footer Note for Print */}
-      <div
+    <div
+      style={{
+        maxWidth: "1100px",
+        margin: "0 auto",
+        background: "white",
+        boxShadow: "0 20px 60px rgba(0,0,0,0.1)",
+        borderRadius: "16px",
+        overflow: "hidden",
+        position: "relative",
+      }}
+    >
+      {/* Enhanced Print Button */}
+      <button
+        onClick={handlePrint}
+        disabled={!isPrintReady || isLoading}
         style={{
-          position: "absolute",
-          bottom: "10mm",
-          left: "20mm",
-          right: "20mm",
-          textAlign: "center",
-          fontSize: "10px",
-          color: "#495057",
-          borderTop: "1px solid #e9ecef",
-          paddingTop: "5mm",
-          background: "#ffffff",
+          position: "fixed",
+          top: "30px",
+          right: "30px",
+          zIndex: 1000,
+          background:
+            isPrintReady && !isLoading
+              ? "linear-gradient(135deg, #e53e3e, #c53030)"
+              : "linear-gradient(135deg, #a0aec0, #718096)",
+          color: "white",
+          border: "none",
+          padding: "16px 28px",
+          borderRadius: "50px",
+          cursor: isPrintReady && !isLoading ? "pointer" : "not-allowed",
+          fontSize: "16px",
+          fontWeight: "700",
+          boxShadow:
+            isPrintReady && !isLoading
+              ? "0 8px 25px rgba(229, 62, 62, 0.3)"
+              : "0 4px 15px rgba(160, 174, 192, 0.3)",
+          transition: "all 0.3s ease",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          fontFamily: "inherit",
+          textTransform: "uppercase",
+          letterSpacing: "0.5px",
+        }}
+        onMouseOver={(e) => {
+          if (isPrintReady && !isLoading) {
+            e.target.style.transform = "translateY(-3px)";
+            e.target.style.boxShadow = "0 12px 35px rgba(229, 62, 62, 0.4)";
+          }
+        }}
+        onMouseOut={(e) => {
+          if (isPrintReady && !isLoading) {
+            e.target.style.transform = "translateY(0)";
+            e.target.style.boxShadow = "0 8px 25px rgba(229, 62, 62, 0.3)";
+          }
         }}
       >
-        🏥 This is a computer-generated invoice. No physical signature required.
-        | Generated on: {new Date().toLocaleString()} | Powered by Hare Krishna
-        Medical System
+        <span style={{ fontSize: "20px" }}>{isLoading ? "⏳" : "🖨️"}</span>
+        {isLoading
+          ? "Loading..."
+          : isPrintReady
+            ? "Print Invoice"
+            : "Not Ready"}
+      </button>
+
+      {/* Invoice Content */}
+      <div
+        style={{
+          padding: "50px",
+          background: "white",
+        }}
+      >
+        <div dangerouslySetInnerHTML={{ __html: generateInvoiceHTML() }} />
       </div>
+
+      {/* Inject CSS */}
+      <style>{getPrintCSS()}</style>
     </div>
   );
 };
