@@ -443,12 +443,25 @@ const AdminDashboard = () => {
                             </td>
                             <td>
                               <Button
-                                as={Link}
-                                to={`/admin/orders/${order.id}`}
                                 size="sm"
                                 variant="outline-primary"
                                 className="btn-medical-outline"
+                                onClick={() => handleViewOrder(order)}
+                                style={{
+                                  transition: "all 0.3s ease",
+                                }}
+                                onMouseOver={(e) => {
+                                  e.target.style.background = "#e63946";
+                                  e.target.style.borderColor = "#e63946";
+                                  e.target.style.color = "white";
+                                }}
+                                onMouseOut={(e) => {
+                                  e.target.style.background = "transparent";
+                                  e.target.style.borderColor = "#e63946";
+                                  e.target.style.color = "#e63946";
+                                }}
                               >
+                                <i className="bi bi-eye me-1"></i>
                                 View
                               </Button>
                             </td>
