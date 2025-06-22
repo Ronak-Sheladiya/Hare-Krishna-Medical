@@ -161,7 +161,7 @@ const AdminMessages = () => {
   };
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleString();
+    return formatDateTime(date);
   };
 
   const unreadCount = messages.filter((m) => !m.isRead).length;
