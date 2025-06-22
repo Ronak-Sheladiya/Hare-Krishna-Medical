@@ -179,9 +179,60 @@ main {
   transition: all 0.3s ease;
 }
 
-/* Smooth scroll behavior */
+/* Smooth scroll behavior and page opening fixes */
 html {
   scroll-behavior: smooth;
+}
+
+/* Ensure pages always start from the top */
+body {
+  scroll-padding-top: 0;
+}
+
+/* Prevent layout shift when modals open */
+body.modal-open {
+  padding-right: 0 !important;
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+/* Fix modal backdrop to prevent layout changes */
+.modal-backdrop {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1040;
+}
+
+/* Ensure modal content doesn't cause layout shifts */
+.modal {
+  padding-right: 0 !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Ensure modals are properly positioned */
+.modal.show .modal-dialog {
+  transform: none;
+}
+
+/* Page transition fixes */
+.fade-in {
+  animation: fadeInFromTop 0.3s ease-out;
+}
+
+@keyframes fadeInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Modern button hover effects */
