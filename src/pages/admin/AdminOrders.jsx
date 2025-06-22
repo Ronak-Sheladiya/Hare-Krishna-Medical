@@ -438,7 +438,7 @@ const AdminOrders = () => {
                                     variant="outline-success"
                                     title="View Invoice"
                                     onClick={() =>
-                                      (window.location.href = `/invoice/${order.orderId}`)
+                                      navigate(`/invoice/${order.orderId}`)
                                     }
                                   >
                                     <i className="bi bi-receipt"></i>
@@ -447,9 +447,9 @@ const AdminOrders = () => {
                                     size="sm"
                                     variant="outline-info"
                                     title="Print"
-                                    onClick={() => {
-                                      window.location.href = `/invoice/${order.orderId}`;
-                                    }}
+                                    onClick={() =>
+                                      navigate(`/invoice/${order.orderId}`)
+                                    }
                                   >
                                     <i className="bi bi-printer"></i>
                                   </Button>
