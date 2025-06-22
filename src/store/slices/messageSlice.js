@@ -14,7 +14,7 @@ const initialState = {
       priority: "Medium",
       status: "Open",
       isRead: false,
-      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+      createdAt: createDateOffset(2), // 2 hours ago
       reply: "",
       repliedAt: null,
     },
