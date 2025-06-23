@@ -49,19 +49,19 @@ class ErrorBoundary extends React.Component {
                   <Card.Body className="p-5 text-center">
                     <div className="mb-4">
                       <div
-                        style={{
-                          width: "80px",
-                          height: "80px",
-                          background:
-                            "linear-gradient(135deg, #dc3545, #e63946)",
-                          borderRadius: "50%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          margin: "0 auto",
-                          boxShadow: "0 8px 25px rgba(220, 53, 69, 0.3)",
-                        }}
-                      >
+                        <pre
+                          style={{
+                            fontSize: "12px",
+                            background: "#f1f3f4",
+                            padding: "15px",
+                            borderRadius: "8px",
+                            whiteSpace: "pre-wrap",
+                            overflow: "auto",
+                          }}
+                        >
+                          {this.state.error && this.state.error.toString()}
+                          {this.state.errorInfo?.componentStack || ""}
+                        </pre>
                         <i
                           className="bi bi-exclamation-triangle"
                           style={{ fontSize: "40px", color: "white" }}
