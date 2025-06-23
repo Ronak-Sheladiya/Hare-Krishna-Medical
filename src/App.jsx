@@ -18,6 +18,7 @@ import Footer from "./components/layout/Footer.jsx";
 import LoadingSpinner from "./components/common/LoadingSpinner.jsx";
 import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
 import CrossTabSync from "./components/common/CrossTabSync.jsx";
+import RealTimeSync from "./components/common/RealTimeSync.jsx";
 
 // Pages
 import Home from "./pages/Home.jsx";
