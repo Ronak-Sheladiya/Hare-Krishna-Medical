@@ -73,6 +73,9 @@ const Footer = () => {
               <li className="mb-2">
                 <Link to="/user-guide">User Guide</Link>
               </li>
+              <li className="mb-2">
+                <Link to="/localsetup-guide">Setup Guide</Link>
+              </li>
             </ul>
           </Col>
 
