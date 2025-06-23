@@ -12,6 +12,7 @@ import {
   Modal,
   ProgressBar,
   Alert,
+  Spinner,
 } from "react-bootstrap";
 import { Link, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -21,15 +22,31 @@ import {
   downloadInvoice,
   createInvoiceData,
 } from "../../utils/invoiceUtils.js";
+import { formatDateTime, getRelativeTime } from "../../utils/dateUtils";
+import { api, safeApiCall } from "../../utils/apiClient";
+import {
+  PageHeroSection,
+  ThemeCard,
+  ThemeButton,
+} from "../../components/common/ConsistentTheme";
+import OfficialInvoiceDesign from "../../components/common/OfficialInvoiceDesign";
 
 const UserInvoices = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const [invoices, setInvoices] = useState([]);
+  const [filteredInvoices, setFilteredInvoices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [bulkDownloading, setBulkDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [showBulkModal, setShowBulkModal] = useState(false);
+  const [selectedInvoicesForDownload, setSelectedInvoicesForDownload] =
+    useState([]);
 
   // Redirect admin to admin invoices page
   if (!isAuthenticated) {
@@ -39,722 +56,559 @@ const UserInvoices = () => {
   if (user?.role === 1) {
     return (
       <div className="fade-in">
-        <section
-          style={{
-            background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
-            paddingTop: "80px",
-            paddingBottom: "80px",
-            color: "white",
-          }}
-        >
-          <Container>
-            <Row className="text-center">
-              <Col lg={12}>
-                <Alert variant="warning" className="bg-white text-dark">
-                  <h4>Access Restricted</h4>
-                  <p>
-                    This page is for regular users only. As an admin, please use
-                    the admin invoice management system.
-                  </p>
-                  <div className="d-flex gap-2 justify-content-center">
-                    <Button
-                      as={Link}
-                      to="/admin/invoices"
-                      className="btn-medical-primary"
-                    >
-                      <i className="bi bi-gear me-2"></i>
-                      Go to Admin Invoices
-                    </Button>
-                    <Button
-                      as={Link}
-                      to="/admin/dashboard"
-                      variant="outline-secondary"
-                    >
-                      <i className="bi bi-house me-2"></i>
-                      Admin Dashboard
-                    </Button>
-                  </div>
-                </Alert>
-              </Col>
-            </Row>
-          </Container>
-        </section>
+        <PageHeroSection
+          title="Access Denied"
+          description="Administrators should use the admin panel for invoice management"
+          icon="🚫"
+        />
+        <Container className="py-5 text-center">
+          <ThemeCard>
+            <Card.Body>
+              <h5>You are logged in as an administrator</h5>
+              <p className="text-muted">
+                Please use the admin panel to manage invoices
+              </p>
+              <Link to="/admin/invoices">
+                <ThemeButton>Go to Admin Invoices</ThemeButton>
+              </Link>
+            </Card.Body>
+          </ThemeCard>
+        </Container>
       </div>
     );
   }
 
-  // Helper function to create invoice data from user invoice
-  const createInvoiceDataFromInvoice = (invoice) => {
-    return {
-      invoiceId: invoice.id,
-      orderId: invoice.orderId,
-      orderDate: invoice.date,
-      orderTime: "14:30:25",
-      customerDetails: {
-        fullName: invoice.customerName,
-        email: "john.doe@example.com",
-        mobile: "+91 9876543210",
-        address: "123 Medical Street",
-        city: "Surat",
-        state: "Gujarat",
-        pincode: "395007",
-      },
-      items: [
-        {
-          id: 1,
-          name: "Medical Products",
-          company: "Various Brands",
-          quantity: invoice.items,
-          price: invoice.amount / invoice.items,
-        },
-      ],
-      subtotal: invoice.amount * 0.95,
-      shipping: 0,
-      total: invoice.amount,
-      paymentMethod: "Cash on Delivery",
-      paymentStatus: "Paid",
-      status: "Delivered",
-    };
+  // Fetch user invoices
+  const fetchUserInvoices = async () => {
+    setLoading(true);
+    setError(null);
+
+    const {
+      success,
+      data,
+      error: apiError,
+    } = await safeApiCall(() => api.get("/api/user/invoices"), []);
+
+    if (success && data) {
+      const invoicesData = data.data || data;
+      setInvoices(invoicesData);
+      setFilteredInvoices(invoicesData);
+    } else {
+      setError(apiError || "Failed to load invoices");
+      // Keep empty state for offline mode
+      setInvoices([]);
+      setFilteredInvoices([]);
+    }
+
+    setLoading(false);
   };
 
-  // Mock invoices data
-  const mockInvoices = [
-    {
-      id: "INV001",
-      orderId: "HKM12345678",
-      date: "2024-01-15",
-      amount: 102.35,
-      status: "Paid",
-      downloadCount: 2,
-      customerName: "John Doe",
-      items: 3,
-    },
-    {
-      id: "INV002",
-      orderId: "HKM12345679",
-      date: "2024-01-12",
-      amount: 146.34,
-      status: "Paid",
-      downloadCount: 1,
-      customerName: "John Doe",
-      items: 2,
-    },
-    {
-      id: "INV003",
-      orderId: "HKM12345680",
-      date: "2024-01-10",
-      amount: 1364.99,
-      status: "Paid",
-      downloadCount: 3,
-      customerName: "John Doe",
-      items: 1,
-    },
-    {
-      id: "INV004",
-      orderId: "HKM12345681",
-      date: "2024-01-08",
-      amount: 89.25,
-      status: "Paid",
-      downloadCount: 0,
-      customerName: "John Doe",
-      items: 2,
-    },
-    {
-      id: "INV005",
-      orderId: "HKM12345682",
-      date: "2024-01-05",
-      amount: 245.8,
-      status: "Paid",
-      downloadCount: 1,
-      customerName: "John Doe",
-      items: 4,
-    },
-  ];
+  // Filter invoices based on search and filters
+  useEffect(() => {
+    let filtered = invoices;
+
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (invoice) =>
+          invoice.invoiceId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          invoice.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          invoice.items?.some((item) =>
+            item.name?.toLowerCase().includes(searchTerm.toLowerCase()),
+          ),
+      );
+    }
+
+    if (statusFilter) {
+      filtered = filtered.filter((invoice) => invoice.status === statusFilter);
+    }
+
+    if (dateFilter) {
+      const today = new Date();
+      const filterDate = new Date(today);
+
+      switch (dateFilter) {
+        case "today":
+          filtered = filtered.filter((invoice) => {
+            const invoiceDate = new Date(invoice.createdAt);
+            return invoiceDate.toDateString() === today.toDateString();
+          });
+          break;
+        case "week":
+          filterDate.setDate(today.getDate() - 7);
+          filtered = filtered.filter(
+            (invoice) => new Date(invoice.createdAt) >= filterDate,
+          );
+          break;
+        case "month":
+          filterDate.setMonth(today.getMonth() - 1);
+          filtered = filtered.filter(
+            (invoice) => new Date(invoice.createdAt) >= filterDate,
+          );
+          break;
+        case "year":
+          filterDate.setFullYear(today.getFullYear() - 1);
+          filtered = filtered.filter(
+            (invoice) => new Date(invoice.createdAt) >= filterDate,
+          );
+          break;
+      }
+    }
+
+    setFilteredInvoices(filtered);
+  }, [invoices, searchTerm, statusFilter, dateFilter]);
 
   useEffect(() => {
-    setInvoices(mockInvoices);
+    fetchUserInvoices();
   }, []);
 
-  const filteredInvoices = invoices.filter((invoice) => {
-    const matchesSearch =
-      invoice.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      invoice.orderId.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesDate = !dateFilter || invoice.date.includes(dateFilter);
-
-    return matchesSearch && matchesDate;
-  });
-
-  const handleDownloadPDF = async (invoice) => {
-    try {
-      const invoiceData = createInvoiceDataFromInvoice(invoice);
-      const success = await downloadInvoice(invoiceData);
-      if (success) {
-        alert("Invoice downloaded successfully!");
-      }
-    } catch (error) {
-      console.error("Error downloading PDF:", error);
-      alert("Error generating PDF. Please try again.");
-    }
+  const handleViewInvoice = (invoice) => {
+    setSelectedInvoice(invoice);
+    setShowInvoiceModal(true);
   };
 
-  const handlePrintInvoice = async (invoice) => {
-    try {
-      const invoiceData = createInvoiceDataFromInvoice(invoice);
-      await printInvoice(invoiceData);
-    } catch (error) {
-      console.error("Error printing invoice:", error);
-      alert("Error printing invoice. Please try again.");
-    }
+  const handlePrintInvoice = (invoice) => {
+    printInvoice(invoice);
   };
 
-  const handleViewInvoice = async (invoice) => {
-    try {
-      // Create basic invoice data for viewing
-      const invoiceData = {
-        invoiceId: invoice.id,
-        orderId: invoice.orderId,
-        orderDate: invoice.date,
-        orderTime: "14:30:25",
-        customerDetails: {
-          fullName: invoice.customerName,
-          email: "john.doe@example.com",
-          mobile: "+91 9876543210",
-          address: "123 Medical Street",
-          city: "Surat",
-          state: "Gujarat",
-          pincode: "395007",
-        },
-        items: [
-          {
-            id: 1,
-            name: "Medical Products",
-            company: "Various Brands",
-            quantity: invoice.items,
-            price: invoice.amount / invoice.items,
-          },
-        ],
-        subtotal: invoice.amount * 0.95,
-        shipping: 0,
-        total: invoice.amount,
-        paymentMethod: "Cash on Delivery",
-        paymentStatus: "Paid",
-        status: "Delivered",
-      };
-
-      await viewInvoice(invoiceData);
-    } catch (error) {
-      console.error("Error viewing invoice:", error);
-      alert("Error viewing invoice. Please try again.");
-    }
+  const handleDownloadInvoice = (invoice) => {
+    downloadInvoice(invoice);
   };
 
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case "Paid":
-        return <Badge bg="success">Paid</Badge>;
-      case "Pending":
-        return <Badge bg="warning">Pending</Badge>;
-      case "Overdue":
-        return <Badge bg="danger">Overdue</Badge>;
-      default:
-        return <Badge bg="secondary">Unknown</Badge>;
-    }
-  };
-
-  const getTotalAmount = () => {
-    return filteredInvoices.reduce(
-      (total, invoice) => total + invoice.amount,
-      0,
-    );
-  };
-
-  const getDownloadStats = () => {
-    const totalDownloads = invoices.reduce(
-      (total, invoice) => total + invoice.downloadCount,
-      0,
-    );
-    const undownloadedCount = invoices.filter(
-      (invoice) => invoice.downloadCount === 0,
-    ).length;
-    return { totalDownloads, undownloadedCount };
-  };
-
-  const stats = getDownloadStats();
-
+  // Bulk download functionality
   const handleBulkDownload = async () => {
-    if (filteredInvoices.length === 0) {
-      alert("No invoices to download");
-      return;
-    }
-
-    setShowBulkModal(true);
     setBulkDownloading(true);
     setDownloadProgress(0);
 
-    try {
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pageHeight = 295;
-      let isFirstPage = true;
+    const invoicesToDownload = selectedInvoicesForDownload.length
+      ? filteredInvoices.filter((inv) =>
+          selectedInvoicesForDownload.includes(inv._id),
+        )
+      : filteredInvoices;
 
-      for (let i = 0; i < filteredInvoices.length; i++) {
-        const invoice = filteredInvoices[i];
-
-        // Update progress
-        setDownloadProgress(((i + 1) / filteredInvoices.length) * 100);
-
-        // Create invoice content for each invoice using professional component
-        const invoiceHtml = await createInvoiceHTML(invoice);
-
-        // Create a temporary div to render the invoice
-        const tempDiv = document.createElement("div");
-        tempDiv.innerHTML = invoiceHtml;
-        tempDiv.style.position = "absolute";
-        tempDiv.style.left = "-9999px";
-        tempDiv.style.width = "210mm";
-        tempDiv.style.padding = "20px";
-        tempDiv.style.backgroundColor = "white";
-        document.body.appendChild(tempDiv);
-
-        // Wait a bit for rendering
+    for (let i = 0; i < invoicesToDownload.length; i++) {
+      try {
+        await downloadInvoice(invoicesToDownload[i]);
+        setDownloadProgress(((i + 1) / invoicesToDownload.length) * 100);
+        // Small delay to prevent overwhelming the browser
         await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Convert to canvas
-        const canvas = await html2canvas(tempDiv, {
-          scale: 2,
-          logging: false,
-          useCORS: true,
-          backgroundColor: "#ffffff",
-        });
-
-        // Remove temporary div
-        document.body.removeChild(tempDiv);
-
-        // Add new page if not first
-        if (!isFirstPage) {
-          pdf.addPage();
-        }
-        isFirstPage = false;
-
-        // Add to PDF
-        const imgData = canvas.toDataURL("image/png");
-        const imgWidth = 210;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      } catch (error) {
+        console.error("Error downloading invoice:", error);
       }
+    }
 
-      // Download the combined PDF
-      pdf.save(
-        `Invoices_Combined_${new Date().toISOString().split("T")[0]}.pdf`,
-      );
-    } catch (error) {
-      console.error("Error generating bulk PDF:", error);
-      alert(
-        "Error generating PDF. Please try downloading individual invoices.",
-      );
-    } finally {
-      setBulkDownloading(false);
-      setDownloadProgress(0);
-      setTimeout(() => setShowBulkModal(false), 1000);
+    setBulkDownloading(false);
+    setShowBulkModal(false);
+    setSelectedInvoicesForDownload([]);
+  };
+
+  const getStatusBadgeColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case "paid":
+        return "success";
+      case "pending":
+        return "warning";
+      case "cancelled":
+        return "danger";
+      case "refunded":
+        return "info";
+      default:
+        return "secondary";
     }
   };
 
-  const createInvoiceHTML = async (invoice) => {
-    // Use the professional invoice component for bulk downloads
-    const invoiceData = {
-      invoiceId: invoice.id,
-      orderId: invoice.orderId,
-      orderDate: invoice.date,
-      orderTime: "14:30:25",
-      customerDetails: {
-        fullName: invoice.customerName,
-        email: "john.doe@example.com",
-        mobile: "+91 9876543210",
-        address: "123 Medical Street",
-        city: "Surat",
-        state: "Gujarat",
-        pincode: "395007",
-      },
-      items: [
-        {
-          id: 1,
-          name: "Medical Products",
-          company: "Various Brands",
-          quantity: invoice.items,
-          price: invoice.amount / invoice.items,
-          total: invoice.amount,
-        },
-      ],
-      subtotal: invoice.amount * 0.95,
-      shipping: 0,
-      tax: invoice.amount * 0.05,
-      total: invoice.amount,
-      paymentMethod: "Cash on Delivery",
-      paymentStatus: "Paid",
-      status: "Delivered",
-    };
-
-    // Create a temporary element with the professional invoice
-    const tempDiv = document.createElement("div");
-    tempDiv.style.width = "210mm";
-    tempDiv.style.backgroundColor = "white";
-
-    // Use React to render the component to HTML string
-    const { createRoot } = await import("react-dom/client");
-    const OfficialInvoiceDesign = (
-      await import("../../components/common/OfficialInvoiceDesign.jsx")
-    ).default;
-
-    const root = createRoot(tempDiv);
-    await new Promise((resolve) => {
-      root.render(
-        React.createElement(OfficialInvoiceDesign, {
-          invoiceData,
-          forPrint: true,
-        }),
-      );
-      setTimeout(() => {
-        resolve();
-      }, 100);
-    });
-
-    const htmlContent = tempDiv.innerHTML;
-    root.unmount();
-
-    return htmlContent;
+  const toggleInvoiceSelection = (invoiceId) => {
+    setSelectedInvoicesForDownload((prev) =>
+      prev.includes(invoiceId)
+        ? prev.filter((id) => id !== invoiceId)
+        : [...prev, invoiceId],
+    );
   };
 
+  const selectAllInvoices = () => {
+    if (selectedInvoicesForDownload.length === filteredInvoices.length) {
+      setSelectedInvoicesForDownload([]);
+    } else {
+      setSelectedInvoicesForDownload(filteredInvoices.map((inv) => inv._id));
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="fade-in">
+        <PageHeroSection
+          title="My Invoices"
+          description="View and download your purchase invoices"
+          icon="🧾"
+        />
+        <Container className="py-5">
+          <div
+            className="d-flex justify-content-center align-items-center"
+            style={{ minHeight: "40vh" }}
+          >
+            <Spinner animation="border" variant="danger" />
+            <span className="ms-2">Loading your invoices...</span>
+          </div>
+        </Container>
+      </div>
+    );
+  }
+
   return (
-    <div className="fade-in user-page-content" data-page="user">
-      {/* Hero Section - About Us Red Theme */}
-      <section
-        style={{
-          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
-          paddingTop: "80px",
-          paddingBottom: "80px",
-          color: "white",
-        }}
-      >
-        <Container>
-          <Row className="text-center">
-            <Col lg={12}>
-              <h1
-                style={{
-                  fontSize: "3rem",
-                  fontWeight: "800",
-                  marginBottom: "20px",
-                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
-                }}
-              >
-                My Invoices
-              </h1>
-              <p
-                style={{
-                  fontSize: "1.2rem",
-                  opacity: "0.9",
-                  maxWidth: "600px",
-                  margin: "0 auto",
-                }}
-              >
-                View and download your purchase invoices
-              </p>
-            </Col>
-          </Row>
-        </Container>
-      </section>
+    <div className="fade-in">
+      <PageHeroSection
+        title="My Invoices"
+        description="View and download your purchase invoices"
+        icon="🧾"
+      />
 
-      {/* Invoices Content */}
-      <section
-        style={{
-          background: "#f8f9fa",
-          paddingTop: "80px",
-          paddingBottom: "80px",
-          minHeight: "60vh",
-        }}
-      >
-        <Container>
-          {/* Header */}
-          <Row className="mb-4">
-            <Col lg={12}>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h2>My Invoices</h2>
-                  <p className="text-muted">
-                    Download and manage your invoices
-                  </p>
-                </div>
-                <Button
-                  as={Link}
-                  to="/user/orders"
-                  className="btn-medical-primary"
+      <Container className="py-5">
+        {error && (
+          <Alert variant="warning" className="mb-4">
+            <Alert.Heading>Offline Mode</Alert.Heading>
+            <p>{error}</p>
+            <ThemeButton variant="outline" onClick={fetchUserInvoices}>
+              Try Again
+            </ThemeButton>
+          </Alert>
+        )}
+
+        {/* Summary Cards */}
+        <Row className="mb-4">
+          <Col md={3}>
+            <ThemeCard className="text-center">
+              <Card.Body>
+                <h4 className="text-danger">{invoices.length}</h4>
+                <small className="text-muted">Total Invoices</small>
+              </Card.Body>
+            </ThemeCard>
+          </Col>
+          <Col md={3}>
+            <ThemeCard className="text-center">
+              <Card.Body>
+                <h4 className="text-success">
+                  {invoices.filter((inv) => inv.status === "paid").length}
+                </h4>
+                <small className="text-muted">Paid Invoices</small>
+              </Card.Body>
+            </ThemeCard>
+          </Col>
+          <Col md={3}>
+            <ThemeCard className="text-center">
+              <Card.Body>
+                <h4 className="text-warning">
+                  {invoices.filter((inv) => inv.status === "pending").length}
+                </h4>
+                <small className="text-muted">Pending Invoices</small>
+              </Card.Body>
+            </ThemeCard>
+          </Col>
+          <Col md={3}>
+            <ThemeCard className="text-center">
+              <Card.Body>
+                <h4 className="text-info">
+                  ₹
+                  {invoices
+                    .filter((inv) => inv.status === "paid")
+                    .reduce((sum, inv) => sum + (inv.totalAmount || 0), 0)
+                    .toLocaleString()}
+                </h4>
+                <small className="text-muted">Total Paid</small>
+              </Card.Body>
+            </ThemeCard>
+          </Col>
+        </Row>
+
+        {/* Filters and Search */}
+        <ThemeCard className="mb-4">
+          <Card.Body>
+            <Row>
+              <Col md={3}>
+                <InputGroup>
+                  <Form.Control
+                    type="text"
+                    placeholder="Search invoices..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </InputGroup>
+              </Col>
+              <Col md={2}>
+                <Form.Select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
                 >
-                  <i className="bi bi-bag me-2"></i>
-                  View Orders
-                </Button>
-              </div>
-            </Col>
-          </Row>
+                  <option value="">All Status</option>
+                  <option value="paid">Paid</option>
+                  <option value="pending">Pending</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="refunded">Refunded</option>
+                </Form.Select>
+              </Col>
+              <Col md={2}>
+                <Form.Select
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                >
+                  <option value="">All Time</option>
+                  <option value="today">Today</option>
+                  <option value="week">This Week</option>
+                  <option value="month">This Month</option>
+                  <option value="year">This Year</option>
+                </Form.Select>
+              </Col>
+              <Col md={5}>
+                <div className="d-flex gap-2">
+                  <ThemeButton
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowBulkModal(true)}
+                    disabled={filteredInvoices.length === 0}
+                  >
+                    📥 Bulk Download
+                  </ThemeButton>
+                  <ThemeButton
+                    variant="outline"
+                    size="sm"
+                    onClick={fetchUserInvoices}
+                  >
+                    🔄 Refresh
+                  </ThemeButton>
+                </div>
+              </Col>
+            </Row>
+          </Card.Body>
+        </ThemeCard>
 
-          {/* Invoice Statistics */}
-          <Row className="mb-4">
-            <Col lg={3} md={6} className="mb-3">
-              <Card className="medical-card text-center h-100">
-                <Card.Body>
-                  <h4 className="text-medical-blue">{invoices.length}</h4>
-                  <p className="mb-0 small">Total Invoices</p>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col lg={3} md={6} className="mb-3">
-              <Card className="medical-card text-center h-100">
-                <Card.Body>
-                  <h4 className="text-success">
-                    ₹{getTotalAmount().toFixed(2)}
-                  </h4>
-                  <p className="mb-0 small">Total Amount</p>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col lg={3} md={6} className="mb-3">
-              <Card className="medical-card text-center h-100">
-                <Card.Body>
-                  <h4 className="text-info">{stats.totalDownloads}</h4>
-                  <p className="mb-0 small">Total Downloads</p>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col lg={3} md={6} className="mb-3">
-              <Card className="medical-card text-center h-100">
-                <Card.Body>
-                  <h4 className="text-warning">{stats.undownloadedCount}</h4>
-                  <p className="mb-0 small">Not Downloaded</p>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-
-          {/* Filters */}
-          <Row className="mb-4">
-            <Col lg={6}>
-              <InputGroup>
-                <InputGroup.Text>
-                  <i className="bi bi-search"></i>
-                </InputGroup.Text>
-                <Form.Control
-                  type="text"
-                  placeholder="Search by invoice ID or order ID..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </InputGroup>
-            </Col>
-            <Col lg={3}>
-              <Form.Control
-                type="month"
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-              />
-            </Col>
-            <Col lg={3}>
-              <Button
-                variant="outline-secondary"
-                onClick={() => {
-                  setSearchTerm("");
-                  setDateFilter("");
-                }}
-              >
-                Clear Filters
-              </Button>
-            </Col>
-          </Row>
-
-          {/* Invoices Table */}
-          <Card className="medical-card">
-            <Card.Header className="bg-medical-light">
-              <h5 className="mb-0">
-                <i className="bi bi-receipt me-2"></i>
-                Invoice History ({filteredInvoices.length})
-              </h5>
-            </Card.Header>
-            <Card.Body className="p-0">
-              <div className="table-responsive">
-                <Table className="mb-0">
-                  <thead className="table-light">
-                    <tr>
-                      <th>Invoice ID</th>
-                      <th>Order ID</th>
-                      <th>Date</th>
-                      <th>Items</th>
-                      <th>Amount</th>
-                      <th>Status</th>
-                      <th>Downloads</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredInvoices.map((invoice) => (
-                      <tr key={invoice.id}>
-                        <td>
-                          <span className="text-monospace fw-bold">
-                            {invoice.id}
-                          </span>
-                        </td>
-                        <td>
-                          <Link
-                            to={`/order/${invoice.orderId}`}
-                            className="text-decoration-none"
-                          >
-                            {invoice.orderId}
-                          </Link>
-                        </td>
-                        <td>{invoice.date}</td>
-                        <td>
-                          <Badge bg="secondary">{invoice.items} items</Badge>
-                        </td>
-                        <td>
-                          <span className="fw-bold">
-                            ₹{invoice.amount.toFixed(2)}
-                          </span>
-                        </td>
-                        <td>{getStatusBadge(invoice.status)}</td>
-                        <td>
-                          <Badge
-                            bg={
-                              invoice.downloadCount > 0 ? "success" : "warning"
-                            }
-                          >
-                            {invoice.downloadCount}
-                          </Badge>
-                        </td>
-                        <td>
-                          <div className="d-flex gap-1">
-                            <Button
-                              size="sm"
-                              variant="outline-primary"
-                              onClick={() => handleDownloadPDF(invoice)}
-                              className="btn-medical-outline"
-                              title="Download PDF directly"
-                            >
-                              <i className="bi bi-download me-1"></i>
-                              Download
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline-success"
-                              onClick={() => handlePrintInvoice(invoice)}
-                              className="btn-medical-outline"
-                              title="Print Invoice directly"
-                            >
-                              <i className="bi bi-printer"></i>
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline-info"
-                              onClick={() => handleViewInvoice(invoice)}
-                              className="btn-medical-outline"
-                              title="View in new tab"
-                            >
-                              <i className="bi bi-eye"></i>
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </div>
-            </Card.Body>
-          </Card>
-
-          {/* Invoice Summary */}
-          <Row className="mt-4">
-            <Col lg={12}>
-              <Card className="medical-card">
-                <Card.Header className="bg-medical-light">
-                  <h5 className="mb-0">
-                    <i className="bi bi-graph-up me-2"></i>
-                    Invoice Summary
-                  </h5>
-                </Card.Header>
-                <Card.Body>
-                  <Row>
-                    <Col md={6}>
-                      <h6>Quick Stats</h6>
-                      <ul className="list-unstyled">
-                        <li className="mb-2">
-                          <i className="bi bi-check-circle text-success me-2"></i>
-                          All invoices are paid and up to date
-                        </li>
-                        <li className="mb-2">
-                          <i className="bi bi-download text-primary me-2"></i>
-                          {stats.totalDownloads} downloads across all invoices
-                        </li>
-                        <li className="mb-2">
-                          <i className="bi bi-calendar text-info me-2"></i>
-                          Invoices available from{" "}
-                          {invoices[invoices.length - 1]?.date} onwards
-                        </li>
-                      </ul>
-                    </Col>
-                    <Col md={6}>
-                      <h6>Download Options</h6>
-                      <p className="text-muted">
-                        All invoices are available for download in PDF format.
-                        You can also view them online by clicking the view
-                        button.
-                      </p>
-                      <Button
-                        variant="outline-primary"
-                        className="btn-medical-outline"
-                        onClick={handleBulkDownload}
-                        disabled={
-                          bulkDownloading || filteredInvoices.length === 0
+        {/* Invoices Table */}
+        <ThemeCard>
+          <Card.Header className="bg-gradient text-white d-flex justify-content-between align-items-center">
+            <h5 className="mb-0">My Invoices ({filteredInvoices.length})</h5>
+          </Card.Header>
+          <Card.Body className="p-0">
+            {filteredInvoices.length > 0 ? (
+              <Table responsive hover className="mb-0">
+                <thead className="table-light">
+                  <tr>
+                    <th>
+                      <Form.Check
+                        type="checkbox"
+                        checked={
+                          selectedInvoicesForDownload.length ===
+                          filteredInvoices.length
                         }
-                      >
-                        <i
-                          className={`bi bi-${bulkDownloading ? "hourglass-split" : "download"} me-2`}
-                        ></i>
-                        {bulkDownloading
-                          ? "Generating PDF..."
-                          : "Download All (PDF)"}
-                      </Button>
-                    </Col>
-                  </Row>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        </Container>
-      </section>
-
-      {/* Bulk Download Progress Modal */}
-      <Modal show={showBulkModal} centered backdrop="static" keyboard={false}>
-        <Modal.Header>
-          <Modal.Title>Generating PDF</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div className="text-center">
-            <i className="bi bi-file-earmark-pdf display-1 text-danger mb-3"></i>
-            <h5>Creating Combined Invoice PDF</h5>
-            <p className="text-muted mb-3">
-              Processing {filteredInvoices.length} invoice(s)...
-            </p>
-            <ProgressBar
-              now={downloadProgress}
-              label={`${Math.round(downloadProgress)}%`}
-              className="mb-3"
-              style={{ height: "25px" }}
-            />
-            {downloadProgress === 100 && !bulkDownloading && (
-              <div className="text-success">
-                <i className="bi bi-check-circle me-2"></i>
-                PDF generated successfully!
+                        onChange={selectAllInvoices}
+                      />
+                    </th>
+                    <th>Invoice ID</th>
+                    <th>Order ID</th>
+                    <th>Items</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredInvoices.map((invoice) => (
+                    <tr key={invoice._id}>
+                      <td>
+                        <Form.Check
+                          type="checkbox"
+                          checked={selectedInvoicesForDownload.includes(
+                            invoice._id,
+                          )}
+                          onChange={() => toggleInvoiceSelection(invoice._id)}
+                        />
+                      </td>
+                      <td>
+                        <strong>{invoice.invoiceId || invoice._id}</strong>
+                      </td>
+                      <td>{invoice.orderId}</td>
+                      <td>
+                        <span className="badge bg-light text-dark">
+                          {invoice.items?.length || 0} items
+                        </span>
+                        {invoice.items?.length > 0 && (
+                          <div>
+                            <small className="text-muted">
+                              {invoice.items[0]?.name}
+                              {invoice.items.length > 1 &&
+                                ` +${invoice.items.length - 1} more`}
+                            </small>
+                          </div>
+                        )}
+                      </td>
+                      <td>
+                        <strong>
+                          ₹{invoice.totalAmount?.toLocaleString()}
+                        </strong>
+                      </td>
+                      <td>
+                        <Badge bg={getStatusBadgeColor(invoice.status)}>
+                          {invoice.status || "Pending"}
+                        </Badge>
+                      </td>
+                      <td>
+                        <div>
+                          <div>{formatDateTime(invoice.createdAt)}</div>
+                          <small className="text-muted">
+                            {getRelativeTime(invoice.createdAt)}
+                          </small>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="d-flex gap-1">
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
+                            onClick={() => handleViewInvoice(invoice)}
+                          >
+                            👁️
+                          </Button>
+                          <Button
+                            variant="outline-secondary"
+                            size="sm"
+                            onClick={() => handlePrintInvoice(invoice)}
+                          >
+                            🖨️
+                          </Button>
+                          <Button
+                            variant="outline-success"
+                            size="sm"
+                            onClick={() => handleDownloadInvoice(invoice)}
+                          >
+                            📥
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            ) : (
+              <div className="text-center py-5">
+                <div className="mb-3">
+                  <span style={{ fontSize: "4rem" }}>🧾</span>
+                </div>
+                <h5>No Invoices Found</h5>
+                <p className="text-muted">
+                  {error
+                    ? "Unable to load invoices. Please check your connection."
+                    : searchTerm || statusFilter || dateFilter
+                      ? "No invoices match your current filters."
+                      : "You haven't made any purchases yet."}
+                </p>
+                {error ? (
+                  <ThemeButton onClick={fetchUserInvoices}>
+                    Try Again
+                  </ThemeButton>
+                ) : !searchTerm && !statusFilter && !dateFilter ? (
+                  <Link to="/products">
+                    <ThemeButton>Start Shopping</ThemeButton>
+                  </Link>
+                ) : (
+                  <ThemeButton
+                    variant="outline"
+                    onClick={() => {
+                      setSearchTerm("");
+                      setStatusFilter("");
+                      setDateFilter("");
+                    }}
+                  >
+                    Clear Filters
+                  </ThemeButton>
+                )}
               </div>
             )}
-          </div>
-        </Modal.Body>
-      </Modal>
+          </Card.Body>
+        </ThemeCard>
+
+        {/* View Invoice Modal */}
+        <Modal
+          show={showInvoiceModal}
+          onHide={() => setShowInvoiceModal(false)}
+          size="lg"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Invoice Details</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {selectedInvoice && (
+              <OfficialInvoiceDesign
+                invoice={selectedInvoice}
+                onPrint={() => handlePrintInvoice(selectedInvoice)}
+                onDownload={() => handleDownloadInvoice(selectedInvoice)}
+              />
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowInvoiceModal(false)}
+            >
+              Close
+            </Button>
+            <ThemeButton
+              variant="outline"
+              onClick={() => handlePrintInvoice(selectedInvoice)}
+            >
+              🖨️ Print
+            </ThemeButton>
+            <ThemeButton onClick={() => handleDownloadInvoice(selectedInvoice)}>
+              📥 Download
+            </ThemeButton>
+          </Modal.Footer>
+        </Modal>
+
+        {/* Bulk Download Modal */}
+        <Modal show={showBulkModal} onHide={() => setShowBulkModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Bulk Download Invoices</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {bulkDownloading ? (
+              <div>
+                <div className="mb-3">
+                  <strong>Downloading invoices...</strong>
+                </div>
+                <ProgressBar
+                  now={downloadProgress}
+                  label={`${Math.round(downloadProgress)}%`}
+                  animated
+                />
+              </div>
+            ) : (
+              <div>
+                <p>
+                  Download{" "}
+                  {selectedInvoicesForDownload.length > 0
+                    ? `${selectedInvoicesForDownload.length} selected`
+                    : `all ${filteredInvoices.length}`}{" "}
+                  invoices?
+                </p>
+                <p className="text-muted small">
+                  Each invoice will be downloaded as a separate PDF file.
+                </p>
+              </div>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowBulkModal(false)}
+              disabled={bulkDownloading}
+            >
+              Cancel
+            </Button>
+            <ThemeButton
+              onClick={handleBulkDownload}
+              disabled={bulkDownloading}
+            >
+              {bulkDownloading ? "Downloading..." : "Start Download"}
+            </ThemeButton>
+          </Modal.Footer>
+        </Modal>
+      </Container>
     </div>
   );
 };
