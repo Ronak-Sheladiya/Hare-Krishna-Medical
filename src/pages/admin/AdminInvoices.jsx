@@ -287,6 +287,9 @@ const AdminInvoices = () => {
   // Centralized print function
   const printInvoice = async (invoiceData, qrCode) => {
     try {
+      // Close modal first if open
+      setShowViewModal(false);
+
       // Create a temporary div for printing
       const tempDiv = document.createElement("div");
       tempDiv.style.position = "absolute";
@@ -309,7 +312,7 @@ const AdminInvoices = () => {
       );
 
       // Wait for rendering
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Print using window.print()
       const printWindow = window.open("", "_blank");
@@ -338,13 +341,95 @@ const AdminInvoices = () => {
       `);
       printWindow.document.close();
       printWindow.focus();
-      printWindow.print();
-      printWindow.close();
+
+      // Delay before printing to ensure content is loaded
+      setTimeout(() => {
+        printWindow.print();
+        setTimeout(() => printWindow.close(), 1000);
+      }, 500);
 
       // Cleanup
-      document.body.removeChild(tempDiv);
+      setTimeout(() => {
+        if (document.body.contains(tempDiv)) {
+          document.body.removeChild(tempDiv);
+        }
+      }, 2000);
     } catch (error) {
       console.error("Centralized print error:", error);
+      throw error;
+    }
+  };
+
+  // Centralized download function
+  const downloadInvoice = async (invoiceData, qrCode) => {
+    try {
+      // Close modal first if open
+      setShowViewModal(false);
+
+      // Create a temporary div for PDF generation
+      const tempDiv = document.createElement("div");
+      tempDiv.style.position = "absolute";
+      tempDiv.style.left = "-9999px";
+      tempDiv.style.width = "210mm";
+      tempDiv.style.backgroundColor = "white";
+      document.body.appendChild(tempDiv);
+
+      // Import and render OfficialInvoiceDesign component
+      const React = (await import("react")).default;
+      const { createRoot } = await import("react-dom/client");
+
+      const root = createRoot(tempDiv);
+      root.render(
+        React.createElement(OfficialInvoiceDesign, {
+          invoiceData: invoiceData,
+          qrCode: qrCode,
+          forPrint: true,
+        }),
+      );
+
+      // Wait for rendering
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      // Generate PDF using html2canvas and jsPDF
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      let position = 0;
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Download the PDF
+      pdf.save(
+        `Invoice-${invoiceData.invoiceId}-${new Date().toISOString().split("T")[0]}.pdf`,
+      );
+
+      // Cleanup
+      setTimeout(() => {
+        if (document.body.contains(tempDiv)) {
+          document.body.removeChild(tempDiv);
+        }
+      }, 1000);
+    } catch (error) {
+      console.error("Centralized download error:", error);
       throw error;
     }
   };
