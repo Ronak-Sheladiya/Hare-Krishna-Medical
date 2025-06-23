@@ -117,28 +117,84 @@ const AccessDenied = () => {
   const content = getAccessDeniedContent();
 
   return (
-    <div
-      className="fade-in"
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
-      }}
-    >
-      <Container>
-        <Row
-          className="justify-content-center align-items-center"
-          style={{ minHeight: "100vh" }}
-        >
-          <Col lg={6} md={8} className="text-center">
-            <div
-              className="card border-0 shadow-lg"
-              style={{
-                borderRadius: "24px",
-                background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.1)",
-                overflow: "hidden",
-              }}
-            >
+    <div className="fade-in">
+      {/* Hero Section with Red Theme */}
+      <section
+        style={{
+          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
+          minHeight: "40vh",
+          paddingTop: "80px",
+          paddingBottom: "40px",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* Background Pattern */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            opacity: 0.3,
+          }}
+        ></div>
+
+        <Container style={{ position: "relative", zIndex: 2 }}>
+          <Row className="justify-content-center text-center">
+            <Col lg={8}>
+              <div
+                className="mb-4"
+                style={{
+                  animation: "pulse 2s infinite",
+                  fontSize: "6rem",
+                  color: "white",
+                }}
+              >
+                <i className={content.icon}></i>
+              </div>
+              <h1
+                className="text-white mb-3"
+                style={{
+                  fontWeight: "800",
+                  fontSize: "3rem",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                }}
+              >
+                {content.title}
+              </h1>
+              <p
+                className="text-white-50 mb-0"
+                style={{
+                  fontSize: "1.3rem",
+                  fontWeight: "300",
+                }}
+              >
+                {content.subtitle}
+              </p>
+            </Col>
+          </Row>
+        </Container>
+      </section>
+
+      {/* Content Section */}
+      <section style={{ padding: "80px 0", background: "#f8f9fa" }}>
+        <Container>
+          <Row className="justify-content-center">
+            <Col lg={8}>
+              <div
+                className="card border-0 shadow-lg"
+                style={{
+                  borderRadius: "20px",
+                  background: "white",
+                  boxShadow: "0 15px 50px rgba(0,0,0,0.1)",
+                  marginTop: "-60px",
+                  position: "relative",
+                  zIndex: 3,
+                }}
+              >
               {/* Animated Background Pattern */}
               <div
                 style={{
