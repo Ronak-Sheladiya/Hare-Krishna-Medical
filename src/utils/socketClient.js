@@ -67,21 +67,32 @@ class SocketClient {
   connect(token = null, role = 0) {
     // Don't connect if not in browser environment
     if (!this.isBrowser) {
-      console.warn("Socket.io client can only run in browser environment");
-      return null;
+      console.debug("Socket.io client requires browser environment");
+      return this.createMockSocket();
     }
 
+    // Return existing connection if available and connected
     if (this.socket && this.isConnected) {
       return this.socket;
     }
 
-    try {
-      // Create real-time connection
-      const socketUrl =
-        import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+    // Return mock socket if we've exceeded retry attempts or in fallback mode
+    if (
+      this.reconnectAttempts >= this.maxReconnectAttempts ||
+      this.fallbackMode
+    ) {
+      console.info(
+        "Using mock socket due to connection issues or fallback mode",
+      );
+      return this.createMockSocket();
+    }
 
-      // Ensure io is available
-      if (!io || typeof io !== "function") {
+    try {
+      // Determine socket URL with fallback
+      const socketUrl = this.getSocketUrl();
+
+      // Check if socket.io is available
+      if (!io || typeof io !== "function" || !socketAvailable) {
         console.warn(
           "Socket.io-client not available. Please install: npm install socket.io-client",
         );
