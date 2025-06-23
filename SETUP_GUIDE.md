@@ -33,9 +33,9 @@ cd hare-krishna-medical-store
 Create a `.env` file in the root directory:
 
 ```env
-REACT_APP_BACKEND_URL=http://localhost:5000
-REACT_APP_APP_NAME=Hare Krishna Medical Store
-REACT_APP_VERSION=1.0.0
+VITE_BACKEND_URL=http://localhost:5000
+VITE_APP_NAME=Hare Krishna Medical Store
+VITE_VERSION=1.0.0
 ```
 
 #### Backend Environment
