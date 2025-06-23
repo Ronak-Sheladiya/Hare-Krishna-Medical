@@ -145,7 +145,7 @@ const Home = () => {
                         "0 6px 20px rgba(230, 57, 70, 0.3)";
                     }}
                   >
-                    <i className="bi bi-cart-plus-fill"></i>
+                    <i className="bi bi-bag-heart-fill"></i>
                     Shop Now
                   </Button>
                   <Button
