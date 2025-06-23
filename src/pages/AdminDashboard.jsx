@@ -97,6 +97,25 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
+
+    // Setup real-time refresh listeners
+    const handleRefreshOrders = () => fetchDashboardData();
+    const handleRefreshProducts = () => fetchDashboardData();
+    const handleRefreshAnalytics = () => fetchDashboardData();
+
+    window.addEventListener("refreshOrders", handleRefreshOrders);
+    window.addEventListener("refreshProducts", handleRefreshProducts);
+    window.addEventListener("refreshAnalytics", handleRefreshAnalytics);
+
+    // Auto-refresh dashboard every 30 seconds
+    const autoRefreshInterval = setInterval(fetchDashboardData, 30000);
+
+    return () => {
+      window.removeEventListener("refreshOrders", handleRefreshOrders);
+      window.removeEventListener("refreshProducts", handleRefreshProducts);
+      window.removeEventListener("refreshAnalytics", handleRefreshAnalytics);
+      clearInterval(autoRefreshInterval);
+    };
   }, [unreadCount]);
 
   const getStatusVariant = (status) => {
