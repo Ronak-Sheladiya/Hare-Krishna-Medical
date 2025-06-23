@@ -467,6 +467,7 @@ const AdminInvoices = () => {
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowViewModal(false)}>
+              <i className="bi bi-x me-2"></i>
               Close
             </Button>
             <ThemeButton onClick={() => window.print()}>
@@ -500,6 +501,7 @@ const AdminInvoices = () => {
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowQRModal(false)}>
+              <i className="bi bi-x me-2"></i>
               Close
             </Button>
             <ThemeButton
