@@ -41,7 +41,7 @@ const OfficialInvoiceDesign = ({ invoiceData, qrCode, forPrint = false }) => {
               <div style="font-size: 11px; line-height: 1.4; opacity: 0.95;">
                 <div>3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat</div>
                 <div>Phone: +91 76989 13354 | +91 91060 18508</div>
-                <div>Email: harekrishnamedical@gmail.com</div>
+                <div>Email: hkmedicalamroli@gmail.com</div>
               </div>
             </div>
             <!-- Right Side - Invoice Info -->
@@ -152,7 +152,7 @@ const OfficialInvoiceDesign = ({ invoiceData, qrCode, forPrint = false }) => {
               <div><strong>Terms:</strong> Payment due within 30 days</div>
               <div>Goods once sold will not be taken back</div>
               <div>Subject to Gujarat jurisdiction only</div>
-              <div style="margin-top: 8px;"><strong>Contact:</strong> harekrishnamedical@gmail.com | +91 76989 13354</div>
+              <div style="margin-top: 8px;"><strong>Contact:</strong> hkmedicalamroli@gmail.com | +91 76989 13354</div>
             </div>
           </div>
           <div style="text-align: center; margin-left: 20px;">

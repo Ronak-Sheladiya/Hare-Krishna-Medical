@@ -50,6 +50,7 @@ import LocalSetupGuide from "./pages/LocalSetupGuide.jsx";
 import InvoiceVerify from "./pages/InvoiceVerify.jsx";
 import NavigationTest from "./components/common/NavigationTest.jsx";
 import ButtonFixer from "./components/common/ButtonFixer.jsx";
+import FunctionalityTest from "./components/common/FunctionalityTest.jsx";
 import InvoiceQRVerify from "./pages/InvoiceQRVerify.jsx";
 import AdminPaymentMethods from "./pages/admin/AdminPaymentMethods.jsx";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
@@ -210,6 +211,11 @@ function App() {
               <Route path="/localsetup-guide" element={<LocalSetupGuide />} />
               <Route path="/navigation-test" element={<NavigationTest />} />
               <Route path="/button-fixer" element={<ButtonFixer />} />
+              <Route
+                path="/functionality-test"
+                element={<FunctionalityTest />}
+              />
+              <Route path="/cart" element={<Cart />} />
               <Route path="/order" element={<Order />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />

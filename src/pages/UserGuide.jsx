@@ -1242,7 +1242,7 @@ const UserGuide = () => {
                         You can reach us through multiple channels:
                         <ul style={{ marginTop: "10px", paddingLeft: "20px" }}>
                           <li>Phone: +91 76989 13354 or +91 91060 18508</li>
-                          <li>Email: harekrishnamedical@gmail.com</li>
+                          <li>Email: hkmedicalamroli@gmail.com</li>
                           <li>Contact form on our website</li>
                           <li>
                             Visit our store: 3 Sahyog Complex, Man Sarovar

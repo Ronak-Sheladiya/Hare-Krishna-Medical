@@ -157,7 +157,7 @@ router.get("/verify/:invoiceId", async (req, res) => {
         address:
           "3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat",
         phone: "+91 76989 13354",
-        email: "harekrishnamedical@gmail.com",
+        email: "hkmedicalamroli@gmail.com",
       },
     };
 

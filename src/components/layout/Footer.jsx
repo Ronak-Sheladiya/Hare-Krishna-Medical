@@ -24,7 +24,7 @@ const Footer = () => {
                 <i className="bi bi-instagram"></i>
               </a>
               <a
-                href="mailto:harekrishnamedical@gmail.com"
+                href="mailto:hkmedicalamroli@gmail.com"
                 className="social-icon email"
               >
                 <i className="bi bi-envelope"></i>
@@ -89,8 +89,8 @@ const Footer = () => {
               </p>
               <p className="mb-2">
                 <i className="bi bi-envelope-fill me-2 text-medical-red"></i>
-                <a href="mailto:harekrishnamedical@gmail.com">
-                  harekrishnamedical@gmail.com
+                <a href="mailto:hkmedicalamroli@gmail.com">
+                  hkmedicalamroli@gmail.com
                 </a>
               </p>
               <p className="mb-2">

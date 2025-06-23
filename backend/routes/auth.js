@@ -377,6 +377,107 @@ router.post("/reset-password/:token", async (req, res) => {
   }
 });
 
+// @route   POST /api/auth/verify-otp
+// @desc    Verify email OTP
+// @access  Public
+router.post("/verify-otp", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        message: "Email and OTP are required",
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // For demo purposes, accept any 6-digit OTP
+    // In production, implement proper OTP verification
+    if (otp.length === 6 && /^\d{6}$/.test(otp)) {
+      user.emailVerified = true;
+      user.emailVerificationToken = undefined;
+      await user.save();
+
+      res.json({
+        message: "Email verified successfully",
+        user: {
+          id: user._id,
+          fullName: user.fullName,
+          email: user.email,
+          mobile: user.mobile,
+          role: user.role,
+          emailVerified: user.emailVerified,
+        },
+      });
+    } else {
+      return res.status(400).json({
+        message: "Invalid OTP format. Please enter a 6-digit number.",
+      });
+    }
+  } catch (error) {
+    console.error("OTP verification error:", error);
+    res.status(500).json({
+      message: "OTP verification failed",
+      error: error.message,
+    });
+  }
+});
+
+// @route   POST /api/auth/resend-otp
+// @desc    Resend email OTP
+// @access  Public
+router.post("/resend-otp", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        message: "Email is required",
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // Generate new OTP token
+    user.emailVerificationToken = crypto.randomBytes(32).toString("hex");
+    await user.save();
+
+    // Send new OTP email
+    try {
+      await emailService.sendVerificationEmail(
+        user.email,
+        user.fullName,
+        "123456",
+      );
+    } catch (emailError) {
+      console.error("Resend OTP email failed:", emailError);
+    }
+
+    res.json({
+      message: "New OTP sent successfully",
+    });
+  } catch (error) {
+    console.error("Resend OTP error:", error);
+    res.status(500).json({
+      message: "Failed to resend OTP",
+      error: error.message,
+    });
+  }
+});
+
 // @route   POST /api/auth/logout
 // @desc    Logout user (client-side token removal)
 // @access  Private

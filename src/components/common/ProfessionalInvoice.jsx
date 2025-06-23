@@ -61,7 +61,7 @@ const ProfessionalInvoice = ({
           company: "Hare Krishna Medical",
           location: "Surat, Gujarat, India",
           phone: "+91 76989 13354",
-          email: "harekrishnamedical@gmail.com",
+          email: "hkmedicalamroli@gmail.com",
           generated_at: new Date().toISOString(),
         };
 
@@ -474,7 +474,7 @@ const ProfessionalInvoice = ({
                 <div class="company-details">
                   📍 3 Sahyog Complex, Man Sarovar Circle, Amroli, Surat - 394107, Gujarat<br>
                   📞 +91 76989 13354 | 📱 +91 91060 18508<br>
-                  📧 harekrishnamedical@gmail.com
+                  📧 hkmedicalamroli@gmail.com
                 </div>
               </div>
 
@@ -604,7 +604,7 @@ const ProfessionalInvoice = ({
 
               <div class="contact-info">
                 <strong>📞 Customer Support:</strong><br>
-                Email: harekrishnamedical@gmail.com<br>
+                Email: hkmedicalamroli@gmail.com<br>
                 Phone: +91 76989 13354 | Emergency: +91 91060 18508<br>
                 Hours: Monday-Saturday, 9:00 AM - 8:00 PM
               </div>

@@ -465,7 +465,7 @@ const PrivacyPolicy = () => {
                     If you have questions about this Privacy Policy, please
                     contact us at:
                     <br />
-                    <strong>harekrishnamedical@gmail.com</strong>
+                    <strong>hkmedicalamroli@gmail.com</strong>
                   </div>
                 </Card.Body>
               </Card>

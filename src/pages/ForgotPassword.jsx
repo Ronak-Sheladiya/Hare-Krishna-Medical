@@ -35,7 +35,7 @@ const ForgotPassword = () => {
       const validEmails = [
         "admin@gmail.com",
         "user@example.com",
-        "harekrishnamedical@gmail.com",
+        "hkmedicalamroli@gmail.com",
       ];
 
       if (!validEmails.includes(email)) {
@@ -332,7 +332,7 @@ const ForgotPassword = () => {
           align-items: center;
           position: relative;
         }
-        
+
         .step-number {
           width: 40px;
           height: 40px;
@@ -346,12 +346,12 @@ const ForgotPassword = () => {
           margin-bottom: 8px;
           transition: all 0.3s ease;
         }
-        
+
         .step-indicator.active .step-number {
           background: var(--medical-red);
           color: white;
         }
-        
+
         .step-line {
           flex: 1;
           height: 2px;
@@ -359,7 +359,7 @@ const ForgotPassword = () => {
           margin: 0 20px;
           margin-top: -20px;
         }
-        
+
         .step-indicator.active ~ .step-line {
           background: var(--medical-red);
         }

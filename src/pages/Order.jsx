@@ -361,7 +361,7 @@ const Order = () => {
                 <div>📍 3 Sahyog Complex, Man Sarovar circle</div>
                 <div>🏙️ Amroli, 394107, Gujarat, India</div>
                 <div>📞 +91 76989 13354 | +91 91060 18508</div>
-                <div>📧 harekrishnamedical@gmail.com</div>
+                <div>📧 hkmedicalamroli@gmail.com</div>
               </div>
             </div>
             <!-- Right Side - Invoice Info -->
@@ -476,7 +476,7 @@ const Order = () => {
                 <div>✅ Payment due within 30 days</div>
                 <div>❌ Goods once sold will not be taken back</div>
                 <div>⚖️ Subject to Gujarat jurisdiction only</div>
-                <div style="margin-top: 12px;"><strong style="color: #3498db;">📞 Contact:</strong> harekrishnamedical@gmail.com | +91 76989 13354</div>
+                <div style="margin-top: 12px;"><strong style="color: #3498db;">📞 Contact:</strong> hkmedicalamroli@gmail.com | +91 76989 13354</div>
               </div>
             </div>
             <div style="text-align: center; margin-left: 25px;">
@@ -769,7 +769,7 @@ const Order = () => {
                                   </div>
                                   <div>
                                     <strong>📧 Email:</strong>{" "}
-                                    harekrishnamedical@gmail.com
+                                    hkmedicalamroli@gmail.com
                                   </div>
                                   <div>
                                     <strong>🏠 Address:</strong> 3 Sahyog

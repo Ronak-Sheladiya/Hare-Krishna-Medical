@@ -49,13 +49,18 @@ export const convertToInputDate = (displayDate) => {
 };
 
 /**
- * Format date and time string for display
+ * Format date and time string for display in dd/mm/yyyy format
  * @param {string} dateString - ISO date string
  * @returns {string} Formatted date and time string
  */
 export const formatDateTime = (dateString) => {
   if (!dateString) return "";
-  return new Date(dateString).toLocaleString();
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  const time = date.toLocaleTimeString();
+  return `${day}/${month}/${year} ${time}`;
 };
 
 /**
@@ -150,4 +155,28 @@ export const sortByDateAsc = (array, dateField = "createdAt") => {
   return [...array].sort(
     (a, b) => new Date(a[dateField]) - new Date(b[dateField]),
   );
+};
+
+/**
+ * Universal date formatter - always returns dd/mm/yyyy format
+ * @param {string|Date} dateInput - Date string or Date object
+ * @returns {string} Formatted date string in dd/mm/yyyy format
+ */
+export const formatDateUniversal = (dateInput) => {
+  if (!dateInput) return "";
+  const date = new Date(dateInput);
+  if (isNaN(date.getTime())) return "";
+  return formatDate(date.toISOString());
+};
+
+/**
+ * Universal date time formatter - always returns dd/mm/yyyy HH:mm format
+ * @param {string|Date} dateInput - Date string or Date object
+ * @returns {string} Formatted date and time string
+ */
+export const formatDateTimeUniversal = (dateInput) => {
+  if (!dateInput) return "";
+  const date = new Date(dateInput);
+  if (isNaN(date.getTime())) return "";
+  return formatDateTime(date.toISOString());
 };

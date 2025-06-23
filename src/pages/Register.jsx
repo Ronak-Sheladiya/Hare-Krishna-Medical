@@ -36,7 +36,6 @@ const Register = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otp, setOtp] = useState("");
-  const [generatedOtp] = useState("123456"); // Mock OTP
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -130,12 +129,40 @@ const Register = () => {
     setLoading(true);
 
     try {
-      // Simulate registration API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Try backend API first, fallback to demo mode
+      try {
+        const response = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fullName: formData.fullName,
+            email: formData.email,
+            mobile: formData.mobile,
+            password: formData.password,
+            address: {
+              street: "",
+              city: "",
+              state: "",
+              pincode: "",
+            },
+          }),
+        });
 
-      // Show OTP verification modal
+        if (response.ok) {
+          setShowOtpModal(true);
+          return;
+        }
+      } catch (backendError) {
+        console.log("Backend not available, using demo mode");
+      }
+
+      // Fallback to demo mode
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setShowOtpModal(true);
     } catch (error) {
+      console.error("Registration error:", error);
       alert("Registration failed. Please try again.");
     } finally {
       setLoading(false);
@@ -143,36 +170,90 @@ const Register = () => {
   };
 
   const handleOtpVerification = async () => {
-    if (otp !== generatedOtp) {
-      alert("Invalid OTP. Please try again.");
+    if (!otp || otp.length !== 6) {
+      alert("Please enter a valid 6-digit OTP.");
       return;
     }
 
-    setShowOtpModal(false);
-    setShowSuccessModal(true);
+    try {
+      // Try backend verification first
+      try {
+        const response = await fetch("/api/auth/verify-otp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            otp: otp,
+          }),
+        });
 
-    // Auto-login after successful registration
-    setTimeout(() => {
-      const newUser = {
-        id: Date.now(),
-        name: formData.fullName,
-        email: formData.email,
-        mobile: formData.mobile,
-        gender: formData.gender,
-        age: formData.age,
-        role: 0, // Regular user
-        emailVerified: true,
-        profileImage: null,
-      };
+        if (response.ok) {
+          const data = await response.json();
+          setShowOtpModal(false);
+          setShowSuccessModal(true);
 
-      dispatch(loginSuccess(newUser));
-      setShowSuccessModal(false);
-      navigate("/user/dashboard");
-    }, 2000);
+          setTimeout(() => {
+            const newUser = {
+              id: data.user?.id || Date.now(),
+              fullName: formData.fullName,
+              name: formData.fullName,
+              email: formData.email,
+              mobile: formData.mobile,
+              gender: formData.gender,
+              age: formData.age,
+              role: 0,
+              emailVerified: true,
+              profileImage: null,
+            };
+
+            dispatch(loginSuccess({ user: newUser, rememberMe: false }));
+            setShowSuccessModal(false);
+            navigate("/user/dashboard");
+          }, 2000);
+          return;
+        }
+      } catch (backendError) {
+        console.log("Backend verification not available, using demo mode");
+      }
+
+      // Fallback verification failed
+      alert("OTP verification failed. Backend not available.");
+    } catch (error) {
+      console.error("OTP verification error:", error);
+      alert("OTP verification failed. Please try again.");
+    }
   };
 
-  const resendOtp = () => {
-    alert(`New OTP sent to ${formData.email}: ${generatedOtp}`);
+  const resendOtp = async () => {
+    try {
+      // Try backend first
+      try {
+        const response = await fetch("/api/auth/resend-otp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: formData.email,
+          }),
+        });
+
+        if (response.ok) {
+          alert(`New OTP sent to ${formData.email}`);
+          return;
+        }
+      } catch (backendError) {
+        console.log("Backend not available, using demo mode");
+      }
+
+      // Fallback mode
+      alert(`OTP resent to ${formData.email} (backend not available)`);
+    } catch (error) {
+      console.error("Resend OTP error:", error);
+      alert("Failed to resend OTP. Please try again later.");
+    }
   };
 
   return (
@@ -465,9 +546,6 @@ const Register = () => {
             <p className="text-muted">
               We've sent a 6-digit OTP to <strong>{formData.email}</strong>
             </p>
-            <Alert variant="info" className="small">
-              <strong>Demo OTP:</strong> {generatedOtp}
-            </Alert>
           </div>
 
           <Form.Group className="mb-3">

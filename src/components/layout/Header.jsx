@@ -35,7 +35,7 @@ const Header = () => {
 
   const getUserDisplayName = () => {
     if (!user) return "User";
-    return user.name || user.fullName || "User";
+    return user.fullName || user.name || "User";
   };
 
   const getUserRole = () => {
@@ -66,7 +66,6 @@ const Header = () => {
               <h4 className="mb-0 text-medical-red fw-bold">
                 Hare Krishna Medical
               </h4>
-              <small className="text-muted">Healthcare Excellence</small>
             </div>
           </Navbar.Brand>
 
@@ -107,6 +106,18 @@ const Header = () => {
               >
                 Contact
               </Nav.Link>
+              {process.env.NODE_ENV === "development" && (
+                <Nav.Link
+                  as={Link}
+                  to="/functionality-test"
+                  className={
+                    isActiveRoute("/functionality-test") ? "active" : ""
+                  }
+                  style={{ color: "#e63946" }}
+                >
+                  🔧 Test
+                </Nav.Link>
+              )}
             </Nav>
 
             <Nav className="ms-auto d-flex align-items-center">
@@ -134,9 +145,9 @@ const Header = () => {
                     className="text-decoration-none"
                   >
                     <div className="d-flex align-items-center">
-                      <UserAvatar user={user} size={35} className="me-2" />
+                      <UserAvatar user={user} size={45} className="me-2" />
                       <div className="d-none d-md-block text-start">
-                        <div className="fw-bold small">
+                        <div className="fw-bold small text-medical-red">
                           {getUserDisplayName()}
                         </div>
                         <div
@@ -224,12 +235,18 @@ const Header = () => {
                   <Button
                     as={Link}
                     to="/login"
-                    variant="outline-primary"
+                    variant="outline-secondary"
                     size="sm"
+                    className="btn-login-custom"
                   >
                     Login
                   </Button>
-                  <Button as={Link} to="/register" variant="primary" size="sm">
+                  <Button
+                    as={Link}
+                    to="/register"
+                    size="sm"
+                    className="btn-register-custom"
+                  >
                     Register
                   </Button>
                 </div>
@@ -321,6 +338,38 @@ const Header = () => {
           color: #e63946;
         }
 
+        .btn-login-custom {
+          border-color: #6c757d !important;
+          color: #6c757d !important;
+          font-weight: 500;
+          padding: 8px 20px;
+          border-radius: 6px;
+          transition: all 0.3s ease;
+        }
+
+        .btn-login-custom:hover {
+          background-color: #6c757d !important;
+          border-color: #6c757d !important;
+          color: white !important;
+          transform: translateY(-1px);
+        }
+
+        .btn-register-custom {
+          background: linear-gradient(135deg, #e63946, #dc3545) !important;
+          border: none !important;
+          color: white !important;
+          font-weight: 500;
+          padding: 8px 20px;
+          border-radius: 6px;
+          transition: all 0.3s ease;
+        }
+
+        .btn-register-custom:hover {
+          background: linear-gradient(135deg, #dc3545, #c82333) !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+        }
+
         @media (max-width: 768px) {
           .medical-logo {
             width: 40px;
@@ -329,10 +378,6 @@ const Header = () => {
 
           .brand-text-container h4 {
             font-size: 1rem;
-          }
-
-          .brand-text-container small {
-            font-size: 0.7rem;
           }
         }
       `}</style>
