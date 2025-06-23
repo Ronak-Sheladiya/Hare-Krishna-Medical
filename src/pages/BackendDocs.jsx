@@ -300,8 +300,8 @@ const userSchema = new mongoose.Schema({
     street: { type: String, required: true },
     city: { type: String, required: true },
     state: { type: String, required: true },
-    pincode: { 
-      type: String, 
+    pincode: {
+      type: String,
       required: true,
       match: [/^\\d{6}$/, 'Please enter a valid pincode']
     }
@@ -348,7 +348,7 @@ userSchema.virtual('isLocked').get(function() {
 // Pre-save middleware to hash password
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
-  
+
   try {
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
@@ -376,14 +376,14 @@ userSchema.methods.incLoginAttempts = function() {
       $set: { loginAttempts: 1 }
     });
   }
-  
+
   const updates = { $inc: { loginAttempts: 1 } };
-  
+
   // Lock account after 5 attempts for 2 hours
   if (this.loginAttempts + 1 >= 5 && !this.isLocked) {
     updates.$set = { lockUntil: Date.now() + 2 * 60 * 60 * 1000 };
   }
-  
+
   return this.updateOne(updates);
 };
 
@@ -637,9 +637,9 @@ const orderItemSchema = new mongoose.Schema({
   name: { type: String, required: true },
   company: { type: String, required: true },
   price: { type: Number, required: true },
-  quantity: { 
-    type: Number, 
-    required: true, 
+  quantity: {
+    type: Number,
+    required: true,
     min: [1, 'Quantity must be at least 1']
   },
   total: { type: Number, required: true }
@@ -789,7 +789,7 @@ orderSchema.methods.cancelOrder = function(reason, cancelledBy) {
     cancelledAt: new Date(),
     refundStatus: this.payment.status === 'Completed' ? 'Pending' : null
   };
-  
+
   this.statusHistory.push({
     status: 'Cancelled',
     note: \`Order cancelled: \${reason}\`,
@@ -816,7 +816,7 @@ orderSchema.statics.getOrdersByStatus = function(status) {
 orderSchema.statics.getDailySales = function(date = new Date()) {
   const startOfDay = new Date(date);
   startOfDay.setHours(0, 0, 0, 0);
-  
+
   const endOfDay = new Date(date);
   endOfDay.setHours(23, 59, 59, 999);
 
@@ -1086,7 +1086,7 @@ router.post('/forgot-password', [
 
     // Send reset email
     const resetUrl = \`\${process.env.FRONTEND_URL}/reset-password?token=\${resetToken}\`;
-    
+
     try {
       await sendEmail({
         to: user.email,
@@ -1107,7 +1107,7 @@ router.post('/forgot-password', [
       user.resetPasswordToken = undefined;
       user.resetPasswordExpires = undefined;
       await user.save();
-      
+
       throw emailError;
     }
 
@@ -1171,7 +1171,7 @@ router.post('/reset-password', [
     user.resetPasswordExpires = undefined;
     user.loginAttempts = 0;
     user.lockUntil = undefined;
-    
+
     await user.save();
 
     res.json({
@@ -1745,61 +1745,46 @@ ALLOWED_FILE_TYPES=image/jpeg,image/png,image/gif,image/webp`,
                           boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
                         }}
                       >
-                        <Card.Header
-                          style={{
-                            background:
-                              "linear-gradient(135deg, #6f42c1, #6610f2)",
-                            color: "white",
-                            borderRadius: "16px 16px 0 0",
-                            padding: "20px",
-                          }}
-                        >
-                          <h5 className="mb-0" style={{ fontWeight: "700" }}>
-                            <i className="bi bi-database me-2"></i>
-                            Database Models & Schemas
-                          </h5>
-                        </Card.Header>
-                        <Card.Body style={{ padding: "30px" }}>
-                          <Accordion defaultActiveKey="0">
-                            <Accordion.Item eventKey="0">
-                              <Accordion.Header>
-                                👤 User Model (models/User.js)
-                              </Accordion.Header>
-                              <Accordion.Body>
-                                <CodeBlock
-                                  title="User Model with Authentication"
-                                  fileName="models/User.js"
-                                  code={backendCodes.userModel}
-                                />
-                              </Accordion.Body>
-                            </Accordion.Item>
-
-                            <Accordion.Item eventKey="1">
-                              <Accordion.Header>
-                                🛍️ Product Model (models/Product.js)
-                              </Accordion.Header>
-                              <Accordion.Body>
-                                <CodeBlock
-                                  title="Product Model with Search & Inventory"
-                                  fileName="models/Product.js"
-                                  code={backendCodes.productModel}
-                                />
-                              </Accordion.Body>
-                            </Accordion.Item>
-
-                            <Accordion.Item eventKey="2">
-                              <Accordion.Header>
-                                📦 Order Model (models/Order.js)
-                              </Accordion.Header>
-                              <Accordion.Body>
-                                <CodeBlock
-                                  title="Order Model with Status Tracking"
-                                  fileName="models/Order.js"
-                                  code={backendCodes.orderModel}
-                                />
-                              </Accordion.Body>
-                            </Accordion.Item>
-                          </Accordion>
+                        <Nav.Item>
+                          <Nav.Link
+                            eventKey="structure"
+                            onClick={() => setActiveTab("structure")}
+                            style={{
+                              borderRadius: "8px",
+                              marginBottom: "8px",
+                              fontWeight: "600",
+                              color:
+                                activeTab === "structure" ? "white" : "#333",
+                              background:
+                                activeTab === "structure"
+                                  ? "linear-gradient(135deg, #6f42c1, #6610f2)"
+                                  : "transparent",
+                            }}
+                          >
+                            <i className="bi bi-folder-tree me-2"></i>
+                            File Structure
+                          </Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                          <Nav.Link
+                            eventKey="deployment"
+                            onClick={() => setActiveTab("deployment")}
+                            style={{
+                              borderRadius: "8px",
+                              marginBottom: "8px",
+                              fontWeight: "600",
+                              color:
+                                activeTab === "deployment" ? "white" : "#333",
+                              background:
+                                activeTab === "deployment"
+                                  ? "linear-gradient(135deg, #e63946, #dc3545)"
+                                  : "transparent",
+                            }}
+                          >
+                            <i className="bi bi-cloud-upload me-2"></i>
+                            Deployment
+                          </Nav.Link>
+                        </Nav.Item>
 
                           <Alert
                             variant="info"
