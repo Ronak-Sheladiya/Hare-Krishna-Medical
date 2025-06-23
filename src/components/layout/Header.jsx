@@ -347,9 +347,9 @@ const Header = () => {
           color: #6c757d !important;
           font-weight: 500;
           transition: all 0.3s ease;
-          padding: 8px 16px !important;
+          padding: 8px 12px !important;
           border-radius: 8px;
-          margin: 0 4px;
+          margin: 0 2px;
           display: flex;
           align-items: center;
         }

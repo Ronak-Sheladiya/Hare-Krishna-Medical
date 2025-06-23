@@ -11,6 +11,7 @@ import {
   Table,
   Spinner,
 } from "react-bootstrap";
+import ProfessionalLoading from "../components/common/ProfessionalLoading";
 
 const InvoiceVerify = () => {
   const { invoiceId } = useParams();
@@ -89,16 +90,11 @@ const InvoiceVerify = () => {
 
   if (loading) {
     return (
-      <div
-        className="d-flex justify-content-center align-items-center"
-        style={{ minHeight: "100vh" }}
-      >
-        <div className="text-center">
-          <Spinner animation="border" variant="primary" className="mb-3" />
-          <h5>Loading Invoice...</h5>
-          <p className="text-muted">Verifying invoice {invoiceId}</p>
-        </div>
-      </div>
+      <ProfessionalLoading
+        size="lg"
+        message="Loading Invoice..."
+        fullScreen={true}
+      />
     );
   }
 
@@ -251,18 +247,31 @@ const InvoiceVerify = () => {
                     <Row className="align-items-center">
                       <Col lg={8}>
                         <div className="d-flex align-items-center">
-                          <img
-                            src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
-                            alt="Hare Krishna Medical"
+                          <div
                             style={{
-                              height: "60px",
-                              width: "auto",
-                              marginRight: "20px",
+                              width: "80px",
+                              height: "80px",
                               background: "white",
-                              padding: "8px",
-                              borderRadius: "8px",
+                              borderRadius: "50%",
+                              padding: "10px",
+                              border: "3px solid rgba(255,255,255,0.3)",
+                              boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              marginRight: "20px",
                             }}
-                          />
+                          >
+                            <img
+                              src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
+                              alt="Hare Krishna Medical"
+                              style={{
+                                width: "60px",
+                                height: "60px",
+                                objectFit: "contain",
+                              }}
+                            />
+                          </div>
                           <div>
                             <h2
                               style={{

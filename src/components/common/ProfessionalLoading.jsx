@@ -10,13 +10,13 @@ const ProfessionalLoading = ({
   const getSizeConfig = () => {
     switch (size) {
       case "sm":
-        return { logoSize: 40, containerSize: 80, fontSize: "0.9rem" };
+        return { logoSize: 50, containerSize: 100, fontSize: "0.9rem" };
       case "lg":
-        return { logoSize: 80, containerSize: 160, fontSize: "1.2rem" };
+        return { logoSize: 90, containerSize: 180, fontSize: "1.2rem" };
       case "xl":
-        return { logoSize: 120, containerSize: 240, fontSize: "1.4rem" };
+        return { logoSize: 130, containerSize: 260, fontSize: "1.4rem" };
       default:
-        return { logoSize: 60, containerSize: 120, fontSize: "1rem" };
+        return { logoSize: 70, containerSize: 140, fontSize: "1rem" };
     }
   };
 
@@ -62,29 +62,30 @@ const ProfessionalLoading = ({
           style={{
             width: containerSize,
             height: containerSize,
-            border: `3px solid ${color}20`,
-            borderTop: `3px solid ${color}`,
+            border: `4px solid ${color}20`,
+            borderTop: `4px solid ${color}`,
             borderRadius: "50%",
-            animation: "spin 2s linear infinite",
+            animation: "spin 1.5s linear infinite",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             position: "relative",
+            filter: `drop-shadow(0 4px 8px ${color}30)`,
           }}
         >
           {/* Inner White Circle with Logo */}
           <div
             style={{
-              width: logoSize + 20,
-              height: logoSize + 20,
+              width: logoSize + 30,
+              height: logoSize + 30,
               background: "white",
               borderRadius: "50%",
-              border: `2px solid ${color}15`,
-              boxShadow: `0 8px 32px ${color}20`,
+              border: `3px solid ${color}25`,
+              boxShadow: `0 12px 40px ${color}25, inset 0 2px 4px rgba(255,255,255,0.8)`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              animation: "counterSpin 2s linear infinite",
+              animation: "logoFloat 2s ease-in-out infinite",
             }}
           >
             <img
@@ -183,25 +184,31 @@ const ProfessionalLoading = ({
           100% { transform: rotate(360deg); }
         }
 
-        @keyframes counterSpin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(-360deg); }
+        @keyframes logoFloat {
+          0%, 100% {
+            transform: translateY(0px) scale(1);
+            box-shadow: 0 12px 40px ${color}25, inset 0 2px 4px rgba(255,255,255,0.8);
+          }
+          50% {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 16px 48px ${color}35, inset 0 2px 4px rgba(255,255,255,0.9);
+          }
         }
 
         @keyframes pulse {
-          0%, 100% { 
-            transform: scale(1); 
-            opacity: 1; 
+          0%, 100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
           }
-          50% { 
-            transform: scale(1.05); 
-            opacity: 0.8; 
+          50% {
+            transform: scale(1.08) rotate(2deg);
+            opacity: 0.9;
           }
         }
 
         @keyframes fadeInOut {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 1; }
+          0%, 100% { opacity: 0.4; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1); }
         }
       `}</style>
     </div>
