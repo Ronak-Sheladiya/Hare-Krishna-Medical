@@ -22,6 +22,12 @@ class SocketClient {
     }
 
     try {
+      // Ensure io is available
+      if (typeof io !== "function") {
+        console.warn("Socket.io not available");
+        return null;
+      }
+
       // Connect to backend server
       this.socket = io(
         process.env.REACT_APP_BACKEND_URL || "http://localhost:5000",
@@ -32,10 +38,14 @@ class SocketClient {
           transports: ["websocket", "polling"],
           timeout: 20000,
           forceNew: true,
+          autoConnect: false, // Don't auto-connect immediately
         },
       );
 
       this.setupEventListeners(role);
+
+      // Manually connect after setup
+      this.socket.connect();
 
       return this.socket;
     } catch (error) {
