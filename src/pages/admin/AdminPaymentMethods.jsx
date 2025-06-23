@@ -56,7 +56,7 @@ const AdminPaymentMethods = () => {
 
     const { success, data, error } = await safeApiCall(
       () => api.get("/api/admin/payment-methods"),
-      [],
+      []
     );
 
     if (success && data?.data) {
@@ -301,27 +301,39 @@ const AdminPaymentMethods = () => {
   }
 
   return (
-    <Container className="py-4">
-      <Row className="mb-4">
-        <Col>
-          <div className="d-flex justify-content-between align-items-center">
-            <div>
-              <h2 className="mb-1">Payment Methods</h2>
-              <p className="text-muted">
-                Manage payment options available to customers
-              </p>
-            </div>
-            <Button
-              variant="primary"
-              onClick={() => handleShowModal()}
-              className="d-flex align-items-center"
-            >
-              <i className="bi bi-plus-circle me-2"></i>
-              Add Payment Method
-            </Button>
-          </div>
-        </Col>
-      </Row>
+    <div className="fade-in">
+      {/* Hero Section */}
+      <PageHeroSection
+        title="Payment Methods"
+        subtitle="Manage payment options available to customers"
+        icon="bi-credit-card"
+      />
+
+      <ThemeSection background="#f8f9fa">
+        <Container>
+          <Row className="mb-4">
+            <Col>
+              <ThemeCard>
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h5 className="mb-1" style={{ color: "#333", fontWeight: "700" }}>
+                      <i className="bi bi-gear me-2"></i>
+                      Manage Payment Options
+                    </h5>
+                    <p className="text-muted mb-0">
+                      Configure how customers can pay for their orders
+                    </p>
+                  </div>
+                  <ThemeButton
+                    onClick={() => handleShowModal()}
+                    icon="bi bi-plus-circle"
+                  >
+                    Add Payment Method
+                  </ThemeButton>
+                </div>
+              </ThemeCard>
+            </Col>
+          </Row>
 
       {error && (
         <Row className="mb-4">
