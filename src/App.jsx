@@ -20,7 +20,6 @@ import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
 import RealTimeSync from "./components/common/RealTimeSync.jsx";
 import RealTimeStatus from "./components/common/RealTimeStatus.jsx";
 import SocketDiagnostic from "./components/common/SocketDiagnostic.jsx";
-import crossTabSessionManager from "./utils/crossTabSessionManager.js";
 
 // Pages
 import Home from "./pages/Home.jsx";
