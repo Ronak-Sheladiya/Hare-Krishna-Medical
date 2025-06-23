@@ -187,7 +187,7 @@ const Login = () => {
     },
     {
       type: "Admin (Ronak)",
-      email: "ronaksheladiya62@gmail.com",
+      email: "ronaksheladiya652@gmail.com",
       password: "admin@123",
       description: "Access admin dashboard",
     },
