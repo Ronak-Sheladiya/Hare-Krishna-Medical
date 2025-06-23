@@ -353,19 +353,28 @@ const Header = () => {
           transform: scale(1.05);
         }
 
-        .nav-link {
+        .nav-link-custom {
           color: #6c757d !important;
           font-weight: 500;
           transition: all 0.3s ease;
+          padding: 8px 16px !important;
+          border-radius: 8px;
+          margin: 0 4px;
+          display: flex;
+          align-items: center;
         }
 
-        .nav-link:hover {
+        .nav-link-custom:hover {
           color: #e63946 !important;
+          background-color: rgba(230, 57, 70, 0.1);
+          transform: translateY(-1px);
         }
 
-        .nav-link.active {
+        .nav-link-custom.active {
           color: #e63946 !important;
           font-weight: 600;
+          background-color: rgba(230, 57, 70, 0.15);
+          border-bottom: 2px solid #e63946;
         }
 
         .dropdown-toggle::after {
