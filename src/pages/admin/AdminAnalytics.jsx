@@ -247,7 +247,7 @@ const AdminAnalytics = () => {
       <PageHeroSection
         title="Analytics Dashboard"
         description="Comprehensive business insights and data analytics"
-        icon="📊"
+        icon={<i className="bi bi-graph-up"></i>}
       />
 
       <Container className="py-5">
@@ -472,13 +472,15 @@ const AdminAnalytics = () => {
               <Card.Body>
                 <div className="d-flex gap-2 flex-wrap">
                   <ThemeButton onClick={exportToExcel}>
-                    📊 Export to Excel
+                    <i className="bi bi-file-earmark-excel me-2"></i>
+                    Export to Excel
                   </ThemeButton>
                   <ThemeButton variant="outline" onClick={exportToPDF}>
                     📄 Export to PDF
                   </ThemeButton>
                   <ThemeButton variant="outline" onClick={fetchAnalyticsData}>
-                    🔄 Refresh Data
+                    <i className="bi bi-arrow-clockwise me-2"></i>
+                    Refresh Data
                   </ThemeButton>
                 </div>
               </Card.Body>
