@@ -64,6 +64,10 @@ const AdminProducts = () => {
     images: [],
   });
 
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState([]);
+  const [imageUploadError, setImageUploadError] = useState("");
+
   const API_BASE_URL =
     import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
@@ -154,12 +158,20 @@ const AdminProducts = () => {
       return;
     }
 
+    // Validate images for new products
+    if (!isEdit && imageFiles.length === 0) {
+      showNotification("At least one product image is required", "danger");
+      setActionLoading(false);
+      return;
+    }
+
     const productData = {
       ...formData,
       price: parseFloat(formData.price),
       originalPrice:
         parseFloat(formData.originalPrice) || parseFloat(formData.price),
       stock: parseInt(formData.stock),
+      benefits: formatBenefits(formData.benefits), // Format benefits as bullet points
     };
 
     const { success, error: apiError } = isEdit
@@ -224,6 +236,79 @@ const AdminProducts = () => {
       weight: "",
       images: [],
     });
+    setImageFiles([]);
+    setImagePreviewUrls([]);
+    setImageUploadError("");
+  };
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setImageUploadError("");
+
+    if (files.length === 0) {
+      setImageUploadError("At least one image is required");
+      return;
+    }
+
+    if (files.length > 5) {
+      setImageUploadError("Maximum 5 images allowed");
+      return;
+    }
+
+    // Validate each file
+    const validFiles = [];
+    const previews = [];
+
+    files.forEach((file) => {
+      if (!file.type.startsWith("image/")) {
+        setImageUploadError("Only image files are allowed");
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB limit
+        setImageUploadError("Each image must be less than 5MB");
+        return;
+      }
+
+      validFiles.push(file);
+
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previews.push(e.target.result);
+        if (previews.length === validFiles.length) {
+          setImagePreviewUrls(previews);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    setImageFiles(validFiles);
+  };
+
+  const removeImage = (index) => {
+    const newFiles = imageFiles.filter((_, i) => i !== index);
+    const newPreviews = imagePreviewUrls.filter((_, i) => i !== index);
+
+    setImageFiles(newFiles);
+    setImagePreviewUrls(newPreviews);
+
+    if (newFiles.length === 0) {
+      setImageUploadError("At least one image is required");
+    } else {
+      setImageUploadError("");
+    }
+  };
+
+  const formatBenefits = (benefitsText) => {
+    if (!benefitsText) return "";
+
+    return benefitsText
+      .split("\n")
+      .filter((line) => line.trim() !== "")
+      .map((line) => `• ${line.trim()}`)
+      .join("\n");
   };
 
   const handleAddClick = () => {
