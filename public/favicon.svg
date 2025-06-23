@@ -5,22 +5,6 @@
   <!-- Red border -->
   <circle cx="16" cy="16" r="15" stroke="#e63946" stroke-width="2"/>
 
-  <!-- Medical caduceus/rod of asclepius inspired design -->
-  <!-- Central staff -->
-  <rect x="15" y="6" width="2" height="20" fill="#e63946"/>
-
-  <!-- Snake body wrapping around staff -->
-  <path d="M14 8 Q12 10 14 12 Q16 14 14 16 Q12 18 14 20 Q16 22 14 24" stroke="#e63946" stroke-width="1.5" fill="none"/>
-  <path d="M18 8 Q20 10 18 12 Q16 14 18 16 Q20 18 18 20 Q16 22 18 24" stroke="#e63946" stroke-width="1.5" fill="none"/>
-
-  <!-- Medical cross on top -->
-  <rect x="13" y="4" width="6" height="2" fill="#e63946" rx="1"/>
-  <rect x="15" y="2" width="2" height="6" fill="#e63946" rx="1"/>
-
-  <!-- Heart symbol at center -->
-  <path d="M16 18c0 0-3-2-3-4 0-1 0.75-1.75 1.5-1.75s1.5 0.75 1.5 1.75c0-1 0.75-1.75 1.5-1.75s1.5 0.75 1.5 1.75c0 2-3 4-3 4z" fill="#e63946"/>
-
-  <!-- Wings/leaves for pharmacy symbol -->
-  <ellipse cx="12" cy="14" rx="2" ry="3" fill="#e63946" opacity="0.7" transform="rotate(-30 12 14)"/>
-  <ellipse cx="20" cy="14" rx="2" ry="3" fill="#e63946" opacity="0.7" transform="rotate(30 20 14)"/>
+  <!-- Embed the actual logo -->
+  <image x="4" y="4" width="24" height="24" href="https://cdn.builder.io/api/v1/assets/72c59d801d5945d4830160c2c2f8a610/hk-34b526?format=webp&width=800"/>
 </svg>
