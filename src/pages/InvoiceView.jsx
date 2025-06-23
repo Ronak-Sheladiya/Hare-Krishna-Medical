@@ -14,6 +14,7 @@ import { useSelector, useDispatch } from "react-redux";
 import ProfessionalLoading from "../components/common/ProfessionalLoading";
 import { refreshSession } from "../store/slices/authSlice";
 import { api, safeApiCall } from "../utils/apiClient";
+import { getDemoInvoice, isDemoInvoice } from "../utils/demoInvoiceData";
 
 const InvoiceView = () => {
   const { orderId } = useParams();
@@ -58,6 +59,17 @@ const InvoiceView = () => {
     setLoading(true);
     setError("");
 
+    // Check if this is a demo invoice first
+    if (isDemoInvoice(orderId)) {
+      const demoInvoice = getDemoInvoice(orderId);
+      if (demoInvoice) {
+        setInvoice(demoInvoice);
+        setLoading(false);
+        return;
+      }
+    }
+
+    // Otherwise fetch from API
     const {
       success,
       data,
