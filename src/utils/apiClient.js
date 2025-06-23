@@ -171,11 +171,20 @@ export const api = {
 export const safeApiCall = async (apiFunction, fallbackValue = null) => {
   try {
     const result = await apiFunction();
+
+    // Check if the API call was successful
+    if (result && result.success === false) {
+      // API call failed but didn't throw - this is expected behavior
+      console.warn("API call failed (safely handled):", result.error);
+      return { success: false, data: fallbackValue, error: result.error };
+    }
+
+    // API call was successful
     return { success: true, data: result.data || result, error: null };
   } catch (error) {
-    // Handle all types of errors gracefully
+    // This should rarely happen now, but keep as final safety net
     const errorMessage = error.message || "Unknown error occurred";
-    console.warn("API call failed (safely handled):", errorMessage);
+    console.warn("API call threw error (safely handled):", errorMessage);
     return { success: false, data: fallbackValue, error: errorMessage };
   }
 };
