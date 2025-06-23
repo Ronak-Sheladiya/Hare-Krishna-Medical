@@ -379,43 +379,58 @@ const AdminProducts = () => {
 
   return (
     <div className="fade-in">
-      <section className="section-padding-sm">
+      {/* Hero Section */}
+      <PageHeroSection
+        title="Product Management"
+        subtitle="Manage your medical products and inventory with comprehensive tools"
+        icon="bi-box"
+      />
+
+      <ThemeSection background="#f8f9fa">
         <Container>
-          {/* Header */}
+          {/* Quick Actions */}
           <Row className="mb-4">
-            <Col lg={8}>
-              <h2>Product Management</h2>
-              <p className="text-muted">
-                Manage your medical products and inventory
-              </p>
-            </Col>
-            <Col lg={4} className="text-end">
-              <Button
-                variant="primary"
-                onClick={handleAddClick}
-                className="btn-medical-primary me-2"
-              >
-                <i className="bi bi-plus-circle me-2"></i>
-                Add Product
-              </Button>
-              <Button
-                variant="outline-primary"
-                onClick={() => fetchProducts()}
-                disabled={loading}
-                className="btn-medical-outline"
-              >
-                <i className="bi bi-arrow-clockwise me-2"></i>
-                Refresh
-              </Button>
+            <Col lg={12}>
+              <ThemeCard title="Quick Actions" className="mb-4">
+                <Row>
+                  <Col lg={8}>
+                    <p className="text-muted mb-3">
+                      Add new products, update inventory, and manage your medical store catalog
+                    </p>
+                  </Col>
+                  <Col lg={4} className="text-end">
+                    <ThemeButton
+                      variant="primary"
+                      onClick={handleAddClick}
+                      className="me-2"
+                      icon="bi-plus-circle"
+                    >
+                      Add Product
+                    </ThemeButton>
+                    <ThemeButton
+                      variant="outline"
+                      onClick={() => fetchProducts()}
+                      disabled={loading}
+                      icon="bi-arrow-clockwise"
+                    >
+                      Refresh
+                    </ThemeButton>
+                  </Col>
+                </Row>
+              </ThemeCard>
             </Col>
           </Row>
 
           {/* Error Alert */}
           {error && (
-            <Alert variant="danger" dismissible onClose={() => setError(null)}>
-              <i className="bi bi-exclamation-triangle me-2"></i>
-              {error}
-            </Alert>
+            <Row className="mb-4">
+              <Col lg={12}>
+                <Alert variant="danger" dismissible onClose={() => setError(null)}>
+                  <i className="bi bi-exclamation-triangle me-2"></i>
+                  {error}
+                </Alert>
+              </Col>
+            </Row>
           )}
 
           {/* Filters */}
