@@ -108,14 +108,27 @@ const Login = () => {
           role: 1, // Admin role
           profileImage: null,
         };
+        // Store redirect URL before login
+        const redirectUrl =
+          sessionStorage.getItem("redirectAfterLogin") || from;
+
         dispatch(
           loginSuccess({
             user: adminUser,
             rememberMe: formData.rememberMe,
           }),
         );
-        // Redirect to intended URL or default admin dashboard
-        navigate(from || "/admin/dashboard", { replace: true });
+
+        // Navigate to intended URL or default admin dashboard
+        if (
+          redirectUrl &&
+          redirectUrl !== "/login" &&
+          redirectUrl !== "/register"
+        ) {
+          navigate(redirectUrl, { replace: true });
+        } else {
+          navigate("/admin/dashboard", { replace: true });
+        }
         return;
       }
 
