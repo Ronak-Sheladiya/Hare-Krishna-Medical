@@ -1,20 +1,5 @@
-// Import socket.io-client with error handling
-let io;
-try {
-  const socketIO = require("socket.io-client");
-  io = socketIO.io || socketIO.default || socketIO;
-} catch (error) {
-  console.warn("Socket.io-client not available, using fallback:", error);
-  // Fallback no-op function
-  io = () => ({
-    on: () => {},
-    off: () => {},
-    emit: () => {},
-    connect: () => {},
-    disconnect: () => {},
-    id: null,
-  });
-}
+// Import socket.io-client
+import { io } from "socket.io-client";
 
 class SocketClient {
   constructor() {
