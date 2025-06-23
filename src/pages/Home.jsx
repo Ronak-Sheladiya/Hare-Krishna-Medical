@@ -20,19 +20,15 @@ const Home = () => {
   const { featuredProducts } = useSelector((state) => state.products);
 
   // Fetch featured products from API
-  const API_BASE_URL =
-    process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+  const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 
   const fetchFeaturedProducts = async () => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/products/public?featured=true&limit=4`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
+      const response = await fetch(`${API_BASE_URL}/api/products/public?featured=true&limit=4`, {
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -267,7 +263,7 @@ const Home = () => {
           </Row>
 
           <Row>
-            {productsToShow.map((product, index) => (
+            {productsToShow.length > 0 ? productsToShow.map((product, index) => (
               <Col lg={3} md={6} className="mb-4" key={product.id || index}>
                 <Card
                   className="h-100"
