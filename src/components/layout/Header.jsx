@@ -213,19 +213,27 @@ const Header = () => {
                           src={user.profileImage}
                           alt={getUserDisplayName()}
                           className="rounded-circle me-2"
-                          width="35"
-                          height="35"
+                          width="40"
+                          height="40"
+                          style={{
+                            objectFit: "cover",
+                            border: "2px solid #e63946",
+                            boxShadow: "0 2px 8px rgba(230, 57, 70, 0.3)",
+                          }}
                         />
                       ) : (
-                        <div className="bg-medical-red text-white rounded-circle d-flex align-items-center justify-content-center me-2">
-                          <i
-                            className="bi bi-person-fill"
-                            style={{
-                              width: "35px",
-                              height: "35px",
-                              fontSize: "1.2rem",
-                            }}
-                          ></i>
+                        <div
+                          className="text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #e63946, #dc3545)",
+                            width: "40px",
+                            height: "40px",
+                            fontSize: "1.2rem",
+                            boxShadow: "0 2px 8px rgba(230, 57, 70, 0.3)",
+                          }}
+                        >
+                          <i className="bi bi-person-fill"></i>
                         </div>
                       )}
                       <div className="d-none d-md-block text-start">
