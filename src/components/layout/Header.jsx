@@ -77,10 +77,28 @@ const Header = () => {
                 className="medical-logo"
               />
             </div>
-            <div className="brand-text-container">
-              <h4 className="mb-0 text-medical-red fw-bold">
-                Hare Krishna Medical
+            <div className="brand-text-container ms-3">
+              <h4
+                className="mb-0 fw-bold"
+                style={{
+                  color: "#e63946",
+                  fontSize: "1.4rem",
+                  letterSpacing: "0.5px",
+                  textShadow: "0 1px 2px rgba(0,0,0,0.1)",
+                }}
+              >
+                HARE KRISHNA MEDICAL
               </h4>
+              <small
+                style={{
+                  color: "#6c757d",
+                  fontSize: "0.7rem",
+                  fontWeight: "500",
+                  letterSpacing: "0.3px",
+                }}
+              >
+                🏥 Your Trusted Health Partner
+              </small>
             </div>
           </Navbar.Brand>
 
