@@ -1,5 +1,5 @@
 /* Import Professional Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap");
 
 /* Import Professional Invoice Styles */
 @import url("./styles/ProfessionalInvoice.css");
@@ -90,9 +90,11 @@
 
 /* Enhanced Medical Header Styling */
 .medical-header {
-  background: linear-gradient(135deg,
+  background: linear-gradient(
+    135deg,
     rgba(255, 255, 255, 0.95) 0%,
-    rgba(248, 249, 250, 0.98) 100%);
+    rgba(248, 249, 250, 0.98) 100%
+  );
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(230, 57, 70, 0.1);
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
@@ -113,75 +115,6 @@
   .medical-logo {
     width: 50px !important;
     height: 50px !important;
-  }
-}
-
-/* Ensure invoice takes full width */
-  .invoice-content,
-  .professional-invoice {
-    width: 210mm !important;
-    max-width: 210mm !important;
-    min-height: 297mm !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  /* Page breaks */
-  .invoice-section {
-    page-break-inside: avoid;
-  }
-
-  .page-break {
-    page-break-before: always;
-  }
-
-  /* Print-specific table styling */
-  table {
-    border-collapse: collapse !important;
-    width: 100% !important;
-  }
-
-  table th,
-  table td {
-    border: 1px solid #333 !important;
-    padding: 8px !important;
-    word-wrap: break-word !important;
-  }
-
-  /* Ensure text is visible */
-  .text-white {
-    color: white !important;
-  }
-
-  /* Preserve background colors */
-  .bg-primary,
-  .bg-danger,
-  .bg-success,
-  .bg-warning,
-  .bg-info {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  /* Force page break after invoice */
-  .professional-invoice {
-    page-break-after: always;
-  }
-
-  /* Prevent elements from breaking across pages */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    page-break-after: avoid;
-  }
-
-  /* Print-specific adjustments */
-  .invoice-content {
-    padding: 0 !important;
-    max-width: 100% !important;
   }
 }
 
