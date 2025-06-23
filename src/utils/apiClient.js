@@ -14,8 +14,8 @@ const DEFAULT_CONFIG = {
 export const apiCall = async (endpoint, options = {}) => {
   // Return a promise that always resolves, never rejects
   return new Promise((resolve) => {
-    // Wrap everything in try-catch with promise resolution
-    (async () => {
+    // Wrap the entire async operation in try-catch to ensure promise always resolves
+    const executeApiCall = async () => {
       try {
         const config = {
           ...DEFAULT_CONFIG,
@@ -128,7 +128,16 @@ export const apiCall = async (endpoint, options = {}) => {
           originalError: globalError,
         });
       }
-    })();
+    };
+
+    // Execute the async function and catch any unhandled promise rejections
+    executeApiCall().catch((error) => {
+      resolve({
+        success: false,
+        error: "Critical error occurred",
+        originalError: error,
+      });
+    });
   });
 };
 
