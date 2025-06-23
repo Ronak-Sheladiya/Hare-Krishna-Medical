@@ -51,7 +51,7 @@ const AdminUsers = () => {
 
   const { user: currentUser } = useSelector((state) => state.auth);
   const API_BASE_URL =
-    process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
   // Real-time event handlers
   const handleUserStatusUpdated = (data) => {
