@@ -447,7 +447,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 For support and queries:
 
-- **Email**: harekrishnamedical@gmail.com
+- **Email**: hkmedicalamroli@gmail.com
 - **Phone**: +91 76989 13354
 - **Address**: 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat
 
