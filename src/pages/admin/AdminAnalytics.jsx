@@ -1,1031 +1,863 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Row,
   Col,
   Card,
-  Form,
-  Button,
-  Badge,
-  ButtonGroup,
   Table,
-  Tab,
-  Nav,
-  Spinner,
+  Badge,
+  Button,
+  Form,
+  ProgressBar,
+  Dropdown,
 } from "react-bootstrap";
-import {
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import * as XLSX from "xlsx";
-import html2canvas from "html2canvas";
+import { Link } from "react-router-dom";
 
 const AdminAnalytics = () => {
-  const [dateRange, setDateRange] = useState("30");
-  const [activeView, setActiveView] = useState("overview");
-  const [chartType, setChartType] = useState("line");
-  const [viewMode, setViewMode] = useState("chart"); // 'chart' or 'table'
-  const [exportLoading, setExportLoading] = useState(false);
+  const [dateRange, setDateRange] = useState("last30days");
+  const [selectedMetric, setSelectedMetric] = useState("revenue");
 
   // Mock analytics data
-  const salesData = {
-    totalRevenue: 45670.5,
-    totalOrders: 156,
-    totalProducts: 45,
-    totalCustomers: 1234,
-    avgOrderValue: 292.76,
-    conversionRate: 3.2,
-    repeatCustomerRate: 24.5,
-    monthlyGrowth: 12.5,
+  const analyticsData = {
+    overview: {
+      totalRevenue: 156750.75,
+      totalOrders: 1247,
+      totalCustomers: 856,
+      averageOrderValue: 125.6,
+      conversionRate: 3.2,
+      repeatCustomerRate: 45.8,
+      topSellingCategories: 8,
+      lowStockItems: 12,
+    },
+    salesMetrics: {
+      todayRevenue: 3250.5,
+      yesterdayRevenue: 2890.25,
+      weekRevenue: 18750.75,
+      monthRevenue: 45200.0,
+      revenueGrowth: 12.5,
+      orderGrowth: 8.3,
+      customerGrowth: 15.2,
+    },
+    topProducts: [
+      {
+        id: 1,
+        name: "Paracetamol Tablets 500mg",
+        category: "Pain Relief",
+        sold: 1245,
+        revenue: 32175.55,
+        growth: 15.2,
+      },
+      {
+        id: 2,
+        name: "Vitamin D3 Capsules",
+        category: "Vitamins",
+        sold: 856,
+        revenue: 38948.0,
+        growth: 22.8,
+      },
+      {
+        id: 3,
+        name: "Blood Pressure Monitor",
+        category: "Equipment",
+        sold: 234,
+        revenue: 304116.0,
+        growth: -5.1,
+      },
+      {
+        id: 4,
+        name: "Cough Syrup",
+        category: "Cough & Cold",
+        sold: 567,
+        revenue: 20267.25,
+        growth: 8.7,
+      },
+    ],
+    customerMetrics: {
+      newCustomers: 124,
+      returningCustomers: 732,
+      customerLifetimeValue: 450.75,
+      averageSessionDuration: "4m 32s",
+      bounceRate: 35.2,
+    },
+    regionData: [
+      { region: "Surat", orders: 456, revenue: 68940.5, percentage: 44.0 },
+      { region: "Ahmedabad", orders: 312, revenue: 43250.25, percentage: 27.6 },
+      { region: "Vadodara", orders: 198, revenue: 28750.0, percentage: 18.3 },
+      { region: "Rajkot", orders: 156, revenue: 15810.0, percentage: 10.1 },
+    ],
+    paymentMethods: {
+      online: { count: 785, percentage: 63.0 },
+      cod: { count: 462, percentage: 37.0 },
+    },
   };
 
-  // Sample data for charts
-  const monthlyRevenueData = [
-    { month: "Jan", revenue: 12000, orders: 45, customers: 120 },
-    { month: "Feb", revenue: 15500, orders: 52, customers: 145 },
-    { month: "Mar", revenue: 18200, orders: 68, customers: 165 },
-    { month: "Apr", revenue: 22100, orders: 72, customers: 180 },
-    { month: "May", revenue: 25800, orders: 85, customers: 200 },
-    { month: "Jun", revenue: 28900, orders: 95, customers: 220 },
-    { month: "Jul", revenue: 32400, orders: 108, customers: 245 },
-    { month: "Aug", revenue: 35600, orders: 125, customers: 270 },
-    { month: "Sep", revenue: 38900, orders: 138, customers: 295 },
-    { month: "Oct", revenue: 42100, orders: 148, customers: 315 },
-    { month: "Nov", revenue: 45200, orders: 156, customers: 340 },
-    { month: "Dec", revenue: 48500, orders: 165, customers: 365 },
-  ];
+  // Enhanced Button Component
+  const EnhancedButton = ({
+    children,
+    variant = "primary",
+    onClick,
+    icon,
+    style = {},
+    size = "md",
+    disabled = false,
+  }) => {
+    const baseStyle = {
+      borderRadius: size === "lg" ? "12px" : "8px",
+      padding:
+        size === "lg" ? "12px 24px" : size === "sm" ? "6px 12px" : "8px 16px",
+      fontWeight: "600",
+      transition: "all 0.3s ease",
+      border: "none",
+      position: "relative",
+      overflow: "hidden",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      opacity: disabled ? 0.6 : 1,
+      cursor: disabled ? "not-allowed" : "pointer",
+      ...style,
+    };
 
-  const categoryData = [
-    { name: "Pain Relief", value: 35, revenue: 15680.5, color: "#DC3545" },
-    { name: "Vitamins", value: 28, revenue: 18750.25, color: "#198754" },
-    { name: "Medical Devices", value: 20, revenue: 78450.0, color: "#0D6EFD" },
-    { name: "Cough & Cold", value: 12, revenue: 12890.75, color: "#FFC107" },
-    { name: "First Aid", value: 5, revenue: 8945.5, color: "#6C757D" },
-  ];
+    const variants = {
+      primary: {
+        background: "linear-gradient(135deg, #e63946, #dc3545)",
+        color: "white",
+        boxShadow: "0 4px 15px rgba(230, 57, 70, 0.3)",
+      },
+      success: {
+        background: "linear-gradient(135deg, #28a745, #20c997)",
+        color: "white",
+        boxShadow: "0 4px 15px rgba(40, 167, 69, 0.3)",
+      },
+      info: {
+        background: "linear-gradient(135deg, #17a2b8, #20c997)",
+        color: "white",
+        boxShadow: "0 4px 15px rgba(23, 162, 184, 0.3)",
+      },
+      warning: {
+        background: "linear-gradient(135deg, #ffc107, #fd7e14)",
+        color: "white",
+        boxShadow: "0 4px 15px rgba(255, 193, 7, 0.3)",
+      },
+      outline: {
+        background: "transparent",
+        border: "2px solid #e63946",
+        color: "#e63946",
+      },
+    };
 
-  const paymentStatusData = [
-    { name: "Paid", value: 85, count: 132, color: "#198754" },
-    { name: "Unpaid (COD)", value: 12, count: 19, color: "#FFC107" },
-    { name: "Partial", value: 3, count: 5, color: "#DC3545" },
-  ];
+    const currentStyle = { ...baseStyle, ...variants[variant] };
 
-  const weeklyOrdersData = [
-    { day: "Mon", orders: 12, revenue: 3200 },
-    { day: "Tue", orders: 18, revenue: 4800 },
-    { day: "Wed", orders: 15, revenue: 3900 },
-    { day: "Thu", orders: 22, revenue: 5800 },
-    { day: "Fri", orders: 25, revenue: 6700 },
-    { day: "Sat", orders: 28, revenue: 7500 },
-    { day: "Sun", orders: 20, revenue: 5200 },
-  ];
-
-  const productPerformanceData = [
-    { name: "Paracetamol", sales: 450, revenue: 11697.5, profit: 4500 },
-    { name: "Vitamin D3", sales: 287, revenue: 13058.5, profit: 5200 },
-    { name: "BP Monitor", sales: 45, revenue: 58499.55, profit: 15000 },
-    { name: "Cough Syrup", sales: 234, revenue: 8365.5, profit: 3200 },
-    { name: "Antiseptic", sales: 189, revenue: 5292.0, profit: 2100 },
-  ];
-
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-3 border rounded shadow">
-          <p className="fw-bold mb-2">{label}</p>
-          {payload.map((entry, index) => (
-            <p key={index} style={{ color: entry.color }} className="mb-1">
-              {entry.dataKey}: {entry.dataKey.includes("revenue") ? "₹" : ""}
-              {entry.value.toLocaleString()}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const renderChart = () => {
-    switch (activeView) {
-      case "revenue":
-        return (
-          <ResponsiveContainer width="100%" height={400}>
-            {chartType === "line" ? (
-              <LineChart data={monthlyRevenueData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="#DC3545"
-                  strokeWidth={3}
-                  dot={{ fill: "#DC3545", strokeWidth: 2, r: 6 }}
-                />
-              </LineChart>
-            ) : chartType === "area" ? (
-              <AreaChart data={monthlyRevenueData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                <Area
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="#DC3545"
-                  fill="#DC3545"
-                  fillOpacity={0.3}
-                />
-              </AreaChart>
-            ) : (
-              <BarChart data={monthlyRevenueData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                <Bar dataKey="revenue" fill="#DC3545" />
-              </BarChart>
-            )}
-          </ResponsiveContainer>
-        );
-
-      case "orders":
-        return (
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={weeklyOrdersData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="day" />
-              <YAxis />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Bar dataKey="orders" fill="#0D6EFD" />
-            </BarChart>
-          </ResponsiveContainer>
-        );
-
-      case "categories":
-        return (
-          <ResponsiveContainer width="100%" height={400}>
-            <PieChart>
-              <Pie
-                data={categoryData}
-                cx="50%"
-                cy="50%"
-                outerRadius={120}
-                dataKey="value"
-                label={({ name, value }) => `${name}: ${value}%`}
-              >
-                {categoryData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        );
-
-      case "payments":
-        return (
-          <Row>
-            <Col md={6}>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={paymentStatusData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    dataKey="value"
-                    label={({ name, value }) => `${name}: ${value}%`}
-                  >
-                    {paymentStatusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </Col>
-            <Col md={6}>
-              <div className="mt-4">
-                <h6>Payment Status Details</h6>
-                {paymentStatusData.map((item, index) => (
-                  <div
-                    key={index}
-                    className="d-flex justify-content-between align-items-center mb-3"
-                  >
-                    <div className="d-flex align-items-center">
-                      <div
-                        className="me-2"
-                        style={{
-                          width: "20px",
-                          height: "20px",
-                          backgroundColor: item.color,
-                          borderRadius: "50%",
-                        }}
-                      ></div>
-                      <span>{item.name}</span>
-                    </div>
-                    <div className="text-end">
-                      <div className="fw-bold">{item.count} orders</div>
-                      <small className="text-muted">{item.value}%</small>
-                    </div>
-                  </div>
-                ))}
-                <div className="mt-4 p-3 bg-light rounded">
-                  <h6>Payment Notes:</h6>
-                  <ul className="small mb-0">
-                    <li>
-                      <strong>Paid:</strong> Orders with complete payment
-                      received
-                    </li>
-                    <li>
-                      <strong>Unpaid (COD):</strong> Cash on Delivery orders -
-                      payment pending
-                    </li>
-                    <li>
-                      <strong>Partial:</strong> Orders with partial payment
-                      received
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </Col>
-          </Row>
-        );
-
-      case "products":
-        return (
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={productPerformanceData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Bar dataKey="sales" fill="#0D6EFD" name="Sales" />
-              <Bar dataKey="profit" fill="#198754" name="Profit (₹)" />
-            </BarChart>
-          </ResponsiveContainer>
-        );
-
-      default:
-        return (
-          <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={monthlyRevenueData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="revenue"
-                stroke="#DC3545"
-                strokeWidth={3}
-                name="Revenue (₹)"
-              />
-              <Line
-                type="monotone"
-                dataKey="orders"
-                stroke="#0D6EFD"
-                strokeWidth={3}
-                name="Orders"
-              />
-              <Line
-                type="monotone"
-                dataKey="customers"
-                stroke="#198754"
-                strokeWidth={3}
-                name="Customers"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        );
-    }
-  };
-
-  const renderTable = () => {
-    switch (activeView) {
-      case "revenue":
-        return (
-          <Table striped bordered hover responsive>
-            <thead>
-              <tr>
-                <th>Month</th>
-                <th>Revenue (₹)</th>
-                <th>Orders</th>
-                <th>Customers</th>
-                <th>Avg Order Value (₹)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {monthlyRevenueData.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.month}</td>
-                  <td>₹{item.revenue.toLocaleString()}</td>
-                  <td>{item.orders}</td>
-                  <td>{item.customers}</td>
-                  <td>₹{(item.revenue / item.orders).toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        );
-
-      case "orders":
-        return (
-          <Table striped bordered hover responsive>
-            <thead>
-              <tr>
-                <th>Day</th>
-                <th>Orders</th>
-                <th>Revenue (₹)</th>
-                <th>Avg Order Value (₹)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {weeklyOrdersData.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.day}</td>
-                  <td>{item.orders}</td>
-                  <td>₹{item.revenue.toLocaleString()}</td>
-                  <td>₹{(item.revenue / item.orders).toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        );
-
-      case "categories":
-        return (
-          <Table striped bordered hover responsive>
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th>Percentage (%)</th>
-                <th>Revenue (₹)</th>
-                <th>Growth</th>
-              </tr>
-            </thead>
-            <tbody>
-              {categoryData.map((item, index) => (
-                <tr key={index}>
-                  <td>
-                    <div className="d-flex align-items-center">
-                      <div
-                        className="me-2"
-                        style={{
-                          width: "16px",
-                          height: "16px",
-                          backgroundColor: item.color,
-                          borderRadius: "50%",
-                        }}
-                      ></div>
-                      {item.name}
-                    </div>
-                  </td>
-                  <td>{item.value}%</td>
-                  <td>₹{item.revenue.toLocaleString()}</td>
-                  <td>
-                    <Badge bg="success">
-                      +{(Math.random() * 10 + 5).toFixed(1)}%
-                    </Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        );
-
-      case "payments":
-        return (
-          <Table striped bordered hover responsive>
-            <thead>
-              <tr>
-                <th>Payment Status</th>
-                <th>Count</th>
-                <th>Percentage (%)</th>
-                <th>Amount (₹)</th>
-                <th>Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paymentStatusData.map((item, index) => (
-                <tr key={index}>
-                  <td>
-                    <div className="d-flex align-items-center">
-                      <div
-                        className="me-2"
-                        style={{
-                          width: "16px",
-                          height: "16px",
-                          backgroundColor: item.color,
-                          borderRadius: "50%",
-                        }}
-                      ></div>
-                      {item.name}
-                    </div>
-                  </td>
-                  <td>{item.count}</td>
-                  <td>{item.value}%</td>
-                  <td>₹{(item.count * 293).toLocaleString()}</td>
-                  <td>
-                    {item.name === "Paid" && "Complete payment received"}
-                    {item.name === "Unpaid (COD)" && "Cash on delivery orders"}
-                    {item.name === "Partial" && "Partial payment received"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        );
-
-      case "products":
-        return (
-          <Table striped bordered hover responsive>
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Sales</th>
-                <th>Revenue (₹)</th>
-                <th>Profit (₹)</th>
-                <th>Profit Margin (%)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {productPerformanceData.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.name}</td>
-                  <td>{item.sales}</td>
-                  <td>₹{item.revenue.toLocaleString()}</td>
-                  <td>₹{item.profit.toLocaleString()}</td>
-                  <td>
-                    <Badge
-                      bg={
-                        (item.profit / item.revenue) * 100 > 30
-                          ? "success"
-                          : "warning"
-                      }
-                    >
-                      {((item.profit / item.revenue) * 100).toFixed(1)}%
-                    </Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        );
-
-      default:
-        return (
-          <Table striped bordered hover responsive>
-            <thead>
-              <tr>
-                <th>Month</th>
-                <th>Revenue (₹)</th>
-                <th>Orders</th>
-                <th>Customers</th>
-                <th>Growth (%)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {monthlyRevenueData.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.month}</td>
-                  <td>₹{item.revenue.toLocaleString()}</td>
-                  <td>{item.orders}</td>
-                  <td>{item.customers}</td>
-                  <td>
-                    <Badge bg="success">
-                      +
-                      {index === 0
-                        ? "0"
-                        : (
-                            (item.revenue /
-                              monthlyRevenueData[index - 1].revenue -
-                              1) *
-                            100
-                          ).toFixed(1)}
-                      %
-                    </Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        );
-    }
-  };
-
-  const viewOptions = [
-    { key: "overview", label: "Overview", icon: "bi-graph-up" },
-    { key: "revenue", label: "Revenue", icon: "bi-currency-rupee" },
-    { key: "orders", label: "Orders", icon: "bi-bag" },
-    { key: "categories", label: "Categories", icon: "bi-pie-chart" },
-    { key: "payments", label: "Payments", icon: "bi-credit-card" },
-    { key: "products", label: "Products", icon: "bi-box" },
-  ];
-
-  const chartTypes = [
-    { key: "line", label: "Line", icon: "bi-graph-up" },
-    { key: "area", label: "Area", icon: "bi-bar-chart" },
-    { key: "bar", label: "Bar", icon: "bi-bar-chart-fill" },
-  ];
-
-  const handleExportAnalytics = async () => {
-    setExportLoading(true);
-
-    try {
-      // Create workbook
-      const workbook = XLSX.utils.book_new();
-
-      // 1. Summary Sheet
-      const summaryData = [
-        {
-          Metric: "Total Revenue",
-          Value: `₹${salesData.totalRevenue.toLocaleString()}`,
-          Growth: `+${salesData.monthlyGrowth}%`,
-        },
-        {
-          Metric: "Total Orders",
-          Value: salesData.totalOrders,
-          Growth: "+8.2%",
-        },
-        {
-          Metric: "Total Products",
-          Value: salesData.totalProducts,
-          Growth: "+2.1%",
-        },
-        {
-          Metric: "Total Customers",
-          Value: salesData.totalCustomers,
-          Growth: "+15.3%",
-        },
-        {
-          Metric: "Average Order Value",
-          Value: `₹${salesData.avgOrderValue}`,
-          Growth: "+5.1%",
-        },
-        {
-          Metric: "Conversion Rate",
-          Value: `${salesData.conversionRate}%`,
-          Growth: "+1.8%",
-        },
-        {
-          Metric: "Repeat Customer Rate",
-          Value: `${salesData.repeatCustomerRate}%`,
-          Growth: "+3.2%",
-        },
-      ];
-      const summarySheet = XLSX.utils.json_to_sheet(summaryData);
-      XLSX.utils.book_append_sheet(workbook, summarySheet, "Summary");
-
-      // 2. Monthly Revenue Data
-      const revenueData = monthlyRevenueData.map((item) => ({
-        Month: item.month,
-        Revenue: item.revenue,
-        Orders: item.orders,
-        Customers: item.customers,
-        "Avg Order Value": (item.revenue / item.orders).toFixed(2),
-        "Growth %":
-          item.month === "Jan"
-            ? "0%"
-            : `+${((item.revenue / (monthlyRevenueData[monthlyRevenueData.indexOf(item) - 1]?.revenue || 1) - 1) * 100).toFixed(1)}%`,
-      }));
-      const revenueSheet = XLSX.utils.json_to_sheet(revenueData);
-      XLSX.utils.book_append_sheet(workbook, revenueSheet, "Monthly Revenue");
-
-      // 3. Category Performance
-      const categoryExportData = categoryData.map((item) => ({
-        Category: item.name,
-        "Market Share %": item.value,
-        Revenue: item.revenue,
-        "Revenue ₹": `₹${item.revenue.toLocaleString()}`,
-        Color: item.color,
-      }));
-      const categorySheet = XLSX.utils.json_to_sheet(categoryExportData);
-      XLSX.utils.book_append_sheet(
-        workbook,
-        categorySheet,
-        "Category Performance",
-      );
-
-      // 4. Payment Status Analysis
-      const paymentExportData = paymentStatusData.map((item) => ({
-        "Payment Status": item.name,
-        "Order Count": item.count,
-        "Percentage %": item.value,
-        "Estimated Amount": `₹${(item.count * 293).toLocaleString()}`,
-        Notes:
-          item.name === "Paid"
-            ? "Complete payment received"
-            : item.name === "Unpaid (COD)"
-              ? "Cash on delivery orders"
-              : "Partial payment received",
-      }));
-      const paymentSheet = XLSX.utils.json_to_sheet(paymentExportData);
-      XLSX.utils.book_append_sheet(workbook, paymentSheet, "Payment Analysis");
-
-      // 5. Product Performance
-      const productExportData = productPerformanceData.map((item) => ({
-        Product: item.name,
-        "Units Sold": item.sales,
-        "Revenue ₹": item.revenue,
-        "Profit ₹": item.profit,
-        "Profit Margin %": ((item.profit / item.revenue) * 100).toFixed(1),
-        "Avg Price": (item.revenue / item.sales).toFixed(2),
-      }));
-      const productSheet = XLSX.utils.json_to_sheet(productExportData);
-      XLSX.utils.book_append_sheet(
-        workbook,
-        productSheet,
-        "Product Performance",
-      );
-
-      // 6. Weekly Orders Analysis
-      const weeklyExportData = weeklyOrdersData.map((item) => ({
-        Day: item.day,
-        Orders: item.orders,
-        "Revenue ₹": item.revenue,
-        "Avg Order Value": (item.revenue / item.orders).toFixed(2),
-      }));
-      const weeklySheet = XLSX.utils.json_to_sheet(weeklyExportData);
-      XLSX.utils.book_append_sheet(workbook, weeklySheet, "Weekly Analysis");
-
-      // Try to capture chart as image and include in Excel (if possible)
-      try {
-        const chartElement = document.querySelector(".recharts-wrapper");
-        if (chartElement) {
-          const chartCanvas = await html2canvas(chartElement, {
-            backgroundColor: "#ffffff",
-            scale: 2,
-          });
-
-          // Convert to base64 and add to a separate sheet with notes
-          const chartData = [
-            {
-              Note: "Chart Image",
-              Description: "Current chart view captured",
-              Timestamp: new Date().toLocaleString(),
-            },
-            { Note: "Chart Type", Description: chartType, Timestamp: "" },
-            { Note: "Active View", Description: activeView, Timestamp: "" },
-            {
-              Note: "Date Range",
-              Description: `Last ${dateRange} days`,
-              Timestamp: "",
-            },
-          ];
-          const chartSheet = XLSX.utils.json_to_sheet(chartData);
-          XLSX.utils.book_append_sheet(workbook, chartSheet, "Chart Info");
+    const handleHover = (e, isHover) => {
+      if (disabled) return;
+      if (isHover) {
+        e.target.style.transform = "translateY(-2px)";
+        if (variant === "outline") {
+          e.target.style.background = "#e63946";
+          e.target.style.color = "white";
         }
-      } catch (chartError) {
-        console.log(
-          "Chart capture failed, continuing with data export:",
-          chartError,
-        );
+      } else {
+        e.target.style.transform = "translateY(0)";
+        if (variant === "outline") {
+          e.target.style.background = "transparent";
+          e.target.style.color = "#e63946";
+        }
       }
+    };
 
-      // Set column widths for better readability
-      const worksheets = [
-        "Summary",
-        "Monthly Revenue",
-        "Category Performance",
-        "Payment Analysis",
-        "Product Performance",
-        "Weekly Analysis",
-      ];
-      worksheets.forEach((sheetName) => {
-        if (workbook.Sheets[sheetName]) {
-          const worksheet = workbook.Sheets[sheetName];
-          const cols = [];
-          for (let i = 0; i < 10; i++) {
-            cols.push({ wch: 15 });
-          }
-          worksheet["!cols"] = cols;
-        }
-      });
+    return (
+      <button
+        style={currentStyle}
+        onClick={onClick}
+        disabled={disabled}
+        onMouseEnter={(e) => handleHover(e, true)}
+        onMouseLeave={(e) => handleHover(e, false)}
+      >
+        {icon && <i className={`${icon} me-2`}></i>}
+        {children}
+      </button>
+    );
+  };
 
-      // Generate filename with current date and view
-      const currentDate = new Date().toISOString().split("T")[0];
-      const fileName = `Hare_Krishna_Medical_Analytics_${activeView}_${currentDate}.xlsx`;
+  // Circular Stat Card Component
+  const CircularStatCard = ({
+    icon,
+    value,
+    label,
+    gradient,
+    badge,
+    description,
+    trend,
+  }) => (
+    <Card
+      style={{
+        border: "none",
+        borderRadius: "20px",
+        background: "linear-gradient(135deg, #ffffff, #f8f9fa)",
+        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+        transition: "all 0.3s ease",
+        height: "100%",
+      }}
+      onMouseOver={(e) => {
+        e.currentTarget.style.transform = "translateY(-5px)";
+        e.currentTarget.style.boxShadow = "0 15px 45px rgba(0, 0, 0, 0.15)";
+      }}
+      onMouseOut={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "0 8px 32px rgba(0, 0, 0, 0.1)";
+      }}
+    >
+      <Card.Body className="text-center" style={{ padding: "30px" }}>
+        <div
+          style={{
+            width: "80px",
+            height: "80px",
+            background: gradient,
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 20px",
+            boxShadow: "0 8px 25px rgba(0, 0, 0, 0.2)",
+            position: "relative",
+          }}
+        >
+          <i className={icon} style={{ fontSize: "30px", color: "white" }}></i>
+          {trend && (
+            <div
+              style={{
+                position: "absolute",
+                top: "-8px",
+                right: "-8px",
+                width: "24px",
+                height: "24px",
+                background: trend > 0 ? "#28a745" : "#dc3545",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "10px",
+                color: "white",
+                fontWeight: "bold",
+              }}
+            >
+              <i className={`bi bi-arrow-${trend > 0 ? "up" : "down"}`}></i>
+            </div>
+          )}
+        </div>
 
-      // Export file
-      XLSX.writeFile(workbook, fileName);
+        <h2
+          style={{
+            color: "#333",
+            fontWeight: "800",
+            marginBottom: "8px",
+            fontSize: "2rem",
+          }}
+        >
+          {typeof value === "number" && value > 1000
+            ? `${(value / 1000).toFixed(1)}k`
+            : typeof value === "number" && value % 1 !== 0
+              ? value.toFixed(1)
+              : value}
+        </h2>
 
-      alert(`Analytics exported successfully! File: ${fileName}`);
-    } catch (error) {
-      console.error("Export failed:", error);
-      alert("Failed to export analytics. Please try again.");
-    } finally {
-      setExportLoading(false);
-    }
+        <h6
+          style={{
+            color: "#6c757d",
+            marginBottom: "12px",
+            fontWeight: "600",
+            fontSize: "12px",
+            textTransform: "uppercase",
+            letterSpacing: "1px",
+          }}
+        >
+          {label}
+        </h6>
+
+        {description && (
+          <p
+            style={{
+              color: "#8e9297",
+              fontSize: "11px",
+              marginBottom: badge ? "12px" : "0",
+              lineHeight: "1.4",
+            }}
+          >
+            {description}
+          </p>
+        )}
+
+        {badge && (
+          <Badge
+            style={{
+              background:
+                badge.includes("+") || badge.includes("↑")
+                  ? "linear-gradient(135deg, #28a745, #20c997)"
+                  : badge.includes("-") || badge.includes("↓")
+                    ? "linear-gradient(135deg, #dc3545, #e63946)"
+                    : "linear-gradient(135deg, #17a2b8, #20c997)",
+              color: "white",
+              padding: "4px 10px",
+              borderRadius: "15px",
+              fontSize: "10px",
+              fontWeight: "600",
+            }}
+          >
+            {badge}
+          </Badge>
+        )}
+      </Card.Body>
+    </Card>
+  );
+
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+    }).format(amount);
+  };
+
+  // Get growth trend
+  const getTrendColor = (growth) => {
+    return growth > 0 ? "#28a745" : growth < 0 ? "#dc3545" : "#6c757d";
   };
 
   return (
     <div className="fade-in">
-      <section className="section-padding-sm">
+      <section
+        style={{
+          paddingTop: "2rem",
+          paddingBottom: "2rem",
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+        }}
+      >
         <Container>
-          {/* Header */}
+          {/* Enhanced Header */}
           <Row className="mb-4">
             <Col lg={12}>
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <h2>Advanced Analytics</h2>
-                  <p className="text-muted">
-                    Comprehensive data analysis with interactive charts and
-                    tables
+                  <h1
+                    style={{
+                      color: "#333",
+                      fontWeight: "800",
+                      marginBottom: "10px",
+                      fontSize: "2.5rem",
+                    }}
+                  >
+                    Analytics Dashboard
+                  </h1>
+                  <p
+                    style={{
+                      color: "#6c757d",
+                      fontSize: "1.1rem",
+                      marginBottom: "0",
+                    }}
+                  >
+                    Comprehensive business insights and performance metrics
                   </p>
                 </div>
-                <div className="d-flex gap-2 align-items-center">
-                  <Button
-                    onClick={handleExportAnalytics}
-                    disabled={exportLoading}
-                    className="btn-medical-primary"
+                <div className="d-flex gap-3">
+                  <Form.Select
+                    value={dateRange}
+                    onChange={(e) => setDateRange(e.target.value)}
                     style={{
-                      height: "38px",
-                      minWidth: "160px",
-                      fontSize: "14px",
+                      borderRadius: "8px",
+                      border: "2px solid #e9ecef",
                       fontWeight: "600",
                     }}
                   >
-                    {exportLoading ? (
-                      <>
-                        <Spinner size="sm" className="me-2" />
-                        Exporting Analytics...
-                      </>
-                    ) : (
-                      <>
-                        <i className="bi bi-file-earmark-excel me-2"></i>
-                        Export Analytics
-                      </>
-                    )}
-                  </Button>
-                  <Form.Select
-                    size="sm"
-                    value={dateRange}
-                    onChange={(e) => setDateRange(e.target.value)}
-                    style={{ minWidth: "130px", height: "38px" }}
-                  >
-                    <option value="7">Last 7 days</option>
-                    <option value="30">Last 30 days</option>
-                    <option value="90">Last 3 months</option>
-                    <option value="365">Last year</option>
+                    <option value="today">Today</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="last7days">Last 7 Days</option>
+                    <option value="last30days">Last 30 Days</option>
+                    <option value="last90days">Last 90 Days</option>
+                    <option value="thisyear">This Year</option>
                   </Form.Select>
+                  <EnhancedButton
+                    variant="info"
+                    onClick={() => window.location.reload()}
+                    icon="bi bi-arrow-clockwise"
+                  >
+                    Refresh
+                  </EnhancedButton>
+                  <EnhancedButton
+                    variant="success"
+                    onClick={() => {}}
+                    icon="bi bi-download"
+                  >
+                    Export
+                  </EnhancedButton>
                 </div>
               </div>
             </Col>
           </Row>
 
-          {/* Key Metrics */}
-          <Row className="mb-4">
-            <Col lg={3} md={6} className="mb-4">
-              <Card className="medical-card h-100">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <h3 className="text-success">
-                        ₹{salesData.totalRevenue.toLocaleString()}
-                      </h3>
-                      <p className="text-muted mb-0">Total Revenue</p>
-                      <small className="text-success">
-                        <i className="bi bi-arrow-up"></i> +
-                        {salesData.monthlyGrowth}% growth
-                      </small>
-                    </div>
-                    <div className="bg-success text-white rounded-circle p-3">
-                      <i className="bi bi-currency-rupee fs-4"></i>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
+          {/* Enhanced Statistics Cards */}
+          <Row className="mb-5 g-4">
+            <Col lg={3} md={6}>
+              <CircularStatCard
+                icon="bi bi-currency-rupee"
+                value={`₹${(analyticsData.overview.totalRevenue / 1000).toFixed(0)}k`}
+                label="Total Revenue"
+                gradient="linear-gradient(135deg, #e63946, #dc3545)"
+                badge={`+${analyticsData.salesMetrics.revenueGrowth}%`}
+                description="Total business revenue"
+                trend={analyticsData.salesMetrics.revenueGrowth}
+              />
             </Col>
 
-            <Col lg={3} md={6} className="mb-4">
-              <Card className="medical-card h-100">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <h3 className="text-medical-blue">
-                        {salesData.totalOrders}
-                      </h3>
-                      <p className="text-muted mb-0">Total Orders</p>
-                      <small className="text-success">
-                        <i className="bi bi-arrow-up"></i> +8.2% from last month
-                      </small>
-                    </div>
-                    <div className="bg-medical-blue text-white rounded-circle p-3">
-                      <i className="bi bi-bag-check fs-4"></i>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
+            <Col lg={3} md={6}>
+              <CircularStatCard
+                icon="bi bi-bag-check"
+                value={analyticsData.overview.totalOrders}
+                label="Total Orders"
+                gradient="linear-gradient(135deg, #28a745, #20c997)"
+                badge={`+${analyticsData.salesMetrics.orderGrowth}%`}
+                description="Orders processed"
+                trend={analyticsData.salesMetrics.orderGrowth}
+              />
             </Col>
 
-            <Col lg={3} md={6} className="mb-4">
-              <Card className="medical-card h-100">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <h3 className="text-medical-red">
-                        ₹{salesData.avgOrderValue}
-                      </h3>
-                      <p className="text-muted mb-0">Avg Order Value</p>
-                      <small className="text-success">
-                        <i className="bi bi-arrow-up"></i> +5.1% improvement
-                      </small>
-                    </div>
-                    <div className="bg-medical-red text-white rounded-circle p-3">
-                      <i className="bi bi-graph-up fs-4"></i>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
+            <Col lg={3} md={6}>
+              <CircularStatCard
+                icon="bi bi-people"
+                value={analyticsData.overview.totalCustomers}
+                label="Total Customers"
+                gradient="linear-gradient(135deg, #6f42c1, #6610f2)"
+                badge={`+${analyticsData.salesMetrics.customerGrowth}%`}
+                description="Registered customers"
+                trend={analyticsData.salesMetrics.customerGrowth}
+              />
             </Col>
 
-            <Col lg={3} md={6} className="mb-4">
-              <Card className="medical-card h-100">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <h3 className="text-warning">
-                        {salesData.conversionRate}%
-                      </h3>
-                      <p className="text-muted mb-0">Conversion Rate</p>
-                      <small className="text-success">
-                        <i className="bi bi-arrow-up"></i> +1.8% this month
-                      </small>
-                    </div>
-                    <div className="bg-warning text-white rounded-circle p-3">
-                      <i className="bi bi-percent fs-4"></i>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
+            <Col lg={3} md={6}>
+              <CircularStatCard
+                icon="bi bi-graph-up"
+                value={`₹${analyticsData.overview.averageOrderValue}`}
+                label="Avg Order Value"
+                gradient="linear-gradient(135deg, #17a2b8, #20c997)"
+                badge="Stable"
+                description="Average per order"
+              />
             </Col>
           </Row>
 
-          {/* Analytics Controls */}
-          <Row className="mb-4">
-            <Col lg={8}>
-              <Card className="medical-card">
-                <Card.Header className="bg-medical-light">
-                  <div className="d-flex justify-content-between align-items-center">
-                    <h5 className="mb-0">
-                      <i className="bi bi-graph-up me-2"></i>
-                      Analytics Dashboard
-                    </h5>
-                    <div className="d-flex gap-2 align-items-center">
-                      {/* View Mode Toggle */}
-                      <ButtonGroup size="sm">
-                        <Button
-                          variant={
-                            viewMode === "chart"
-                              ? "primary"
-                              : "outline-secondary"
-                          }
-                          onClick={() => setViewMode("chart")}
-                        >
-                          <i className="bi bi-bar-chart me-1"></i>
-                          Chart
-                        </Button>
-                        <Button
-                          variant={
-                            viewMode === "table"
-                              ? "primary"
-                              : "outline-secondary"
-                          }
-                          onClick={() => setViewMode("table")}
-                        >
-                          <i className="bi bi-table me-1"></i>
-                          Table
-                        </Button>
-                      </ButtonGroup>
+          {/* Secondary Metrics */}
+          <Row className="mb-5 g-4">
+            <Col lg={2} md={4} sm={6}>
+              <CircularStatCard
+                icon="bi bi-percent"
+                value={`${analyticsData.overview.conversionRate}%`}
+                label="Conversion Rate"
+                gradient="linear-gradient(135deg, #fd7e14, #ffc107)"
+                description="Visitor to customer"
+              />
+            </Col>
 
-                      {/* Chart Type Toggle - Only show for chart mode and relevant views */}
-                      {viewMode === "chart" &&
-                        (activeView === "revenue" ||
-                          activeView === "overview") && (
-                          <ButtonGroup size="sm">
-                            {chartTypes.map((type) => (
-                              <Button
-                                key={type.key}
-                                variant={
-                                  chartType === type.key
-                                    ? "primary"
-                                    : "outline-secondary"
-                                }
-                                onClick={() => setChartType(type.key)}
-                              >
-                                <i className={`${type.icon} me-1`}></i>
-                                {type.label}
-                              </Button>
-                            ))}
-                          </ButtonGroup>
-                        )}
-                    </div>
-                  </div>
+            <Col lg={2} md={4} sm={6}>
+              <CircularStatCard
+                icon="bi bi-arrow-repeat"
+                value={`${analyticsData.overview.repeatCustomerRate}%`}
+                label="Repeat Customers"
+                gradient="linear-gradient(135deg, #20c997, #28a745)"
+                description="Customer retention"
+              />
+            </Col>
+
+            <Col lg={2} md={4} sm={6}>
+              <CircularStatCard
+                icon="bi bi-tags"
+                value={analyticsData.overview.topSellingCategories}
+                label="Top Categories"
+                gradient="linear-gradient(135deg, #6610f2, #6f42c1)"
+                description="Product categories"
+              />
+            </Col>
+
+            <Col lg={2} md={4} sm={6}>
+              <CircularStatCard
+                icon="bi bi-exclamation-triangle"
+                value={analyticsData.overview.lowStockItems}
+                label="Low Stock"
+                gradient="linear-gradient(135deg, #dc3545, #e63946)"
+                badge="Attention needed"
+                description="Items need restock"
+              />
+            </Col>
+
+            <Col lg={2} md={4} sm={6}>
+              <CircularStatCard
+                icon="bi bi-credit-card"
+                value={`${analyticsData.paymentMethods.online.percentage}%`}
+                label="Online Payments"
+                gradient="linear-gradient(135deg, #17a2b8, #20c997)"
+                description="Digital transactions"
+              />
+            </Col>
+
+            <Col lg={2} md={4} sm={6}>
+              <CircularStatCard
+                icon="bi bi-cash-coin"
+                value={`${analyticsData.paymentMethods.cod.percentage}%`}
+                label="COD Payments"
+                gradient="linear-gradient(135deg, #ffc107, #fd7e14)"
+                description="Cash on delivery"
+              />
+            </Col>
+          </Row>
+
+          {/* Analytics Tables and Charts */}
+          <Row className="g-4">
+            {/* Top Products */}
+            <Col lg={8}>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                }}
+              >
+                <Card.Header
+                  style={{
+                    background: "linear-gradient(135deg, #e63946, #dc3545)",
+                    color: "white",
+                    borderRadius: "16px 16px 0 0",
+                    padding: "20px 25px",
+                  }}
+                >
+                  <h5 className="mb-0" style={{ fontWeight: "700" }}>
+                    <i className="bi bi-star me-2"></i>
+                    Top Performing Products
+                  </h5>
                 </Card.Header>
-                <Card.Body>
-                  {viewMode === "chart" ? renderChart() : renderTable()}
+                <Card.Body style={{ padding: "0" }}>
+                  <Table responsive hover style={{ marginBottom: "0" }}>
+                    <thead style={{ background: "#f8f9fa" }}>
+                      <tr>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                          }}
+                        >
+                          Product
+                        </th>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                          }}
+                        >
+                          Category
+                        </th>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                          }}
+                        >
+                          Units Sold
+                        </th>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                          }}
+                        >
+                          Revenue
+                        </th>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                          }}
+                        >
+                          Growth
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {analyticsData.topProducts.map((product, index) => (
+                        <tr
+                          key={product.id}
+                          style={{ borderBottom: "1px solid #f1f3f4" }}
+                        >
+                          <td style={{ padding: "15px" }}>
+                            <div className="d-flex align-items-center">
+                              <div
+                                style={{
+                                  width: "40px",
+                                  height: "40px",
+                                  background: `linear-gradient(135deg, ${
+                                    index === 0
+                                      ? "#e63946, #dc3545"
+                                      : index === 1
+                                        ? "#28a745, #20c997"
+                                        : index === 2
+                                          ? "#ffc107, #fd7e14"
+                                          : "#6f42c1, #6610f2"
+                                  })`,
+                                  borderRadius: "50%",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  color: "white",
+                                  fontWeight: "bold",
+                                  marginRight: "12px",
+                                  fontSize: "14px",
+                                }}
+                              >
+                                #{index + 1}
+                              </div>
+                              <div>
+                                <div
+                                  style={{
+                                    fontWeight: "600",
+                                    marginBottom: "2px",
+                                  }}
+                                >
+                                  {product.name}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td style={{ padding: "15px" }}>
+                            <span
+                              style={{
+                                background: "#f8f9fa",
+                                color: "#6c757d",
+                                padding: "4px 8px",
+                                borderRadius: "6px",
+                                fontSize: "12px",
+                                fontWeight: "600",
+                              }}
+                            >
+                              {product.category}
+                            </span>
+                          </td>
+                          <td style={{ padding: "15px" }}>
+                            <div
+                              style={{
+                                fontWeight: "700",
+                                color: "#333",
+                                fontSize: "16px",
+                              }}
+                            >
+                              {product.sold.toLocaleString()}
+                            </div>
+                          </td>
+                          <td style={{ padding: "15px" }}>
+                            <div
+                              style={{
+                                fontWeight: "700",
+                                color: "#28a745",
+                                fontSize: "16px",
+                              }}
+                            >
+                              {formatCurrency(product.revenue)}
+                            </div>
+                          </td>
+                          <td style={{ padding: "15px" }}>
+                            <Badge
+                              style={{
+                                background:
+                                  product.growth > 0
+                                    ? "linear-gradient(135deg, #28a745, #20c997)"
+                                    : "linear-gradient(135deg, #dc3545, #e63946)",
+                                color: "white",
+                                padding: "6px 12px",
+                                borderRadius: "15px",
+                                fontSize: "11px",
+                                fontWeight: "600",
+                              }}
+                            >
+                              {product.growth > 0 ? "+" : ""}
+                              {product.growth}%
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
                 </Card.Body>
               </Card>
             </Col>
 
+            {/* Regional Performance */}
             <Col lg={4}>
-              <Card className="medical-card h-100">
-                <Card.Header className="bg-medical-light">
-                  <h5 className="mb-0">
-                    <i className="bi bi-toggles me-2"></i>
-                    View Options
-                  </h5>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                  marginBottom: "20px",
+                }}
+              >
+                <Card.Header
+                  style={{
+                    background: "linear-gradient(135deg, #6f42c1, #6610f2)",
+                    color: "white",
+                    borderRadius: "16px 16px 0 0",
+                    padding: "20px 25px",
+                  }}
+                >
+                  <h6 className="mb-0" style={{ fontWeight: "700" }}>
+                    <i className="bi bi-geo-alt me-2"></i>
+                    Regional Performance
+                  </h6>
                 </Card.Header>
-                <Card.Body>
-                  <div className="d-grid gap-2">
-                    {viewOptions.map((option) => (
-                      <Button
-                        key={option.key}
+                <Card.Body style={{ padding: "20px" }}>
+                  {analyticsData.regionData.map((region, index) => (
+                    <div
+                      key={region.region}
+                      style={{
+                        background: "#f8f9fa",
+                        borderRadius: "12px",
+                        padding: "15px",
+                        marginBottom: "15px",
+                        transition: "all 0.3s ease",
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.transform = "translateY(-2px)";
+                        e.currentTarget.style.boxShadow =
+                          "0 5px 15px rgba(0, 0, 0, 0.1)";
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.boxShadow = "none";
+                      }}
+                    >
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <div style={{ fontWeight: "600", color: "#333" }}>
+                          {region.region}
+                        </div>
+                        <Badge
+                          style={{
+                            background: `linear-gradient(135deg, ${
+                              index === 0
+                                ? "#e63946, #dc3545"
+                                : index === 1
+                                  ? "#28a745, #20c997"
+                                  : index === 2
+                                    ? "#ffc107, #fd7e14"
+                                    : "#6f42c1, #6610f2"
+                            })`,
+                            color: "white",
+                            fontSize: "10px",
+                            fontWeight: "600",
+                          }}
+                        >
+                          {region.percentage}%
+                        </Badge>
+                      </div>
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <small style={{ color: "#6c757d" }}>
+                          {region.orders} orders
+                        </small>
+                        <div
+                          style={{
+                            fontWeight: "700",
+                            color: "#28a745",
+                            fontSize: "14px",
+                          }}
+                        >
+                          {formatCurrency(region.revenue)}
+                        </div>
+                      </div>
+                      <ProgressBar
+                        now={region.percentage}
+                        style={{ height: "6px", borderRadius: "3px" }}
                         variant={
-                          activeView === option.key
-                            ? "primary"
-                            : "outline-secondary"
+                          index === 0
+                            ? "danger"
+                            : index === 1
+                              ? "success"
+                              : index === 2
+                                ? "warning"
+                                : "primary"
                         }
-                        onClick={() => setActiveView(option.key)}
-                        className={`text-start ${
-                          activeView === option.key
-                            ? "btn-medical-primary"
-                            : "btn-medical-outline"
-                        }`}
-                      >
-                        <i className={`${option.icon} me-2`}></i>
-                        {option.label}
-                        {activeView === option.key && (
-                          <Badge bg="light" text="dark" className="ms-2">
-                            Active
-                          </Badge>
-                        )}
-                      </Button>
-                    ))}
-                  </div>
-
-                  <div className="mt-4 p-3 bg-light rounded">
-                    <h6 className="mb-3">Current View Info:</h6>
-                    <p className="small mb-2">
-                      <strong>Mode:</strong>{" "}
-                      {viewMode === "chart" ? "Chart View" : "Table View"}
-                    </p>
-                    <p className="small mb-0">
-                      {activeView === "overview" &&
-                        "Complete business overview with all key metrics"}
-                      {activeView === "revenue" &&
-                        "Detailed revenue analysis over time"}
-                      {activeView === "orders" && "Order patterns and trends"}
-                      {activeView === "categories" &&
-                        "Product category performance breakdown"}
-                      {activeView === "payments" &&
-                        "Payment status and method analysis with COD tracking"}
-                      {activeView === "products" &&
-                        "Individual product performance metrics"}
-                    </p>
-                  </div>
-
-                  {viewMode === "chart" && (
-                    <div className="mt-3 p-3 bg-light rounded">
-                      <h6 className="mb-2">Chart Controls:</h6>
-                      <p className="small mb-0">
-                        Use the chart type buttons to switch between Line, Area,
-                        and Bar charts for revenue and overview data.
-                      </p>
+                      />
                     </div>
-                  )}
+                  ))}
+                </Card.Body>
+              </Card>
 
-                  {viewMode === "table" && (
-                    <div className="mt-3 p-3 bg-light rounded">
-                      <h6 className="mb-2">Table Features:</h6>
-                      <p className="small mb-0">
-                        Detailed tabular data with sorting capabilities and
-                        export options. Perfect for detailed analysis and
-                        reporting.
-                      </p>
-                    </div>
-                  )}
+              {/* Quick Actions */}
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                }}
+              >
+                <Card.Header
+                  style={{
+                    background: "linear-gradient(135deg, #28a745, #20c997)",
+                    color: "white",
+                    borderRadius: "16px 16px 0 0",
+                    padding: "20px 25px",
+                  }}
+                >
+                  <h6 className="mb-0" style={{ fontWeight: "700" }}>
+                    <i className="bi bi-lightning me-2"></i>
+                    Quick Analytics Actions
+                  </h6>
+                </Card.Header>
+                <Card.Body style={{ padding: "20px" }}>
+                  <div className="d-grid gap-2">
+                    <EnhancedButton
+                      variant="outline"
+                      onClick={() => {}}
+                      icon="bi bi-graph-up"
+                      style={{
+                        justifyContent: "flex-start",
+                        padding: "12px 16px",
+                      }}
+                    >
+                      Generate Sales Report
+                    </EnhancedButton>
+                    <EnhancedButton
+                      variant="outline"
+                      onClick={() => {}}
+                      icon="bi bi-people"
+                      style={{
+                        justifyContent: "flex-start",
+                        padding: "12px 16px",
+                      }}
+                    >
+                      Customer Analysis
+                    </EnhancedButton>
+                    <EnhancedButton
+                      variant="outline"
+                      onClick={() => {}}
+                      icon="bi bi-box-seam"
+                      style={{
+                        justifyContent: "flex-start",
+                        padding: "12px 16px",
+                      }}
+                    >
+                      Inventory Report
+                    </EnhancedButton>
+                    <EnhancedButton
+                      variant="outline"
+                      onClick={() => {}}
+                      icon="bi bi-cash-stack"
+                      style={{
+                        justifyContent: "flex-start",
+                        padding: "12px 16px",
+                      }}
+                    >
+                      Revenue Breakdown
+                    </EnhancedButton>
+                  </div>
                 </Card.Body>
               </Card>
             </Col>
