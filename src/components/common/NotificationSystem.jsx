@@ -256,7 +256,7 @@ const NotificationSystem = () => {
           className="position-relative border-0 bg-transparent p-0"
           id="notifications-dropdown"
         >
-          <i className="bi bi-bell fs-5 text-dark"></i>
+          <i className="bi bi-bell-fill fs-5 text-dark"></i>
           {unreadCount > 0 && (
             <Badge
               bg="danger"
