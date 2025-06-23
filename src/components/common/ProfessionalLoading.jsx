@@ -125,8 +125,7 @@ const ProfessionalLoading = ({
             filter: `drop-shadow(0 4px 12px ${color}40)`,
             zIndex: 1,
           }}
-        >
-        }
+        />
 
         {/* Decorative Dots */}
         <div
