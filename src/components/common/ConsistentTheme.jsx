@@ -22,75 +22,133 @@ export const PageHeroSection = ({
     const path = location.pathname.toLowerCase();
     if (path.includes("admin")) colorContext = "admin";
     else if (path.includes("user")) colorContext = "user";
-    else if (path.includes("login") || path.includes("register")) colorContext = "auth";
+    else if (path.includes("login") || path.includes("register"))
+      colorContext = "auth";
     else if (path.includes("invoice")) colorContext = "invoice";
-    else if (path.includes("error") || path.includes("denied")) colorContext = "error";
+    else if (path.includes("error") || path.includes("denied"))
+      colorContext = "error";
   }
 
   const iconGradient = getIconColor(colorContext);
-  const heroBackground = background ||
-    (colorContext === "admin" ? "linear-gradient(135deg, #343a40 0%, #495057 100%)" :
-     colorContext === "user" ? "linear-gradient(135deg, #17a2b8 0%, #007bff 100%)" :
-     colorContext === "invoice" ? "linear-gradient(135deg, #28a745 0%, #20c997 100%)" :
-     colorContext === "error" ? "linear-gradient(135deg, #dc3545 0%, #c82333 100%)" :
-     "linear-gradient(135deg, #e63946 0%, #dc3545 100%)");
+  const heroBackground =
+    background ||
+    (colorContext === "admin"
+      ? "linear-gradient(135deg, #343a40 0%, #495057 100%)"
+      : colorContext === "user"
+        ? "linear-gradient(135deg, #17a2b8 0%, #007bff 100%)"
+        : colorContext === "invoice"
+          ? "linear-gradient(135deg, #28a745 0%, #20c997 100%)"
+          : colorContext === "error"
+            ? "linear-gradient(135deg, #dc3545 0%, #c82333 100%)"
+            : "linear-gradient(135deg, #e63946 0%, #dc3545 100%)");
 
   return (
-  <section
-    style={{
-      background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
-      paddingTop: "80px",
-      paddingBottom: "80px",
-      color: "white",
-    }}
-  >
-    <div className="container">
-      <div className="row text-center">
-        <div className="col-lg-12">
-          <div className="d-flex justify-content-center align-items-center mb-4">
-            <div
-              style={{
-                width: "80px",
-                height: "80px",
-                background: "rgba(255, 255, 255, 0.2)",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: "20px",
-              }}
-            >
-              <i
-                className={`${icon}`}
-                style={{ fontSize: "32px", color: "white" }}
-              ></i>
+    <section
+      style={{
+        background: heroBackground,
+        paddingTop: "80px",
+        paddingBottom: "80px",
+        color: "white",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Background pattern */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background:
+            "repeating-linear-gradient(45deg, transparent, transparent 50px, rgba(255,255,255,0.03) 50px, rgba(255,255,255,0.03) 100px)",
+          pointerEvents: "none",
+        }}
+      />
+
+      <div className="container" style={{ position: "relative", zIndex: 2 }}>
+        <div className="row text-center">
+          <div className="col-lg-12">
+            <div className="d-flex justify-content-center align-items-center mb-4 flex-wrap">
+              {/* Professional Icon with Circle Background */}
+              <ProfessionalIcon
+                icon={displayIcon}
+                size={90}
+                gradient="rgba(255, 255, 255, 0.9)"
+                iconSize={42}
+                style={{
+                  marginRight: "25px",
+                  marginBottom: "10px",
+                  color:
+                    colorContext === "admin"
+                      ? "#343a40"
+                      : colorContext === "user"
+                        ? "#17a2b8"
+                        : colorContext === "invoice"
+                          ? "#28a745"
+                          : colorContext === "error"
+                            ? "#dc3545"
+                            : "#e63946",
+                  boxShadow: "0 12px 40px rgba(0,0,0,0.25)",
+                  border: "4px solid rgba(255,255,255,0.95)",
+                  animation: "heroIconFloat 3s ease-in-out infinite",
+                }}
+              />
+              <div>
+                <h1
+                  style={{
+                    fontSize: "3.2rem",
+                    fontWeight: "800",
+                    marginBottom: "8px",
+                    textShadow: "2px 2px 8px rgba(0,0,0,0.3)",
+                    lineHeight: "1.1",
+                  }}
+                >
+                  {title}
+                </h1>
+              </div>
             </div>
-            <h1
+            <p
               style={{
-                fontSize: "3rem",
-                fontWeight: "800",
-                marginBottom: "0",
-                textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                fontSize: "1.25rem",
+                opacity: "0.95",
+                maxWidth: "700px",
+                margin: "0 auto",
+                lineHeight: "1.6",
+                textShadow: "1px 1px 3px rgba(0,0,0,0.2)",
               }}
             >
-              {title}
-            </h1>
+              {subtitle}
+            </p>
           </div>
-          <p
-            style={{
-              fontSize: "1.2rem",
-              opacity: "0.9",
-              maxWidth: "600px",
-              margin: "0 auto",
-            }}
-          >
-            {subtitle}
-          </p>
         </div>
       </div>
-    </div>
-  </section>
-);
+
+      {/* CSS Animation */}
+      <style>{`
+        @keyframes heroIconFloat {
+          0%, 100% {
+            transform: translateY(0px) scale(1);
+          }
+          50% {
+            transform: translateY(-8px) scale(1.05);
+          }
+        }
+        
+        @media (max-width: 768px) {
+          .hero-section h1 {
+            font-size: 2.5rem !important;
+          }
+          .hero-section .professional-icon {
+            margin-right: 0 !important;
+            margin-bottom: 20px !important;
+          }
+        }
+      `}</style>
+    </section>
+  );
+};
 
 // Consistent Card Component
 export const ThemeCard = ({
@@ -117,7 +175,7 @@ export const ThemeCard = ({
             e.currentTarget.style.borderColor = "#343a40";
             e.currentTarget.style.transform = "translateY(-4px)";
             e.currentTarget.style.boxShadow =
-              "0 8px 25px rgba(52, 58, 64, 0.2)";
+              "0 12px 40px rgba(52, 58, 64, 0.15)";
           }
         : undefined
     }
@@ -136,32 +194,25 @@ export const ThemeCard = ({
   </Card>
 );
 
-// Consistent Icon Component
+// Enhanced Icon Component using ProfessionalIcon
 export const ThemeIcon = ({
   icon,
   gradient = "linear-gradient(135deg, #e63946, #dc3545)",
-  size = "80px",
-  fontSize = "32px",
+  size = 80,
+  fontSize = 32,
+  className = "",
 }) => (
-  <div
+  <ProfessionalIcon
+    icon={icon}
+    size={size}
+    gradient={gradient}
+    iconSize={fontSize}
+    className={className}
     style={{
-      width: size,
-      height: size,
-      background: gradient,
-      borderRadius: "50%",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
       margin: "0 auto 24px",
-      color: "white",
-      fontSize: fontSize,
       transition: "all 0.3s ease",
-      boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
     }}
-    className="theme-icon"
-  >
-    <i className={icon}></i>
-  </div>
+  />
 );
 
 // Consistent Button Component
@@ -206,17 +257,21 @@ export const ThemeButton = ({
       onMouseOver={(e) => {
         if (variant === "primary") {
           e.target.style.background = "#343a40";
+          e.target.style.transform = "translateY(-2px)";
         } else if (variant === "outline") {
           e.target.style.background = "#e63946";
           e.target.style.color = "white";
+          e.target.style.transform = "translateY(-2px)";
         }
       }}
       onMouseOut={(e) => {
         if (variant === "primary") {
           e.target.style.background = "#e63946";
+          e.target.style.transform = "translateY(0)";
         } else if (variant === "outline") {
           e.target.style.background = "transparent";
           e.target.style.color = "#e63946";
+          e.target.style.transform = "translateY(0)";
         }
       }}
       {...props}
