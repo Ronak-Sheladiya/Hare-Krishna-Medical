@@ -147,7 +147,7 @@ const Header = () => {
                     <div className="d-flex align-items-center">
                       <UserAvatar user={user} size={45} className="me-2" />
                       <div className="d-none d-md-block text-start">
-                        <div className="fw-bold small">
+                        <div className="fw-bold small text-medical-red">
                           {getUserDisplayName()}
                         </div>
                         <div
