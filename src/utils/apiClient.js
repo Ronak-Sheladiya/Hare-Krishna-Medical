@@ -2,6 +2,9 @@
 const API_BASE_URL =
   import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
+// Store original fetch to avoid external interference
+const originalFetch = window.fetch.bind(window);
+
 // Default configuration
 const DEFAULT_CONFIG = {
   timeout: 8000, // 8 seconds
