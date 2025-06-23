@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import socketClient from "../utils/socketClient";
+
+// Lazy import socketClient to prevent initialization issues
+let socketClient = null;
+if (typeof window !== "undefined") {
+  try {
+    const socketModule = require("../utils/socketClient");
+    socketClient = socketModule.default;
+  } catch (error) {
+    console.warn("SocketClient not available:", error);
+  }
+}
 
 export const useRealTime = () => {
   const { user, token } = useSelector((state) => state.auth);
@@ -10,23 +20,39 @@ export const useRealTime = () => {
   });
 
   useEffect(() => {
+    if (!socketClient || typeof window === "undefined") return;
+
     const updateConnectionStatus = () => {
-      setConnectionStatus(socketClient.getConnectionStatus());
+      try {
+        setConnectionStatus(socketClient.getConnectionStatus());
+      } catch (error) {
+        console.warn("Failed to get connection status:", error);
+        setConnectionStatus({ isConnected: false, socketId: null });
+      }
     };
 
-    // Update status every second
-    const interval = setInterval(updateConnectionStatus, 1000);
+    // Update status every 5 seconds instead of every second
+    const interval = setInterval(updateConnectionStatus, 5000);
 
     return () => clearInterval(interval);
   }, []);
 
   const emitEvent = (eventName, data) => {
-    socketClient.emitEvent(eventName, data);
+    if (socketClient && typeof socketClient.emitEvent === "function") {
+      socketClient.emitEvent(eventName, data);
+    }
   };
 
   const subscribeToEvent = (eventName, callback) => {
-    socketClient.on(eventName, callback);
-    return () => socketClient.off(eventName, callback);
+    if (socketClient && typeof socketClient.on === "function") {
+      socketClient.on(eventName, callback);
+      return () => {
+        if (socketClient && typeof socketClient.off === "function") {
+          socketClient.off(eventName, callback);
+        }
+      };
+    }
+    return () => {}; // Return empty cleanup function if socketClient not available
   };
 
   return {
