@@ -16,7 +16,6 @@ import sessionManager from "./utils/sessionManager.js";
 import Header from "./components/layout/Header.jsx";
 import Footer from "./components/layout/Footer.jsx";
 import LoadingSpinner from "./components/common/LoadingSpinner.jsx";
-import GlobalSecurity from "./components/common/GlobalSecurity.jsx";
 import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
 
 // Pages
@@ -47,7 +46,11 @@ import BackendDocs from "./pages/BackendDocs.jsx";
 import InvoiceView from "./pages/InvoiceView.jsx";
 import OrderDetails from "./pages/OrderDetails.jsx";
 import UserGuide from "./pages/UserGuide.jsx";
+import BackendDocs from "./pages/BackendDocs.jsx";
+import LocalSetupGuide from "./pages/LocalSetupGuide.jsx";
 import InvoiceVerify from "./pages/InvoiceVerify.jsx";
+import InvoiceQRVerify from "./pages/InvoiceQRVerify.jsx";
+import AdminPaymentMethods from "./pages/admin/AdminPaymentMethods.jsx";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
 import VerificationStatus from "./pages/VerificationStatus.jsx";
 import NotFound from "./pages/NotFound.jsx";
@@ -189,16 +192,21 @@ function App() {
       <ErrorBoundary>
         <div className="App">
           <ScrollToTop />
-          <GlobalSecurity />
           <Header />
           <main>
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Home />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/product/:id" element={<ProductDetails />} />
               <Route path="/invoice/:orderId" element={<InvoiceView />} />
               <Route
                 path="/invoice-verify/:invoiceId"
                 element={<InvoiceVerify />}
+              />
+              <Route
+                path="/qr/invoice/:invoiceId"
+                element={<InvoiceQRVerify />}
               />
               <Route path="/verify-email/:token" element={<VerifyEmail />} />
               <Route
@@ -207,6 +215,7 @@ function App() {
               />
               <Route path="/user-guide" element={<UserGuide />} />
               <Route path="/backend-docs" element={<BackendDocs />} />
+              <Route path="/localsetup-guide" element={<LocalSetupGuide />} />
               <Route path="/order" element={<Order />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
@@ -260,6 +269,10 @@ function App() {
               <Route path="/admin/analytics" element={<AdminAnalytics />} />
               <Route path="/admin/messages" element={<AdminMessages />} />
               <Route path="/admin/invoices" element={<AdminInvoices />} />
+              <Route
+                path="/admin/payment-methods"
+                element={<AdminPaymentMethods />}
+              />
               <Route path="/admin/backend-docs" element={<BackendDocs />} />
 
               {/* User Routes */}

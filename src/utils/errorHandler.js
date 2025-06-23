@@ -26,7 +26,7 @@ class ErrorHandler {
       });
 
       // Don't prevent default for development
-      if (process.env.NODE_ENV === "production") {
+      if (import.meta.env.PROD) {
         event.preventDefault();
       }
     });
@@ -42,7 +42,7 @@ class ErrorHandler {
     console.error(`Error in ${context}:`, error);
 
     // In production, you might want to send this to an error tracking service
-    if (process.env.NODE_ENV === "production") {
+    if (import.meta.env.PROD) {
       // Example: Send to error tracking service
       // errorTrackingService.log(error, context);
     }

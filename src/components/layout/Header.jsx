@@ -227,11 +227,15 @@ const Header = () => {
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/orders">
                           <i className="bi bi-bag-check me-2"></i>
-                          Orders
+                          Manage Orders
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/invoices">
                           <i className="bi bi-receipt-cutoff me-2"></i>
                           Manage Invoices
+                        </Dropdown.Item>
+                        <Dropdown.Item as={Link} to="/admin/payment-methods">
+                          <i className="bi bi-credit-card me-2"></i>
+                          Payment Methods
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/analytics">
                           <i className="bi bi-graph-up me-2"></i>
@@ -239,7 +243,7 @@ const Header = () => {
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/messages">
                           <i className="bi bi-envelope me-2"></i>
-                          Manage Messages
+                          Messages
                         </Dropdown.Item>
                       </>
                     )}

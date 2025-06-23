@@ -55,7 +55,7 @@ class SocketClient {
 
       // Connect to backend server
       this.socket = io(
-        process.env.REACT_APP_BACKEND_URL || "http://localhost:5000",
+        import.meta.env.VITE_BACKEND_URL || "http://localhost:5000",
         {
           auth: {
             token: token,

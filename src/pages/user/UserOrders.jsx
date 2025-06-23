@@ -10,528 +10,651 @@ import {
   Modal,
   Form,
   InputGroup,
+  Spinner,
+  Alert,
 } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { formatDateTime, getRelativeTime } from "../../utils/dateUtils";
+import { api, safeApiCall } from "../../utils/apiClient";
+import {
+  PageHeroSection,
+  ThemeCard,
+  ThemeButton,
+} from "../../components/common/ConsistentTheme";
 
 const UserOrders = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
   const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
 
-  // Mock orders data
-  const mockOrders = [
-    {
-      id: "HKM12345678",
-      date: "2024-01-15",
-      time: "14:30:25",
-      items: [
-        {
-          name: "Paracetamol Tablets",
-          quantity: 2,
-          price: 25.99,
-          total: 51.98,
-        },
-        { name: "Vitamin D3 Capsules", quantity: 1, price: 45.5, total: 45.5 },
-      ],
-      subtotal: 97.48,
-      shipping: 0,
-      tax: 4.87,
-      total: 102.35,
-      status: "Delivered",
-      paymentMethod: "Cash on Delivery",
-      deliveryDate: "2024-01-17",
-      trackingNumber: "TRK123456789",
-    },
-    {
-      id: "HKM12345679",
-      date: "2024-01-12",
-      time: "10:15:30",
-      items: [
-        { name: "Cough Syrup", quantity: 1, price: 35.75, total: 35.75 },
-        { name: "Antiseptic Liquid", quantity: 2, price: 28.0, total: 56.0 },
-      ],
-      subtotal: 91.75,
-      shipping: 50,
-      tax: 4.59,
-      total: 146.34,
-      status: "Processing",
-      paymentMethod: "Cash on Delivery",
-      estimatedDelivery: "2024-01-18",
-    },
-    {
-      id: "HKM12345680",
-      date: "2024-01-10",
-      time: "16:45:12",
-      items: [
-        {
-          name: "Blood Pressure Monitor",
-          quantity: 1,
-          price: 1299.99,
-          total: 1299.99,
-        },
-      ],
-      subtotal: 1299.99,
-      shipping: 0,
-      tax: 65.0,
-      total: 1364.99,
-      status: "Delivered",
-      paymentMethod: "Cash on Delivery",
-      deliveryDate: "2024-01-12",
-      trackingNumber: "TRK987654321",
-    },
-  ];
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: "/user/orders" }} replace />;
+  }
+
+  // Redirect admin to admin panel
+  if (user?.role === 1) {
+    return (
+      <div className="fade-in">
+        <PageHeroSection
+          title="Access Denied"
+          description="Administrators should use the admin panel for order management"
+          icon="🚫"
+        />
+        <Container className="py-5 text-center">
+          <ThemeCard>
+            <Card.Body>
+              <h5>You are logged in as an administrator</h5>
+              <p className="text-muted">
+                Please use the admin panel to manage orders
+              </p>
+              <Link to="/admin/orders">
+                <ThemeButton>Go to Admin Orders</ThemeButton>
+              </Link>
+            </Card.Body>
+          </ThemeCard>
+        </Container>
+      </div>
+    );
+  }
+
+  // Fetch user orders
+  const fetchUserOrders = async () => {
+    setLoading(true);
+    setError(null);
+
+    const {
+      success,
+      data,
+      error: apiError,
+    } = await safeApiCall(() => api.get("/api/user/orders"), []);
+
+    if (success && data) {
+      const ordersData = data.data || data;
+      setOrders(ordersData);
+      setFilteredOrders(ordersData);
+    } else {
+      setError(apiError || "Failed to load orders");
+      // Keep empty state for offline mode
+      setOrders([]);
+      setFilteredOrders([]);
+    }
+
+    setLoading(false);
+  };
+
+  // Cancel order
+  const cancelOrder = async (orderId) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to cancel this order? This action cannot be undone.",
+      )
+    ) {
+      return;
+    }
+
+    const { success, error: apiError } = await safeApiCall(
+      () => api.patch(`/api/user/orders/${orderId}/cancel`),
+      null,
+    );
+
+    if (success) {
+      // Update local state
+      setOrders((prev) =>
+        prev.map((order) =>
+          order._id === orderId ? { ...order, status: "cancelled" } : order,
+        ),
+      );
+      setFilteredOrders((prev) =>
+        prev.map((order) =>
+          order._id === orderId ? { ...order, status: "cancelled" } : order,
+        ),
+      );
+      alert("Order cancelled successfully");
+    } else {
+      alert(apiError || "Failed to cancel order");
+    }
+  };
+
+  // Reorder functionality
+  const reorderItems = async (order) => {
+    try {
+      // Add order items to cart
+      const { success, error: apiError } = await safeApiCall(
+        () =>
+          api.post("/api/user/cart/reorder", {
+            orderId: order._id,
+            items: order.items,
+          }),
+        null,
+      );
+
+      if (success) {
+        alert("Items added to cart successfully!");
+        navigate("/cart");
+      } else {
+        alert(apiError || "Failed to add items to cart");
+      }
+    } catch (error) {
+      console.error("Error reordering items:", error);
+      alert("Failed to reorder items");
+    }
+  };
+
+  // Filter orders based on search and filters
+  useEffect(() => {
+    let filtered = orders;
+
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (order) =>
+          order.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          order._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          order.items?.some((item) =>
+            item.name?.toLowerCase().includes(searchTerm.toLowerCase()),
+          ),
+      );
+    }
+
+    if (statusFilter) {
+      filtered = filtered.filter((order) => order.status === statusFilter);
+    }
+
+    if (dateFilter) {
+      const today = new Date();
+      const filterDate = new Date(today);
+
+      switch (dateFilter) {
+        case "today":
+          filtered = filtered.filter((order) => {
+            const orderDate = new Date(order.createdAt);
+            return orderDate.toDateString() === today.toDateString();
+          });
+          break;
+        case "week":
+          filterDate.setDate(today.getDate() - 7);
+          filtered = filtered.filter(
+            (order) => new Date(order.createdAt) >= filterDate,
+          );
+          break;
+        case "month":
+          filterDate.setMonth(today.getMonth() - 1);
+          filtered = filtered.filter(
+            (order) => new Date(order.createdAt) >= filterDate,
+          );
+          break;
+        case "year":
+          filterDate.setFullYear(today.getFullYear() - 1);
+          filtered = filtered.filter(
+            (order) => new Date(order.createdAt) >= filterDate,
+          );
+          break;
+      }
+    }
+
+    setFilteredOrders(filtered);
+  }, [orders, searchTerm, statusFilter, dateFilter]);
 
   useEffect(() => {
-    setOrders(mockOrders);
+    fetchUserOrders();
   }, []);
-
-  const statusOptions = [
-    "Pending",
-    "Confirmed",
-    "Processing",
-    "Shipped",
-    "Delivered",
-    "Cancelled",
-  ];
-
-  const filteredOrders = orders.filter((order) => {
-    const matchesSearch = order.id
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesStatus = !statusFilter || order.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
 
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
     setShowDetailsModal(true);
   };
 
-  const getStatusVariant = (status) => {
-    switch (status) {
-      case "Pending":
+  const getStatusBadgeColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case "delivered":
+        return "success";
+      case "processing":
         return "warning";
-      case "Confirmed":
+      case "shipped":
         return "info";
-      case "Processing":
-        return "primary";
-      case "Shipped":
-        return "success";
-      case "Delivered":
-        return "success";
-      case "Cancelled":
+      case "pending":
+        return "secondary";
+      case "cancelled":
         return "danger";
+      default:
+        return "primary";
+    }
+  };
+
+  const getPaymentStatusBadgeColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case "paid":
+        return "success";
+      case "pending":
+        return "warning";
+      case "failed":
+        return "danger";
+      case "refunded":
+        return "info";
       default:
         return "secondary";
     }
   };
 
-  const getStatusCounts = () => {
-    const counts = {};
-    statusOptions.forEach((status) => {
-      counts[status] = orders.filter((order) => order.status === status).length;
-    });
-    return counts;
+  const canCancelOrder = (order) => {
+    if (!order || !order.status) {
+      return false;
+    }
+    const cancelableStatuses = ["pending", "processing"];
+    return cancelableStatuses.includes(order.status.toLowerCase());
   };
 
-  const statusCounts = getStatusCounts();
+  if (loading) {
+    return (
+      <div className="fade-in">
+        <PageHeroSection
+          title="My Orders"
+          description="Track and manage your orders"
+          icon="📦"
+        />
+        <Container className="py-5">
+          <div
+            className="d-flex justify-content-center align-items-center"
+            style={{ minHeight: "40vh" }}
+          >
+            <Spinner animation="border" variant="danger" />
+            <span className="ms-2">Loading your orders...</span>
+          </div>
+        </Container>
+      </div>
+    );
+  }
 
   return (
-    <div className="fade-in user-page-content" data-page="user">
-      {/* Hero Section - About Us Red Theme */}
-      <section
-        style={{
-          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
-          paddingTop: "80px",
-          paddingBottom: "80px",
-          color: "white",
-        }}
-      >
-        <Container>
-          <Row className="text-center">
-            <Col lg={12}>
-              <h1
-                style={{
-                  fontSize: "3rem",
-                  fontWeight: "800",
-                  marginBottom: "20px",
-                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
-                }}
-              >
-                My Orders
-              </h1>
-              <p
-                style={{
-                  fontSize: "1.2rem",
-                  opacity: "0.9",
-                  maxWidth: "600px",
-                  margin: "0 auto",
-                }}
-              >
-                Track and manage your medical product orders
-              </p>
-            </Col>
-          </Row>
-        </Container>
-      </section>
+    <div className="fade-in">
+      <PageHeroSection
+        title="My Orders"
+        description="Track and manage your orders"
+        icon={<i className="bi bi-box-seam"></i>}
+      />
 
-      {/* Orders Content */}
-      <section
-        style={{
-          background: "#f8f9fa",
-          paddingTop: "80px",
-          paddingBottom: "80px",
-          minHeight: "60vh",
-        }}
-      >
-        <Container>
-          {/* Header */}
-          <Row className="mb-4">
-            <Col lg={12}>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h2>My Orders</h2>
-                  <p className="text-muted">Track and manage your orders</p>
-                </div>
-                <Button
-                  as={Link}
-                  to="/products"
-                  className="btn-medical-primary"
+      <Container className="py-5">
+        {error && (
+          <Alert variant="warning" className="mb-4">
+            <Alert.Heading>Offline Mode</Alert.Heading>
+            <p>{error}</p>
+            <ThemeButton variant="outline" onClick={fetchUserOrders}>
+              Try Again
+            </ThemeButton>
+          </Alert>
+        )}
+
+        {/* Summary Cards */}
+        <Row className="mb-4">
+          <Col md={3}>
+            <ThemeCard className="text-center">
+              <Card.Body>
+                <h4 className="text-danger">{orders.length}</h4>
+                <small className="text-muted">Total Orders</small>
+              </Card.Body>
+            </ThemeCard>
+          </Col>
+          <Col md={3}>
+            <ThemeCard className="text-center">
+              <Card.Body>
+                <h4 className="text-warning">
+                  {orders.filter((o) => o.status === "pending").length}
+                </h4>
+                <small className="text-muted">Pending Orders</small>
+              </Card.Body>
+            </ThemeCard>
+          </Col>
+          <Col md={3}>
+            <ThemeCard className="text-center">
+              <Card.Body>
+                <h4 className="text-info">
+                  {orders.filter((o) => o.status === "processing").length}
+                </h4>
+                <small className="text-muted">Processing Orders</small>
+              </Card.Body>
+            </ThemeCard>
+          </Col>
+          <Col md={3}>
+            <ThemeCard className="text-center">
+              <Card.Body>
+                <h4 className="text-success">
+                  {orders.filter((o) => o.status === "delivered").length}
+                </h4>
+                <small className="text-muted">Delivered Orders</small>
+              </Card.Body>
+            </ThemeCard>
+          </Col>
+        </Row>
+
+        {/* Filters and Search */}
+        <ThemeCard className="mb-4">
+          <Card.Body>
+            <Row>
+              <Col md={4}>
+                <InputGroup>
+                  <Form.Control
+                    type="text"
+                    placeholder="Search orders..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </InputGroup>
+              </Col>
+              <Col md={3}>
+                <Form.Select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
                 >
-                  <i className="bi bi-plus me-2"></i>
-                  Shop More
-                </Button>
-              </div>
-            </Col>
-          </Row>
+                  <option value="">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="processing">Processing</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
+                </Form.Select>
+              </Col>
+              <Col md={3}>
+                <Form.Select
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                >
+                  <option value="">All Time</option>
+                  <option value="today">Today</option>
+                  <option value="week">This Week</option>
+                  <option value="month">This Month</option>
+                  <option value="year">This Year</option>
+                </Form.Select>
+              </Col>
+              <Col md={2}>
+                <ThemeButton
+                  variant="outline"
+                  className="w-100"
+                  onClick={fetchUserOrders}
+                >
+                  <i className="bi bi-arrow-clockwise me-2"></i>
+                  Refresh
+                </ThemeButton>
+              </Col>
+            </Row>
+          </Card.Body>
+        </ThemeCard>
 
-          {/* Order Statistics */}
-          <Row className="mb-4">
-            <Col lg={2} md={4} sm={6} className="mb-3">
-              <Card className="medical-card text-center h-100">
-                <Card.Body>
-                  <h4 className="text-medical-blue">{orders.length}</h4>
-                  <p className="mb-0 small">Total Orders</p>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col lg={2} md={4} sm={6} className="mb-3">
-              <Card className="medical-card text-center h-100">
-                <Card.Body>
-                  <h4 className="text-success">
-                    {statusCounts["Delivered"] || 0}
-                  </h4>
-                  <p className="mb-0 small">Delivered</p>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col lg={2} md={4} sm={6} className="mb-3">
-              <Card className="medical-card text-center h-100">
-                <Card.Body>
-                  <h4 className="text-primary">
-                    {statusCounts["Processing"] || 0}
-                  </h4>
-                  <p className="mb-0 small">Processing</p>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col lg={2} md={4} sm={6} className="mb-3">
-              <Card className="medical-card text-center h-100">
-                <Card.Body>
-                  <h4 className="text-warning">
-                    {statusCounts["Pending"] || 0}
-                  </h4>
-                  <p className="mb-0 small">Pending</p>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col lg={2} md={4} sm={6} className="mb-3">
-              <Card className="medical-card text-center h-100">
-                <Card.Body>
-                  <h4 className="text-info">{statusCounts["Shipped"] || 0}</h4>
-                  <p className="mb-0 small">Shipped</p>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col lg={2} md={4} sm={6} className="mb-3">
-              <Card className="medical-card text-center h-100">
-                <Card.Body>
-                  <h4 className="text-danger">
-                    {statusCounts["Cancelled"] || 0}
-                  </h4>
-                  <p className="mb-0 small">Cancelled</p>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-
-          {/* Filters */}
-          <Row className="mb-4">
-            <Col lg={6}>
-              <InputGroup>
-                <InputGroup.Text>
-                  <i className="bi bi-search"></i>
-                </InputGroup.Text>
-                <Form.Control
-                  type="text"
-                  placeholder="Search orders..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </InputGroup>
-            </Col>
-            <Col lg={3}>
-              <Form.Select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="">All Status</option>
-                {statusOptions.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </Form.Select>
-            </Col>
-            <Col lg={3}>
-              <Button
-                variant="outline-secondary"
-                onClick={() => {
-                  setSearchTerm("");
-                  setStatusFilter("");
-                }}
-              >
-                Clear Filters
-              </Button>
-            </Col>
-          </Row>
-
-          {/* Orders Table */}
-          <Card className="medical-card">
-            <Card.Header className="bg-medical-light">
-              <h5 className="mb-0">
-                <i className="bi bi-bag me-2"></i>
-                Your Orders ({filteredOrders.length})
-              </h5>
-            </Card.Header>
-            <Card.Body className="p-0">
-              <div className="table-responsive">
-                <Table className="mb-0">
-                  <thead className="table-light">
-                    <tr>
-                      <th>Order ID</th>
-                      <th>Date</th>
-                      <th>Items</th>
-                      <th>Total Amount</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredOrders.map((order) => (
-                      <tr key={order.id}>
-                        <td>
-                          <span className="text-monospace fw-bold">
-                            {order.id}
+        {/* Orders Table */}
+        <ThemeCard>
+          <Card.Header className="bg-gradient text-white d-flex justify-content-between align-items-center">
+            <h5 className="mb-0">My Orders ({filteredOrders.length})</h5>
+          </Card.Header>
+          <Card.Body className="p-0">
+            {filteredOrders.length > 0 ? (
+              <Table responsive hover className="mb-0">
+                <thead className="table-light">
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Payment</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredOrders.map((order) => (
+                    <tr key={order._id}>
+                      <td>
+                        <strong>{order.orderId || order._id}</strong>
+                      </td>
+                      <td>
+                        <div>
+                          <span className="badge bg-light text-dark">
+                            {order.items?.length || 0} items
                           </span>
-                        </td>
-                        <td>
-                          <div>{order.date}</div>
-                          <small className="text-muted">{order.time}</small>
-                        </td>
-                        <td>
-                          <Badge bg="secondary">
-                            {order.items.length} items
-                          </Badge>
-                        </td>
-                        <td>
-                          <span className="fw-bold">
-                            ₹{order.total.toFixed(2)}
-                          </span>
-                        </td>
-                        <td>
-                          <Badge bg={getStatusVariant(order.status)}>
-                            {order.status}
-                          </Badge>
-                        </td>
-                        <td>
-                          <div className="d-flex gap-1">
-                            <Button
-                              size="sm"
-                              variant="outline-primary"
-                              onClick={() => handleViewDetails(order)}
-                              className="btn-medical-outline"
-                            >
-                              <i className="bi bi-eye me-1"></i>
-                              View
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline-success"
-                              onClick={() => navigate(`/invoice/${order.id}`)}
-                              className="btn-medical-outline"
-                            >
-                              <i className="bi bi-receipt"></i>
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </div>
-            </Card.Body>
-          </Card>
-        </Container>
-      </section>
-
-      {/* Order Details Modal */}
-      <Modal
-        show={showDetailsModal}
-        onHide={() => setShowDetailsModal(false)}
-        size="lg"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Order Details - {selectedOrder?.id}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedOrder && (
-            <div>
-              {/* Order Status */}
-              <Card className="mb-4">
-                <Card.Header>
-                  <h6 className="mb-0">Order Status</h6>
-                </Card.Header>
-                <Card.Body>
-                  <Row>
-                    <Col md={6}>
-                      <p>
-                        <strong>Status:</strong>{" "}
-                        <Badge
-                          bg={getStatusVariant(selectedOrder.status)}
-                          className="ms-2"
-                        >
-                          {selectedOrder.status}
+                          {order.items?.length > 0 && (
+                            <div>
+                              <small className="text-muted">
+                                {order.items[0]?.name}
+                                {order.items.length > 1 &&
+                                  ` +${order.items.length - 1} more`}
+                              </small>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td>
+                        <strong>₹{order.totalAmount?.toLocaleString()}</strong>
+                      </td>
+                      <td>
+                        <Badge bg={getStatusBadgeColor(order.status)}>
+                          {order.status}
                         </Badge>
-                      </p>
-                      <p>
-                        <strong>Order Date:</strong> {selectedOrder.date}{" "}
-                        {selectedOrder.time}
-                      </p>
-                      <p>
-                        <strong>Payment Method:</strong>{" "}
-                        {selectedOrder.paymentMethod}
-                      </p>
-                    </Col>
-                    <Col md={6}>
-                      {selectedOrder.trackingNumber && (
-                        <p>
-                          <strong>Tracking Number:</strong>{" "}
-                          {selectedOrder.trackingNumber}
-                        </p>
+                      </td>
+                      <td>
+                        <div>
+                          <Badge
+                            bg={getPaymentStatusBadgeColor(order.paymentStatus)}
+                          >
+                            {order.paymentStatus || "Pending"}
+                          </Badge>
+                          <br />
+                          <small className="text-muted">
+                            {order.paymentMethod}
+                          </small>
+                        </div>
+                      </td>
+                      <td>
+                        <div>
+                          <div>{formatDateTime(order.createdAt)}</div>
+                          <small className="text-muted">
+                            {getRelativeTime(order.createdAt)}
+                          </small>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="d-flex gap-1 flex-wrap">
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
+                            onClick={() => handleViewDetails(order)}
+                          >
+                            👁️ View
+                          </Button>
+                          {order.status === "delivered" && (
+                            <Button
+                              variant="outline-success"
+                              size="sm"
+                              onClick={() => reorderItems(order)}
+                            >
+                              🔄 Reorder
+                            </Button>
+                          )}
+                          {canCancelOrder(order) && (
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => cancelOrder(order._id)}
+                            >
+                              ❌ Cancel
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            ) : (
+              <div className="text-center py-5">
+                <div className="mb-3">
+                  <span style={{ fontSize: "4rem" }}>📦</span>
+                </div>
+                <h5>No Orders Found</h5>
+                <p className="text-muted">
+                  {error
+                    ? "Unable to load orders. Please check your connection."
+                    : searchTerm || statusFilter || dateFilter
+                      ? "No orders match your current filters."
+                      : "You haven't placed any orders yet."}
+                </p>
+                {error ? (
+                  <ThemeButton onClick={fetchUserOrders}>Try Again</ThemeButton>
+                ) : !searchTerm && !statusFilter && !dateFilter ? (
+                  <Link to="/products">
+                    <ThemeButton>Start Shopping</ThemeButton>
+                  </Link>
+                ) : (
+                  <ThemeButton
+                    variant="outline"
+                    onClick={() => {
+                      setSearchTerm("");
+                      setStatusFilter("");
+                      setDateFilter("");
+                    }}
+                  >
+                    Clear Filters
+                  </ThemeButton>
+                )}
+              </div>
+            )}
+          </Card.Body>
+        </ThemeCard>
+
+        {/* Order Details Modal */}
+        <Modal
+          show={showDetailsModal}
+          onHide={() => setShowDetailsModal(false)}
+          size="lg"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Order Details</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {selectedOrder && (
+              <div>
+                <Row className="mb-3">
+                  <Col md={6}>
+                    <strong>Order ID:</strong>{" "}
+                    {selectedOrder.orderId || selectedOrder._id}
+                  </Col>
+                  <Col md={6}>
+                    <strong>Status:</strong>{" "}
+                    <Badge bg={getStatusBadgeColor(selectedOrder.status)}>
+                      {selectedOrder.status}
+                    </Badge>
+                  </Col>
+                </Row>
+                <Row className="mb-3">
+                  <Col md={6}>
+                    <strong>Order Date:</strong>{" "}
+                    {formatDateTime(selectedOrder.createdAt)}
+                  </Col>
+                  <Col md={6}>
+                    <strong>Payment Method:</strong>{" "}
+                    {selectedOrder.paymentMethod}
+                  </Col>
+                </Row>
+                <Row className="mb-3">
+                  <Col md={6}>
+                    <strong>Payment Status:</strong>{" "}
+                    <Badge
+                      bg={getPaymentStatusBadgeColor(
+                        selectedOrder.paymentStatus,
                       )}
-                      {selectedOrder.deliveryDate && (
-                        <p>
-                          <strong>Delivered On:</strong>{" "}
-                          {selectedOrder.deliveryDate}
-                        </p>
-                      )}
-                      {selectedOrder.estimatedDelivery && (
-                        <p>
-                          <strong>Estimated Delivery:</strong>{" "}
-                          {selectedOrder.estimatedDelivery}
-                        </p>
-                      )}
+                    >
+                      {selectedOrder.paymentStatus || "Pending"}
+                    </Badge>
+                  </Col>
+                  <Col md={6}>
+                    <strong>Total Amount:</strong>{" "}
+                    <span className="fw-bold text-success">
+                      ₹{selectedOrder.totalAmount?.toLocaleString()}
+                    </span>
+                  </Col>
+                </Row>
+                {selectedOrder.trackingNumber && (
+                  <Row className="mb-3">
+                    <Col md={12}>
+                      <strong>Tracking Number:</strong>{" "}
+                      {selectedOrder.trackingNumber}
                     </Col>
                   </Row>
-                </Card.Body>
-              </Card>
-
-              {/* Items */}
-              <Card className="mb-4">
-                <Card.Header>
-                  <h6 className="mb-0">Items Ordered</h6>
-                </Card.Header>
-                <Card.Body>
-                  <Table responsive>
-                    <thead>
-                      <tr>
-                        <th>Item</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                        <th>Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedOrder.items.map((item, index) => (
-                        <tr key={index}>
-                          <td>{item.name}</td>
-                          <td>{item.quantity}</td>
-                          <td>₹{item.price}</td>
-                          <td>₹{item.total.toFixed(2)}</td>
+                )}
+                {selectedOrder.shippingAddress && (
+                  <Row className="mb-3">
+                    <Col md={12}>
+                      <strong>Shipping Address:</strong>
+                      <div className="border p-2 rounded bg-light">
+                        {typeof selectedOrder.shippingAddress === "string"
+                          ? selectedOrder.shippingAddress
+                          : `${selectedOrder.shippingAddress.street}, ${selectedOrder.shippingAddress.city}, ${selectedOrder.shippingAddress.state} - ${selectedOrder.shippingAddress.pincode}`}
+                      </div>
+                    </Col>
+                  </Row>
+                )}
+                <Row className="mb-3">
+                  <Col md={12}>
+                    <strong>Items:</strong>
+                    <Table size="sm" className="mt-2">
+                      <thead>
+                        <tr>
+                          <th>Product</th>
+                          <th>Quantity</th>
+                          <th>Price</th>
+                          <th>Total</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </Card.Body>
-              </Card>
-
-              {/* Order Summary */}
-              <Card>
-                <Card.Header>
-                  <h6 className="mb-0">Order Summary</h6>
-                </Card.Header>
-                <Card.Body>
-                  <div className="d-flex justify-content-between mb-2">
-                    <span>Subtotal:</span>
-                    <span>₹{selectedOrder.subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="d-flex justify-content-between mb-2">
-                    <span>Shipping:</span>
-                    <span>
-                      {selectedOrder.shipping === 0
-                        ? "FREE"
-                        : `₹${selectedOrder.shipping.toFixed(2)}`}
-                    </span>
-                  </div>
-                  <div className="d-flex justify-content-between mb-2">
-                    <span>Tax:</span>
-                    <span>₹{selectedOrder.tax.toFixed(2)}</span>
-                  </div>
-                  <hr />
-                  <div className="d-flex justify-content-between">
-                    <strong>Total:</strong>
-                    <strong className="text-medical-red">
-                      ₹{selectedOrder.total.toFixed(2)}
-                    </strong>
-                  </div>
-                </Card.Body>
-              </Card>
-            </div>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setShowDetailsModal(false)}
-          >
-            Close
-          </Button>
-          {selectedOrder && (
+                      </thead>
+                      <tbody>
+                        {selectedOrder.items?.map((item, index) => (
+                          <tr key={index}>
+                            <td>{item.name}</td>
+                            <td>{item.quantity}</td>
+                            <td>₹{item.price?.toLocaleString()}</td>
+                            <td>
+                              ₹{(item.quantity * item.price)?.toLocaleString()}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </Col>
+                </Row>
+              </div>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
             <Button
-              className="btn-medical-primary"
-              as={Link}
-              to={`/invoice/${selectedOrder.id}`}
+              variant="secondary"
+              onClick={() => setShowDetailsModal(false)}
             >
-              <i className="bi bi-receipt me-2"></i>
-              View Invoice
+              Close
             </Button>
-          )}
-        </Modal.Footer>
-      </Modal>
+            {selectedOrder?.status === "delivered" && (
+              <ThemeButton onClick={() => reorderItems(selectedOrder)}>
+                🔄 Reorder Items
+              </ThemeButton>
+            )}
+            {canCancelOrder(selectedOrder) && (
+              <ThemeButton
+                variant="outline"
+                onClick={() => {
+                  cancelOrder(selectedOrder._id);
+                  setShowDetailsModal(false);
+                }}
+              >
+                ❌ Cancel Order
+              </ThemeButton>
+            )}
+          </Modal.Footer>
+        </Modal>
+      </Container>
     </div>
   );
 };

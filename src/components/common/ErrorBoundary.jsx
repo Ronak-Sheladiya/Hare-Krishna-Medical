@@ -50,16 +50,16 @@ class ErrorBoundary extends React.Component {
                     <div className="mb-4">
                       <div
                         style={{
-                          width: "80px",
-                          height: "80px",
+                          width: "120px",
+                          height: "120px",
                           background:
-                            "linear-gradient(135deg, #dc3545, #e63946)",
+                            "linear-gradient(135deg, #dc3545, #c82333)",
                           borderRadius: "50%",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          margin: "0 auto",
-                          boxShadow: "0 8px 25px rgba(220, 53, 69, 0.3)",
+                          margin: "0 auto 30px",
+                          boxShadow: "0 15px 40px rgba(220, 53, 69, 0.3)",
                         }}
                       >
                         <i
@@ -69,72 +69,87 @@ class ErrorBoundary extends React.Component {
                       </div>
                     </div>
 
-                    <h2
+                    <h1
                       style={{
                         color: "#dc3545",
                         fontWeight: "800",
                         marginBottom: "20px",
+                        fontSize: "2.5rem",
                       }}
                     >
-                      Something went wrong
-                    </h2>
+                      Oops! Something went wrong
+                    </h1>
 
                     <p
                       style={{
-                        color: "#666",
-                        fontSize: "16px",
-                        lineHeight: "1.6",
+                        color: "#6c757d",
+                        fontSize: "1.2rem",
                         marginBottom: "30px",
+                        lineHeight: "1.6",
                       }}
                     >
                       We're sorry, but something unexpected happened. Please try
-                      reloading the page or contact support if the problem
-                      persists.
+                      refreshing the page or go back to the previous page.
                     </p>
 
-                    {process.env.NODE_ENV === "development" && (
-                      <div
-                        style={{
-                          background: "#f8f9fa",
-                          border: "1px solid #dee2e6",
-                          borderRadius: "8px",
-                          padding: "20px",
-                          marginBottom: "30px",
-                          textAlign: "left",
-                        }}
-                      >
-                        <h6 style={{ color: "#dc3545", marginBottom: "10px" }}>
-                          Error Details (Development Mode):
-                        </h6>
-                        <pre
+                    {/* Error Details - Only show in development */}
+                    {import.meta.env.DEV && (
+                      <div className="mb-4">
+                        <details
                           style={{
-                            fontSize: "12px",
-                            color: "#6c757d",
-                            margin: "0",
-                            maxHeight: "200px",
-                            overflow: "auto",
+                            textAlign: "left",
+                            margin: "20px 0",
+                            padding: "15px",
+                            background: "#f8f9fa",
+                            borderRadius: "8px",
+                            border: "1px solid #dee2e6",
                           }}
                         >
-                          {this.state.error && this.state.error.toString()}
-                          {this.state.errorInfo.componentStack}
-                        </pre>
+                          <summary
+                            style={{
+                              cursor: "pointer",
+                              fontWeight: "600",
+                              color: "#495057",
+                              marginBottom: "10px",
+                            }}
+                          >
+                            Error Details (Development Only)
+                          </summary>
+                          <pre
+                            style={{
+                              fontSize: "12px",
+                              background: "#ffffff",
+                              padding: "15px",
+                              borderRadius: "8px",
+                              whiteSpace: "pre-wrap",
+                              overflow: "auto",
+                              border: "1px solid #dee2e6",
+                              margin: "10px 0 0 0",
+                            }}
+                          >
+                            {this.state.error && this.state.error.toString()}
+                            {this.state.errorInfo?.componentStack || ""}
+                          </pre>
+                        </details>
                       </div>
                     )}
 
-                    <div>
+                    <div className="d-flex gap-3 justify-content-center flex-wrap">
                       <Button
-                        variant="danger"
+                        variant="primary"
                         size="lg"
                         onClick={this.handleReload}
                         style={{
+                          background:
+                            "linear-gradient(135deg, #e63946, #dc3545)",
+                          border: "none",
                           borderRadius: "12px",
                           fontWeight: "600",
                           padding: "12px 30px",
-                          marginRight: "15px",
                         }}
                       >
                         <i className="bi bi-arrow-clockwise me-2"></i>
-                        Reload Page
+                        Refresh Page
                       </Button>
 
                       <Button

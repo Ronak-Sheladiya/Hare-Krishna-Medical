@@ -12,62 +12,30 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../store/slices/cartSlice";
+import { setFeaturedProducts } from "../store/slices/productsSlice";
+import { api, safeApiCall } from "../utils/apiClient";
 
 const Home = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { featuredProducts } = useSelector((state) => state.products);
 
-  // Mock featured products - 4 products for single line
-  const defaultFeaturedProducts = [
-    {
-      id: 1,
-      name: "Paracetamol Tablets",
-      company: "Hare Krishna Pharma",
-      price: 25.99,
-      originalPrice: 30.99,
-      image:
-        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+1",
-      description: "Effective pain relief and fever reducer",
-      inStock: true,
-    },
-    {
-      id: 2,
-      name: "Vitamin D3 Capsules",
-      company: "Health Plus",
-      price: 45.5,
-      originalPrice: 55.0,
-      image:
-        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+2",
-      description: "Essential vitamin for bone health",
-      inStock: true,
-    },
-    {
-      id: 3,
-      name: "Cough Syrup",
-      company: "Wellness Care",
-      price: 35.75,
-      originalPrice: 42.0,
-      image:
-        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+3",
-      description: "Natural cough relief formula",
-      inStock: true,
-    },
-    {
-      id: 4,
-      name: "Antiseptic Liquid",
-      company: "Safe Guard",
-      price: 28.0,
-      originalPrice: 35.0,
-      image:
-        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+4",
-      description: "Multipurpose antiseptic for wound care",
-      inStock: true,
-    },
-  ];
+  // Fetch featured products from API
+  const fetchFeaturedProducts = async () => {
+    const { success, data } = await safeApiCall(
+      () => api.get("/api/products/public?featured=true&limit=4"),
+      [],
+    );
 
-  const productsToShow =
-    featuredProducts.length > 0 ? featuredProducts : defaultFeaturedProducts;
+    if (success && data?.data) {
+      dispatch(setFeaturedProducts(data.data));
+    } else {
+      // Set empty array to show empty state gracefully
+      dispatch(setFeaturedProducts([]));
+    }
+  };
+
+  const productsToShow = featuredProducts.length > 0 ? featuredProducts : [];
 
   const handleAddToCart = (e, product) => {
     e.stopPropagation(); // Prevent card click navigation
@@ -86,7 +54,7 @@ const Home = () => {
   };
 
   useEffect(() => {
-    // In a real app, this would fetch featured products from API
+    fetchFeaturedProducts();
   }, [dispatch]);
 
   return (
@@ -289,115 +257,172 @@ const Home = () => {
           </Row>
 
           <Row>
-            {productsToShow.map((product, index) => (
-              <Col lg={3} md={6} className="mb-4" key={product.id || index}>
-                <Card
-                  className="h-100"
-                  style={{
-                    border: "2px solid #ffffff",
-                    borderRadius: "12px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                    transition: "all 0.3s ease",
-                    overflow: "hidden",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handleCardClick(product.id)}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.transform = "translateY(-8px)";
-                    e.currentTarget.style.boxShadow =
-                      "0 12px 30px rgba(230, 57, 70, 0.15)";
-                    e.currentTarget.style.borderColor = "#e63946";
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow =
-                      "0 4px 12px rgba(0,0,0,0.08)";
-                    e.currentTarget.style.borderColor = "#ffffff";
-                  }}
+            {productsToShow.length > 0 ? (
+              productsToShow.map((product, index) => (
+                <Col
+                  lg={3}
+                  md={6}
+                  className="mb-4"
+                  key={product._id || product.id || index}
                 >
-                  <div style={{ position: "relative" }}>
-                    <Card.Img
-                      variant="top"
-                      src={product.image}
-                      style={{ height: "200px", objectFit: "cover" }}
-                    />
-                  </div>
+                  <Card
+                    className="h-100"
+                    style={{
+                      border: "2px solid #ffffff",
+                      borderRadius: "12px",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                      transition: "all 0.3s ease",
+                      overflow: "hidden",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => handleCardClick(product._id || product.id)}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.transform = "translateY(-8px)";
+                      e.currentTarget.style.boxShadow =
+                        "0 12px 30px rgba(230, 57, 70, 0.15)";
+                      e.currentTarget.style.borderColor = "#e63946";
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow =
+                        "0 4px 12px rgba(0,0,0,0.08)";
+                      e.currentTarget.style.borderColor = "#ffffff";
+                    }}
+                  >
+                    <div style={{ position: "relative" }}>
+                      <Card.Img
+                        variant="top"
+                        src={
+                          product.images?.[0] ||
+                          product.image ||
+                          "https://via.placeholder.com/300x200/e6e6e6/666666?text=No+Image"
+                        }
+                        style={{ height: "200px", objectFit: "cover" }}
+                      />
+                    </div>
 
-                  <Card.Body style={{ padding: "24px" }}>
-                    <h5
-                      style={{
-                        color: "#333333",
-                        fontWeight: "600",
-                        fontSize: "18px",
-                        marginBottom: "8px",
-                      }}
-                    >
-                      {product.name}
-                    </h5>
-                    <p
-                      style={{
-                        color: "#495057",
-                        fontSize: "14px",
-                        marginBottom: "12px",
-                      }}
-                    >
-                      by {product.company}
-                    </p>
-                    <p
-                      style={{
-                        color: "#495057",
-                        fontSize: "14px",
-                        marginBottom: "20px",
-                        lineHeight: "1.5",
-                      }}
-                    >
-                      {product.description}
-                    </p>
-
-                    <div className="d-flex justify-content-between align-items-center">
-                      <div>
-                        <span
-                          style={{
-                            color: "#e63946",
-                            fontSize: "20px",
-                            fontWeight: "700",
-                          }}
-                        >
-                          ₹{product.price}
-                        </span>
-                        {product.originalPrice && (
-                          <span
-                            style={{
-                              color: "#495057",
-                              fontSize: "14px",
-                              textDecoration: "line-through",
-                              marginLeft: "8px",
-                            }}
-                          >
-                            ₹{product.originalPrice}
-                          </span>
-                        )}
-                      </div>
-                      <Button
-                        onClick={(e) => handleAddToCart(e, product)}
-                        disabled={!product.inStock}
+                    <Card.Body style={{ padding: "24px" }}>
+                      <h5
                         style={{
-                          background: product.inStock ? "#e63946" : "#495057",
-                          border: "none",
-                          borderRadius: "6px",
-                          padding: "8px 16px",
-                          fontSize: "14px",
+                          color: "#333333",
                           fontWeight: "600",
+                          fontSize: "18px",
+                          marginBottom: "8px",
                         }}
                       >
-                        <i className="bi bi-cart-plus me-1"></i>
-                        {product.inStock ? "Add to Cart" : "Out of Stock"}
-                      </Button>
-                    </div>
-                  </Card.Body>
-                </Card>
+                        {product.name}
+                      </h5>
+                      <p
+                        style={{
+                          color: "#495057",
+                          fontSize: "14px",
+                          marginBottom: "12px",
+                        }}
+                      >
+                        by{" "}
+                        {product.company ||
+                          product.brand ||
+                          "Hare Krishna Medical"}
+                      </p>
+                      <p
+                        style={{
+                          color: "#495057",
+                          fontSize: "14px",
+                          marginBottom: "20px",
+                          lineHeight: "1.5",
+                        }}
+                      >
+                        {product.description || "Quality medical product"}
+                      </p>
+
+                      <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                          <span
+                            style={{
+                              color: "#e63946",
+                              fontSize: "20px",
+                              fontWeight: "700",
+                            }}
+                          >
+                            ₹{product.price || 0}
+                          </span>
+                          {product.originalPrice &&
+                            product.originalPrice > product.price && (
+                              <span
+                                style={{
+                                  color: "#495057",
+                                  fontSize: "14px",
+                                  textDecoration: "line-through",
+                                  marginLeft: "8px",
+                                }}
+                              >
+                                ₹{product.originalPrice}
+                              </span>
+                            )}
+                        </div>
+                        <Button
+                          onClick={(e) => handleAddToCart(e, product)}
+                          disabled={!product.inStock && product.stock <= 0}
+                          style={{
+                            background:
+                              product.inStock || product.stock > 0
+                                ? "#e63946"
+                                : "#495057",
+                            border: "none",
+                            borderRadius: "6px",
+                            padding: "8px 16px",
+                            fontSize: "14px",
+                            fontWeight: "600",
+                          }}
+                        >
+                          <i className="bi bi-cart-plus me-1"></i>
+                          {product.inStock || product.stock > 0
+                            ? "Add to Cart"
+                            : "Out of Stock"}
+                        </Button>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))
+            ) : (
+              <Col lg={12} className="text-center py-5">
+                <div style={{ color: "#6c757d" }}>
+                  <i
+                    className="bi bi-box"
+                    style={{
+                      fontSize: "3rem",
+                      marginBottom: "1rem",
+                      display: "block",
+                    }}
+                  ></i>
+                  <h5>No Featured Products Available</h5>
+                  <p>
+                    Featured products will appear here when admin adds them.
+                  </p>
+                  <div className="mt-3">
+                    <small className="text-muted d-block mb-3">
+                      <i className="bi bi-info-circle me-1"></i>
+                      If you're a developer: Make sure the backend server is
+                      running on{" "}
+                      {import.meta.env.VITE_BACKEND_URL ||
+                        "http://localhost:5000"}
+                    </small>
+                    <Button
+                      as={Link}
+                      to="/products"
+                      variant="outline-primary"
+                      style={{
+                        color: "#e63946",
+                        borderColor: "#e63946",
+                      }}
+                    >
+                      Browse All Products
+                    </Button>
+                  </div>
+                </div>
               </Col>
-            ))}
+            )}
           </Row>
         </Container>
       </section>

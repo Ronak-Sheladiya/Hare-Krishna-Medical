@@ -12,824 +12,705 @@ import {
   ListGroup,
   Carousel,
   Alert,
+  Spinner,
 } from "react-bootstrap";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../store/slices/cartSlice.js";
+import { api, safeApiCall } from "../utils/apiClient";
 
 const ProductDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [relatedProducts, setRelatedProducts] = useState([]);
 
-  // Mock product data
-  const mockProduct = {
-    id: parseInt(id),
-    name: "Paracetamol Tablets 500mg",
-    company: "Hare Krishna Pharma",
-    price: 25.99,
-    originalPrice: 30.99,
-    images: [
-      "https://via.placeholder.com/500x400/e6e6e6/666666?text=Paracetamol+Main",
-      "https://via.placeholder.com/500x400/cccccc/666666?text=Paracetamol+Side",
-      "https://via.placeholder.com/500x400/b3b3b3/666666?text=Paracetamol+Back",
-      "https://via.placeholder.com/500x400/999999/666666?text=Paracetamol+Pack",
-    ],
-    description:
-      "Effective pain relief and fever reducer for adults and children. Fast-acting formula that provides quick relief from headaches, body aches, and fever.",
-    benefits: [
-      "Quick pain relief within 30 minutes",
-      "Reduces fever effectively",
-      "Gentle on stomach",
-      "Suitable for adults and children",
-      "Non-drowsy formula",
-    ],
-    usage:
-      "Adults: Take 1-2 tablets every 4-6 hours as needed. Do not exceed 8 tablets in 24 hours. Children: Consult healthcare provider for appropriate dosage.",
-    weight: "50 tablets (500mg each)",
-    inStock: true,
-    stockCount: 45,
-    ingredients: [
-      "Paracetamol 500mg",
-      "Microcrystalline Cellulose",
-      "Starch",
-      "Magnesium Stearate",
-    ],
-    warnings: [
-      "Do not exceed recommended dosage",
-      "Consult doctor if symptoms persist",
-      "Keep out of reach of children",
-      "Store in cool, dry place",
-    ],
-    reviews: [
-      {
-        id: 1,
-        name: "John D.",
-        rating: 5,
-        comment: "Very effective for headaches. Works quickly.",
-        date: "2024-01-10",
-      },
-      {
-        id: 2,
-        name: "Sarah M.",
-        rating: 4,
-        comment: "Good quality product. Gentle on stomach.",
-        date: "2024-01-08",
-      },
-    ],
+  // Fetch product details
+  const fetchProduct = async () => {
+    setLoading(true);
+    setError(null);
+
+    const {
+      success,
+      data,
+      error: apiError,
+    } = await safeApiCall(() => api.get(`/api/products/${id}`), null);
+
+    if (success && data) {
+      const productData = data.data || data;
+      setProduct(productData);
+      // Fetch related products in the same category
+      fetchRelatedProducts(productData.category);
+    } else {
+      setError(apiError || "Product not found");
+    }
+
+    setLoading(false);
+  };
+
+  // Fetch related products
+  const fetchRelatedProducts = async (category) => {
+    if (!category) return;
+
+    const { success, data } = await safeApiCall(
+      () =>
+        api.get(
+          `/api/products/public?category=${encodeURIComponent(category)}&limit=4`,
+        ),
+      [],
+    );
+
+    if (success && data) {
+      const productsData = data.data || data;
+      const products = productsData.products || [];
+      // Filter out the current product
+      setRelatedProducts(products.filter((p) => p._id !== id));
+    }
   };
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setProduct(mockProduct);
-      setLoading(false);
-    }, 1000);
+    fetchProduct();
   }, [id]);
 
   const handleAddToCart = () => {
-    if (product) {
-      dispatch(
-        addToCart({
-          ...product,
-          quantity: quantity,
-        }),
-      );
-    }
+    if (!product) return;
+
+    dispatch(
+      addToCart({
+        id: product._id,
+        name: product.name,
+        price: product.discountPrice || product.price,
+        image: product.images?.[0] || "/placeholder.svg",
+        company: product.company,
+        quantity: quantity,
+      }),
+    );
+
+    // Show success feedback
+    alert(`${quantity} ${product.name} added to cart!`);
   };
 
-  const handleQuantityChange = (increment) => {
-    setQuantity((prev) => Math.max(1, prev + increment));
+  const handleBuyNow = () => {
+    handleAddToCart();
+    navigate("/cart");
   };
-
-  const handleShare = async () => {
-    const url = window.location.href;
-    const text = `Check out ${product.name} at Hare Krishna Medical`;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: product.name,
-          text: text,
-          url: url,
-        });
-      } catch (error) {
-        // Fallback to clipboard
-        navigator.clipboard.writeText(url);
-        alert("Product link copied to clipboard!");
-      }
-    } else {
-      // Fallback for browsers without native sharing
-      navigator.clipboard.writeText(url);
-      alert("Product link copied to clipboard!");
-    }
-  };
-
-  // Calculate total price based on quantity
-  const totalPrice = product ? (product.price * quantity).toFixed(2) : "0.00";
 
   if (loading) {
     return (
       <div className="fade-in">
-        <Container className="section-padding">
-          <div className="text-center">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-            <p className="mt-3">Loading product details...</p>
+        <Container className="py-5">
+          <div
+            className="d-flex justify-content-center align-items-center"
+            style={{ minHeight: "60vh" }}
+          >
+            <Spinner animation="border" variant="danger" />
+            <span className="ms-3">Loading product details...</span>
           </div>
         </Container>
       </div>
     );
   }
 
-  if (!product) {
+  if (error || !product) {
     return (
       <div className="fade-in">
-        <Container className="section-padding">
-          <Alert variant="danger">
-            <h4>Product Not Found</h4>
-            <p>The product you're looking for doesn't exist.</p>
-            <Button as={Link} to="/products" variant="outline-danger">
-              Back to Products
-            </Button>
-          </Alert>
+        <Container className="py-5">
+          <div className="text-center py-5">
+            <div className="mb-3">
+              <div
+                style={{
+                  width: "80px",
+                  height: "80px",
+                  background: "linear-gradient(135deg, #f8f9fa, #e9ecef)",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto",
+                  fontSize: "32px",
+                  color: "#6c757d",
+                }}
+              >
+                <i className="bi bi-exclamation-triangle"></i>
+              </div>
+            </div>
+            <h3>Product Not Found</h3>
+            <p className="text-muted">
+              {error || "The product you're looking for doesn't exist."}
+            </p>
+            <div className="d-flex gap-2 justify-content-center">
+              <Button variant="outline-secondary" onClick={() => navigate(-1)}>
+                <i className="bi bi-arrow-left me-2"></i>
+                Go Back
+              </Button>
+              <Link to="/products">
+                <Button
+                  variant="danger"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
+                    border: "none",
+                  }}
+                >
+                  <i className="bi bi-grid-3x3-gap me-2"></i>
+                  Browse Products
+                </Button>
+              </Link>
+            </div>
+          </div>
         </Container>
       </div>
     );
   }
 
   return (
-    <div className="fade-in">
-      {/* Hero Section - Matching About Us */}
-      <section
-        style={{
-          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
-          paddingTop: "80px",
-          paddingBottom: "80px",
-          color: "white",
-        }}
-      >
-        <Container>
-          <Row className="text-center">
-            <Col lg={12}>
-              <h1
-                style={{
-                  fontSize: "3rem",
-                  fontWeight: "800",
-                  marginBottom: "20px",
-                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
-                }}
-              >
-                Product Details
-              </h1>
-              <p
-                style={{
-                  fontSize: "1.2rem",
-                  opacity: "0.9",
-                  maxWidth: "600px",
-                  margin: "0 auto",
-                }}
-              >
-                Detailed information about your selected medical product
-              </p>
-            </Col>
-          </Row>
-        </Container>
-      </section>
+    <div
+      className="fade-in product-details-content"
+      data-page="product-details"
+    >
+      <Container className="py-4">
+        {/* Breadcrumb */}
+        <Breadcrumb className="mb-4">
+          <Breadcrumb.Item>
+            <Link to="/" className="text-decoration-none">
+              <i className="bi bi-house me-1"></i>
+              Home
+            </Link>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>
+            <Link to="/products" className="text-decoration-none">
+              <i className="bi bi-grid-3x3-gap me-1"></i>
+              Products
+            </Link>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item active>{product.name}</Breadcrumb.Item>
+        </Breadcrumb>
 
-      {/* Product Details */}
-      <section
-        style={{
-          background: "#f8f9fa",
-          paddingTop: "80px",
-          paddingBottom: "80px",
-        }}
-      >
-        <Container>
-          <Row>
-            {/* Modern Product Image Carousel */}
-            <Col lg={6} className="mb-4">
-              <Card
-                style={{
-                  border: "2px solid #f8f9fa",
-                  borderRadius: "16px",
-                  overflow: "hidden",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
-                }}
-              >
-                {/* Main Carousel */}
-                <div style={{ position: "relative" }}>
-                  <Carousel
-                    interval={null}
-                    activeIndex={activeImageIndex}
-                    onSelect={(selectedIndex) =>
-                      setActiveImageIndex(selectedIndex)
-                    }
-                    style={{
-                      borderRadius: "16px 16px 0 0",
-                      overflow: "hidden",
-                    }}
-                    indicators={false}
-                    prevIcon={
-                      <div
-                        style={{
-                          background:
-                            "linear-gradient(135deg, #e63946, #dc3545)",
-                          borderRadius: "50%",
-                          width: "50px",
-                          height: "50px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          backdropFilter: "blur(10px)",
-                        }}
-                      >
-                        <i
-                          className="bi bi-chevron-left"
-                          style={{ color: "#ffffff", fontSize: "20px" }}
-                        ></i>
-                      </div>
-                    }
-                    nextIcon={
-                      <div
-                        style={{
-                          background:
-                            "linear-gradient(135deg, #e63946, #dc3545)",
-                          borderRadius: "50%",
-                          width: "50px",
-                          height: "50px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          backdropFilter: "blur(10px)",
-                        }}
-                      >
-                        <i
-                          className="bi bi-chevron-right"
-                          style={{ color: "#ffffff", fontSize: "20px" }}
-                        ></i>
-                      </div>
-                    }
-                  >
-                    {product.images.map((image, index) => (
-                      <Carousel.Item key={index}>
-                        <img
-                          className="d-block w-100"
-                          src={image}
-                          alt={`${product.name} - Image ${index + 1}`}
-                          style={{
-                            height: "450px",
-                            objectFit: "cover",
-                            cursor: "zoom-in",
-                          }}
-                        />
-                      </Carousel.Item>
-                    ))}
-                  </Carousel>
-
-                  {/* Colorful Custom Indicators */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "20px",
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      display: "flex",
-                      gap: "8px",
-                      background: "rgba(0,0,0,0.5)",
-                      padding: "8px 16px",
-                      borderRadius: "20px",
-                      backdropFilter: "blur(10px)",
-                    }}
-                  >
-                    {product.images.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setActiveImageIndex(index)}
-                        style={{
-                          width: "12px",
-                          height: "12px",
-                          borderRadius: "50%",
-                          border: "none",
-                          background:
-                            activeImageIndex === index
-                              ? "linear-gradient(135deg, #e63946, #dc3545)"
-                              : "rgba(255,255,255,0.5)",
-                          cursor: "pointer",
-                          transition: "all 0.3s ease",
-                          transform:
-                            activeImageIndex === index
-                              ? "scale(1.2)"
-                              : "scale(1)",
-                        }}
-                        onMouseOver={(e) => {
-                          if (activeImageIndex !== index) {
-                            e.target.style.background =
-                              "linear-gradient(135deg, #343a40, #495057)";
-                          }
-                        }}
-                        onMouseOut={(e) => {
-                          if (activeImageIndex !== index) {
-                            e.target.style.background = "rgba(255,255,255,0.5)";
-                          }
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                {/* Colorful Thumbnail Navigation */}
-                <div
-                  style={{
-                    padding: "20px",
-                    background: "#f8f9fa",
-                    display: "flex",
-                    gap: "12px",
-                    overflowX: "auto",
-                    scrollbarWidth: "thin",
-                  }}
-                >
-                  {product.images.map((image, index) => (
+        <Row>
+          {/* Product Images */}
+          <Col lg={6} md={6} className="mb-4">
+            <Card
+              style={{
+                border: "2px solid #f8f9fa",
+                borderRadius: "16px",
+                overflow: "hidden",
+              }}
+            >
+              <Card.Body className="p-0">
+                {product.images && product.images.length > 0 ? (
+                  <div>
+                    {/* Main Image */}
                     <div
-                      key={index}
-                      onClick={() => setActiveImageIndex(index)}
                       style={{
-                        minWidth: "80px",
-                        height: "80px",
-                        borderRadius: "8px",
+                        height: "400px",
                         overflow: "hidden",
-                        cursor: "pointer",
-                        border:
-                          activeImageIndex === index
-                            ? "3px solid #e63946"
-                            : "2px solid #e9ecef",
-                        transition: "all 0.3s ease",
-                        transform:
-                          activeImageIndex === index
-                            ? "scale(1.05)"
-                            : "scale(1)",
-                        boxShadow:
-                          activeImageIndex === index
-                            ? "0 4px 12px rgba(230, 57, 70, 0.3)"
-                            : "none",
-                      }}
-                      onMouseOver={(e) => {
-                        if (activeImageIndex !== index) {
-                          e.currentTarget.style.borderColor = "#343a40";
-                          e.currentTarget.style.transform = "scale(1.02)";
-                        }
-                      }}
-                      onMouseOut={(e) => {
-                        if (activeImageIndex !== index) {
-                          e.currentTarget.style.borderColor = "#e9ecef";
-                          e.currentTarget.style.transform = "scale(1)";
-                        }
+                        position: "relative",
                       }}
                     >
                       <img
-                        src={image}
-                        alt={`Thumbnail ${index + 1}`}
+                        src={product.images[activeImageIndex]}
+                        alt={product.name}
                         style={{
                           width: "100%",
                           height: "100%",
                           objectFit: "cover",
                         }}
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                <div
-                  style={{
-                    padding: "20px",
-                    textAlign: "center",
-                    background: "#f8f9fa",
-                  }}
-                >
-                  <small style={{ color: "#495057", fontWeight: "600" }}>
-                    <i className="bi bi-images me-2"></i>
-                    {product.images.length} High-Quality Images • Click to zoom
-                  </small>
-                </div>
-              </Card>
-            </Col>
-
-            {/* Product Information */}
-            <Col lg={6} className="mb-4">
-              <div className="product-info">
-                <h1
-                  style={{
-                    color: "#333333",
-                    fontSize: "2.5rem",
-                    fontWeight: "700",
-                    marginBottom: "12px",
-                  }}
-                >
-                  {product.name}
-                </h1>
-
-                <p
-                  style={{
-                    color: "#495057",
-                    fontSize: "16px",
-                    marginBottom: "24px",
-                  }}
-                >
-                  by <strong>{product.company}</strong>
-                </p>
-
-                <div className="price-section mb-4">
-                  <div className="d-flex align-items-center gap-3 mb-2">
-                    <span
-                      style={{
-                        color: "#e63946",
-                        fontSize: "2.5rem",
-                        fontWeight: "800",
-                      }}
-                    >
-                      ₹{product.price}
-                    </span>
-                    {product.originalPrice && (
-                      <span
-                        style={{
-                          color: "#495057",
-                          fontSize: "1.5rem",
-                          textDecoration: "line-through",
+                        onError={(e) => {
+                          e.target.src = "/placeholder.svg";
                         }}
+                      />
+                      {product.discountPrice && (
+                        <Badge
+                          bg="danger"
+                          style={{
+                            position: "absolute",
+                            top: "16px",
+                            right: "16px",
+                            fontSize: "14px",
+                            padding: "8px 12px",
+                          }}
+                        >
+                          <i className="bi bi-percent me-1"></i>
+                          {Math.round(
+                            ((product.price - product.discountPrice) /
+                              product.price) *
+                              100,
+                          )}
+                          % OFF
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Thumbnail Images */}
+                    {product.images.length > 1 && (
+                      <div
+                        className="d-flex p-3 gap-2"
+                        style={{ backgroundColor: "#f8f9fa" }}
                       >
-                        ₹{product.originalPrice}
-                      </span>
+                        {product.images.map((image, index) => (
+                          <img
+                            key={index}
+                            src={image}
+                            alt={`${product.name} ${index + 1}`}
+                            style={{
+                              width: "80px",
+                              height: "80px",
+                              objectFit: "cover",
+                              borderRadius: "8px",
+                              cursor: "pointer",
+                              border:
+                                activeImageIndex === index
+                                  ? "3px solid #e63946"
+                                  : "2px solid #dee2e6",
+                              transition: "all 0.3s ease",
+                            }}
+                            onClick={() => setActiveImageIndex(index)}
+                            onError={(e) => {
+                              e.target.src = "/placeholder.svg";
+                            }}
+                          />
+                        ))}
+                      </div>
                     )}
                   </div>
-                </div>
-
-                <p
-                  style={{
-                    color: "#333333",
-                    fontSize: "16px",
-                    lineHeight: "1.6",
-                    marginBottom: "32px",
-                  }}
-                >
-                  {product.description}
-                </p>
-
-                {/* Quantity Selector */}
-                <div className="quantity-section mb-4">
-                  <label
+                ) : (
+                  <div
                     style={{
-                      color: "#333333",
-                      fontWeight: "600",
-                      marginBottom: "12px",
-                      display: "block",
+                      height: "400px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: "#f8f9fa",
                     }}
                   >
-                    Quantity:
-                  </label>
-                  <div className="d-flex align-items-center gap-3">
-                    <div
-                      className="d-flex align-items-center"
-                      style={{
-                        border: "2px solid #e9ecef",
-                        borderRadius: "8px",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <Button
-                        onClick={() => handleQuantityChange(-1)}
-                        style={{
-                          background: "#f8f9fa",
-                          border: "none",
-                          color: "#333333",
-                          padding: "8px 16px",
-                          borderRadius: "0",
-                        }}
-                      >
-                        <i className="bi bi-dash"></i>
-                      </Button>
-                      <span
-                        style={{
-                          padding: "8px 20px",
-                          fontSize: "16px",
-                          fontWeight: "600",
-                          minWidth: "60px",
-                          textAlign: "center",
-                          background: "#ffffff",
-                          color: "#333333",
-                        }}
-                      >
-                        {quantity}
-                      </span>
-                      <Button
-                        onClick={() => handleQuantityChange(1)}
-                        style={{
-                          background: "#f8f9fa",
-                          border: "none",
-                          color: "#333333",
-                          padding: "8px 16px",
-                          borderRadius: "0",
-                        }}
-                      >
-                        <i className="bi bi-plus"></i>
-                      </Button>
-                    </div>
-                    <span style={{ color: "#495057", fontSize: "14px" }}>
-                      {product.stockCount} available
-                    </span>
-                  </div>
-
-                  {/* Dynamic Total Price */}
-                  <div style={{ marginTop: "16px" }}>
-                    <div
-                      style={{
-                        background: "#f8f9fa",
-                        padding: "16px",
-                        borderRadius: "8px",
-                        border: "2px solid #e9ecef",
-                      }}
-                    >
-                      <div className="d-flex justify-content-between align-items-center">
-                        <span style={{ color: "#495057", fontWeight: "600" }}>
-                          Total Price:
-                        </span>
-                        <span
-                          style={{
-                            color: "#e63946",
-                            fontSize: "1.8rem",
-                            fontWeight: "800",
-                          }}
-                        >
-                          ₹{totalPrice}
-                        </span>
-                      </div>
-                      <small style={{ color: "#6c757d" }}>
-                        ₹{product.price} × {quantity}{" "}
-                        {quantity > 1 ? "items" : "item"}
-                      </small>
+                    <div className="text-center text-muted">
+                      <i
+                        className="bi bi-image"
+                        style={{ fontSize: "48px" }}
+                      ></i>
+                      <p className="mt-2">No Image Available</p>
                     </div>
                   </div>
-                </div>
+                )}
+              </Card.Body>
+            </Card>
+          </Col>
 
-                {/* Action Buttons */}
-                <div className="action-buttons d-flex gap-3 mb-4">
-                  <Button
-                    onClick={handleAddToCart}
-                    disabled={!product.inStock}
-                    size="lg"
-                    style={{
-                      background: "#e63946",
-                      border: "none",
-                      borderRadius: "8px",
-                      padding: "16px 32px",
-                      fontSize: "16px",
-                      fontWeight: "600",
-                      flex: "1",
-                      boxShadow: "0 4px 12px rgba(230, 57, 70, 0.3)",
-                    }}
-                  >
-                    <i className="bi bi-cart-plus me-2"></i>
-                    {product.inStock ? "Add to Cart" : "Out of Stock"}
-                  </Button>
-                  <Button
-                    onClick={handleShare}
-                    variant="outline-secondary"
-                    size="lg"
-                    style={{
-                      borderColor: "#343a40",
-                      color: "#343a40",
-                      borderRadius: "8px",
-                      padding: "16px 20px",
-                      fontSize: "16px",
-                      fontWeight: "600",
-                    }}
-                  >
-                    <i className="bi bi-share"></i>
-                  </Button>
-                </div>
-
-                {/* Product Info Pills */}
-                <div className="product-pills d-flex flex-wrap gap-2">
-                  <Badge
-                    style={{
-                      background: "#343a40",
-                      padding: "8px 12px",
-                      borderRadius: "20px",
-                    }}
-                  >
-                    <i className="bi bi-box-seam me-1"></i>
-                    {product.weight}
-                  </Badge>
-                  <Badge
-                    style={{
-                      background: "#495057",
-                      padding: "8px 12px",
-                      borderRadius: "20px",
-                    }}
-                  >
-                    <i className="bi bi-truck me-1"></i>
-                    Free Delivery
-                  </Badge>
-                  <Badge
-                    style={{
-                      background: "#6c757d",
-                      padding: "8px 12px",
-                      borderRadius: "20px",
-                    }}
-                  >
-                    <i className="bi bi-shield-check me-1"></i>
-                    Authentic
-                  </Badge>
-                </div>
-              </div>
-            </Col>
-          </Row>
-
-          {/* Product Details Tabs */}
-          <Row className="mt-5">
-            <Col lg={12}>
-              <Tabs
-                defaultActiveKey="description"
-                className="mb-4"
+          {/* Product Information */}
+          <Col lg={6} md={6}>
+            <div className="sticky-top" style={{ top: "100px" }}>
+              <Card
                 style={{
-                  borderBottom: "2px solid #f8f9fa",
+                  border: "2px solid #f8f9fa",
+                  borderRadius: "16px",
+                  boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
                 }}
               >
-                <Tab eventKey="description" title="Description & Benefits">
-                  <div
-                    style={{
-                      padding: "32px",
-                      background: "#f8f9fa",
-                      borderRadius: "12px",
-                    }}
-                  >
-                    <h4 style={{ color: "#333333", marginBottom: "20px" }}>
-                      Product Description
-                    </h4>
-                    <p
-                      style={{
-                        color: "#495057",
-                        lineHeight: "1.6",
-                        marginBottom: "24px",
-                      }}
-                    >
-                      {product.description}
-                    </p>
-
-                    <h5 style={{ color: "#e63946", marginBottom: "16px" }}>
-                      Key Benefits:
-                    </h5>
-                    <ul style={{ color: "#495057", lineHeight: "1.8" }}>
-                      {product.benefits.map((benefit, index) => (
-                        <li key={index} style={{ marginBottom: "8px" }}>
-                          <i
-                            className="bi bi-check-circle-fill me-2"
-                            style={{ color: "#28a745" }}
-                          ></i>
-                          {benefit}
-                        </li>
-                      ))}
-                    </ul>
+                <Card.Body style={{ padding: "30px" }}>
+                  {/* Product Header */}
+                  <div className="mb-3">
+                    <h1 className="h3 mb-2">{product.name}</h1>
+                    <div className="d-flex align-items-center gap-2 mb-3">
+                      <Badge bg="primary" style={{ fontSize: "12px" }}>
+                        <i className="bi bi-building me-1"></i>
+                        {product.company}
+                      </Badge>
+                      {product.category && (
+                        <Badge bg="info" style={{ fontSize: "12px" }}>
+                          <i className="bi bi-tag me-1"></i>
+                          {product.category}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                </Tab>
 
-                <Tab eventKey="usage" title="Usage & Dosage">
-                  <div
-                    style={{
-                      padding: "32px",
-                      background: "#f8f9fa",
-                      borderRadius: "12px",
-                    }}
-                  >
-                    <h4 style={{ color: "#333333", marginBottom: "20px" }}>
-                      How to Use
-                    </h4>
-                    <p
-                      style={{
-                        color: "#495057",
-                        lineHeight: "1.6",
-                        marginBottom: "24px",
-                      }}
-                    >
-                      {product.usage}
-                    </p>
-
-                    <h5 style={{ color: "#e63946", marginBottom: "16px" }}>
-                      Important Warnings:
-                    </h5>
-                    <ul style={{ color: "#dc3545", lineHeight: "1.8" }}>
-                      {product.warnings.map((warning, index) => (
-                        <li key={index} style={{ marginBottom: "8px" }}>
-                          <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                          {warning}
-                        </li>
-                      ))}
-                    </ul>
+                  {/* Price */}
+                  <div className="mb-4">
+                    <div className="d-flex align-items-center gap-2">
+                      <h3 className="text-danger mb-0">
+                        ₹
+                        {(
+                          product.discountPrice || product.price
+                        )?.toLocaleString()}
+                      </h3>
+                      {product.discountPrice && (
+                        <span
+                          className="text-muted"
+                          style={{ textDecoration: "line-through" }}
+                        >
+                          ₹{product.price?.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                    <small className="text-muted">Inclusive of all taxes</small>
                   </div>
-                </Tab>
 
-                <Tab eventKey="ingredients" title="Ingredients">
-                  <div
-                    style={{
-                      padding: "32px",
-                      background: "#f8f9fa",
-                      borderRadius: "12px",
-                    }}
-                  >
-                    <h4 style={{ color: "#333333", marginBottom: "20px" }}>
-                      Active Ingredients
-                    </h4>
-                    <ListGroup>
-                      {product.ingredients.map((ingredient, index) => (
-                        <ListGroup.Item
-                          key={index}
+                  {/* Stock Status */}
+                  <div className="mb-4">
+                    {product.stock > 0 ? (
+                      <div className="d-flex align-items-center text-success">
+                        <i className="bi bi-check-circle-fill me-2"></i>
+                        <strong>In Stock</strong>
+                        {product.stock <= 10 && (
+                          <Badge bg="warning" className="ms-2">
+                            Only {product.stock} left
+                          </Badge>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="d-flex align-items-center text-danger">
+                        <i className="bi bi-x-circle-fill me-2"></i>
+                        <strong>Out of Stock</strong>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Quantity Selector */}
+                  {product.stock > 0 && (
+                    <div className="mb-4">
+                      <label className="form-label fw-bold">
+                        <i className="bi bi-plus-slash-minus me-2"></i>
+                        Quantity
+                      </label>
+                      <div className="d-flex align-items-center gap-2">
+                        <Button
+                          variant="outline-secondary"
+                          size="sm"
+                          onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                          disabled={quantity <= 1}
+                        >
+                          <i className="bi bi-dash"></i>
+                        </Button>
+                        <span
+                          className="px-3 py-2 border rounded text-center"
+                          style={{ minWidth: "60px" }}
+                        >
+                          {quantity}
+                        </span>
+                        <Button
+                          variant="outline-secondary"
+                          size="sm"
+                          onClick={() =>
+                            setQuantity(Math.min(product.stock, quantity + 1))
+                          }
+                          disabled={quantity >= product.stock}
+                        >
+                          <i className="bi bi-plus"></i>
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="d-grid gap-2">
+                    {product.stock > 0 ? (
+                      <>
+                        <Button
+                          variant="danger"
+                          size="lg"
+                          onClick={handleBuyNow}
                           style={{
+                            background:
+                              "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
                             border: "none",
-                            background: "#ffffff",
-                            marginBottom: "8px",
-                            borderRadius: "8px",
-                            padding: "16px",
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                            padding: "12px",
+                            fontWeight: "600",
                           }}
                         >
-                          <i
-                            className="bi bi-capsule me-2"
-                            style={{ color: "#e63946" }}
-                          ></i>
-                          {ingredient}
-                        </ListGroup.Item>
-                      ))}
-                    </ListGroup>
+                          <i className="bi bi-lightning-fill me-2"></i>
+                          Buy Now
+                        </Button>
+                        <Button
+                          variant="outline-danger"
+                          size="lg"
+                          onClick={handleAddToCart}
+                          style={{
+                            border: "2px solid #e63946",
+                            padding: "12px",
+                            fontWeight: "600",
+                          }}
+                        >
+                          <i className="bi bi-cart-plus me-2"></i>
+                          Add to Cart
+                        </Button>
+                      </>
+                    ) : (
+                      <Button variant="secondary" size="lg" disabled>
+                        <i className="bi bi-x-circle me-2"></i>
+                        Out of Stock
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Product Features */}
+                  <div className="mt-4 pt-4 border-top">
+                    <h6 className="fw-bold mb-3">
+                      <i className="bi bi-shield-check me-2"></i>
+                      Product Features
+                    </h6>
+                    <div className="row g-2">
+                      <div className="col-6">
+                        <div className="d-flex align-items-center text-sm">
+                          <i className="bi bi-truck me-2 text-success"></i>
+                          <small>Free Delivery</small>
+                        </div>
+                      </div>
+                      <div className="col-6">
+                        <div className="d-flex align-items-center text-sm">
+                          <i className="bi bi-arrow-clockwise me-2 text-info"></i>
+                          <small>Easy Returns</small>
+                        </div>
+                      </div>
+                      <div className="col-6">
+                        <div className="d-flex align-items-center text-sm">
+                          <i className="bi bi-shield-check me-2 text-success"></i>
+                          <small>Quality Assured</small>
+                        </div>
+                      </div>
+                      <div className="col-6">
+                        <div className="d-flex align-items-center text-sm">
+                          <i className="bi bi-telephone me-2 text-primary"></i>
+                          <small>24/7 Support</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            </div>
+          </Col>
+        </Row>
+
+        {/* Product Details Tabs */}
+        <Row className="mt-5">
+          <Col>
+            <Card
+              style={{
+                border: "2px solid #f8f9fa",
+                borderRadius: "16px",
+                overflow: "hidden",
+              }}
+            >
+              <Tabs
+                defaultActiveKey="description"
+                className="border-bottom-0"
+                style={{ backgroundColor: "#f8f9fa" }}
+              >
+                <Tab
+                  eventKey="description"
+                  title={
+                    <span>
+                      <i className="bi bi-file-text me-2"></i>
+                      Description
+                    </span>
+                  }
+                >
+                  <div style={{ padding: "30px" }}>
+                    <h5 className="mb-3">
+                      <i className="bi bi-info-circle me-2"></i>
+                      Product Description
+                    </h5>
+                    <p style={{ lineHeight: "1.8", fontSize: "16px" }}>
+                      {product.description ||
+                        "No description available for this product."}
+                    </p>
+
+                    {product.benefits && product.benefits.length > 0 && (
+                      <div className="mt-4">
+                        <h6 className="fw-bold mb-3">
+                          <i className="bi bi-check-circle me-2"></i>
+                          Key Benefits
+                        </h6>
+                        <ListGroup variant="flush">
+                          {product.benefits.map((benefit, index) => (
+                            <ListGroup.Item
+                              key={index}
+                              className="d-flex align-items-center border-0 px-0"
+                            >
+                              <i className="bi bi-check text-success me-2"></i>
+                              {benefit}
+                            </ListGroup.Item>
+                          ))}
+                        </ListGroup>
+                      </div>
+                    )}
                   </div>
                 </Tab>
 
                 <Tab
-                  eventKey="reviews"
-                  title={`Reviews (${product.reviews.length})`}
+                  eventKey="specifications"
+                  title={
+                    <span>
+                      <i className="bi bi-list-ul me-2"></i>
+                      Specifications
+                    </span>
+                  }
                 >
-                  <div
-                    style={{
-                      padding: "32px",
-                      background: "#f8f9fa",
-                      borderRadius: "12px",
-                    }}
-                  >
-                    <h4 style={{ color: "#333333", marginBottom: "20px" }}>
-                      Customer Reviews
-                    </h4>
-                    {product.reviews.map((review) => (
-                      <Card
-                        key={review.id}
-                        className="mb-3"
-                        style={{ border: "none", borderRadius: "12px" }}
-                      >
-                        <Card.Body>
-                          <div className="d-flex justify-content-between align-items-start mb-2">
-                            <div>
-                              <h6
-                                style={{
-                                  color: "#333333",
-                                  marginBottom: "4px",
-                                }}
-                              >
-                                {review.name}
-                              </h6>
-                              <div>
-                                {[...Array(5)].map((_, i) => (
-                                  <i
-                                    key={i}
-                                    className={`bi bi-star${i < review.rating ? "-fill" : ""}`}
-                                    style={{
-                                      color:
-                                        i < review.rating
-                                          ? "#ffc107"
-                                          : "#e9ecef",
-                                      marginRight: "2px",
-                                    }}
-                                  ></i>
-                                ))}
-                              </div>
-                            </div>
-                            <small style={{ color: "#495057" }}>
-                              {review.date}
-                            </small>
+                  <div style={{ padding: "30px" }}>
+                    <h5 className="mb-3">
+                      <i className="bi bi-gear me-2"></i>
+                      Product Specifications
+                    </h5>
+                    <div className="row g-3">
+                      <div className="col-md-6">
+                        <div className="border rounded p-3 h-100">
+                          <h6 className="fw-bold text-primary mb-2">
+                            <i className="bi bi-box me-2"></i>
+                            General Information
+                          </h6>
+                          <div className="mb-2">
+                            <strong>Brand:</strong> {product.company}
                           </div>
-                          <p style={{ color: "#495057", margin: "0" }}>
-                            {review.comment}
-                          </p>
-                        </Card.Body>
-                      </Card>
-                    ))}
+                          <div className="mb-2">
+                            <strong>Category:</strong>{" "}
+                            {product.category || "General"}
+                          </div>
+                          {product.weight && (
+                            <div className="mb-2">
+                              <strong>Weight:</strong> {product.weight}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="border rounded p-3 h-100">
+                          <h6 className="fw-bold text-success mb-2">
+                            <i className="bi bi-shield-check me-2"></i>
+                            Quality & Safety
+                          </h6>
+                          <div className="mb-2">
+                            <i className="bi bi-check text-success me-2"></i>
+                            Quality Tested
+                          </div>
+                          <div className="mb-2">
+                            <i className="bi bi-check text-success me-2"></i>
+                            FDA Approved
+                          </div>
+                          <div className="mb-2">
+                            <i className="bi bi-check text-success me-2"></i>
+                            Safe for Use
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </Tab>
               </Tabs>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Related Products */}
+        {relatedProducts.length > 0 && (
+          <Row className="mt-5">
+            <Col>
+              <Card
+                style={{
+                  border: "2px solid #f8f9fa",
+                  borderRadius: "16px",
+                  overflow: "hidden",
+                }}
+              >
+                <Card.Header
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
+                    color: "white",
+                    padding: "20px 30px",
+                    border: "none",
+                  }}
+                >
+                  <h4 className="mb-0 d-flex align-items-center">
+                    <i className="bi bi-grid-3x3-gap me-2"></i>
+                    Related Products
+                  </h4>
+                </Card.Header>
+                <Card.Body style={{ padding: "30px" }}>
+                  <Row>
+                    {relatedProducts.slice(0, 4).map((relatedProduct) => (
+                      <Col
+                        lg={3}
+                        md={6}
+                        className="mb-4"
+                        key={relatedProduct._id}
+                      >
+                        <Card
+                          className="h-100"
+                          style={{
+                            border: "2px solid #f8f9fa",
+                            borderRadius: "12px",
+                            transition: "all 0.3s ease",
+                            cursor: "pointer",
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.borderColor = "#e63946";
+                            e.currentTarget.style.transform =
+                              "translateY(-4px)";
+                            e.currentTarget.style.boxShadow =
+                              "0 8px 25px rgba(230, 57, 70, 0.2)";
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.borderColor = "#f8f9fa";
+                            e.currentTarget.style.transform = "translateY(0)";
+                            e.currentTarget.style.boxShadow = "none";
+                          }}
+                          onClick={() =>
+                            navigate(`/product/${relatedProduct._id}`)
+                          }
+                        >
+                          <Card.Img
+                            variant="top"
+                            src={
+                              relatedProduct.images?.[0] || "/placeholder.svg"
+                            }
+                            style={{ height: "200px", objectFit: "cover" }}
+                            onError={(e) => {
+                              e.target.src = "/placeholder.svg";
+                            }}
+                          />
+                          <Card.Body>
+                            <Card.Title className="h6">
+                              {relatedProduct.name}
+                            </Card.Title>
+                            <div className="d-flex justify-content-between align-items-center">
+                              <div>
+                                <span className="fw-bold text-danger">
+                                  ₹
+                                  {(
+                                    relatedProduct.discountPrice ||
+                                    relatedProduct.price
+                                  )?.toLocaleString()}
+                                </span>
+                                {relatedProduct.discountPrice && (
+                                  <small
+                                    className="text-muted ms-2"
+                                    style={{ textDecoration: "line-through" }}
+                                  >
+                                    ₹{relatedProduct.price?.toLocaleString()}
+                                  </small>
+                                )}
+                              </div>
+                              <Badge bg="primary" style={{ fontSize: "10px" }}>
+                                {relatedProduct.company}
+                              </Badge>
+                            </div>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                    ))}
+                  </Row>
+                </Card.Body>
+              </Card>
             </Col>
           </Row>
-        </Container>
-      </section>
+        )}
+      </Container>
     </div>
   );
 };

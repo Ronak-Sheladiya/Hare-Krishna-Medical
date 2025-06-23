@@ -18,6 +18,7 @@ import {
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useRealTime } from "../../hooks/useRealTime";
+import { api, safeApiCall } from "../../utils/apiClient";
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -58,7 +59,7 @@ const AdminProducts = () => {
   });
 
   const API_BASE_URL =
-    process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
   const categories = [
     "Pain Relief",
@@ -101,47 +102,39 @@ const AdminProducts = () => {
   };
 
   const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      const queryParams = new URLSearchParams({
-        page: currentPage,
-        limit: productsPerPage,
-        ...(searchTerm && { search: searchTerm }),
-        ...(categoryFilter && { category: categoryFilter }),
-        ...(stockFilter && { stockFilter: stockFilter }),
-      });
+    const queryParams = new URLSearchParams({
+      page: currentPage,
+      limit: productsPerPage,
+      ...(searchTerm && { search: searchTerm }),
+      ...(categoryFilter && { category: categoryFilter }),
+      ...(stockFilter && { stockFilter: stockFilter }),
+    });
 
-      const response = await fetch(
-        `${API_BASE_URL}/api/products?${queryParams}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
+    const {
+      success,
+      data,
+      error: apiError,
+    } = await safeApiCall(() => api.get(`/api/products?${queryParams}`), {
+      products: [],
+      pagination: { totalProducts: 0, totalPages: 1 },
+    });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch products: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        setProducts(data.data.products);
-        setTotalPages(data.data.pagination.totalPages);
-        setTotalProducts(data.data.pagination.totalProducts);
-      } else {
-        throw new Error(data.message || "Failed to fetch products");
-      }
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
+    if (success && data) {
+      const productsData = data.data || data;
+      setProducts(productsData.products || []);
+      setTotalPages(productsData.pagination?.totalPages || 1);
+      setTotalProducts(productsData.pagination?.totalProducts || 0);
+    } else {
+      setError(apiError || "Failed to fetch products");
+      setProducts([]);
+      setTotalPages(1);
+      setTotalProducts(0);
     }
+
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -195,37 +188,25 @@ const AdminProducts = () => {
       return;
     }
 
-    try {
-      setActionLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/products`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+    setActionLoading(true);
 
-      if (!response.ok) {
-        throw new Error("Failed to add product");
-      }
+    const {
+      success,
+      data,
+      error: apiError,
+    } = await safeApiCall(() => api.post("/api/products", formData), null);
 
-      const data = await response.json();
-
-      if (data.success) {
-        setProducts((prev) => [data.data, ...prev]);
-        setShowAddModal(false);
-        resetForm();
-        showNotification("Product added successfully!", "success");
-      } else {
-        throw new Error(data.message || "Failed to add product");
-      }
-    } catch (error) {
-      console.error("Error adding product:", error);
-      showNotification(error.message, "danger");
-    } finally {
-      setActionLoading(false);
+    if (success && data) {
+      const productData = data.data || data;
+      setProducts((prev) => [productData, ...prev]);
+      setShowAddModal(false);
+      resetForm();
+      showNotification("Product added successfully!", "success");
+    } else {
+      showNotification(apiError || "Failed to add product", "danger");
     }
+
+    setActionLoading(false);
   };
 
   const handleEditProduct = async () => {
@@ -236,84 +217,60 @@ const AdminProducts = () => {
       return;
     }
 
-    try {
-      setActionLoading(true);
-      const response = await fetch(
-        `${API_BASE_URL}/api/products/${selectedProduct._id}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        },
+    setActionLoading(true);
+
+    const {
+      success,
+      data,
+      error: apiError,
+    } = await safeApiCall(
+      () => api.put(`/api/products/${selectedProduct._id}`, formData),
+      null,
+    );
+
+    if (success && data) {
+      const productData = data.data || data;
+      setProducts((prev) =>
+        prev.map((product) =>
+          product._id === selectedProduct._id ? productData : product,
+        ),
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to update product");
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        setProducts((prev) =>
-          prev.map((product) =>
-            product._id === selectedProduct._id ? data.data : product,
-          ),
-        );
-        setShowEditModal(false);
-        resetForm();
-        showNotification("Product updated successfully!", "success");
-      } else {
-        throw new Error(data.message || "Failed to update product");
-      }
-    } catch (error) {
-      console.error("Error updating product:", error);
-      showNotification(error.message, "danger");
-    } finally {
-      setActionLoading(false);
+      setShowEditModal(false);
+      resetForm();
+      showNotification("Product updated successfully!", "success");
+    } else {
+      showNotification(apiError || "Failed to update product", "danger");
     }
+
+    setActionLoading(false);
   };
 
   const handleDeleteProduct = async () => {
     if (!productToDelete) return;
 
-    try {
-      setActionLoading(true);
-      const response = await fetch(
-        `${API_BASE_URL}/api/products/${productToDelete._id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        },
+    setActionLoading(true);
+
+    const {
+      success,
+      data,
+      error: apiError,
+    } = await safeApiCall(
+      () => api.delete(`/api/products/${productToDelete._id}`),
+      null,
+    );
+
+    if (success) {
+      setProducts((prev) =>
+        prev.filter((product) => product._id !== productToDelete._id),
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete product");
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        setProducts((prev) =>
-          prev.filter((product) => product._id !== productToDelete._id),
-        );
-        setShowDeleteModal(false);
-        setProductToDelete(null);
-        showNotification("Product deleted successfully!", "success");
-      } else {
-        throw new Error(data.message || "Failed to delete product");
-      }
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      showNotification(error.message, "danger");
-    } finally {
-      setActionLoading(false);
+      setShowDeleteModal(false);
+      setProductToDelete(null);
+      showNotification("Product deleted successfully!", "success");
+    } else {
+      showNotification(apiError || "Failed to delete product", "danger");
     }
+
+    setActionLoading(false);
   };
 
   const resetForm = () => {

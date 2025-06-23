@@ -1,389 +1,107 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Button } from "react-bootstrap";
 
 const GlobalSecurity = () => {
-  const [showWarning, setShowWarning] = useState(false);
-  const [warningType, setWarningType] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Disable right-click context menu
-    const handleRightClick = (e) => {
-      e.preventDefault();
-      setWarningType("Right-click");
-      setShowWarning(true);
-      return false;
+    // Disable right-click during loading
+    const handleContextMenu = (e) => {
+      if (isLoading) {
+        e.preventDefault();
+        return false;
+      }
     };
 
-    // Disable keyboard shortcuts
+    // Disable certain key combinations during loading
     const handleKeyDown = (e) => {
-      // F12 - Developer Tools
-      if (e.keyCode === 123) {
-        e.preventDefault();
-        setWarningType("Developer tools");
-        setShowWarning(true);
-        return false;
+      if (isLoading) {
+        // Disable F12, Ctrl+Shift+I, Ctrl+U, Ctrl+Shift+C
+        if (
+          e.key === "F12" ||
+          (e.ctrlKey && e.shiftKey && e.key === "I") ||
+          (e.ctrlKey && e.key === "u") ||
+          (e.ctrlKey && e.shiftKey && e.key === "C")
+        ) {
+          e.preventDefault();
+          return false;
+        }
       }
-
-      // Ctrl+Shift+I - Developer Tools
-      if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
-        e.preventDefault();
-        setWarningType("Developer tools");
-        setShowWarning(true);
-        return false;
-      }
-
-      // Ctrl+U - View Source
-      if (e.ctrlKey && e.keyCode === 85) {
-        e.preventDefault();
-        setWarningType("View source");
-        setShowWarning(true);
-        return false;
-      }
-
-      // Ctrl+S - Save Page
-      if (e.ctrlKey && e.keyCode === 83) {
-        e.preventDefault();
-        setWarningType("Save page");
-        setShowWarning(true);
-        return false;
-      }
-
-      // Ctrl+A - Select All (allow on contact, invoice, admin, and user pages)
-      if (
-        e.ctrlKey &&
-        e.keyCode === 65 &&
-        !window.location.pathname.includes("contact") &&
-        !window.location.pathname.includes("invoice") &&
-        !window.location.pathname.includes("/admin") &&
-        !window.location.pathname.includes("/user")
-      ) {
-        e.preventDefault();
-        setWarningType("Select all");
-        setShowWarning(true);
-        return false;
-      }
-
-      // Ctrl+C - Copy (allow on contact, invoice, admin, and user pages)
-      if (
-        e.ctrlKey &&
-        e.keyCode === 67 &&
-        !window.location.pathname.includes("contact") &&
-        !window.location.pathname.includes("invoice") &&
-        !window.location.pathname.includes("/admin") &&
-        !window.location.pathname.includes("/user")
-      ) {
-        e.preventDefault();
-        setWarningType("Copy");
-        setShowWarning(true);
-        return false;
-      }
-
-      // Ctrl+V - Paste (allow on admin and user pages)
-      if (
-        e.ctrlKey &&
-        e.keyCode === 86 &&
-        !window.location.pathname.includes("/admin") &&
-        !window.location.pathname.includes("/user")
-      ) {
-        e.preventDefault();
-        setWarningType("Paste");
-        setShowWarning(true);
-        return false;
-      }
-
-      // Ctrl+X - Cut (allow on admin and user pages)
-      if (
-        e.ctrlKey &&
-        e.keyCode === 88 &&
-        !window.location.pathname.includes("/admin") &&
-        !window.location.pathname.includes("/user")
-      ) {
-        e.preventDefault();
-        setWarningType("Cut");
-        setShowWarning(true);
-        return false;
-      }
-
-      // Ctrl+P - Print (allow for invoice and contact pages)
-      if (
-        e.ctrlKey &&
-        e.keyCode === 80 &&
-        !window.location.pathname.includes("invoice") &&
-        !window.location.pathname.includes("contact")
-      ) {
-        e.preventDefault();
-        setWarningType("Print");
-        setShowWarning(true);
-        return false;
-      }
-    };
-
-    // Disable drag and drop
-    const handleDragStart = (e) => {
-      e.preventDefault();
-      setWarningType("Drag and drop");
-      setShowWarning(true);
-      return false;
-    };
-
-    // Disable text selection (allow on invoice, contact, admin, and user pages)
-    const handleSelectStart = (e) => {
-      if (
-        window.location.pathname.includes("invoice") ||
-        window.location.pathname.includes("contact") ||
-        window.location.pathname.includes("/admin") ||
-        window.location.pathname.includes("/user")
-      ) {
-        return true; // Allow selection
-      }
-      e.preventDefault();
-      return false;
     };
 
     // Add event listeners
-    document.addEventListener("contextmenu", handleRightClick);
+    document.addEventListener("contextmenu", handleContextMenu);
     document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("dragstart", handleDragStart);
-    document.addEventListener("selectstart", handleSelectStart);
 
-    // Cleanup event listeners
+    // Simulate loading completion after 3 seconds or when page is fully loaded
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
+
+    // Also check for document ready state
+    const checkLoading = () => {
+      if (document.readyState === "complete") {
+        setTimeout(() => setIsLoading(false), 1000);
+      }
+    };
+
+    document.addEventListener("readystatechange", checkLoading);
+    checkLoading(); // Check immediately
+
     return () => {
-      document.removeEventListener("contextmenu", handleRightClick);
+      document.removeEventListener("contextmenu", handleContextMenu);
       document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("dragstart", handleDragStart);
-      document.removeEventListener("selectstart", handleSelectStart);
+      document.removeEventListener("readystatechange", checkLoading);
+      clearTimeout(timer);
     };
-  }, []);
+  }, [isLoading]);
 
-  // Apply global CSS for security
-  useEffect(() => {
-    const style = document.createElement("style");
-    style.textContent = `
-      /* Disable text selection globally */
-      * {
-        -webkit-user-select: none !important;
-        -moz-user-select: none !important;
-        -ms-user-select: none !important;
-        user-select: none !important;
-        -webkit-touch-callout: none !important;
-        -webkit-tap-highlight-color: transparent !important;
-      }
-
-      /* Disable drag and drop */
-      img, a {
-        -webkit-user-drag: none !important;
-        -khtml-user-drag: none !important;
-        -moz-user-drag: none !important;
-        -o-user-drag: none !important;
-        user-drag: none !important;
-        pointer-events: auto !important;
-      }
-
-      /* Allow input fields to be selectable for forms */
-      input, textarea, select, [contenteditable="true"] {
-        -webkit-user-select: text !important;
-        -moz-user-select: text !important;
-        -ms-user-select: text !important;
-        user-select: text !important;
-      }
-
-      /* Allow text selection on contact, invoice, admin, and user pages */
-      .contact-page-content, .contact-page-content *,
-      .invoice-container, .invoice-container *,
-      .admin-page-content, .admin-page-content *,
-      .user-page-content, .user-page-content *,
-      [data-page="contact"] *, [data-page="invoice"] *,
-      [data-page="admin"] *, [data-page="user"] *,
-      [class*="admin-"] *, [class*="user-"] *,
-      body[data-path*="/admin"] *, body[data-path*="/user"] *,
-      .contact-page-content a, .contact-page-content button, .contact-page-content span, .contact-page-content div, .contact-page-content p, .contact-page-content h1, .contact-page-content h2, .contact-page-content h3, .contact-page-content h4, .contact-page-content h5, .contact-page-content h6, .contact-page-content li {
-        -webkit-user-select: text !important;
-        -moz-user-select: text !important;
-        -ms-user-select: text !important;
-        user-select: text !important;
-      }
-
-      /* Red selection theme for contact page */
-      .contact-page-content ::selection {
-        background: #e63946 !important;
-        color: white !important;
-      }
-
-      .contact-page-content ::-moz-selection {
-        background: #e63946 !important;
-        color: white !important;
-      }
-
-      /* Specific selection for contact info elements */
-      .contact-info-selectable,
-      .contact-info-selectable *,
-      .contact-address,
-      .contact-phone,
-      .contact-email,
-      [data-contact-info] {
-        -webkit-user-select: text !important;
-        -moz-user-select: text !important;
-        -ms-user-select: text !important;
-        user-select: text !important;
-        cursor: text !important;
-      }
-
-      .contact-info-selectable::selection,
-      .contact-address::selection,
-      .contact-phone::selection,
-      .contact-email::selection {
-        background: #e63946 !important;
-        color: white !important;
-      }
-
-      .contact-info-selectable::-moz-selection,
-      .contact-address::-moz-selection,
-      .contact-phone::-moz-selection,
-      .contact-email::-moz-selection {
-        background: #e63946 !important;
-        color: white !important;
-      }
-
-      /* Red selection theme for admin pages (About Us theme) */
-      .admin-page-content ::selection,
-      [data-page="admin"] ::selection,
-      [class*="admin-"] ::selection {
-        background: #e63946 !important;
-        color: white !important;
-      }
-
-      .admin-page-content ::-moz-selection,
-      [data-page="admin"] ::-moz-selection,
-      [class*="admin-"] ::-moz-selection {
-        background: #e63946 !important;
-        color: white !important;
-      }
-
-      /* Red selection theme for user pages (About Us theme) */
-      .user-page-content ::selection,
-      [data-page="user"] ::selection,
-      [class*="user-"] ::selection {
-        background: #e63946 !important;
-        color: white !important;
-      }
-
-      .user-page-content ::-moz-selection,
-      [data-page="user"] ::-moz-selection,
-      [class*="user-"] ::-moz-selection {
-        background: #e63946 !important;
-        color: white !important;
-      }
-
-      /* Hide scrollbars in developer tools */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-
-      ::-webkit-scrollbar-track {
-        background: #f1f1f1;
-      }
-
-      ::-webkit-scrollbar-thumb {
-        background: #c1c1c1;
-        border-radius: 4px;
-      }
-
-      ::-webkit-scrollbar-thumb:hover {
-        background: #a1a1a1;
-      }
-
-      /* Disable highlighting */
-      ::selection {
-        background: transparent !important;
-      }
-
-      ::-moz-selection {
-        background: transparent !important;
-      }
-
-      /* Security watermark for print */
-      @media print {
-        body::before {
-          content: "HARE KRISHNA MEDICAL - CONFIDENTIAL";
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%) rotate(-45deg);
-          font-size: 72px;
-          color: rgba(230, 57, 70, 0.05);
-          font-weight: bold;
-          z-index: -1;
-          pointer-events: none;
-        }
-      }
-    `;
-
-    document.head.appendChild(style);
-
-    return () => {
-      if (document.head.contains(style)) {
-        document.head.removeChild(style);
-      }
-    };
-  }, []);
-
-  const handleCloseWarning = () => {
-    setShowWarning(false);
-    setWarningType("");
-  };
-
-  return (
-    <>
-      {/* Security Warning Modal */}
-      <Modal
-        show={showWarning}
-        onHide={handleCloseWarning}
-        centered
-        backdrop="static"
-        keyboard={false}
-        size="md"
+  // Add loading overlay
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          background: "rgba(255, 255, 255, 0.9)",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 9999,
+          backdropFilter: "blur(5px)",
+        }}
       >
-        <Modal.Header className="bg-danger text-white">
-          <Modal.Title className="d-flex align-items-center">
-            <i className="bi bi-shield-exclamation me-2 fs-3"></i>
-            Security Alert
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="text-center py-4">
-          <div className="mb-4">
-            <i
-              className="bi bi-exclamation-triangle-fill text-warning"
-              style={{ fontSize: "4rem" }}
-            ></i>
-          </div>
-          <h5 className="text-danger mb-3">Access Restricted!</h5>
-          <p className="mb-2">
-            <strong>{warningType}</strong> is disabled for security reasons.
-          </p>
-          <p className="text-muted small mb-0">
-            This website's content is protected. Unauthorized access attempts
-            are logged and monitored.
-          </p>
-          <div className="mt-3 p-3 bg-light rounded">
-            <small className="text-muted">
-              <i className="bi bi-info-circle me-1"></i>
-              <strong>Hare Krishna Medical</strong> - Your Trusted Healthcare
-              Partner
-            </small>
-          </div>
-        </Modal.Body>
-        <Modal.Footer className="justify-content-center">
-          <Button
-            variant="danger"
-            onClick={handleCloseWarning}
-            className="px-4"
-          >
-            <i className="bi bi-check-circle me-2"></i>I Understand
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </>
-  );
+        <div
+          style={{
+            width: "60px",
+            height: "60px",
+            border: "4px solid #f3f3f3",
+            borderTop: "4px solid #e63946",
+            borderRadius: "50%",
+            animation: "spin 1s linear infinite",
+            marginBottom: "20px",
+          }}
+        />
+        <h4 style={{ color: "#333", marginBottom: "10px" }}>Loading...</h4>
+        <p style={{ color: "#666", textAlign: "center", maxWidth: "300px" }}>
+          Hare Krishna Medical Store is preparing your experience
+        </p>
+        <style>
+          {`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}
+        </style>
+      </div>
+    );
+  }
+
+  return null;
 };
 
 export default GlobalSecurity;
