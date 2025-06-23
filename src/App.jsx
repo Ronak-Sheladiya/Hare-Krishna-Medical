@@ -364,6 +364,14 @@ function App() {
                 }
               />
               <Route
+                path="/admin/profile"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <UserProfile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/admin/backend-docs"
                 element={
                   <ProtectedRoute adminOnly>
@@ -384,7 +392,7 @@ function App() {
               <Route
                 path="/user/orders"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute userOnly>
                     <UserOrders />
                   </ProtectedRoute>
                 }
@@ -392,7 +400,7 @@ function App() {
               <Route
                 path="/user/invoices"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute userOnly>
                     <UserInvoices />
                   </ProtectedRoute>
                 }
@@ -400,7 +408,7 @@ function App() {
               <Route
                 path="/user/profile"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute userOnly>
                     <UserProfile />
                   </ProtectedRoute>
                 }
