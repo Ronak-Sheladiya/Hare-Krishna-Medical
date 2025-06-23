@@ -218,7 +218,7 @@ const AdminDashboard = () => {
                   }}
                 >
                   <h5 className="mb-0" style={{ fontWeight: "700" }}>
-                    <i className="bi bi-activity me-2"></i>
+                    <i className="bi bi-clock-history me-2"></i>
                     Recent Orders
                   </h5>
                 </div>
