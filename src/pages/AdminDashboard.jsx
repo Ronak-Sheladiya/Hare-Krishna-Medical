@@ -228,6 +228,67 @@ const AdminDashboard = () => {
                     </ThemeButton>
                   </Col>
                 </Row>
+
+                {/* Additional Management Actions */}
+                <Row className="g-3 mt-2">
+                  <Col md={4}>
+                    <ThemeButton
+                      as={Link}
+                      to="/admin/invoices"
+                      variant="outline"
+                      className="w-100"
+                      style={{
+                        borderColor: "#dc3545",
+                        color: "#dc3545",
+                        transition: "all 0.3s ease",
+                      }}
+                    >
+                      <i className="bi bi-receipt-cutoff me-2"></i>
+                      Invoice Management
+                    </ThemeButton>
+                  </Col>
+                  <Col md={4}>
+                    <ThemeButton
+                      as={Link}
+                      to="/admin/messages"
+                      variant="outline"
+                      className="w-100 position-relative"
+                      style={{
+                        borderColor: "#e83e8c",
+                        color: "#e83e8c",
+                        transition: "all 0.3s ease",
+                      }}
+                    >
+                      <i className="bi bi-envelope-heart me-2"></i>
+                      Messages
+                      {unreadCount > 0 && (
+                        <Badge
+                          bg="danger"
+                          className="position-absolute top-0 start-100 translate-middle"
+                          style={{ fontSize: "0.7rem" }}
+                        >
+                          {unreadCount}
+                        </Badge>
+                      )}
+                    </ThemeButton>
+                  </Col>
+                  <Col md={4}>
+                    <ThemeButton
+                      as={Link}
+                      to="/admin/payment-methods"
+                      variant="outline"
+                      className="w-100"
+                      style={{
+                        borderColor: "#198754",
+                        color: "#198754",
+                        transition: "all 0.3s ease",
+                      }}
+                    >
+                      <i className="bi bi-credit-card-2-front me-2"></i>
+                      Payment Settings
+                    </ThemeButton>
+                  </Col>
+                </Row>
               </ThemeCard>
             </Col>
           </Row>
