@@ -5,10 +5,15 @@ import { useSelector } from "react-redux";
 let socketClient = null;
 if (typeof window !== "undefined") {
   try {
-    const socketModule = require("../utils/socketClient");
-    socketClient = socketModule.default;
+    import("../utils/socketClient")
+      .then((module) => {
+        socketClient = module.default;
+      })
+      .catch((error) => {
+        console.warn("SocketClient not available:", error);
+      });
   } catch (error) {
-    console.warn("SocketClient not available:", error);
+    console.warn("SocketClient import failed:", error);
   }
 }
 
