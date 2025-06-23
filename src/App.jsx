@@ -102,11 +102,9 @@ const ProtectedRoute = ({ children, adminOnly = false, userOnly = false }) => {
     );
     return (
       <Navigate
-        to="/access-denied"
+        to="/login"
         state={{
-          from: location.pathname,
-          reason: "authentication_required",
-          attemptedPath: location.pathname + location.search,
+          from: location.pathname + location.search,
         }}
         replace
       />
