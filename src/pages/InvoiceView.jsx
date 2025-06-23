@@ -718,11 +718,15 @@ Generated: ${new Date().toLocaleString()}
                         {isAuthenticated && (
                           <EnhancedButton
                             variant="outline"
-                            to="/user/orders"
+                            to={
+                              user?.role === 1
+                                ? "/admin/orders"
+                                : "/user/orders"
+                            }
                             icon="bi bi-box-seam"
                             size="sm"
                           >
-                            My Orders
+                            {user?.role === 1 ? "Manage Orders" : "My Orders"}
                           </EnhancedButton>
                         )}
                         {!isAuthenticated && (

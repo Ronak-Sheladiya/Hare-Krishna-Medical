@@ -197,6 +197,10 @@ const Header = () => {
                           <i className="bi bi-receipt-cutoff me-2"></i>
                           Manage Invoices
                         </Dropdown.Item>
+                        <Dropdown.Item as={Link} to="/admin/payment-methods">
+                          <i className="bi bi-credit-card me-2"></i>
+                          Payment Management
+                        </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/analytics">
                           <i className="bi bi-graph-up me-2"></i>
                           Analytics
@@ -326,6 +330,8 @@ const Header = () => {
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
           border: none;
           min-width: 220px;
+          max-height: 400px;
+          overflow-y: auto;
         }
 
         .dropdown-item {
