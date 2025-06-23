@@ -400,17 +400,26 @@ const Home = () => {
                   <p>
                     Featured products will appear here when admin adds them.
                   </p>
-                  <Button
-                    as={Link}
-                    to="/products"
-                    variant="outline-primary"
-                    style={{
-                      color: "#e63946",
-                      borderColor: "#e63946",
-                    }}
-                  >
-                    Browse All Products
-                  </Button>
+                  <div className="mt-3">
+                    <small className="text-muted d-block mb-3">
+                      <i className="bi bi-info-circle me-1"></i>
+                      If you're a developer: Make sure the backend server is
+                      running on{" "}
+                      {import.meta.env.VITE_BACKEND_URL ||
+                        "http://localhost:5000"}
+                    </small>
+                    <Button
+                      as={Link}
+                      to="/products"
+                      variant="outline-primary"
+                      style={{
+                        color: "#e63946",
+                        borderColor: "#e63946",
+                      }}
+                    >
+                      Browse All Products
+                    </Button>
+                  </div>
                 </div>
               </Col>
             )}
