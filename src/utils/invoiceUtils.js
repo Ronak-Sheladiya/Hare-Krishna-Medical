@@ -41,9 +41,12 @@ export const viewInvoice = async (invoiceData, qrCode = null) => {
     const modalHTML = `
       <div id="${modalId}" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;">
         <div style="background: white; border-radius: 12px; max-width: 90vw; max-height: 90vh; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-          <div style="background: #e63946; color: white; padding: 15px 20px; display: flex; justify-content: between; align-items: center;">
-            <h3 style="margin: 0; font-size: 18px;">Invoice Details - ${invoiceData.invoiceId}</h3>
-            <button id="close-invoice-modal" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer; margin-left: auto;">&times;</button>
+          <div style="background: linear-gradient(135deg, #e63946 0%, #dc3545 100%); color: white; padding: 15px 20px; display: flex; justify-content: between; align-items: center;">
+            <div style="display: flex; align-items: center;">
+              <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800" alt="HK Medical" style="width: 40px; height: 40px; margin-right: 12px; border-radius: 8px;">
+              <h3 style="margin: 0; font-size: 18px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">Invoice Details - ${invoiceData.invoiceId}</h3>
+            </div>
+            <button id="close-invoice-modal" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer; margin-left: auto; transition: all 0.3s ease;">&times;</button>
           </div>
           <div id="invoice-modal-content" style="padding: 0; max-height: 70vh; overflow-y: auto;">
             <!-- Invoice content will be inserted here -->
@@ -152,9 +155,9 @@ export const printInvoice = async (invoiceData, qrCode = null) => {
           <title>Invoice ${invoiceData.invoiceId}</title>
           <style>
             @page { size: A4; margin: 0.2in; }
-            body { 
-              margin: 0; 
-              padding: 0; 
+            body {
+              margin: 0;
+              padding: 0;
               font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
