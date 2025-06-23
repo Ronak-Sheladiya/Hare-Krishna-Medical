@@ -100,148 +100,46 @@ const ProtectedRoute = ({ children, adminOnly = false, userOnly = false }) => {
       "redirectAfterLogin",
       location.pathname + location.search,
     );
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+    return (
+      <Navigate
+        to="/access-denied"
+        state={{
+          from: location.pathname,
+          reason: "authentication_required",
+          attemptedPath: location.pathname + location.search,
+        }}
+        replace
+      />
+    );
   }
 
   if (adminOnly && user?.role !== 1) {
-    return <Navigate to="/user/dashboard" replace />;
+    return (
+      <Navigate
+        to="/access-denied"
+        state={{
+          from: location.pathname,
+          reason: "insufficient_permissions",
+          requiredRole: "admin",
+          attemptedPath: location.pathname + location.search,
+        }}
+        replace
+      />
+    );
   }
 
   if (userOnly && user?.role === 1) {
-    // Admin trying to access user-only route - show access denied
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+      <Navigate
+        to="/access-denied"
+        state={{
+          from: location.pathname,
+          reason: "role_mismatch",
+          requiredRole: "user",
+          attemptedPath: location.pathname + location.search,
         }}
-      >
-        <div className="container py-5">
-          <div
-            className="row justify-content-center align-items-center"
-            style={{ minHeight: "80vh" }}
-          >
-            <div className="col-lg-6 col-md-8 text-center">
-              <div
-                className="card shadow-lg border-0"
-                style={{
-                  borderRadius: "20px",
-                  background:
-                    "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-                  boxShadow: "0 15px 35px rgba(0,0,0,0.1)",
-                }}
-              >
-                <div className="card-body p-5">
-                  {/* Icon with animation */}
-                  <div
-                    className="mb-4"
-                    style={{
-                      animation: "pulse 2s infinite",
-                      fontSize: "5rem",
-                      color: "#dc3545",
-                    }}
-                  >
-                    <i className="bi bi-shield-exclamation"></i>
-                  </div>
-
-                  {/* Title */}
-                  <h2
-                    className="text-danger mb-3"
-                    style={{ fontWeight: "700" }}
-                  >
-                    Access Restricted
-                  </h2>
-
-                  {/* Subtitle */}
-                  <h5 className="text-muted mb-4" style={{ fontWeight: "500" }}>
-                    Admin Only Area
-                  </h5>
-
-                  {/* Description */}
-                  <p className="text-secondary mb-4 lead">
-                    This section is exclusively for regular users. As an
-                    administrator, you have access to the admin dashboard with
-                    enhanced management capabilities.
-                  </p>
-
-                  {/* User info */}
-                  <div
-                    className="alert alert-info mb-4"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%)",
-                      border: "none",
-                      borderRadius: "12px",
-                    }}
-                  >
-                    <i className="bi bi-info-circle me-2"></i>
-                    <strong>Logged in as:</strong>{" "}
-                    {user?.fullName || user?.name || "Administrator"}
-                  </div>
-
-                  {/* Action buttons */}
-                  <div className="d-flex gap-3 justify-content-center flex-wrap">
-                    <button
-                      className="btn btn-danger btn-lg px-4"
-                      onClick={() =>
-                        (window.location.href = "/admin/dashboard")
-                      }
-                      style={{
-                        background:
-                          "linear-gradient(135deg, #dc3545 0%, #c82333 100%)",
-                        border: "none",
-                        borderRadius: "12px",
-                        fontWeight: "600",
-                        transition: "all 0.3s ease",
-                      }}
-                    >
-                      <i className="bi bi-speedometer2 me-2"></i>
-                      Admin Dashboard
-                    </button>
-                    <button
-                      className="btn btn-outline-secondary btn-lg px-4"
-                      onClick={() => window.history.back()}
-                      style={{
-                        borderRadius: "12px",
-                        fontWeight: "600",
-                        transition: "all 0.3s ease",
-                      }}
-                    >
-                      <i className="bi bi-arrow-left me-2"></i>
-                      Go Back
-                    </button>
-                  </div>
-
-                  {/* Additional help */}
-                  <div className="mt-4 pt-3 border-top">
-                    <small className="text-muted">
-                      <i className="bi bi-question-circle me-1"></i>
-                      Need help?{" "}
-                      <a href="/contact" className="text-decoration-none">
-                        Contact Support
-                      </a>
-                    </small>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* CSS Animation */}
-        <style>{`
-          @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-          }
-
-          .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-          }
-        `}</style>
-      </div>
+        replace
+      />
     );
   }
 
