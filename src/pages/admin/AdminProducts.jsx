@@ -18,6 +18,7 @@ import {
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useRealTime } from "../../hooks/useRealTime";
+import { api, safeApiCall } from "../../utils/apiClient";
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
