@@ -173,22 +173,22 @@ const Header = () => {
                     <Dropdown.Divider />
 
                     <Dropdown.Item onClick={handleDashboardClick}>
-                      <i className="bi bi-grid-3x3-gap-fill me-2"></i>
+                      <i className="bi bi-speedometer2 me-2"></i>
                       Dashboard
                     </Dropdown.Item>
 
                     {user?.role === 0 && (
                       <>
                         <Dropdown.Item as={Link} to="/user/orders">
-                          <i className="bi bi-bag-check-fill me-2"></i>
+                          <i className="bi bi-bag me-2"></i>
                           My Orders
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/user/invoices">
-                          <i className="bi bi-file-earmark-text-fill me-2"></i>
+                          <i className="bi bi-receipt me-2"></i>
                           My Invoices
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/user/profile">
-                          <i className="bi bi-person-circle me-2"></i>
+                          <i className="bi bi-person me-2"></i>
                           Profile Settings
                         </Dropdown.Item>
                       </>
@@ -197,15 +197,15 @@ const Header = () => {
                     {user?.role === 1 && (
                       <>
                         <Dropdown.Item as={Link} to="/admin/users">
-                          <i className="bi bi-people-fill me-2"></i>
+                          <i className="bi bi-people me-2"></i>
                           Manage Users
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/products">
-                          <i className="bi bi-box-seam-fill me-2"></i>
+                          <i className="bi bi-box me-2"></i>
                           Manage Products
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/orders">
-                          <i className="bi bi-clipboard2-check-fill me-2"></i>
+                          <i className="bi bi-bag-check me-2"></i>
                           Manage Orders
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/invoices">
@@ -213,11 +213,11 @@ const Header = () => {
                           Manage Invoices
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/payment-methods">
-                          <i className="bi bi-credit-card-2-front-fill me-2"></i>
+                          <i className="bi bi-credit-card me-2"></i>
                           Payment Management
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/analytics">
-                          <i className="bi bi-graph-up-arrow me-2"></i>
+                          <i className="bi bi-graph-up me-2"></i>
                           Analytics
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/profile">
@@ -225,7 +225,7 @@ const Header = () => {
                           Edit Profile
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/messages">
-                          <i className="bi bi-envelope-heart-fill me-2"></i>
+                          <i className="bi bi-envelope me-2"></i>
                           Messages
                         </Dropdown.Item>
                         <Dropdown.Divider />
@@ -233,11 +233,11 @@ const Header = () => {
                           <small className="text-muted">Admin Tools</small>
                         </Dropdown.Header>
                         <Dropdown.Item as={Link} to="/functionality-test">
-                          <i className="bi bi-tools me-2"></i>
+                          <i className="bi bi-gear me-2"></i>
                           Functionality Test
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/navigation-test">
-                          <i className="bi bi-diagram-3-fill me-2"></i>
+                          <i className="bi bi-list-ul me-2"></i>
                           Navigation Test
                         </Dropdown.Item>
                       </>
@@ -248,7 +248,7 @@ const Header = () => {
                       onClick={() => setShowLogoutModal(true)}
                       className="text-danger"
                     >
-                      <i className="bi bi-box-arrow-left me-2"></i>
+                      <i className="bi bi-box-arrow-right me-2"></i>
                       Logout
                     </Dropdown.Item>
                   </Dropdown.Menu>
