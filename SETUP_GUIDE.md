@@ -173,7 +173,7 @@ Change `PORT=5000` to `PORT=5001` in `backend/.env`
 If you change the backend port, update the frontend `.env`:
 
 ```env
-REACT_APP_BACKEND_URL=http://localhost:5001
+VITE_BACKEND_URL=http://localhost:5001
 ```
 
 ## 📂 Project Structure
