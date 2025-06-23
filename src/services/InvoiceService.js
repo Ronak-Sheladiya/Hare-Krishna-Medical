@@ -14,7 +14,7 @@ class InvoiceService {
    */
   async generateInvoiceQR(invoiceId) {
     try {
-      const verificationUrl = `${this.baseUrl}/invoice-verify/${invoiceId}`;
+      const verificationUrl = `${this.baseUrl}/invoice/${invoiceId}`;
 
       const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, {
         width: 180,
@@ -102,11 +102,11 @@ class InvoiceService {
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
         }
-        .no-print { 
-          display: none !important; 
+        .no-print {
+          display: none !important;
         }
-        .page-break { 
-          page-break-before: always; 
+        .page-break {
+          page-break-before: always;
         }
         .invoice-content {
           max-height: none !important;
@@ -158,19 +158,19 @@ class InvoiceService {
         color: #333 !important;
         font-size: 12px !important;
       }
-      .text-medical-red { 
-        color: #e63946 !important; 
+      .text-medical-red {
+        color: #e63946 !important;
       }
-      .text-success { 
-        color: #28a745 !important; 
+      .text-success {
+        color: #28a745 !important;
       }
-      .company-logo { 
-        max-width: 60px !important; 
-        height: auto !important; 
+      .company-logo {
+        max-width: 60px !important;
+        height: auto !important;
       }
-      .table th, .table td { 
-        padding: 6px !important; 
-        border: 1px solid #dee2e6 !important; 
+      .table th, .table td {
+        padding: 6px !important;
+        border: 1px solid #dee2e6 !important;
       }
     `;
   }
@@ -315,8 +315,8 @@ class InvoiceService {
       const normalizedInvoice = this.normalizeInvoiceData(invoice);
       const invoiceId = normalizedInvoice.invoiceId;
 
-      // Navigate to the centralized invoice details page
-      const viewUrl = `${this.baseUrl}/invoice-details/${invoiceId}`;
+      // Navigate to the invoice page
+      const viewUrl = `${this.baseUrl}/invoice/${invoiceId}`;
       window.open(viewUrl, "_blank");
 
       return {
@@ -334,14 +334,14 @@ class InvoiceService {
    * Get public verification URL for invoice
    */
   getVerificationUrl(invoiceId) {
-    return `${this.baseUrl}/invoice-verify/${invoiceId}`;
+    return `${this.baseUrl}/invoice/${invoiceId}`;
   }
 
   /**
    * Get invoice details URL
    */
   getInvoiceUrl(invoiceId) {
-    return `${this.baseUrl}/invoice-details/${invoiceId}`;
+    return `${this.baseUrl}/invoice/${invoiceId}`;
   }
 
   /**
@@ -363,8 +363,8 @@ class InvoiceService {
 
     if (showView) {
       buttons.push(`
-        <button 
-          class="${buttonClass} btn-outline-primary" 
+        <button
+          class="${buttonClass} btn-outline-primary"
           onclick="window.invoiceService.viewInvoice(${JSON.stringify(normalizedInvoice).replace(/"/g, "&quot;")})"
           title="View Invoice"
         >
@@ -375,8 +375,8 @@ class InvoiceService {
 
     if (showPrint) {
       buttons.push(`
-        <button 
-          class="${buttonClass} btn-outline-secondary" 
+        <button
+          class="${buttonClass} btn-outline-secondary"
           onclick="window.invoiceService.printInvoice(${JSON.stringify(normalizedInvoice).replace(/"/g, "&quot;")})"
           title="Print Invoice"
         >
@@ -387,8 +387,8 @@ class InvoiceService {
 
     if (showDownload) {
       buttons.push(`
-        <button 
-          class="${buttonClass} btn-outline-success" 
+        <button
+          class="${buttonClass} btn-outline-success"
           onclick="window.invoiceService.downloadInvoice(${JSON.stringify(normalizedInvoice).replace(/"/g, "&quot;")})"
           title="Download PDF"
         >

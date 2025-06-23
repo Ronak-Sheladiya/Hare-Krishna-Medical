@@ -290,14 +290,14 @@ router.post(
 
       // Generate new QR code with public verification URL
       const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-      const verificationUrl = `${frontendUrl}/invoice-verify/${invoice.invoiceId}`;
+      const verificationUrl = `${frontendUrl}/invoice/${invoice.invoiceId}`;
 
       invoice.qrCodeData = JSON.stringify({
         invoice_id: invoice.invoiceId,
         customer_name: invoice.customerDetails?.fullName || "Customer",
         total_amount: invoice.total,
         verification_url: verificationUrl,
-        invoice_url: `${frontendUrl}/invoice-details/${invoice.invoiceId}`,
+        invoice_url: verificationUrl,
         generated_at: new Date().toISOString(),
         company: "Hare Krishna Medical",
         type: "invoice_verification",
@@ -359,7 +359,7 @@ router.get("/:id/qr", auth, validateObjectId("id"), async (req, res) => {
     // Generate QR code if it doesn't exist
     if (!invoice.qrCode && invoice.invoiceId) {
       const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-      const verificationUrl = `${frontendUrl}/invoice-verify/${invoice.invoiceId}`;
+      const verificationUrl = `${frontendUrl}/invoice/${invoice.invoiceId}`;
 
       try {
         invoice.qrCodeData = JSON.stringify({
@@ -367,7 +367,7 @@ router.get("/:id/qr", auth, validateObjectId("id"), async (req, res) => {
           customer_name: invoice.customerDetails?.fullName || "Customer",
           total_amount: invoice.total,
           verification_url: verificationUrl,
-          invoice_url: `${frontendUrl}/invoice-details/${invoice.invoiceId}`,
+          invoice_url: verificationUrl,
           generated_at: new Date().toISOString(),
           company: "Hare Krishna Medical",
           type: "invoice_verification",

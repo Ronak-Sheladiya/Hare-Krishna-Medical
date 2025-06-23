@@ -49,11 +49,9 @@ import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
 import TermsConditions from "./pages/TermsConditions.jsx";
 import BackendDocs from "./pages/BackendDocs.jsx";
 import InvoiceView from "./pages/InvoiceView.jsx";
-import InvoiceDetails from "./pages/InvoiceDetails.jsx";
 import OrderDetails from "./pages/OrderDetails.jsx";
 import UserGuide from "./pages/UserGuide.jsx";
 import LocalSetupGuide from "./pages/LocalSetupGuide.jsx";
-import InvoiceVerify from "./pages/InvoiceVerify.jsx";
 import NavigationTest from "./components/common/NavigationTest.jsx";
 import ButtonFixer from "./components/common/ButtonFixer.jsx";
 import FunctionalityTest from "./components/common/FunctionalityTest.jsx";
@@ -247,15 +245,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/products" element={<Products />} />
               <Route path="/product/:id" element={<ProductDetails />} />
-              <Route path="/invoice/:orderId" element={<InvoiceView />} />
-              <Route
-                path="/invoice-details/:invoiceId"
-                element={<InvoiceDetails />}
-              />
-              <Route
-                path="/invoice-verify/:invoiceId"
-                element={<InvoiceVerify />}
-              />
+              <Route path="/invoice/:invoiceId" element={<InvoiceView />} />
               <Route
                 path="/qr/invoice/:invoiceId"
                 element={<InvoiceQRVerify />}

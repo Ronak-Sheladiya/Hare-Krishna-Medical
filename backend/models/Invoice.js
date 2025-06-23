@@ -114,7 +114,7 @@ invoiceSchema.pre("save", async function (next) {
     try {
       // Create public verification URL for QR code
       const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-      const verificationUrl = `${frontendUrl}/invoice-verify/${this.invoiceId}`;
+      const verificationUrl = `${frontendUrl}/invoice/${this.invoiceId}`;
 
       // Store comprehensive data for verification
       this.qrCodeData = JSON.stringify({
@@ -122,7 +122,7 @@ invoiceSchema.pre("save", async function (next) {
         customer_name: this.customerDetails?.fullName || "Customer",
         total_amount: this.total,
         verification_url: verificationUrl,
-        invoice_url: `${frontendUrl}/invoice-details/${this.invoiceId}`,
+        invoice_url: verificationUrl,
         generated_at: new Date().toISOString(),
         company: "Hare Krishna Medical",
         type: "invoice_verification",
