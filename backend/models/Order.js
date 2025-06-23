@@ -142,8 +142,8 @@ orderSchema.pre("save", function (next) {
     0,
   );
 
-  // Calculate tax (5% of subtotal)
-  this.tax = this.subtotal * 0.05;
+  // Tax is zero by default - all taxes included in product price
+  this.tax = 0;
 
   // Calculate shipping charges (free for orders above 500)
   if (this.subtotal >= 500) {

@@ -16,12 +16,12 @@ import {
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import QRCode from "qrcode";
 import OfficialInvoiceDesign from "../../components/common/OfficialInvoiceDesign";
+import InvoiceActions from "../../components/common/InvoiceActions";
 import { formatDateTime, getRelativeTime } from "../../utils/dateUtils";
 import { api, safeApiCall } from "../../utils/apiClient";
+import invoiceService from "../../services/InvoiceService";
 import {
   PageHeroSection,
   ThemeCard,
@@ -383,44 +383,52 @@ const AdminInvoices = () => {
                         </div>
                       </td>
                       <td>
-                        <Dropdown>
-                          <Dropdown.Toggle
-                            variant="outline-secondary"
+                        <div className="d-flex gap-1">
+                          <InvoiceActions
+                            invoice={invoice}
+                            variant="icons"
                             size="sm"
-                            className="border-0"
-                          >
-                            Actions
-                          </Dropdown.Toggle>
-                          <Dropdown.Menu>
-                            <Dropdown.Item
-                              onClick={() => handleViewInvoice(invoice)}
-                            >
-                              👁️ View Invoice
-                            </Dropdown.Item>
-                            <Dropdown.Item
-                              onClick={() => generateQRCode(invoice)}
-                            >
-                              📱 Generate QR
-                            </Dropdown.Item>
-                            <Dropdown.Divider />
-                            <Dropdown.Item
-                              onClick={() =>
-                                updateInvoiceStatus(invoice._id, "Paid")
+                            showLabels={false}
+                            onAction={(action, result) => {
+                              if (action === "view") {
+                                handleViewInvoice(invoice);
                               }
-                              disabled={invoice.status === "Paid"}
+                            }}
+                          />
+                          <Dropdown>
+                            <Dropdown.Toggle
+                              variant="outline-secondary"
+                              size="sm"
+                              className="border-0"
                             >
-                              ✅ Mark as Paid
-                            </Dropdown.Item>
-                            <Dropdown.Item
-                              onClick={() =>
-                                updateInvoiceStatus(invoice._id, "Cancelled")
-                              }
-                              disabled={invoice.status === "Cancelled"}
-                            >
-                              ❌ Cancel Invoice
-                            </Dropdown.Item>
-                          </Dropdown.Menu>
-                        </Dropdown>
+                              <i className="bi bi-gear"></i>
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                              <Dropdown.Item
+                                onClick={() => generateQRCode(invoice)}
+                              >
+                                📱 Generate QR
+                              </Dropdown.Item>
+                              <Dropdown.Divider />
+                              <Dropdown.Item
+                                onClick={() =>
+                                  updateInvoiceStatus(invoice._id, "Paid")
+                                }
+                                disabled={invoice.status === "Paid"}
+                              >
+                                ✅ Mark as Paid
+                              </Dropdown.Item>
+                              <Dropdown.Item
+                                onClick={() =>
+                                  updateInvoiceStatus(invoice._id, "Cancelled")
+                                }
+                                disabled={invoice.status === "Cancelled"}
+                              >
+                                ❌ Cancel Invoice
+                              </Dropdown.Item>
+                            </Dropdown.Menu>
+                          </Dropdown>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -457,12 +465,40 @@ const AdminInvoices = () => {
           <Modal.Body>
             {selectedInvoice && (
               <OfficialInvoiceDesign
-                invoice={selectedInvoice}
+                invoiceData={{
+                  invoiceId: selectedInvoice.invoiceId || selectedInvoice._id,
+                  orderId: selectedInvoice.orderId,
+                  orderDate: new Date(
+                    selectedInvoice.createdAt,
+                  ).toLocaleDateString("en-IN"),
+                  orderTime: new Date(
+                    selectedInvoice.createdAt,
+                  ).toLocaleTimeString("en-IN"),
+                  customerDetails: {
+                    fullName: selectedInvoice.customerName,
+                    email: selectedInvoice.customerEmail,
+                    mobile: selectedInvoice.customerMobile,
+                    address: selectedInvoice.customerAddress,
+                    city: selectedInvoice.customerCity,
+                    state: selectedInvoice.customerState,
+                    pincode: selectedInvoice.customerPincode,
+                  },
+                  items: selectedInvoice.items || [],
+                  subtotal:
+                    selectedInvoice.subtotal || selectedInvoice.totalAmount,
+                  shipping: selectedInvoice.shipping || 0,
+                  total: selectedInvoice.totalAmount,
+                  paymentMethod: selectedInvoice.paymentMethod || "COD",
+                  paymentStatus:
+                    selectedInvoice.paymentStatus || selectedInvoice.status,
+                  status: selectedInvoice.status,
+                }}
+                qrCode={selectedInvoice.qrCode}
                 onPrint={() => window.print()}
                 onDownload={() => {
-                  // Implement download functionality
                   console.log("Download invoice:", selectedInvoice);
                 }}
+                showActionButtons={true}
               />
             )}
           </Modal.Body>

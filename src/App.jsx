@@ -52,11 +52,9 @@ import InvoiceView from "./pages/InvoiceView.jsx";
 import OrderDetails from "./pages/OrderDetails.jsx";
 import UserGuide from "./pages/UserGuide.jsx";
 import LocalSetupGuide from "./pages/LocalSetupGuide.jsx";
-import InvoiceVerify from "./pages/InvoiceVerify.jsx";
 import NavigationTest from "./components/common/NavigationTest.jsx";
 import ButtonFixer from "./components/common/ButtonFixer.jsx";
 import FunctionalityTest from "./components/common/FunctionalityTest.jsx";
-import InvoiceQRVerify from "./pages/InvoiceQRVerify.jsx";
 import AdminPaymentMethods from "./pages/admin/AdminPaymentMethods.jsx";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
 import VerificationStatus from "./pages/VerificationStatus.jsx";
@@ -64,6 +62,9 @@ import AccessDenied from "./pages/AccessDenied.jsx";
 import NotFound from "./pages/NotFound.jsx";
 // Use simple socket client until socket.io-client is installed
 import socketClient from "./utils/socketClient.simple";
+
+// Invoice Service
+import invoiceService from "./services/InvoiceService";
 
 // Styles
 import "./App.css";
@@ -169,6 +170,10 @@ function App() {
   useEffect(() => {
     // Initialize session manager and set loading to false immediately
     sessionManager; // This initializes the session manager
+
+    // Initialize centralized invoice service
+    invoiceService.init();
+
     setLoading(false);
   }, []);
 
@@ -239,15 +244,8 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/products" element={<Products />} />
               <Route path="/product/:id" element={<ProductDetails />} />
-              <Route path="/invoice/:orderId" element={<InvoiceView />} />
-              <Route
-                path="/invoice-verify/:invoiceId"
-                element={<InvoiceVerify />}
-              />
-              <Route
-                path="/qr/invoice/:invoiceId"
-                element={<InvoiceQRVerify />}
-              />
+              <Route path="/invoice/:invoiceId" element={<InvoiceView />} />
+
               <Route path="/verify-email/:token" element={<VerifyEmail />} />
               <Route
                 path="/verification-status"

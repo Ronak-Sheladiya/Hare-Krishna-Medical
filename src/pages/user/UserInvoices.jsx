@@ -16,12 +16,6 @@ import {
 } from "react-bootstrap";
 import { Link, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import {
-  viewInvoice,
-  printInvoice,
-  downloadInvoice,
-  createInvoiceData,
-} from "../../utils/invoiceUtils.js";
 import { formatDateTime, getRelativeTime } from "../../utils/dateUtils";
 import { api, safeApiCall } from "../../utils/apiClient";
 import {
@@ -30,6 +24,8 @@ import {
   ThemeButton,
 } from "../../components/common/ConsistentTheme";
 import OfficialInvoiceDesign from "../../components/common/OfficialInvoiceDesign";
+import InvoiceActions from "../../components/common/InvoiceActions";
+import invoiceService from "../../services/InvoiceService";
 
 const UserInvoices = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
@@ -166,12 +162,12 @@ const UserInvoices = () => {
     setShowInvoiceModal(true);
   };
 
-  const handlePrintInvoice = (invoice) => {
-    printInvoice(invoice);
+  const handlePrintInvoice = async (invoice) => {
+    await invoiceService.printInvoice(invoice);
   };
 
-  const handleDownloadInvoice = (invoice) => {
-    downloadInvoice(invoice);
+  const handleDownloadInvoice = async (invoice) => {
+    await invoiceService.downloadInvoice(invoice);
   };
 
   // Bulk download functionality
@@ -460,29 +456,17 @@ const UserInvoices = () => {
                         </div>
                       </td>
                       <td>
-                        <div className="d-flex gap-1">
-                          <Button
-                            variant="outline-primary"
-                            size="sm"
-                            onClick={() => handleViewInvoice(invoice)}
-                          >
-                            👁️
-                          </Button>
-                          <Button
-                            variant="outline-secondary"
-                            size="sm"
-                            onClick={() => handlePrintInvoice(invoice)}
-                          >
-                            🖨️
-                          </Button>
-                          <Button
-                            variant="outline-success"
-                            size="sm"
-                            onClick={() => handleDownloadInvoice(invoice)}
-                          >
-                            📥
-                          </Button>
-                        </div>
+                        <InvoiceActions
+                          invoice={invoice}
+                          variant="icons"
+                          size="sm"
+                          showLabels={false}
+                          onAction={(action, result) => {
+                            if (action === "view") {
+                              handleViewInvoice(invoice);
+                            }
+                          }}
+                        />
                       </td>
                     </tr>
                   ))}
@@ -538,9 +522,38 @@ const UserInvoices = () => {
           <Modal.Body>
             {selectedInvoice && (
               <OfficialInvoiceDesign
-                invoice={selectedInvoice}
+                invoiceData={{
+                  invoiceId: selectedInvoice.invoiceId || selectedInvoice._id,
+                  orderId: selectedInvoice.orderId,
+                  orderDate: new Date(
+                    selectedInvoice.createdAt,
+                  ).toLocaleDateString("en-IN"),
+                  orderTime: new Date(
+                    selectedInvoice.createdAt,
+                  ).toLocaleTimeString("en-IN"),
+                  customerDetails: {
+                    fullName: selectedInvoice.customerName,
+                    email: selectedInvoice.customerEmail,
+                    mobile: selectedInvoice.customerMobile,
+                    address: selectedInvoice.customerAddress,
+                    city: selectedInvoice.customerCity,
+                    state: selectedInvoice.customerState,
+                    pincode: selectedInvoice.customerPincode,
+                  },
+                  items: selectedInvoice.items || [],
+                  subtotal:
+                    selectedInvoice.subtotal || selectedInvoice.totalAmount,
+                  shipping: selectedInvoice.shipping || 0,
+                  total: selectedInvoice.totalAmount,
+                  paymentMethod: selectedInvoice.paymentMethod || "COD",
+                  paymentStatus:
+                    selectedInvoice.paymentStatus || selectedInvoice.status,
+                  status: selectedInvoice.status,
+                }}
+                qrCode={selectedInvoice.qrCode}
                 onPrint={() => handlePrintInvoice(selectedInvoice)}
                 onDownload={() => handleDownloadInvoice(selectedInvoice)}
+                showActionButtons={true}
               />
             )}
           </Modal.Body>
