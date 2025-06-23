@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   Container,
   Row,
@@ -11,18 +11,45 @@ import {
   Button,
   Badge,
 } from "react-bootstrap";
+import { PageHeroSection } from "../components/common/ConsistentTheme";
+import ProfessionalLoading from "../components/common/ProfessionalLoading";
+import { refreshSession } from "../store/slices/authSlice";
+import { api, safeApiCall } from "../utils/apiClient";
 
 const InvoiceQRVerify = () => {
   const { invoiceId } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [invoice, setInvoice] = useState(null);
   const [verificationStatus, setVerificationStatus] = useState(null);
 
-  const API_BASE_URL =
-    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+  useEffect(() => {
+    // Check and refresh authentication session on page load
+    dispatch(refreshSession());
+  }, [dispatch]);
+
+  // Cross-tab auth sync
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === "auth-event") {
+        try {
+          const authEvent = JSON.parse(e.newValue);
+          if (authEvent.type === "LOGIN" || authEvent.type === "LOGOUT") {
+            // Refresh session to sync auth state
+            dispatch(refreshSession());
+          }
+        } catch (error) {
+          console.warn("Error parsing auth event:", error);
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [dispatch]);
 
   useEffect(() => {
     if (invoiceId) {
@@ -34,57 +61,46 @@ const InvoiceQRVerify = () => {
   }, [invoiceId]);
 
   const verifyInvoice = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      // Try to fetch invoice from API
-      const response = await fetch(
-        `${API_BASE_URL}/api/invoices/verify/${invoiceId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      );
+    const {
+      success,
+      data,
+      error: apiError,
+    } = await safeApiCall(
+      () => api.get(`/api/invoices/verify/${invoiceId}`),
+      null,
+    );
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.data) {
-          setInvoice(data.data);
-          setVerificationStatus("verified");
-        } else {
-          setError(data.message || "Invoice not found");
-          setVerificationStatus("not_found");
-        }
-      } else if (response.status === 404) {
+    if (success && data?.data) {
+      setInvoice(data.data);
+      setVerificationStatus("verified");
+    } else {
+      if (apiError?.includes("not found") || apiError?.includes("404")) {
         setError("Invoice not found or has been deleted");
         setVerificationStatus("not_found");
       } else {
-        // If API is not available, set error status
         setError(
-          "Unable to connect to server. Please check your connection and try again.",
+          apiError ||
+            "Unable to connect to server. Please check your connection and try again.",
         );
         setVerificationStatus("error");
       }
-    } catch (error) {
-      console.error("Error verifying invoice:", error);
-      setError("Unable to verify invoice. Please try again.");
-      setVerificationStatus("error");
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
   const getStatusBadge = (status) => {
     const statusConfig = {
       paid: { variant: "success", label: "Paid" },
+      completed: { variant: "success", label: "Completed" },
       pending: { variant: "warning", label: "Pending" },
       overdue: { variant: "danger", label: "Overdue" },
       cancelled: { variant: "secondary", label: "Cancelled" },
     };
-    const config = statusConfig[status] || statusConfig.pending;
+    const config = statusConfig[status?.toLowerCase()] || statusConfig.pending;
     return <Badge bg={config.variant}>{config.label}</Badge>;
   };
 
@@ -92,44 +108,49 @@ const InvoiceQRVerify = () => {
     switch (verificationStatus) {
       case "verified":
         return (
-          <Alert variant="success" className="d-flex align-items-center">
+          <Alert variant="success" className="d-flex align-items-center mb-4">
             <i
-              className="bi bi-check-circle-fill me-2"
-              style={{ fontSize: "1.5rem" }}
+              className="bi bi-check-circle-fill me-3"
+              style={{ fontSize: "2rem" }}
             ></i>
             <div>
-              <strong>✓ Invoice Verified Successfully</strong>
-              <br />
-              This is a genuine invoice from Hare Krishna Medical Store.
+              <h5 className="mb-1">✓ Invoice Verified Successfully</h5>
+              <p className="mb-0">
+                This is a genuine invoice from Hare Krishna Medical Store.
+                Scanned at {new Date().toLocaleString("en-IN")}.
+              </p>
             </div>
           </Alert>
         );
       case "not_found":
         return (
-          <Alert variant="danger" className="d-flex align-items-center">
+          <Alert variant="danger" className="d-flex align-items-center mb-4">
             <i
-              className="bi bi-x-circle-fill me-2"
-              style={{ fontSize: "1.5rem" }}
+              className="bi bi-x-circle-fill me-3"
+              style={{ fontSize: "2rem" }}
             ></i>
             <div>
-              <strong>✗ Invoice Not Found</strong>
-              <br />
-              This invoice does not exist in our records or may have been
-              deleted.
+              <h5 className="mb-1">✗ Invoice Not Found</h5>
+              <p className="mb-0">
+                This invoice does not exist in our records or may have been
+                deleted.
+              </p>
             </div>
           </Alert>
         );
       case "error":
         return (
-          <Alert variant="warning" className="d-flex align-items-center">
+          <Alert variant="warning" className="d-flex align-items-center mb-4">
             <i
-              className="bi bi-exclamation-triangle-fill me-2"
-              style={{ fontSize: "1.5rem" }}
+              className="bi bi-exclamation-triangle-fill me-3"
+              style={{ fontSize: "2rem" }}
             ></i>
             <div>
-              <strong>⚠ Verification Error</strong>
-              <br />
-              Unable to verify the invoice at this time. Please try again later.
+              <h5 className="mb-1">⚠ Verification Error</h5>
+              <p className="mb-0">
+                Unable to verify the invoice at this time. Please try again
+                later or contact support.
+              </p>
             </div>
           </Alert>
         );
@@ -138,327 +159,544 @@ const InvoiceQRVerify = () => {
     }
   };
 
+  const renderAuthActions = () => {
+    if (!isAuthenticated) {
+      return (
+        <Button
+          variant="primary"
+          onClick={() => navigate("/login")}
+          style={{
+            borderRadius: "8px",
+            padding: "12px 24px",
+            fontWeight: "600",
+          }}
+        >
+          <i className="bi bi-box-arrow-in-right me-2"></i>
+          Login to Access More
+        </Button>
+      );
+    }
+
+    if (user?.role === 1) {
+      // Admin user
+      return (
+        <Button
+          variant="success"
+          onClick={() => navigate("/admin/invoices")}
+          style={{
+            borderRadius: "8px",
+            padding: "12px 24px",
+            fontWeight: "600",
+          }}
+        >
+          <i className="bi bi-gear me-2"></i>
+          Manage Invoices
+        </Button>
+      );
+    } else {
+      // Regular user
+      return (
+        <Button
+          variant="info"
+          onClick={() => navigate("/user/invoices")}
+          style={{
+            borderRadius: "8px",
+            padding: "12px 24px",
+            fontWeight: "600",
+          }}
+        >
+          <i className="bi bi-file-text me-2"></i>
+          My Invoices
+        </Button>
+      );
+    }
+  };
+
   if (loading) {
     return (
-      <Container className="py-5">
-        <Row className="justify-content-center">
-          <Col md={8}>
-            <Card>
-              <Card.Body className="text-center py-5">
-                <Spinner animation="border" role="status" size="lg" />
-                <h4 className="mt-3">Verifying Invoice...</h4>
-                <p className="text-muted">
-                  Please wait while we verify the invoice authenticity.
-                </p>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
+      <ProfessionalLoading
+        size="lg"
+        message="Verifying QR Code..."
+        fullScreen={true}
+      />
     );
   }
 
   return (
-    <Container className="py-5">
-      <Row className="justify-content-center">
-        <Col md={10}>
-          {/* Verification Status */}
-          <div className="mb-4">{getVerificationBadge()}</div>
+    <div className="bg-light min-vh-100">
+      <PageHeroSection
+        title="QR Code Verification"
+        subtitle="Verify invoice authenticity via QR code scan"
+        iconContext="invoice"
+      />
 
-          {error && !invoice && (
-            <Card>
-              <Card.Body className="text-center py-5">
-                <i
-                  className="bi bi-exclamation-triangle text-warning"
-                  style={{ fontSize: "3rem" }}
-                ></i>
-                <h4 className="mt-3 text-danger">Verification Failed</h4>
-                <p className="text-muted">{error}</p>
-                <div className="d-flex gap-2 justify-content-center">
-                  <Button variant="outline-primary" onClick={verifyInvoice}>
-                    <i className="bi bi-arrow-clockwise me-2"></i>
-                    Try Again
-                  </Button>
-                  <Button variant="secondary" onClick={() => navigate("/")}>
-                    <i className="bi bi-house me-2"></i>
-                    Go Home
-                  </Button>
-                </div>
-              </Card.Body>
-            </Card>
-          )}
+      <Container className="py-5">
+        <Row className="justify-content-center">
+          <Col md={10}>
+            {/* Verification Status */}
+            {getVerificationBadge()}
 
-          {invoice && (
-            <Card>
-              <Card.Header className="bg-primary text-white">
-                <Row className="align-items-center">
-                  <Col>
-                    <h5 className="mb-0">
-                      <i className="bi bi-receipt me-2"></i>
-                      Invoice Verification Details
-                    </h5>
-                  </Col>
-                  <Col xs="auto">
-                    <div className="d-flex gap-2">
+            {error && !invoice && (
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+                }}
+              >
+                <Card.Body className="text-center py-5">
+                  <i
+                    className="bi bi-exclamation-triangle text-warning"
+                    style={{ fontSize: "4rem" }}
+                  ></i>
+                  <h3 className="mt-4 text-danger">QR Verification Failed</h3>
+                  <p className="text-muted mb-4 fs-5">{error}</p>
+                  <div className="d-flex gap-3 justify-content-center flex-wrap">
+                    <Button
+                      variant="outline-primary"
+                      onClick={verifyInvoice}
+                      style={{
+                        borderRadius: "8px",
+                        padding: "12px 24px",
+                        fontWeight: "600",
+                      }}
+                    >
+                      <i className="bi bi-arrow-clockwise me-2"></i>
+                      Try Again
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => navigate("/")}
+                      style={{
+                        borderRadius: "8px",
+                        padding: "12px 24px",
+                        fontWeight: "600",
+                      }}
+                    >
+                      <i className="bi bi-house me-2"></i>
+                      Go Home
+                    </Button>
+                    {renderAuthActions()}
+                  </div>
+                </Card.Body>
+              </Card>
+            )}
+
+            {invoice && (
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+                  overflow: "hidden",
+                }}
+              >
+                <Card.Header
+                  style={{
+                    background: "linear-gradient(135deg, #28a745, #20c997)",
+                    color: "white",
+                    padding: "25px 30px",
+                  }}
+                >
+                  <Row className="align-items-center">
+                    <Col>
+                      <h4 className="mb-0">
+                        <i className="bi bi-qr-code-scan me-2"></i>
+                        QR Code Verification Details
+                      </h4>
+                      <small style={{ opacity: "0.9" }}>
+                        Invoice successfully verified via QR scan
+                      </small>
+                    </Col>
+                    <Col xs="auto">
+                      <div className="d-flex gap-2">
+                        <Button
+                          variant="light"
+                          size="sm"
+                          onClick={() =>
+                            navigate(
+                              `/invoice-verify/${invoice._id || invoiceId}`,
+                            )
+                          }
+                          style={{
+                            borderRadius: "6px",
+                            fontWeight: "600",
+                          }}
+                        >
+                          <i className="bi bi-eye me-2"></i>
+                          View Full Invoice
+                        </Button>
+                        <Button
+                          variant="outline-light"
+                          size="sm"
+                          onClick={() => window.print()}
+                          style={{
+                            borderRadius: "6px",
+                            fontWeight: "600",
+                          }}
+                        >
+                          <i className="bi bi-printer me-2"></i>
+                          Print
+                        </Button>
+                      </div>
+                    </Col>
+                  </Row>
+                </Card.Header>
+
+                <Card.Body className="p-4">
+                  <Row>
+                    <Col md={6}>
+                      <h6
+                        className="mb-3"
+                        style={{ color: "#28a745", fontWeight: "700" }}
+                      >
+                        <i className="bi bi-file-text me-2"></i>
+                        Invoice Information
+                      </h6>
+                      <div
+                        className="p-3"
+                        style={{
+                          background: "#f8f9fa",
+                          borderRadius: "8px",
+                          border: "1px solid #e9ecef",
+                        }}
+                      >
+                        <table className="table table-borderless mb-0">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <strong>Invoice ID:</strong>
+                              </td>
+                              <td>
+                                <code
+                                  className="p-2 rounded"
+                                  style={{
+                                    background: "#e63946",
+                                    color: "white",
+                                    fontWeight: "600",
+                                  }}
+                                >
+                                  {invoice.invoiceId ||
+                                    invoice.invoiceNumber ||
+                                    invoiceId}
+                                </code>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <strong>Issue Date:</strong>
+                              </td>
+                              <td>
+                                {new Date(
+                                  invoice.invoiceDate ||
+                                    invoice.issueDate ||
+                                    invoice.createdAt,
+                                ).toLocaleDateString("en-IN", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                })}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <strong>Status:</strong>
+                              </td>
+                              <td>
+                                {getStatusBadge(
+                                  invoice.paymentStatus || invoice.status,
+                                )}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <strong>Total Amount:</strong>
+                              </td>
+                              <td>
+                                <span
+                                  className="fw-bold"
+                                  style={{
+                                    fontSize: "1.25rem",
+                                    color: "#28a745",
+                                  }}
+                                >
+                                  ₹
+                                  {parseFloat(
+                                    invoice.total || invoice.totalAmount || 0,
+                                  ).toFixed(2)}
+                                </span>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </Col>
+
+                    <Col md={6}>
+                      <h6
+                        className="mb-3"
+                        style={{ color: "#17a2b8", fontWeight: "700" }}
+                      >
+                        <i className="bi bi-person me-2"></i>
+                        Customer Information
+                      </h6>
+                      <div
+                        className="p-3"
+                        style={{
+                          background: "#f8f9fa",
+                          borderRadius: "8px",
+                          border: "1px solid #e9ecef",
+                        }}
+                      >
+                        <table className="table table-borderless mb-0">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <strong>Name:</strong>
+                              </td>
+                              <td>{invoice.customerName || "N/A"}</td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <strong>Email:</strong>
+                              </td>
+                              <td>{invoice.customerEmail || "Not provided"}</td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <strong>Phone:</strong>
+                              </td>
+                              <td>
+                                {invoice.customerPhone ||
+                                  invoice.customerMobile ||
+                                  "Not provided"}
+                              </td>
+                            </tr>
+                            {(invoice.customerAddress || invoice.address) && (
+                              <tr>
+                                <td>
+                                  <strong>Address:</strong>
+                                </td>
+                                <td>
+                                  {invoice.customerAddress || invoice.address}
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </Col>
+                  </Row>
+
+                  <hr className="my-4" />
+
+                  <h6
+                    className="mb-3"
+                    style={{ color: "#6f42c1", fontWeight: "700" }}
+                  >
+                    <i className="bi bi-list-ul me-2"></i>
+                    Invoice Items Summary
+                  </h6>
+                  <div className="table-responsive">
+                    <table
+                      className="table table-hover"
+                      style={{
+                        border: "2px solid #e9ecef",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <thead style={{ background: "#f8f9fa" }}>
+                        <tr>
+                          <th style={{ border: "none", padding: "15px" }}>
+                            Item
+                          </th>
+                          <th
+                            className="text-center"
+                            style={{ border: "none", padding: "15px" }}
+                          >
+                            Quantity
+                          </th>
+                          <th
+                            className="text-end"
+                            style={{ border: "none", padding: "15px" }}
+                          >
+                            Unit Price
+                          </th>
+                          <th
+                            className="text-end"
+                            style={{ border: "none", padding: "15px" }}
+                          >
+                            Total
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {invoice.items?.map((item, index) => (
+                          <tr key={index}>
+                            <td style={{ padding: "12px 15px" }}>
+                              <strong>
+                                {item.name || item.productName || "Item"}
+                              </strong>
+                              {item.description && (
+                                <div>
+                                  <small className="text-muted">
+                                    {item.description}
+                                  </small>
+                                </div>
+                              )}
+                            </td>
+                            <td
+                              className="text-center"
+                              style={{
+                                padding: "12px 15px",
+                                fontWeight: "600",
+                              }}
+                            >
+                              {item.quantity}
+                            </td>
+                            <td
+                              className="text-end"
+                              style={{
+                                padding: "12px 15px",
+                                fontWeight: "600",
+                              }}
+                            >
+                              ₹{parseFloat(item.price || 0).toFixed(2)}
+                            </td>
+                            <td
+                              className="text-end"
+                              style={{
+                                padding: "12px 15px",
+                                fontWeight: "700",
+                                color: "#28a745",
+                              }}
+                            >
+                              ₹
+                              {parseFloat(
+                                item.total || item.price * item.quantity || 0,
+                              ).toFixed(2)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot style={{ background: "#f8f9fa" }}>
+                        <tr>
+                          <td
+                            colSpan="3"
+                            style={{
+                              padding: "15px",
+                              fontWeight: "700",
+                              fontSize: "1.1rem",
+                            }}
+                          >
+                            Total Amount:
+                          </td>
+                          <td
+                            className="text-end"
+                            style={{
+                              padding: "15px",
+                              fontWeight: "900",
+                              fontSize: "1.25rem",
+                              color: "#28a745",
+                            }}
+                          >
+                            ₹
+                            {parseFloat(
+                              invoice.total || invoice.totalAmount || 0,
+                            ).toFixed(2)}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+
+                  <hr className="my-4" />
+
+                  <div className="text-center">
+                    <div className="row justify-content-center">
+                      <div className="col-md-8">
+                        <div
+                          className="p-4 rounded"
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #e9f8e9, #f0fff0)",
+                            border: "2px solid #28a745",
+                          }}
+                        >
+                          <i
+                            className="bi bi-shield-check"
+                            style={{ fontSize: "3rem", color: "#28a745" }}
+                          ></i>
+                          <h5
+                            className="mt-3 mb-2"
+                            style={{ color: "#28a745" }}
+                          >
+                            Digitally Verified ✓
+                          </h5>
+                          <p className="mb-0" style={{ color: "#155724" }}>
+                            This invoice has been digitally verified and is
+                            authentic.
+                            <br />
+                            Generated by{" "}
+                            <strong>Hare Krishna Medical Store</strong>
+                            <br />
+                            <small>
+                              QR Code scanned at{" "}
+                              {new Date().toLocaleString("en-IN")}
+                            </small>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card.Body>
+
+                <Card.Footer
+                  style={{ background: "#f8f9fa", padding: "20px 30px" }}
+                >
+                  <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <small className="text-muted">
+                      <i className="bi bi-info-circle me-1"></i>
+                      Scanned via QR Code at{" "}
+                      {new Date().toLocaleString("en-IN")}
+                    </small>
+                    <div className="d-flex gap-2 flex-wrap">
                       <Button
-                        variant="light"
-                        size="sm"
+                        variant="outline-secondary"
+                        onClick={() => navigate("/")}
+                        style={{
+                          borderRadius: "6px",
+                          fontWeight: "600",
+                        }}
+                      >
+                        <i className="bi bi-house me-2"></i>
+                        Home
+                      </Button>
+                      {renderAuthActions()}
+                      <Button
+                        variant="primary"
                         onClick={() =>
-                          navigate(`/invoice/${invoice.orderId || invoice._id}`)
+                          navigate(
+                            `/invoice-verify/${invoice._id || invoiceId}`,
+                          )
                         }
+                        style={{
+                          borderRadius: "6px",
+                          fontWeight: "600",
+                        }}
                       >
                         <i className="bi bi-eye me-2"></i>
                         View Full Invoice
                       </Button>
-                      <Button
-                        variant="outline-light"
-                        size="sm"
-                        onClick={() => window.print()}
-                      >
-                        <i className="bi bi-printer me-2"></i>
-                        Print
-                      </Button>
-                    </div>
-                  </Col>
-                </Row>
-              </Card.Header>
-              <Card.Body>
-                <Row>
-                  <Col md={6}>
-                    <h6 className="text-primary mb-3">
-                      <i className="bi bi-file-text me-2"></i>
-                      Invoice Information
-                    </h6>
-                    <table className="table table-borderless">
-                      <tbody>
-                        <tr>
-                          <td>
-                            <strong>Invoice Number:</strong>
-                          </td>
-                          <td>
-                            <code className="bg-light p-2 rounded">
-                              {invoice.invoiceNumber}
-                            </code>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <strong>Issue Date:</strong>
-                          </td>
-                          <td>
-                            {new Date(invoice.issueDate).toLocaleDateString(
-                              "en-IN",
-                              {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              },
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <strong>Due Date:</strong>
-                          </td>
-                          <td>
-                            {new Date(invoice.dueDate).toLocaleDateString(
-                              "en-IN",
-                              {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              },
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <strong>Status:</strong>
-                          </td>
-                          <td>{getStatusBadge(invoice.status)}</td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <strong>Total Amount:</strong>
-                          </td>
-                          <td>
-                            <span className="fs-5 fw-bold text-success">
-                              ₹{parseFloat(invoice.total).toFixed(2)}
-                            </span>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </Col>
-                  <Col md={6}>
-                    <h6 className="text-primary mb-3">
-                      <i className="bi bi-person me-2"></i>
-                      Customer Information
-                    </h6>
-                    <table className="table table-borderless">
-                      <tbody>
-                        <tr>
-                          <td>
-                            <strong>Name:</strong>
-                          </td>
-                          <td>{invoice.customerName}</td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <strong>Email:</strong>
-                          </td>
-                          <td>{invoice.customerEmail}</td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <strong>Phone:</strong>
-                          </td>
-                          <td>{invoice.customerPhone}</td>
-                        </tr>
-                        {invoice.customerAddress && (
-                          <tr>
-                            <td>
-                              <strong>Address:</strong>
-                            </td>
-                            <td>{invoice.customerAddress}</td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </Col>
-                </Row>
-
-                <hr />
-
-                <h6 className="text-primary mb-3">
-                  <i className="bi bi-list-ul me-2"></i>
-                  Invoice Items
-                </h6>
-                <div className="table-responsive">
-                  <table className="table table-hover">
-                    <thead className="table-light">
-                      <tr>
-                        <th>Item</th>
-                        <th className="text-center">Quantity</th>
-                        <th className="text-end">Unit Price</th>
-                        <th className="text-end">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {invoice.items?.map((item, index) => (
-                        <tr key={index}>
-                          <td>{item.name}</td>
-                          <td className="text-center">{item.quantity}</td>
-                          <td className="text-end">
-                            ₹{parseFloat(item.price).toFixed(2)}
-                          </td>
-                          <td className="text-end">
-                            ₹{parseFloat(item.total).toFixed(2)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot className="table-light">
-                      <tr>
-                        <td colSpan="3">
-                          <strong>Subtotal:</strong>
-                        </td>
-                        <td className="text-end">
-                          <strong>
-                            ₹{parseFloat(invoice.subtotal).toFixed(2)}
-                          </strong>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td colSpan="3">
-                          <strong>Tax:</strong>
-                        </td>
-                        <td className="text-end">
-                          <strong className="text-success">
-                            Included in product price
-                          </strong>
-                        </td>
-                      </tr>
-                      <tr className="table-primary">
-                        <td colSpan="3">
-                          <strong>Total Amount:</strong>
-                        </td>
-                        <td className="text-end">
-                          <strong className="fs-5">
-                            ₹{parseFloat(invoice.total).toFixed(2)}
-                          </strong>
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-
-                <hr />
-
-                <div className="text-center">
-                  <div className="row justify-content-center">
-                    <div className="col-md-6">
-                      <div className="bg-light p-3 rounded">
-                        <i
-                          className="bi bi-shield-check text-success"
-                          style={{ fontSize: "2rem" }}
-                        ></i>
-                        <h6 className="mt-2 mb-1">Digitally Verified</h6>
-                        <small className="text-muted">
-                          This invoice has been digitally verified and is
-                          authentic.
-                          <br />
-                          Generated by Hare Krishna Medical Store
-                        </small>
-                      </div>
                     </div>
                   </div>
-                </div>
-              </Card.Body>
-              <Card.Footer className="bg-light">
-                <div className="d-flex justify-content-between align-items-center">
-                  <small className="text-muted">
-                    <i className="bi bi-info-circle me-1"></i>
-                    Scanned via QR Code at {new Date().toLocaleString("en-IN")}
-                  </small>
-                  <div className="d-flex gap-2">
-                    <Button
-                      variant="outline-secondary"
-                      onClick={() => navigate("/")}
-                    >
-                      <i className="bi bi-house me-2"></i>
-                      Back to Home
-                    </Button>
-                    {isAuthenticated && (
-                      <Button
-                        variant="outline-primary"
-                        onClick={() =>
-                          navigate(
-                            user?.role === 1 ? "/admin/orders" : "/user/orders",
-                          )
-                        }
-                      >
-                        <i className="bi bi-bag me-2"></i>
-                        {user?.role === 1 ? "Manage Orders" : "My Orders"}
-                      </Button>
-                    )}
-                    <Button
-                      variant="primary"
-                      onClick={() =>
-                        navigate(`/invoice/${invoice.orderId || invoice._id}`)
-                      }
-                    >
-                      <i className="bi bi-eye me-2"></i>
-                      View Full Invoice
-                    </Button>
-                  </div>
-                </div>
-              </Card.Footer>
-            </Card>
-          )}
-        </Col>
-      </Row>
-    </Container>
+                </Card.Footer>
+              </Card>
+            )}
+          </Col>
+        </Row>
+      </Container>
+    </div>
   );
 };
 
