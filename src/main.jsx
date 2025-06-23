@@ -5,6 +5,7 @@ import store from "./store/store.js";
 import App from "./App.jsx";
 import "./index.css";
 import "./utils/errorHandler.js"; // Initialize global error handling
+import "./utils/crossTabSessionManager.js"; // Initialize cross-tab session management
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
