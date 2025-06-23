@@ -192,22 +192,30 @@ const ProfessionalLoading = ({
         @keyframes logoFloat {
           0%, 100% {
             transform: translateY(0px) scale(1);
-            box-shadow: 0 12px 40px ${color}25, inset 0 2px 4px rgba(255,255,255,0.8);
+            box-shadow: 0 16px 64px ${color}25, 0 8px 32px rgba(0,0,0,0.1);
           }
           50% {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 16px 48px ${color}35, inset 0 2px 4px rgba(255,255,255,0.9);
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 20px 72px ${color}35, 0 12px 40px rgba(0,0,0,0.15);
           }
         }
 
-        @keyframes pulse {
+        @keyframes logoSpin {
           0%, 100% {
-            transform: scale(1) rotate(0deg);
+            transform: rotate(0deg) scale(1);
             opacity: 1;
           }
+          25% {
+            transform: rotate(2deg) scale(1.02);
+            opacity: 0.95;
+          }
           50% {
-            transform: scale(1.08) rotate(2deg);
+            transform: rotate(0deg) scale(1.05);
             opacity: 0.9;
+          }
+          75% {
+            transform: rotate(-2deg) scale(1.02);
+            opacity: 0.95;
           }
         }
 
