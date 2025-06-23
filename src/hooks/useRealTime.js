@@ -5,10 +5,13 @@ import { useSelector } from "react-redux";
 let socketClient = null;
 try {
   if (typeof window !== "undefined") {
-    socketClient = require("../utils/socketClient").default;
+    const socketModule = await import("../utils/socketClient");
+    socketClient = socketModule.default;
   }
 } catch (error) {
-  console.warn("SocketClient not available:", error);
+  console.warn(
+    "SocketClient not available. Install socket.io-client: npm install socket.io-client",
+  );
 }
 
 export const useRealTime = () => {
