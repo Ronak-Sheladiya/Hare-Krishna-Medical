@@ -290,7 +290,7 @@ const Header = () => {
         </Modal.Header>
         <Modal.Body>
           <div className="text-center">
-            <i className="bi bi-shield-exclamation display-1 text-warning mb-3"></i>
+            <i className="bi bi-question-circle display-1 text-warning mb-3"></i>
             <h5>Are you sure you want to logout?</h5>
             <p className="text-muted">
               You will need to login again to access your account features.
