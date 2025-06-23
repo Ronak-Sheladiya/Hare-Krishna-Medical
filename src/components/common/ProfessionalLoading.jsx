@@ -55,11 +55,42 @@ const ProfessionalLoading = ({
 
   return (
     <div style={containerStyle}>
-      {/* Brand Logo and Loading Animation */}
-      <div style={{ position: "relative", marginBottom: "15px" }}>
-        {/* Company Logo */}
+      {/* Centered Loading Animation with Logo */}
+      <div style={{
+        position: "relative",
+        marginBottom: "20px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: containerSize + 60,
+        height: containerSize + 60,
+      }}>
+        {/* Outer Rotating Ring */}
         <div
           style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: containerSize + 30,
+            height: containerSize + 30,
+            border: `3px solid transparent`,
+            borderTop: `3px solid ${color}`,
+            borderRight: `3px solid ${color}60`,
+            borderRadius: "50%",
+            animation: "spin 2s linear infinite",
+            filter: `drop-shadow(0 4px 12px ${color}40)`,
+            zIndex: 1,
+          }}
+        />
+
+        {/* Company Logo - Perfectly Centered */}
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
             width: logoSize + 20,
             height: logoSize + 20,
             background: "white",
@@ -69,13 +100,12 @@ const ProfessionalLoading = ({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            position: "relative",
             animation: "logoFloat 2.5s ease-in-out infinite",
-            zIndex: 2,
+            zIndex: 3,
           }}
         >
           <img
-            src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
+            src="https://cdn.builder.io/api/v1/assets/72c59d801d5945d4830160c2c2f8a610/hk-34b526?format=webp&width=800"
             alt="Hare Krishna Medical"
             style={{
               width: logoSize,
@@ -106,7 +136,7 @@ const ProfessionalLoading = ({
           >
             HK
           </div>
-        </div>
+        }
 
         {/* Outer Rotating Ring */}
         <div
