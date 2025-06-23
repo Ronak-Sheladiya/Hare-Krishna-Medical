@@ -13,6 +13,7 @@ import {
   InputGroup,
   Spinner,
 } from "react-bootstrap";
+import { safeApiCall, api } from "../../utils/apiClient";
 
 const AdminPaymentMethods = () => {
   const [paymentMethods, setPaymentMethods] = useState([]);
