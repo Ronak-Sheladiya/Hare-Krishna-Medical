@@ -14,6 +14,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { addToCart } from "../../store/slices/cartSlice";
 import { api } from "../../utils/apiClient";
+import { formatDateUniversal } from "../../utils/dateUtils";
 
 const FunctionalityTest = () => {
   const navigate = useNavigate();
@@ -132,17 +133,16 @@ const FunctionalityTest = () => {
       name: "Date Utilities",
       test: () => {
         try {
-          const { formatDateUniversal } = require("../../utils/dateUtils");
           const formatted = formatDateUniversal(new Date());
 
           return {
-            passed: formatted.includes("/"),
+            passed: formatted && formatted.includes("/"),
             message: `Date format: ${formatted}`,
           };
         } catch (error) {
           return {
             passed: false,
-            message: "Date utilities not working",
+            message: `Date utilities error: ${error.message}`,
           };
         }
       },
