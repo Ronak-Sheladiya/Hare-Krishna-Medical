@@ -61,11 +61,11 @@ const Header = () => {
               style={{
                 background: "white",
                 borderRadius: "50%",
-                padding: "8px",
+                padding: "10px",
                 border: "2px solid rgba(230, 57, 70, 0.1)",
                 boxShadow: "0 4px 16px rgba(230, 57, 70, 0.25)",
-                width: "60px",
-                height: "60px",
+                width: "80px",
+                height: "80px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -89,16 +89,6 @@ const Header = () => {
               >
                 HARE KRISHNA MEDICAL
               </h4>
-              <small
-                style={{
-                  color: "#6c757d",
-                  fontSize: "0.7rem",
-                  fontWeight: "500",
-                  letterSpacing: "0.3px",
-                }}
-              >
-                🏥 Your Trusted Health Partner
-              </small>
             </div>
           </Navbar.Brand>
 
@@ -111,7 +101,6 @@ const Header = () => {
                 to="/"
                 className={`nav-link-custom ${isActiveRoute("/") ? "active" : ""}`}
               >
-                <i className="bi bi-house-door me-1"></i>
                 Home
               </Nav.Link>
               <Nav.Link
@@ -124,7 +113,6 @@ const Header = () => {
                     : ""
                 }`}
               >
-                <i className="bi bi-capsule me-1"></i>
                 Products
               </Nav.Link>
               <Nav.Link
@@ -132,7 +120,6 @@ const Header = () => {
                 to="/about"
                 className={`nav-link-custom ${isActiveRoute("/about") ? "active" : ""}`}
               >
-                <i className="bi bi-info-circle me-1"></i>
                 About
               </Nav.Link>
               <Nav.Link
@@ -140,7 +127,6 @@ const Header = () => {
                 to="/contact"
                 className={`nav-link-custom ${isActiveRoute("/contact") ? "active" : ""}`}
               >
-                <i className="bi bi-envelope me-1"></i>
                 Contact
               </Nav.Link>
             </Nav>
@@ -262,6 +248,10 @@ const Header = () => {
                           <i className="bi bi-list-ul me-2"></i>
                           Navigation Test
                         </Dropdown.Item>
+                        <Dropdown.Item as={Link} to="/socket-diagnostics">
+                          <i className="bi bi-wifi me-2"></i>
+                          WebSocket Diagnostics
+                        </Dropdown.Item>
                       </>
                     )}
 
@@ -341,8 +331,8 @@ const Header = () => {
       {/* Header Styling */}
       <style jsx>{`
         .medical-logo {
-          width: 44px;
-          height: 44px;
+          width: 60px;
+          height: 60px;
           border-radius: 50%;
           transition: all 0.3s ease;
           object-fit: contain;
@@ -434,16 +424,12 @@ const Header = () => {
 
         @media (max-width: 768px) {
           .medical-logo {
-            width: 36px;
-            height: 36px;
+            width: 50px;
+            height: 50px;
           }
 
           .brand-text-container h4 {
             font-size: 1.1rem !important;
-          }
-
-          .brand-text-container small {
-            font-size: 0.65rem !important;
           }
         }
       `}</style>

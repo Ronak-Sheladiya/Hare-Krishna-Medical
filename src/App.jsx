@@ -272,6 +272,14 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/socket-diagnostics"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <SocketDiagnostic />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/cart" element={<Cart />} />
               <Route path="/order" element={<Order />} />
               <Route path="/about" element={<About />} />
@@ -451,11 +459,7 @@ function App() {
           {/* Footer displayed on all pages */}
           <Footer />
 
-          {/* Real-time connection status indicator */}
-          <RealTimeStatus />
-
-          {/* Socket diagnostic tool (admin only, shows on connection issues) */}
-          <SocketDiagnostic />
+          {/* Socket diagnostic tool route handled separately */}
         </div>
       </ErrorBoundary>
     </Router>
