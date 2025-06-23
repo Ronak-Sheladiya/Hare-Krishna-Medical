@@ -13,7 +13,7 @@ const server = http.createServer(app);
 // Socket.io setup for real-time updates
 const io = socketIo(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
   },
 });
@@ -25,7 +25,7 @@ app.set("io", io);
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
   }),
 );
@@ -56,20 +56,28 @@ mongoose
 
 // Socket.io connection handling
 io.on("connection", (socket) => {
-  console.log("👤 User connected:", socket.id);
+  if (process.env.NODE_ENV === "development") {
+    console.log("👤 User connected:", socket.id);
+  }
 
   socket.on("join-admin", () => {
     socket.join("admin-room");
-    console.log("👨‍💼 Admin joined admin room");
+    if (process.env.NODE_ENV === "development") {
+      console.log("👨‍💼 Admin joined admin room");
+    }
   });
 
   socket.on("join-user", (userId) => {
     socket.join(`user-${userId}`);
-    console.log(`👤 User ${userId} joined user room`);
+    if (process.env.NODE_ENV === "development") {
+      console.log(`👤 User ${userId} joined user room`);
+    }
   });
 
   socket.on("disconnect", () => {
-    console.log("👤 User disconnected:", socket.id);
+    if (process.env.NODE_ENV === "development") {
+      console.log("👤 User disconnected:", socket.id);
+    }
   });
 });
 

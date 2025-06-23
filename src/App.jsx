@@ -46,9 +46,10 @@ import BackendDocs from "./pages/BackendDocs.jsx";
 import InvoiceView from "./pages/InvoiceView.jsx";
 import OrderDetails from "./pages/OrderDetails.jsx";
 import UserGuide from "./pages/UserGuide.jsx";
-import BackendDocs from "./pages/BackendDocs.jsx";
 import LocalSetupGuide from "./pages/LocalSetupGuide.jsx";
 import InvoiceVerify from "./pages/InvoiceVerify.jsx";
+import NavigationTest from "./components/common/NavigationTest.jsx";
+import ButtonFixer from "./components/common/ButtonFixer.jsx";
 import InvoiceQRVerify from "./pages/InvoiceQRVerify.jsx";
 import AdminPaymentMethods from "./pages/admin/AdminPaymentMethods.jsx";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
@@ -120,18 +121,9 @@ function App() {
   const { user, token } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    // Simulate initial loading
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-
-    // Initialize session manager
+    // Initialize session manager and set loading to false immediately
     sessionManager; // This initializes the session manager
-
-    return () => {
-      clearTimeout(timer);
-      // Session manager cleanup is handled by its own destructor
-    };
+    setLoading(false);
   }, []);
 
   // Socket connection management
@@ -216,23 +208,13 @@ function App() {
               <Route path="/user-guide" element={<UserGuide />} />
               <Route path="/backend-docs" element={<BackendDocs />} />
               <Route path="/localsetup-guide" element={<LocalSetupGuide />} />
+              <Route path="/navigation-test" element={<NavigationTest />} />
+              <Route path="/button-fixer" element={<ButtonFixer />} />
               <Route path="/order" element={<Order />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-conditions" element={<TermsConditions />} />
-              <Route path="/backend-docs" element={<BackendDocs />} />
-              <Route path="/user-guide" element={<UserGuide />} />
-              <Route path="/invoice/:orderId" element={<InvoiceView />} />
-              <Route
-                path="/invoice-verify/:invoiceId"
-                element={<InvoiceVerify />}
-              />
-              <Route path="/verify-email/:token" element={<VerifyEmail />} />
-              <Route
-                path="/verification-status"
-                element={<VerificationStatus />}
-              />
               <Route path="/order/:orderId" element={<OrderDetails />} />
 
               {/* Auth Routes (redirect if already authenticated) */}
@@ -262,24 +244,112 @@ function App() {
               />
 
               {/* Admin Routes */}
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/products" element={<AdminProducts />} />
-              <Route path="/admin/orders" element={<AdminOrders />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
-              <Route path="/admin/analytics" element={<AdminAnalytics />} />
-              <Route path="/admin/messages" element={<AdminMessages />} />
-              <Route path="/admin/invoices" element={<AdminInvoices />} />
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/products"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminProducts />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/orders"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminOrders />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminUsers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/analytics"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminAnalytics />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/messages"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminMessages />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/invoices"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminInvoices />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/admin/payment-methods"
-                element={<AdminPaymentMethods />}
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminPaymentMethods />
+                  </ProtectedRoute>
+                }
               />
-              <Route path="/admin/backend-docs" element={<BackendDocs />} />
+              <Route
+                path="/admin/backend-docs"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <BackendDocs />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* User Routes */}
-              <Route path="/user/dashboard" element={<UserDashboard />} />
-              <Route path="/user/orders" element={<UserOrders />} />
-              <Route path="/user/invoices" element={<UserInvoices />} />
-              <Route path="/user/profile" element={<UserProfile />} />
+              <Route
+                path="/user/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <UserDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/user/orders"
+                element={
+                  <ProtectedRoute>
+                    <UserOrders />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/user/invoices"
+                element={
+                  <ProtectedRoute>
+                    <UserInvoices />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/user/profile"
+                element={
+                  <ProtectedRoute>
+                    <UserProfile />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/user/*"
                 element={

@@ -45,6 +45,36 @@ const seedUsers = async () => {
         },
       },
       {
+        fullName: "Ronak Sheladiya",
+        email: "ronaksheladiya652@gmail.com",
+        mobile: "9876543211",
+        password: "admin@123",
+        role: 1,
+        isActive: true,
+        emailVerified: true,
+        address: {
+          street: "Admin Complex",
+          city: "Surat",
+          state: "Gujarat",
+          pincode: "394107",
+        },
+      },
+      {
+        fullName: "Mayur Gajera",
+        email: "mayurgajera097@gmail.com",
+        mobile: "9876543212",
+        password: "admin@123",
+        role: 1,
+        isActive: true,
+        emailVerified: true,
+        address: {
+          street: "Admin Complex",
+          city: "Surat",
+          state: "Gujarat",
+          pincode: "394107",
+        },
+      },
+      {
         fullName: "John Smith",
         email: "john@example.com",
         mobile: "9876543210",
@@ -388,6 +418,10 @@ const seedDatabase = async () => {
     console.log("\n🔐 Admin Login Credentials:");
     console.log("   Email: admin@harekrishnamedical.com");
     console.log("   Password: admin123");
+    console.log("   Email: ronaksheladiya652@gmail.com");
+    console.log("   Password: admin@123");
+    console.log("   Email: mayurgajera097@gmail.com");
+    console.log("   Password: admin@123");
 
     console.log("\n👤 Test User Credentials:");
     console.log("   Email: john@example.com");

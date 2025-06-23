@@ -12,6 +12,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../store/slices/authSlice.js";
 import NotificationSystem from "../common/NotificationSystem.jsx";
+import UserAvatar from "../common/UserAvatar.jsx";
 
 const Header = () => {
   const location = useLocation();
@@ -34,7 +35,7 @@ const Header = () => {
 
   const getUserDisplayName = () => {
     if (!user) return "User";
-    return user.name || "User";
+    return user.name || user.fullName || "User";
   };
 
   const getUserRole = () => {
@@ -42,37 +43,42 @@ const Header = () => {
     return user.role === 1 ? "Admin" : "User";
   };
 
-  const getDashboardLink = () => {
-    if (!user) return "/";
-    return user.role === 1 ? "/admin/dashboard" : "/user/dashboard";
+  const handleDashboardClick = (e) => {
+    e.preventDefault();
+    if (!user) return;
+    const dashboardPath =
+      user.role === 1 ? "/admin/dashboard" : "/user/dashboard";
+    navigate(dashboardPath);
   };
 
   return (
     <>
       <Navbar expand="lg" className="medical-header" sticky="top">
         <Container>
-          {/* Logo Section */}
+          {/* Simplified Header Layout */}
           <Navbar.Brand as={Link} to="/" className="d-flex align-items-center">
             <img
               src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
               alt="Hare Krishna Medical"
-              className="medical-logo me-2"
+              className="medical-logo me-3"
             />
-            <span className="fw-bold text-dark d-none d-md-inline">
-              Hare Krishna Medical
-            </span>
+            <div className="brand-text-container">
+              <h4 className="mb-0 text-medical-red fw-bold">
+                Hare Krishna Medical
+              </h4>
+              <small className="text-muted">Healthcare Excellence</small>
+            </div>
           </Navbar.Brand>
 
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
+
           <Navbar.Collapse id="basic-navbar-nav">
-            {/* Navigation Links */}
-            <Nav className="medical-nav me-auto">
+            <Nav className="me-auto">
               <Nav.Link
                 as={Link}
                 to="/"
                 className={isActiveRoute("/") ? "active" : ""}
               >
-                <i className="bi bi-house me-1 d-lg-none"></i>
                 Home
               </Nav.Link>
               <Nav.Link
@@ -85,7 +91,6 @@ const Header = () => {
                     : ""
                 }
               >
-                <i className="bi bi-grid3x3-gap me-1 d-lg-none"></i>
                 Products
               </Nav.Link>
               <Nav.Link
@@ -93,88 +98,50 @@ const Header = () => {
                 to="/about"
                 className={isActiveRoute("/about") ? "active" : ""}
               >
-                <i className="bi bi-info-circle me-1 d-lg-none"></i>
-                About Us
+                About
               </Nav.Link>
               <Nav.Link
                 as={Link}
                 to="/contact"
                 className={isActiveRoute("/contact") ? "active" : ""}
               >
-                <i className="bi bi-telephone me-1 d-lg-none"></i>
                 Contact
               </Nav.Link>
             </Nav>
 
-            {/* Right side - Cart and Auth */}
-            <Nav className="d-flex align-items-center">
-              {/* Cart Icon */}
-              <Nav.Link
-                as={Link}
-                to="/cart"
-                className="position-relative me-3 cart-link"
-              >
+            <Nav className="ms-auto d-flex align-items-center">
+              {/* Cart */}
+              <Nav.Link as={Link} to="/cart" className="position-relative me-3">
                 <i className="bi bi-cart3 fs-5"></i>
                 {totalItems > 0 && (
                   <Badge
                     bg="danger"
-                    className="cart-badge position-absolute"
-                    style={{
-                      top: "-8px",
-                      right: "-8px",
-                      fontSize: "0.75rem",
-                      minWidth: "20px",
-                      height: "20px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      borderRadius: "50%",
-                    }}
+                    className="position-absolute top-0 start-100 translate-middle"
                   >
                     {totalItems}
                   </Badge>
                 )}
               </Nav.Link>
 
-              {/* Real-time Notifications for Admin */}
+              {/* Notifications for Admin */}
               {isAuthenticated && user?.role === 1 && <NotificationSystem />}
 
-              {/* Authentication Buttons/User Menu */}
+              {/* Authentication */}
               {isAuthenticated ? (
                 <Dropdown align="end">
                   <Dropdown.Toggle
                     variant="link"
-                    className="d-flex align-items-center text-decoration-none text-dark border-0 bg-transparent"
-                    id="user-dropdown"
+                    className="text-decoration-none"
                   >
                     <div className="d-flex align-items-center">
-                      {user?.profileImage ? (
-                        <img
-                          src={user.profileImage}
-                          alt={getUserDisplayName()}
-                          className="rounded-circle me-2"
-                          width="35"
-                          height="35"
-                        />
-                      ) : (
-                        <div className="bg-medical-red text-white rounded-circle d-flex align-items-center justify-content-center me-2">
-                          <i
-                            className="bi bi-person-fill"
-                            style={{
-                              width: "35px",
-                              height: "35px",
-                              fontSize: "1.2rem",
-                            }}
-                          ></i>
-                        </div>
-                      )}
+                      <UserAvatar user={user} size={35} className="me-2" />
                       <div className="d-none d-md-block text-start">
                         <div className="fw-bold small">
                           {getUserDisplayName()}
                         </div>
                         <div
                           className="text-muted"
-                          style={{ fontSize: "0.75rem" }}
+                          style={{ fontSize: "0.7rem" }}
                         >
                           {getUserRole()}
                         </div>
@@ -183,17 +150,15 @@ const Header = () => {
                     </div>
                   </Dropdown.Toggle>
 
-                  <Dropdown.Menu className="border-0 shadow">
+                  <Dropdown.Menu>
                     <Dropdown.Header>
-                      <div className="text-center">
-                        <strong>{getUserDisplayName()}</strong>
-                        <br />
-                        <small className="text-muted">{user?.email}</small>
-                      </div>
+                      <strong>{getUserDisplayName()}</strong>
+                      <br />
+                      <small className="text-muted">{user?.email}</small>
                     </Dropdown.Header>
                     <Dropdown.Divider />
 
-                    <Dropdown.Item as={Link} to={getDashboardLink()}>
+                    <Dropdown.Item onClick={handleDashboardClick}>
                       <i className="bi bi-speedometer2 me-2"></i>
                       Dashboard
                     </Dropdown.Item>
@@ -206,11 +171,11 @@ const Header = () => {
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/user/invoices">
                           <i className="bi bi-receipt me-2"></i>
-                          Invoices
+                          My Invoices
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/user/profile">
                           <i className="bi bi-person me-2"></i>
-                          Edit Profile
+                          Profile Settings
                         </Dropdown.Item>
                       </>
                     )}
@@ -232,10 +197,6 @@ const Header = () => {
                         <Dropdown.Item as={Link} to="/admin/invoices">
                           <i className="bi bi-receipt-cutoff me-2"></i>
                           Manage Invoices
-                        </Dropdown.Item>
-                        <Dropdown.Item as={Link} to="/admin/payment-methods">
-                          <i className="bi bi-credit-card me-2"></i>
-                          Payment Methods
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/analytics">
                           <i className="bi bi-graph-up me-2"></i>
@@ -265,19 +226,10 @@ const Header = () => {
                     to="/login"
                     variant="outline-primary"
                     size="sm"
-                    className="btn-medical-outline"
                   >
-                    <i className="bi bi-box-arrow-in-right me-1 d-lg-none"></i>
                     Login
                   </Button>
-                  <Button
-                    as={Link}
-                    to="/register"
-                    variant="primary"
-                    size="sm"
-                    className="btn-medical-primary"
-                  >
-                    <i className="bi bi-person-plus me-1 d-lg-none"></i>
+                  <Button as={Link} to="/register" variant="primary" size="sm">
                     Register
                   </Button>
                 </div>
@@ -309,20 +261,81 @@ const Header = () => {
           <Button
             variant="secondary"
             onClick={() => setShowLogoutModal(false)}
-            className="btn-medical-outline"
+            className="btn-modal-cancel"
           >
             Cancel
           </Button>
           <Button
             variant="danger"
             onClick={handleLogout}
-            className="btn-medical-primary"
+            className="btn-modal-confirm"
           >
             <i className="bi bi-box-arrow-right me-2"></i>
             Logout
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {/* Header Styling */}
+      <style jsx>{`
+        .medical-logo {
+          width: 45px;
+          height: 45px;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(230, 57, 70, 0.2);
+        }
+
+        .nav-link {
+          color: #6c757d !important;
+          font-weight: 500;
+          transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+          color: #e63946 !important;
+        }
+
+        .nav-link.active {
+          color: #e63946 !important;
+          font-weight: 600;
+        }
+
+        .dropdown-toggle::after {
+          display: none;
+        }
+
+        .dropdown-menu {
+          border-radius: 10px;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+          border: none;
+          min-width: 220px;
+        }
+
+        .dropdown-item {
+          padding: 0.75rem 1rem;
+          transition: all 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+          background-color: rgba(230, 57, 70, 0.1);
+          color: #e63946;
+        }
+
+        @media (max-width: 768px) {
+          .medical-logo {
+            width: 40px;
+            height: 40px;
+          }
+
+          .brand-text-container h4 {
+            font-size: 1rem;
+          }
+
+          .brand-text-container small {
+            font-size: 0.7rem;
+          }
+        }
+      `}</style>
     </>
   );
 };

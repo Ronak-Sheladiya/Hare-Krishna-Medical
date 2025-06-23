@@ -1,3 +1,6 @@
+/* Import Professional Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap");
+
 /* Import Professional Invoice Styles */
 @import url("./styles/ProfessionalInvoice.css");
 
@@ -47,73 +50,71 @@
     box-shadow: none !important;
     text-shadow: none !important;
   }
+}
 
-  /* Ensure invoice takes full width */
-  .invoice-content,
-  .professional-invoice {
-    width: 210mm !important;
-    max-width: 210mm !important;
-    min-height: 297mm !important;
-    margin: 0 !important;
-    padding: 0 !important;
+/* Professional Header Branding Styles */
+.brand-text-container {
+  line-height: 1;
+  transition: all 0.3s ease;
+}
+
+.brand-title {
+  display: flex;
+  align-items: baseline;
+  line-height: 1;
+}
+
+.brand-title:hover {
+  transform: translateY(-1px);
+  transition: transform 0.3s ease;
+}
+
+.brand-tagline {
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.navbar-brand:hover .brand-tagline {
+  opacity: 1;
+}
+
+.medical-logo {
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(230, 57, 70, 0.1));
+}
+
+.navbar-brand:hover .medical-logo {
+  transform: scale(1.05);
+  filter: drop-shadow(0 4px 8px rgba(230, 57, 70, 0.2));
+}
+
+/* Enhanced Medical Header Styling */
+.medical-header {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(248, 249, 250, 0.98) 100%
+  );
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(230, 57, 70, 0.1);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+}
+
+.medical-header .navbar-brand {
+  padding: 0.75rem 0;
+}
+
+/* Responsive brand text */
+@media (max-width: 576px) {
+  .brand-title span {
+    font-size: 1rem !important;
   }
+}
 
-  /* Page breaks */
-  .invoice-section {
-    page-break-inside: avoid;
-  }
-
-  .page-break {
-    page-break-before: always;
-  }
-
-  /* Print-specific table styling */
-  table {
-    border-collapse: collapse !important;
-    width: 100% !important;
-  }
-
-  table th,
-  table td {
-    border: 1px solid #333 !important;
-    padding: 8px !important;
-    word-wrap: break-word !important;
-  }
-
-  /* Ensure text is visible */
-  .text-white {
-    color: white !important;
-  }
-
-  /* Preserve background colors */
-  .bg-primary,
-  .bg-danger,
-  .bg-success,
-  .bg-warning,
-  .bg-info {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  /* Force page break after invoice */
-  .professional-invoice {
-    page-break-after: always;
-  }
-
-  /* Prevent elements from breaking across pages */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    page-break-after: avoid;
-  }
-
-  /* Print-specific adjustments */
-  .invoice-content {
-    padding: 0 !important;
-    max-width: 100% !important;
+@media (max-width: 768px) {
+  .medical-logo {
+    width: 50px !important;
+    height: 50px !important;
   }
 }
 
@@ -383,25 +384,178 @@ body.modal-open {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-/* Responsive design improvements */
-@media (max-width: 768px) {
+/* Enhanced Responsive Design */
+@media (max-width: 1200px) {
+  .container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media (max-width: 992px) {
   .section-padding {
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
   }
 
   .cart-summary-sticky,
   .order-summary-sticky {
     position: relative;
     top: auto;
+    margin-bottom: 2rem;
+  }
+
+  .d-lg-flex {
+    display: none !important;
+  }
+
+  .row {
+    margin-left: -0.75rem;
+    margin-right: -0.75rem;
+  }
+
+  .row > * {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .section-padding {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
   }
 
   .contact-form-card .card-header {
-    padding: 1.5rem;
+    padding: 1.5rem 1rem;
   }
 
   .contact-form-card .card-body {
-    padding: 1.5rem;
+    padding: 1.5rem 1rem;
+  }
+
+  .medical-card {
+    margin-bottom: 1rem;
+  }
+
+  .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .btn-group .btn {
+    width: auto;
+    margin-bottom: 0;
+  }
+
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .navbar-brand h4 {
+    font-size: 1.1rem;
+  }
+
+  .navbar-brand small {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .section-padding {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .medical-header {
+    padding: 0.5rem 0;
+  }
+
+  .medical-logo {
+    width: 35px !important;
+    height: 35px !important;
+  }
+
+  .navbar-brand h4 {
+    font-size: 1rem;
+  }
+
+  .btn {
+    font-size: 0.875rem;
+    padding: 0.5rem;
+  }
+
+  .card {
+    margin-bottom: 1rem;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  .modal-dialog {
+    margin: 0.25rem;
+  }
+
+  .container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .row {
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+  }
+
+  .row > * {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  /* Fix for navbar collapse on very small screens */
+  .navbar-collapse {
+    margin-top: 1rem;
+    border-top: 1px solid #e9ecef;
+    padding-top: 1rem;
+  }
+
+  /* Ensure dropdowns work properly on mobile */
+  .dropdown-menu {
+    position: static !important;
+    float: none;
+    width: 100%;
+    margin: 0.125rem 0 0;
+    font-size: 0.875rem;
+    box-shadow: none;
+    border: 1px solid #e9ecef;
+  }
+}
+
+/* Specific responsive fixes for common patterns */
+@media (max-width: 480px) {
+  .d-flex.gap-2,
+  .d-flex.gap-3 {
+    flex-direction: column;
+    gap: 0.5rem !important;
+  }
+
+  .text-nowrap {
+    white-space: normal !important;
+  }
+
+  .table th,
+  .table td {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.25rem;
   }
 }
 

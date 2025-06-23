@@ -19,6 +19,12 @@ import {
 import { Link } from "react-router-dom";
 import { useRealTime } from "../../hooks/useRealTime";
 import { api, safeApiCall } from "../../utils/apiClient";
+import {
+  PageHeroSection,
+  ThemeCard,
+  ThemeButton,
+  ThemeSection,
+} from "../../components/common/ConsistentTheme";
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -57,6 +63,10 @@ const AdminProducts = () => {
     weight: "",
     images: [],
   });
+
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState([]);
+  const [imageUploadError, setImageUploadError] = useState("");
 
   const API_BASE_URL =
     import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
@@ -101,37 +111,34 @@ const AdminProducts = () => {
     setShowToast(true);
   };
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (page = currentPage) => {
     setLoading(true);
     setError(null);
-
-    const queryParams = new URLSearchParams({
-      page: currentPage,
-      limit: productsPerPage,
-      ...(searchTerm && { search: searchTerm }),
-      ...(categoryFilter && { category: categoryFilter }),
-      ...(stockFilter && { stockFilter: stockFilter }),
-    });
 
     const {
       success,
       data,
       error: apiError,
-    } = await safeApiCall(() => api.get(`/api/products?${queryParams}`), {
-      products: [],
-      pagination: { totalProducts: 0, totalPages: 1 },
-    });
+    } = await safeApiCall(
+      () =>
+        api.get(
+          `/api/products?page=${page}&limit=${productsPerPage}&admin=true`,
+        ),
+      [],
+    );
 
-    if (success && data) {
-      const productsData = data.data || data;
-      setProducts(productsData.products || []);
-      setTotalPages(productsData.pagination?.totalPages || 1);
-      setTotalProducts(productsData.pagination?.totalProducts || 0);
+    if (success && data?.data) {
+      const productsData = Array.isArray(data.data)
+        ? data.data
+        : data.data.products || [];
+      setProducts(productsData);
+      setTotalProducts(data.data.total || productsData.length);
+      setTotalPages(
+        Math.ceil((data.data.total || productsData.length) / productsPerPage),
+      );
     } else {
       setError(apiError || "Failed to fetch products");
       setProducts([]);
-      setTotalPages(1);
-      setTotalProducts(0);
     }
 
     setLoading(false);
@@ -139,124 +146,66 @@ const AdminProducts = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [currentPage, searchTerm, categoryFilter, stockFilter]);
+  }, [currentPage]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const handleSubmit = async (e, isEdit = false) => {
+    e.preventDefault();
+    setActionLoading(true);
 
-  const validateForm = () => {
-    const errors = {};
-
-    if (!formData.name.trim()) {
-      errors.name = "Product name is required";
-    }
-
-    if (!formData.company.trim()) {
-      errors.company = "Company name is required";
-    }
-
-    if (!formData.description.trim()) {
-      errors.description = "Description is required";
-    }
-
-    if (!formData.price || parseFloat(formData.price) <= 0) {
-      errors.price = "Valid price is required (must be greater than 0)";
-    }
-
-    if (!formData.stock || parseInt(formData.stock) < 0) {
-      errors.stock = "Valid stock quantity is required (cannot be negative)";
-    }
-
-    if (!formData.category) {
-      errors.category = "Category selection is required";
-    }
-
-    if (!formData.weight.trim()) {
-      errors.weight = "Weight is required";
-    }
-
-    return errors;
-  };
-
-  const handleAddProduct = async () => {
-    const errors = validateForm();
-
-    if (Object.keys(errors).length > 0) {
-      showNotification(Object.values(errors)[0], "danger");
+    if (!formData.name || !formData.price || !formData.stock) {
+      showNotification("Please fill in all required fields", "danger");
+      setActionLoading(false);
       return;
     }
 
-    setActionLoading(true);
+    // Validate images for new products
+    if (!isEdit && imageFiles.length === 0) {
+      showNotification("At least one product image is required", "danger");
+      setActionLoading(false);
+      return;
+    }
 
-    const {
-      success,
-      data,
-      error: apiError,
-    } = await safeApiCall(() => api.post("/api/products", formData), null);
+    const productData = {
+      ...formData,
+      price: parseFloat(formData.price),
+      originalPrice:
+        parseFloat(formData.originalPrice) || parseFloat(formData.price),
+      stock: parseInt(formData.stock),
+      benefits: formatBenefits(formData.benefits), // Format benefits as bullet points
+    };
 
-    if (success && data) {
-      const productData = data.data || data;
-      setProducts((prev) => [productData, ...prev]);
+    const { success, error: apiError } = isEdit
+      ? await safeApiCall(() =>
+          api.put(`/api/products/${selectedProduct._id}`, productData),
+        )
+      : await safeApiCall(() => api.post("/api/products", productData));
+
+    if (success) {
+      await fetchProducts();
+      resetForm();
       setShowAddModal(false);
-      resetForm();
-      showNotification("Product added successfully!", "success");
-    } else {
-      showNotification(apiError || "Failed to add product", "danger");
-    }
-
-    setActionLoading(false);
-  };
-
-  const handleEditProduct = async () => {
-    const errors = validateForm();
-
-    if (Object.keys(errors).length > 0) {
-      showNotification(Object.values(errors)[0], "danger");
-      return;
-    }
-
-    setActionLoading(true);
-
-    const {
-      success,
-      data,
-      error: apiError,
-    } = await safeApiCall(
-      () => api.put(`/api/products/${selectedProduct._id}`, formData),
-      null,
-    );
-
-    if (success && data) {
-      const productData = data.data || data;
-      setProducts((prev) =>
-        prev.map((product) =>
-          product._id === selectedProduct._id ? productData : product,
-        ),
-      );
       setShowEditModal(false);
-      resetForm();
-      showNotification("Product updated successfully!", "success");
+      showNotification(
+        `Product ${isEdit ? "updated" : "added"} successfully!`,
+        "success",
+      );
     } else {
-      showNotification(apiError || "Failed to update product", "danger");
+      showNotification(
+        apiError || `Failed to ${isEdit ? "update" : "add"} product`,
+        "danger",
+      );
     }
 
     setActionLoading(false);
   };
 
-  const handleDeleteProduct = async () => {
+  const handleDelete = async () => {
     if (!productToDelete) return;
 
     setActionLoading(true);
 
-    const {
-      success,
-      data,
-      error: apiError,
-    } = await safeApiCall(
-      () => api.delete(`/api/products/${productToDelete._id}`),
-      null,
+    const { success, error: apiError } = await safeApiCall(() =>
+      api.delete(`/api/products/${productToDelete._id}`),
     );
 
     if (success) {
@@ -287,6 +236,79 @@ const AdminProducts = () => {
       weight: "",
       images: [],
     });
+    setImageFiles([]);
+    setImagePreviewUrls([]);
+    setImageUploadError("");
+  };
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setImageUploadError("");
+
+    if (files.length === 0) {
+      setImageUploadError("At least one image is required");
+      return;
+    }
+
+    if (files.length > 5) {
+      setImageUploadError("Maximum 5 images allowed");
+      return;
+    }
+
+    // Validate each file
+    const validFiles = [];
+    const previews = [];
+
+    files.forEach((file) => {
+      if (!file.type.startsWith("image/")) {
+        setImageUploadError("Only image files are allowed");
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB limit
+        setImageUploadError("Each image must be less than 5MB");
+        return;
+      }
+
+      validFiles.push(file);
+
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previews.push(e.target.result);
+        if (previews.length === validFiles.length) {
+          setImagePreviewUrls(previews);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    setImageFiles(validFiles);
+  };
+
+  const removeImage = (index) => {
+    const newFiles = imageFiles.filter((_, i) => i !== index);
+    const newPreviews = imagePreviewUrls.filter((_, i) => i !== index);
+
+    setImageFiles(newFiles);
+    setImagePreviewUrls(newPreviews);
+
+    if (newFiles.length === 0) {
+      setImageUploadError("At least one image is required");
+    } else {
+      setImageUploadError("");
+    }
+  };
+
+  const formatBenefits = (benefitsText) => {
+    if (!benefitsText) return "";
+
+    return benefitsText
+      .split("\n")
+      .filter((line) => line.trim() !== "")
+      .map((line) => `• ${line.trim()}`)
+      .join("\n");
   };
 
   const handleAddClick = () => {
@@ -341,6 +363,7 @@ const AdminProducts = () => {
     return new Date(dateString).toLocaleDateString();
   };
 
+  // Apply filters
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -373,275 +396,318 @@ const AdminProducts = () => {
 
   return (
     <div className="fade-in">
-      <section className="section-padding-sm">
+      {/* Hero Section */}
+      <PageHeroSection
+        title="Product Management"
+        subtitle="Manage your medical products and inventory with comprehensive tools"
+        icon="bi-box"
+      />
+
+      <ThemeSection background="#f8f9fa">
         <Container>
-          {/* Header */}
+          {/* Quick Actions */}
           <Row className="mb-4">
-            <Col lg={8}>
-              <h2>Product Management</h2>
-              <p className="text-muted">
-                Manage your medical products and inventory
-              </p>
-            </Col>
-            <Col lg={4} className="text-end">
-              <Button
-                variant="primary"
-                onClick={handleAddClick}
-                className="btn-medical-primary me-2"
-              >
-                <i className="bi bi-plus-circle me-2"></i>
-                Add Product
-              </Button>
-              <Button
-                variant="outline-primary"
-                onClick={() => fetchProducts()}
-                disabled={loading}
-                className="btn-medical-outline"
-              >
-                <i className="bi bi-arrow-clockwise me-2"></i>
-                Refresh
-              </Button>
+            <Col lg={12}>
+              <ThemeCard title="Quick Actions" className="mb-4">
+                <Row>
+                  <Col lg={8}>
+                    <p className="text-muted mb-3">
+                      Add new products, update inventory, and manage your
+                      medical store catalog
+                    </p>
+                  </Col>
+                  <Col lg={4} className="text-end">
+                    <ThemeButton
+                      variant="primary"
+                      onClick={handleAddClick}
+                      className="me-2"
+                      icon="bi-plus-circle"
+                    >
+                      Add Product
+                    </ThemeButton>
+                    <ThemeButton
+                      variant="outline"
+                      onClick={() => fetchProducts()}
+                      disabled={loading}
+                      icon="bi-arrow-clockwise"
+                    >
+                      Refresh
+                    </ThemeButton>
+                  </Col>
+                </Row>
+              </ThemeCard>
             </Col>
           </Row>
 
           {/* Error Alert */}
           {error && (
-            <Alert variant="danger" dismissible onClose={() => setError(null)}>
-              <i className="bi bi-exclamation-triangle me-2"></i>
-              {error}
-            </Alert>
+            <Row className="mb-4">
+              <Col lg={12}>
+                <Alert
+                  variant="danger"
+                  dismissible
+                  onClose={() => setError(null)}
+                >
+                  <i className="bi bi-exclamation-triangle me-2"></i>
+                  {error}
+                </Alert>
+              </Col>
+            </Row>
           )}
 
           {/* Filters */}
           <Row className="mb-4">
-            <Col lg={4}>
-              <InputGroup>
-                <InputGroup.Text>
-                  <i className="bi bi-search"></i>
-                </InputGroup.Text>
-                <Form.Control
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </InputGroup>
-            </Col>
-            <Col lg={3}>
-              <Form.Select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
+            <Col lg={12}>
+              <ThemeCard
+                title="Search & Filter"
+                icon="bi-funnel"
+                className="mb-4"
               >
-                <option value="">All Categories</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </Form.Select>
-            </Col>
-            <Col lg={3}>
-              <Form.Select
-                value={stockFilter}
-                onChange={(e) => setStockFilter(e.target.value)}
-              >
-                <option value="">All Stock Levels</option>
-                <option value="in-stock">In Stock</option>
-                <option value="low-stock">Low Stock</option>
-                <option value="out-of-stock">Out of Stock</option>
-              </Form.Select>
-            </Col>
-            <Col lg={2}>
-              <Button
-                variant="outline-secondary"
-                onClick={() => {
-                  setSearchTerm("");
-                  setCategoryFilter("");
-                  setStockFilter("");
-                  setCurrentPage(1);
-                }}
-                className="w-100"
-              >
-                Clear
-              </Button>
+                <Row>
+                  <Col lg={4} className="mb-3 mb-lg-0">
+                    <Form.Label className="text-muted small">
+                      Search Products
+                    </Form.Label>
+                    <InputGroup>
+                      <InputGroup.Text>
+                        <i className="bi bi-search"></i>
+                      </InputGroup.Text>
+                      <Form.Control
+                        type="text"
+                        placeholder="Search by name or company..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </InputGroup>
+                  </Col>
+                  <Col lg={3} className="mb-3 mb-lg-0">
+                    <Form.Label className="text-muted small">
+                      Category
+                    </Form.Label>
+                    <Form.Select
+                      value={categoryFilter}
+                      onChange={(e) => setCategoryFilter(e.target.value)}
+                    >
+                      <option value="">All Categories</option>
+                      {categories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Col>
+                  <Col lg={3} className="mb-3 mb-lg-0">
+                    <Form.Label className="text-muted small">
+                      Stock Level
+                    </Form.Label>
+                    <Form.Select
+                      value={stockFilter}
+                      onChange={(e) => setStockFilter(e.target.value)}
+                    >
+                      <option value="">All Stock Levels</option>
+                      <option value="in-stock">In Stock (10+)</option>
+                      <option value="low-stock">Low Stock (1-10)</option>
+                      <option value="out-of-stock">Out of Stock</option>
+                    </Form.Select>
+                  </Col>
+                  <Col lg={2} className="d-flex align-items-end">
+                    <ThemeButton
+                      variant="outline"
+                      onClick={() => {
+                        setSearchTerm("");
+                        setCategoryFilter("");
+                        setStockFilter("");
+                        setCurrentPage(1);
+                      }}
+                      className="w-100"
+                      icon="bi-x-circle"
+                    >
+                      Clear
+                    </ThemeButton>
+                  </Col>
+                </Row>
+              </ThemeCard>
             </Col>
           </Row>
 
           {/* Products Table */}
-          <Card className="medical-card">
-            <Card.Header className="bg-medical-light">
-              <h5 className="mb-0">
-                <i className="bi bi-box me-2"></i>
-                Products ({filteredProducts.length})
-              </h5>
-            </Card.Header>
-            <Card.Body className="p-0">
-              {loading ? (
-                <div className="text-center py-4">
-                  <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </Spinner>
-                </div>
-              ) : filteredProducts.length > 0 ? (
-                <div className="table-responsive">
-                  <Table className="mb-0">
-                    <thead className="table-light">
-                      <tr>
-                        <th>Product</th>
-                        <th>Category</th>
-                        <th>Price</th>
-                        <th>Stock</th>
-                        <th>Status</th>
-                        <th>Updated</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredProducts.map((product) => (
-                        <tr key={product._id}>
-                          <td>
-                            <div className="d-flex align-items-center">
-                              <div
-                                className="bg-medical-blue text-white rounded me-3 d-flex align-items-center justify-content-center"
-                                style={{ width: "50px", height: "50px" }}
-                              >
-                                <i className="bi bi-capsule"></i>
-                              </div>
-                              <div>
-                                <div className="fw-bold">{product.name}</div>
-                                <small className="text-muted">
-                                  {product.company}
-                                </small>
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <Badge bg="secondary">{product.category}</Badge>
-                          </td>
-                          <td>
-                            <div>
-                              <span className="fw-bold text-medical-red">
-                                {formatCurrency(product.price)}
-                              </span>
-                              {product.originalPrice &&
-                                product.originalPrice > product.price && (
+          <Row>
+            <Col lg={12}>
+              <ThemeCard
+                title={`Products (${filteredProducts.length})`}
+                icon="bi-box"
+                className="table-card"
+              >
+                {loading ? (
+                  <div className="text-center py-4">
+                    <Spinner animation="border" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </Spinner>
+                  </div>
+                ) : filteredProducts.length > 0 ? (
+                  <>
+                    <div className="table-responsive">
+                      <Table className="mb-0">
+                        <thead className="table-light">
+                          <tr>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th>Updated</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredProducts.map((product) => (
+                            <tr key={product._id}>
+                              <td>
+                                <div className="d-flex align-items-center">
+                                  <div
+                                    className="bg-medical-blue text-white rounded me-3 d-flex align-items-center justify-content-center"
+                                    style={{ width: "50px", height: "50px" }}
+                                  >
+                                    <i className="bi bi-capsule"></i>
+                                  </div>
                                   <div>
-                                    <small className="text-muted text-decoration-line-through">
-                                      {formatCurrency(product.originalPrice)}
+                                    <div className="fw-bold">
+                                      {product.name}
+                                    </div>
+                                    <small className="text-muted">
+                                      {product.company}
                                     </small>
                                   </div>
-                                )}
-                            </div>
-                          </td>
-                          <td>
-                            <span className="fw-bold">{product.stock}</span>
-                          </td>
-                          <td>{getStockBadge(product.stock)}</td>
-                          <td>
-                            <small className="text-muted">
-                              {formatDate(product.updatedAt)}
-                            </small>
-                          </td>
-                          <td>
-                            <div className="btn-group" role="group">
-                              <Button
-                                size="sm"
-                                variant="outline-primary"
-                                onClick={() => handleViewClick(product)}
-                                className="btn-medical-outline"
+                                </div>
+                              </td>
+                              <td>
+                                <Badge bg="secondary">{product.category}</Badge>
+                              </td>
+                              <td>
+                                <div>
+                                  <strong>
+                                    {formatCurrency(product.price)}
+                                  </strong>
+                                  {product.originalPrice !== product.price && (
+                                    <div>
+                                      <small className="text-decoration-line-through text-muted">
+                                        {formatCurrency(product.originalPrice)}
+                                      </small>
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                              <td>
+                                <div className="text-center">
+                                  <div className="fw-bold">{product.stock}</div>
+                                </div>
+                              </td>
+                              <td>{getStockBadge(product.stock)}</td>
+                              <td>{formatDate(product.updatedAt)}</td>
+                              <td>
+                                <div className="d-flex gap-1">
+                                  <Button
+                                    size="sm"
+                                    variant="outline-primary"
+                                    onClick={() => handleViewClick(product)}
+                                    title="View Details"
+                                  >
+                                    <i className="bi bi-eye"></i>
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline-success"
+                                    onClick={() => handleEditClick(product)}
+                                    title="Edit Product"
+                                  >
+                                    <i className="bi bi-pencil"></i>
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline-danger"
+                                    onClick={() =>
+                                      confirmDeleteProduct(product)
+                                    }
+                                    title="Delete Product"
+                                  >
+                                    <i className="bi bi-trash"></i>
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Table>
+                    </div>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <div className="d-flex justify-content-center mt-4">
+                        <Pagination>
+                          <Pagination.First
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(1)}
+                          />
+                          <Pagination.Prev
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(currentPage - 1)}
+                          />
+
+                          {Array.from({ length: totalPages }, (_, i) => i + 1)
+                            .slice(
+                              Math.max(0, currentPage - 3),
+                              Math.min(totalPages, currentPage + 2),
+                            )
+                            .map((pageNumber) => (
+                              <Pagination.Item
+                                key={pageNumber}
+                                active={pageNumber === currentPage}
+                                onClick={() => setCurrentPage(pageNumber)}
                               >
-                                <i className="bi bi-eye"></i>
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline-warning"
-                                onClick={() => handleEditClick(product)}
-                              >
-                                <i className="bi bi-pencil"></i>
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline-danger"
-                                onClick={() => confirmDeleteProduct(product)}
-                                disabled={actionLoading}
-                              >
-                                <i className="bi bi-trash"></i>
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </div>
-              ) : (
-                <div className="text-center py-5">
-                  <i
-                    className="bi bi-box text-muted"
-                    style={{ fontSize: "3rem" }}
-                  ></i>
-                  <h5 className="text-muted mt-3">No products found</h5>
-                  <p className="text-muted">
-                    {searchTerm || categoryFilter || stockFilter
-                      ? "Try adjusting your filters"
-                      : "No products have been added yet"}
-                  </p>
-                  <Button
-                    variant="primary"
-                    onClick={handleAddClick}
-                    className="btn-medical-primary"
-                  >
-                    <i className="bi bi-plus-circle me-2"></i>
-                    Add First Product
-                  </Button>
-                </div>
-              )}
-            </Card.Body>
-          </Card>
+                                {pageNumber}
+                              </Pagination.Item>
+                            ))}
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="d-flex justify-content-center mt-4">
-              <Pagination>
-                <Pagination.First
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(1)}
-                />
-                <Pagination.Prev
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                />
-
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const startPage = Math.max(1, currentPage - 2);
-                  const pageNumber = startPage + i;
-
-                  if (pageNumber > totalPages) return null;
-
-                  return (
-                    <Pagination.Item
-                      key={pageNumber}
-                      active={pageNumber === currentPage}
-                      onClick={() => setCurrentPage(pageNumber)}
-                    >
-                      {pageNumber}
-                    </Pagination.Item>
-                  );
-                })}
-
-                <Pagination.Next
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                />
-                <Pagination.Last
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(totalPages)}
-                />
-              </Pagination>
-            </div>
-          )}
+                          <Pagination.Next
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                          />
+                          <Pagination.Last
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(totalPages)}
+                          />
+                        </Pagination>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-5">
+                    <div className="text-muted">
+                      <i className="bi bi-box display-1"></i>
+                      <h5 className="mt-3">No products found</h5>
+                      <p>
+                        {searchTerm || categoryFilter || stockFilter
+                          ? "Try adjusting your filters"
+                          : "Add your first product to get started"}
+                      </p>
+                      {!(searchTerm || categoryFilter || stockFilter) && (
+                        <ThemeButton
+                          variant="primary"
+                          onClick={handleAddClick}
+                          icon="bi-plus-circle"
+                          className="mt-3"
+                        >
+                          Add Your First Product
+                        </ThemeButton>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </ThemeCard>
+            </Col>
+          </Row>
         </Container>
-      </section>
+      </ThemeSection>
 
       {/* Add Product Modal */}
       <Modal
@@ -653,31 +719,32 @@ const AdminProducts = () => {
           <Modal.Title>Add New Product</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
+          <Form onSubmit={(e) => handleSubmit(e, false)}>
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>Product Name *</Form.Label>
                   <Form.Control
                     type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
                     placeholder="Enter product name"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     required
                   />
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Company *</Form.Label>
+                  <Form.Label>Company</Form.Label>
                   <Form.Control
                     type="text"
-                    name="company"
-                    value={formData.company}
-                    onChange={handleInputChange}
                     placeholder="Enter company name"
-                    required
+                    value={formData.company}
+                    onChange={(e) =>
+                      setFormData({ ...formData, company: e.target.value })
+                    }
                   />
                 </Form.Group>
               </Col>
@@ -687,48 +754,45 @@ const AdminProducts = () => {
               <Col md={4}>
                 <Form.Group className="mb-3">
                   <Form.Label>Price *</Form.Label>
-                  <InputGroup>
-                    <InputGroup.Text>₹</InputGroup.Text>
-                    <Form.Control
-                      type="number"
-                      name="price"
-                      value={formData.price}
-                      onChange={handleInputChange}
-                      placeholder="0.00"
-                      step="0.01"
-                      min="0"
-                      required
-                    />
-                  </InputGroup>
+                  <Form.Control
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={formData.price}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
+                    required
+                  />
                 </Form.Group>
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
                   <Form.Label>Original Price</Form.Label>
-                  <InputGroup>
-                    <InputGroup.Text>₹</InputGroup.Text>
-                    <Form.Control
-                      type="number"
-                      name="originalPrice"
-                      value={formData.originalPrice}
-                      onChange={handleInputChange}
-                      placeholder="0.00"
-                      step="0.01"
-                      min="0"
-                    />
-                  </InputGroup>
+                  <Form.Control
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={formData.originalPrice}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        originalPrice: e.target.value,
+                      })
+                    }
+                  />
                 </Form.Group>
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Stock Quantity *</Form.Label>
+                  <Form.Label>Stock *</Form.Label>
                   <Form.Control
                     type="number"
-                    name="stock"
-                    value={formData.stock}
-                    onChange={handleInputChange}
                     placeholder="0"
-                    min="0"
+                    value={formData.stock}
+                    onChange={(e) =>
+                      setFormData({ ...formData, stock: e.target.value })
+                    }
                     required
                   />
                 </Form.Group>
@@ -738,12 +802,12 @@ const AdminProducts = () => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Category *</Form.Label>
+                  <Form.Label>Category</Form.Label>
                   <Form.Select
-                    name="category"
                     value={formData.category}
-                    onChange={handleInputChange}
-                    required
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
                   >
                     <option value="">Select Category</option>
                     {categories.map((category) => (
@@ -756,77 +820,282 @@ const AdminProducts = () => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Weight/Size *</Form.Label>
+                  <Form.Label>Weight</Form.Label>
                   <Form.Control
                     type="text"
-                    name="weight"
+                    placeholder="e.g., 500mg, 10ml"
                     value={formData.weight}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 500mg, 100ml, 50 tablets"
-                    required
+                    onChange={(e) =>
+                      setFormData({ ...formData, weight: e.target.value })
+                    }
                   />
                 </Form.Group>
               </Col>
             </Row>
 
             <Form.Group className="mb-3">
-              <Form.Label>Description *</Form.Label>
+              <Form.Label>Description</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
-                name="description"
+                placeholder="Enter detailed product description"
                 value={formData.description}
-                onChange={handleInputChange}
-                placeholder="Enter product description"
-                required
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
               />
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Benefits</Form.Label>
+              <Form.Label>
+                Product Benefits <span className="text-danger">*</span>
+              </Form.Label>
               <Form.Control
                 as="textarea"
-                rows={3}
-                name="benefits"
+                rows={4}
+                placeholder="Enter product benefits (each line will be a bullet point)&#10;Example:&#10;Reduces pain and inflammation&#10;Fast-acting relief&#10;Safe for daily use"
                 value={formData.benefits}
-                onChange={handleInputChange}
-                placeholder="List product benefits (one per line)"
+                onChange={(e) =>
+                  setFormData({ ...formData, benefits: e.target.value })
+                }
+                required
               />
+              <Form.Text className="text-muted">
+                <i className="bi bi-info-circle me-1"></i>
+                Each new line will be displayed as a separate bullet point
+              </Form.Text>
             </Form.Group>
 
             <Form.Group className="mb-3">
               <Form.Label>Usage Instructions</Form.Label>
               <Form.Control
                 as="textarea"
-                rows={2}
-                name="usage"
+                rows={3}
+                placeholder="Enter detailed usage instructions"
                 value={formData.usage}
-                onChange={handleInputChange}
-                placeholder="Enter usage instructions"
+                onChange={(e) =>
+                  setFormData({ ...formData, usage: e.target.value })
+                }
               />
+            </Form.Group>
+
+            <Form.Group className="mb-4">
+              <Form.Label>Update Product Images</Form.Label>
+              <Form.Control
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageChange}
+                className="mb-3"
+              />
+              <Form.Text className="text-muted mb-3">
+                <i className="bi bi-info-circle me-1"></i>
+                Upload new images to replace existing ones. Leave empty to keep
+                current images.
+              </Form.Text>
+
+              {imageUploadError && (
+                <Alert variant="danger" className="py-2">
+                  <i className="bi bi-exclamation-triangle me-2"></i>
+                  {imageUploadError}
+                </Alert>
+              )}
+
+              {/* Current Images Display */}
+              {selectedProduct &&
+                selectedProduct.images &&
+                selectedProduct.images.length > 0 &&
+                imagePreviewUrls.length === 0 && (
+                  <div className="current-images mb-3">
+                    <label className="form-label small text-muted">
+                      Current Images:
+                    </label>
+                    <Row className="g-2">
+                      {selectedProduct.images.map((imageUrl, index) => (
+                        <Col xs={6} md={4} lg={3} key={index}>
+                          <img
+                            src={imageUrl}
+                            alt={`Current ${index + 1}`}
+                            className="img-fluid rounded border"
+                            style={{
+                              width: "100%",
+                              height: "100px",
+                              objectFit: "cover",
+                            }}
+                          />
+                        </Col>
+                      ))}
+                    </Row>
+                  </div>
+                )}
+
+              {/* New Image Previews */}
+              {imagePreviewUrls.length > 0 && (
+                <div className="image-preview-container">
+                  <label className="form-label small text-muted">
+                    New Images Preview:
+                  </label>
+                  <Row className="g-2">
+                    {imagePreviewUrls.map((url, index) => (
+                      <Col xs={6} md={4} lg={3} key={index}>
+                        <div className="position-relative">
+                          <img
+                            src={url}
+                            alt={`Preview ${index + 1}`}
+                            className="img-fluid rounded border"
+                            style={{
+                              width: "100%",
+                              height: "100px",
+                              objectFit: "cover",
+                            }}
+                          />
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            className="position-absolute top-0 end-0 m-1 rounded-circle"
+                            style={{
+                              width: "24px",
+                              height: "24px",
+                              padding: "0",
+                            }}
+                            onClick={() => removeImage(index)}
+                          >
+                            <i
+                              className="bi bi-x"
+                              style={{ fontSize: "12px" }}
+                            ></i>
+                          </Button>
+                        </div>
+                      </Col>
+                    ))}
+                  </Row>
+                </div>
+              )}
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>
+                Product Benefits <span className="text-danger">*</span>
+              </Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={4}
+                placeholder="Enter product benefits (each line will be a bullet point)&#10;Example:&#10;Reduces pain and inflammation&#10;Fast-acting relief&#10;Safe for daily use"
+                value={formData.benefits}
+                onChange={(e) =>
+                  setFormData({ ...formData, benefits: e.target.value })
+                }
+                required
+              />
+              <Form.Text className="text-muted">
+                <i className="bi bi-info-circle me-1"></i>
+                Each new line will be displayed as a separate bullet point
+              </Form.Text>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Usage Instructions</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                placeholder="Enter detailed usage instructions"
+                value={formData.usage}
+                onChange={(e) =>
+                  setFormData({ ...formData, usage: e.target.value })
+                }
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-4">
+              <Form.Label>
+                Product Images <span className="text-danger">*</span>
+              </Form.Label>
+              <Form.Control
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageChange}
+                className="mb-3"
+                required={!selectedProduct}
+              />
+              <Form.Text className="text-muted mb-3">
+                <i className="bi bi-info-circle me-1"></i>
+                Upload 1-5 high-quality images. Maximum 5MB per image. JPG, PNG,
+                WebP formats supported.
+              </Form.Text>
+
+              {imageUploadError && (
+                <Alert variant="danger" className="py-2">
+                  <i className="bi bi-exclamation-triangle me-2"></i>
+                  {imageUploadError}
+                </Alert>
+              )}
+
+              {/* Image Previews */}
+              {imagePreviewUrls.length > 0 && (
+                <div className="image-preview-container">
+                  <label className="form-label small text-muted">
+                    Preview:
+                  </label>
+                  <Row className="g-2">
+                    {imagePreviewUrls.map((url, index) => (
+                      <Col xs={6} md={4} lg={3} key={index}>
+                        <div className="position-relative">
+                          <img
+                            src={url}
+                            alt={`Preview ${index + 1}`}
+                            className="img-fluid rounded border"
+                            style={{
+                              width: "100%",
+                              height: "100px",
+                              objectFit: "cover",
+                            }}
+                          />
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            className="position-absolute top-0 end-0 m-1 rounded-circle"
+                            style={{
+                              width: "24px",
+                              height: "24px",
+                              padding: "0",
+                            }}
+                            onClick={() => removeImage(index)}
+                          >
+                            <i
+                              className="bi bi-x"
+                              style={{ fontSize: "12px" }}
+                            ></i>
+                          </Button>
+                        </div>
+                      </Col>
+                    ))}
+                  </Row>
+                </div>
+              )}
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowAddModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowAddModal(false)}
+            disabled={actionLoading}
+          >
             Cancel
           </Button>
           <Button
             variant="primary"
-            onClick={handleAddProduct}
+            onClick={(e) => handleSubmit(e, false)}
             disabled={actionLoading}
-            className="btn-medical-primary"
           >
             {actionLoading ? (
               <>
-                <Spinner animation="border" size="sm" className="me-2" />
+                <Spinner size="sm" className="me-2" />
                 Adding...
               </>
             ) : (
-              <>
-                <i className="bi bi-plus-circle me-2"></i>
-                Add Product
-              </>
+              "Add Product"
             )}
           </Button>
         </Modal.Footer>
@@ -842,32 +1111,33 @@ const AdminProducts = () => {
           <Modal.Title>Edit Product</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {/* Same form as Add Modal */}
-          <Form>
+          <Form onSubmit={(e) => handleSubmit(e, true)}>
+            {/* Same form structure as Add Modal */}
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>Product Name *</Form.Label>
                   <Form.Control
                     type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
                     placeholder="Enter product name"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     required
                   />
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Company *</Form.Label>
+                  <Form.Label>Company</Form.Label>
                   <Form.Control
                     type="text"
-                    name="company"
-                    value={formData.company}
-                    onChange={handleInputChange}
                     placeholder="Enter company name"
-                    required
+                    value={formData.company}
+                    onChange={(e) =>
+                      setFormData({ ...formData, company: e.target.value })
+                    }
                   />
                 </Form.Group>
               </Col>
@@ -877,48 +1147,45 @@ const AdminProducts = () => {
               <Col md={4}>
                 <Form.Group className="mb-3">
                   <Form.Label>Price *</Form.Label>
-                  <InputGroup>
-                    <InputGroup.Text>₹</InputGroup.Text>
-                    <Form.Control
-                      type="number"
-                      name="price"
-                      value={formData.price}
-                      onChange={handleInputChange}
-                      placeholder="0.00"
-                      step="0.01"
-                      min="0"
-                      required
-                    />
-                  </InputGroup>
+                  <Form.Control
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={formData.price}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
+                    required
+                  />
                 </Form.Group>
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
                   <Form.Label>Original Price</Form.Label>
-                  <InputGroup>
-                    <InputGroup.Text>₹</InputGroup.Text>
-                    <Form.Control
-                      type="number"
-                      name="originalPrice"
-                      value={formData.originalPrice}
-                      onChange={handleInputChange}
-                      placeholder="0.00"
-                      step="0.01"
-                      min="0"
-                    />
-                  </InputGroup>
+                  <Form.Control
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={formData.originalPrice}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        originalPrice: e.target.value,
+                      })
+                    }
+                  />
                 </Form.Group>
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Stock Quantity *</Form.Label>
+                  <Form.Label>Stock *</Form.Label>
                   <Form.Control
                     type="number"
-                    name="stock"
-                    value={formData.stock}
-                    onChange={handleInputChange}
                     placeholder="0"
-                    min="0"
+                    value={formData.stock}
+                    onChange={(e) =>
+                      setFormData({ ...formData, stock: e.target.value })
+                    }
                     required
                   />
                 </Form.Group>
@@ -928,12 +1195,12 @@ const AdminProducts = () => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Category *</Form.Label>
+                  <Form.Label>Category</Form.Label>
                   <Form.Select
-                    name="category"
                     value={formData.category}
-                    onChange={handleInputChange}
-                    required
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
                   >
                     <option value="">Select Category</option>
                     {categories.map((category) => (
@@ -946,77 +1213,53 @@ const AdminProducts = () => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Weight/Size *</Form.Label>
+                  <Form.Label>Weight</Form.Label>
                   <Form.Control
                     type="text"
-                    name="weight"
+                    placeholder="e.g., 500mg, 10ml"
                     value={formData.weight}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 500mg, 100ml, 50 tablets"
-                    required
+                    onChange={(e) =>
+                      setFormData({ ...formData, weight: e.target.value })
+                    }
                   />
                 </Form.Group>
               </Col>
             </Row>
 
             <Form.Group className="mb-3">
-              <Form.Label>Description *</Form.Label>
+              <Form.Label>Description</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
                 placeholder="Enter product description"
-                required
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Benefits</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                name="benefits"
-                value={formData.benefits}
-                onChange={handleInputChange}
-                placeholder="List product benefits (one per line)"
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Usage Instructions</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={2}
-                name="usage"
-                value={formData.usage}
-                onChange={handleInputChange}
-                placeholder="Enter usage instructions"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
               />
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowEditModal(false)}
+            disabled={actionLoading}
+          >
             Cancel
           </Button>
           <Button
             variant="primary"
-            onClick={handleEditProduct}
+            onClick={(e) => handleSubmit(e, true)}
             disabled={actionLoading}
-            className="btn-medical-primary"
           >
             {actionLoading ? (
               <>
-                <Spinner animation="border" size="sm" className="me-2" />
+                <Spinner size="sm" className="me-2" />
                 Updating...
               </>
             ) : (
-              <>
-                <i className="bi bi-check-circle me-2"></i>
-                Update Product
-              </>
+              "Update Product"
             )}
           </Button>
         </Modal.Footer>
@@ -1033,92 +1276,99 @@ const AdminProducts = () => {
         </Modal.Header>
         <Modal.Body>
           {selectedProduct && (
-            <div>
-              <Row>
-                <Col md={8}>
-                  <h4>{selectedProduct.name}</h4>
-                  <p className="text-muted">{selectedProduct.company}</p>
-                  <Badge bg="secondary" className="me-2">
-                    {selectedProduct.category}
-                  </Badge>
-                  {getStockBadge(selectedProduct.stock)}
-                </Col>
-                <Col md={4} className="text-end">
-                  <h3 className="text-medical-red">
-                    {formatCurrency(selectedProduct.price)}
-                  </h3>
-                  {selectedProduct.originalPrice &&
-                    selectedProduct.originalPrice > selectedProduct.price && (
-                      <p className="text-muted text-decoration-line-through">
-                        {formatCurrency(selectedProduct.originalPrice)}
-                      </p>
-                    )}
-                </Col>
-              </Row>
+            <Row>
+              <Col md={12}>
+                <Card className="border-0">
+                  <Card.Body>
+                    <Row>
+                      <Col md={6}>
+                        <h5 className="text-primary">{selectedProduct.name}</h5>
+                        <p className="text-muted">{selectedProduct.company}</p>
+                        <hr />
+                        <p>
+                          <strong>Category:</strong> {selectedProduct.category}
+                        </p>
+                        <p>
+                          <strong>Price:</strong>{" "}
+                          {formatCurrency(selectedProduct.price)}
+                        </p>
+                        <p>
+                          <strong>Stock:</strong> {selectedProduct.stock} units
+                        </p>
+                        <p>
+                          <strong>Weight:</strong>{" "}
+                          {selectedProduct.weight || "N/A"}
+                        </p>
+                      </Col>
+                      <Col md={6}>
+                        <h6>Description</h6>
+                        <p className="text-muted">
+                          {selectedProduct.description ||
+                            "No description available"}
+                        </p>
+                        <h6>Benefits</h6>
+                        {selectedProduct.benefits ? (
+                          <div className="text-muted">
+                            {selectedProduct.benefits.split("\n").map(
+                              (benefit, index) =>
+                                benefit.trim() && (
+                                  <div key={index} className="mb-1">
+                                    {benefit.startsWith("•")
+                                      ? benefit
+                                      : `• ${benefit}`}
+                                  </div>
+                                ),
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-muted">No benefits listed</p>
+                        )}
 
-              <hr />
+                        <h6 className="mt-3">Usage</h6>
+                        <p className="text-muted">
+                          {selectedProduct.usage || "No usage instructions"}
+                        </p>
 
-              <Row>
-                <Col md={6}>
-                  <p>
-                    <strong>Stock:</strong> {selectedProduct.stock} units
-                  </p>
-                  <p>
-                    <strong>Weight/Size:</strong> {selectedProduct.weight}
-                  </p>
-                  <p>
-                    <strong>Added:</strong>{" "}
-                    {formatDate(selectedProduct.createdAt)}
-                  </p>
-                </Col>
-                <Col md={6}>
-                  <p>
-                    <strong>Category:</strong> {selectedProduct.category}
-                  </p>
-                  <p>
-                    <strong>Company:</strong> {selectedProduct.company}
-                  </p>
-                  <p>
-                    <strong>Updated:</strong>{" "}
-                    {formatDate(selectedProduct.updatedAt)}
-                  </p>
-                </Col>
-              </Row>
-
-              <hr />
-
-              <h6>Description</h6>
-              <p className="text-muted">{selectedProduct.description}</p>
-
-              {selectedProduct.benefits && (
-                <>
-                  <h6>Benefits</h6>
-                  <p className="text-muted">{selectedProduct.benefits}</p>
-                </>
-              )}
-
-              {selectedProduct.usage && (
-                <>
-                  <h6>Usage Instructions</h6>
-                  <p className="text-muted">{selectedProduct.usage}</p>
-                </>
-              )}
-            </div>
+                        {/* Product Images */}
+                        {selectedProduct.images &&
+                          selectedProduct.images.length > 0 && (
+                            <>
+                              <h6 className="mt-3">Product Images</h6>
+                              <Row className="g-2">
+                                {selectedProduct.images.map(
+                                  (imageUrl, index) => (
+                                    <Col xs={6} md={4} key={index}>
+                                      <img
+                                        src={imageUrl}
+                                        alt={`Product ${index + 1}`}
+                                        className="img-fluid rounded border"
+                                        style={{
+                                          width: "100%",
+                                          height: "120px",
+                                          objectFit: "cover",
+                                          cursor: "pointer",
+                                        }}
+                                        onClick={() =>
+                                          window.open(imageUrl, "_blank")
+                                        }
+                                      />
+                                    </Col>
+                                  ),
+                                )}
+                              </Row>
+                            </>
+                          )}
+                      </Col>
+                    </Row>
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
           )}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowViewModal(false)}>
             Close
-          </Button>
-          <Button
-            variant="warning"
-            onClick={() => {
-              setShowViewModal(false);
-              handleEditClick(selectedProduct);
-            }}
-          >
-            <i className="bi bi-pencil me-2"></i>
-            Edit Product
           </Button>
         </Modal.Footer>
       </Modal>
@@ -1134,36 +1384,35 @@ const AdminProducts = () => {
         </Modal.Header>
         <Modal.Body>
           <div className="text-center">
-            <i
-              className="bi bi-exclamation-triangle text-warning"
-              style={{ fontSize: "3rem" }}
-            ></i>
-            <h5 className="mt-3">Are you sure?</h5>
-            <p className="text-muted">
-              This action will permanently delete{" "}
-              <strong>{productToDelete?.name}</strong>. This cannot be undone.
+            <i className="bi bi-exclamation-triangle display-1 text-warning mb-3"></i>
+            <h5>Are you sure?</h5>
+            <p>
+              Do you really want to delete{" "}
+              <strong>{productToDelete?.name}</strong>? This action cannot be
+              undone.
             </p>
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowDeleteModal(false)}
+            disabled={actionLoading}
+          >
             Cancel
           </Button>
           <Button
             variant="danger"
-            onClick={handleDeleteProduct}
+            onClick={handleDelete}
             disabled={actionLoading}
           >
             {actionLoading ? (
               <>
-                <Spinner animation="border" size="sm" className="me-2" />
+                <Spinner size="sm" className="me-2" />
                 Deleting...
               </>
             ) : (
-              <>
-                <i className="bi bi-trash me-2"></i>
-                Delete Product
-              </>
+              "Delete Product"
             )}
           </Button>
         </Modal.Footer>
@@ -1176,17 +1425,22 @@ const AdminProducts = () => {
           onClose={() => setShowToast(false)}
           delay={4000}
           autohide
-          bg={toastType}
         >
-          <Toast.Header>
+          <Toast.Header
+            className={
+              toastType === "success"
+                ? "bg-success text-white"
+                : toastType === "danger"
+                  ? "bg-danger text-white"
+                  : "bg-info text-white"
+            }
+          >
             <strong className="me-auto">
               {toastType === "success"
                 ? "Success"
                 : toastType === "danger"
                   ? "Error"
-                  : toastType === "warning"
-                    ? "Warning"
-                    : "Info"}
+                  : "Info"}
             </strong>
           </Toast.Header>
           <Toast.Body className={toastType === "success" ? "text-white" : ""}>
@@ -1194,6 +1448,70 @@ const AdminProducts = () => {
           </Toast.Body>
         </Toast>
       </ToastContainer>
+
+      <style jsx>{`
+        .image-preview-container {
+          border: 2px dashed #e63946;
+          border-radius: 8px;
+          padding: 16px;
+          background-color: rgba(230, 57, 70, 0.05);
+        }
+
+        .form-control:focus {
+          border-color: #e63946;
+          box-shadow: 0 0 0 0.2rem rgba(230, 57, 70, 0.25);
+        }
+
+        .btn-primary {
+          background-color: #e63946;
+          border-color: #e63946;
+        }
+
+        .btn-primary:hover {
+          background-color: #d32535;
+          border-color: #d32535;
+        }
+
+        .btn-outline-primary {
+          color: #e63946;
+          border-color: #e63946;
+        }
+
+        .btn-outline-primary:hover {
+          background-color: #e63946;
+          border-color: #e63946;
+        }
+
+        .nav-pills .nav-link.active {
+          background-color: #e63946;
+        }
+
+        .table-light {
+          background-color: rgba(230, 57, 70, 0.05);
+        }
+
+        .text-primary {
+          color: #e63946 !important;
+        }
+
+        .border-primary {
+          border-color: #e63946 !important;
+        }
+
+        .bg-primary {
+          background-color: #e63946 !important;
+        }
+
+        .current-images img:hover {
+          transform: scale(1.05);
+          transition: transform 0.3s ease;
+        }
+
+        .image-preview-container img:hover {
+          transform: scale(1.05);
+          transition: transform 0.3s ease;
+        }
+      `}</style>
     </div>
   );
 };

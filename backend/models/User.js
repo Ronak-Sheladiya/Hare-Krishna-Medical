@@ -45,7 +45,19 @@ const userSchema = new mongoose.Schema(
       default: true,
     },
     lastLogin: Date,
-    avatar: String,
+    avatar: String, // Deprecated - use profileImage instead
+    profileImage: {
+      type: String,
+      default: "",
+      validate: {
+        validator: function (v) {
+          // Allow empty string or valid URL/base64 image
+          if (!v) return true;
+          return /^(https?:\/\/|data:image\/)/.test(v);
+        },
+        message: "Profile image must be a valid URL or base64 image",
+      },
+    },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
     emailVerified: {
