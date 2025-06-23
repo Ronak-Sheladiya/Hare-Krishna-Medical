@@ -920,14 +920,7 @@ const Order = () => {
                 </>
               )}
             </Button>
-            <Button
-              variant="outline-info"
-              onClick={handleViewOnlineInvoice}
-              className="btn-medical-outline"
-            >
-              <i className="bi bi-eye me-2"></i>
-              View Online
-            </Button>
+
             <Button
               className="btn-medical-primary"
               onClick={handleInvoiceClose}

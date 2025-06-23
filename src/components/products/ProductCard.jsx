@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Card, Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { getProductImageUrls } from "../../utils/imageUtils";
 
 const ProductCard = ({ product, onAddToCart }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const productImages = getProductImageUrls(product);
 
   const handleAddToCart = () => {
     // Direct add to cart without confirmation
@@ -12,13 +14,13 @@ const ProductCard = ({ product, onAddToCart }) => {
 
   const nextImage = () => {
     setCurrentImageIndex((prev) =>
-      prev === product.images.length - 1 ? 0 : prev + 1,
+      prev === productImages.length - 1 ? 0 : prev + 1,
     );
   };
 
   const prevImage = () => {
     setCurrentImageIndex((prev) =>
-      prev === 0 ? product.images.length - 1 : prev - 1,
+      prev === 0 ? productImages.length - 1 : prev - 1,
     );
   };
 
@@ -27,12 +29,12 @@ const ProductCard = ({ product, onAddToCart }) => {
       <div className="position-relative">
         <Card.Img
           variant="top"
-          src={product.images[currentImageIndex]}
+          src={productImages[currentImageIndex]}
           className="product-image"
         />
 
         {/* Image Navigation */}
-        {product.images.length > 1 && (
+        {productImages.length > 1 && (
           <>
             <Button
               variant="light"

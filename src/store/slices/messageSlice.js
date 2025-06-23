@@ -1,103 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { createDateOffset } from "../../utils/dateUtils";
 
 const initialState = {
-  messages: [
-    {
-      id: 1,
-      name: "John Smith",
-      email: "john.smith@email.com",
-      mobile: "+91 9876543210",
-      subject: "Product Inquiry",
-      message:
-        "Hi, I need information about Paracetamol tablets. What are the side effects and dosage recommendations?",
-      priority: "Medium",
-      status: "Open",
-      isRead: false,
-      createdAt: createDateOffset(2), // 2 hours ago
-      reply: "",
-      repliedAt: null,
-    },
-    {
-      id: 2,
-      name: "Sarah Johnson",
-      email: "sarah.j@gmail.com",
-      mobile: "+91 9123456789",
-      subject: "Order Status Inquiry",
-      message:
-        "Hello, I placed an order yesterday for Vitamin D3 capsules. Can you please provide the tracking information?",
-      priority: "High",
-      status: "In Progress",
-      isRead: true,
-      createdAt: createDateOffset(4), // 4 hours ago
-      reply:
-        "Thank you for contacting us. Your order has been processed and will be shipped within 24 hours.",
-      repliedAt: createDateOffset(1), // 1 hour ago
-    },
-    {
-      id: 3,
-      name: "Michael Brown",
-      email: "mike.brown@company.com",
-      mobile: "+91 9988776655",
-      subject: "Bulk Order Request",
-      message:
-        "We are a healthcare facility looking to place bulk orders for medical supplies. Please share your wholesale pricing and minimum order quantities.",
-      priority: "High",
-      status: "Open",
-      isRead: false,
-      createdAt: createDateOffset(6), // 6 hours ago
-      reply: "",
-      repliedAt: null,
-    },
-    {
-      id: 4,
-      name: "Priya Patel",
-      email: "priya.patel@email.com",
-      mobile: "+91 9876512345",
-      subject: "Product Availability",
-      message:
-        "Is the Blood Pressure Monitor currently in stock? I need it urgently for my father. Also, do you provide home delivery in our area?",
-      priority: "Medium",
-      status: "Replied",
-      isRead: true,
-      createdAt: createDateOffset(12), // 12 hours ago
-      reply:
-        "Yes, the BP monitor is in stock. We provide home delivery across the city. Your order will be delivered within 2-3 hours.",
-      repliedAt: createDateOffset(8), // 8 hours ago
-    },
-    {
-      id: 5,
-      name: "Rahul Kumar",
-      email: "rahul.k@techcorp.in",
-      mobile: "+91 9123498765",
-      subject: "Website Feedback",
-      message:
-        "Great website! The ordering process is very smooth. However, I think you should add more payment options like UPI and digital wallets.",
-      priority: "Low",
-      status: "Closed",
-      isRead: true,
-      createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-      reply:
-        "Thank you for your feedback! We're working on adding more payment options including UPI and digital wallets.",
-      repliedAt: new Date(Date.now() - 20 * 60 * 60 * 1000).toISOString(), // 20 hours ago
-    },
-    {
-      id: 6,
-      name: "Dr. Anjali Sharma",
-      email: "dr.anjali@clinic.com",
-      mobile: "+91 9988123456",
-      subject: "Professional Discount Inquiry",
-      message:
-        "Hello, I am a practicing doctor and would like to know if you offer professional discounts for healthcare practitioners. Please share the details.",
-      priority: "Medium",
-      status: "Open",
-      isRead: false,
-      createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
-      reply: "",
-      repliedAt: null,
-    },
-  ],
-  unreadCount: 3,
+  messages: [],
+  unreadCount: 0,
   loading: false,
   error: null,
 };
@@ -124,7 +29,9 @@ const messageSlice = createSlice({
     },
     markAsRead: (state, action) => {
       const messageId = action.payload;
-      const message = state.messages.find((msg) => msg.id === messageId);
+      const message = state.messages.find(
+        (msg) => msg.id === messageId || msg._id === messageId,
+      );
       if (message && !message.isRead) {
         message.isRead = true;
         state.unreadCount -= 1;
@@ -132,7 +39,9 @@ const messageSlice = createSlice({
     },
     markMessageAsRead: (state, action) => {
       const messageId = action.payload;
-      const message = state.messages.find((msg) => msg.id === messageId);
+      const message = state.messages.find(
+        (msg) => msg.id === messageId || msg._id === messageId,
+      );
       if (message && !message.isRead) {
         message.isRead = true;
         state.unreadCount -= 1;
@@ -140,22 +49,26 @@ const messageSlice = createSlice({
     },
     markMessageAsUnread: (state, action) => {
       const messageId = action.payload;
-      const message = state.messages.find((msg) => msg.id === messageId);
+      const message = state.messages.find(
+        (msg) => msg.id === messageId || msg._id === messageId,
+      );
       if (message && message.isRead) {
         message.isRead = false;
         state.unreadCount += 1;
       }
     },
     markAllAsRead: (state) => {
-      state.messages.forEach((msg) => {
-        msg.isRead = true;
+      state.messages.forEach((message) => {
+        if (!message.isRead) {
+          message.isRead = true;
+        }
       });
       state.unreadCount = 0;
     },
     deleteMessage: (state, action) => {
       const messageId = action.payload;
       const messageIndex = state.messages.findIndex(
-        (msg) => msg.id === messageId,
+        (msg) => msg.id === messageId || msg._id === messageId,
       );
       if (messageIndex !== -1) {
         const message = state.messages[messageIndex];
@@ -167,22 +80,71 @@ const messageSlice = createSlice({
     },
     replyToMessage: (state, action) => {
       const { messageId, reply, repliedAt } = action.payload;
-      const message = state.messages.find((msg) => msg.id === messageId);
+      const message = state.messages.find(
+        (msg) => msg.id === messageId || msg._id === messageId,
+      );
       if (message) {
         message.reply = reply;
         message.repliedAt = repliedAt;
-        message.isRead = true;
+        message.status = "Replied";
         if (!message.isRead) {
+          message.isRead = true;
           state.unreadCount -= 1;
         }
       }
     },
     updateMessageStatus: (state, action) => {
       const { messageId, status } = action.payload;
-      const message = state.messages.find((msg) => msg.id === messageId);
+      const message = state.messages.find(
+        (msg) => msg.id === messageId || msg._id === messageId,
+      );
       if (message) {
         message.status = status;
       }
+    },
+    // Real-time message handling
+    receiveNewMessage: (state, action) => {
+      const newMessage = action.payload;
+      // Avoid duplicates
+      const exists = state.messages.some(
+        (msg) =>
+          (msg.id && msg.id === newMessage.id) ||
+          (msg._id && msg._id === newMessage._id),
+      );
+
+      if (!exists) {
+        state.messages.unshift(newMessage);
+        if (!newMessage.isRead) {
+          state.unreadCount += 1;
+        }
+      }
+    },
+    updateMessageRealTime: (state, action) => {
+      const updatedMessage = action.payload;
+      const messageIndex = state.messages.findIndex(
+        (msg) =>
+          (msg.id && msg.id === updatedMessage.id) ||
+          (msg._id && msg._id === updatedMessage._id),
+      );
+
+      if (messageIndex !== -1) {
+        const oldMessage = state.messages[messageIndex];
+        const wasUnread = !oldMessage.isRead;
+        const isUnread = !updatedMessage.isRead;
+
+        state.messages[messageIndex] = updatedMessage;
+
+        // Update unread count
+        if (wasUnread && !isUnread) {
+          state.unreadCount -= 1;
+        } else if (!wasUnread && isUnread) {
+          state.unreadCount += 1;
+        }
+      }
+    },
+    clearMessages: (state) => {
+      state.messages = [];
+      state.unreadCount = 0;
     },
   },
 });
@@ -199,6 +161,9 @@ export const {
   deleteMessage,
   replyToMessage,
   updateMessageStatus,
+  receiveNewMessage,
+  updateMessageRealTime,
+  clearMessages,
 } = messageSlice.actions;
 
 export default messageSlice.reducer;

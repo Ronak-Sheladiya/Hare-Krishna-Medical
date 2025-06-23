@@ -256,6 +256,7 @@ const AdminAnalytics = () => {
             <Alert.Heading>Offline Mode</Alert.Heading>
             <p>{error}</p>
             <ThemeButton variant="outline" onClick={fetchAnalyticsData}>
+              <i className="bi bi-arrow-clockwise me-2"></i>
               Try Again
             </ThemeButton>
           </Alert>
@@ -476,7 +477,8 @@ const AdminAnalytics = () => {
                     Export to Excel
                   </ThemeButton>
                   <ThemeButton variant="outline" onClick={exportToPDF}>
-                    📄 Export to PDF
+                    <i className="bi bi-file-earmark-pdf me-2"></i>
+                    Export to PDF
                   </ThemeButton>
                   <ThemeButton variant="outline" onClick={fetchAnalyticsData}>
                     <i className="bi bi-arrow-clockwise me-2"></i>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
   Container,
   Row,
@@ -14,6 +15,7 @@ import {
 const InvoiceQRVerify = () => {
   const { invoiceId } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [invoice, setInvoice] = useState(null);
@@ -201,7 +203,9 @@ const InvoiceQRVerify = () => {
                       <Button
                         variant="light"
                         size="sm"
-                        onClick={() => navigate(`/invoice/${invoice._id}`)}
+                        onClick={() =>
+                          navigate(`/invoice/${invoice.orderId || invoice._id}`)
+                        }
                       >
                         <i className="bi bi-eye me-2"></i>
                         View Full Invoice
@@ -425,9 +429,24 @@ const InvoiceQRVerify = () => {
                       <i className="bi bi-house me-2"></i>
                       Back to Home
                     </Button>
+                    {isAuthenticated && (
+                      <Button
+                        variant="outline-primary"
+                        onClick={() =>
+                          navigate(
+                            user?.role === 1 ? "/admin/orders" : "/user/orders",
+                          )
+                        }
+                      >
+                        <i className="bi bi-bag me-2"></i>
+                        {user?.role === 1 ? "Manage Orders" : "My Orders"}
+                      </Button>
+                    )}
                     <Button
                       variant="primary"
-                      onClick={() => navigate(`/invoice/${invoice._id}`)}
+                      onClick={() =>
+                        navigate(`/invoice/${invoice.orderId || invoice._id}`)
+                      }
                     >
                       <i className="bi bi-eye me-2"></i>
                       View Full Invoice

@@ -541,4 +541,114 @@ router.delete(
   },
 );
 
+// @route   POST /api/users/upload-profile-image
+// @desc    Upload profile image to database
+// @access  Private
+router.post("/upload-profile-image", auth, async (req, res) => {
+  try {
+    const { userId, imageData } = req.body;
+
+    // Validate user ID matches authenticated user or is admin
+    if (req.user.id !== userId && req.user.role !== 1) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized to update this profile",
+      });
+    }
+
+    // Validate image data
+    if (!imageData || !imageData.startsWith("data:image/")) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid image data provided",
+      });
+    }
+
+    // Check image size (base64 encoded, roughly 1.37x the actual size)
+    const imageSizeBytes = (imageData.length * 3) / 4;
+    const maxSizeBytes = 5 * 1024 * 1024; // 5MB
+
+    if (imageSizeBytes > maxSizeBytes) {
+      return res.status(400).json({
+        success: false,
+        message: "Image size too large. Maximum 5MB allowed.",
+      });
+    }
+
+    // Update user profile image
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { profileImage: imageData },
+      { new: true, runValidators: true },
+    ).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Profile image uploaded successfully",
+      data: {
+        imageUrl: imageData,
+        user,
+      },
+    });
+  } catch (error) {
+    console.error("Profile image upload error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to upload profile image",
+      error: error.message,
+    });
+  }
+});
+
+// @route   DELETE /api/users/delete-profile-image/:userId
+// @desc    Delete profile image
+// @access  Private
+router.delete("/delete-profile-image/:userId", auth, async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Validate user ID matches authenticated user or is admin
+    if (req.user.id !== userId && req.user.role !== 1) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized to update this profile",
+      });
+    }
+
+    // Update user to remove profile image
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $unset: { profileImage: 1 } },
+      { new: true, runValidators: true },
+    ).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Profile image deleted successfully",
+      data: { user },
+    });
+  } catch (error) {
+    console.error("Profile image delete error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete profile image",
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;

@@ -58,7 +58,7 @@ const Header = () => {
           {/* Simplified Header Layout */}
           <Navbar.Brand as={Link} to="/" className="d-flex align-items-center">
             <img
-              src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
+              src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
               alt="Hare Krishna Medical"
               className="medical-logo me-3"
             />
@@ -197,9 +197,17 @@ const Header = () => {
                           <i className="bi bi-receipt-cutoff me-2"></i>
                           Manage Invoices
                         </Dropdown.Item>
+                        <Dropdown.Item as={Link} to="/admin/payment-methods">
+                          <i className="bi bi-credit-card me-2"></i>
+                          Payment Management
+                        </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/analytics">
                           <i className="bi bi-graph-up me-2"></i>
                           Analytics
+                        </Dropdown.Item>
+                        <Dropdown.Item as={Link} to="/admin/profile">
+                          <i className="bi bi-person-gear me-2"></i>
+                          Edit Profile
                         </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/messages">
                           <i className="bi bi-envelope me-2"></i>
@@ -326,6 +334,8 @@ const Header = () => {
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
           border: none;
           min-width: 220px;
+          max-height: 400px;
+          overflow-y: auto;
         }
 
         .dropdown-item {

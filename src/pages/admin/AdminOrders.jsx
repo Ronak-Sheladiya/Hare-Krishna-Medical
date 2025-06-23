@@ -274,6 +274,7 @@ const AdminOrders = () => {
             <Alert.Heading>Offline Mode</Alert.Heading>
             <p>{error}</p>
             <ThemeButton variant="outline" onClick={fetchOrders}>
+              <i className="bi bi-arrow-clockwise me-2"></i>
               Try Again
             </ThemeButton>
           </Alert>
