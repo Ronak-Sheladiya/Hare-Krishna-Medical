@@ -74,7 +74,7 @@ const Header = () => {
               <img
                 src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
                 alt="Hare Krishna Medical"
-                className="medical-logo me-3"
+                className="medical-logo"
               />
             </div>
             <div className="brand-text-container">
