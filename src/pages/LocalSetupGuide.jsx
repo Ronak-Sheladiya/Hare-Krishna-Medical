@@ -55,17 +55,19 @@ const LocalSetupGuide = () => {
         <Alert variant="info" className="mb-4">
           <Alert.Heading>
             <i className="bi bi-info-circle me-2"></i>
-            Quick Start
+            Production-Ready Setup Guide
           </Alert.Heading>
           <p>
             This guide will help you set up the complete Hare Krishna Medical
-            Store application on your local machine with MongoDB database
-            integration and all security features enabled.
+            Store application on your local machine. The project includes a 100%
+            configured database with sample data, production-ready security
+            features, and comprehensive documentation for smooth deployment.
           </p>
           <hr />
           <p className="mb-0">
-            <strong>Prerequisites:</strong> Node.js (v18+), MongoDB, Git, Basic
-            terminal knowledge
+            <strong>What's Included:</strong> Full MERN stack, MongoDB with
+            sample data, JWT authentication, real-time features, professional
+            UI, and complete API documentation.
           </p>
         </Alert>
 
@@ -348,7 +350,7 @@ npm audit fix  # Fix any issues`}</code>
 cd backend
 npm install socket.io@^4.7.2 express-mongo-sanitize@^2.2.0 express-rate-limit@^7.1.5
 
-# Frontend additional dependencies (if needed)  
+# Frontend additional dependencies (if needed)
 cd ..
 npm install socket.io-client@^4.7.2`}</code>
               </pre>
