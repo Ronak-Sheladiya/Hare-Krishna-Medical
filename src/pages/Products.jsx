@@ -29,6 +29,7 @@ const Products = () => {
     (state) => state.products,
   );
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [viewMode, setViewMode] = useState("card"); // 'card' or 'list'
 
   // Categories for filtering
   const categories = [
@@ -162,8 +163,8 @@ const Products = () => {
         <section
           style={{
             background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
-            paddingTop: "80px",
-            paddingBottom: "80px",
+            paddingTop: "40px",
+            paddingBottom: "40px",
             color: "white",
           }}
         >
@@ -229,8 +230,8 @@ const Products = () => {
       <section
         style={{
           background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
-          paddingTop: "80px",
-          paddingBottom: "80px",
+          paddingTop: "40px",
+          paddingBottom: "40px",
           color: "white",
         }}
       >
@@ -239,24 +240,24 @@ const Products = () => {
             <Col lg={12}>
               <div
                 style={{
-                  width: "80px",
-                  height: "80px",
+                  width: "60px",
+                  height: "60px",
                   background: "rgba(255,255,255,0.2)",
                   borderRadius: "50%",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  margin: "0 auto 24px",
-                  fontSize: "32px",
+                  margin: "0 auto 16px",
+                  fontSize: "24px",
                 }}
               >
                 <i className="bi bi-grid-3x3-gap"></i>
               </div>
               <h1
                 style={{
-                  fontSize: "3rem",
+                  fontSize: "2.5rem",
                   fontWeight: "800",
-                  marginBottom: "20px",
+                  marginBottom: "12px",
                   textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
                 }}
               >
@@ -264,9 +265,9 @@ const Products = () => {
               </h1>
               <p
                 style={{
-                  fontSize: "1.2rem",
+                  fontSize: "1rem",
                   opacity: "0.9",
-                  maxWidth: "600px",
+                  maxWidth: "500px",
                   margin: "0 auto",
                 }}
               >
@@ -396,25 +397,214 @@ const Products = () => {
                 <i className="bi bi-grid-3x3-gap me-2"></i>
                 All Products ({filteredProducts.length})
               </h3>
-              <div className="d-flex align-items-center gap-2">
+              <div className="d-flex align-items-center gap-3">
                 <span className="text-muted">
                   <i className="bi bi-info-circle me-1"></i>
                   {filteredProducts.length} of {products.length} products
                 </span>
+
+                {/* View Toggle Buttons */}
+                <div
+                  className="btn-group"
+                  role="group"
+                  aria-label="View toggle"
+                >
+                  <Button
+                    variant={
+                      viewMode === "card" ? "danger" : "outline-secondary"
+                    }
+                    size="sm"
+                    onClick={() => setViewMode("card")}
+                    style={{
+                      background:
+                        viewMode === "card"
+                          ? "linear-gradient(135deg, #e63946 0%, #dc3545 100%)"
+                          : "transparent",
+                      border:
+                        viewMode === "card" ? "none" : "2px solid #dee2e6",
+                    }}
+                  >
+                    <i className="bi bi-grid-3x3-gap me-1"></i>
+                    Card
+                  </Button>
+                  <Button
+                    variant={
+                      viewMode === "list" ? "danger" : "outline-secondary"
+                    }
+                    size="sm"
+                    onClick={() => setViewMode("list")}
+                    style={{
+                      background:
+                        viewMode === "list"
+                          ? "linear-gradient(135deg, #e63946 0%, #dc3545 100%)"
+                          : "transparent",
+                      border:
+                        viewMode === "list" ? "none" : "2px solid #dee2e6",
+                    }}
+                  >
+                    <i className="bi bi-list-ul me-1"></i>
+                    List
+                  </Button>
+                </div>
               </div>
             </div>
 
             {filteredProducts.length > 0 ? (
-              <Row>
-                {filteredProducts.map((product) => (
-                  <Col lg={3} md={4} sm={6} className="mb-4" key={product._id}>
-                    <ProductCard
-                      product={product}
-                      onAddToCart={() => handleAddToCart(product)}
-                    />
-                  </Col>
-                ))}
-              </Row>
+              viewMode === "card" ? (
+                <Row>
+                  {filteredProducts.map((product) => (
+                    <Col
+                      lg={3}
+                      md={4}
+                      sm={6}
+                      className="mb-4"
+                      key={product._id}
+                    >
+                      <ProductCard
+                        product={product}
+                        onAddToCart={() => handleAddToCart(product)}
+                      />
+                    </Col>
+                  ))}
+                </Row>
+              ) : (
+                <div className="list-view">
+                  {filteredProducts.map((product) => (
+                    <Card
+                      key={product._id}
+                      className="mb-3"
+                      style={{
+                        border: "2px solid #f8f9fa",
+                        borderRadius: "12px",
+                        transition: "all 0.3s ease",
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.borderColor = "#e63946";
+                        e.currentTarget.style.boxShadow =
+                          "0 4px 15px rgba(230, 57, 70, 0.2)";
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.borderColor = "#f8f9fa";
+                        e.currentTarget.style.boxShadow = "none";
+                      }}
+                    >
+                      <Card.Body>
+                        <Row className="align-items-center">
+                          <Col md={2}>
+                            <img
+                              src={product.images?.[0] || "/placeholder.svg"}
+                              alt={product.name}
+                              style={{
+                                width: "100%",
+                                height: "120px",
+                                objectFit: "cover",
+                                borderRadius: "8px",
+                              }}
+                              onError={(e) => {
+                                e.target.src = "/placeholder.svg";
+                              }}
+                            />
+                          </Col>
+                          <Col md={6}>
+                            <div>
+                              <h5 className="mb-2">{product.name}</h5>
+                              <div className="d-flex align-items-center gap-2 mb-2">
+                                <Badge
+                                  bg="primary"
+                                  style={{ fontSize: "11px" }}
+                                >
+                                  <i className="bi bi-building me-1"></i>
+                                  {product.company}
+                                </Badge>
+                                {product.category && (
+                                  <Badge bg="info" style={{ fontSize: "11px" }}>
+                                    <i className="bi bi-tag me-1"></i>
+                                    {product.category}
+                                  </Badge>
+                                )}
+                              </div>
+                              <p
+                                className="text-muted mb-0"
+                                style={{ fontSize: "14px" }}
+                              >
+                                {product.description?.substring(0, 100)}...
+                              </p>
+                            </div>
+                          </Col>
+                          <Col md={2}>
+                            <div className="text-center">
+                              <div className="mb-2">
+                                <span className="fw-bold text-danger h5">
+                                  ₹
+                                  {(
+                                    product.discountPrice || product.price
+                                  )?.toLocaleString()}
+                                </span>
+                                {product.discountPrice && (
+                                  <div>
+                                    <small
+                                      className="text-muted"
+                                      style={{ textDecoration: "line-through" }}
+                                    >
+                                      ₹{product.price?.toLocaleString()}
+                                    </small>
+                                  </div>
+                                )}
+                              </div>
+                              {product.stock > 0 ? (
+                                <div className="text-success small">
+                                  <i className="bi bi-check-circle me-1"></i>
+                                  In Stock
+                                </div>
+                              ) : (
+                                <div className="text-danger small">
+                                  <i className="bi bi-x-circle me-1"></i>
+                                  Out of Stock
+                                </div>
+                              )}
+                            </div>
+                          </Col>
+                          <Col md={2}>
+                            <div className="d-grid gap-2">
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                onClick={() => handleAddToCart(product)}
+                                disabled={product.stock <= 0}
+                                style={{
+                                  background:
+                                    product.stock > 0
+                                      ? "linear-gradient(135deg, #e63946 0%, #dc3545 100%)"
+                                      : "#6c757d",
+                                  border: "none",
+                                  fontSize: "12px",
+                                }}
+                              >
+                                <i className="bi bi-cart-plus me-1"></i>
+                                Add to Cart
+                              </Button>
+                              <Button
+                                variant="outline-primary"
+                                size="sm"
+                                onClick={() =>
+                                  window.open(
+                                    `/product/${product._id}`,
+                                    "_self",
+                                  )
+                                }
+                                style={{ fontSize: "12px" }}
+                              >
+                                <i className="bi bi-eye me-1"></i>
+                                View Details
+                              </Button>
+                            </div>
+                          </Col>
+                        </Row>
+                      </Card.Body>
+                    </Card>
+                  ))}
+                </div>
+              )
             ) : (
               <div className="text-center py-5">
                 <div className="mb-3">
