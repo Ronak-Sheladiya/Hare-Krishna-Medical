@@ -365,18 +365,16 @@ const InvoiceQRVerify = () => {
                           </strong>
                         </td>
                       </tr>
-                      {invoice.tax > 0 && (
-                        <tr>
-                          <td colSpan="3">
-                            <strong>Tax:</strong>
-                          </td>
-                          <td className="text-end">
-                            <strong>
-                              ₹{parseFloat(invoice.tax).toFixed(2)}
-                            </strong>
-                          </td>
-                        </tr>
-                      )}
+                      <tr>
+                        <td colSpan="3">
+                          <strong>Tax:</strong>
+                        </td>
+                        <td className="text-end">
+                          <strong className="text-success">
+                            Included in product price
+                          </strong>
+                        </td>
+                      </tr>
                       <tr className="table-primary">
                         <td colSpan="3">
                           <strong>Total Amount:</strong>

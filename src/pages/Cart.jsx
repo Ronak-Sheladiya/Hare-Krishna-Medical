@@ -457,7 +457,7 @@ const Cart = () => {
                   <div className="d-flex justify-content-between mb-3">
                     <span style={{ color: "#6c757d" }}>Tax:</span>
                     <span style={{ color: "#3182ce", fontWeight: "600" }}>
-                      Included
+                      Included in product price
                     </span>
                   </div>
                   <hr style={{ borderColor: "#e2e8f0", margin: "20px 0" }} />

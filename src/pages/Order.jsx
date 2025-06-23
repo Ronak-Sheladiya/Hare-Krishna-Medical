@@ -225,7 +225,7 @@ const Order = () => {
       orderTime: new Date().toLocaleTimeString(),
       status: "Pending",
       paymentMethod: paymentMethod,
-      paymentStatus: paymentMethod === "cod" ? "Unpaid" : "Paid",
+      paymentStatus: "Pending",
       qrCode: qrCodeData,
     };
 
@@ -454,8 +454,8 @@ const Order = () => {
                   <td style="background: #d5f4e6; border: 1px solid #a2d9ce; padding: 12px 15px; font-size: 13px; text-align: right; color: #27ae60; font-weight: bold;">${shippingCost === 0 ? "FREE 🎉" : `₹${shippingCost.toFixed(2)}`}</td>
                 </tr>
                 <tr>
-                  <td style="background: linear-gradient(135deg, #fdeaa7 0%, #f39c12 100%); border: 1px solid #f39c12; padding: 12px 15px; font-size: 13px; font-weight: bold; color: #f39c12;">📋 Tax (5%):</td>
-                  <td style="background: #fdeaa7; border: 1px solid #f39c12; padding: 12px 15px; font-size: 13px; text-align: right; color: #f39c12; font-weight: bold;">₹${taxAmount.toFixed(2)}</td>
+                  <td style="background: linear-gradient(135deg, #fdeaa7 0%, #f39c12 100%); border: 1px solid #f39c12; padding: 12px 15px; font-size: 13px; font-weight: bold; color: #f39c12;">📋 Tax:</td>
+                  <td style="background: #fdeaa7; border: 1px solid #f39c12; padding: 12px 15px; font-size: 13px; text-align: right; color: #f39c12; font-weight: bold;">Included in product price</td>
                 </tr>
                 <tr>
                   <td style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); border: 3px solid #c0392b; padding: 18px 15px; font-size: 16px; font-weight: bold; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">💎 TOTAL:</td>
@@ -729,7 +729,7 @@ const Order = () => {
                         <div className="d-flex justify-content-between mb-2">
                           <span>Tax</span>
                           <span className="text-success fw-bold">
-                            Included in price
+                            Included in product price
                           </span>
                         </div>
                         <hr />

@@ -21,7 +21,7 @@ const OfficialInvoiceDesign = ({ invoiceData, qrCode, forPrint = false }) => {
     subtotal ||
     items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const calculatedTotal = total || calculatedSubtotal + shipping;
-  const tax = calculatedTotal * 0.05;
+  const tax = 0; // Tax included in product price
 
   const createOfficialInvoiceHTML = () => {
     return `
@@ -132,8 +132,8 @@ const OfficialInvoiceDesign = ({ invoiceData, qrCode, forPrint = false }) => {
                   <td style="background: #f8f9fa; border: 1px solid #ddd; padding: 8px 12px; font-size: 12px; text-align: right; font-weight: bold;">${shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}</td>
                 </tr>
                 <tr>
-                  <td style="background: #f8f9fa; border: 1px solid #ddd; padding: 8px 12px; font-size: 12px; font-weight: bold;">Tax (5%):</td>
-                  <td style="background: #f8f9fa; border: 1px solid #ddd; padding: 8px 12px; font-size: 12px; text-align: right; font-weight: bold;">₹${tax.toFixed(2)}</td>
+                  <td style="background: #f8f9fa; border: 1px solid #ddd; padding: 8px 12px; font-size: 12px; font-weight: bold;">Tax:</td>
+                  <td style="background: #f8f9fa; border: 1px solid #ddd; padding: 8px 12px; font-size: 12px; text-align: right; font-weight: bold;">Included in product price</td>
                 </tr>
                 <tr>
                   <td style="background: #e63946; border: 1px solid #e63946; padding: 12px 12px; font-size: 14px; font-weight: bold; color: white;">TOTAL:</td>
