@@ -449,6 +449,9 @@ function App() {
           </main>
           {/* Footer displayed on all pages */}
           <Footer />
+
+          {/* Real-time connection status indicator */}
+          <RealTimeStatus />
         </div>
       </ErrorBoundary>
     </Router>
