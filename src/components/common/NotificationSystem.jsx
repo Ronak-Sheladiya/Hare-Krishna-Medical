@@ -13,7 +13,6 @@ import {
   markAllAsRead,
   removeNotification,
   hideToast,
-  simulateNotifications,
 } from "../../store/slices/notificationSlice";
 
 const NotificationSystem = () => {
