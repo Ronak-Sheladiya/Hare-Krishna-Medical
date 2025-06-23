@@ -879,44 +879,7 @@ const AdminProducts = () => {
               />
             </Form.Group>
 
-            <Form.Group className="mb-4">
-              <Form.Label>Update Product Images</Form.Label>
-              <Form.Control
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImageChange}
-                className="mb-3"
-              />
-              <Form.Text className="text-muted mb-3">
-                <i className="bi bi-info-circle me-1"></i>
-                Upload new images to replace existing ones. Leave empty to keep
-                current images.
-              </Form.Text>
 
-              {imageUploadError && (
-                <Alert variant="danger" className="py-2">
-                  <i className="bi bi-exclamation-triangle me-2"></i>
-                  {imageUploadError}
-                </Alert>
-              )}
-
-              {/* Current Images Display */}
-              {selectedProduct &&
-                selectedProduct.images &&
-                selectedProduct.images.length > 0 &&
-                imagePreviewUrls.length === 0 && (
-                  <div className="current-images mb-3">
-                    <label className="form-label small text-muted">
-                      Current Images:
-                    </label>
-                    <Row className="g-2">
-                      {selectedProduct.images.map((imageUrl, index) => (
-                        <Col xs={6} md={4} lg={3} key={index}>
-                          <img
-                            src={imageUrl}
-                            alt={`Current ${index + 1}`}
-                            className="img-fluid rounded border"
                             style={{
                               width: "100%",
                               height: "100px",
