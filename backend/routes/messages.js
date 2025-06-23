@@ -102,24 +102,24 @@ router.post(
               <h1 style="margin: 0; font-size: 28px;">Message Received! ✅</h1>
               <p style="margin: 10px 0 0 0; font-size: 16px;">Thank you for contacting us</p>
             </div>
-            
+
             <div style="padding: 30px; background: #f8f9fa; border-radius: 10px; margin-top: 20px;">
               <h2 style="color: #333; margin-top: 0;">Hello ${name}!</h2>
-              
+
               <p style="color: #666; line-height: 1.6;">
                 We have received your message and our team will get back to you within 24 hours.
               </p>
-              
+
               <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
                 <h3 style="color: #28a745; margin-top: 0;">Your Message:</h3>
                 <p style="margin: 0;"><strong>Subject:</strong> ${subject}</p>
                 <p style="margin: 10px 0 0 0; color: #666;">${message}</p>
               </div>
-              
+
               <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px; text-align: center;">
                 <p style="color: #888; font-size: 14px; margin: 0;">
                   📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat<br>
-                  📞 +91 76989 13354 | 📧 harekrishnamedical@gmail.com
+                  📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
                 </p>
               </div>
             </div>
@@ -144,10 +144,10 @@ router.post(
               <h1 style="margin: 0; font-size: 28px;">New Message Received! 📧</h1>
               <p style="margin: 10px 0 0 0; font-size: 16px;">Contact Form Submission</p>
             </div>
-            
+
             <div style="padding: 30px; background: #f8f9fa; border-radius: 10px; margin-top: 20px;">
               <h2 style="color: #333; margin-top: 0;">Message Details:</h2>
-              
+
               <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
                 <table style="width: 100%; border-collapse: collapse;">
                   <tr>
@@ -172,9 +172,9 @@ router.post(
                   </tr>
                 </table>
               </div>
-              
+
               <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.FRONTEND_URL}/admin/messages" 
+                <a href="${process.env.FRONTEND_URL}/admin/messages"
                    style="background: #e63946; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
                   View in Admin Panel
                 </a>
@@ -445,27 +445,27 @@ router.post(
               <h1 style="margin: 0; font-size: 28px;">Response from Hare Krishna Medical 💬</h1>
               <p style="margin: 10px 0 0 0; font-size: 16px;">Re: ${message.subject}</p>
             </div>
-            
+
             <div style="padding: 30px; background: #f8f9fa; border-radius: 10px; margin-top: 20px;">
               <h2 style="color: #333; margin-top: 0;">Hello ${message.name}!</h2>
-              
+
               <div style="background: #e7f3ff; border-left: 4px solid #17a2b8; padding: 20px; margin: 20px 0;">
                 <h3 style="color: #17a2b8; margin-top: 0;">Your Original Message:</h3>
                 <p style="color: #666; margin: 0; font-style: italic;">"${message.message}"</p>
               </div>
-              
+
               <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
                 <h3 style="color: #17a2b8; margin-top: 0;">Our Response:</h3>
                 <p style="color: #333; line-height: 1.6; margin: 0;">${response}</p>
               </div>
-              
+
               <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.FRONTEND_URL}/contact" 
+                <a href="${process.env.FRONTEND_URL}/contact"
                    style="background: #17a2b8; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
                   Contact Us Again
                 </a>
               </div>
-              
+
               <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px; text-align: center;">
                 <p style="color: #888; font-size: 14px; margin: 0;">
                   📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat<br>
