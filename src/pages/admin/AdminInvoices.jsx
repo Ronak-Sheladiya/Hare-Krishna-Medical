@@ -393,28 +393,17 @@ const AdminInvoices = () => {
       // Wait for rendering
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Print
-      const printWindow = window.open("", "_blank");
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Invoice ${invoice.invoiceId}</title>
-            <style>
-              @page { size: A4; margin: 10mm; }
-              body { margin: 0; font-family: Arial, sans-serif; }
-            </style>
-          </head>
-          <body>
-            ${tempDiv.innerHTML}
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.print();
+      // Use original print process without new tab
+      const originalContents = document.body.innerHTML;
+      document.body.innerHTML = tempDiv.innerHTML;
+      window.print();
+      document.body.innerHTML = originalContents;
 
       // Cleanup
       document.body.removeChild(tempDiv);
+
+      // Reload to restore original content
+      window.location.reload();
     } catch (error) {
       console.error("Print error:", error);
     } finally {
