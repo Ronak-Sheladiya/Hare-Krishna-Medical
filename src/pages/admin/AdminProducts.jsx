@@ -58,7 +58,7 @@ const AdminProducts = () => {
   });
 
   const API_BASE_URL =
-    process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
   const categories = [
     "Pain Relief",
