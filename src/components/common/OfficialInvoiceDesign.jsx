@@ -31,17 +31,24 @@ const OfficialInvoiceDesign = ({ invoiceData, qrCode, forPrint = false }) => {
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <!-- Left Side - Company Info -->
             <div style="flex: 1;">
-              <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <img src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800" alt="Hare Krishna Medical Logo" style="height: 60px; width: auto; margin-right: 15px; background: white; padding: 8px; border-radius: 8px;" onerror="this.style.display='none';" />
+              <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                <div style="position: relative; margin-right: 20px;">
+                  <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800" alt="Hare Krishna Medical Logo" style="height: 80px; width: 80px; background: white; padding: 10px; border-radius: 12px; border: 3px solid rgba(255,255,255,0.8); box-shadow: 0 4px 16px rgba(0,0,0,0.1); object-fit: contain;" onerror="this.style.display='none';" />
+                  <div style="position: absolute; top: -5px; right: -5px; width: 20px; height: 20px; background: #27ae60; border-radius: 50%; border: 2px solid white;"></div>
+                </div>
                 <div>
-                  <h1 style="font-size: 24px; font-weight: bold; margin: 0; line-height: 1.2;">HARE KRISHNA MEDICAL</h1>
-                  <p style="font-size: 12px; margin: 3px 0; opacity: 0.9;">Your Trusted Health Partner</p>
+                  <h1 style="font-size: 28px; font-weight: 900; margin: 0; line-height: 1.1; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">HARE KRISHNA MEDICAL</h1>
+                  <p style="font-size: 14px; margin: 5px 0 0 0; opacity: 0.95; font-weight: 500; letter-spacing: 0.5px;">🏥 Your Trusted Health Partner Since 2020</p>
+                  <div style="display: flex; align-items: center; margin-top: 8px; font-size: 12px; opacity: 0.9;">
+                    <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; margin-right: 8px;">✓ Verified</span>
+                    <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px;">🚀 Fast Delivery</span>
+                  </div>
                 </div>
               </div>
-              <div style="font-size: 11px; line-height: 1.4; opacity: 0.95;">
-                <div>3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat</div>
-                <div>Phone: +91 76989 13354 | +91 91060 18508</div>
-                <div>Email: hkmedicalamroli@gmail.com</div>
+              <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; font-size: 11px; line-height: 1.5;">
+                <div style="display: flex; align-items: center; margin-bottom: 4px;"><i style="margin-right: 8px;">📍</i> 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat</div>
+                <div style="display: flex; align-items-center; margin-bottom: 4px;"><i style="margin-right: 8px;">📞</i> +91 76989 13354 | +91 91060 18508</div>
+                <div style="display: flex; align-items-center;"><i style="margin-right: 8px;">✉️</i> hkmedicalamroli@gmail.com</div>
               </div>
             </div>
             <!-- Right Side - Invoice Info -->
