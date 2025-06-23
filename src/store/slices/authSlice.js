@@ -252,6 +252,9 @@ export const {
   clearError,
   updateUser,
   refreshSession,
+  setRedirectUrl,
+  clearRedirectUrl,
+  syncFromStorage,
 } = authSlice.actions;
 
 export default authSlice.reducer;
