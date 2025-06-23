@@ -588,11 +588,10 @@ const AdminPaymentMethods = () => {
                 </Form.Group>
               </Modal.Body>
               <Modal.Footer>
-                <Button variant="secondary" onClick={handleCloseModal}>
+                <ThemeButton variant="outline" onClick={handleCloseModal}>
                   Cancel
-                </Button>
-                <Button
-                  variant="primary"
+                </ThemeButton>
+                <ThemeButton
                   type="submit"
                   disabled={saving}
                   className="d-flex align-items-center"
@@ -601,7 +600,7 @@ const AdminPaymentMethods = () => {
                     <Spinner animation="border" size="sm" className="me-2" />
                   )}
                   {editingMethod ? "Update Method" : "Add Method"}
-                </Button>
+                </ThemeButton>
               </Modal.Footer>
             </Form>
           </Modal>
