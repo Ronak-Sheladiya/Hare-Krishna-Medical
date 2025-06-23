@@ -15,6 +15,8 @@ import { PageHeroSection } from "../components/common/ConsistentTheme";
 import ProfessionalLoading from "../components/common/ProfessionalLoading";
 import { refreshSession } from "../store/slices/authSlice";
 import { api, safeApiCall } from "../utils/apiClient";
+import { getDemoInvoice, isDemoInvoice } from "../utils/demoInvoiceData";
+import "../styles/InvoicePrintA4.css";
 
 const InvoiceQRVerify = () => {
   const { invoiceId } = useParams();
@@ -64,6 +66,17 @@ const InvoiceQRVerify = () => {
     setLoading(true);
     setError(null);
 
+    // Check if this is a demo invoice first
+    if (isDemoInvoice(invoiceId)) {
+      const demoInvoice = getDemoInvoice(invoiceId);
+      if (demoInvoice) {
+        setInvoice(demoInvoice);
+        setVerificationStatus("verified");
+        setLoading(false);
+        return;
+      }
+    }
+
     const {
       success,
       data,
@@ -90,6 +103,138 @@ const InvoiceQRVerify = () => {
     }
 
     setLoading(false);
+  };
+
+  const handlePrint = () => {
+    const printContent = document.querySelector(".card");
+    if (printContent) {
+      const printWindow = window.open("", "_blank");
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Invoice QR Verification - ${invoice?.invoiceNumber || invoice?.invoiceId || invoiceId}</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+            <style>
+              @page {
+                size: A4;
+                margin: 15mm;
+              }
+              @media print {
+                body {
+                  margin: 0;
+                  color: black !important;
+                  font-size: 11px;
+                  line-height: 1.3;
+                  -webkit-print-color-adjust: exact;
+                  print-color-adjust: exact;
+                }
+                .no-print { display: none !important; }
+                .table {
+                  font-size: 10px !important;
+                  margin-bottom: 8px !important;
+                }
+                .table th, .table td {
+                  padding: 4px 6px !important;
+                  border: 1px solid #dee2e6 !important;
+                }
+              }
+              body {
+                font-family: 'Segoe UI', Arial, sans-serif;
+                line-height: 1.3;
+                color: #333;
+              }
+              .text-success { color: #28a745 !important; }
+            </style>
+          </head>
+          <body>
+            ${printContent.innerHTML}
+            <script>
+              window.onload = function() {
+                setTimeout(function() {
+                  window.print();
+                  window.close();
+                }, 500);
+              };
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
+
+      const printContent = document.querySelector(".card");
+      if (!printContent) {
+        alert("Content not found");
+        return;
+      }
+
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      iframeDoc.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Invoice QR Verification - ${invoice?.invoiceNumber || invoice?.invoiceId || invoiceId}</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+            <style>
+              @page {
+                size: A4;
+                margin: 15mm;
+              }
+              body {
+                font-family: 'Segoe UI', Arial, sans-serif;
+                line-height: 1.3;
+                color: #333;
+                font-size: 11px;
+                margin: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              .table {
+                font-size: 10px !important;
+                margin-bottom: 8px !important;
+              }
+              .table th, .table td {
+                padding: 4px 6px !important;
+                border: 1px solid #dee2e6 !important;
+              }
+              .text-success { color: #28a745 !important; }
+              .no-print { display: none !important; }
+            </style>
+          </head>
+          <body>
+            ${printContent.innerHTML}
+          </body>
+        </html>
+      `);
+      iframeDoc.close();
+
+      setTimeout(() => {
+        try {
+          iframe.contentWindow.print();
+          setTimeout(() => {
+            document.body.removeChild(iframe);
+          }, 1000);
+        } catch (error) {
+          console.error("Download failed:", error);
+          alert(
+            "Download feature requires a PDF library. Using print instead.",
+          );
+          handlePrint();
+        }
+      }, 1000);
+    } catch (error) {
+      console.error("Download preparation failed:", error);
+      alert("Download preparation failed. Using print instead.");
+      handlePrint();
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -329,7 +474,7 @@ const InvoiceQRVerify = () => {
                         <Button
                           variant="outline-light"
                           size="sm"
-                          onClick={() => window.print()}
+                          onClick={handlePrint}
                           style={{
                             borderRadius: "6px",
                             fontWeight: "600",
@@ -337,6 +482,18 @@ const InvoiceQRVerify = () => {
                         >
                           <i className="bi bi-printer me-2"></i>
                           Print
+                        </Button>
+                        <Button
+                          variant="light"
+                          size="sm"
+                          onClick={handleDownload}
+                          style={{
+                            borderRadius: "6px",
+                            fontWeight: "600",
+                          }}
+                        >
+                          <i className="bi bi-download me-2"></i>
+                          Download
                         </Button>
                       </div>
                     </Col>

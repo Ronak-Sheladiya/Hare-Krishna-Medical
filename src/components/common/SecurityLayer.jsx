@@ -1,10 +1,20 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
+import SecurityPopup from "./SecurityPopup";
 
 const SecurityLayer = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const location = useLocation();
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupAction, setPopupAction] = useState("");
+  const [popupContext, setPopupContext] = useState("");
+
+  const showSecurityPopup = (action, context = "") => {
+    setPopupAction(action);
+    setPopupContext(context);
+    setShowPopup(true);
+  };
 
   useEffect(() => {
     const isAuthenticatedPage =
@@ -14,6 +24,7 @@ const SecurityLayer = () => {
     // Disable right-click context menu
     const disableRightClick = (e) => {
       e.preventDefault();
+      showSecurityPopup("rightClick", "public page");
       return false;
     };
 
@@ -23,6 +34,7 @@ const SecurityLayer = () => {
       if (e.ctrlKey && e.key === "a") {
         if (!isAuthenticatedPage || !isAuthenticated) {
           e.preventDefault();
+          showSecurityPopup("selectAll", "public page");
           return false;
         }
       }
@@ -31,6 +43,7 @@ const SecurityLayer = () => {
       if (e.ctrlKey && e.key === "c") {
         if (!isAuthenticatedPage || !isAuthenticated) {
           e.preventDefault();
+          showSecurityPopup("copy", "public page");
           return false;
         }
       }
@@ -39,6 +52,7 @@ const SecurityLayer = () => {
       if (e.ctrlKey && e.key === "v") {
         if (!isAuthenticatedPage || !isAuthenticated) {
           e.preventDefault();
+          showSecurityPopup("paste", "public page");
           return false;
         }
       }
@@ -47,6 +61,7 @@ const SecurityLayer = () => {
       if (e.ctrlKey && e.key === "x") {
         if (!isAuthenticatedPage || !isAuthenticated) {
           e.preventDefault();
+          showSecurityPopup("cut", "public page");
           return false;
         }
       }
@@ -54,42 +69,49 @@ const SecurityLayer = () => {
       // Disable Ctrl+S (Save) - prevent saving pages
       if (e.ctrlKey && e.key === "s") {
         e.preventDefault();
+        showSecurityPopup("save", "page save");
         return false;
       }
 
       // Disable Ctrl+P (Print) - prevent printing
       if (e.ctrlKey && e.key === "p") {
         e.preventDefault();
+        showSecurityPopup("print", "keyboard shortcut");
         return false;
       }
 
       // Disable F12 (Developer Tools)
       if (e.key === "F12") {
         e.preventDefault();
+        showSecurityPopup("devTools", "F12 key");
         return false;
       }
 
       // Disable Ctrl+Shift+I (Developer Tools)
       if (e.ctrlKey && e.shiftKey && e.key === "I") {
         e.preventDefault();
+        showSecurityPopup("devTools", "keyboard shortcut");
         return false;
       }
 
       // Disable Ctrl+Shift+C (Inspect Element)
       if (e.ctrlKey && e.shiftKey && e.key === "C") {
         e.preventDefault();
+        showSecurityPopup("devTools", "inspect element");
         return false;
       }
 
       // Disable Ctrl+Shift+J (Console)
       if (e.ctrlKey && e.shiftKey && e.key === "J") {
         e.preventDefault();
+        showSecurityPopup("devTools", "console access");
         return false;
       }
 
       // Disable Ctrl+U (View Source)
       if (e.ctrlKey && e.key === "u") {
         e.preventDefault();
+        showSecurityPopup("viewSource", "keyboard shortcut");
         return false;
       }
     };
@@ -242,7 +264,14 @@ const SecurityLayer = () => {
     return () => clearInterval(devToolsInterval);
   }, []);
 
-  return null;
+  return (
+    <SecurityPopup
+      show={showPopup}
+      onClose={() => setShowPopup(false)}
+      action={popupAction}
+      context={popupContext}
+    />
+  );
 };
 
 export default SecurityLayer;

@@ -16,6 +16,8 @@ import ProfessionalLoading from "../components/common/ProfessionalLoading";
 import { PageHeroSection } from "../components/common/ConsistentTheme";
 import { refreshSession } from "../store/slices/authSlice";
 import { api, safeApiCall } from "../utils/apiClient";
+import { getDemoInvoice, isDemoInvoice } from "../utils/demoInvoiceData";
+import "../styles/InvoicePrintA4.css";
 
 const InvoiceVerify = () => {
   const { invoiceId } = useParams();
@@ -61,6 +63,16 @@ const InvoiceVerify = () => {
     setLoading(true);
     setError("");
 
+    // Check if this is a demo invoice first
+    if (isDemoInvoice(invoiceId)) {
+      const demoInvoice = getDemoInvoice(invoiceId);
+      if (demoInvoice) {
+        setInvoice(demoInvoice);
+        setLoading(false);
+        return;
+      }
+    }
+
     const {
       success,
       data,
@@ -83,7 +95,6 @@ const InvoiceVerify = () => {
   };
 
   const handlePrint = () => {
-    // Enhanced print functionality
     const printContent = document.getElementById("invoice-content");
     if (printContent) {
       const printWindow = window.open("", "_blank");
@@ -91,31 +102,66 @@ const InvoiceVerify = () => {
         <!DOCTYPE html>
         <html>
           <head>
-            <title>Invoice ${invoice.invoiceId || invoiceId}</title>
+            <title>Invoice ${invoice?.invoiceNumber || invoice?.invoiceId || invoiceId}</title>
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
             <style>
-              @media print {
-                body { margin: 0; color: black !important; }
-                .no-print { display: none !important; }
-                .print-only { display: block !important; }
+              @page {
+                size: A4;
+                margin: 15mm;
               }
-              body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.4; }
-              .invoice-header { background: #e63946 !important; color: white !important; }
-              .professional-invoice { max-width: 800px; margin: 0 auto; }
+              @media print {
+                body {
+                  margin: 0;
+                  color: black !important;
+                  font-size: 11px;
+                  line-height: 1.3;
+                  -webkit-print-color-adjust: exact;
+                  print-color-adjust: exact;
+                }
+                .no-print { display: none !important; }
+                .invoice-header {
+                  background: #e63946 !important;
+                  color: white !important;
+                  padding: 15px !important;
+                  margin-bottom: 10px !important;
+                }
+                .customer-info, .payment-info {
+                  padding: 12px !important;
+                  margin-bottom: 8px !important;
+                }
+                .table {
+                  font-size: 10px !important;
+                  margin-bottom: 8px !important;
+                }
+                .table th, .table td {
+                  padding: 4px 6px !important;
+                  border: 1px solid #dee2e6 !important;
+                }
+              }
+              body {
+                font-family: 'Segoe UI', Arial, sans-serif;
+                line-height: 1.3;
+                color: #333;
+              }
+              .invoice-header {
+                background: #e63946 !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
               .text-medical-red { color: #e63946 !important; }
               .text-success { color: #28a745 !important; }
+              .company-logo { max-width: 60px; height: auto; }
             </style>
           </head>
           <body>
-            <div class="professional-invoice">
-              ${printContent.innerHTML}
-            </div>
+            ${printContent.innerHTML}
             <script>
               window.onload = function() {
                 setTimeout(function() {
                   window.print();
                   window.close();
-                }, 250);
+                }, 500);
               };
             </script>
           </body>
@@ -125,12 +171,94 @@ const InvoiceVerify = () => {
     }
   };
 
-  const handleDownload = () => {
-    // Navigate to full invoice view for download functionality
-    if (invoice?.orderId) {
-      navigate(`/invoice/${invoice.orderId}`);
-    } else {
-      // Fallback: open in new window for download
+  const handleDownload = async () => {
+    try {
+      // Create a hidden iframe for PDF generation
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
+
+      const printContent = document.getElementById("invoice-content");
+      if (!printContent) {
+        alert("Invoice content not found");
+        return;
+      }
+
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      iframeDoc.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Invoice ${invoice?.invoiceNumber || invoice?.invoiceId || invoiceId}</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+            <style>
+              @page {
+                size: A4;
+                margin: 15mm;
+              }
+              body {
+                font-family: 'Segoe UI', Arial, sans-serif;
+                line-height: 1.3;
+                color: #333;
+                font-size: 11px;
+                margin: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              .invoice-header {
+                background: #e63946 !important;
+                color: white !important;
+                padding: 15px !important;
+                margin-bottom: 10px !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              .customer-info, .payment-info {
+                padding: 12px !important;
+                margin-bottom: 8px !important;
+              }
+              .table {
+                font-size: 10px !important;
+                margin-bottom: 8px !important;
+              }
+              .table th, .table td {
+                padding: 4px 6px !important;
+                border: 1px solid #dee2e6 !important;
+              }
+              .text-medical-red { color: #e63946 !important; }
+              .text-success { color: #28a745 !important; }
+              .company-logo { max-width: 60px; height: auto; }
+              .no-print { display: none !important; }
+            </style>
+          </head>
+          <body>
+            ${printContent.innerHTML}
+          </body>
+        </html>
+      `);
+      iframeDoc.close();
+
+      // Wait for content to load
+      setTimeout(() => {
+        try {
+          // Use browser's built-in save as PDF functionality
+          iframe.contentWindow.print();
+
+          // Clean up
+          setTimeout(() => {
+            document.body.removeChild(iframe);
+          }, 1000);
+        } catch (error) {
+          console.error("Download failed:", error);
+          alert(
+            "Download feature requires a PDF library. Using print instead.",
+          );
+          handlePrint();
+        }
+      }, 1000);
+    } catch (error) {
+      console.error("Download preparation failed:", error);
+      alert("Download preparation failed. Using print instead.");
       handlePrint();
     }
   };
