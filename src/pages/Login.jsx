@@ -108,10 +108,6 @@ const Login = () => {
           role: 1, // Admin role
           profileImage: null,
         };
-        // Store redirect URL before login
-        const redirectUrl =
-          sessionStorage.getItem("redirectAfterLogin") || from;
-
         dispatch(
           loginSuccess({
             user: adminUser,
@@ -119,11 +115,14 @@ const Login = () => {
           }),
         );
 
-        // Navigate to intended URL or default admin dashboard
+        // Handle redirect after login
+        const redirectUrl =
+          sessionStorage.getItem("redirectAfterLogin") || from;
         if (
           redirectUrl &&
           redirectUrl !== "/login" &&
-          redirectUrl !== "/register"
+          redirectUrl !== "/register" &&
+          redirectUrl !== "/access-denied"
         ) {
           navigate(redirectUrl, { replace: true });
         } else {
