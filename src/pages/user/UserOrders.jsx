@@ -276,7 +276,7 @@ const UserOrders = () => {
       <PageHeroSection
         title="My Orders"
         description="Track and manage your orders"
-        icon="📦"
+        icon={<i className="bi bi-box-seam"></i>}
       />
 
       <Container className="py-5">
@@ -377,7 +377,8 @@ const UserOrders = () => {
                   className="w-100"
                   onClick={fetchUserOrders}
                 >
-                  🔄 Refresh
+                  <i className="bi bi-arrow-clockwise me-2"></i>
+                  Refresh
                 </ThemeButton>
               </Col>
             </Row>
