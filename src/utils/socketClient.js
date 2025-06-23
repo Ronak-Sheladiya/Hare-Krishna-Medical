@@ -55,8 +55,13 @@ class SocketClient {
     this.socket = null;
     this.isConnected = false;
     this.reconnectAttempts = 0;
-    this.maxReconnectAttempts = 5;
+    this.maxReconnectAttempts = 3;
     this.isBrowser = typeof window !== "undefined";
+    this.connectionTimeout = null;
+    this.reconnectTimeout = null;
+    this.useWebSocket = true;
+    this.fallbackMode = false;
+    this.lastError = null;
   }
 
   connect(token = null, role = 0) {
