@@ -87,7 +87,11 @@ const Home = () => {
 
         <Container style={{ position: "relative", zIndex: 2 }}>
           <Row className="align-items-center">
-            <Col lg={7} className="mb-4" style={{ paddingRight: "2rem" }}>
+            <Col
+              lg={7}
+              className="mb-4 mb-lg-0"
+              style={{ paddingRight: "1rem" }}
+            >
               <div className="hero-content">
                 <h1
                   style={{
@@ -185,22 +189,38 @@ const Home = () => {
             </Col>
 
             <Col lg={5}>
-              <div className="hero-image text-center">
+              <div
+                className="hero-image text-center"
+                style={{ paddingLeft: "0" }}
+              >
                 <div
                   style={{
                     background: "transparent",
                     borderRadius: "20px",
-                    padding: "20px",
-                    paddingLeft: "0px",
+                    padding: "10px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
                 >
                   <img
                     src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
                     alt="Hare Krishna Medical"
-                    className="img-fluid"
+                    className="img-fluid hero-logo"
                     style={{
-                      maxHeight: "400px",
+                      maxHeight: "380px",
                       filter: "brightness(1.1) contrast(1.2)",
+                      transition: "all 0.4s ease",
+                      cursor: "pointer",
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.transform = "scale(1.05) rotate(2deg)";
+                      e.target.style.filter =
+                        "brightness(1.2) contrast(1.3) drop-shadow(0 10px 30px rgba(230, 57, 70, 0.3))";
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.transform = "scale(1) rotate(0deg)";
+                      e.target.style.filter = "brightness(1.1) contrast(1.2)";
                     }}
                   />
                 </div>
