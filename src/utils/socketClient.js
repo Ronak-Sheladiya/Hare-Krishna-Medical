@@ -1,24 +1,32 @@
-// Optional socket.io-client import - will be available after npm install
+// Real-time socket client for live updates
 let io = null;
 
-// Try to import socket.io-client if available
+// Try to import socket.io-client
 try {
-  // This will be resolved after the dependency is installed
   if (typeof window !== "undefined") {
-    // Placeholder for socket.io-client - install with: npm install socket.io-client
-    console.log(
-      "Socket.io-client will be available after: npm install socket.io-client",
-    );
-
-    // Mock io function for now
-    io = () => ({
-      on: () => {},
-      off: () => {},
-      emit: () => {},
-      connect: () => {},
-      disconnect: () => {},
-      id: null,
-    });
+    // Check if socket.io-client is available
+    import("socket.io-client")
+      .then((socketio) => {
+        io = socketio.io;
+      })
+      .catch(() => {
+        console.info(
+          "Socket.io-client not installed. Install with: npm install socket.io-client",
+        );
+        // Create mock io for development
+        io = () => ({
+          on: (event, callback) =>
+            console.log(`Mock socket listening for: ${event}`),
+          off: (event) =>
+            console.log(`Mock socket removed listener for: ${event}`),
+          emit: (event, data) =>
+            console.log(`Mock socket emitting: ${event}`, data),
+          connect: () => console.log("Mock socket connected"),
+          disconnect: () => console.log("Mock socket disconnected"),
+          id: "mock-socket-id",
+          connected: false,
+        });
+      });
   }
 } catch (error) {
   console.warn("Socket.io-client not available:", error);
