@@ -12,6 +12,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../store/slices/authSlice.js";
 import NotificationSystem from "../common/NotificationSystem.jsx";
+import UserAvatar from "../common/UserAvatar.jsx";
 
 const Header = () => {
   const location = useLocation();
@@ -208,34 +209,12 @@ const Header = () => {
                     id="user-dropdown"
                   >
                     <div className="d-flex align-items-center">
-                      {user?.profileImage ? (
-                        <img
-                          src={user.profileImage}
-                          alt={getUserDisplayName()}
-                          className="rounded-circle me-2"
-                          width="40"
-                          height="40"
-                          style={{
-                            objectFit: "cover",
-                            border: "2px solid #e63946",
-                            boxShadow: "0 2px 8px rgba(230, 57, 70, 0.3)",
-                          }}
-                        />
-                      ) : (
-                        <div
-                          className="text-white rounded-circle d-flex align-items-center justify-content-center me-2"
-                          style={{
-                            background:
-                              "linear-gradient(135deg, #e63946, #dc3545)",
-                            width: "40px",
-                            height: "40px",
-                            fontSize: "1.2rem",
-                            boxShadow: "0 2px 8px rgba(230, 57, 70, 0.3)",
-                          }}
-                        >
-                          <i className="bi bi-person-fill"></i>
-                        </div>
-                      )}
+                      <UserAvatar
+                        user={user}
+                        size={40}
+                        className="me-2"
+                        showBorder={true}
+                      />
                       <div className="d-none d-md-block text-start">
                         <div className="fw-bold small">
                           {getUserDisplayName()}
