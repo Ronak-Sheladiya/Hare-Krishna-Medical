@@ -138,7 +138,14 @@ function App() {
     try {
       if (token && user) {
         // Connect socket when user is authenticated
-        socketClient.connect(token, user.role);
+        // Note: Socket.io-client needs to be installed first: npm install socket.io-client
+        if (socketClient && typeof socketClient.connect === "function") {
+          socketClient.connect(token, user.role);
+        } else {
+          console.log(
+            "Socket.io-client not available. Install with: npm install socket.io-client",
+          );
+        }
 
         // Request notification permission safely
         if (
@@ -152,7 +159,9 @@ function App() {
         }
       } else {
         // Disconnect socket when user logs out
-        socketClient.disconnect();
+        if (socketClient && typeof socketClient.disconnect === "function") {
+          socketClient.disconnect();
+        }
       }
     } catch (error) {
       console.warn("Socket connection initialization failed:", error);
@@ -161,7 +170,9 @@ function App() {
     // Cleanup on unmount
     return () => {
       try {
-        socketClient.disconnect();
+        if (socketClient && typeof socketClient.disconnect === "function") {
+          socketClient.disconnect();
+        }
       } catch (error) {
         console.warn("Socket disconnect error:", error);
       }
