@@ -46,8 +46,10 @@ class SocketClient {
 
     try {
       // Ensure io is available
-      if (typeof io !== "function") {
-        console.warn("Socket.io not available");
+      if (!io || typeof io !== "function") {
+        console.warn(
+          "Socket.io-client not available. Please install: npm install socket.io-client",
+        );
         return null;
       }
 
