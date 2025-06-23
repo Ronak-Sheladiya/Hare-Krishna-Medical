@@ -40,6 +40,45 @@ const InvoiceView = () => {
     }
   }, [invoiceId]);
 
+  // Add print event listeners for better print handling
+  useEffect(() => {
+    const handleBeforePrint = () => {
+      const invoiceElement = document.getElementById("invoice-content");
+      if (invoiceElement) {
+        invoiceElement.classList.add("printing");
+        document.body.classList.add("printing");
+      }
+    };
+
+    const handleAfterPrint = () => {
+      const invoiceElement = document.getElementById("invoice-content");
+      if (invoiceElement) {
+        invoiceElement.classList.remove("printing");
+        document.body.classList.remove("printing");
+      }
+    };
+
+    // Add event listeners for browser print dialog
+    window.addEventListener("beforeprint", handleBeforePrint);
+    window.addEventListener("afterprint", handleAfterPrint);
+
+    // Also handle Ctrl+P keyboard shortcut
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "p") {
+        e.preventDefault();
+        handlePrint();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("beforeprint", handleBeforePrint);
+      window.removeEventListener("afterprint", handleAfterPrint);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   const fetchInvoiceData = async () => {
     setLoading(true);
     setError("");
@@ -106,9 +145,35 @@ const InvoiceView = () => {
 
   const handlePrint = () => {
     // Ensure the content is properly loaded before printing
+    const invoiceElement = document.getElementById("invoice-content");
+    if (!invoiceElement) {
+      alert(
+        "Invoice content not found. Please wait for the page to load completely.",
+      );
+      return;
+    }
+
+    // Add print-ready class for better styling
+    invoiceElement.classList.add("printing");
+    document.body.classList.add("printing");
+
+    // Small delay to ensure styles are applied
     setTimeout(() => {
-      window.print();
-    }, 500);
+      try {
+        window.print();
+      } catch (error) {
+        console.error("Print failed:", error);
+        alert(
+          "Print failed. Please try again or use your browser's print function (Ctrl+P).",
+        );
+      } finally {
+        // Clean up classes after printing
+        setTimeout(() => {
+          invoiceElement.classList.remove("printing");
+          document.body.classList.remove("printing");
+        }, 1000);
+      }
+    }, 300);
   };
 
   const handleDownloadPDF = async () => {
