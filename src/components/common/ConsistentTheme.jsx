@@ -59,16 +59,7 @@ export const PageHeroSection = ({
                 style={{
                   marginRight: "25px",
                   marginBottom: "10px",
-                  color:
-                    colorContext === "admin"
-                      ? "#343a40"
-                      : colorContext === "user"
-                        ? "#17a2b8"
-                        : colorContext === "invoice"
-                          ? "#28a745"
-                          : colorContext === "error"
-                            ? "#dc3545"
-                            : "#e63946",
+                  color: "#e63946",
                   boxShadow: "0 12px 40px rgba(0,0,0,0.25)",
                   border: "4px solid rgba(255,255,255,0.95)",
                   animation: "heroIconFloat 3s ease-in-out infinite",
