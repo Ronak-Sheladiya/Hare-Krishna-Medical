@@ -59,7 +59,7 @@ const UserProfile = () => {
   useEffect(() => {
     if (user) {
       setPersonalInfo({
-        fullName: user.name || "",
+        fullName: user.name || user.fullName || "",
         email: user.email || "",
         mobile: user.mobile || "",
         dateOfBirth: user.dateOfBirth || "",
@@ -68,11 +68,11 @@ const UserProfile = () => {
       });
 
       setAddressInfo({
-        street: user.address || "",
-        city: user.city || "",
-        state: user.state || "",
-        pincode: user.pincode || "",
-        landmark: user.landmark || "",
+        street: user.address?.street || user.address || "",
+        city: user.address?.city || user.city || "",
+        state: user.address?.state || user.state || "",
+        pincode: user.address?.pincode || user.pincode || "",
+        landmark: user.address?.landmark || user.landmark || "",
       });
     }
   }, [user]);
@@ -150,7 +150,7 @@ const UserProfile = () => {
     <div className="fade-in">
       {/* Hero Section */}
       <PageHeroSection
-        title={`Welcome, ${user?.fullName || user?.name || "User"}!`}
+        title={`Welcome, ${personalInfo.fullName || user?.name || "User"}!`}
         subtitle="Manage your profile information and account settings"
         icon="bi-person-circle"
       />
@@ -161,7 +161,13 @@ const UserProfile = () => {
           {alert.show && (
             <Row className="mb-4">
               <Col lg={12}>
-                <Alert variant={alert.variant} dismissible onClose={() => setAlert({ show: false, message: "", variant: "" })}>
+                <Alert
+                  variant={alert.variant}
+                  dismissible
+                  onClose={() =>
+                    setAlert({ show: false, message: "", variant: "" })
+                  }
+                >
                   {alert.message}
                 </Alert>
               </Col>
@@ -171,7 +177,11 @@ const UserProfile = () => {
           {/* Profile Overview Card */}
           <Row className="mb-4">
             <Col lg={12}>
-              <ThemeCard title="Profile Overview" icon="bi-person-badge" className="mb-4">
+              <ThemeCard
+                title="Profile Overview"
+                icon="bi-person-badge"
+                className="mb-4"
+              >
                 <Row>
                   <Col md={3} className="text-center">
                     <div
@@ -186,43 +196,66 @@ const UserProfile = () => {
                         justifyContent: "center",
                         color: "white",
                         fontSize: "3rem",
-                        boxShadow: "0 8px 32px rgba(230, 57, 70, 0.3)"
+                        boxShadow: "0 8px 32px rgba(230, 57, 70, 0.3)",
                       }}
                     >
                       {personalInfo.profileImage ? (
                         <img
                           src={personalInfo.profileImage}
                           alt="Profile"
-                          style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                          }}
                         />
                       ) : (
                         <i className="bi bi-person-fill"></i>
                       )}
                     </div>
-                    <h5 className="mb-1">{personalInfo.fullName || "User Name"}</h5>
+                    <h5 className="mb-1">
+                      {personalInfo.fullName || "User Name"}
+                    </h5>
                     <p className="text-muted mb-2">{personalInfo.email}</p>
-                    <Badge bg="success" className="px-3 py-2">Active Account</Badge>
+                    <Badge bg="success" className="px-3 py-2">
+                      Active Account
+                    </Badge>
                   </Col>
                   <Col md={9}>
                     <Row>
                       <Col md={6}>
                         <div className="info-item mb-3">
-                          <label className="text-muted small">Mobile Number</label>
-                          <div className="fw-bold">{personalInfo.mobile || "Not provided"}</div>
+                          <label className="text-muted small">
+                            Mobile Number
+                          </label>
+                          <div className="fw-bold">
+                            {personalInfo.mobile || "Not provided"}
+                          </div>
                         </div>
                         <div className="info-item mb-3">
-                          <label className="text-muted small">Date of Birth</label>
-                          <div className="fw-bold">{personalInfo.dateOfBirth || "Not provided"}</div>
+                          <label className="text-muted small">
+                            Date of Birth
+                          </label>
+                          <div className="fw-bold">
+                            {personalInfo.dateOfBirth || "Not provided"}
+                          </div>
                         </div>
                       </Col>
                       <Col md={6}>
                         <div className="info-item mb-3">
                           <label className="text-muted small">Gender</label>
-                          <div className="fw-bold">{personalInfo.gender || "Not specified"}</div>
+                          <div className="fw-bold">
+                            {personalInfo.gender || "Not specified"}
+                          </div>
                         </div>
                         <div className="info-item mb-3">
-                          <label className="text-muted small">Member Since</label>
-                          <div className="fw-bold">{new Date().getFullYear()}</div>
+                          <label className="text-muted small">
+                            Member Since
+                          </label>
+                          <div className="fw-bold">
+                            {new Date().getFullYear()}
+                          </div>
                         </div>
                       </Col>
                     </Row>
@@ -236,7 +269,10 @@ const UserProfile = () => {
           <Row>
             <Col lg={12}>
               <ThemeCard className="profile-tabs-card">
-                <Tab.Container activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
+                <Tab.Container
+                  activeKey={activeTab}
+                  onSelect={(k) => setActiveTab(k)}
+                >
                   <Nav variant="pills" className="nav-pills-custom mb-4">
                     <Nav.Item>
                       <Nav.Link eventKey="personal" className="nav-pill-item">
@@ -285,7 +321,8 @@ const UserProfile = () => {
                           <Col md={6}>
                             <Form.Group className="mb-4">
                               <Form.Label className="form-label-custom">
-                                <i className="bi bi-envelope me-2"></i>Email Address
+                                <i className="bi bi-envelope me-2"></i>Email
+                                Address
                               </Form.Label>
                               <Form.Control
                                 type="email"
@@ -311,7 +348,8 @@ const UserProfile = () => {
                           <Col md={6}>
                             <Form.Group className="mb-4">
                               <Form.Label className="form-label-custom">
-                                <i className="bi bi-phone me-2"></i>Mobile Number
+                                <i className="bi bi-phone me-2"></i>Mobile
+                                Number
                               </Form.Label>
                               <InputGroup>
                                 <InputGroup.Text>+91</InputGroup.Text>
@@ -333,7 +371,8 @@ const UserProfile = () => {
                           <Col md={6}>
                             <Form.Group className="mb-4">
                               <Form.Label className="form-label-custom">
-                                <i className="bi bi-calendar me-2"></i>Date of Birth
+                                <i className="bi bi-calendar me-2"></i>Date of
+                                Birth
                               </Form.Label>
                               <Form.Control
                                 type="date"
@@ -354,7 +393,8 @@ const UserProfile = () => {
                           <Col md={6}>
                             <Form.Group className="mb-4">
                               <Form.Label className="form-label-custom">
-                                <i className="bi bi-gender-ambiguous me-2"></i>Gender
+                                <i className="bi bi-gender-ambiguous me-2"></i>
+                                Gender
                               </Form.Label>
                               <Form.Select
                                 value={personalInfo.gender}
@@ -370,7 +410,9 @@ const UserProfile = () => {
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
                                 <option value="other">Other</option>
-                                <option value="prefer-not-to-say">Prefer not to say</option>
+                                <option value="prefer-not-to-say">
+                                  Prefer not to say
+                                </option>
                               </Form.Select>
                             </Form.Group>
                           </Col>
@@ -381,10 +423,14 @@ const UserProfile = () => {
                             type="submit"
                             variant="primary"
                             disabled={loading}
-                            icon={loading ? "bi-arrow-clockwise" : "bi-check-circle"}
+                            icon={
+                              loading ? "bi-arrow-clockwise" : "bi-check-circle"
+                            }
                             size="lg"
                           >
-                            {loading ? "Updating..." : "Update Personal Information"}
+                            {loading
+                              ? "Updating..."
+                              : "Update Personal Information"}
                           </ThemeButton>
                         </div>
                       </Form>
@@ -397,7 +443,8 @@ const UserProfile = () => {
                           <Col md={12}>
                             <Form.Group className="mb-4">
                               <Form.Label className="form-label-custom">
-                                <i className="bi bi-house me-2"></i>Street Address
+                                <i className="bi bi-house me-2"></i>Street
+                                Address
                               </Form.Label>
                               <Form.Control
                                 type="text"
@@ -480,7 +527,8 @@ const UserProfile = () => {
                           <Col md={6}>
                             <Form.Group className="mb-4">
                               <Form.Label className="form-label-custom">
-                                <i className="bi bi-signpost me-2"></i>Landmark (Optional)
+                                <i className="bi bi-signpost me-2"></i>Landmark
+                                (Optional)
                               </Form.Label>
                               <Form.Control
                                 type="text"
@@ -503,10 +551,14 @@ const UserProfile = () => {
                             type="submit"
                             variant="primary"
                             disabled={loading}
-                            icon={loading ? "bi-arrow-clockwise" : "bi-check-circle"}
+                            icon={
+                              loading ? "bi-arrow-clockwise" : "bi-check-circle"
+                            }
                             size="lg"
                           >
-                            {loading ? "Updating..." : "Update Address Information"}
+                            {loading
+                              ? "Updating..."
+                              : "Update Address Information"}
                           </ThemeButton>
                         </div>
                       </Form>
@@ -523,7 +575,9 @@ const UserProfile = () => {
                                 Password & Security
                               </h5>
                               <p className="text-muted">
-                                Keep your account secure by using a strong password and enabling additional security features.
+                                Keep your account secure by using a strong
+                                password and enabling additional security
+                                features.
                               </p>
                             </div>
 
@@ -556,7 +610,8 @@ const UserProfile = () => {
                                 <Row>
                                   <Col md={8}>
                                     <h6 className="mb-2">
-                                      <i className="bi bi-envelope-check me-2"></i>Email Verification
+                                      <i className="bi bi-envelope-check me-2"></i>
+                                      Email Verification
                                     </h6>
                                     <p className="text-muted mb-0">
                                       Your email address is verified
@@ -564,7 +619,8 @@ const UserProfile = () => {
                                   </Col>
                                   <Col md={4} className="text-end">
                                     <Badge bg="success" className="px-3 py-2">
-                                      <i className="bi bi-check-circle me-1"></i>Verified
+                                      <i className="bi bi-check-circle me-1"></i>
+                                      Verified
                                     </Badge>
                                   </Col>
                                 </Row>
@@ -576,10 +632,12 @@ const UserProfile = () => {
                                 <Row>
                                   <Col md={8}>
                                     <h6 className="mb-2">
-                                      <i className="bi bi-phone-vibrate me-2"></i>Two-Factor Authentication
+                                      <i className="bi bi-phone-vibrate me-2"></i>
+                                      Two-Factor Authentication
                                     </h6>
                                     <p className="text-muted mb-0">
-                                      Add an extra layer of security to your account
+                                      Add an extra layer of security to your
+                                      account
                                     </p>
                                   </Col>
                                   <Col md={4} className="text-end">
@@ -725,559 +783,66 @@ const UserProfile = () => {
           </ThemeButton>
         </Modal.Footer>
       </Modal>
-    </div>
-  );
-        }}
-      >
-        <Container>
-          <Row className="text-center">
-            <Col lg={12}>
-              <h1
-                style={{
-                  fontSize: "3rem",
-                  fontWeight: "800",
-                  marginBottom: "20px",
-                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
-                }}
-              >
-                Edit Profile
-              </h1>
-              <p
-                style={{
-                  fontSize: "1.2rem",
-                  opacity: "0.9",
-                  maxWidth: "600px",
-                  margin: "0 auto",
-                }}
-              >
-                Update your personal information and account settings
-              </p>
-            </Col>
-          </Row>
-        </Container>
-      </section>
 
-      {/* Profile Content */}
-      <section
-        style={{
-          background: "#f8f9fa",
-          paddingTop: "80px",
-          paddingBottom: "80px",
-          minHeight: "60vh",
-        }}
-      >
-        <Container>
-          {alert.show && (
-            <Row className="mb-4">
-              <Col lg={12}>
-                <Alert variant={alert.variant}>
-                  <i
-                    className={`bi bi-${alert.variant === "success" ? "check-circle" : "exclamation-triangle"} me-2`}
-                  ></i>
-                  {alert.message}
-                </Alert>
-              </Col>
-            </Row>
-          )}
+      <style jsx>{`
+        .form-label-custom {
+          font-weight: 600;
+          color: #495057;
+          margin-bottom: 8px;
+        }
 
-          <Row>
-            <Col lg={12}>
-              <Card
-                style={{
-                  border: "2px solid #f8f9fa",
-                  borderRadius: "16px",
-                  boxShadow: "0 8px 25px rgba(0,0,0,0.05)",
-                }}
-              >
-                <Card.Body className="p-0">
-                  <Tab.Container activeKey={activeTab} onSelect={setActiveTab}>
-                    <Nav variant="tabs" className="border-bottom">
-                      <Nav.Item>
-                        <Nav.Link eventKey="personal">
-                          <i className="bi bi-person me-2"></i>
-                          Personal Information
-                        </Nav.Link>
-                      </Nav.Item>
-                      <Nav.Item>
-                        <Nav.Link eventKey="address">
-                          <i className="bi bi-geo-alt me-2"></i>
-                          Address
-                        </Nav.Link>
-                      </Nav.Item>
-                      <Nav.Item>
-                        <Nav.Link eventKey="security">
-                          <i className="bi bi-shield-lock me-2"></i>
-                          Security
-                        </Nav.Link>
-                      </Nav.Item>
-                    </Nav>
+        .form-control-custom {
+          border: 2px solid #e9ecef;
+          border-radius: 8px;
+          padding: 12px 16px;
+          font-size: 14px;
+          transition: all 0.3s ease;
+        }
 
-                    <Tab.Content className="p-4">
-                      {/* Personal Information Tab */}
-                      <Tab.Pane eventKey="personal">
-                        <Form onSubmit={handlePersonalInfoSubmit}>
-                          <Row className="mb-4">
-                            <Col lg={12} className="text-center">
-                              <div className="profile-image-container">
-                                <img
-                                  src={
-                                    personalInfo.profileImage ||
-                                    "https://via.placeholder.com/150x150/e6e6e6/666666?text=User"
-                                  }
-                                  alt="Profile"
-                                  style={{
-                                    width: "150px",
-                                    height: "150px",
-                                    borderRadius: "50%",
-                                    objectFit: "cover",
-                                    border: "4px solid #e9ecef",
-                                  }}
-                                />
-                                <p
-                                  style={{
-                                    color: "#6c757d",
-                                    marginTop: "10px",
-                                  }}
-                                >
-                                  Profile Picture
-                                </p>
-                              </div>
-                            </Col>
-                          </Row>
+        .form-control-custom:focus {
+          border-color: #e63946;
+          box-shadow: 0 0 0 0.2rem rgba(230, 57, 70, 0.25);
+        }
 
-                          <Row>
-                            <Col md={6} className="mb-3">
-                              <Form.Label style={{ fontWeight: "600" }}>
-                                Full Name *
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                value={personalInfo.fullName}
-                                onChange={(e) =>
-                                  setPersonalInfo({
-                                    ...personalInfo,
-                                    fullName: e.target.value,
-                                  })
-                                }
-                                required
-                                style={{
-                                  borderRadius: "8px",
-                                  padding: "12px",
-                                }}
-                              />
-                            </Col>
-                            <Col md={6} className="mb-3">
-                              <Form.Label style={{ fontWeight: "600" }}>
-                                Email Address *
-                              </Form.Label>
-                              <Form.Control
-                                type="email"
-                                value={personalInfo.email}
-                                onChange={(e) =>
-                                  setPersonalInfo({
-                                    ...personalInfo,
-                                    email: e.target.value,
-                                  })
-                                }
-                                required
-                                style={{
-                                  borderRadius: "8px",
-                                  padding: "12px",
-                                }}
-                              />
-                            </Col>
-                          </Row>
+        .nav-pills-custom .nav-link {
+          border-radius: 10px;
+          padding: 12px 20px;
+          margin-right: 8px;
+          border: 2px solid transparent;
+          color: #6c757d;
+          font-weight: 500;
+          transition: all 0.3s ease;
+        }
 
-                          <Row>
-                            <Col md={6} className="mb-3">
-                              <Form.Label style={{ fontWeight: "600" }}>
-                                Mobile Number *
-                              </Form.Label>
-                              <Form.Control
-                                type="tel"
-                                value={personalInfo.mobile}
-                                onChange={(e) =>
-                                  setPersonalInfo({
-                                    ...personalInfo,
-                                    mobile: e.target.value,
-                                  })
-                                }
-                                required
-                                style={{
-                                  borderRadius: "8px",
-                                  padding: "12px",
-                                }}
-                              />
-                            </Col>
-                            <Col md={6} className="mb-3">
-                              <Form.Label style={{ fontWeight: "600" }}>
-                                Date of Birth
-                              </Form.Label>
-                              <Form.Control
-                                type="date"
-                                value={personalInfo.dateOfBirth}
-                                onChange={(e) =>
-                                  setPersonalInfo({
-                                    ...personalInfo,
-                                    dateOfBirth: e.target.value,
-                                  })
-                                }
-                                style={{
-                                  borderRadius: "8px",
-                                  padding: "12px",
-                                }}
-                              />
-                            </Col>
-                          </Row>
+        .nav-pills-custom .nav-link:hover {
+          border-color: #e63946;
+          color: #e63946;
+          background-color: rgba(230, 57, 70, 0.1);
+        }
 
-                          <Row>
-                            <Col md={6} className="mb-3">
-                              <Form.Label style={{ fontWeight: "600" }}>
-                                Gender
-                              </Form.Label>
-                              <Form.Select
-                                value={personalInfo.gender}
-                                onChange={(e) =>
-                                  setPersonalInfo({
-                                    ...personalInfo,
-                                    gender: e.target.value,
-                                  })
-                                }
-                                style={{
-                                  borderRadius: "8px",
-                                  padding: "12px",
-                                }}
-                              >
-                                <option value="">Select Gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
-                              </Form.Select>
-                            </Col>
-                          </Row>
+        .nav-pills-custom .nav-link.active {
+          background-color: #e63946;
+          border-color: #e63946;
+          color: white;
+        }
 
-                          <div className="text-end">
-                            <Button
-                              type="submit"
-                              disabled={loading}
-                              style={{
-                                background: "#e63946",
-                                border: "none",
-                                borderRadius: "8px",
-                                padding: "12px 24px",
-                                fontWeight: "600",
-                              }}
-                            >
-                              {loading ? (
-                                <>
-                                  <Spinner size="sm" className="me-2" />
-                                  Updating...
-                                </>
-                              ) : (
-                                <>
-                                  <i className="bi bi-check-circle me-2"></i>
-                                  Update Information
-                                </>
-                              )}
-                            </Button>
-                          </div>
-                        </Form>
-                      </Tab.Pane>
+        .info-item label {
+          display: block;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 4px;
+        }
 
-                      {/* Address Tab */}
-                      <Tab.Pane eventKey="address">
-                        <Form onSubmit={handleAddressSubmit}>
-                          <Row>
-                            <Col md={12} className="mb-3">
-                              <Form.Label style={{ fontWeight: "600" }}>
-                                Street Address *
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                value={addressInfo.street}
-                                onChange={(e) =>
-                                  setAddressInfo({
-                                    ...addressInfo,
-                                    street: e.target.value,
-                                  })
-                                }
-                                required
-                                style={{
-                                  borderRadius: "8px",
-                                  padding: "12px",
-                                }}
-                              />
-                            </Col>
-                          </Row>
+        .profile-tabs-card .card-body {
+          padding: 2rem;
+        }
 
-                          <Row>
-                            <Col md={6} className="mb-3">
-                              <Form.Label style={{ fontWeight: "600" }}>
-                                City *
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                value={addressInfo.city}
-                                onChange={(e) =>
-                                  setAddressInfo({
-                                    ...addressInfo,
-                                    city: e.target.value,
-                                  })
-                                }
-                                required
-                                style={{
-                                  borderRadius: "8px",
-                                  padding: "12px",
-                                }}
-                              />
-                            </Col>
-                            <Col md={6} className="mb-3">
-                              <Form.Label style={{ fontWeight: "600" }}>
-                                State *
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                value={addressInfo.state}
-                                onChange={(e) =>
-                                  setAddressInfo({
-                                    ...addressInfo,
-                                    state: e.target.value,
-                                  })
-                                }
-                                required
-                                style={{
-                                  borderRadius: "8px",
-                                  padding: "12px",
-                                }}
-                              />
-                            </Col>
-                          </Row>
-
-                          <Row>
-                            <Col md={6} className="mb-3">
-                              <Form.Label style={{ fontWeight: "600" }}>
-                                PIN Code *
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                value={addressInfo.pincode}
-                                onChange={(e) =>
-                                  setAddressInfo({
-                                    ...addressInfo,
-                                    pincode: e.target.value,
-                                  })
-                                }
-                                required
-                                style={{
-                                  borderRadius: "8px",
-                                  padding: "12px",
-                                }}
-                              />
-                            </Col>
-                            <Col md={6} className="mb-3">
-                              <Form.Label style={{ fontWeight: "600" }}>
-                                Landmark
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                value={addressInfo.landmark}
-                                onChange={(e) =>
-                                  setAddressInfo({
-                                    ...addressInfo,
-                                    landmark: e.target.value,
-                                  })
-                                }
-                                style={{
-                                  borderRadius: "8px",
-                                  padding: "12px",
-                                }}
-                              />
-                            </Col>
-                          </Row>
-
-                          <div className="text-end">
-                            <Button
-                              type="submit"
-                              disabled={loading}
-                              style={{
-                                background: "#e63946",
-                                border: "none",
-                                borderRadius: "8px",
-                                padding: "12px 24px",
-                                fontWeight: "600",
-                              }}
-                            >
-                              {loading ? (
-                                <>
-                                  <Spinner size="sm" className="me-2" />
-                                  Updating...
-                                </>
-                              ) : (
-                                <>
-                                  <i className="bi bi-check-circle me-2"></i>
-                                  Update Address
-                                </>
-                              )}
-                            </Button>
-                          </div>
-                        </Form>
-                      </Tab.Pane>
-
-                      {/* Security Tab */}
-                      <Tab.Pane eventKey="security">
-                        <div>
-                          <h5
-                            style={{ color: "#e63946", marginBottom: "20px" }}
-                          >
-                            Security Settings
-                          </h5>
-
-                          <div
-                            style={{
-                              background: "#f8f9fa",
-                              padding: "20px",
-                              borderRadius: "8px",
-                              marginBottom: "20px",
-                            }}
-                          >
-                            <div className="d-flex justify-content-between align-items-center">
-                              <div>
-                                <h6 style={{ margin: 0 }}>Password</h6>
-                                <small style={{ color: "#6c757d" }}>
-                                  Last changed 30 days ago
-                                </small>
-                              </div>
-                              <Button
-                                variant="outline-primary"
-                                onClick={() => setShowPasswordModal(true)}
-                                style={{
-                                  borderColor: "#e63946",
-                                  color: "#e63946",
-                                }}
-                              >
-                                Change Password
-                              </Button>
-                            </div>
-                          </div>
-
-                          <div
-                            style={{
-                              background: "#f8f9fa",
-                              padding: "20px",
-                              borderRadius: "8px",
-                            }}
-                          >
-                            <h6>Account Security Tips</h6>
-                            <ul style={{ fontSize: "14px", color: "#6c757d" }}>
-                              <li>Use a strong, unique password</li>
-                              <li>Don't share your login credentials</li>
-                              <li>Log out from shared devices</li>
-                              <li>Regularly update your password</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </Tab.Pane>
-                    </Tab.Content>
-                  </Tab.Container>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        </Container>
-      </section>
-
-      {/* Password Change Modal */}
-      <Modal
-        show={showPasswordModal}
-        onHide={() => setShowPasswordModal(false)}
-        centered
-      >
-        <Modal.Header
-          closeButton
-          style={{
-            background: "linear-gradient(135deg, #e63946, #dc3545)",
-            color: "white",
-          }}
-        >
-          <Modal.Title>Change Password</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handlePasswordSubmit}>
-          <Modal.Body style={{ padding: "30px" }}>
-            <Form.Group className="mb-3">
-              <Form.Label style={{ fontWeight: "600" }}>
-                Current Password
-              </Form.Label>
-              <Form.Control
-                type="password"
-                value={passwordData.currentPassword}
-                onChange={(e) =>
-                  setPasswordData({
-                    ...passwordData,
-                    currentPassword: e.target.value,
-                  })
-                }
-                required
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label style={{ fontWeight: "600" }}>
-                New Password
-              </Form.Label>
-              <Form.Control
-                type="password"
-                value={passwordData.newPassword}
-                onChange={(e) =>
-                  setPasswordData({
-                    ...passwordData,
-                    newPassword: e.target.value,
-                  })
-                }
-                required
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label style={{ fontWeight: "600" }}>
-                Confirm New Password
-              </Form.Label>
-              <Form.Control
-                type="password"
-                value={passwordData.confirmPassword}
-                onChange={(e) =>
-                  setPasswordData({
-                    ...passwordData,
-                    confirmPassword: e.target.value,
-                  })
-                }
-                required
-              />
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button
-              variant="outline-secondary"
-              onClick={() => setShowPasswordModal(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              style={{ background: "#e63946", border: "none" }}
-            >
-              {loading ? (
-                <>
-                  <Spinner size="sm" className="me-2" />
-                  Changing...
-                </>
-              ) : (
-                "Change Password"
-              )}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
+        .security-section .card:hover {
+          transform: translateY(-2px);
+          transition: all 0.3s ease;
+        }
+      `}</style>
     </div>
   );
 };
