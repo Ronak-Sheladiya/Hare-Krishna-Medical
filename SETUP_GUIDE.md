@@ -294,7 +294,7 @@ npx kill-port 5000
 
 #### 5. API calls failing
 
-- Verify `REACT_APP_BACKEND_URL` in frontend `.env`
+- Verify `VITE_BACKEND_URL` in frontend `.env`
 - Ensure backend server is running
 - Check browser network tab for error details
 
