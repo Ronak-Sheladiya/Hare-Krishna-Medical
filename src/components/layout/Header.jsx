@@ -324,7 +324,7 @@ const Header = () => {
           border-radius: 50%;
           transition: all 0.3s ease;
           object-fit: contain;
-          margin: 0;
+          margin: 0 !important;
         }
 
         .medical-logo:hover {
