@@ -14,6 +14,7 @@ const RealTimeStatus = ({ position = "fixed" }) => {
     }
 
     let statusTimeout;
+    let statusInterval;
     let socket = null;
 
     const initializeConnection = async () => {
@@ -22,61 +23,93 @@ const RealTimeStatus = ({ position = "fixed" }) => {
         const socketModule = await import("../../utils/socketClient");
         const socketClient = socketModule.default;
 
-        if (socketClient && typeof socketClient.connect === "function") {
+        if (socketClient) {
+          // Get initial connection status
+          const status = socketClient.getConnectionStatus();
+
+          if (status.fallbackMode) {
+            setConnectionStatus("mock");
+          } else {
+            setConnectionStatus("connecting");
+          }
+
+          // Attempt connection
           socket = socketClient.connect();
 
           if (socket) {
-            setConnectionStatus("connected");
-            setLastUpdate(new Date());
+            // Monitor connection status
+            statusInterval = setInterval(() => {
+              const currentStatus = socketClient.getConnectionStatus();
 
-            // Listen for connection events
-            socket.on("connect", () => {
-              setConnectionStatus("connected");
-              setLastUpdate(new Date());
-            });
-
-            socket.on("disconnect", () => {
-              setConnectionStatus("disconnected");
-            });
-
-            socket.on("reconnect", () => {
-              setConnectionStatus("connected");
-              setLastUpdate(new Date());
-            });
-
-            // Listen for any data update to show activity
-            socket.on("data_updated", () => {
-              setLastUpdate(new Date());
-            });
-
-            // Simulate heartbeat
-            const heartbeat = setInterval(() => {
-              if (socket && socket.connected) {
+              if (currentStatus.fallbackMode) {
+                setConnectionStatus("mock");
+              } else if (currentStatus.connected) {
+                setConnectionStatus("connected");
                 setLastUpdate(new Date());
+              } else if (currentStatus.lastError) {
+                setConnectionStatus("error");
+              } else {
+                setConnectionStatus("connecting");
               }
-            }, 30000); // 30 seconds
+            }, 2000);
 
-            return () => clearInterval(heartbeat);
+            // Listen for connection events if real socket
+            if (
+              typeof socket.on === "function" &&
+              !socket.id?.includes("mock")
+            ) {
+              socket.on("connect", () => {
+                setConnectionStatus("connected");
+                setLastUpdate(new Date());
+              });
+
+              socket.on("disconnect", () => {
+                setConnectionStatus("disconnected");
+              });
+
+              socket.on("reconnect", () => {
+                setConnectionStatus("connected");
+                setLastUpdate(new Date());
+              });
+
+              socket.on("connect_error", () => {
+                setConnectionStatus("error");
+              });
+
+              // Listen for any data update to show activity
+              socket.on("data_updated", () => {
+                setLastUpdate(new Date());
+              });
+            } else {
+              // Mock socket detected
+              setConnectionStatus("mock");
+            }
+          } else {
+            setConnectionStatus("error");
           }
         } else {
-          setConnectionStatus("mock");
+          setConnectionStatus("error");
         }
       } catch (error) {
-        console.warn("Real-time connection failed:", error);
+        console.warn("Real-time connection initialization failed:", error);
         setConnectionStatus("error");
       }
     };
 
     // Initialize with delay
-    statusTimeout = setTimeout(initializeConnection, 2000);
+    statusTimeout = setTimeout(initializeConnection, 1000);
 
     return () => {
       clearTimeout(statusTimeout);
-      if (socket) {
+      if (statusInterval) {
+        clearInterval(statusInterval);
+      }
+      if (socket && typeof socket.off === "function") {
         try {
           socket.off("connect");
           socket.off("disconnect");
           socket.off("reconnect");
+          socket.off("connect_error");
           socket.off("data_updated");
         } catch (error) {
           console.warn("Error cleaning up socket listeners:", error);
@@ -203,12 +236,12 @@ style.textContent = `
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
   }
-  
+
   @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
   }
-  
+
   .spin {
     animation: spin 1s linear infinite;
   }
