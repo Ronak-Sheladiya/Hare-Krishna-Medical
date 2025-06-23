@@ -397,8 +397,8 @@ const Header = () => {
 
         @media (max-width: 768px) {
           .medical-logo {
-            width: 50px;
-            height: 50px;
+            width: 36px;
+            height: 36px;
           }
 
           .brand-text-container h4 {
