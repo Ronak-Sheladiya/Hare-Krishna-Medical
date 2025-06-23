@@ -24,7 +24,7 @@ const Footer = () => {
                 <i className="bi bi-instagram"></i>
               </a>
               <a
-                href="mailto:harekrishnamedical@gmail.com"
+                href="mailto:hkmedicalamroli@gmail.com"
                 className="social-icon email"
               >
                 <i className="bi bi-envelope"></i>

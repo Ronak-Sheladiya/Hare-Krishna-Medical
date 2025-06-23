@@ -416,15 +416,15 @@ const Contact = () => {
                   data-contact-info="email"
                 >
                   <a
-                    href="mailto:harekrishnamedical@gmail.com"
+                    href="mailto:hkmedicalamroli@gmail.com"
                     style={{ textDecoration: "none", color: "#495057" }}
                     className="contact-info-selectable"
                   >
-                    harekrishnamedical@gmail.com
+                    hkmedicalamroli@gmail.com
                   </a>
                 </p>
                 <Button
-                  href="mailto:harekrishnamedical@gmail.com"
+                  href="mailto:hkmedicalamroli@gmail.com"
                   style={{
                     background: "#e63946",
                     border: "none",

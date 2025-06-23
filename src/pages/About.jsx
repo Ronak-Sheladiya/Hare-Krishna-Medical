@@ -594,7 +594,7 @@ const About = () => {
                     <div style={{ marginBottom: "8px" }}>
                       📞 +91 76989 13354 | +91 91060 18508
                     </div>
-                    <div>✉️ harekrishnamedical@gmail.com</div>
+                    <div>✉️ hkmedicalamroli@gmail.com</div>
                   </div>
                   <Button
                     href="https://maps.google.com?q=3+Sahyog+Complex+Man+Sarovar+circle+Amroli+394107"
