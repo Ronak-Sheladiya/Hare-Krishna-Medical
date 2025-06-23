@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import {
   Container,
   Row,
@@ -12,13 +13,21 @@ import {
   Spinner,
 } from "react-bootstrap";
 import ProfessionalLoading from "../components/common/ProfessionalLoading";
+import { refreshSession } from "../store/slices/authSlice";
 
 const InvoiceVerify = () => {
   const { invoiceId } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    // Check and refresh authentication session on page load
+    dispatch(refreshSession());
+  }, [dispatch]);
 
   useEffect(() => {
     if (invoiceId) {
@@ -31,7 +40,24 @@ const InvoiceVerify = () => {
       setLoading(true);
       setError("");
 
-      const response = await fetch(`/api/invoices/verify/${invoiceId}`);
+      // Get auth token from localStorage or sessionStorage
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      // Add authorization header if token exists
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`/api/invoices/verify/${invoiceId}`, {
+        method: "GET",
+        headers,
+      });
+
       const data = await response.json();
 
       if (data.success) {

@@ -35,17 +35,19 @@ const getStoredAuth = () => {
   }
 };
 
-const setStoredUser = (user, rememberMe = false) => {
+const setStoredUser = (user, rememberMe = false, token = null) => {
   try {
     const userString = JSON.stringify(user);
     if (rememberMe) {
       localStorage.setItem("user", userString);
       localStorage.setItem("isAuthenticated", "true");
       localStorage.setItem("loginTime", Date.now().toString());
+      if (token) localStorage.setItem("token", token);
     } else {
       sessionStorage.setItem("user", userString);
       sessionStorage.setItem("isAuthenticated", "true");
       sessionStorage.setItem("loginTime", Date.now().toString());
+      if (token) sessionStorage.setItem("token", token);
     }
   } catch (error) {
     console.error("Error storing user:", error);
@@ -57,15 +59,17 @@ const clearStoredUser = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("isAuthenticated");
     localStorage.removeItem("loginTime");
+    localStorage.removeItem("token");
     sessionStorage.removeItem("user");
     sessionStorage.removeItem("isAuthenticated");
     sessionStorage.removeItem("loginTime");
+    sessionStorage.removeItem("token");
   } catch (error) {
     console.error("Error clearing stored user:", error);
   }
 };
 
-// Check if session is expired (24 hours for localStorage, 2 hours for sessionStorage)
+// Check if session is expired (7 days for localStorage, 4 hours for sessionStorage)
 const isSessionExpired = () => {
   try {
     const localLoginTime = localStorage.getItem("loginTime");
@@ -73,16 +77,17 @@ const isSessionExpired = () => {
 
     if (localLoginTime) {
       const elapsed = Date.now() - parseInt(localLoginTime);
-      return elapsed > 24 * 60 * 60 * 1000; // 24 hours
+      return elapsed > 7 * 24 * 60 * 60 * 1000; // 7 days
     }
 
     if (sessionLoginTime) {
       const elapsed = Date.now() - parseInt(sessionLoginTime);
-      return elapsed > 2 * 60 * 60 * 1000; // 2 hours
+      return elapsed > 4 * 60 * 60 * 1000; // 4 hours
     }
 
     return true;
   } catch (error) {
+    console.warn("Session check error:", error);
     return true;
   }
 };
@@ -123,15 +128,20 @@ const authSlice = createSlice({
       state.error = null;
     },
     loginSuccess: (state, action) => {
-      const { user, rememberMe = false, skipRedirect = false } = action.payload;
+      const {
+        user,
+        token,
+        rememberMe = false,
+        skipRedirect = false,
+      } = action.payload;
       state.loading = false;
       state.isAuthenticated = true;
       state.user = user;
       state.error = null;
       state.rememberMe = rememberMe;
 
-      // Store user data
-      setStoredUser(user, rememberMe);
+      // Store user data and token
+      setStoredUser(user, rememberMe, token);
 
       // Broadcast login to other tabs
       window.localStorage.setItem(
