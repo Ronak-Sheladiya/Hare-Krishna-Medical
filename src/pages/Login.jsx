@@ -85,7 +85,7 @@ const Login = () => {
       // Check for admin credentials
       if (
         (emailOrMobile === "admin@gmail.com" && password === "Ronak@95865") ||
-        (emailOrMobile === "ronaksheladiya62@gmail.com" &&
+        (emailOrMobile === "ronaksheladiya652@gmail.com" &&
           password === "admin@123") ||
         (emailOrMobile === "mayurgajera098@gmail.com" &&
           password === "admin@123")
@@ -93,13 +93,13 @@ const Login = () => {
         const adminUser = {
           id: 1,
           fullName:
-            emailOrMobile === "ronaksheladiya62@gmail.com"
+            emailOrMobile === "ronaksheladiya652@gmail.com"
               ? "Ronak Sheladiya"
               : emailOrMobile === "mayurgajera098@gmail.com"
                 ? "Mayur Gajera"
                 : "Admin",
           name:
-            emailOrMobile === "ronaksheladiya62@gmail.com"
+            emailOrMobile === "ronaksheladiya652@gmail.com"
               ? "Ronak Sheladiya"
               : emailOrMobile === "mayurgajera098@gmail.com"
                 ? "Mayur Gajera"
@@ -114,8 +114,20 @@ const Login = () => {
             rememberMe: formData.rememberMe,
           }),
         );
-        // Redirect to intended URL or default admin dashboard
-        navigate(from || "/admin/dashboard", { replace: true });
+
+        // Handle redirect after login
+        const redirectUrl =
+          sessionStorage.getItem("redirectAfterLogin") || from;
+        if (
+          redirectUrl &&
+          redirectUrl !== "/login" &&
+          redirectUrl !== "/register" &&
+          redirectUrl !== "/access-denied"
+        ) {
+          navigate(redirectUrl, { replace: true });
+        } else {
+          navigate("/admin/dashboard", { replace: true });
+        }
         return;
       }
 
@@ -140,8 +152,20 @@ const Login = () => {
             rememberMe: formData.rememberMe,
           }),
         );
-        // Redirect to intended URL or default user dashboard
-        navigate(from || "/user/dashboard", { replace: true });
+
+        // Handle redirect after login
+        const redirectUrl =
+          sessionStorage.getItem("redirectAfterLogin") || from;
+        if (
+          redirectUrl &&
+          redirectUrl !== "/login" &&
+          redirectUrl !== "/register" &&
+          redirectUrl !== "/access-denied"
+        ) {
+          navigate(redirectUrl, { replace: true });
+        } else {
+          navigate("/user/dashboard", { replace: true });
+        }
         return;
       }
 
@@ -161,7 +185,7 @@ const Login = () => {
     },
     {
       type: "Admin (Ronak)",
-      email: "ronaksheladiya62@gmail.com",
+      email: "ronaksheladiya652@gmail.com",
       password: "admin@123",
       description: "Access admin dashboard",
     },

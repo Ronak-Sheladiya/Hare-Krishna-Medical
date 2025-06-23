@@ -18,6 +18,7 @@ import {
   ThemeSection,
   StatsCard,
 } from "../components/common/ConsistentTheme";
+import ProfessionalLoading from "../components/common/ProfessionalLoading";
 
 const AdminDashboard = () => {
   const { unreadCount } = useSelector((state) => state.messages);
@@ -97,6 +98,25 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
+
+    // Setup real-time refresh listeners
+    const handleRefreshOrders = () => fetchDashboardData();
+    const handleRefreshProducts = () => fetchDashboardData();
+    const handleRefreshAnalytics = () => fetchDashboardData();
+
+    window.addEventListener("refreshOrders", handleRefreshOrders);
+    window.addEventListener("refreshProducts", handleRefreshProducts);
+    window.addEventListener("refreshAnalytics", handleRefreshAnalytics);
+
+    // Auto-refresh dashboard every 30 seconds
+    const autoRefreshInterval = setInterval(fetchDashboardData, 30000);
+
+    return () => {
+      window.removeEventListener("refreshOrders", handleRefreshOrders);
+      window.removeEventListener("refreshProducts", handleRefreshProducts);
+      window.removeEventListener("refreshAnalytics", handleRefreshAnalytics);
+      clearInterval(autoRefreshInterval);
+    };
   }, [unreadCount]);
 
   const getStatusVariant = (status) => {
@@ -145,68 +165,6 @@ const AdminDashboard = () => {
               </Col>
             </Row>
           )}
-
-          {/* Quick Actions */}
-          <Row className="mb-5">
-            <Col lg={12}>
-              <ThemeCard>
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                  <h5
-                    className="mb-0"
-                    style={{ color: "#333", fontWeight: "700" }}
-                  >
-                    <i className="bi bi-lightning me-2"></i>
-                    Quick Actions
-                  </h5>
-                </div>
-                <Row className="g-3">
-                  <Col md={3}>
-                    <ThemeButton
-                      as={Link}
-                      to="/admin/products"
-                      icon="bi bi-plus-circle"
-                      className="w-100"
-                    >
-                      Add Product
-                    </ThemeButton>
-                  </Col>
-                  <Col md={3}>
-                    <ThemeButton
-                      as={Link}
-                      to="/admin/orders"
-                      variant="outline"
-                      icon="bi bi-bag-check"
-                      className="w-100"
-                    >
-                      Manage Orders
-                    </ThemeButton>
-                  </Col>
-                  <Col md={3}>
-                    <ThemeButton
-                      as={Link}
-                      to="/admin/users"
-                      variant="outline"
-                      icon="bi bi-people"
-                      className="w-100"
-                    >
-                      Manage Users
-                    </ThemeButton>
-                  </Col>
-                  <Col md={3}>
-                    <ThemeButton
-                      as={Link}
-                      to="/admin/analytics"
-                      variant="outline"
-                      icon="bi bi-graph-up"
-                      className="w-100"
-                    >
-                      View Analytics
-                    </ThemeButton>
-                  </Col>
-                </Row>
-              </ThemeCard>
-            </Col>
-          </Row>
 
           {/* Statistics Cards */}
           <Row className="mb-5 g-4">
@@ -286,10 +244,11 @@ const AdminDashboard = () => {
                 </div>
 
                 {loading ? (
-                  <div className="text-center py-4">
-                    <Spinner animation="border" />
-                    <p className="mt-2 text-muted">Loading orders...</p>
-                  </div>
+                  <ProfessionalLoading
+                    size="sm"
+                    message="Loading orders..."
+                    fullScreen={false}
+                  />
                 ) : recentOrders.length > 0 ? (
                   <>
                     <Table responsive hover>

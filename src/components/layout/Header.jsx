@@ -30,7 +30,7 @@ const Header = () => {
   const handleLogout = () => {
     dispatch(logout());
     setShowLogoutModal(false);
-    navigate("/");
+    navigate("/", { replace: true });
   };
 
   const getUserDisplayName = () => {
@@ -57,14 +57,37 @@ const Header = () => {
         <Container>
           {/* Simplified Header Layout */}
           <Navbar.Brand as={Link} to="/" className="d-flex align-items-center">
-            <img
-              src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
-              alt="Hare Krishna Medical"
-              className="medical-logo me-3"
-            />
-            <div className="brand-text-container">
-              <h4 className="mb-0 text-medical-red fw-bold">
-                Hare Krishna Medical
+            <div
+              style={{
+                background: "white",
+                borderRadius: "50%",
+                padding: "10px",
+                border: "2px solid rgba(230, 57, 70, 0.1)",
+                boxShadow: "0 4px 16px rgba(230, 57, 70, 0.25)",
+                width: "80px",
+                height: "80px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <img
+                src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
+                alt="Hare Krishna Medical"
+                className="medical-logo"
+              />
+            </div>
+            <div className="brand-text-container ms-3">
+              <h4
+                className="mb-0 fw-bold"
+                style={{
+                  color: "#e63946",
+                  fontSize: "1.4rem",
+                  letterSpacing: "0.5px",
+                  textShadow: "0 1px 2px rgba(0,0,0,0.1)",
+                }}
+              >
+                HARE KRISHNA MEDICAL
               </h4>
             </div>
           </Navbar.Brand>
@@ -72,37 +95,37 @@ const Header = () => {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
 
           <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="me-auto">
+            <Nav className="mx-auto">
               <Nav.Link
                 as={Link}
                 to="/"
-                className={isActiveRoute("/") ? "active" : ""}
+                className={`nav-link-custom ${isActiveRoute("/") ? "active" : ""}`}
               >
                 Home
               </Nav.Link>
               <Nav.Link
                 as={Link}
                 to="/products"
-                className={
+                className={`nav-link-custom ${
                   isActiveRoute("/products") ||
                   location.pathname.startsWith("/products/")
                     ? "active"
                     : ""
-                }
+                }`}
               >
                 Products
               </Nav.Link>
               <Nav.Link
                 as={Link}
                 to="/about"
-                className={isActiveRoute("/about") ? "active" : ""}
+                className={`nav-link-custom ${isActiveRoute("/about") ? "active" : ""}`}
               >
                 About
               </Nav.Link>
               <Nav.Link
                 as={Link}
                 to="/contact"
-                className={isActiveRoute("/contact") ? "active" : ""}
+                className={`nav-link-custom ${isActiveRoute("/contact") ? "active" : ""}`}
               >
                 Contact
               </Nav.Link>
@@ -225,6 +248,10 @@ const Header = () => {
                           <i className="bi bi-list-ul me-2"></i>
                           Navigation Test
                         </Dropdown.Item>
+                        <Dropdown.Item as={Link} to="/socket-diagnostics">
+                          <i className="bi bi-wifi me-2"></i>
+                          WebSocket Diagnostics
+                        </Dropdown.Item>
                       </>
                     )}
 
@@ -304,25 +331,40 @@ const Header = () => {
       {/* Header Styling */}
       <style jsx>{`
         .medical-logo {
-          width: 45px;
-          height: 45px;
-          border-radius: 8px;
-          box-shadow: 0 2px 8px rgba(230, 57, 70, 0.2);
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          transition: all 0.3s ease;
+          object-fit: contain;
+          margin: 0 !important;
         }
 
-        .nav-link {
+        .medical-logo:hover {
+          transform: scale(1.05);
+        }
+
+        .nav-link-custom {
           color: #6c757d !important;
           font-weight: 500;
           transition: all 0.3s ease;
+          padding: 8px 12px !important;
+          border-radius: 8px;
+          margin: 0 2px;
+          display: flex;
+          align-items: center;
         }
 
-        .nav-link:hover {
+        .nav-link-custom:hover {
           color: #e63946 !important;
+          background-color: rgba(230, 57, 70, 0.1);
+          transform: translateY(-1px);
         }
 
-        .nav-link.active {
+        .nav-link-custom.active {
           color: #e63946 !important;
           font-weight: 600;
+          background-color: rgba(230, 57, 70, 0.15);
+          border-bottom: 2px solid #e63946;
         }
 
         .dropdown-toggle::after {
@@ -382,12 +424,12 @@ const Header = () => {
 
         @media (max-width: 768px) {
           .medical-logo {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
           }
 
           .brand-text-container h4 {
-            font-size: 1rem;
+            font-size: 1.1rem !important;
           }
         }
       `}</style>

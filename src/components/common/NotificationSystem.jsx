@@ -27,12 +27,13 @@ const NotificationSystem = () => {
     return null;
   }
 
-  // Load real notifications from API with robust error handling
+  // Load real notifications from API with robust error handling and real-time updates
   useEffect(() => {
     let isMounted = true;
     let isApiAvailable = true;
     let failureCount = 0;
     const maxFailures = 2;
+    let socketConnection = null;
 
     const loadNotifications = async () => {
       // Skip if component unmounted or API marked as unavailable
@@ -87,11 +88,140 @@ const NotificationSystem = () => {
       }
     };
 
+    // Setup real-time socket connection for live notifications
+    const setupSocketConnection = async () => {
+      try {
+        // Try to import socket client
+        const socketModule = await import("../../utils/socketClient");
+        const socketClient = socketModule.default;
+
+        if (socketClient && typeof socketClient.connect === "function") {
+          // Check connection status first
+          const status = socketClient.getConnectionStatus();
+
+          if (status.fallbackMode) {
+            console.info(
+              "Socket in fallback mode, notifications will work but without real-time updates",
+            );
+            return;
+          }
+
+          // Connect socket for real-time notifications
+          const socket = socketClient.connect();
+
+          if (socket && !socket.id?.includes("mock")) {
+            // Listen for real-time notifications
+            socket.on("admin_notification", (notificationData) => {
+              if (!isMounted) return;
+
+              const {
+                type,
+                title,
+                message,
+                orderId,
+                customerName,
+                totalAmount,
+                productName,
+                currentStock,
+                threshold,
+                senderName,
+                subject,
+                amount,
+                method,
+                userName,
+                action,
+              } = notificationData;
+
+              // Show browser notification if permission granted
+              if (Notification.permission === "granted") {
+                new Notification(title || "New Notification", {
+                  body: message,
+                  icon: "/favicon.ico",
+                  badge: "/favicon.ico",
+                });
+              }
+
+              // Dispatch appropriate notification based on type
+              switch (type) {
+                case "order":
+                  dispatch({
+                    type: "notifications/addOrderNotification",
+                    payload: { orderId, customerName, totalAmount },
+                  });
+                  break;
+                case "stock":
+                  dispatch({
+                    type: "notifications/addStockNotification",
+                    payload: { productName, currentStock, threshold },
+                  });
+                  break;
+                case "message":
+                  dispatch({
+                    type: "notifications/addMessageNotification",
+                    payload: { senderName, subject },
+                  });
+                  break;
+                case "payment":
+                  dispatch({
+                    type: "notifications/addPaymentNotification",
+                    payload: { orderId, amount, method },
+                  });
+                  break;
+                case "user":
+                  dispatch({
+                    type: "notifications/addUserNotification",
+                    payload: { userName, action },
+                  });
+                  break;
+                default:
+                  // Generic notification
+                  dispatch({
+                    type: "notifications/addNotification",
+                    payload: { type, title, message, ...notificationData },
+                  });
+              }
+            });
+
+            // Listen for real-time data updates
+            socket.on("data_update", (updateData) => {
+              if (!isMounted) return;
+
+              // Trigger data refresh based on update type
+              switch (updateData.type) {
+                case "orders":
+                  // Trigger order data refresh
+                  window.dispatchEvent(new CustomEvent("refreshOrders"));
+                  break;
+                case "products":
+                  // Trigger product data refresh
+                  window.dispatchEvent(new CustomEvent("refreshProducts"));
+                  break;
+                case "users":
+                  // Trigger user data refresh
+                  window.dispatchEvent(new CustomEvent("refreshUsers"));
+                  break;
+                case "analytics":
+                  // Trigger analytics refresh
+                  window.dispatchEvent(new CustomEvent("refreshAnalytics"));
+                  break;
+              }
+            });
+
+            socketConnection = socket;
+          }
+        }
+      } catch (error) {
+        console.warn("Socket connection for notifications failed:", error);
+        // Continue without real-time notifications
+      }
+    };
+
     if (user?.role === 1) {
       // Initial load with a small delay to prevent immediate errors
       const initialTimeout = setTimeout(() => {
         if (isMounted) {
           loadNotifications();
+          setupSocketConnection();
         }
       }, 1000);
 
@@ -121,6 +251,11 @@ const NotificationSystem = () => {
         if (initialTimeout) clearTimeout(initialTimeout);
         if (intervalTimeout) clearTimeout(intervalTimeout);
         if (interval) clearInterval(interval);
+
+        // Cleanup socket connection
+        if (socketConnection && typeof socketConnection.off === "function") {
+          socketConnection.off("admin_notification");
+        }
       };
     }
   }, [dispatch, user]);

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import {
   Container,
   Row,
@@ -11,13 +12,22 @@ import {
   Table,
   Spinner,
 } from "react-bootstrap";
+import ProfessionalLoading from "../components/common/ProfessionalLoading";
+import { refreshSession } from "../store/slices/authSlice";
 
 const InvoiceVerify = () => {
   const { invoiceId } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    // Check and refresh authentication session on page load
+    dispatch(refreshSession());
+  }, [dispatch]);
 
   useEffect(() => {
     if (invoiceId) {
@@ -30,7 +40,24 @@ const InvoiceVerify = () => {
       setLoading(true);
       setError("");
 
-      const response = await fetch(`/api/invoices/verify/${invoiceId}`);
+      // Get auth token from localStorage or sessionStorage
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      // Add authorization header if token exists
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`/api/invoices/verify/${invoiceId}`, {
+        method: "GET",
+        headers,
+      });
+
       const data = await response.json();
 
       if (data.success) {
@@ -89,16 +116,11 @@ const InvoiceVerify = () => {
 
   if (loading) {
     return (
-      <div
-        className="d-flex justify-content-center align-items-center"
-        style={{ minHeight: "100vh" }}
-      >
-        <div className="text-center">
-          <Spinner animation="border" variant="primary" className="mb-3" />
-          <h5>Loading Invoice...</h5>
-          <p className="text-muted">Verifying invoice {invoiceId}</p>
-        </div>
-      </div>
+      <ProfessionalLoading
+        size="lg"
+        message="Loading Invoice..."
+        fullScreen={true}
+      />
     );
   }
 
@@ -251,18 +273,31 @@ const InvoiceVerify = () => {
                     <Row className="align-items-center">
                       <Col lg={8}>
                         <div className="d-flex align-items-center">
-                          <img
-                            src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
-                            alt="Hare Krishna Medical"
+                          <div
                             style={{
-                              height: "60px",
-                              width: "auto",
-                              marginRight: "20px",
+                              width: "80px",
+                              height: "80px",
                               background: "white",
-                              padding: "8px",
-                              borderRadius: "8px",
+                              borderRadius: "50%",
+                              padding: "10px",
+                              border: "3px solid rgba(255,255,255,0.3)",
+                              boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              marginRight: "20px",
                             }}
-                          />
+                          >
+                            <img
+                              src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
+                              alt="Hare Krishna Medical"
+                              style={{
+                                width: "60px",
+                                height: "60px",
+                                objectFit: "contain",
+                              }}
+                            />
+                          </div>
                           <div>
                             <h2
                               style={{

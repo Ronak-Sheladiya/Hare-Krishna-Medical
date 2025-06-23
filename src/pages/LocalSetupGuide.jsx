@@ -55,17 +55,19 @@ const LocalSetupGuide = () => {
         <Alert variant="info" className="mb-4">
           <Alert.Heading>
             <i className="bi bi-info-circle me-2"></i>
-            Quick Start
+            Production-Ready Setup Guide
           </Alert.Heading>
           <p>
             This guide will help you set up the complete Hare Krishna Medical
-            Store application on your local machine with MongoDB database
-            integration and all security features enabled.
+            Store application on your local machine. The project includes a 100%
+            configured database with sample data, production-ready security
+            features, and comprehensive documentation for smooth deployment.
           </p>
           <hr />
           <p className="mb-0">
-            <strong>Prerequisites:</strong> Node.js (v18+), MongoDB, Git, Basic
-            terminal knowledge
+            <strong>What's Included:</strong> Full MERN stack, MongoDB with
+            sample data, JWT authentication, real-time features, professional
+            UI, and complete API documentation.
           </p>
         </Alert>
 
@@ -348,7 +350,7 @@ npm audit fix  # Fix any issues`}</code>
 cd backend
 npm install socket.io@^4.7.2 express-mongo-sanitize@^2.2.0 express-rate-limit@^7.1.5
 
-# Frontend additional dependencies (if needed)  
+# Frontend additional dependencies (if needed)
 cd ..
 npm install socket.io-client@^4.7.2`}</code>
               </pre>
@@ -709,14 +711,31 @@ npm run dev
                     </h6>
                   </Card.Header>
                   <Card.Body>
-                    <p>
-                      <strong>Email:</strong> admin@harekrishnamedical.com
-                    </p>
-                    <p>
-                      <strong>Password:</strong> admin123
-                    </p>
+                    <div className="mb-3">
+                      <p>
+                        <strong>Primary Admin:</strong>
+                      </p>
+                      <p>
+                        <strong>Email:</strong> admin@gmail.com
+                      </p>
+                      <p>
+                        <strong>Password:</strong> Ronak@95865
+                      </p>
+                    </div>
+                    <div className="mb-3">
+                      <p>
+                        <strong>Alternative Admin:</strong>
+                      </p>
+                      <p>
+                        <strong>Email:</strong> ronaksheladiya652@gmail.com
+                      </p>
+                      <p>
+                        <strong>Password:</strong> admin@123
+                      </p>
+                    </div>
                     <p className="text-muted small mb-0">
-                      Full access: manage products, orders, users, analytics
+                      Full access: manage products, orders, users, analytics,
+                      real-time dashboard
                     </p>
                   </Card.Body>
                 </Card>
@@ -726,18 +745,35 @@ npm run dev
                   <Card.Header className="bg-primary text-white">
                     <h6 className="mb-0">
                       <i className="bi bi-person me-2"></i>
-                      User Login
+                      Customer Login
                     </h6>
                   </Card.Header>
                   <Card.Body>
-                    <p>
-                      <strong>Email:</strong> john@example.com
-                    </p>
-                    <p>
-                      <strong>Password:</strong> user123
-                    </p>
+                    <div className="mb-3">
+                      <p>
+                        <strong>Test Customer:</strong>
+                      </p>
+                      <p>
+                        <strong>Email:</strong> user@example.com
+                      </p>
+                      <p>
+                        <strong>Password:</strong> password123
+                      </p>
+                    </div>
+                    <div className="mb-3">
+                      <p>
+                        <strong>Mobile Login:</strong>
+                      </p>
+                      <p>
+                        <strong>Mobile:</strong> 9876543210
+                      </p>
+                      <p>
+                        <strong>Password:</strong> password123
+                      </p>
+                    </div>
                     <p className="text-muted small mb-0">
-                      Customer access: place orders, view invoices, profile
+                      Customer access: shopping, orders, invoices, profile
+                      management
                     </p>
                   </Card.Body>
                 </Card>
@@ -756,30 +792,104 @@ npm run dev
             </Alert>
 
             <h5 className="mt-4">Test Application Features</h5>
+
+            {/* Real-time Features Alert */}
+            <Alert variant="success" className="mb-3">
+              <h6>
+                <i className="bi bi-lightning-charge me-2"></i>Real-Time
+                Features Enabled
+              </h6>
+              <p className="mb-0">
+                This application includes live updates without page refresh! All
+                data syncs automatically across browser tabs and users.
+              </p>
+            </Alert>
+
             <Row>
               <Col md={6}>
-                <h6>User Features to Test:</h6>
+                <h6>
+                  <i className="bi bi-person-check me-2"></i>Customer Features
+                  to Test:
+                </h6>
                 <ul>
-                  <li>Registration and email verification</li>
-                  <li>Login and password reset</li>
-                  <li>Browse products and categories</li>
-                  <li>Add items to cart and checkout</li>
-                  <li>View order history and invoices</li>
-                  <li>Real-time order updates</li>
+                  <li>✅ Secure registration with email verification</li>
+                  <li>✅ Login with cross-tab synchronization</li>
+                  <li>✅ Real-time product browsing and search</li>
+                  <li>✅ Shopping cart with persistent sessions</li>
+                  <li>✅ Live order tracking and status updates</li>
+                  <li>✅ Instant invoice generation with QR codes</li>
+                  <li>✅ Real-time notifications for order updates</li>
+                  <li>✅ Professional mobile-responsive interface</li>
                 </ul>
               </Col>
               <Col md={6}>
-                <h6>Admin Features to Test:</h6>
+                <h6>
+                  <i className="bi bi-shield-check me-2"></i>Admin Features to
+                  Test:
+                </h6>
                 <ul>
-                  <li>Dashboard analytics</li>
-                  <li>Product management (CRUD)</li>
-                  <li>Order management and status updates</li>
-                  <li>User management</li>
-                  <li>Invoice generation and QR codes</li>
-                  <li>Real-time notifications</li>
+                  <li>🚀 Live dashboard with real-time analytics</li>
+                  <li>🚀 Product management with instant updates</li>
+                  <li>🚀 Order processing with live notifications</li>
+                  <li>🚀 User management with activity tracking</li>
+                  <li>🚀 Professional invoice system with QR verification</li>
+                  <li>🚀 Real-time notifications for all activities</li>
+                  <li>🚀 Live stock alerts and inventory management</li>
+                  <li>🚀 Cross-tab data synchronization</li>
+                  <li>🚀 Auto-refresh dashboard every 30 seconds</li>
                 </ul>
               </Col>
             </Row>
+
+            <div className="mt-3">
+              <h6>
+                <i className="bi bi-cpu me-2"></i>Real-Time System Features:
+              </h6>
+              <Row>
+                <Col md={4}>
+                  <Card className="border-success">
+                    <Card.Body className="text-center">
+                      <i
+                        className="bi bi-broadcast text-success"
+                        style={{ fontSize: "2rem" }}
+                      ></i>
+                      <h6 className="mt-2">Live Updates</h6>
+                      <small className="text-muted">
+                        Data updates instantly without refresh
+                      </small>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col md={4}>
+                  <Card className="border-info">
+                    <Card.Body className="text-center">
+                      <i
+                        className="bi bi-bell-fill text-info"
+                        style={{ fontSize: "2rem" }}
+                      ></i>
+                      <h6 className="mt-2">Push Notifications</h6>
+                      <small className="text-muted">
+                        Instant alerts for important events
+                      </small>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col md={4}>
+                  <Card className="border-warning">
+                    <Card.Body className="text-center">
+                      <i
+                        className="bi bi-arrow-repeat text-warning"
+                        style={{ fontSize: "2rem" }}
+                      ></i>
+                      <h6 className="mt-2">Auto Sync</h6>
+                      <small className="text-muted">
+                        Cross-tab and multi-user synchronization
+                      </small>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              </Row>
+            </div>
           </Card.Body>
         </Card>
 
@@ -840,6 +950,52 @@ netstat -ano | findstr :5000   # Windows
 lsof -ti:5173 | xargs kill -9  # macOS/Linux
 netstat -ano | findstr :5173   # Windows`}</code>
               </pre>
+            </Alert>
+
+            <Alert variant="info">
+              <h6>
+                <i className="bi bi-wifi-off me-2"></i>
+                WebSocket Connection Issues
+              </h6>
+              <p>
+                <strong>Symptoms:</strong> "websocket error" or real-time
+                features not working
+              </p>
+              <p>
+                <strong>Solutions:</strong>
+              </p>
+              <ul>
+                <li>
+                  ✅ <strong>Backend Not Running:</strong> Ensure backend server
+                  is running on port 5000
+                </li>
+                <li>
+                  ✅ <strong>Environment Variables:</strong> Check
+                  VITE_SOCKET_URL and VITE_BACKEND_URL in .env
+                </li>
+                <li>
+                  ✅ <strong>CORS Issues:</strong> Verify FRONTEND_URL is
+                  correct in backend/.env
+                </li>
+                <li>
+                  ✅ <strong>Firewall/Proxy:</strong> Check if WebSocket
+                  connections are blocked
+                </li>
+                <li>
+                  ✅ <strong>Fallback Mode:</strong> App works in demo mode if
+                  real-time fails
+                </li>
+              </ul>
+              <div className="mt-2">
+                <strong>🔧 Quick Test:</strong>
+                <br />
+                <code>curl http://localhost:5000/health</code> (should return
+                OK)
+                <br />
+                <small className="text-muted">
+                  Real-time status indicator shows connection state
+                </small>
+              </div>
             </Alert>
 
             <Alert variant="info">

@@ -31,17 +31,26 @@ const OfficialInvoiceDesign = ({ invoiceData, qrCode, forPrint = false }) => {
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <!-- Left Side - Company Info -->
             <div style="flex: 1;">
-              <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <img src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800" alt="Hare Krishna Medical Logo" style="height: 60px; width: auto; margin-right: 15px; background: white; padding: 8px; border-radius: 8px;" onerror="this.style.display='none';" />
+              <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                <div style="position: relative; margin-right: 20px;">
+                  <div style="background: white; border-radius: 50%; padding: 12px; border: 3px solid rgba(255,255,255,0.9); box-shadow: 0 6px 20px rgba(0,0,0,0.15);">
+                    <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800" alt="Hare Krishna Medical Logo" style="height: 56px; width: 56px; object-fit: contain; border-radius: 50%;" onerror="this.style.display='none';" />
+                  </div>
+                  <div style="position: absolute; top: -5px; right: -5px; width: 20px; height: 20px; background: #27ae60; border-radius: 50%; border: 2px solid white;"></div>
+                </div>
                 <div>
-                  <h1 style="font-size: 24px; font-weight: bold; margin: 0; line-height: 1.2;">HARE KRISHNA MEDICAL</h1>
-                  <p style="font-size: 12px; margin: 3px 0; opacity: 0.9;">Your Trusted Health Partner</p>
+                  <h1 style="font-size: 28px; font-weight: 900; margin: 0; line-height: 1.1; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">HARE KRISHNA MEDICAL</h1>
+                  <p style="font-size: 14px; margin: 5px 0 0 0; opacity: 0.95; font-weight: 500; letter-spacing: 0.5px;">🏥 Your Trusted Health Partner Since 2020</p>
+                  <div style="display: flex; align-items: center; margin-top: 8px; font-size: 12px; opacity: 0.9;">
+                    <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; margin-right: 8px;">✓ Verified</span>
+                    <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px;">🚀 Fast Delivery</span>
+                  </div>
                 </div>
               </div>
-              <div style="font-size: 11px; line-height: 1.4; opacity: 0.95;">
-                <div>3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat</div>
-                <div>Phone: +91 76989 13354 | +91 91060 18508</div>
-                <div>Email: hkmedicalamroli@gmail.com</div>
+              <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; font-size: 11px; line-height: 1.5;">
+                <div style="display: flex; align-items: center; margin-bottom: 4px;"><i style="margin-right: 8px;">📍</i> 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat</div>
+                <div style="display: flex; align-items-center; margin-bottom: 4px;"><i style="margin-right: 8px;">📞</i> +91 76989 13354 | +91 91060 18508</div>
+                <div style="display: flex; align-items-center;"><i style="margin-right: 8px;">✉️</i> hkmedicalamroli@gmail.com</div>
               </div>
             </div>
             <!-- Right Side - Invoice Info -->
@@ -144,20 +153,49 @@ const OfficialInvoiceDesign = ({ invoiceData, qrCode, forPrint = false }) => {
           </div>
         </div>
 
-        <!-- Footer Section -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+        <!-- Footer Section with Enhanced QR Design -->
+        <div style="display: flex; justify-content: space-between; align-items: stretch; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 20px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e0e0e0;">
           <div style="flex: 1;">
-            <h5 style="font-size: 14px; font-weight: bold; margin: 0 0 10px 0; color: #333;">Thank You for Your Business!</h5>
-            <div style="font-size: 11px; line-height: 1.5; color: #666;">
-              <div><strong>Terms:</strong> Payment due within 30 days</div>
-              <div>Goods once sold will not be taken back</div>
-              <div>Subject to Gujarat jurisdiction only</div>
-              <div style="margin-top: 8px;"><strong>Contact:</strong> hkmedicalamroli@gmail.com | +91 76989 13354</div>
+            <h5 style="font-size: 16px; font-weight: bold; margin: 0 0 12px 0; color: #e63946;">🙏 Thank You for Your Business!</h5>
+            <div style="font-size: 12px; line-height: 1.6; color: #444;">
+              <div style="background: white; padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #e63946;">
+                <strong>Terms & Conditions:</strong><br>
+                • Payment due within 30 days<br>
+                • Goods once sold will not be taken back<br>
+                • Subject to Gujarat jurisdiction only
+              </div>
+              <div style="display: flex; align-items: center; margin-top: 10px; font-size: 11px;">
+                <span style="background: #e63946; color: white; padding: 4px 8px; border-radius: 12px; margin-right: 8px; font-weight: bold;">📞 24/7 Support</span>
+                <span>hkmedicalamroli@gmail.com | +91 76989 13354</span>
+              </div>
             </div>
           </div>
-          <div style="text-align: center; margin-left: 20px;">
-            ${qrCode ? `<img src="${qrCode}" alt="QR Code" style="width: 120px; height: 120px; border: 2px solid #e63946; border-radius: 8px; padding: 3px; background: white;" />` : '<div style="width: 120px; height: 120px; border: 2px solid #e63946; border-radius: 8px; padding: 3px; background: white; display: flex; align-items: center; justify-content: center; color: #333; font-size: 10px; font-weight: bold;">QR CODE</div>'}
-            <div style="font-size: 10px; margin-top: 5px; color: #666;">Scan to Verify</div>
+
+          <!-- Enhanced QR Code Section -->
+          <div style="margin-left: 25px; text-align: center; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
+            <div style="margin-bottom: 10px;">
+              <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800" alt="Logo" style="height: 30px; width: 30px; object-fit: contain;" onerror="this.style.display='none';" />
+            </div>
+            ${
+              qrCode
+                ? `
+              <img src="${qrCode}" alt="Invoice QR Code" style="width: 120px; height: 120px; border: 3px solid #e63946; border-radius: 12px; padding: 4px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+              <div style="margin-top: 10px;">
+                <div style="font-size: 11px; font-weight: bold; color: #e63946;">📱 SCAN TO VERIFY</div>
+                <div style="font-size: 9px; color: #666; margin-top: 2px;">Invoice #${invoiceId}</div>
+              </div>
+            `
+                : `
+              <div style="width: 120px; height: 120px; border: 3px dashed #e63946; border-radius: 12px; background: linear-gradient(45deg, #f8f9fa 25%, transparent 25%), linear-gradient(-45deg, #f8f9fa 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f8f9fa 75%), linear-gradient(-45deg, transparent 75%, #f8f9fa 75%); background-size: 8px 8px; background-position: 0 0, 0 4px, 4px -4px, -4px 0px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #e63946;">
+                <div style="font-size: 14px; margin-bottom: 5px;">📱</div>
+                <div style="font-size: 10px; font-weight: bold; text-align: center; line-height: 1.2;">QR CODE<br>PLACEHOLDER</div>
+              </div>
+              <div style="margin-top: 10px;">
+                <div style="font-size: 11px; font-weight: bold; color: #e63946;">VERIFICATION CODE</div>
+                <div style="font-size: 9px; color: #666; margin-top: 2px;">Invoice #${invoiceId}</div>
+              </div>
+            `
+            }
           </div>
         </div>
 

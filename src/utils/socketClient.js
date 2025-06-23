@@ -1,27 +1,52 @@
-// Optional socket.io-client import - will be available after npm install
+// Real-time socket client with robust error handling and fallback mechanisms
 let io = null;
+let socketAvailable = false;
 
-// Try to import socket.io-client if available
-try {
-  // This will be resolved after the dependency is installed
-  if (typeof window !== "undefined") {
-    // Placeholder for socket.io-client - install with: npm install socket.io-client
-    console.log(
-      "Socket.io-client will be available after: npm install socket.io-client",
-    );
+// Create a mock socket for fallback when real socket isn't available
+const createMockSocket = () => ({
+  on: (event, callback) => {
+    console.debug(`Mock socket: Registered listener for ${event}`);
+    return this;
+  },
+  off: (event) => {
+    console.debug(`Mock socket: Removed listener for ${event}`);
+    return this;
+  },
+  emit: (event, data) => {
+    console.debug(`Mock socket: Emitting ${event}`, data);
+    return this;
+  },
+  connect: () => {
+    console.debug("Mock socket: Connected");
+    return this;
+  },
+  disconnect: () => {
+    console.debug("Mock socket: Disconnected");
+    return this;
+  },
+  connected: false,
+  id: "mock-socket-" + Date.now(),
+});
 
-    // Mock io function for now
-    io = () => ({
-      on: () => {},
-      off: () => {},
-      emit: () => {},
-      connect: () => {},
-      disconnect: () => {},
-      id: null,
+// Initialize socket.io with proper error handling
+if (typeof window !== "undefined") {
+  // Dynamically import socket.io-client
+  import("socket.io-client")
+    .then((socketio) => {
+      io = socketio.io;
+      socketAvailable = true;
+      console.debug("Socket.io-client loaded successfully");
+    })
+    .catch((error) => {
+      console.info("Socket.io-client not installed:", error.message);
+      console.info("Install with: npm install socket.io-client");
+      io = createMockSocket;
+      socketAvailable = false;
     });
-  }
-} catch (error) {
-  console.warn("Socket.io-client not available:", error);
+} else {
+  // Server-side rendering fallback
+  io = createMockSocket;
+  socketAvailable = false;
 }
 
 class SocketClient {
@@ -29,350 +54,323 @@ class SocketClient {
     this.socket = null;
     this.isConnected = false;
     this.reconnectAttempts = 0;
-    this.maxReconnectAttempts = 5;
+    this.maxReconnectAttempts = 3;
     this.isBrowser = typeof window !== "undefined";
+    this.connectionTimeout = null;
+    this.reconnectTimeout = null;
+    this.useWebSocket = true;
+    this.fallbackMode = false;
+    this.lastError = null;
+    this.eventListeners = new Map();
   }
 
   connect(token = null, role = 0) {
-    // Don't connect if not in browser environment
+    // Browser environment check
     if (!this.isBrowser) {
-      console.warn("Socket.io client can only run in browser environment");
-      return null;
+      console.debug("Socket client requires browser environment");
+      return this.createMockSocketInstance();
     }
 
+    // Return existing connection if available
     if (this.socket && this.isConnected) {
       return this.socket;
     }
 
+    // Use mock socket if in fallback mode or max attempts reached
+    if (
+      this.fallbackMode ||
+      this.reconnectAttempts >= this.maxReconnectAttempts
+    ) {
+      console.info("Using mock socket due to connection issues");
+      return this.createMockSocketInstance();
+    }
+
     try {
-      // Ensure io is available
-      if (!io || typeof io !== "function") {
-        console.warn(
-          "Socket.io-client not available. Please install: npm install socket.io-client",
-        );
-        return null;
+      // Check socket.io availability
+      if (!io || typeof io !== "function" || !socketAvailable) {
+        console.info("Socket.io not available, using mock socket");
+        this.fallbackMode = true;
+        return this.createMockSocketInstance();
       }
 
-      // Connect to backend server
-      this.socket = io(
-        import.meta.env.VITE_BACKEND_URL || "http://localhost:5000",
-        {
-          auth: {
-            token: token,
-          },
-          transports: ["websocket", "polling"],
-          timeout: 20000,
-          forceNew: true,
-          autoConnect: false, // Don't auto-connect immediately
-        },
-      );
+      const socketUrl = this.getSocketUrl();
+      const socketOptions = this.getSocketOptions();
 
-      this.setupEventListeners(role);
+      console.debug(`Connecting to socket: ${socketUrl}`);
 
-      // Manually connect after setup
-      this.socket.connect();
+      this.socket = io(socketUrl, socketOptions);
+      this.setupEventHandlers(token, role);
+      this.setConnectionTimeout();
 
       return this.socket;
     } catch (error) {
-      console.error("Socket connection error:", error);
-      return null;
+      console.error("Socket connection failed:", error);
+      this.lastError = error;
+      this.handleConnectionFailure(error.message);
+      return this.createMockSocketInstance();
     }
   }
 
-  setupEventListeners(role) {
+  getSocketUrl() {
+    // Priority order for socket URL determination
+    const envSocketUrl = import.meta.env?.VITE_SOCKET_URL;
+    const envBackendUrl = import.meta.env?.VITE_BACKEND_URL;
+    const currentOrigin = this.isBrowser ? window.location.origin : "";
+
+    if (envSocketUrl) {
+      return envSocketUrl;
+    }
+
+    if (envBackendUrl) {
+      return envBackendUrl;
+    }
+
+    // Local development fallback
+    if (
+      currentOrigin.includes("localhost") ||
+      currentOrigin.includes("127.0.0.1")
+    ) {
+      return "http://localhost:5000";
+    }
+
+    // Production fallback - try same origin
+    return currentOrigin || "http://localhost:5000";
+  }
+
+  getSocketOptions() {
+    return {
+      transports: this.useWebSocket ? ["websocket", "polling"] : ["polling"],
+      timeout: 10000,
+      forceNew: false,
+      reconnection: true,
+      reconnectionAttempts: this.maxReconnectAttempts,
+      reconnectionDelay: 2000,
+      autoConnect: true,
+      upgrade: this.useWebSocket,
+      rememberUpgrade: false,
+    };
+  }
+
+  createMockSocketInstance() {
+    const mockSocket = {
+      on: (event, callback) => {
+        console.debug(`Mock socket: Registered listener for ${event}`);
+        // Store listeners for potential future use
+        if (!this.eventListeners.has(event)) {
+          this.eventListeners.set(event, []);
+        }
+        this.eventListeners.get(event).push(callback);
+        return mockSocket;
+      },
+      off: (event, callback) => {
+        console.debug(`Mock socket: Removed listener for ${event}`);
+        if (this.eventListeners.has(event)) {
+          const listeners = this.eventListeners.get(event);
+          const index = listeners.indexOf(callback);
+          if (index > -1) {
+            listeners.splice(index, 1);
+          }
+        }
+        return mockSocket;
+      },
+      emit: (event, data) => {
+        console.debug(`Mock socket: Emitting ${event}`, data);
+        return mockSocket;
+      },
+      disconnect: () => {
+        console.debug("Mock socket: Disconnected");
+        return mockSocket;
+      },
+      connected: false,
+      id: "mock-socket-" + Date.now(),
+    };
+
+    this.socket = mockSocket;
+    this.isConnected = false;
+    this.fallbackMode = true;
+
+    return mockSocket;
+  }
+
+  setupEventHandlers(token, role) {
     if (!this.socket) return;
 
-    // Connection events
     this.socket.on("connect", () => {
-      console.log("✅ Socket connected:", this.socket.id);
+      console.debug("Socket connected:", this.socket.id);
       this.isConnected = true;
       this.reconnectAttempts = 0;
+      this.lastError = null;
+      this.clearConnectionTimeout();
 
-      // Join appropriate room based on role
-      if (role === 1) {
-        this.socket.emit("join-admin");
-      } else {
-        this.socket.emit("join-user", this.socket.auth?.userId);
+      // Send authentication if token provided
+      if (token) {
+        this.socket.emit("authenticate", { token, role });
       }
     });
 
     this.socket.on("disconnect", (reason) => {
-      console.log("❌ Socket disconnected:", reason);
+      console.debug("Socket disconnected:", reason);
       this.isConnected = false;
 
-      // Attempt to reconnect
+      // Don't reconnect for intentional disconnections
       if (
         reason === "io server disconnect" ||
-        this.reconnectAttempts < this.maxReconnectAttempts
+        reason === "io client disconnect"
       ) {
-        setTimeout(() => {
-          this.reconnectAttempts++;
-          console.log(`🔄 Reconnecting... Attempt ${this.reconnectAttempts}`);
-          this.socket.connect();
-        }, 2000 * this.reconnectAttempts);
+        return;
       }
+
+      this.attemptReconnection();
     });
 
     this.socket.on("connect_error", (error) => {
-      console.error("Socket connection error:", error);
-      this.isConnected = false;
+      console.warn("Socket connection error:", error.message);
+      this.lastError = error;
+      this.handleConnectionFailure(error.message);
     });
 
-    // Admin-specific events
-    if (role === 1) {
-      this.setupAdminEventListeners();
-    } else {
-      this.setupUserEventListeners();
+    this.socket.on("error", (error) => {
+      console.warn("Socket error:", error);
+      this.lastError = error;
+    });
+
+    this.socket.on("reconnect", (attemptNumber) => {
+      console.debug("Socket reconnected after", attemptNumber, "attempts");
+      this.isConnected = true;
+      this.reconnectAttempts = 0;
+    });
+
+    this.socket.on("reconnect_error", (error) => {
+      console.warn("Socket reconnection failed:", error.message);
+      this.reconnectAttempts++;
+
+      if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+        console.warn("Max reconnection attempts reached");
+        this.fallbackMode = true;
+        this.disconnect();
+      }
+    });
+  }
+
+  setConnectionTimeout() {
+    this.connectionTimeout = setTimeout(() => {
+      if (!this.isConnected) {
+        console.warn("Socket connection timeout");
+        this.handleConnectionFailure("Connection timeout");
+      }
+    }, 15000);
+  }
+
+  clearConnectionTimeout() {
+    if (this.connectionTimeout) {
+      clearTimeout(this.connectionTimeout);
+      this.connectionTimeout = null;
     }
   }
 
-  setupAdminEventListeners() {
-    if (!this.socket) return;
+  handleConnectionFailure(reason) {
+    this.reconnectAttempts++;
+    console.warn(
+      `Connection failed (attempt ${this.reconnectAttempts}): ${reason}`,
+    );
 
-    // New user registration
-    this.socket.on("new-user-registered", (data) => {
-      console.log("👤 New user registered:", data);
-      this.showNotification("New User Registration", {
-        body: `${data.user.fullName} just registered`,
-        icon: "/favicon.ico",
-        tag: "new-user",
-      });
+    this.clearConnectionTimeout();
 
-      // Dispatch custom event for components to listen
-      if (this.isBrowser && typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("admin-new-user", { detail: data }),
-        );
-      }
-    });
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.warn("Switching to fallback mode");
+      this.fallbackMode = true;
+      this.disconnect();
+      return;
+    }
 
-    // New order notifications
-    this.socket.on("new-order", (data) => {
-      console.log("🛒 New order received:", data);
-      this.showNotification("New Order", {
-        body: `Order ${data.order.orderId} - ₹${data.order.total}`,
-        icon: "/favicon.ico",
-        tag: "new-order",
-      });
-
-      if (this.isBrowser && typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("admin-new-order", { detail: data }),
-        );
-      }
-    });
-
-    // Order status updates
-    this.socket.on("order-status-updated", (data) => {
-      console.log("📦 Order status updated:", data);
-      if (this.isBrowser && typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("admin-order-status-updated", { detail: data }),
-        );
-      }
-    });
-
-    // Payment status updates
-    this.socket.on("payment-status-updated", (data) => {
-      console.log("💳 Payment status updated:", data);
-      this.showNotification("Payment Update", {
-        body: `Invoice ${data.invoiceNumber} - ${data.newStatus}`,
-        icon: "/favicon.ico",
-        tag: "payment-update",
-      });
-
-      if (this.isBrowser && typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("admin-payment-status-updated", { detail: data }),
-        );
-      }
-
-      // Product updates
-      this.socket.on("product-created", (data) => {
-        console.log("📦 Product created:", data);
-        if (this.isBrowser && typeof window !== "undefined") {
-          window.dispatchEvent(
-            new CustomEvent("admin-product-created", { detail: data }),
-          );
-        }
-      });
-
-      this.socket.on("stock-updated", (data) => {
-        console.log("📊 Stock updated:", data);
-        if (data.product.stockStatus === "Low Stock") {
-          this.showNotification("Low Stock Alert", {
-            body: `${data.product.name} - Only ${data.product.stock} left`,
-            icon: "/favicon.ico",
-            tag: "low-stock",
-          });
-        }
-
-        if (this.isBrowser && typeof window !== "undefined") {
-          window.dispatchEvent(
-            new CustomEvent("admin-stock-updated", { detail: data }),
-          );
-        }
-      });
-
-      // Message notifications
-      this.socket.on("new-message", (data) => {
-        console.log("📧 New message:", data);
-        this.showNotification("New Message", {
-          body: `From: ${data.message.name} - ${data.message.subject}`,
-          icon: "/favicon.ico",
-          tag: "new-message",
-        });
-
-        if (this.isBrowser && typeof window !== "undefined") {
-          window.dispatchEvent(
-            new CustomEvent("admin-new-message", { detail: data }),
-          );
-        }
-      });
-
-      // User activity
-      this.socket.on("user-logged-in", (data) => {
-        console.log("🔐 User logged in:", data);
-        if (this.isBrowser && typeof window !== "undefined") {
-          window.dispatchEvent(
-            new CustomEvent("admin-user-activity", { detail: data }),
-          );
-        }
-      });
-    });
-  }
-
-  setupUserEventListeners() {
-    if (!this.socket) return;
-
-    // Order notifications
-    this.socket.on("order-created", (data) => {
-      console.log("✅ Order created:", data);
-      this.showNotification("Order Confirmed", {
-        body: `Your order ${data.order.orderId} has been confirmed`,
-        icon: "/favicon.ico",
-        tag: "order-confirmed",
-      });
-
-      if (this.isBrowser && typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("user-order-created", { detail: data }),
-        );
-      }
-
-      this.socket.on("order-status-changed", (data) => {
-        console.log("📦 Order status changed:", data);
-        this.showNotification("Order Update", {
-          body: `Order ${data.orderNumber} is now ${data.newStatus}`,
-          icon: "/favicon.ico",
-          tag: "order-update",
-        });
-
-        if (this.isBrowser && typeof window !== "undefined") {
-          window.dispatchEvent(
-            new CustomEvent("user-order-status-changed", { detail: data }),
-          );
-        }
-      });
-
-      // Payment notifications
-      this.socket.on("payment-status-changed", (data) => {
-        console.log("💳 Payment status changed:", data);
-        this.showNotification("Payment Update", {
-          body: `Payment for ${data.invoiceNumber} is ${data.newStatus}`,
-          icon: "/favicon.ico",
-          tag: "payment-update",
-        });
-
-        if (this.isBrowser && typeof window !== "undefined") {
-          window.dispatchEvent(
-            new CustomEvent("user-payment-status-changed", { detail: data }),
-          );
-        }
-      });
-    });
-  }
-
-  showNotification(title, options) {
-    // Only run in browser environment
-    if (!this.isBrowser) return;
-
-    try {
-      // Check if notifications are supported and permitted
-      if (typeof window !== "undefined" && "Notification" in window) {
-        if (Notification.permission === "granted") {
-          new Notification(title, options);
-        } else if (Notification.permission !== "denied") {
-          // Request permission if not already requested
-          Notification.requestPermission()
-            .then((permission) => {
-              if (permission === "granted") {
-                new Notification(title, options);
-              }
-            })
-            .catch((error) => {
-              console.warn("Notification permission request failed:", error);
-            });
-        }
-      }
-    } catch (error) {
-      console.warn("Notification API error:", error);
+    // Try polling-only if WebSocket fails
+    if (
+      this.useWebSocket &&
+      (reason.toLowerCase().includes("websocket") ||
+        reason.toLowerCase().includes("transport"))
+    ) {
+      console.info("WebSocket failed, trying polling transport");
+      this.useWebSocket = false;
+      this.attemptReconnection();
     }
   }
 
-  // Public methods for components to emit events
-  emitEvent(eventName, data) {
-    if (this.socket && this.isConnected) {
-      this.socket.emit(eventName, data);
+  attemptReconnection() {
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+    }
+
+    if (
+      this.reconnectAttempts < this.maxReconnectAttempts &&
+      !this.fallbackMode
+    ) {
+      const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 10000);
+      console.debug(`Reconnecting in ${delay}ms`);
+
+      this.reconnectTimeout = setTimeout(() => {
+        this.disconnect();
+        this.connect();
+      }, delay);
     }
   }
 
-  // Subscribe to specific events
-  on(eventName, callback) {
-    if (this.socket) {
-      this.socket.on(eventName, callback);
-    }
-  }
-
-  // Unsubscribe from events
-  off(eventName, callback) {
-    if (this.socket) {
-      this.socket.off(eventName, callback);
-    }
-  }
-
-  // Disconnect socket
   disconnect() {
-    if (this.socket) {
+    this.clearConnectionTimeout();
+
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
+    }
+
+    if (this.socket && typeof this.socket.disconnect === "function") {
       this.socket.disconnect();
-      this.socket = null;
-      this.isConnected = false;
     }
+
+    this.socket = null;
+    this.isConnected = false;
   }
 
-  // Join specific rooms
-  joinAdminRoom() {
-    if (this.socket && this.isConnected) {
-      this.socket.emit("join-admin");
+  // Utility methods for external use
+  on(event, callback) {
+    if (this.socket && typeof this.socket.on === "function") {
+      return this.socket.on(event, callback);
     }
+    return this.createMockSocketInstance().on(event, callback);
   }
 
-  joinUserRoom(userId) {
-    if (this.socket && this.isConnected) {
-      this.socket.emit("join-user", userId);
+  off(event, callback) {
+    if (this.socket && typeof this.socket.off === "function") {
+      return this.socket.off(event, callback);
     }
+    return this.createMockSocketInstance().off(event, callback);
   }
 
-  // Get connection status
+  emit(event, data) {
+    if (this.socket && typeof this.socket.emit === "function") {
+      return this.socket.emit(event, data);
+    }
+    return this.createMockSocketInstance().emit(event, data);
+  }
+
   getConnectionStatus() {
     return {
-      isConnected: this.isConnected,
+      connected: this.isConnected,
+      fallbackMode: this.fallbackMode,
+      attempts: this.reconnectAttempts,
+      lastError: this.lastError?.message || null,
       socketId: this.socket?.id || null,
     };
   }
 }
 
-// Create singleton instance
+// Create and export singleton instance
 const socketClient = new SocketClient();
 
 export default socketClient;
+
+// Export additional utilities
+export const getConnectionStatus = () => socketClient.getConnectionStatus();
+export const forceReconnect = () => {
+  socketClient.disconnect();
+  return socketClient.connect();
+};

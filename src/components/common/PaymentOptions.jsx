@@ -100,7 +100,7 @@ const PaymentOptions = ({
     <div>
       <h5 className="mb-3">
         <i className="bi bi-credit-card-2-front me-2"></i>
-        Choose Payment Method
+        Payment Method
       </h5>
 
       {paymentMethods.map((method) => (
@@ -171,11 +171,7 @@ const PaymentOptions = ({
           <i className="bi bi-shield-check text-success me-2"></i>
           Secure Payment
         </Alert.Heading>
-        <p className="mb-0 small">
-          All online payments are processed through encrypted and secure
-          channels. Your financial information is protected with
-          industry-standard security measures.
-        </p>
+        <p className="mb-0 small">All payments are encrypted and secure.</p>
       </Alert>
 
       {/* COD Information */}
