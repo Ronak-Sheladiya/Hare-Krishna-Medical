@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Row,
@@ -9,6 +9,8 @@ import {
   Badge,
   ProgressBar,
   Modal,
+  Alert,
+  Spinner,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -17,72 +19,111 @@ const AdminDashboard = () => {
   const { unreadCount } = useSelector((state) => state.messages);
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock data for admin dashboard
-  const dashboardStats = {
-    totalOrders: 156,
-    totalProducts: 45,
-    totalUsers: 1234,
-    totalRevenue: 45670.5,
-    monthlyGrowth: 12.5,
-    pendingOrders: 23,
-    lowStockProducts: 8,
-    newUsersToday: 12,
-    unreadMessages: unreadCount || 5,
+  // Real dashboard data state
+  const [dashboardStats, setDashboardStats] = useState({
+    totalOrders: 0,
+    totalProducts: 0,
+    totalUsers: 0,
+    totalRevenue: 0,
+    monthlyGrowth: 0,
+    pendingOrders: 0,
+    lowStockProducts: 0,
+    newUsersToday: 0,
+    unreadMessages: 0,
+  });
+
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [lowStockProducts, setLowStockProducts] = useState([]);
+
+  const API_BASE_URL =
+    process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+
+  // Fetch dashboard data
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const token = localStorage.getItem("token");
+      const headers = {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      };
+
+      // Fetch all required data
+      const [statsRes, ordersRes, productsRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/analytics/dashboard-stats`, {
+          headers,
+        }).catch(() => null),
+        fetch(`${API_BASE_URL}/api/orders?limit=5&sort=createdAt&order=desc`, {
+          headers,
+        }).catch(() => null),
+        fetch(`${API_BASE_URL}/api/products?limit=10&stock=low`, {
+          headers,
+        }).catch(() => null),
+      ]);
+
+      // Process stats
+      if (statsRes && statsRes.ok) {
+        const statsData = await statsRes.json();
+        if (statsData.success) {
+          setDashboardStats((prev) => ({
+            ...prev,
+            ...statsData.data,
+            unreadMessages: unreadCount || 0,
+          }));
+        }
+      }
+
+      // Process recent orders
+      if (ordersRes && ordersRes.ok) {
+        const ordersData = await ordersRes.json();
+        if (ordersData.success) {
+          setRecentOrders(ordersData.data || []);
+        }
+      }
+
+      // Process low stock products
+      if (productsRes && productsRes.ok) {
+        const productsData = await productsRes.json();
+        if (productsData.success) {
+          const lowStock = (productsData.data || []).filter(
+            (product) => product.stock <= (product.lowStockThreshold || 10),
+          );
+          setLowStockProducts(lowStock);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+      setError("Unable to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const recentOrders = [
-    {
-      id: "HKM12345678",
-      customer: "John Doe",
-      customerEmail: "john.doe@email.com",
-      customerPhone: "+91 9876543210",
-      address: "123 Main Street, Surat, Gujarat 395007",
-      amount: 235.5,
-      status: "Pending",
-      date: "2024-01-15",
-      time: "10:30 AM",
-      items: 3,
-      paymentMethod: "Online",
-    },
-    {
-      id: "HKM12345679",
-      customer: "Jane Smith",
-      customerEmail: "jane.smith@email.com",
-      customerPhone: "+91 9123456789",
-      address: "456 Oak Avenue, Ahmedabad, Gujarat 380001",
-      amount: 156.75,
-      status: "Confirmed",
-      date: "2024-01-15",
-      time: "02:15 PM",
-      items: 2,
-      paymentMethod: "COD",
-    },
-  ];
+  useEffect(() => {
+    fetchDashboardData();
+  }, [unreadCount]);
 
   const handleViewOrder = (order) => {
     setSelectedOrder(order);
     setShowOrderModal(true);
   };
 
-  const lowStockProducts = [
-    { id: 1, name: "Paracetamol Tablets", stock: 5, threshold: 20 },
-    { id: 2, name: "Vitamin D3 Capsules", stock: 12, threshold: 25 },
-    { id: 3, name: "Cough Syrup", stock: 8, threshold: 15 },
-    { id: 4, name: "Antiseptic Liquid", stock: 3, threshold: 10 },
-  ];
-
   const getStatusVariant = (status) => {
-    switch (status) {
-      case "Pending":
+    switch (status?.toLowerCase()) {
+      case "pending":
         return "warning";
-      case "Confirmed":
+      case "confirmed":
         return "info";
-      case "Processing":
+      case "processing":
         return "primary";
-      case "Delivered":
+      case "delivered":
         return "success";
-      case "Cancelled":
+      case "cancelled":
         return "danger";
       default:
         return "secondary";
@@ -196,6 +237,7 @@ const AdminDashboard = () => {
     gradient,
     badge,
     action,
+    isLoading = false,
   }) => (
     <Card
       style={{
@@ -231,7 +273,14 @@ const AdminDashboard = () => {
             position: "relative",
           }}
         >
-          <i className={icon} style={{ fontSize: "40px", color: "white" }}></i>
+          {isLoading ? (
+            <Spinner animation="border" size="sm" style={{ color: "white" }} />
+          ) : (
+            <i
+              className={icon}
+              style={{ fontSize: "40px", color: "white" }}
+            ></i>
+          )}
           <div
             style={{
               position: "absolute",
@@ -262,9 +311,11 @@ const AdminDashboard = () => {
             lineHeight: "1",
           }}
         >
-          {typeof value === "number" && value > 1000
-            ? `${(value / 1000).toFixed(1)}k`
-            : value}
+          {isLoading
+            ? "..."
+            : typeof value === "number" && value > 1000
+              ? `${(value / 1000).toFixed(1)}k`
+              : value}
         </h1>
 
         <h5
@@ -280,7 +331,7 @@ const AdminDashboard = () => {
           {label}
         </h5>
 
-        {badge && (
+        {badge && !isLoading && (
           <Badge
             style={{
               background: "linear-gradient(135deg, #28a745, #20c997)",
@@ -297,7 +348,7 @@ const AdminDashboard = () => {
           </Badge>
         )}
 
-        {action && (
+        {action && !isLoading && (
           <div style={{ marginTop: "20px" }}>
             <EnhancedButton
               variant="outline"
@@ -311,6 +362,20 @@ const AdminDashboard = () => {
       </Card.Body>
     </Card>
   );
+
+  if (loading) {
+    return (
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "100vh" }}
+      >
+        <div className="text-center">
+          <Spinner animation="border" role="status" size="lg" />
+          <p className="mt-3">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fade-in">
@@ -376,6 +441,25 @@ const AdminDashboard = () => {
             </Col>
           </Row>
 
+          {error && (
+            <Row className="mb-4">
+              <Col lg={12}>
+                <Alert variant="warning" className="d-flex align-items-center">
+                  <i className="bi bi-exclamation-triangle me-2"></i>
+                  {error}
+                  <Button
+                    variant="outline-warning"
+                    size="sm"
+                    className="ms-auto"
+                    onClick={fetchDashboardData}
+                  >
+                    Retry
+                  </Button>
+                </Alert>
+              </Col>
+            </Row>
+          )}
+
           {/* Enhanced Statistics Cards */}
           <Row className="mb-5 g-4">
             <Col lg={3} md={6}>
@@ -384,12 +468,17 @@ const AdminDashboard = () => {
                 value={dashboardStats.totalOrders}
                 label="Total Orders"
                 gradient="linear-gradient(135deg, #e63946, #dc3545)"
-                badge={`+${dashboardStats.monthlyGrowth}% this month`}
+                badge={
+                  dashboardStats.monthlyGrowth > 0
+                    ? `+${dashboardStats.monthlyGrowth}% this month`
+                    : null
+                }
                 action={{
                   text: "View All",
                   link: "/admin/orders",
                   icon: "bi bi-arrow-right",
                 }}
+                isLoading={loading}
               />
             </Col>
 
@@ -404,6 +493,7 @@ const AdminDashboard = () => {
                   link: "/admin/products",
                   icon: "bi bi-gear",
                 }}
+                isLoading={loading}
               />
             </Col>
 
@@ -413,19 +503,28 @@ const AdminDashboard = () => {
                 value={dashboardStats.totalUsers}
                 label="Total Users"
                 gradient="linear-gradient(135deg, #6f42c1, #6610f2)"
-                badge={`+${dashboardStats.newUsersToday} today`}
+                badge={
+                  dashboardStats.newUsersToday > 0
+                    ? `+${dashboardStats.newUsersToday} today`
+                    : null
+                }
                 action={{
                   text: "View Users",
                   link: "/admin/users",
                   icon: "bi bi-person-lines-fill",
                 }}
+                isLoading={loading}
               />
             </Col>
 
             <Col lg={3} md={6}>
               <CircularStatCard
                 icon="bi bi-currency-rupee"
-                value={`₹${(dashboardStats.totalRevenue / 1000).toFixed(1)}k`}
+                value={
+                  dashboardStats.totalRevenue > 0
+                    ? `₹${(dashboardStats.totalRevenue / 1000).toFixed(1)}k`
+                    : "₹0"
+                }
                 label="Total Revenue"
                 gradient="linear-gradient(135deg, #fd7e14, #dc3545)"
                 badge="This month"
@@ -434,6 +533,7 @@ const AdminDashboard = () => {
                   link: "/admin/analytics",
                   icon: "bi bi-chart-line",
                 }}
+                isLoading={loading}
               />
             </Col>
           </Row>
@@ -462,76 +562,95 @@ const AdminDashboard = () => {
                   </h5>
                 </Card.Header>
                 <Card.Body style={{ padding: "25px" }}>
-                  <Table responsive hover>
-                    <thead>
-                      <tr>
-                        <th>Order ID</th>
-                        <th>Customer</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {recentOrders.map((order) => (
-                        <tr key={order.id}>
-                          <td>
-                            <code
-                              style={{
-                                background: "#f8f9fa",
-                                padding: "4px 8px",
-                                borderRadius: "6px",
-                              }}
-                            >
-                              {order.id}
-                            </code>
-                          </td>
-                          <td>
-                            <div>
-                              <div style={{ fontWeight: "600" }}>
-                                {order.customer}
-                              </div>
-                              <small className="text-muted">
-                                {order.customerEmail}
-                              </small>
-                            </div>
-                          </td>
-                          <td>
-                            <strong style={{ color: "#28a745" }}>
-                              ₹{order.amount}
-                            </strong>
-                          </td>
-                          <td>
-                            <Badge bg={getStatusVariant(order.status)}>
-                              {order.status}
-                            </Badge>
-                          </td>
-                          <td>
-                            <EnhancedButton
-                              variant="outline"
-                              onClick={() => handleViewOrder(order)}
-                              style={{
-                                padding: "6px 12px",
-                                fontSize: "12px",
-                                borderRadius: "8px",
-                              }}
-                            >
-                              View
-                            </EnhancedButton>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                  <div className="text-center mt-3">
-                    <EnhancedButton
-                      variant="outline"
-                      to="/admin/orders"
-                      icon="bi bi-arrow-right"
-                    >
-                      View All Orders
-                    </EnhancedButton>
-                  </div>
+                  {recentOrders.length > 0 ? (
+                    <>
+                      <Table responsive hover>
+                        <thead>
+                          <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {recentOrders.map((order) => (
+                            <tr key={order._id || order.id}>
+                              <td>
+                                <code
+                                  style={{
+                                    background: "#f8f9fa",
+                                    padding: "4px 8px",
+                                    borderRadius: "6px",
+                                  }}
+                                >
+                                  {order.orderNumber || order._id || order.id}
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <div style={{ fontWeight: "600" }}>
+                                    {order.customer?.name ||
+                                      order.customerName ||
+                                      "N/A"}
+                                  </div>
+                                  <small className="text-muted">
+                                    {order.customer?.email ||
+                                      order.customerEmail ||
+                                      ""}
+                                  </small>
+                                </div>
+                              </td>
+                              <td>
+                                <strong style={{ color: "#28a745" }}>
+                                  ₹{order.total || order.amount || 0}
+                                </strong>
+                              </td>
+                              <td>
+                                <Badge bg={getStatusVariant(order.status)}>
+                                  {order.status || "Pending"}
+                                </Badge>
+                              </td>
+                              <td>
+                                <EnhancedButton
+                                  variant="outline"
+                                  onClick={() => handleViewOrder(order)}
+                                  style={{
+                                    padding: "6px 12px",
+                                    fontSize: "12px",
+                                    borderRadius: "8px",
+                                  }}
+                                >
+                                  View
+                                </EnhancedButton>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Table>
+                      <div className="text-center mt-3">
+                        <EnhancedButton
+                          variant="outline"
+                          to="/admin/orders"
+                          icon="bi bi-arrow-right"
+                        >
+                          View All Orders
+                        </EnhancedButton>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-4">
+                      <i
+                        className="bi bi-inbox"
+                        style={{ fontSize: "3rem", color: "#6c757d" }}
+                      ></i>
+                      <h5 className="mt-3 text-muted">No Recent Orders</h5>
+                      <p className="text-muted">
+                        Orders will appear here when customers place them.
+                      </p>
+                    </div>
+                  )}
                 </Card.Body>
               </Card>
             </Col>
@@ -559,37 +678,60 @@ const AdminDashboard = () => {
                   </h6>
                 </Card.Header>
                 <Card.Body style={{ padding: "20px" }}>
-                  {lowStockProducts.map((product) => (
-                    <div key={product.id} className="mb-3">
-                      <div className="d-flex justify-content-between align-items-center mb-1">
-                        <span style={{ fontSize: "14px", fontWeight: "600" }}>
-                          {product.name}
-                        </span>
-                        <Badge bg="danger" style={{ fontSize: "10px" }}>
-                          {product.stock} left
-                        </Badge>
+                  {lowStockProducts.length > 0 ? (
+                    <>
+                      {lowStockProducts.map((product) => (
+                        <div key={product._id || product.id} className="mb-3">
+                          <div className="d-flex justify-content-between align-items-center mb-1">
+                            <span
+                              style={{ fontSize: "14px", fontWeight: "600" }}
+                            >
+                              {product.name}
+                            </span>
+                            <Badge bg="danger" style={{ fontSize: "10px" }}>
+                              {product.stock} left
+                            </Badge>
+                          </div>
+                          <ProgressBar
+                            now={
+                              (product.stock /
+                                (product.lowStockThreshold || 20)) *
+                              100
+                            }
+                            variant="danger"
+                            style={{ height: "6px", borderRadius: "3px" }}
+                          />
+                        </div>
+                      ))}
+                      <div className="text-center mt-3">
+                        <EnhancedButton
+                          variant="outline"
+                          to="/admin/products"
+                          style={{
+                            padding: "8px 16px",
+                            fontSize: "12px",
+                            borderRadius: "8px",
+                          }}
+                          icon="bi bi-plus-circle"
+                        >
+                          Restock Products
+                        </EnhancedButton>
                       </div>
-                      <ProgressBar
-                        now={(product.stock / product.threshold) * 100}
-                        variant="danger"
-                        style={{ height: "6px", borderRadius: "3px" }}
-                      />
+                    </>
+                  ) : (
+                    <div className="text-center py-3">
+                      <i
+                        className="bi bi-check-circle"
+                        style={{ fontSize: "2rem", color: "#28a745" }}
+                      ></i>
+                      <p
+                        className="mt-2 mb-0 text-muted"
+                        style={{ fontSize: "14px" }}
+                      >
+                        All products are well stocked!
+                      </p>
                     </div>
-                  ))}
-                  <div className="text-center mt-3">
-                    <EnhancedButton
-                      variant="outline"
-                      to="/admin/products"
-                      style={{
-                        padding: "8px 16px",
-                        fontSize: "12px",
-                        borderRadius: "8px",
-                      }}
-                      icon="bi bi-plus-circle"
-                    >
-                      Restock Products
-                    </EnhancedButton>
-                  </div>
+                  )}
                 </Card.Body>
               </Card>
 
@@ -684,45 +826,65 @@ const AdminDashboard = () => {
                 <Col md={6}>
                   <h6>Order Information</h6>
                   <p>
-                    <strong>Order ID:</strong> {selectedOrder.id}
+                    <strong>Order ID:</strong>{" "}
+                    {selectedOrder.orderNumber ||
+                      selectedOrder._id ||
+                      selectedOrder.id}
                   </p>
                   <p>
-                    <strong>Date:</strong> {selectedOrder.date} at{" "}
-                    {selectedOrder.time}
+                    <strong>Date:</strong>{" "}
+                    {new Date(
+                      selectedOrder.createdAt || selectedOrder.date,
+                    ).toLocaleDateString()}
                   </p>
                   <p>
                     <strong>Status:</strong>{" "}
                     <Badge bg={getStatusVariant(selectedOrder.status)}>
-                      {selectedOrder.status}
+                      {selectedOrder.status || "Pending"}
                     </Badge>
                   </p>
                   <p>
-                    <strong>Payment:</strong> {selectedOrder.paymentMethod}
+                    <strong>Payment:</strong>{" "}
+                    {selectedOrder.paymentMethod || "Not specified"}
                   </p>
                 </Col>
                 <Col md={6}>
                   <h6>Customer Information</h6>
                   <p>
-                    <strong>Name:</strong> {selectedOrder.customer}
+                    <strong>Name:</strong>{" "}
+                    {selectedOrder.customer?.name ||
+                      selectedOrder.customerName ||
+                      "N/A"}
                   </p>
                   <p>
-                    <strong>Email:</strong> {selectedOrder.customerEmail}
+                    <strong>Email:</strong>{" "}
+                    {selectedOrder.customer?.email ||
+                      selectedOrder.customerEmail ||
+                      "N/A"}
                   </p>
                   <p>
-                    <strong>Phone:</strong> {selectedOrder.customerPhone}
+                    <strong>Phone:</strong>{" "}
+                    {selectedOrder.customer?.phone ||
+                      selectedOrder.customerPhone ||
+                      "N/A"}
                   </p>
                   <p>
-                    <strong>Address:</strong> {selectedOrder.address}
+                    <strong>Address:</strong>{" "}
+                    {selectedOrder.shippingAddress ||
+                      selectedOrder.customerAddress ||
+                      "N/A"}
                   </p>
                 </Col>
               </Row>
               <hr />
               <h6>Order Summary</h6>
               <p>
-                <strong>Items:</strong> {selectedOrder.items}
+                <strong>Items:</strong>{" "}
+                {selectedOrder.items?.length || selectedOrder.itemCount || 0}
               </p>
               <p>
-                <strong>Total Amount:</strong> ₹{selectedOrder.amount}
+                <strong>Total Amount:</strong> ₹
+                {selectedOrder.total || selectedOrder.amount || 0}
               </p>
             </div>
           )}
@@ -733,7 +895,7 @@ const AdminDashboard = () => {
           </Button>
           <EnhancedButton
             variant="primary"
-            to={`/admin/orders/${selectedOrder?.id}`}
+            to={`/admin/orders/${selectedOrder?._id || selectedOrder?.id}`}
           >
             View Full Details
           </EnhancedButton>
