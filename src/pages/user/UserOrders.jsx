@@ -246,8 +246,11 @@ const UserOrders = () => {
   };
 
   const canCancelOrder = (order) => {
+    if (!order || !order.status) {
+      return false;
+    }
     const cancelableStatuses = ["pending", "processing"];
-    return cancelableStatuses.includes(order.status?.toLowerCase());
+    return cancelableStatuses.includes(order.status.toLowerCase());
   };
 
   if (loading) {
