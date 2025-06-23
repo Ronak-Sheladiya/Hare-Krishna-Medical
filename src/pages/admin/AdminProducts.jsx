@@ -102,47 +102,39 @@ const AdminProducts = () => {
   };
 
   const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      const queryParams = new URLSearchParams({
-        page: currentPage,
-        limit: productsPerPage,
-        ...(searchTerm && { search: searchTerm }),
-        ...(categoryFilter && { category: categoryFilter }),
-        ...(stockFilter && { stockFilter: stockFilter }),
-      });
+    const queryParams = new URLSearchParams({
+      page: currentPage,
+      limit: productsPerPage,
+      ...(searchTerm && { search: searchTerm }),
+      ...(categoryFilter && { category: categoryFilter }),
+      ...(stockFilter && { stockFilter: stockFilter }),
+    });
 
-      const response = await fetch(
-        `${API_BASE_URL}/api/products?${queryParams}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
+    const {
+      success,
+      data,
+      error: apiError,
+    } = await safeApiCall(() => api.get(`/api/products?${queryParams}`), {
+      products: [],
+      pagination: { totalProducts: 0, totalPages: 1 },
+    });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch products: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        setProducts(data.data.products);
-        setTotalPages(data.data.pagination.totalPages);
-        setTotalProducts(data.data.pagination.totalProducts);
-      } else {
-        throw new Error(data.message || "Failed to fetch products");
-      }
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
+    if (success && data) {
+      const productsData = data.data || data;
+      setProducts(productsData.products || []);
+      setTotalPages(productsData.pagination?.totalPages || 1);
+      setTotalProducts(productsData.pagination?.totalProducts || 0);
+    } else {
+      setError(apiError || "Failed to fetch products");
+      setProducts([]);
+      setTotalPages(1);
+      setTotalProducts(0);
     }
+
+    setLoading(false);
   };
 
   useEffect(() => {
