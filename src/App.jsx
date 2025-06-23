@@ -193,7 +193,7 @@ function App() {
         <div className="App">
           <ScrollToTop />
           <GlobalSecurity />
-          <DevModeIndicator />
+          {/* <DevModeIndicator /> Temporarily disabled to prevent API errors */}
           <Header />
           <main>
             <Routes>
