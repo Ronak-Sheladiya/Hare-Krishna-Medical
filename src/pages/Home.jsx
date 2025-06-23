@@ -223,6 +223,28 @@ const Home = () => {
                       e.target.style.filter = "brightness(1.1) contrast(1.2)";
                     }}
                   />
+
+                  {/* Responsive CSS for hero logo */}
+                  <style>{`
+                    @media (max-width: 992px) {
+                      .hero-logo {
+                        max-height: 300px !important;
+                      }
+                    }
+
+                    @media (max-width: 768px) {
+                      .hero-logo {
+                        max-height: 250px !important;
+                        margin-top: 20px;
+                      }
+                    }
+
+                    @media (max-width: 576px) {
+                      .hero-logo {
+                        max-height: 200px !important;
+                      }
+                    }
+                  `}</style>
                 </div>
               </div>
             </Col>
