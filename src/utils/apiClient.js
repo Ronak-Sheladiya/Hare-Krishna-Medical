@@ -132,58 +132,38 @@ export const apiCall = async (endpoint, options = {}) => {
   });
 };
 
-// Convenience methods for different HTTP verbs
+// Convenience methods for different HTTP verbs - NEVER THROW ERRORS
 export const api = {
   get: async (endpoint, options = {}) => {
-    const result = await apiCall(endpoint, { method: "GET", ...options });
-    if (result && result.success === false) {
-      throw new Error(result.error || "API call failed");
-    }
-    return result;
+    return await apiCall(endpoint, { method: "GET", ...options });
   },
 
   post: async (endpoint, data, options = {}) => {
-    const result = await apiCall(endpoint, {
+    return await apiCall(endpoint, {
       method: "POST",
       body: JSON.stringify(data),
       ...options,
     });
-    if (result && result.success === false) {
-      throw new Error(result.error || "API call failed");
-    }
-    return result;
   },
 
   put: async (endpoint, data, options = {}) => {
-    const result = await apiCall(endpoint, {
+    return await apiCall(endpoint, {
       method: "PUT",
       body: JSON.stringify(data),
       ...options,
     });
-    if (result && result.success === false) {
-      throw new Error(result.error || "API call failed");
-    }
-    return result;
   },
 
   patch: async (endpoint, data, options = {}) => {
-    const result = await apiCall(endpoint, {
+    return await apiCall(endpoint, {
       method: "PATCH",
       body: JSON.stringify(data),
       ...options,
     });
-    if (result && result.success === false) {
-      throw new Error(result.error || "API call failed");
-    }
-    return result;
   },
 
   delete: async (endpoint, options = {}) => {
-    const result = await apiCall(endpoint, { method: "DELETE", ...options });
-    if (result && result.success === false) {
-      throw new Error(result.error || "API call failed");
-    }
-    return result;
+    return await apiCall(endpoint, { method: "DELETE", ...options });
   },
 };
 
