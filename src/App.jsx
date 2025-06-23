@@ -17,6 +17,7 @@ import Header from "./components/layout/Header.jsx";
 import Footer from "./components/layout/Footer.jsx";
 import LoadingSpinner from "./components/common/LoadingSpinner.jsx";
 import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
+import CrossTabSync from "./components/common/CrossTabSync.jsx";
 
 // Pages
 import Home from "./pages/Home.jsx";
@@ -326,6 +327,7 @@ function App() {
     <Router>
       <ErrorBoundary>
         <div className="App">
+          <CrossTabSync />
           <ScrollToTop />
           <Header />
           <main>
