@@ -138,9 +138,18 @@ function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/products/:id" element={<ProductDetails />} />
-            <Route path="/cart" element={<Cart />} />
+            <Route path="/invoice/:orderId" element={<InvoiceView />} />
+            <Route
+              path="/invoice-verify/:invoiceId"
+              element={<InvoiceVerify />}
+            />
+            <Route path="/verify-email/:token" element={<VerifyEmail />} />
+            <Route
+              path="/verification-status"
+              element={<VerificationStatus />}
+            />
+            <Route path="/user-guide" element={<UserGuide />} />
+            <Route path="/backend-docs" element={<BackendDocs />} />
             <Route path="/order" element={<Order />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
