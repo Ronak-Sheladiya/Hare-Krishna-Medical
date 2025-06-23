@@ -119,18 +119,9 @@ function App() {
   const { user, token } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    // Simulate initial loading
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-
-    // Initialize session manager
+    // Initialize session manager and set loading to false immediately
     sessionManager; // This initializes the session manager
-
-    return () => {
-      clearTimeout(timer);
-      // Session manager cleanup is handled by its own destructor
-    };
+    setLoading(false);
   }, []);
 
   // Socket connection management
