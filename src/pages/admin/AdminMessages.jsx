@@ -325,7 +325,7 @@ const AdminMessages = () => {
 
         {/* Summary Cards */}
         <Row className="mb-4">
-          <Col md={3}>
+          <Col md={3} key="total-messages">
             <ThemeCard className="text-center">
               <Card.Body>
                 <h4 className="text-danger">{messages.length}</h4>
@@ -333,7 +333,7 @@ const AdminMessages = () => {
               </Card.Body>
             </ThemeCard>
           </Col>
-          <Col md={3}>
+          <Col md={3} key="unread-messages">
             <ThemeCard className="text-center">
               <Card.Body>
                 <h4 className="text-warning">
@@ -343,7 +343,7 @@ const AdminMessages = () => {
               </Card.Body>
             </ThemeCard>
           </Col>
-          <Col md={3}>
+          <Col md={3} key="pending-messages">
             <ThemeCard className="text-center">
               <Card.Body>
                 <h4 className="text-info">
@@ -353,7 +353,7 @@ const AdminMessages = () => {
               </Card.Body>
             </ThemeCard>
           </Col>
-          <Col md={3}>
+          <Col md={3} key="resolved-messages">
             <ThemeCard className="text-center">
               <Card.Body>
                 <h4 className="text-success">
