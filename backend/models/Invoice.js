@@ -52,7 +52,10 @@ const invoiceSchema = new mongoose.Schema(
       pincode: String,
     },
     subtotal: Number,
-    tax: Number,
+    tax: {
+      type: Number,
+      default: 0,
+    },
     shipping: Number,
     discount: Number,
     total: Number,

@@ -1,6 +1,13 @@
 import React from "react";
 
-const OfficialInvoiceDesign = ({ invoiceData, qrCode, forPrint = false }) => {
+const OfficialInvoiceDesign = ({
+  invoiceData,
+  qrCode,
+  forPrint = false,
+  onPrint,
+  onDownload,
+  showActionButtons = true
+}) => {
   const {
     invoiceId,
     orderId,
@@ -23,9 +30,83 @@ const OfficialInvoiceDesign = ({ invoiceData, qrCode, forPrint = false }) => {
   const calculatedTotal = total || calculatedSubtotal + shipping;
   const tax = 0; // Tax included in product price
 
+  const handlePrint = () => {
+    if (onPrint) {
+      onPrint();
+    } else {
+      const printContent = document.getElementById("invoice-print-content");
+      if (printContent) {
+        const printWindow = window.open("", "_blank");
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Invoice ${invoiceId}</title>
+              <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+              <style>
+                @page { size: A4; margin: 15mm; }
+                @media print {
+                  body { margin: 0; color: black !important; font-size: 11px; line-height: 1.3; -webkit-print-color-adjust: exact; }
+                  .no-print { display: none !important; }
+                  .invoice-header { background: #e63946 !important; color: white !important; }
+                }
+                body { font-family: 'Segoe UI', Arial, sans-serif; }
+                .invoice-header { background: #e63946 !important; color: white !important; }
+              </style>
+            </head>
+            <body>
+              ${printContent.innerHTML}
+              <script>
+                window.onload = function() {
+                  setTimeout(function() { window.print(); window.close(); }, 500);
+                };
+              </script>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+      }
+    }
+  };
+
+  const handleDownload = () => {
+    if (onDownload) {
+      onDownload();
+    } else {
+      const printContent = document.getElementById("invoice-print-content");
+      if (printContent) {
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        document.body.appendChild(iframe);
+
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        iframeDoc.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Invoice ${invoiceId}</title>
+              <style>
+                @page { size: A4; margin: 15mm; }
+                body { font-family: Arial, sans-serif; font-size: 11px; margin: 0; }
+                .invoice-header { background: #e63946 !important; color: white !important; }
+              </style>
+            </head>
+            <body>${printContent.innerHTML}</body>
+          </html>
+        `);
+        iframeDoc.close();
+
+        setTimeout(() => {
+          iframe.contentWindow.print();
+          setTimeout(() => document.body.removeChild(iframe), 1000);
+        }, 1000);
+      }
+    }
+  };
+
   const createOfficialInvoiceHTML = () => {
     return `
-      <div style="font-family: Arial, sans-serif; padding: ${forPrint ? "5px" : "15px"}; background: white; max-width: 210mm; margin: 0 auto; ${forPrint ? "height: auto; min-height: auto; transform: scale(0.85); transform-origin: top;" : ""}">
+      <div id="invoice-print-content" style="font-family: Arial, sans-serif; padding: ${forPrint ? "5px" : "15px"}; background: white; max-width: 210mm; margin: 0 auto; ${forPrint ? "height: auto; min-height: auto; transform: scale(0.85); transform-origin: top;" : ""}">`;
         <!-- Header Section - Simple Design -->
         <div style="background: #e63946; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -142,7 +223,7 @@ const OfficialInvoiceDesign = ({ invoiceData, qrCode, forPrint = false }) => {
                 </tr>
                 <tr>
                   <td style="background: #f8f9fa; border: 1px solid #ddd; padding: 8px 12px; font-size: 12px; font-weight: bold;">Tax:</td>
-                  <td style="background: #f8f9fa; border: 1px solid #ddd; padding: 8px 12px; font-size: 12px; text-align: right; font-weight: bold;">Included in product price</td>
+                  <td style="background: #f8f9fa; border: 1px solid #ddd; padding: 8px 12px; font-size: 12px; text-align: right; font-weight: bold; color: #28a745;">All taxes included in product price</td>
                 </tr>
                 <tr>
                   <td style="background: #e63946; border: 1px solid #e63946; padding: 12px 12px; font-size: 14px; font-weight: bold; color: white;">TOTAL:</td>
@@ -199,6 +280,22 @@ const OfficialInvoiceDesign = ({ invoiceData, qrCode, forPrint = false }) => {
           </div>
         </div>
 
+        <!-- Action Buttons (only show when not printing) -->
+        ${!forPrint && showActionButtons ? `
+        <div class="no-print" style="margin-top: 20px; text-align: center; padding: 20px; background: #f8f9fa; border-radius: 12px; border: 1px solid #e9ecef;">
+          <h6 style="margin-bottom: 15px; color: #333; font-weight: 600;">Invoice Actions</h6>
+          <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button onclick="window.handleInvoicePrint && window.handleInvoicePrint()" style="background: #e63946; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#d02943'" onmouseout="this.style.background='#e63946'">
+              <span>🖨️</span> Print Invoice
+            </button>
+            <button onclick="window.handleInvoiceDownload && window.handleInvoiceDownload()" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
+              <span>📥</span> Download PDF
+            </button>
+          </div>
+          <p style="margin-top: 10px; font-size: 12px; color: #666; margin-bottom: 0;">Use the buttons above to print or download this invoice</p>
+        </div>
+        ` : ''}
+
         <!-- Computer Generated Note -->
         <div style="text-align: center; margin-top: 10px; font-size: 10px; color: #888; background: #f8f9fa; padding: 8px; border-radius: 5px;">
           Computer generated invoice - No signature required | Generated: ${new Date().toLocaleString()}
@@ -206,6 +303,17 @@ const OfficialInvoiceDesign = ({ invoiceData, qrCode, forPrint = false }) => {
       </div>
     `;
   };
+
+  // Set up global handlers for the inline buttons
+  React.useEffect(() => {
+    window.handleInvoicePrint = handlePrint;
+    window.handleInvoiceDownload = handleDownload;
+
+    return () => {
+      delete window.handleInvoicePrint;
+      delete window.handleInvoiceDownload;
+    };
+  }, []);
 
   return (
     <div
