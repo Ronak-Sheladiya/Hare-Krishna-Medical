@@ -18,6 +18,7 @@ import {
   ThemeSection,
   StatsCard,
 } from "../components/common/ConsistentTheme";
+import ProfessionalLoading from "../components/common/ProfessionalLoading";
 
 const AdminDashboard = () => {
   const { unreadCount } = useSelector((state) => state.messages);
@@ -243,10 +244,11 @@ const AdminDashboard = () => {
                 </div>
 
                 {loading ? (
-                  <div className="text-center py-4">
-                    <Spinner animation="border" />
-                    <p className="mt-2 text-muted">Loading orders...</p>
-                  </div>
+                  <ProfessionalLoading
+                    size="sm"
+                    message="Loading orders..."
+                    fullScreen={false}
+                  />
                 ) : recentOrders.length > 0 ? (
                   <>
                     <Table responsive hover>
