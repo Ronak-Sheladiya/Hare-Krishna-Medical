@@ -112,6 +112,16 @@ const AdminInvoices = () => {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+
+  // Enhanced statistics
+  const invoiceStats = {
+    totalInvoices: invoices.length,
+    paidInvoices: invoices.filter((inv) => inv.status === "Paid").length,
+    pendingInvoices: invoices.filter((inv) => inv.status === "Pending").length,
+    totalRevenue: invoices.reduce((sum, inv) => sum + inv.totalAmount, 0),
+  };
 
   useEffect(() => {
     setFilteredInvoices(invoices);
@@ -184,7 +194,9 @@ const AdminInvoices = () => {
       await printInvoice(invoice, qrCodeDataURL || invoice.qrCode);
     } catch (error) {
       console.error("Print error:", error);
-      alert("Error printing invoice. Please try again.");
+      setAlertMessage("Error printing invoice. Please try again.");
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
     }
   };
 
@@ -223,13 +235,13 @@ const AdminInvoices = () => {
           <head>
             <title>Invoice ${invoiceData.invoiceId}</title>
             <style>
-              @page {
-                size: A4;
-                margin: 10mm;
+              @page { 
+                size: A4; 
+                margin: 10mm; 
               }
-              body {
-                margin: 0;
-                font-family: Arial, sans-serif;
+              body { 
+                margin: 0; 
+                font-family: Arial, sans-serif; 
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
               }
@@ -275,8 +287,15 @@ const AdminInvoices = () => {
         wb,
         `invoices-${new Date().toISOString().split("T")[0]}.xlsx`,
       );
+
+      setAlertMessage("Invoice data exported successfully!");
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
     } catch (error) {
       console.error("Export error:", error);
+      setAlertMessage("Error exporting data. Please try again.");
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
     } finally {
       setIsExporting(false);
     }
@@ -297,49 +316,398 @@ const AdminInvoices = () => {
 
   return (
     <div className="fade-in">
-      <section className="section-padding">
+      <section
+        style={{
+          paddingTop: "2rem",
+          paddingBottom: "2rem",
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+        }}
+      >
         <Container>
-          {/* Header */}
+          {/* Alert */}
+          {showAlert && (
+            <Row className="mb-4">
+              <Col lg={12}>
+                <Alert
+                  variant={
+                    alertMessage.includes("Error") ? "danger" : "success"
+                  }
+                  onClose={() => setShowAlert(false)}
+                  dismissible
+                  style={{
+                    borderRadius: "12px",
+                    border: "none",
+                    background: alertMessage.includes("Error")
+                      ? "linear-gradient(135deg, #f8d7da, #f5c6cb)"
+                      : "linear-gradient(135deg, #d4edda, #c3e6cb)",
+                  }}
+                >
+                  <i
+                    className={`bi bi-${alertMessage.includes("Error") ? "exclamation-triangle" : "check-circle"} me-2`}
+                  ></i>
+                  {alertMessage}
+                </Alert>
+              </Col>
+            </Row>
+          )}
+
+          {/* Enhanced Header */}
           <Row className="mb-4">
             <Col lg={12}>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h2>Invoice Management</h2>
-                  <p className="text-muted">
-                    Manage and track all customer invoices
-                  </p>
-                </div>
-                <div className="d-flex gap-2">
-                  <Button
-                    variant="success"
-                    onClick={handleExportToExcel}
-                    disabled={isExporting}
-                  >
-                    <i className="bi bi-download me-2"></i>
-                    {isExporting ? "Exporting..." : "Export Excel"}
-                  </Button>
-                  <Button
-                    variant="outline-primary"
-                    onClick={() => window.location.reload()}
-                  >
-                    <i className="bi bi-arrow-clockwise me-2"></i>
-                    Refresh
-                  </Button>
-                </div>
-              </div>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "20px",
+                  background: "linear-gradient(135deg, #e63946, #dc3545)",
+                  color: "white",
+                  boxShadow: "0 15px 50px rgba(230, 57, 70, 0.3)",
+                }}
+              >
+                <Card.Body style={{ padding: "30px" }}>
+                  <Row className="align-items-center">
+                    <Col lg={8}>
+                      <div className="d-flex align-items-center">
+                        <div
+                          style={{
+                            width: "60px",
+                            height: "60px",
+                            background: "rgba(255, 255, 255, 0.2)",
+                            borderRadius: "50%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            marginRight: "20px",
+                          }}
+                        >
+                          <i
+                            className="bi bi-receipt-cutoff"
+                            style={{ fontSize: "28px" }}
+                          ></i>
+                        </div>
+                        <div>
+                          <h1
+                            style={{
+                              fontWeight: "800",
+                              marginBottom: "5px",
+                              fontSize: "2.2rem",
+                            }}
+                          >
+                            Invoice Management
+                          </h1>
+                          <p
+                            style={{
+                              opacity: "0.9",
+                              marginBottom: "0",
+                              fontSize: "1.1rem",
+                            }}
+                          >
+                            Manage and track all customer invoices efficiently
+                          </p>
+                        </div>
+                      </div>
+                    </Col>
+                    <Col lg={4} className="text-end">
+                      <div className="d-flex gap-2 justify-content-end">
+                        <Button
+                          variant="light"
+                          onClick={handleExportToExcel}
+                          disabled={isExporting}
+                          style={{
+                            borderRadius: "8px",
+                            fontWeight: "600",
+                            padding: "8px 16px",
+                          }}
+                        >
+                          <i className="bi bi-download me-2"></i>
+                          {isExporting ? "Exporting..." : "Export"}
+                        </Button>
+                        <Button
+                          variant="outline-light"
+                          onClick={() => window.location.reload()}
+                          style={{
+                            borderRadius: "8px",
+                            fontWeight: "600",
+                            padding: "8px 16px",
+                          }}
+                        >
+                          <i className="bi bi-arrow-clockwise me-2"></i>
+                          Refresh
+                        </Button>
+                      </div>
+                    </Col>
+                  </Row>
+                </Card.Body>
+              </Card>
             </Col>
           </Row>
 
-          {/* Filters */}
+          {/* Enhanced Stats Cards */}
+          <Row className="mb-4 g-3">
+            <Col lg={3} md={6}>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  background: "linear-gradient(135deg, #ffffff, #f8f9fa)",
+                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "translateY(-5px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 15px 45px rgba(0, 0, 0, 0.15)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow =
+                    "0 8px 32px rgba(0, 0, 0, 0.1)";
+                }}
+              >
+                <Card.Body className="text-center" style={{ padding: "25px" }}>
+                  <div
+                    style={{
+                      width: "60px",
+                      height: "60px",
+                      background: "linear-gradient(135deg, #e63946, #dc3545)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      margin: "0 auto 15px",
+                      boxShadow: "0 8px 25px rgba(230, 57, 70, 0.3)",
+                    }}
+                  >
+                    <i
+                      className="bi bi-receipt-cutoff"
+                      style={{ fontSize: "24px", color: "white" }}
+                    ></i>
+                  </div>
+                  <h3
+                    style={{
+                      color: "#333",
+                      fontWeight: "800",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    {invoiceStats.totalInvoices}
+                  </h3>
+                  <p
+                    style={{
+                      color: "#6c757d",
+                      fontSize: "14px",
+                      marginBottom: "0",
+                    }}
+                  >
+                    Total Invoices
+                  </p>
+                </Card.Body>
+              </Card>
+            </Col>
+
+            <Col lg={3} md={6}>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  background: "linear-gradient(135deg, #ffffff, #f8f9fa)",
+                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "translateY(-5px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 15px 45px rgba(0, 0, 0, 0.15)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow =
+                    "0 8px 32px rgba(0, 0, 0, 0.1)";
+                }}
+              >
+                <Card.Body className="text-center" style={{ padding: "25px" }}>
+                  <div
+                    style={{
+                      width: "60px",
+                      height: "60px",
+                      background: "linear-gradient(135deg, #28a745, #20c997)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      margin: "0 auto 15px",
+                      boxShadow: "0 8px 25px rgba(40, 167, 69, 0.3)",
+                    }}
+                  >
+                    <i
+                      className="bi bi-check-circle"
+                      style={{ fontSize: "24px", color: "white" }}
+                    ></i>
+                  </div>
+                  <h3
+                    style={{
+                      color: "#333",
+                      fontWeight: "800",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    {invoiceStats.paidInvoices}
+                  </h3>
+                  <p
+                    style={{
+                      color: "#6c757d",
+                      fontSize: "14px",
+                      marginBottom: "0",
+                    }}
+                  >
+                    Paid Invoices
+                  </p>
+                </Card.Body>
+              </Card>
+            </Col>
+
+            <Col lg={3} md={6}>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  background: "linear-gradient(135deg, #ffffff, #f8f9fa)",
+                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "translateY(-5px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 15px 45px rgba(0, 0, 0, 0.15)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow =
+                    "0 8px 32px rgba(0, 0, 0, 0.1)";
+                }}
+              >
+                <Card.Body className="text-center" style={{ padding: "25px" }}>
+                  <div
+                    style={{
+                      width: "60px",
+                      height: "60px",
+                      background: "linear-gradient(135deg, #ffc107, #fd7e14)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      margin: "0 auto 15px",
+                      boxShadow: "0 8px 25px rgba(255, 193, 7, 0.3)",
+                    }}
+                  >
+                    <i
+                      className="bi bi-clock-history"
+                      style={{ fontSize: "24px", color: "white" }}
+                    ></i>
+                  </div>
+                  <h3
+                    style={{
+                      color: "#333",
+                      fontWeight: "800",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    {invoiceStats.pendingInvoices}
+                  </h3>
+                  <p
+                    style={{
+                      color: "#6c757d",
+                      fontSize: "14px",
+                      marginBottom: "0",
+                    }}
+                  >
+                    Pending Invoices
+                  </p>
+                </Card.Body>
+              </Card>
+            </Col>
+
+            <Col lg={3} md={6}>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  background: "linear-gradient(135deg, #ffffff, #f8f9fa)",
+                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "translateY(-5px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 15px 45px rgba(0, 0, 0, 0.15)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow =
+                    "0 8px 32px rgba(0, 0, 0, 0.1)";
+                }}
+              >
+                <Card.Body className="text-center" style={{ padding: "25px" }}>
+                  <div
+                    style={{
+                      width: "60px",
+                      height: "60px",
+                      background: "linear-gradient(135deg, #6f42c1, #6610f2)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      margin: "0 auto 15px",
+                      boxShadow: "0 8px 25px rgba(111, 66, 193, 0.3)",
+                    }}
+                  >
+                    <i
+                      className="bi bi-currency-rupee"
+                      style={{ fontSize: "24px", color: "white" }}
+                    ></i>
+                  </div>
+                  <h3
+                    style={{
+                      color: "#333",
+                      fontWeight: "800",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    ₹{(invoiceStats.totalRevenue / 1000).toFixed(1)}k
+                  </h3>
+                  <p
+                    style={{
+                      color: "#6c757d",
+                      fontSize: "14px",
+                      marginBottom: "0",
+                    }}
+                  >
+                    Total Revenue
+                  </p>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
+          {/* Enhanced Filters */}
           <Row className="mb-4">
             <Col lg={12}>
-              <Card>
-                <Card.Body>
-                  <Row>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                }}
+              >
+                <Card.Body style={{ padding: "25px" }}>
+                  <Row className="g-3">
                     <Col md={6}>
-                      <Form.Label>Search Invoices</Form.Label>
+                      <Form.Label style={{ fontWeight: "600", color: "#333" }}>
+                        <i className="bi bi-search me-2"></i>
+                        Search Invoices
+                      </Form.Label>
                       <InputGroup>
-                        <InputGroup.Text>
+                        <InputGroup.Text style={{ borderColor: "#e9ecef" }}>
                           <i className="bi bi-search"></i>
                         </InputGroup.Text>
                         <Form.Control
@@ -347,14 +715,25 @@ const AdminInvoices = () => {
                           placeholder="Search by invoice ID, order ID, customer..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
+                          style={{
+                            borderRadius: "0 8px 8px 0",
+                            border: "2px solid #e9ecef",
+                          }}
                         />
                       </InputGroup>
                     </Col>
-                    <Col md={4}>
-                      <Form.Label>Filter by Status</Form.Label>
+                    <Col md={3}>
+                      <Form.Label style={{ fontWeight: "600", color: "#333" }}>
+                        <i className="bi bi-funnel me-2"></i>
+                        Filter by Status
+                      </Form.Label>
                       <Form.Select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
+                        style={{
+                          borderRadius: "8px",
+                          border: "2px solid #e9ecef",
+                        }}
                       >
                         <option value="">All Statuses</option>
                         <option value="Paid">Paid</option>
@@ -362,16 +741,21 @@ const AdminInvoices = () => {
                         <option value="Overdue">Overdue</option>
                       </Form.Select>
                     </Col>
-                    <Col md={2} className="d-flex align-items-end">
+                    <Col md={3} className="d-flex align-items-end">
                       <Button
                         variant="outline-secondary"
                         onClick={() => {
                           setSearchTerm("");
                           setStatusFilter("");
                         }}
-                        className="w-100"
+                        style={{
+                          width: "100%",
+                          borderRadius: "8px",
+                          fontWeight: "600",
+                        }}
                       >
-                        Reset
+                        <i className="bi bi-arrow-clockwise me-2"></i>
+                        Reset Filters
                       </Button>
                     </Col>
                   </Row>
@@ -380,86 +764,230 @@ const AdminInvoices = () => {
             </Col>
           </Row>
 
-          {/* Invoices Table */}
+          {/* Enhanced Invoice Table */}
           <Row>
             <Col lg={12}>
-              <Card>
-                <Card.Header>
-                  <h5 className="mb-0">
-                    <i className="bi bi-receipt-cutoff me-2"></i>
-                    Invoice Records ({filteredInvoices.length})
-                  </h5>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                }}
+              >
+                <Card.Header
+                  style={{
+                    background: "linear-gradient(135deg, #343a40, #495057)",
+                    color: "white",
+                    borderRadius: "16px 16px 0 0",
+                    padding: "20px 25px",
+                  }}
+                >
+                  <div className="d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0" style={{ fontWeight: "700" }}>
+                      <i className="bi bi-receipt-cutoff me-2"></i>
+                      Invoice Records ({filteredInvoices.length})
+                    </h5>
+                    <Badge
+                      style={{
+                        background: "rgba(255,255,255,0.2)",
+                        color: "white",
+                        padding: "6px 12px",
+                        borderRadius: "15px",
+                        fontSize: "12px",
+                      }}
+                    >
+                      {filteredInvoices.length} of {invoices.length} invoices
+                    </Badge>
+                  </div>
                 </Card.Header>
-                <Card.Body className="p-0">
-                  <Table responsive hover>
-                    <thead className="table-light">
+                <Card.Body style={{ padding: "0" }}>
+                  <Table responsive hover style={{ marginBottom: "0" }}>
+                    <thead style={{ background: "#f8f9fa" }}>
                       <tr>
-                        <th>Invoice Details</th>
-                        <th>Customer</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Payment</th>
-                        <th>Date</th>
-                        <th>Actions</th>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                            borderBottom: "2px solid #e9ecef",
+                          }}
+                        >
+                          Invoice Details
+                        </th>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                            borderBottom: "2px solid #e9ecef",
+                          }}
+                        >
+                          Customer
+                        </th>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                            borderBottom: "2px solid #e9ecef",
+                          }}
+                        >
+                          Amount
+                        </th>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                            borderBottom: "2px solid #e9ecef",
+                          }}
+                        >
+                          Status
+                        </th>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                            borderBottom: "2px solid #e9ecef",
+                          }}
+                        >
+                          Payment
+                        </th>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                            borderBottom: "2px solid #e9ecef",
+                          }}
+                        >
+                          Date
+                        </th>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                            borderBottom: "2px solid #e9ecef",
+                          }}
+                        >
+                          Actions
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredInvoices.map((invoice) => (
-                        <tr key={invoice.id}>
-                          <td>
+                        <tr
+                          key={invoice.id}
+                          style={{
+                            borderBottom: "1px solid #f1f3f4",
+                            transition: "all 0.2s ease",
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.backgroundColor = "#f8f9fa";
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.backgroundColor =
+                              "transparent";
+                          }}
+                        >
+                          <td style={{ padding: "15px" }}>
                             <div>
-                              <strong>{invoice.invoiceId}</strong>
-                              <br />
-                              <small className="text-muted">
+                              <div
+                                style={{
+                                  fontWeight: "700",
+                                  marginBottom: "3px",
+                                  color: "#333",
+                                }}
+                              >
+                                {invoice.invoiceId}
+                              </div>
+                              <small style={{ color: "#6c757d" }}>
                                 Order: {invoice.orderId}
                               </small>
                             </div>
                           </td>
-                          <td>
+                          <td style={{ padding: "15px" }}>
                             <div>
-                              <strong>{invoice.customerName}</strong>
-                              <br />
-                              <small className="text-muted">
+                              <div
+                                style={{
+                                  fontWeight: "600",
+                                  marginBottom: "3px",
+                                  color: "#333",
+                                }}
+                              >
+                                {invoice.customerName}
+                              </div>
+                              <small style={{ color: "#6c757d" }}>
                                 {invoice.customerEmail}
                               </small>
                             </div>
                           </td>
-                          <td>
-                            <strong className="text-success">
+                          <td style={{ padding: "15px" }}>
+                            <div
+                              style={{
+                                fontWeight: "700",
+                                color: "#28a745",
+                                fontSize: "16px",
+                              }}
+                            >
                               ₹{invoice.totalAmount.toFixed(2)}
-                            </strong>
+                            </div>
                           </td>
-                          <td>
-                            <Badge bg={getStatusVariant(invoice.status)}>
+                          <td style={{ padding: "15px" }}>
+                            <Badge
+                              bg={getStatusVariant(invoice.status)}
+                              style={{
+                                padding: "6px 12px",
+                                borderRadius: "15px",
+                                fontSize: "11px",
+                                fontWeight: "600",
+                              }}
+                            >
                               {invoice.status}
                             </Badge>
                           </td>
-                          <td>
+                          <td style={{ padding: "15px" }}>
                             <span
-                              className={`badge ${
-                                invoice.paymentMethod === "Online"
-                                  ? "bg-info"
-                                  : "bg-warning"
-                              }`}
+                              style={{
+                                background:
+                                  invoice.paymentMethod === "Online"
+                                    ? "#e7f3ff"
+                                    : "#fff3cd",
+                                color:
+                                  invoice.paymentMethod === "Online"
+                                    ? "#0066cc"
+                                    : "#856404",
+                                padding: "4px 8px",
+                                borderRadius: "6px",
+                                fontSize: "11px",
+                                fontWeight: "600",
+                              }}
                             >
                               {invoice.paymentMethod}
                             </span>
                           </td>
-                          <td>
-                            <div>
-                              <strong>{invoice.orderDate}</strong>
-                              <br />
-                              <small className="text-muted">
-                                {invoice.orderTime}
-                              </small>
+                          <td style={{ padding: "15px" }}>
+                            <div
+                              style={{ fontSize: "14px", fontWeight: "600" }}
+                            >
+                              {invoice.orderDate}
                             </div>
+                            <small style={{ color: "#6c757d" }}>
+                              {invoice.orderTime}
+                            </small>
                           </td>
-                          <td>
-                            <div className="d-flex gap-1">
+                          <td style={{ padding: "15px" }}>
+                            <div className="d-flex gap-2">
                               <Button
                                 variant="outline-primary"
                                 size="sm"
                                 onClick={() => handleViewInvoice(invoice)}
+                                style={{
+                                  borderRadius: "6px",
+                                  fontWeight: "600",
+                                }}
                               >
                                 <i className="bi bi-eye"></i>
                               </Button>
@@ -467,6 +995,10 @@ const AdminInvoices = () => {
                                 variant="outline-success"
                                 size="sm"
                                 onClick={() => handlePrintInvoice(invoice)}
+                                style={{
+                                  borderRadius: "6px",
+                                  fontWeight: "600",
+                                }}
                               >
                                 <i className="bi bi-printer"></i>
                               </Button>
@@ -478,15 +1010,16 @@ const AdminInvoices = () => {
                   </Table>
 
                   {filteredInvoices.length === 0 && (
-                    <div className="text-center p-4">
+                    <div
+                      className="text-center"
+                      style={{ padding: "60px 20px", color: "#6c757d" }}
+                    >
                       <i
-                        className="bi bi-receipt display-1 text-muted mb-3"
-                        style={{ fontSize: "3rem" }}
+                        className="bi bi-receipt"
+                        style={{ fontSize: "48px", marginBottom: "16px" }}
                       ></i>
                       <h5>No invoices found</h5>
-                      <p className="text-muted">
-                        Try adjusting your search or filter criteria
-                      </p>
+                      <p>Try adjusting your search or filter criteria</p>
                     </div>
                   )}
                 </Card.Body>
@@ -496,7 +1029,7 @@ const AdminInvoices = () => {
         </Container>
       </section>
 
-      {/* Invoice View Modal */}
+      {/* Enhanced Invoice View Modal */}
       <Modal
         show={showViewModal}
         onHide={() => {
@@ -507,8 +1040,15 @@ const AdminInvoices = () => {
         backdrop="static"
         keyboard={true}
       >
-        <Modal.Header closeButton>
-          <Modal.Title>
+        <Modal.Header
+          closeButton
+          style={{
+            background: "linear-gradient(135deg, #e63946, #dc3545)",
+            color: "white",
+            borderRadius: "0",
+          }}
+        >
+          <Modal.Title style={{ fontWeight: "700" }}>
             <i className="bi bi-receipt me-2"></i>
             Invoice Preview - {selectedInvoice?.invoiceId}
           </Modal.Title>
@@ -537,12 +1077,16 @@ const AdminInvoices = () => {
             </div>
           )}
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer style={{ background: "#f8f9fa" }}>
           <Button
             variant="secondary"
             onClick={() => {
               setShowViewModal(false);
               setSelectedInvoice(null);
+            }}
+            style={{
+              borderRadius: "8px",
+              fontWeight: "600",
             }}
           >
             <i className="bi bi-x-lg me-2"></i>
@@ -551,6 +1095,10 @@ const AdminInvoices = () => {
           <Button
             variant="success"
             onClick={() => handlePrintInvoice(selectedInvoice)}
+            style={{
+              borderRadius: "8px",
+              fontWeight: "600",
+            }}
           >
             <i className="bi bi-printer me-2"></i>
             Print Invoice
