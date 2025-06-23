@@ -1353,6 +1353,17 @@ const AdminInvoices = () => {
             Close
           </Button>
           <Button
+            variant="info"
+            onClick={() => handleDownloadInvoice(selectedInvoice)}
+            style={{
+              borderRadius: "8px",
+              fontWeight: "600",
+            }}
+          >
+            <i className="bi bi-download me-2"></i>
+            Download PDF
+          </Button>
+          <Button
             variant="success"
             onClick={() => handlePrintInvoice(selectedInvoice)}
             style={{
