@@ -3,8 +3,6 @@ import {
   Container,
   Row,
   Col,
-  Card,
-  Button,
   Table,
   Badge,
   Modal,
@@ -14,6 +12,12 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { safeApiCall, api } from "../../utils/apiClient";
+import {
+  PageHeroSection,
+  ThemeCard,
+  ThemeButton,
+  ThemeSection,
+} from "../../components/common/ConsistentTheme";
 
 const AdminPaymentMethods = () => {
   const [paymentMethods, setPaymentMethods] = useState([]);
