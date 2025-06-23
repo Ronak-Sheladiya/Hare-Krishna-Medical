@@ -105,38 +105,42 @@ const Header = () => {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
 
           <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="me-auto">
+            <Nav className="mx-auto">
               <Nav.Link
                 as={Link}
                 to="/"
-                className={isActiveRoute("/") ? "active" : ""}
+                className={`nav-link-custom ${isActiveRoute("/") ? "active" : ""}`}
               >
+                <i className="bi bi-house-door me-1"></i>
                 Home
               </Nav.Link>
               <Nav.Link
                 as={Link}
                 to="/products"
-                className={
+                className={`nav-link-custom ${
                   isActiveRoute("/products") ||
                   location.pathname.startsWith("/products/")
                     ? "active"
                     : ""
-                }
+                }`}
               >
+                <i className="bi bi-capsule me-1"></i>
                 Products
               </Nav.Link>
               <Nav.Link
                 as={Link}
                 to="/about"
-                className={isActiveRoute("/about") ? "active" : ""}
+                className={`nav-link-custom ${isActiveRoute("/about") ? "active" : ""}`}
               >
+                <i className="bi bi-info-circle me-1"></i>
                 About
               </Nav.Link>
               <Nav.Link
                 as={Link}
                 to="/contact"
-                className={isActiveRoute("/contact") ? "active" : ""}
+                className={`nav-link-custom ${isActiveRoute("/contact") ? "active" : ""}`}
               >
+                <i className="bi bi-envelope me-1"></i>
                 Contact
               </Nav.Link>
             </Nav>
