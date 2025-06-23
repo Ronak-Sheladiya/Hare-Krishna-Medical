@@ -212,6 +212,35 @@ const authSlice = createSlice({
         setStoredUser(state.user, state.rememberMe);
       }
     },
+    setRedirectUrl: (state, action) => {
+      // Store the URL where user should be redirected after login
+      try {
+        sessionStorage.setItem("redirectAfterLogin", action.payload);
+      } catch (error) {
+        console.warn("Failed to store redirect URL:", error);
+      }
+    },
+    clearRedirectUrl: (state) => {
+      try {
+        sessionStorage.removeItem("redirectAfterLogin");
+      } catch (error) {
+        console.warn("Failed to clear redirect URL:", error);
+      }
+    },
+    syncFromStorage: (state, action) => {
+      // Sync auth state from localStorage/sessionStorage (for cross-tab sync)
+      const { user, isAuthenticated, rememberMe } = action.payload;
+      if (isAuthenticated && user) {
+        state.isAuthenticated = true;
+        state.user = user;
+        state.rememberMe = rememberMe;
+        state.error = null;
+      } else {
+        state.isAuthenticated = false;
+        state.user = null;
+        state.rememberMe = false;
+      }
+    },
   },
 });
 
