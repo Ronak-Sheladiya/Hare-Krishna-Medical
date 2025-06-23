@@ -1,20 +1,14 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
-// Lazy import socketClient to prevent initialization issues
+// Import socketClient with error handling
 let socketClient = null;
-if (typeof window !== "undefined") {
-  try {
-    import("../utils/socketClient")
-      .then((module) => {
-        socketClient = module.default;
-      })
-      .catch((error) => {
-        console.warn("SocketClient not available:", error);
-      });
-  } catch (error) {
-    console.warn("SocketClient import failed:", error);
+try {
+  if (typeof window !== "undefined") {
+    socketClient = require("../utils/socketClient").default;
   }
+} catch (error) {
+  console.warn("SocketClient not available:", error);
 }
 
 export const useRealTime = () => {
