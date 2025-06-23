@@ -579,8 +579,8 @@ const ProfessionalInvoice = ({
                 <td class="total-value">${shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}</td>
               </tr>
               <tr class="total-row">
-                <td class="total-label">Tax (GST):</td>
-                <td class="total-value">Included</td>
+                <td class="total-label">Tax:</td>
+                <td class="total-value">Included in product price</td>
               </tr>
               <tr class="total-row grand-total">
                 <td class="total-label">TOTAL AMOUNT:</td>
@@ -598,7 +598,7 @@ const ProfessionalInvoice = ({
                 <li>Returns are accepted only for damaged items within 7 days</li>
                 <li>This invoice is computer-generated and legally valid</li>
                 <li>Subject to Gujarat jurisdiction for legal disputes</li>
-                <li>All prices are inclusive of applicable taxes</li>
+                <li>All taxes are included in product prices</li>
                 <li>Keep this invoice safe for warranty and return purposes</li>
               </ul>
 
