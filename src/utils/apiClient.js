@@ -100,11 +100,16 @@ export const api = {
 // Utility function for handling API calls with error logging
 export const safeApiCall = async (apiFunction, fallbackValue = null) => {
   try {
-    const result = await apiFunction();
+    const result = await Promise.resolve(apiFunction()).catch((error) => {
+      // Catch any errors from the API function itself
+      throw error;
+    });
     return { success: true, data: result.data || result, error: null };
   } catch (error) {
-    console.warn("API call failed:", error.message);
-    return { success: false, data: fallbackValue, error: error.message };
+    // Handle all types of errors gracefully
+    const errorMessage = error.message || "Unknown error occurred";
+    console.warn("API call failed (safely handled):", errorMessage);
+    return { success: false, data: fallbackValue, error: errorMessage };
   }
 };
 
