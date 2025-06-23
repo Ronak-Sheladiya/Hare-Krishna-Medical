@@ -150,7 +150,7 @@ const AdminDashboard = () => {
           <Row className="mb-5 g-4">
             <Col lg={3} md={6}>
               <StatsCard
-                icon="bi bi-bag-check"
+                icon="bi bi-clipboard-data-fill"
                 value={dashboardStats.totalOrders}
                 label="Total Orders"
                 gradient="linear-gradient(135deg, #e63946, #dc3545)"
@@ -165,7 +165,7 @@ const AdminDashboard = () => {
 
             <Col lg={3} md={6}>
               <StatsCard
-                icon="bi bi-box-seam"
+                icon="bi bi-box-seam-fill"
                 value={dashboardStats.totalProducts}
                 label="Total Products"
                 gradient="linear-gradient(135deg, #17a2b8, #20c997)"
@@ -175,7 +175,7 @@ const AdminDashboard = () => {
 
             <Col lg={3} md={6}>
               <StatsCard
-                icon="bi bi-people"
+                icon="bi bi-people-fill"
                 value={dashboardStats.totalUsers}
                 label="Total Users"
                 gradient="linear-gradient(135deg, #6f42c1, #6610f2)"
@@ -190,7 +190,7 @@ const AdminDashboard = () => {
 
             <Col lg={3} md={6}>
               <StatsCard
-                icon="bi bi-currency-rupee"
+                icon="bi bi-cash-coin"
                 value={
                   dashboardStats.totalRevenue > 0
                     ? `₹${(dashboardStats.totalRevenue / 1000).toFixed(1)}k`
