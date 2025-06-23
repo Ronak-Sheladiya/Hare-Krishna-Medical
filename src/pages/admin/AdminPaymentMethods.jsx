@@ -477,9 +477,9 @@ const AdminPaymentMethods = () => {
                     <p className="text-muted">
                       Add payment methods to allow customers to pay for orders.
                     </p>
-                    <Button variant="primary" onClick={() => handleShowModal()}>
+                    <ThemeButton onClick={() => handleShowModal()}>
                       Add First Payment Method
-                    </Button>
+                    </ThemeButton>
                   </div>
                 )}
               </ThemeCard>
