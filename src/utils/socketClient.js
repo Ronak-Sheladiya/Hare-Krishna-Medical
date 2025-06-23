@@ -6,7 +6,7 @@ let socketAvailable = false;
 const createMockSocket = () => ({
   on: (event, callback) => {
     // Store callback for potential future use
-    if (typeof callback === "function") {
+    if (typeof callback === 'function') {
       console.debug(`Mock socket registered listener for: ${event}`);
     }
     return this;
@@ -28,12 +28,12 @@ const createMockSocket = () => ({
     return this;
   },
   connected: false,
-  id: "mock-socket-id",
+  id: 'mock-socket-id'
 });
 
 // Try to import socket.io-client with proper error handling
 if (typeof window !== "undefined") {
-  import("socket.io-client")
+  import('socket.io-client')
     .then((socketio) => {
       io = socketio.io;
       socketAvailable = true;
@@ -77,13 +77,8 @@ class SocketClient {
     }
 
     // Return mock socket if we've exceeded retry attempts or in fallback mode
-    if (
-      this.reconnectAttempts >= this.maxReconnectAttempts ||
-      this.fallbackMode
-    ) {
-      console.info(
-        "Using mock socket due to connection issues or fallback mode",
-      );
+    if (this.reconnectAttempts >= this.maxReconnectAttempts || this.fallbackMode) {
+      console.info("Using mock socket due to connection issues or fallback mode");
       return this.createMockSocket();
     }
 
@@ -93,6 +88,192 @@ class SocketClient {
 
       // Check if socket.io is available
       if (!io || typeof io !== "function" || !socketAvailable) {
+        console.info("Socket.io not available, using mock socket");
+        this.fallbackMode = true;
+        return this.createMockSocket();
+      }
+
+      // Create socket connection with comprehensive configuration
+      const socketOptions = {
+        transports: this.useWebSocket ? ['websocket', 'polling'] : ['polling'],
+        timeout: 10000,
+        forceNew: true,
+        reconnection: true,
+        reconnectionAttempts: this.maxReconnectAttempts,
+        reconnectionDelay: 2000,
+        autoConnect: true,
+        upgrade: this.useWebSocket
+      };
+
+      console.debug(`Attempting socket connection to: ${socketUrl}`, socketOptions);
+
+      this.socket = io(socketUrl, socketOptions);
+      this.setupEventHandlers();
+
+      // Set connection timeout
+      this.connectionTimeout = setTimeout(() => {
+        if (!this.isConnected) {
+          console.warn("Socket connection timeout, falling back to mock");
+          this.handleConnectionFailure("Connection timeout");
+        }
+      }, 15000);
+
+      return this.socket;
+
+    } catch (error) {
+      console.error("Socket connection error:", error);
+      this.lastError = error;
+      this.handleConnectionFailure(error.message);
+      return this.createMockSocket();
+    }
+  }
+
+  getSocketUrl() {
+    // Try multiple URL sources with fallbacks
+    const envUrl = import.meta.env.VITE_SOCKET_URL;
+    const envBackendUrl = import.meta.env.VITE_BACKEND_URL;
+    const currentUrl = window.location.origin;
+
+    // Determine the best URL to use
+    if (envUrl) {
+      return envUrl;
+    } else if (envBackendUrl) {
+      return envBackendUrl;
+    } else if (currentUrl.includes('localhost') || currentUrl.includes('127.0.0.1')) {
+      return 'http://localhost:5000';
+    } else {
+      // For production deployments, try the same origin
+      return currentUrl.replace(/^https/, 'http');
+    }
+  }
+
+  createMockSocket() {
+    const mockSocket = {
+      on: (event, callback) => {
+        console.debug(`Mock socket: Registered listener for ${event}`);
+        return mockSocket;
+      },
+      off: (event) => {
+        console.debug(`Mock socket: Removed listener for ${event}`);
+        return mockSocket;
+      },
+      emit: (event, data) => {
+        console.debug(`Mock socket: Emitting ${event}`, data);
+        return mockSocket;
+      },
+      disconnect: () => {
+        console.debug("Mock socket: Disconnected");
+        return mockSocket;
+      },
+      connected: false,
+      id: 'mock-socket-' + Date.now()
+    };
+
+    this.socket = mockSocket;
+    this.isConnected = false;
+    this.fallbackMode = true;
+
+    return mockSocket;
+  }
+
+  setupEventHandlers() {
+    if (!this.socket) return;
+
+    this.socket.on("connect", () => {
+      console.debug("Socket connected successfully", this.socket.id);
+      this.isConnected = true;
+      this.reconnectAttempts = 0;
+      this.lastError = null;
+
+      if (this.connectionTimeout) {
+        clearTimeout(this.connectionTimeout);
+        this.connectionTimeout = null;
+      }
+    });
+
+    this.socket.on("disconnect", (reason) => {
+      console.debug("Socket disconnected:", reason);
+      this.isConnected = false;
+
+      // Don't attempt reconnection for certain reasons
+      if (reason === "io server disconnect" || reason === "io client disconnect") {
+        console.debug("Disconnect was intentional, not attempting reconnection");
+        return;
+      }
+
+      this.attemptReconnection();
+    });
+
+    this.socket.on("connect_error", (error) => {
+      console.warn("Socket connection error:", error.message);
+      this.lastError = error;
+      this.handleConnectionFailure(error.message);
+    });
+
+    this.socket.on("error", (error) => {
+      console.warn("Socket error:", error);
+      this.lastError = error;
+    });
+
+    this.socket.on("reconnect", () => {
+      console.debug("Socket reconnected successfully");
+      this.isConnected = true;
+      this.reconnectAttempts = 0;
+    });
+
+    this.socket.on("reconnect_error", (error) => {
+      console.warn("Socket reconnection error:", error.message);
+      this.reconnectAttempts++;
+
+      if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+        console.warn("Max reconnection attempts reached, switching to mock mode");
+        this.fallbackMode = true;
+        this.disconnect();
+      }
+    });
+  }
+
+  handleConnectionFailure(reason) {
+    this.reconnectAttempts++;
+    console.warn(`Socket connection failed (attempt ${this.reconnectAttempts}): ${reason}`);
+
+    if (this.connectionTimeout) {
+      clearTimeout(this.connectionTimeout);
+      this.connectionTimeout = null;
+    }
+
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.warn("Max connection attempts reached, switching to mock mode");
+      this.fallbackMode = true;
+      this.disconnect();
+      return;
+    }
+
+    // Try fallback to polling-only on WebSocket failure
+    if (this.useWebSocket && reason.toLowerCase().includes('websocket')) {
+      console.info("WebSocket failed, trying polling transport only");
+      this.useWebSocket = false;
+      this.attemptReconnection();
+    }
+  }
+
+  attemptReconnection() {
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+    }
+
+    if (this.reconnectAttempts < this.maxReconnectAttempts && !this.fallbackMode) {
+      const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 10000);
+      console.debug(`Attempting reconnection in ${delay}ms`);
+
+      this.reconnectTimeout = setTimeout(() => {
+        if (this.socket) {
+          this.disconnect();
+        }
+        this.connect();
+      }, delay);
+    }
+  }
         console.warn(
           "Socket.io-client not available. Please install: npm install socket.io-client",
         );
