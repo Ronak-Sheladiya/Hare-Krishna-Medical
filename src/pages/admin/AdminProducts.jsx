@@ -1368,6 +1368,7 @@ const AdminProducts = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowViewModal(false)}>
+            <i className="bi bi-x me-2"></i>
             Close
           </Button>
         </Modal.Footer>
