@@ -456,4 +456,129 @@ router.get("/admin/low-stock", adminAuth, async (req, res) => {
   }
 });
 
+// @route   POST /api/products/upload-images
+// @desc    Upload product images to database
+// @access  Admin
+router.post("/upload-images", adminAuth, async (req, res) => {
+  try {
+    const { productId, images } = req.body;
+
+    // Validate input
+    if (!productId || !images || !Array.isArray(images)) {
+      return res.status(400).json({
+        success: false,
+        message: "Product ID and images array are required",
+      });
+    }
+
+    // Validate each image
+    for (const imageData of images) {
+      if (!imageData || !imageData.startsWith("data:image/")) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid image data provided",
+        });
+      }
+
+      // Check image size
+      const imageSizeBytes = (imageData.length * 3) / 4;
+      const maxSizeBytes = 5 * 1024 * 1024; // 5MB
+
+      if (imageSizeBytes > maxSizeBytes) {
+        return res.status(400).json({
+          success: false,
+          message: "One or more images exceed 5MB size limit",
+        });
+      }
+    }
+
+    // Update product images
+    const product = await Product.findByIdAndUpdate(
+      productId,
+      { images: images },
+      { new: true, runValidators: true },
+    );
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Product images uploaded successfully",
+      data: {
+        imageUrls: images,
+        product,
+      },
+    });
+  } catch (error) {
+    console.error("Product image upload error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to upload product images",
+      error: error.message,
+    });
+  }
+});
+
+// @route   DELETE /api/products/delete-image
+// @desc    Delete specific product image
+// @access  Admin
+router.delete("/delete-image", adminAuth, async (req, res) => {
+  try {
+    const { productId, imageUrl } = req.body;
+
+    if (!productId || !imageUrl) {
+      return res.status(400).json({
+        success: false,
+        message: "Product ID and image URL are required",
+      });
+    }
+
+    // Find product and remove the specific image
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    // Remove the image from the array
+    const updatedImages = product.images.filter((img) => img !== imageUrl);
+
+    // Ensure at least one image remains
+    if (updatedImages.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Product must have at least one image",
+      });
+    }
+
+    // Update product
+    const updatedProduct = await Product.findByIdAndUpdate(
+      productId,
+      { images: updatedImages },
+      { new: true, runValidators: true },
+    );
+
+    res.json({
+      success: true,
+      message: "Product image deleted successfully",
+      data: { product: updatedProduct },
+    });
+  } catch (error) {
+    console.error("Product image delete error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete product image",
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;
