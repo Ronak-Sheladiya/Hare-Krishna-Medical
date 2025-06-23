@@ -310,7 +310,7 @@ const Header = () => {
             onClick={handleLogout}
             className="btn-modal-confirm"
           >
-            <i className="bi bi-power me-2"></i>
+            <i className="bi bi-box-arrow-right me-2"></i>
             Logout
           </Button>
         </Modal.Footer>
