@@ -184,6 +184,15 @@ function App() {
             <Route path="/backend-docs" element={<BackendDocs />} />
             <Route path="/user-guide" element={<UserGuide />} />
             <Route path="/invoice/:orderId" element={<InvoiceView />} />
+            <Route
+              path="/invoice-verify/:invoiceId"
+              element={<InvoiceVerify />}
+            />
+            <Route path="/verify-email/:token" element={<VerifyEmail />} />
+            <Route
+              path="/verification-status"
+              element={<VerificationStatus />}
+            />
             <Route path="/order/:orderId" element={<OrderDetails />} />
 
             {/* Auth Routes (redirect if already authenticated) */}
