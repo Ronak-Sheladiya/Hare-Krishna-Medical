@@ -102,20 +102,28 @@ export const apiCall = async (endpoint, options = {}) => {
         } catch (fetchError) {
           clearTimeout(timeoutId);
 
-          // Handle fetch errors immediately
-          let errorMessage = "Network error - backend API not available";
-          if (fetchError && fetchError.name === "AbortError") {
-            errorMessage = "Request timed out";
-          } else if (fetchError && fetchError.message) {
-            errorMessage = fetchError.message;
-          }
+          // Try XMLHttpRequest fallback
+          try {
+            response = await xhrFallback(`${API_BASE_URL}${endpoint}`, config);
+            if (!response) {
+              throw new Error("Both fetch and XHR failed");
+            }
+          } catch (xhrError) {
+            // Both fetch and XHR failed
+            let errorMessage = "Network error - backend API not available";
+            if (fetchError && fetchError.name === "AbortError") {
+              errorMessage = "Request timed out";
+            } else if (fetchError && fetchError.message) {
+              errorMessage = fetchError.message;
+            }
 
-          resolve({
-            success: false,
-            error: errorMessage,
-            originalError: fetchError,
-          });
-          return;
+            resolve({
+              success: false,
+              error: errorMessage,
+              originalError: fetchError,
+            });
+            return;
+          }
         }
 
         clearTimeout(timeoutId);
