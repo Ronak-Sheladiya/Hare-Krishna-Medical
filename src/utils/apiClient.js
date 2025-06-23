@@ -80,32 +80,57 @@ export const apiCall = async (endpoint, options = {}) => {
 
 // Convenience methods for different HTTP verbs
 export const api = {
-  get: (endpoint, options = {}) =>
-    apiCall(endpoint, { method: "GET", ...options }),
+  get: async (endpoint, options = {}) => {
+    const result = await apiCall(endpoint, { method: "GET", ...options });
+    if (result.success === false) {
+      throw new Error(result.error);
+    }
+    return result;
+  },
 
-  post: (endpoint, data, options = {}) =>
-    apiCall(endpoint, {
+  post: async (endpoint, data, options = {}) => {
+    const result = await apiCall(endpoint, {
       method: "POST",
       body: JSON.stringify(data),
       ...options,
-    }),
+    });
+    if (result.success === false) {
+      throw new Error(result.error);
+    }
+    return result;
+  },
 
-  put: (endpoint, data, options = {}) =>
-    apiCall(endpoint, {
+  put: async (endpoint, data, options = {}) => {
+    const result = await apiCall(endpoint, {
       method: "PUT",
       body: JSON.stringify(data),
       ...options,
-    }),
+    });
+    if (result.success === false) {
+      throw new Error(result.error);
+    }
+    return result;
+  },
 
-  patch: (endpoint, data, options = {}) =>
-    apiCall(endpoint, {
+  patch: async (endpoint, data, options = {}) => {
+    const result = await apiCall(endpoint, {
       method: "PATCH",
       body: JSON.stringify(data),
       ...options,
-    }),
+    });
+    if (result.success === false) {
+      throw new Error(result.error);
+    }
+    return result;
+  },
 
-  delete: (endpoint, options = {}) =>
-    apiCall(endpoint, { method: "DELETE", ...options }),
+  delete: async (endpoint, options = {}) => {
+    const result = await apiCall(endpoint, { method: "DELETE", ...options });
+    if (result.success === false) {
+      throw new Error(result.error);
+    }
+    return result;
+  },
 };
 
 // Utility function for handling API calls with error logging
