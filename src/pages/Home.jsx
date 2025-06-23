@@ -177,9 +177,9 @@ const Home = () => {
                       e.target.style.borderColor = "#e63946";
                       e.target.style.color = "#e63946";
                       e.target.style.transform = "translateY(0)";
-                      e.target.style.color = "#e63946";
                     }}
                   >
+                    <i className="bi bi-info-circle-fill"></i>
                     Learn More
                   </Button>
                 </div>
