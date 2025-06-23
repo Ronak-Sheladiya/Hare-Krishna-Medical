@@ -50,6 +50,72 @@
     box-shadow: none !important;
     text-shadow: none !important;
   }
+}
+
+/* Professional Header Branding Styles */
+.brand-text-container {
+  line-height: 1;
+  transition: all 0.3s ease;
+}
+
+.brand-title {
+  display: flex;
+  align-items: baseline;
+  line-height: 1;
+}
+
+.brand-title:hover {
+  transform: translateY(-1px);
+  transition: transform 0.3s ease;
+}
+
+.brand-tagline {
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.navbar-brand:hover .brand-tagline {
+  opacity: 1;
+}
+
+.medical-logo {
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(230, 57, 70, 0.1));
+}
+
+.navbar-brand:hover .medical-logo {
+  transform: scale(1.05);
+  filter: drop-shadow(0 4px 8px rgba(230, 57, 70, 0.2));
+}
+
+/* Enhanced Medical Header Styling */
+.medical-header {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(248, 249, 250, 0.98) 100%
+  );
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(230, 57, 70, 0.1);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+}
+
+.medical-header .navbar-brand {
+  padding: 0.75rem 0;
+}
+
+/* Responsive brand text */
+@media (max-width: 576px) {
+  .brand-title span {
+    font-size: 1rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .medical-logo {
+    width: 35px !important;
+    height: 35px !important;
+  }
 
   /* Ensure invoice takes full width */
   .invoice-content,
