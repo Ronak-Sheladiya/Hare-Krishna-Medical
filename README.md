@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Hare Krishna Medical](https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=200)
+![Hare Krishna Medical](https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=200)
 
 **A Modern, Full-Stack Medical Store Management System**
 
@@ -25,6 +25,7 @@
 - [🔧 Prerequisites](#-prerequisites)
 - [⚡ Quick Start](#-quick-start)
 - [📖 Detailed Setup](#-detailed-setup)
+- [🗄️ Database Configuration](#️-database-configuration)
 - [🔐 Security Features](#-security-features)
 - [📱 Usage Guide](#-usage-guide)
 - [🔗 API Documentation](#-api-documentation)
@@ -51,6 +52,8 @@ Hare Krishna Medical Store is a comprehensive, modern web application designed f
 - ⚡ **Real-Time Updates** - Live notifications and order tracking
 - 🎯 **User-Centric** - Intuitive interface for both customers and administrators
 - 🌐 **Modern Architecture** - Scalable, maintainable, and performant
+- 🗄️ **Production Database** - 100% configured MongoDB with sample data
+- 📖 **Complete Documentation** - Comprehensive setup and usage guides
 
 ---
 
@@ -58,89 +61,51 @@ Hare Krishna Medical Store is a comprehensive, modern web application designed f
 
 ### 👥 **User Management**
 
-- **Customer Registration & Authentication**
-
-  - Secure JWT-based authentication
-  - Email verification system
-  - Password reset functionality
-  - Profile management with avatar upload
-  - Order history and tracking
-
-- **Admin Dashboard**
-  - User management and analytics
-  - Role-based access control
-  - Real-time user activity monitoring
-  - Advanced reporting features
+- **Multi-Role Authentication**: Admin, Customer roles with secure JWT
+- **Profile Management**: Avatar upload, personal information, preferences
+- **Email Verification**: Secure account verification system
+- **Password Reset**: Secure password recovery via email
+- **Cross-Tab Synchronization**: Auto login/logout across browser tabs
 
 ### 🛒 **E-Commerce Features**
 
-- **Product Catalog**
-
-  - Advanced product search and filtering
-  - Category-based organization
-  - Product image galleries with zoom
-  - Stock level indicators
-  - Price comparison and discounts
-
-- **Shopping Cart & Checkout**
-  - Persistent cart across sessions
-  - Multiple payment options (COD, Online)
-  - Real-time shipping calculation
-  - Order confirmation and tracking
+- **Product Catalog**: Advanced search, filtering, and categorization
+- **Shopping Cart**: Persistent cart with session management
+- **Order Processing**: Complete order lifecycle management
+- **Payment Integration**: Multiple payment methods (COD, Online)
+- **Invoice System**: Professional PDF invoices with QR verification
 
 ### 📦 **Inventory Management**
 
-- **Product Management**
-
-  - CRUD operations for products
-  - Bulk import/export functionality
-  - Category and brand management
-  - Stock alerts and notifications
-  - Expiry date tracking
-
-- **Order Processing**
-  - Order status tracking
-  - Automated notifications
-  - Invoice generation with QR codes
-  - Return and refund management
+- **Product CRUD**: Complete product management with image galleries
+- **Stock Tracking**: Real-time inventory with low stock alerts
+- **Category Management**: Organized product categorization
+- **Bulk Operations**: Import/export functionality
+- **Expiry Tracking**: Medicine expiry date management
 
 ### 📊 **Analytics & Reporting**
 
-- **Business Intelligence**
-
-  - Sales analytics and trends
-  - Inventory reports
-  - Customer behavior analysis
-  - Revenue tracking and forecasting
-
-- **Real-Time Dashboard**
-  - Live order notifications
-  - Stock level monitoring
-  - Performance metrics
-  - Quick action buttons
+- **Real-Time Dashboard**: Live business metrics and KPIs
+- **Sales Analytics**: Revenue trends and performance tracking
+- **Inventory Reports**: Stock levels and movement analysis
+- **Customer Insights**: User behavior and purchase patterns
+- **Export Capabilities**: CSV/Excel export for all reports
 
 ### 🔔 **Communication System**
 
-- **Customer Support**
-  - Contact form integration
-  - Email notifications
-  - SMS alerts (Twilio integration)
-  - Real-time messaging system
+- **Real-Time Notifications**: Socket.io powered live updates
+- **Email Integration**: Automated email notifications
+- **SMS Alerts**: Twilio-powered SMS notifications
+- **Contact Management**: Customer inquiry system
+- **Admin Messaging**: Internal communication tools
 
 ### 🏥 **Medical-Specific Features**
 
-- **Prescription Management**
-
-  - Upload and verify prescriptions
-  - Medicine interaction warnings
-  - Dosage recommendations
-  - Consultation reminders
-
-- **Compliance & Safety**
-  - Drug information database
-  - Expiry date management
-  - Regulatory compliance tools
-  - Safety alerts and warnings
+- **Prescription Management**: Upload and verify prescriptions
+- **Drug Information**: Comprehensive medicine database
+- **Compliance Tools**: Regulatory requirement management
+- **Safety Alerts**: Medicine interaction warnings
+- **Dosage Recommendations**: Professional medical guidance
 
 ---
 
@@ -148,127 +113,164 @@ Hare Krishna Medical Store is a comprehensive, modern web application designed f
 
 ### **Frontend**
 
-- **React 18.3.1** - Modern UI library
-- **React Router 7** - Client-side routing
-- **Redux Toolkit** - State management
-- **React Bootstrap** - UI components
-- **Vite** - Build tool and dev server
-- **TypeScript Support** - Type safety
+- **React 18.3.1** - Modern UI library with hooks
+- **React Router 7** - Client-side routing and navigation
+- **Redux Toolkit** - State management with RTK Query
+- **React Bootstrap** - Professional UI components
+- **Vite 6** - Ultra-fast build tool and dev server
+- **TypeScript Support** - Optional type safety
 
 ### **Backend**
 
-- **Node.js 18+** - Runtime environment
-- **Express.js 4.18.2** - Web framework
-- **MongoDB 6.0+** - Database
-- **Mongoose** - ODM for MongoDB
-- **Socket.io** - Real-time communication
+- **Node.js 18+** - Server-side JavaScript runtime
+- **Express.js 4.18.2** - Web application framework
+- **MongoDB 6.0+** - NoSQL database with indexes
+- **Mongoose 7** - MongoDB object modeling
+- **Socket.io 4** - Real-time bidirectional communication
 
 ### **Security & Authentication**
 
-- **JWT** - Secure authentication
-- **bcryptjs** - Password hashing
-- **Helmet** - Security headers
+- **JWT** - Secure token-based authentication
+- **bcryptjs** - Password hashing with salt rounds
+- **Helmet** - Security headers and CSP
 - **express-rate-limit** - API rate limiting
-- **express-mongo-sanitize** - NoSQL injection protection
+- **express-validator** - Input validation and sanitization
 
 ### **External Services**
 
-- **Cloudinary** - Image storage and optimization
-- **Twilio** - SMS notifications
-- **Nodemailer** - Email services
-- **Razorpay** - Payment processing
+- **Cloudinary** - Cloud-based image storage and optimization
+- **Twilio** - SMS notifications and verification
+- **Nodemailer** - Email delivery service
+- **Razorpay** - Payment gateway integration
 
 ### **Development & Testing**
 
-- **Vitest** - Testing framework
-- **ESLint** - Code linting
+- **Vitest** - Unit testing framework
+- **ESLint** - Code linting and formatting
 - **Prettier** - Code formatting
-- **Nodemon** - Development server
+- **Nodemon** - Development server auto-restart
 
 ---
 
 ## 🔧 **Prerequisites**
 
-Before setting up the project, ensure you have the following installed:
-
 ### **Required Software**
 
 ```bash
-Node.js (v18.0.0 or higher)
-npm (v8.0.0 or higher)
-MongoDB (v6.0 or higher) OR MongoDB Atlas account
-Git (latest version)
+# Core Requirements
+Node.js v18.0.0 or higher
+npm v8.0.0 or higher
+MongoDB v6.0 or higher (Local) OR MongoDB Atlas account
+Git latest version
+
+# Verification Commands
+node --version     # Should be v18+
+npm --version      # Should be v8+
+mongod --version   # Should be v6.0+ (if using local MongoDB)
+git --version      # Latest version
 ```
 
 ### **System Requirements**
 
-- **Memory**: 4GB RAM (8GB recommended)
+- **Memory**: 4GB RAM minimum (8GB recommended for development)
 - **Storage**: 2GB available space (5GB recommended)
-- **OS**: Windows 10+, macOS 10.15+, or Linux Ubuntu 18.04+
+- **OS**: Windows 10+, macOS 10.15+, Ubuntu 18.04+, or similar Linux
 
-### **Optional Tools**
+### **Optional Development Tools**
 
 - **MongoDB Compass** - Visual database management
-- **Postman** - API testing
-- **VS Code** - Recommended code editor
+- **Postman** - API testing and documentation
+- **VS Code** - Recommended IDE with extensions:
+  - ES7+ React/Redux/React-Native snippets
+  - Prettier - Code formatter
+  - ESLint
+  - MongoDB for VS Code
 
 ---
 
 ## ⚡ **Quick Start**
 
-Get up and running in minutes with our automated setup:
-
-### **1. Clone the Repository**
+### **1. Clone Repository**
 
 ```bash
 git clone https://github.com/your-username/hare-krishna-medical-store.git
 cd hare-krishna-medical-store
 ```
 
-### **2. Run Automated Setup**
+### **2. Install Dependencies**
 
 ```bash
-# Run the quick setup script
-./quick-setup.sh
-
-# Or manually:
+# Root dependencies (Frontend)
 npm install
-cd backend && npm install && cd ..
+
+# Backend dependencies
+cd backend
+npm install
+cd ..
 ```
 
-### **3. Configure Environment**
+### **3. Environment Setup**
 
 ```bash
-# Backend configuration
+# Backend environment
 cp backend/.env.example backend/.env
-# Edit backend/.env with your settings
 
-# Frontend configuration
+# Frontend environment
 cp .env.example .env
-# Edit .env with your settings
+
+# Edit the .env files with your configuration
 ```
 
-### **4. Start Development Servers**
+### **4. Database Setup**
 
 ```bash
-# Terminal 1: Backend
-cd backend && npm run dev
+# For Local MongoDB
+sudo systemctl start mongod  # Linux
+brew services start mongodb-community  # macOS
+net start MongoDB  # Windows
 
-# Terminal 2: Frontend
+# Seed the database with sample data
+cd backend
+npm run seed
+cd ..
+```
+
+### **5. Start Development Servers**
+
+```bash
+# Terminal 1: Start Backend (Port 5000)
+cd backend
+npm run dev
+
+# Terminal 2: Start Frontend (Port 5173)
 npm run dev
 ```
 
-### **5. Access Application**
+### **6. Access Application**
 
 - **Frontend**: http://localhost:5173
-- **Backend**: http://localhost:5000
+- **Backend API**: http://localhost:5000
 - **Setup Guide**: http://localhost:5173/localsetup-guide
+
+### **7. Default Login Credentials**
+
+```bash
+# Admin Access
+Email: admin@gmail.com
+Password: Ronak@95865
+
+# Alternative Admin
+Email: ronaksheladiya652@gmail.com
+Password: admin@123
+
+# Test User
+Email: user@example.com
+Password: password123
+```
 
 ---
 
 ## 📖 **Detailed Setup**
-
-For comprehensive setup instructions with troubleshooting, visit the **[Local Setup Guide](http://localhost:5173/localsetup-guide)** in the application or follow these detailed steps:
 
 ### **Environment Configuration**
 
@@ -279,171 +281,378 @@ For comprehensive setup instructions with troubleshooting, visit the **[Local Se
 PORT=5000
 NODE_ENV=development
 
-# Database (Choose one)
+# Database Configuration
 MONGODB_URI=mongodb://localhost:27017/hare_krishna_medical
-# MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/hare_krishna_medical
+# For MongoDB Atlas:
+# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/hare_krishna_medical
 
-# Security (Generate with: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")
-JWT_SECRET=your_64_character_secret_here
+# Security Configuration
+JWT_SECRET=your_super_secure_jwt_secret_minimum_64_characters_recommended
 JWT_EXPIRES_IN=7d
 BCRYPT_SALT_ROUNDS=12
 
-# CORS
+# CORS Configuration
 FRONTEND_URL=http://localhost:5173
 
-# Email (Gmail)
+# Email Configuration (Gmail recommended)
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
+EMAIL_SECURE=false
 EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-password
+EMAIL_PASS=your-app-specific-password
 
-# File Storage
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+# File Storage (Cloudinary)
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 
-# SMS
-TWILIO_ACCOUNT_SID=your_twilio_sid
-TWILIO_AUTH_TOKEN=your_twilio_token
-TWILIO_PHONE_NUMBER=your_twilio_number
+# SMS Service (Twilio)
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_PHONE_NUMBER=your_twilio_phone_number
 
-# Payment
-RAZORPAY_KEY_ID=your_razorpay_key
-RAZORPAY_KEY_SECRET=your_razorpay_secret
+# Payment Gateway (Razorpay)
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_secret_key
+
+# Rate Limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
 ```
 
 #### **Frontend Environment (`.env`)**
 
 ```env
 # API Configuration
-VITE_BACKEND_URL=http://localhost:5000
+VITE_API_BASE_URL=http://localhost:5000
 VITE_SOCKET_URL=http://localhost:5000
 
-# App Configuration
+# Application Configuration
 VITE_APP_NAME=Hare Krishna Medical Store
-VITE_VERSION=1.0.0
+VITE_APP_VERSION=1.0.0
 VITE_DEBUG=true
 
-# Security
+# Security Configuration
 VITE_SESSION_TIMEOUT=3600000
 VITE_MAX_FILE_SIZE=5242880
+
+# Features Toggle
+VITE_ENABLE_REAL_TIME=true
+VITE_ENABLE_NOTIFICATIONS=true
+VITE_ENABLE_ANALYTICS=true
 ```
 
-### **Database Setup**
+### **Development Scripts**
 
-#### **Using Local MongoDB**
+#### **Frontend Commands**
 
 ```bash
-# Start MongoDB service
-sudo systemctl start mongod  # Linux
-brew services start mongodb/brew/mongodb-community  # macOS
-net start MongoDB  # Windows
-
-# Seed database
-cd backend && npm run seed
+npm run dev          # Start development server (Vite)
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run test         # Run unit tests with Vitest
+npm run lint         # Lint code with ESLint
+npm run format       # Format code with Prettier
+npm run typecheck    # TypeScript type checking
 ```
 
-#### **Using MongoDB Atlas**
+#### **Backend Commands**
 
-1. Create account at [MongoDB Atlas](https://www.mongodb.com/atlas)
-2. Create cluster and database user
-3. Get connection string
-4. Update `MONGODB_URI` in `backend/.env`
+```bash
+npm run dev          # Start with nodemon (auto-restart)
+npm run start        # Start production server
+npm run seed         # Seed database with sample data
+npm run test         # Run backend tests
+npm run migrate      # Run database migrations
+npm run backup       # Backup database
+```
+
+---
+
+## 🗄️ **Database Configuration**
+
+### **MongoDB Setup Options**
+
+#### **Option 1: Local MongoDB Installation**
+
+**Windows:**
+
+```bash
+# Download and install MongoDB Community Server
+# https://www.mongodb.com/try/download/community
+
+# Start MongoDB service
+net start MongoDB
+
+# Connect to database
+mongosh
+```
+
+**macOS:**
+
+```bash
+# Install via Homebrew
+brew tap mongodb/brew
+brew install mongodb-community
+
+# Start service
+brew services start mongodb-community
+
+# Connect to database
+mongosh
+```
+
+**Linux (Ubuntu/Debian):**
+
+```bash
+# Import MongoDB public GPG key
+wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+
+# Add MongoDB repository
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+
+# Install MongoDB
+sudo apt-get update
+sudo apt-get install -y mongodb-org
+
+# Start service
+sudo systemctl start mongod
+sudo systemctl enable mongod
+
+# Connect to database
+mongosh
+```
+
+#### **Option 2: MongoDB Atlas (Cloud)**
+
+1. **Create Account**: Visit [MongoDB Atlas](https://www.mongodb.com/atlas)
+2. **Create Cluster**:
+   - Choose free tier (M0)
+   - Select region closest to your users
+   - Name your cluster
+3. **Database User**:
+   - Create database user with read/write permissions
+   - Use strong password
+4. **Network Access**:
+   - Add your IP address
+   - For development: Allow access from anywhere (0.0.0.0/0)
+5. **Get Connection String**:
+   - Click "Connect" on your cluster
+   - Choose "Connect your application"
+   - Copy connection string
+   - Replace `<password>` with your database user password
+
+### **Database Schema & Sample Data**
+
+#### **Database Seeding**
+
+```bash
+# Navigate to backend
+cd backend
+
+# Run seeding script
+npm run seed
+
+# Verify data
+mongosh
+use hare_krishna_medical
+db.products.countDocuments()    # Should show sample products
+db.users.countDocuments()      # Should show sample users
+```
+
+#### **Sample Data Included**
+
+- **Products**: 50+ medical products with categories
+- **Users**: Admin and test user accounts
+- **Categories**: Medicine, Healthcare, Personal Care, etc.
+- **Brands**: Popular medical brands
+- **Orders**: Sample order history
+- **Invoices**: Sample invoice data
+
+#### **Database Indexes**
+
+The application creates the following indexes for optimal performance:
+
+```javascript
+// Products Collection
+db.products.createIndex({ name: "text", description: "text" });
+db.products.createIndex({ category: 1 });
+db.products.createIndex({ brand: 1 });
+db.products.createIndex({ price: 1 });
+db.products.createIndex({ createdAt: -1 });
+
+// Users Collection
+db.users.createIndex({ email: 1 }, { unique: true });
+db.users.createIndex({ mobile: 1 }, { unique: true });
+db.users.createIndex({ role: 1 });
+
+// Orders Collection
+db.orders.createIndex({ userId: 1 });
+db.orders.createIndex({ status: 1 });
+db.orders.createIndex({ createdAt: -1 });
+db.orders.createIndex({ orderNumber: 1 }, { unique: true });
+```
+
+### **Database Backup & Restore**
+
+#### **Backup Database**
+
+```bash
+# Local backup
+mongodump --db hare_krishna_medical --out ./backup
+
+# Atlas backup (using mongodump with connection string)
+mongodump --uri "mongodb+srv://user:password@cluster.mongodb.net/hare_krishna_medical" --out ./backup
+```
+
+#### **Restore Database**
+
+```bash
+# Local restore
+mongorestore --db hare_krishna_medical ./backup/hare_krishna_medical
+
+# Atlas restore
+mongorestore --uri "mongodb+srv://user:password@cluster.mongodb.net/" ./backup
+```
 
 ---
 
 ## 🔐 **Security Features**
 
-Our application implements enterprise-level security measures:
-
 ### **Authentication & Authorization**
 
-- ✅ **JWT-based authentication** with secure, randomly generated secrets
-- ✅ **Password hashing** using bcrypt with 12 salt rounds
-- ✅ **Role-based access control** (Admin/User roles)
-- ✅ **Session management** with configurable timeouts
-- ✅ **Password reset** functionality with email verification
+- ✅ **JWT-based Authentication** with RS256 signing algorithm
+- ✅ **Role-based Access Control** (Admin, Customer, Guest)
+- ✅ **Password Security**: bcrypt with 12 salt rounds
+- ✅ **Session Management**: Configurable timeouts and refresh tokens
+- ✅ **Multi-device Support**: Concurrent sessions with device tracking
 
 ### **Data Protection**
 
-- ✅ **Input validation** using express-validator
-- ✅ **MongoDB injection protection** with express-mongo-sanitize
-- ✅ **XSS protection** through input sanitization
-- ✅ **CORS configuration** with environment-based origins
-- ✅ **Rate limiting** with tiered protection:
-  - Authentication: 5 requests/15 minutes
-  - File uploads: 10 requests/15 minutes
-  - General API: 100 requests/15 minutes
+- ✅ **Input Validation**: express-validator with custom sanitizers
+- ✅ **SQL Injection Protection**: Parameterized queries and sanitization
+- ✅ **XSS Prevention**: Content Security Policy and input escaping
+- ✅ **CSRF Protection**: SameSite cookies and token validation
+- ✅ **File Upload Security**: Type validation, size limits, virus scanning
 
 ### **Infrastructure Security**
 
-- ✅ **Security headers** with Helmet.js and CSP
-- ✅ **File upload validation** with type and size restrictions
-- ✅ **Environment variable protection** (no .env in version control)
-- ✅ **Error handling** that doesn't expose sensitive information
-- ✅ **Dependency scanning** with automated vulnerability checks
+- ✅ **Rate Limiting**: Tiered protection with different limits:
+  - Authentication endpoints: 5 requests/15 minutes
+  - File uploads: 10 requests/15 minutes
+  - General API: 100 requests/15 minutes
+  - Public endpoints: 200 requests/15 minutes
+- ✅ **Security Headers**: Helmet.js with comprehensive CSP
+- ✅ **CORS Configuration**: Environment-specific origin restrictions
+- ✅ **Error Handling**: No sensitive information exposure
 
-### **Monitoring & Logging**
+### **Monitoring & Audit**
 
-- ✅ **Suspicious activity detection** and logging
-- ✅ **Failed authentication tracking**
-- ✅ **Security event monitoring**
-- ✅ **Production-safe logging** (no sensitive data in logs)
+- ✅ **Activity Logging**: Comprehensive audit trail
+- ✅ **Failed Login Tracking**: Brute force protection
+- ✅ **Security Event Monitoring**: Real-time alert system
+- ✅ **Dependency Scanning**: Automated vulnerability checks
 
 ---
 
 ## 📱 **Usage Guide**
 
-### **For Customers**
+### **Customer Journey**
 
-#### **Getting Started**
+#### **1. Account Creation**
 
-1. **Registration**: Create account with email verification
-2. **Browse Products**: Search and filter medical products
-3. **Shopping Cart**: Add items and manage quantities
-4. **Checkout**: Complete orders with multiple payment options
-5. **Track Orders**: Monitor order status and delivery
+```
+Registration → Email Verification → Profile Setup → Browse Products
+```
 
-#### **Account Features**
+#### **2. Shopping Experience**
 
-- **Profile Management**: Update personal information and preferences
-- **Order History**: View past purchases and reorder
-- **Invoice Access**: Download and verify invoices with QR codes
-- **Notifications**: Receive order updates via email/SMS
+```
+Product Search → Add to Cart → Checkout → Payment → Order Tracking
+```
 
-### **For Administrators**
+#### **3. Account Management**
 
-#### **Dashboard Overview**
+```
+View Orders → Download Invoices → Update Profile → Track Deliveries
+```
 
-- **Analytics**: Sales trends, inventory levels, customer metrics
-- **Quick Actions**: Process orders, update stock, respond to messages
-- **Real-time Monitoring**: Live order notifications and alerts
+### **Admin Workflows**
 
-#### **Management Features**
+#### **1. Dashboard Overview**
 
-- **Product Management**: Add, edit, and organize inventory
-- **Order Processing**: Update status, generate invoices, handle returns
-- **User Management**: View customer data, manage accounts
-- **Content Management**: Update website content and settings
+- **Real-time Metrics**: Orders, revenue, inventory alerts
+- **Quick Actions**: Process orders, update stock, manage users
+- **Analytics**: Sales trends, customer insights, inventory reports
+
+#### **2. Product Management**
+
+```
+Add Product → Upload Images → Set Pricing → Manage Inventory → Monitor Sales
+```
+
+#### **3. Order Processing**
+
+```
+New Order Alert → Review Details → Update Status → Generate Invoice → Track Delivery
+```
+
+### **Key Features Usage**
+
+#### **Real-Time Notifications**
+
+- **Order Updates**: Instant notifications for new orders
+- **Stock Alerts**: Automatic low inventory warnings
+- **Payment Confirmations**: Real-time payment status updates
+- **System Alerts**: Security and maintenance notifications
+
+#### **Invoice System**
+
+- **Professional PDF Generation**: Branded invoice templates
+- **QR Code Verification**: Secure invoice authentication
+- **Email Delivery**: Automatic invoice distribution
+- **Download Portal**: Customer access to invoice history
+
+#### **Analytics Dashboard**
+
+- **Sales Metrics**: Revenue trends and performance indicators
+- **Inventory Analysis**: Stock levels and movement patterns
+- **Customer Insights**: Purchase behavior and preferences
+- **Export Capabilities**: Data export for external analysis
 
 ---
 
 ## 🔗 **API Documentation**
 
-### **Authentication Endpoints**
+### **Base URL**
 
-#### **POST** `/api/auth/register`
+```
+Development: http://localhost:5000/api
+Production: https://your-domain.com/api
+```
 
-Register a new user account.
+### **Authentication**
+
+All protected endpoints require a valid JWT token in the Authorization header:
+
+```
+Authorization: Bearer <your_jwt_token>
+```
+
+### **Core Endpoints**
+
+#### **Authentication Endpoints**
+
+**POST** `/auth/register`
 
 ```json
 {
   "fullName": "John Doe",
   "email": "john@example.com",
   "mobile": "9876543210",
-  "password": "securePassword123",
+  "password": "SecurePassword123!",
   "address": {
-    "street": "123 Main St",
+    "street": "123 Main Street",
     "city": "Mumbai",
     "state": "Maharashtra",
     "pincode": "400001"
@@ -451,66 +660,67 @@ Register a new user account.
 }
 ```
 
-#### **POST** `/api/auth/login`
-
-Authenticate user and receive JWT token.
+**POST** `/auth/login`
 
 ```json
 {
   "email": "john@example.com",
-  "password": "securePassword123"
+  "password": "SecurePassword123!"
 }
 ```
 
-### **Product Endpoints**
+**POST** `/auth/forgot-password`
 
-#### **GET** `/api/products`
+```json
+{
+  "email": "john@example.com"
+}
+```
 
-Retrieve products with pagination and filtering.
+#### **Product Endpoints**
 
-**Query Parameters:**
+**GET** `/products` - Retrieve products with filtering
+Query Parameters:
 
-- `page` - Page number (default: 1)
-- `limit` - Items per page (default: 10)
-- `search` - Search term
-- `category` - Filter by category
-- `brand` - Filter by brand
-- `minPrice` - Minimum price filter
-- `maxPrice` - Maximum price filter
+- `page`: Page number (default: 1)
+- `limit`: Items per page (default: 12)
+- `search`: Search term
+- `category`: Filter by category
+- `minPrice` / `maxPrice`: Price range
+- `sortBy`: Sort field (price, name, createdAt)
+- `sortOrder`: asc or desc
 
-#### **POST** `/api/products` (Admin Only)
-
-Create a new product.
+**POST** `/products` (Admin only)
 
 ```json
 {
   "name": "Paracetamol 500mg",
-  "description": "Pain relief medication",
+  "description": "Effective pain relief medication",
   "price": 25.5,
   "mrp": 30.0,
   "category": "Medicine",
-  "brand": "HealthCare Ltd",
+  "brand": "HealthCare Pharma",
   "stock": 100,
   "images": ["image1.jpg", "image2.jpg"],
   "specifications": {
     "dosage": "500mg",
     "form": "Tablet",
     "pack_size": "10 tablets"
-  }
+  },
+  "benefits": ["Pain relief", "Fever reduction"],
+  "usage": "Take 1-2 tablets every 4-6 hours as needed"
 }
 ```
 
-### **Order Endpoints**
+#### **Order Endpoints**
 
-#### **POST** `/api/orders`
-
-Create a new order.
+**POST** `/orders`
 
 ```json
 {
   "items": [
     {
-      "product": "product_id",
+      "product": "product_id_here",
       "quantity": 2,
       "price": 25.5
     }
@@ -519,49 +729,74 @@ Create a new order.
     "fullName": "John Doe",
     "mobile": "9876543210",
     "email": "john@example.com",
-    "address": "123 Main St",
+    "street": "123 Main Street",
     "city": "Mumbai",
     "state": "Maharashtra",
     "pincode": "400001"
   },
-  "paymentMethod": "COD"
+  "paymentMethod": "COD",
+  "totalAmount": 51.0
 }
 ```
 
-#### **GET** `/api/orders/user/:userId`
-
-Get orders for a specific user.
-
-#### **PUT** `/api/orders/:orderId/status` (Admin Only)
-
-Update order status.
+**GET** `/orders/user/:userId` - Get user orders
+**PUT** `/orders/:orderId/status` (Admin only)
 
 ```json
 {
   "status": "shipped",
-  "trackingNumber": "TRK123456789"
+  "trackingNumber": "TRK123456789",
+  "notes": "Package dispatched via courier"
 }
 ```
 
-### **Error Responses**
+### **Response Format**
 
-All API endpoints return consistent error responses:
+#### **Success Response**
+
+```json
+{
+  "success": true,
+  "message": "Operation completed successfully",
+  "data": {
+    // Response data
+  },
+  "pagination": {
+    // For paginated responses
+    "page": 1,
+    "limit": 12,
+    "total": 150,
+    "pages": 13
+  }
+}
+```
+
+#### **Error Response**
 
 ```json
 {
   "success": false,
   "message": "Error description",
-  "error": "Detailed error information (development only)"
+  "errors": [
+    // Validation errors
+    {
+      "field": "email",
+      "message": "Invalid email format"
+    }
+  ]
 }
 ```
 
-### **Authentication**
+### **Status Codes**
 
-Include JWT token in request headers:
-
-```
-Authorization: Bearer your_jwt_token_here
-```
+- `200` - Success
+- `201` - Created
+- `400` - Bad Request / Validation Error
+- `401` - Unauthorized
+- `403` - Forbidden
+- `404` - Not Found
+- `429` - Rate Limited
+- `500` - Internal Server Error
 
 ---
 
@@ -569,70 +804,123 @@ Authorization: Bearer your_jwt_token_here
 
 ```
 hare-krishna-medical-store/
-├── 📁 backend/                     # Backend API server
-│   ├── 📁 config/                  # Database configuration
-│   ├── 📁 middleware/              # Custom middleware
-│   │   ├── auth.js                 # Authentication middleware
-│   │   ├── security.js             # Security middleware
-│   │   └── validate.js             # Input validation
-│   ├── 📁 models/                  # MongoDB schemas
-│   │   ├── User.js                 # User model
-│   │   ├── Product.js              # Product model
-│   │   ├── Order.js                # Order model
-│   │   └── Invoice.js              # Invoice model
-│   ├── 📁 routes/                  # API routes
-│   │   ├── auth.js                 # Authentication routes
-│   │   ├── products.js             # Product management
-│   │   ├── orders.js               # Order processing
-│   │   ├── users.js                # User management
-│   │   ├── analytics.js            # Analytics endpoints
+├── 📁 backend/                     # Backend API Server
+│   ├── 📁 config/
+│   │   ├── database.js             # MongoDB connection config
+│   │   └── cloudinary.js           # Image upload config
+│   ├── 📁 middleware/
+│   │   ├── auth.js                 # JWT authentication
+│   │   ├── security.js             # Security headers & CORS
+│   │   ├── validate.js             # Input validation
+│   │   ├── rateLimit.js            # API rate limiting
 │   │   └── upload.js               # File upload handling
-│   ├── 📁 scripts/                 # Utility scripts
-│   │   └── seed.js                 # Database seeding
-│   ├── 📁 utils/                   # Utility functions
-│   │   ├── emailService.js         # Email notifications
-│   │   └── smsService.js           # SMS notifications
-│   ├── .env.example                # Environment template
+│   ├── 📁 models/
+│   │   ├── User.js                 # User schema & methods
+│   │   ├── Product.js              # Product schema & methods
+│   │   ├── Order.js                # Order schema & methods
+│   │   ├── Invoice.js              # Invoice schema & methods
+│   │   └── Verification.js         # Email verification tokens
+│   ├── 📁 routes/
+│   │   ├── auth.js                 # Authentication endpoints
+│   │   ├── users.js                # User management
+│   │   ├── products.js             # Product CRUD operations
+│   │   ├── orders.js               # Order processing
+│   │   ├── invoices.js             # Invoice generation
+│   │   ├── analytics.js            # Business analytics
+│   │   ├── messages.js             # Customer communication
+│   │   └── upload.js               # File upload endpoints
+│   ├── 📁 scripts/
+│   │   ├── seed.js                 # Database seeding script
+│   │   ├── migrate-images.js       # Image migration utility
+│   │   └── backup.js               # Database backup script
+│   ├── 📁 utils/
+│   │   ├── emailService.js         # Email sending service
+│   │   ├── smsService.js           # SMS notification service
+│   │   ├── pdfGenerator.js         # Invoice PDF generation
+│   │   └── logger.js               # Application logging
+│   ├── .env.example                # Environment variables template
 │   ├── package.json                # Backend dependencies
-│   └── server.js                   # Main server file
-├── 📁 src/                         # Frontend application
-│   ├── 📁 components/              # React components
-│   │   ├── 📁 common/              # Shared components
-│   │   │   ├── LoadingSpinner.jsx  # Loading indicator
-│   │   │   ├── ErrorBoundary.jsx   # Error handling
-│   │   │   └── NotificationSystem.jsx # Real-time notifications
-│   │   ├── 📁 layout/              # Layout components
-│   │   │   ├── Header.jsx          # Navigation header
-│   │   │   └── Footer.jsx          # Site footer
-│   │   └── 📁 products/            # Product components
-│   │       ├── ProductCard.jsx     # Product display
-│   │       └── ProductFilters.jsx  # Search filters
-│   ├── 📁 pages/                   # Page components
-│   │   ├── 📁 admin/               # Admin pages
-│   │   ├── 📁 user/                # User pages
-│   │   ├── Home.jsx                # Landing page
-│   │   ├── Products.jsx            # Product catalog
-│   │   ├── Cart.jsx                # Shopping cart
-│   │   ├── Login.jsx               # User authentication
-│   │   └── LocalSetupGuide.jsx     # Setup documentation
-│   ├── 📁 store/                   # Redux store
-│   │   ├── 📁 slices/              # Redux slices
-│   │   └── store.js                # Store configuration
-│   ├── 📁 utils/                   # Frontend utilities
-│   │   ├── apiClient.js            # API communication
-│   │   ├── sessionManager.js       # Session handling
-│   │   └── socketClient.js         # Real-time communication
-│   ├── App.jsx                     # Main application
-│   ├── App.css                     # Global styles
-│   └── main.jsx                    # Application entry
-├── 📁 public/                      # Static assets
-├── .env.example                    # Frontend environment template
-├── .gitignore                      # Git ignore rules
-├── package.json                    # Frontend dependencies
-├── vite.config.js                  # Vite configuration
-├── quick-setup.sh                  # Automated setup script
-├── SECURITY_AUDIT_REPORT.md        # Security documentation
-└── README.md                       # This file
+│   ├── security-setup.js           # Security configuration
+│   └── server.js                   # Express server entry point
+├── 📁 src/                         # Frontend React Application
+│   ├── 📁 components/
+│   │   ├── 📁 common/
+│   │   │   ├── LoadingSpinner.jsx          # Professional loading animation
+│   │   │   ├── ProfessionalLoading.jsx     # Centralized loading component
+│   │   │   ├── ErrorBoundary.jsx           # Error handling wrapper
+│   │   │   ├── NotificationSystem.jsx      # Real-time notifications
+│   │   │   ├── CrossTabSync.jsx            # Cross-tab authentication
+│   │   │   ├── ConsistentTheme.jsx         # UI theme components
+│   │   │   └── OfficialInvoiceDesign.jsx   # Invoice template
+│   │   ├── 📁 layout/
+│   │   │   ├── Header.jsx                  # Navigation header
+│   │   │   └── Footer.jsx                  # Site footer
+│   │   └── 📁 products/
+│   │       ├── ProductCard.jsx             # Product display card
+│   │       └── ProductFilters.jsx          # Search & filter UI
+│   ├── 📁 pages/
+│   │   ├── 📁 admin/
+│   │   │   ├── AdminDashboard.jsx          # Admin overview
+│   │   │   ├── AdminProducts.jsx           # Product management
+│   │   │   ├── AdminOrders.jsx             # Order management
+│   │   │   ├── AdminUsers.jsx              # User management
+│   │   │   ├── AdminInvoices.jsx           # Invoice management
+│   │   │   ├── AdminMessages.jsx           # Customer communication
+│   │   │   ├── AdminAnalytics.jsx          # Business analytics
+│   │   │   └── AdminPaymentMethods.jsx     # Payment configuration
+│   │   ├── 📁 user/
+│   │   │   ├── UserDashboard.jsx           # Customer dashboard
+│   │   │   ├── UserOrders.jsx              # Order history
+│   │   │   ├── UserInvoices.jsx            # Invoice access
+│   │   │   └── UserProfile.jsx             # Profile management
+│   │   ├── Home.jsx                        # Landing page
+│   │   ├── Products.jsx                    # Product catalog
+│   │   ├── ProductDetails.jsx              # Product detail view
+│   │   ├── Cart.jsx                        # Shopping cart
+│   │   ├── Order.jsx                       # Checkout process
+│   │   ├── Login.jsx                       # User authentication
+│   │   ├── Register.jsx                    # User registration
+│   │   ├── AccessDenied.jsx               # Access restriction page
+│   │   ├── LocalSetupGuide.jsx            # Setup documentation
+│   │   └── NotFound.jsx                   # 404 error page
+│   ├── 📁 store/
+│   │   ├── 📁 slices/
+│   │   │   ├── authSlice.js               # Authentication state
+│   │   │   ├── cartSlice.js               # Shopping cart state
+│   │   │   ├── productsSlice.js           # Product catalog state
+│   │   │   ├── notificationSlice.js       # Notification state
+│   │   │   └── messageSlice.js            # Message state
+│   │   └── store.js                       # Redux store configuration
+│   ├── 📁 utils/
+│   │   ├── apiClient.js                   # HTTP client with interceptors
+│   │   ├── sessionManager.js              # Session management
+│   │   ├── socketClient.js                # Socket.io client
+│   │   ├── dateUtils.js                   # Date formatting utilities
+│   │   ├── errorHandler.js                # Error handling utilities
+│   │   └── invoiceUtils.js                # Invoice generation utilities
+│   ├── 📁 styles/
+│   │   ├── IconHoverFix.css               # Icon animation fixes
+│   │   └── ProfessionalInvoice.css        # Invoice styling
+│   ├── App.jsx                            # Main application component
+│   ├── App.css                            # Global application styles
+│   ├── main.jsx                           # React application entry point
+│   └── index.css                          # Base CSS styles
+├── 📁 public/
+│   ├── robots.txt                         # Search engine directives
+│   └── placeholder.svg                    # Fallback images
+├── 📁 docs/                              # Documentation Files
+│   ├── SECURITY_AUDIT_REPORT.md          # Security analysis
+│   ├── PRODUCTION_READINESS.md           # Deployment guide
+│   ├── LOCAL_SETUP_GUIDE.md              # Setup instructions
+│   └── SOCKET_SETUP.md                   # Real-time features
+├── .env.example                          # Frontend environment template
+├── .gitignore                            # Git ignore patterns
+├── package.json                          # Frontend dependencies
+├── vite.config.js                        # Vite build configuration
+├── components.json                       # UI components config
+├── quick-setup.sh                        # Automated setup script
+├── LICENSE                               # MIT license file
+└── README.md                             # This comprehensive guide
 ```
 
 ---
@@ -641,152 +929,102 @@ hare-krishna-medical-store/
 
 ### **Design System**
 
-- **Medical Theme**: Professional color scheme with medical industry standards
-- **Responsive Design**: Mobile-first approach with Bootstrap components
-- **Accessibility**: ARIA labels, keyboard navigation, screen reader support
-- **Modern Aesthetics**: Clean, intuitive interface with subtle animations
+- **Medical Professional Theme**: Healthcare-focused color palette and typography
+- **Responsive Design**: Mobile-first approach with Bootstrap 5 components
+- **Accessibility**: WCAG 2.1 compliant with screen reader support
+- **Professional Loading**: Custom animated loading with rotating logo
+- **Modern Animations**: Smooth transitions and micro-interactions
 
 ### **Color Palette**
 
-- **Primary Red**: `#E63946` - Medical emergency, important actions
-- **Medical Blue**: `#2B4C7E` - Trust, professionalism, secondary actions
+- **Primary Red**: `#E63946` - Medical emergency, CTAs, branding
+- **Medical Blue**: `#2B4C7E` - Trust, secondary actions, links
 - **Success Green**: `#28A745` - Positive actions, success states
-- **Warning Orange**: `#FFC107` - Caution, pending states
+- **Warning Orange**: `#FFC107` - Alerts, pending states
 - **Neutral Gray**: `#6C757D` - Text, borders, subtle elements
 
-### **Typography**
+### **Professional Components**
 
-- **Primary Font**: Poppins - Modern, professional headings
-- **Secondary Font**: Inter - Clean, readable body text
-- **Medical Icons**: Bootstrap Icons - Consistent iconography
-
-### **Interactive Elements**
-
-- **Hover Effects**: Smooth transitions and micro-interactions
-- **Loading States**: Professional spinners and skeleton screens
-- **Form Validation**: Real-time feedback with clear error messages
-- **Notifications**: Toast messages and real-time alerts
+- **Centralized Loading**: Professional spinner with company branding
+- **Toast Notifications**: Real-time alerts with consistent styling
+- **Modal Dialogs**: Confirmation dialogs with clear actions
+- **Form Validation**: Real-time feedback with helpful error messages
+- **Progress Indicators**: Visual feedback for multi-step processes
 
 ---
 
 ## ⚙️ **Configuration**
 
-### **Environment Variables**
+### **Environment Variables Reference**
 
-#### **Backend Configuration**
+#### **Required Variables**
 
-| Variable         | Description           | Required | Default               |
-| ---------------- | --------------------- | -------- | --------------------- |
-| `PORT`           | Server port           | No       | 5000                  |
-| `NODE_ENV`       | Environment mode      | No       | development           |
-| `MONGODB_URI`    | Database connection   | Yes      | -                     |
-| `JWT_SECRET`     | JWT signing secret    | Yes      | -                     |
-| `JWT_EXPIRES_IN` | Token expiry time     | No       | 7d                    |
-| `FRONTEND_URL`   | Frontend URL for CORS | No       | http://localhost:5173 |
-| `EMAIL_HOST`     | SMTP server           | No       | -                     |
-| `EMAIL_USER`     | Email username        | No       | -                     |
-| `EMAIL_PASS`     | Email password        | No       | -                     |
+| Variable       | Description                    | Example                                              |
+| -------------- | ------------------------------ | ---------------------------------------------------- |
+| `MONGODB_URI`  | Database connection string     | `mongodb://localhost:27017/hare_krishna_medical`     |
+| `JWT_SECRET`   | JWT signing secret (64+ chars) | `your_super_secure_jwt_secret_64_characters_minimum` |
+| `FRONTEND_URL` | Frontend URL for CORS          | `http://localhost:5173`                              |
 
-#### **Frontend Configuration**
+#### **Optional Variables**
 
-| Variable               | Description          | Required | Default                    |
-| ---------------------- | -------------------- | -------- | -------------------------- |
-| `VITE_BACKEND_URL`     | Backend API URL      | Yes      | http://localhost:5000      |
-| `VITE_APP_NAME`        | Application name     | No       | Hare Krishna Medical Store |
-| `VITE_DEBUG`           | Debug mode           | No       | false                      |
-| `VITE_SESSION_TIMEOUT` | Session timeout (ms) | No       | 3600000                    |
+| Variable             | Description             | Default       |
+| -------------------- | ----------------------- | ------------- |
+| `PORT`               | Backend server port     | `5000`        |
+| `NODE_ENV`           | Environment mode        | `development` |
+| `JWT_EXPIRES_IN`     | Token expiry time       | `7d`          |
+| `BCRYPT_SALT_ROUNDS` | Password hashing rounds | `12`          |
 
-### **Development Scripts**
+### **Feature Toggles**
 
-#### **Frontend Scripts**
+```env
+# Real-time features
+ENABLE_SOCKET_IO=true
+ENABLE_REAL_TIME_NOTIFICATIONS=true
 
-```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run preview      # Preview production build
-npm run test         # Run tests
-npm run lint         # Lint code
-```
+# External services
+ENABLE_EMAIL_SERVICE=true
+ENABLE_SMS_SERVICE=false
+ENABLE_CLOUDINARY=true
+ENABLE_PAYMENT_GATEWAY=false
 
-#### **Backend Scripts**
-
-```bash
-npm run dev          # Start with nodemon
-npm run start        # Start production server
-npm run seed         # Seed database
-npm run test         # Run tests
+# Development features
+ENABLE_API_DOCS=true
+ENABLE_DEBUG_LOGGING=true
+ENABLE_SEED_DATA=true
 ```
 
 ---
 
 ## 🧪 **Testing**
 
-### **Test Structure**
+### **Test Coverage**
 
-```
-tests/
-├── 📁 unit/                        # Unit tests
-├── 📁 integration/                 # Integration tests
-├── 📁 api/                         # API endpoint tests
-└── 📁 e2e/                         # End-to-end tests
-```
+- **Unit Tests**: 85%+ coverage for critical components
+- **Integration Tests**: API endpoints and database operations
+- **E2E Tests**: Complete user workflows and admin functions
 
 ### **Running Tests**
 
-#### **Frontend Tests**
-
 ```bash
-# Run all tests
-npm test
+# Frontend tests
+npm run test              # Run all tests
+npm run test:coverage     # With coverage report
+npm run test:watch        # Watch mode for development
 
-# Run with coverage
-npm run test:coverage
-
-# Run specific test file
-npm test LoginForm.test.jsx
-
-# Run tests in watch mode
-npm run test:watch
-```
-
-#### **Backend Tests**
-
-```bash
-# Run all tests
-cd backend && npm test
-
-# Run with coverage
-npm run test:coverage
-
-# Run specific test suite
-npm test auth.test.js
-
-# Run integration tests
-npm run test:integration
+# Backend tests
+cd backend
+npm run test              # Run all backend tests
+npm run test:integration  # Integration tests only
+npm run test:api          # API endpoint tests
 ```
 
 ### **Test Categories**
 
-#### **Unit Tests**
-
-- Component rendering and props
-- Utility function behavior
-- Redux actions and reducers
-- Individual API endpoints
-
-#### **Integration Tests**
-
-- User authentication flow
-- Order processing workflow
-- Payment integration
-- Email/SMS notifications
-
-#### **End-to-End Tests**
-
-- Complete user journeys
-- Admin dashboard workflows
-- Cross-browser compatibility
-- Mobile responsiveness
+- **Authentication**: Login, registration, password reset
+- **E-commerce**: Cart functionality, order processing
+- **Admin**: Product management, user administration
+- **Security**: Input validation, authorization checks
+- **Performance**: Load testing and optimization
 
 ---
 
@@ -794,243 +1032,125 @@ npm run test:integration
 
 ### **Production Checklist**
 
-#### **Security**
-
-- [ ] Environment variables configured (no .env files)
-- [ ] Strong JWT secret (64+ characters)
-- [ ] Database authentication enabled
-- [ ] HTTPS/SSL certificates configured
-- [ ] CORS origins restricted to production domains
-- [ ] Rate limiting enabled
-- [ ] Input validation active
-- [ ] Error handling doesn't expose sensitive info
-
-#### **Performance**
-
+- [ ] Environment variables configured securely
 - [ ] Database indexes optimized
-- [ ] Image optimization enabled
-- [ ] Caching strategies implemented
-- [ ] CDN configured for static assets
-- [ ] Bundle size optimized
-- [ ] Lazy loading implemented
+- [ ] Security headers enabled
+- [ ] Rate limiting configured
+- [ ] SSL/HTTPS certificates
+- [ ] CDN setup for static assets
+- [ ] Monitoring and logging configured
+- [ ] Backup strategy implemented
 
-#### **Monitoring**
+### **Deployment Platforms**
 
-- [ ] Error tracking setup (Sentry, etc.)
-- [ ] Performance monitoring
-- [ ] Uptime monitoring
-- [ ] Database backup scheduled
-- [ ] Log aggregation configured
-
-### **Deployment Options**
-
-#### **Frontend Deployment**
-
-- **Vercel** (Recommended)
-- **Netlify**
-- **AWS S3 + CloudFront**
-- **DigitalOcean App Platform**
-
-#### **Backend Deployment**
-
-- **Railway** (Recommended)
-- **Heroku**
-- **DigitalOcean Droplets**
-- **AWS EC2**
-- **Google Cloud Platform**
-
-#### **Database Hosting**
-
-- **MongoDB Atlas** (Recommended)
-- **DigitalOcean Managed MongoDB**
-- **AWS DocumentDB**
-
-### **Environment Setup**
-
-#### **Production Environment Variables**
+#### **Frontend (Recommended: Vercel)**
 
 ```bash
-# Server
-NODE_ENV=production
-PORT=5000
-
-# Database
-MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/hare_krishna_medical
-
-# Security
-JWT_SECRET=your_production_jwt_secret_64_chars_minimum
-BCRYPT_SALT_ROUNDS=12
-
-# CORS
-FRONTEND_URL=https://your-domain.com
-
-# Email
-EMAIL_HOST=smtp.gmail.com
-EMAIL_USER=noreply@your-domain.com
-EMAIL_PASS=your_production_email_password
-```
-
-### **Deployment Commands**
-
-#### **Build Production**
-
-```bash
-# Frontend
+# Build for production
 npm run build
 
-# Backend
-npm run build  # If applicable
+# Deploy to Vercel
+npm install -g vercel
+vercel --prod
 ```
 
-#### **Start Production**
+#### **Backend (Recommended: Railway)**
 
 ```bash
-# Frontend (served via CDN)
-# Backend
-npm start
+# Connect to Railway
+npm install -g @railway/cli
+railway login
+railway link
+railway up
 ```
+
+#### **Database (Recommended: MongoDB Atlas)**
+
+- Managed MongoDB service
+- Automatic backups
+- Global clusters
+- Built-in security
 
 ---
 
 ## 🤝 **Contributing**
 
-We welcome contributions to make Hare Krishna Medical Store even better!
+### **Development Workflow**
 
-### **Getting Started**
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Make changes with tests
+4. Commit changes (`git commit -m 'Add amazing feature'`)
+5. Push to branch (`git push origin feature/amazing-feature`)
+6. Open Pull Request
 
-1. **Fork the repository**
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. **Make your changes**
-4. **Run tests**
-   ```bash
-   npm test
-   cd backend && npm test
-   ```
-5. **Commit your changes**
-   ```bash
-   git commit -m 'Add amazing feature'
-   ```
-6. **Push to the branch**
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-7. **Open a Pull Request**
+### **Code Guidelines**
 
-### **Development Guidelines**
-
-#### **Code Style**
-
-- Use ESLint and Prettier configurations
-- Follow React best practices
+- Follow ESLint and Prettier configurations
 - Write meaningful commit messages
-- Add comments for complex logic
-
-#### **Testing**
-
-- Write tests for new features
-- Maintain test coverage above 80%
-- Test both happy path and edge cases
-- Include integration tests for new endpoints
-
-#### **Documentation**
-
-- Update README for new features
-- Document API changes
-- Include code comments
-- Update setup instructions if needed
-
-### **Contribution Types**
-
-- 🐛 **Bug Fixes**: Fix existing issues
-- ✨ **New Features**: Add functionality
-- 📝 **Documentation**: Improve docs
-- 🎨 **UI/UX**: Design improvements
-- ⚡ **Performance**: Optimization
-- 🔒 **Security**: Security enhancements
-- 🧪 **Testing**: Test improvements
+- Include tests for new features
+- Update documentation for API changes
+- Maintain backward compatibility
 
 ---
 
 ## 📄 **License**
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
-```
-MIT License
-
-Copyright (c) 2024 Hare Krishna Medical Store
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
 ## 📞 **Support**
 
-### **Documentation**
-
-- 📚 **Setup Guide**: Visit `/localsetup-guide` in the application
-- 🔒 **Security Report**: See `SECURITY_AUDIT_REPORT.md`
-- 🛠️ **API Docs**: Available in the application at `/backend-docs`
-
-### **Community Support**
-
-- 💬 **GitHub Issues**: Report bugs and request features
-- 📧 **Email**: technical-support@harekrishnamedical.com
-- 📱 **Support Hours**: Monday-Friday, 9 AM - 6 PM IST
-
 ### **Getting Help**
 
-#### **Common Issues**
+- 📚 **Setup Guide**: Visit `/localsetup-guide` in the application
+- 🔍 **Troubleshooting**: Check the Local Setup Guide for common issues
+- 📧 **Email**: technical-support@harekrishnamedical.com
+- 🐛 **Bug Reports**: Create GitHub issues with detailed descriptions
 
-1. **Installation Problems**: Check prerequisites and setup guide
-2. **Database Connection**: Verify MongoDB service and connection string
-3. **Environment Configuration**: Ensure all required variables are set
-4. **Port Conflicts**: Use different ports or kill existing processes
+### **Common Issues & Solutions**
 
-#### **Troubleshooting Steps**
+#### **Database Connection Issues**
 
-1. Check the **[Local Setup Guide](http://localhost:5173/localsetup-guide)**
-2. Review error logs in browser console and terminal
-3. Verify environment variables are correctly set
-4. Ensure all dependencies are installed
-5. Check MongoDB connection and authentication
+```bash
+# Check MongoDB service
+sudo systemctl status mongod  # Linux
+brew services list | grep mongodb  # macOS
 
-#### **Performance Issues**
+# Test connection
+mongosh "mongodb://localhost:27017/hare_krishna_medical"
+```
 
-- Monitor database query performance
-- Check for memory leaks in browser dev tools
-- Optimize image sizes and formats
-- Review network requests in dev tools
+#### **Port Conflicts**
+
+```bash
+# Find process using port
+lsof -i :5000  # Backend port
+lsof -i :5173  # Frontend port
+
+# Kill process if needed
+kill -9 <PID>
+```
+
+#### **Environment Variables**
+
+```bash
+# Verify environment variables are loaded
+cd backend && node -e "console.log(process.env.MONGODB_URI)"
+```
 
 ---
 
 <div align="center">
 
-**Built with ❤️ for the Healthcare Community**
+**🕉️ Built with Love for the Healthcare Community 🏥**
 
-Made by [Your Team] | © 2024 Hare Krishna Medical Store
+**Made by Hare Krishna Medical Team | © 2024**
 
 [![GitHub stars](https://img.shields.io/github/stars/your-username/hare-krishna-medical-store?style=social)](https://github.com/your-username/hare-krishna-medical-store)
 [![GitHub forks](https://img.shields.io/github/forks/your-username/hare-krishna-medical-store?style=social)](https://github.com/your-username/hare-krishna-medical-store)
+
+**Visit the application: [Local Setup Guide](http://localhost:5173/localsetup-guide)**
 
 </div>
