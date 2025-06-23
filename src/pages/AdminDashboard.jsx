@@ -164,9 +164,15 @@ const AdminDashboard = () => {
                     <ThemeButton
                       as={Link}
                       to="/admin/products"
-                      icon="bi bi-plus-circle"
+                      icon="bi bi-plus-circle-fill"
                       className="w-100"
+                      style={{
+                        background: "linear-gradient(135deg, #28a745, #20c997)",
+                        border: "none",
+                        transition: "all 0.3s ease",
+                      }}
                     >
+                      <i className="bi bi-box-seam me-2"></i>
                       Add Product
                     </ThemeButton>
                   </Col>
@@ -175,10 +181,16 @@ const AdminDashboard = () => {
                       as={Link}
                       to="/admin/orders"
                       variant="outline"
-                      icon="bi bi-bag-check"
+                      icon="bi bi-clipboard2-check-fill"
                       className="w-100"
+                      style={{
+                        borderColor: "#17a2b8",
+                        color: "#17a2b8",
+                        transition: "all 0.3s ease",
+                      }}
                     >
-                      Manage Orders
+                      <i className="bi bi-clipboard2-check me-2"></i>
+                      Order Management
                     </ThemeButton>
                   </Col>
                   <Col md={3}>
@@ -186,10 +198,16 @@ const AdminDashboard = () => {
                       as={Link}
                       to="/admin/users"
                       variant="outline"
-                      icon="bi bi-people"
+                      icon="bi bi-people-fill"
                       className="w-100"
+                      style={{
+                        borderColor: "#6f42c1",
+                        color: "#6f42c1",
+                        transition: "all 0.3s ease",
+                      }}
                     >
-                      Manage Users
+                      <i className="bi bi-people-fill me-2"></i>
+                      User Management
                     </ThemeButton>
                   </Col>
                   <Col md={3}>
@@ -197,10 +215,16 @@ const AdminDashboard = () => {
                       as={Link}
                       to="/admin/analytics"
                       variant="outline"
-                      icon="bi bi-graph-up"
+                      icon="bi bi-graph-up-arrow"
                       className="w-100"
+                      style={{
+                        borderColor: "#fd7e14",
+                        color: "#fd7e14",
+                        transition: "all 0.3s ease",
+                      }}
                     >
-                      View Analytics
+                      <i className="bi bi-graph-up-arrow me-2"></i>
+                      Analytics Dashboard
                     </ThemeButton>
                   </Col>
                 </Row>
