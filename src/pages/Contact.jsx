@@ -766,7 +766,7 @@ const Contact = () => {
                       <i className="bi bi-instagram"></i>
                     </a>
                     <a
-                      href="mailto:harekrishnamedical@gmail.com"
+                      href="mailto:hkmedicalamroli@gmail.com"
                       style={{
                         width: "50px",
                         height: "50px",
