@@ -132,15 +132,17 @@ const Home = () => {
                       color: "white",
                       display: "flex",
                       alignItems: "center",
-                      gap: "8px"
+                      gap: "8px",
                     }}
                     onMouseOver={(e) => {
                       e.target.style.transform = "translateY(-2px)";
-                      e.target.style.boxShadow = "0 8px 25px rgba(230, 57, 70, 0.4)";
+                      e.target.style.boxShadow =
+                        "0 8px 25px rgba(230, 57, 70, 0.4)";
                     }}
                     onMouseOut={(e) => {
                       e.target.style.transform = "translateY(0)";
-                      e.target.style.boxShadow = "0 6px 20px rgba(230, 57, 70, 0.3)";
+                      e.target.style.boxShadow =
+                        "0 6px 20px rgba(230, 57, 70, 0.3)";
                     }}
                   >
                     <i className="bi bi-cart-plus-fill"></i>
@@ -162,21 +164,19 @@ const Home = () => {
                       transition: "all 0.3s ease",
                       display: "flex",
                       alignItems: "center",
-                      gap: "8px"
-                      borderRadius: "8px",
-                      padding: "14px 28px",
-                      fontSize: "16px",
-                      fontWeight: "600",
-                      transition: "all 0.3s ease",
+                      gap: "8px",
                     }}
                     onMouseOver={(e) => {
-                      e.target.style.background = "#343a40";
-                      e.target.style.borderColor = "#343a40";
+                      e.target.style.background = "#e63946";
+                      e.target.style.borderColor = "#e63946";
                       e.target.style.color = "white";
+                      e.target.style.transform = "translateY(-2px)";
                     }}
                     onMouseOut={(e) => {
                       e.target.style.background = "transparent";
                       e.target.style.borderColor = "#e63946";
+                      e.target.style.color = "#e63946";
+                      e.target.style.transform = "translateY(0)";
                       e.target.style.color = "#e63946";
                     }}
                   >
