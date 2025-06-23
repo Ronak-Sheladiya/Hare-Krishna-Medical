@@ -93,7 +93,7 @@ class ErrorBoundary extends React.Component {
                     </p>
 
                     {/* Error Details - Only show in development */}
-                    {process.env.NODE_ENV === "development" && (
+                    {import.meta.env.DEV && (
                       <div className="mb-4">
                         <details
                           style={{
