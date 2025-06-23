@@ -9,15 +9,50 @@ import {
   Button,
   Form,
   ProgressBar,
-  Dropdown,
+  Modal,
+  Spinner,
+  Alert,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from "chart.js";
+import { Line, Bar, Doughnut, Pie } from "react-chartjs-2";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+);
 
 const AdminAnalytics = () => {
   const [dateRange, setDateRange] = useState("last30days");
   const [selectedMetric, setSelectedMetric] = useState("revenue");
+  const [loading, setLoading] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportType, setReportType] = useState("");
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
-  // Mock analytics data
+  // Mock analytics data with time series
   const analyticsData = {
     overview: {
       totalRevenue: 156750.75,
@@ -37,6 +72,109 @@ const AdminAnalytics = () => {
       revenueGrowth: 12.5,
       orderGrowth: 8.3,
       customerGrowth: 15.2,
+    },
+    // Time series data for charts
+    revenueChart: {
+      labels: [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ],
+      datasets: [
+        {
+          label: "Revenue",
+          data: [
+            12000, 19000, 15000, 25000, 22000, 30000, 28000, 35000, 32000,
+            40000, 38000, 45000,
+          ],
+          borderColor: "#e63946",
+          backgroundColor: "rgba(230, 57, 70, 0.1)",
+          tension: 0.4,
+          fill: true,
+        },
+        {
+          label: "Target",
+          data: [
+            15000, 20000, 18000, 28000, 25000, 32000, 30000, 38000, 35000,
+            42000, 40000, 48000,
+          ],
+          borderColor: "#28a745",
+          backgroundColor: "rgba(40, 167, 69, 0.1)",
+          tension: 0.4,
+          borderDash: [5, 5],
+        },
+      ],
+    },
+    ordersChart: {
+      labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      datasets: [
+        {
+          label: "Orders",
+          data: [65, 59, 80, 81, 56, 55, 40],
+          backgroundColor: [
+            "#e63946",
+            "#dc3545",
+            "#28a745",
+            "#20c997",
+            "#17a2b8",
+            "#6f42c1",
+            "#fd7e14",
+          ],
+          borderColor: [
+            "#e63946",
+            "#dc3545",
+            "#28a745",
+            "#20c997",
+            "#17a2b8",
+            "#6f42c1",
+            "#fd7e14",
+          ],
+          borderWidth: 1,
+        },
+      ],
+    },
+    categoryChart: {
+      labels: [
+        "Pain Relief",
+        "Vitamins",
+        "Equipment",
+        "Cough & Cold",
+        "First Aid",
+      ],
+      datasets: [
+        {
+          data: [35, 25, 20, 15, 5],
+          backgroundColor: [
+            "#e63946",
+            "#28a745",
+            "#17a2b8",
+            "#ffc107",
+            "#6f42c1",
+          ],
+          borderColor: ["#dc3545", "#20c997", "#138496", "#e0a800", "#6610f2"],
+          borderWidth: 2,
+        },
+      ],
+    },
+    paymentMethodChart: {
+      labels: ["Online Payment", "Cash on Delivery"],
+      datasets: [
+        {
+          data: [63, 37],
+          backgroundColor: ["#28a745", "#ffc107"],
+          borderColor: ["#20c997", "#e0a800"],
+          borderWidth: 2,
+        },
+      ],
     },
     topProducts: [
       {
@@ -72,23 +210,12 @@ const AdminAnalytics = () => {
         growth: 8.7,
       },
     ],
-    customerMetrics: {
-      newCustomers: 124,
-      returningCustomers: 732,
-      customerLifetimeValue: 450.75,
-      averageSessionDuration: "4m 32s",
-      bounceRate: 35.2,
-    },
     regionData: [
       { region: "Surat", orders: 456, revenue: 68940.5, percentage: 44.0 },
       { region: "Ahmedabad", orders: 312, revenue: 43250.25, percentage: 27.6 },
       { region: "Vadodara", orders: 198, revenue: 28750.0, percentage: 18.3 },
       { region: "Rajkot", orders: 156, revenue: 15810.0, percentage: 10.1 },
     ],
-    paymentMethods: {
-      online: { count: 785, percentage: 63.0 },
-      cod: { count: 462, percentage: 37.0 },
-    },
   };
 
   // Enhanced Button Component
@@ -310,17 +437,243 @@ const AdminAnalytics = () => {
     </Card>
   );
 
+  // Chart options
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "top",
+        labels: {
+          usePointStyle: true,
+          padding: 20,
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: "rgba(0,0,0,0.05)",
+        },
+      },
+      x: {
+        grid: {
+          color: "rgba(0,0,0,0.05)",
+        },
+      },
+    },
+  };
+
+  const pieChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "bottom",
+        labels: {
+          usePointStyle: true,
+          padding: 20,
+        },
+      },
+    },
+  };
+
+  // Quick Actions Functions
+  const handleGenerateSalesReport = () => {
+    setLoading(true);
+    setReportType("sales");
+    setShowReportModal(true);
+
+    // Simulate report generation
+    setTimeout(() => {
+      setLoading(false);
+      const salesData = [
+        { Month: "January", Revenue: 12000, Orders: 125, Growth: "8.5%" },
+        { Month: "February", Revenue: 19000, Orders: 189, Growth: "58.3%" },
+        { Month: "March", Revenue: 15000, Orders: 145, Growth: "-21.1%" },
+        { Month: "April", Revenue: 25000, Orders: 234, Growth: "66.7%" },
+        { Month: "May", Revenue: 22000, Orders: 201, Growth: "-12.0%" },
+        { Month: "June", Revenue: 30000, Orders: 267, Growth: "36.4%" },
+      ];
+
+      const ws = XLSX.utils.json_to_sheet(salesData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
+      XLSX.writeFile(
+        wb,
+        `sales-report-${new Date().toISOString().split("T")[0]}.xlsx`,
+      );
+
+      setAlertMessage("Sales report generated and downloaded successfully!");
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
+    }, 2000);
+  };
+
+  const handleCustomerAnalysis = () => {
+    setLoading(true);
+    setReportType("customer");
+    setShowReportModal(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      const customerData = [
+        {
+          Segment: "New Customers",
+          Count: 124,
+          Percentage: "14.5%",
+          Revenue: "₹15,680",
+        },
+        {
+          Segment: "Returning Customers",
+          Count: 732,
+          Percentage: "85.5%",
+          Revenue: "₹141,070",
+        },
+        {
+          Segment: "VIP Customers",
+          Count: 45,
+          Percentage: "5.3%",
+          Revenue: "₹67,890",
+        },
+        {
+          Segment: "At-Risk Customers",
+          Count: 89,
+          Percentage: "10.4%",
+          Revenue: "₹12,340",
+        },
+      ];
+
+      const ws = XLSX.utils.json_to_sheet(customerData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Customer Analysis");
+      XLSX.writeFile(
+        wb,
+        `customer-analysis-${new Date().toISOString().split("T")[0]}.xlsx`,
+      );
+
+      setAlertMessage(
+        "Customer analysis report generated and downloaded successfully!",
+      );
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
+    }, 2000);
+  };
+
+  const handleInventoryReport = () => {
+    setLoading(true);
+    setReportType("inventory");
+    setShowReportModal(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      const inventoryData = [
+        {
+          Product: "Paracetamol Tablets",
+          Stock: 1245,
+          Status: "In Stock",
+          Reorder: "No",
+        },
+        {
+          Product: "Vitamin D3 Capsules",
+          Stock: 5,
+          Status: "Low Stock",
+          Reorder: "Yes",
+        },
+        {
+          Product: "Cough Syrup",
+          Stock: 0,
+          Status: "Out of Stock",
+          Reorder: "Urgent",
+        },
+        { Product: "BP Monitor", Stock: 23, Status: "Normal", Reorder: "No" },
+        {
+          Product: "First Aid Kit",
+          Stock: 8,
+          Status: "Low Stock",
+          Reorder: "Yes",
+        },
+      ];
+
+      const ws = XLSX.utils.json_to_sheet(inventoryData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Inventory Report");
+      XLSX.writeFile(
+        wb,
+        `inventory-report-${new Date().toISOString().split("T")[0]}.xlsx`,
+      );
+
+      setAlertMessage(
+        "Inventory report generated and downloaded successfully!",
+      );
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
+    }, 2000);
+  };
+
+  const handleRevenueBreakdown = () => {
+    setLoading(true);
+    setReportType("revenue");
+    setShowReportModal(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      const revenueData = [
+        {
+          Category: "Pain Relief",
+          Revenue: 54890,
+          Percentage: "35.0%",
+          Profit: "₹16,467",
+        },
+        {
+          Category: "Vitamins",
+          Revenue: 39187,
+          Percentage: "25.0%",
+          Profit: "₹11,756",
+        },
+        {
+          Category: "Equipment",
+          Revenue: 31350,
+          Percentage: "20.0%",
+          Profit: "₹9,405",
+        },
+        {
+          Category: "Cough & Cold",
+          Revenue: 23512,
+          Percentage: "15.0%",
+          Profit: "₹7,054",
+        },
+        {
+          Category: "Others",
+          Revenue: 7811,
+          Percentage: "5.0%",
+          Profit: "₹2,343",
+        },
+      ];
+
+      const ws = XLSX.utils.json_to_sheet(revenueData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Revenue Breakdown");
+      XLSX.writeFile(
+        wb,
+        `revenue-breakdown-${new Date().toISOString().split("T")[0]}.xlsx`,
+      );
+
+      setAlertMessage(
+        "Revenue breakdown report generated and downloaded successfully!",
+      );
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
+    }, 2000);
+  };
+
   // Format currency
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: "INR",
     }).format(amount);
-  };
-
-  // Get growth trend
-  const getTrendColor = (growth) => {
-    return growth > 0 ? "#28a745" : growth < 0 ? "#dc3545" : "#6c757d";
   };
 
   return (
@@ -334,6 +687,27 @@ const AdminAnalytics = () => {
         }}
       >
         <Container>
+          {/* Alert */}
+          {showAlert && (
+            <Row className="mb-4">
+              <Col lg={12}>
+                <Alert
+                  variant="success"
+                  onClose={() => setShowAlert(false)}
+                  dismissible
+                  style={{
+                    borderRadius: "12px",
+                    border: "none",
+                    background: "linear-gradient(135deg, #d4edda, #c3e6cb)",
+                  }}
+                >
+                  <i className="bi bi-check-circle me-2"></i>
+                  {alertMessage}
+                </Alert>
+              </Col>
+            </Row>
+          )}
+
           {/* Enhanced Header */}
           <Row className="mb-4">
             <Col lg={12}>
@@ -382,13 +756,6 @@ const AdminAnalytics = () => {
                     icon="bi bi-arrow-clockwise"
                   >
                     Refresh
-                  </EnhancedButton>
-                  <EnhancedButton
-                    variant="success"
-                    onClick={() => {}}
-                    icon="bi bi-download"
-                  >
-                    Export
                   </EnhancedButton>
                 </div>
               </div>
@@ -445,71 +812,137 @@ const AdminAnalytics = () => {
             </Col>
           </Row>
 
-          {/* Secondary Metrics */}
+          {/* Charts Section */}
           <Row className="mb-5 g-4">
-            <Col lg={2} md={4} sm={6}>
-              <CircularStatCard
-                icon="bi bi-percent"
-                value={`${analyticsData.overview.conversionRate}%`}
-                label="Conversion Rate"
-                gradient="linear-gradient(135deg, #fd7e14, #ffc107)"
-                description="Visitor to customer"
-              />
+            {/* Revenue Chart */}
+            <Col lg={8}>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                }}
+              >
+                <Card.Header
+                  style={{
+                    background: "linear-gradient(135deg, #e63946, #dc3545)",
+                    color: "white",
+                    borderRadius: "16px 16px 0 0",
+                    padding: "20px 25px",
+                  }}
+                >
+                  <h5 className="mb-0" style={{ fontWeight: "700" }}>
+                    <i className="bi bi-graph-up me-2"></i>
+                    Revenue Trend Analysis
+                  </h5>
+                </Card.Header>
+                <Card.Body style={{ padding: "25px", height: "400px" }}>
+                  <Line
+                    data={analyticsData.revenueChart}
+                    options={chartOptions}
+                  />
+                </Card.Body>
+              </Card>
             </Col>
 
-            <Col lg={2} md={4} sm={6}>
-              <CircularStatCard
-                icon="bi bi-arrow-repeat"
-                value={`${analyticsData.overview.repeatCustomerRate}%`}
-                label="Repeat Customers"
-                gradient="linear-gradient(135deg, #20c997, #28a745)"
-                description="Customer retention"
-              />
-            </Col>
-
-            <Col lg={2} md={4} sm={6}>
-              <CircularStatCard
-                icon="bi bi-tags"
-                value={analyticsData.overview.topSellingCategories}
-                label="Top Categories"
-                gradient="linear-gradient(135deg, #6610f2, #6f42c1)"
-                description="Product categories"
-              />
-            </Col>
-
-            <Col lg={2} md={4} sm={6}>
-              <CircularStatCard
-                icon="bi bi-exclamation-triangle"
-                value={analyticsData.overview.lowStockItems}
-                label="Low Stock"
-                gradient="linear-gradient(135deg, #dc3545, #e63946)"
-                badge="Attention needed"
-                description="Items need restock"
-              />
-            </Col>
-
-            <Col lg={2} md={4} sm={6}>
-              <CircularStatCard
-                icon="bi bi-credit-card"
-                value={`${analyticsData.paymentMethods.online.percentage}%`}
-                label="Online Payments"
-                gradient="linear-gradient(135deg, #17a2b8, #20c997)"
-                description="Digital transactions"
-              />
-            </Col>
-
-            <Col lg={2} md={4} sm={6}>
-              <CircularStatCard
-                icon="bi bi-cash-coin"
-                value={`${analyticsData.paymentMethods.cod.percentage}%`}
-                label="COD Payments"
-                gradient="linear-gradient(135deg, #ffc107, #fd7e14)"
-                description="Cash on delivery"
-              />
+            {/* Orders Chart */}
+            <Col lg={4}>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                }}
+              >
+                <Card.Header
+                  style={{
+                    background: "linear-gradient(135deg, #28a745, #20c997)",
+                    color: "white",
+                    borderRadius: "16px 16px 0 0",
+                    padding: "20px 25px",
+                  }}
+                >
+                  <h6 className="mb-0" style={{ fontWeight: "700" }}>
+                    <i className="bi bi-bar-chart me-2"></i>
+                    Weekly Orders
+                  </h6>
+                </Card.Header>
+                <Card.Body style={{ padding: "25px", height: "400px" }}>
+                  <Bar
+                    data={analyticsData.ordersChart}
+                    options={chartOptions}
+                  />
+                </Card.Body>
+              </Card>
             </Col>
           </Row>
 
-          {/* Analytics Tables and Charts */}
+          {/* Secondary Charts */}
+          <Row className="mb-5 g-4">
+            {/* Category Distribution */}
+            <Col lg={6}>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                }}
+              >
+                <Card.Header
+                  style={{
+                    background: "linear-gradient(135deg, #6f42c1, #6610f2)",
+                    color: "white",
+                    borderRadius: "16px 16px 0 0",
+                    padding: "20px 25px",
+                  }}
+                >
+                  <h6 className="mb-0" style={{ fontWeight: "700" }}>
+                    <i className="bi bi-pie-chart me-2"></i>
+                    Sales by Category
+                  </h6>
+                </Card.Header>
+                <Card.Body style={{ padding: "25px", height: "350px" }}>
+                  <Doughnut
+                    data={analyticsData.categoryChart}
+                    options={pieChartOptions}
+                  />
+                </Card.Body>
+              </Card>
+            </Col>
+
+            {/* Payment Methods */}
+            <Col lg={6}>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                }}
+              >
+                <Card.Header
+                  style={{
+                    background: "linear-gradient(135deg, #17a2b8, #20c997)",
+                    color: "white",
+                    borderRadius: "16px 16px 0 0",
+                    padding: "20px 25px",
+                  }}
+                >
+                  <h6 className="mb-0" style={{ fontWeight: "700" }}>
+                    <i className="bi bi-credit-card me-2"></i>
+                    Payment Methods
+                  </h6>
+                </Card.Header>
+                <Card.Body style={{ padding: "25px", height: "350px" }}>
+                  <Pie
+                    data={analyticsData.paymentMethodChart}
+                    options={pieChartOptions}
+                  />
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
+          {/* Analytics Tables and Actions */}
           <Row className="g-4">
             {/* Top Products */}
             <Col lg={8}>
@@ -691,106 +1124,8 @@ const AdminAnalytics = () => {
               </Card>
             </Col>
 
-            {/* Regional Performance */}
+            {/* Quick Actions */}
             <Col lg={4}>
-              <Card
-                style={{
-                  border: "none",
-                  borderRadius: "16px",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
-                  marginBottom: "20px",
-                }}
-              >
-                <Card.Header
-                  style={{
-                    background: "linear-gradient(135deg, #6f42c1, #6610f2)",
-                    color: "white",
-                    borderRadius: "16px 16px 0 0",
-                    padding: "20px 25px",
-                  }}
-                >
-                  <h6 className="mb-0" style={{ fontWeight: "700" }}>
-                    <i className="bi bi-geo-alt me-2"></i>
-                    Regional Performance
-                  </h6>
-                </Card.Header>
-                <Card.Body style={{ padding: "20px" }}>
-                  {analyticsData.regionData.map((region, index) => (
-                    <div
-                      key={region.region}
-                      style={{
-                        background: "#f8f9fa",
-                        borderRadius: "12px",
-                        padding: "15px",
-                        marginBottom: "15px",
-                        transition: "all 0.3s ease",
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.transform = "translateY(-2px)";
-                        e.currentTarget.style.boxShadow =
-                          "0 5px 15px rgba(0, 0, 0, 0.1)";
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.transform = "translateY(0)";
-                        e.currentTarget.style.boxShadow = "none";
-                      }}
-                    >
-                      <div className="d-flex justify-content-between align-items-center mb-2">
-                        <div style={{ fontWeight: "600", color: "#333" }}>
-                          {region.region}
-                        </div>
-                        <Badge
-                          style={{
-                            background: `linear-gradient(135deg, ${
-                              index === 0
-                                ? "#e63946, #dc3545"
-                                : index === 1
-                                  ? "#28a745, #20c997"
-                                  : index === 2
-                                    ? "#ffc107, #fd7e14"
-                                    : "#6f42c1, #6610f2"
-                            })`,
-                            color: "white",
-                            fontSize: "10px",
-                            fontWeight: "600",
-                          }}
-                        >
-                          {region.percentage}%
-                        </Badge>
-                      </div>
-                      <div className="d-flex justify-content-between align-items-center mb-2">
-                        <small style={{ color: "#6c757d" }}>
-                          {region.orders} orders
-                        </small>
-                        <div
-                          style={{
-                            fontWeight: "700",
-                            color: "#28a745",
-                            fontSize: "14px",
-                          }}
-                        >
-                          {formatCurrency(region.revenue)}
-                        </div>
-                      </div>
-                      <ProgressBar
-                        now={region.percentage}
-                        style={{ height: "6px", borderRadius: "3px" }}
-                        variant={
-                          index === 0
-                            ? "danger"
-                            : index === 1
-                              ? "success"
-                              : index === 2
-                                ? "warning"
-                                : "primary"
-                        }
-                      />
-                    </div>
-                  ))}
-                </Card.Body>
-              </Card>
-
-              {/* Quick Actions */}
               <Card
                 style={{
                   border: "none",
@@ -812,10 +1147,10 @@ const AdminAnalytics = () => {
                   </h6>
                 </Card.Header>
                 <Card.Body style={{ padding: "20px" }}>
-                  <div className="d-grid gap-2">
+                  <div className="d-grid gap-3">
                     <EnhancedButton
                       variant="outline"
-                      onClick={() => {}}
+                      onClick={handleGenerateSalesReport}
                       icon="bi bi-graph-up"
                       style={{
                         justifyContent: "flex-start",
@@ -826,7 +1161,7 @@ const AdminAnalytics = () => {
                     </EnhancedButton>
                     <EnhancedButton
                       variant="outline"
-                      onClick={() => {}}
+                      onClick={handleCustomerAnalysis}
                       icon="bi bi-people"
                       style={{
                         justifyContent: "flex-start",
@@ -837,7 +1172,7 @@ const AdminAnalytics = () => {
                     </EnhancedButton>
                     <EnhancedButton
                       variant="outline"
-                      onClick={() => {}}
+                      onClick={handleInventoryReport}
                       icon="bi bi-box-seam"
                       style={{
                         justifyContent: "flex-start",
@@ -848,7 +1183,7 @@ const AdminAnalytics = () => {
                     </EnhancedButton>
                     <EnhancedButton
                       variant="outline"
-                      onClick={() => {}}
+                      onClick={handleRevenueBreakdown}
                       icon="bi bi-cash-stack"
                       style={{
                         justifyContent: "flex-start",
@@ -864,6 +1199,64 @@ const AdminAnalytics = () => {
           </Row>
         </Container>
       </section>
+
+      {/* Report Generation Modal */}
+      <Modal
+        show={showReportModal}
+        onHide={() => setShowReportModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <i className="bi bi-file-earmark-text me-2"></i>
+            Generating Report
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="text-center py-4">
+          {loading ? (
+            <>
+              <Spinner
+                animation="border"
+                variant="primary"
+                style={{ width: "3rem", height: "3rem" }}
+              />
+              <h5 className="mt-3">Generating {reportType} report...</h5>
+              <p className="text-muted">
+                Please wait while we compile your data
+              </p>
+            </>
+          ) : (
+            <>
+              <div
+                style={{
+                  width: "60px",
+                  height: "60px",
+                  background: "linear-gradient(135deg, #28a745, #20c997)",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 20px",
+                }}
+              >
+                <i
+                  className="bi bi-check-lg"
+                  style={{ fontSize: "24px", color: "white" }}
+                ></i>
+              </div>
+              <h5>Report Generated Successfully!</h5>
+              <p className="text-muted">
+                Your report has been downloaded to your device
+              </p>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowReportModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
