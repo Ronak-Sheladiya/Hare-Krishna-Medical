@@ -59,14 +59,21 @@ const Products = () => {
         limit: 50, // Get more products for better filtering
       });
 
+      // Add timeout to fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
       const response = await fetch(
         `${API_BASE_URL}/api/products/public?${queryParams}`,
         {
           headers: {
             "Content-Type": "application/json",
           },
+          signal: controller.signal,
         },
       );
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         // If API fails, don't show error - just show empty state
@@ -90,7 +97,15 @@ const Products = () => {
         dispatch(setFeaturedProducts([]));
       }
     } catch (error) {
-      console.warn("Error fetching products:", error);
+      // Handle different types of errors gracefully
+      if (error.name === "AbortError") {
+        console.warn("Products fetch timed out - showing empty state");
+      } else if (error.message === "Failed to fetch") {
+        console.warn("Backend API not available - showing empty state");
+      } else {
+        console.warn("Error fetching products:", error);
+      }
+
       // Don't show error to user - gracefully degrade to empty state
       dispatch(setProducts([]));
       dispatch(setFeaturedProducts([]));
