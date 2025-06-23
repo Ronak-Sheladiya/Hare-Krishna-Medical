@@ -314,16 +314,15 @@ const Header = () => {
       {/* Header Styling */}
       <style jsx>{`
         .medical-logo {
-          width: 60px;
-          height: 60px;
-          border-radius: 12px;
-          box-shadow: 0 4px 16px rgba(230, 57, 70, 0.25);
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
           transition: all 0.3s ease;
+          object-fit: contain;
         }
 
         .medical-logo:hover {
           transform: scale(1.05);
-          box-shadow: 0 6px 20px rgba(230, 57, 70, 0.35);
         }
 
         .nav-link {
