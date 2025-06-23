@@ -115,7 +115,8 @@
     height: 50px !important;
   }
 }
-  /* Ensure invoice takes full width */
+
+/* Ensure invoice takes full width */
   .invoice-content,
   .professional-invoice {
     width: 210mm !important;
