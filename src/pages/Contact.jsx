@@ -13,6 +13,7 @@ import {
 import { useDispatch } from "react-redux";
 import { addMessage } from "../store/slices/messageSlice";
 import { getCurrentISOString } from "../utils/dateUtils";
+import { PageHeroSection } from "../components/common/ConsistentTheme";
 
 const Contact = () => {
   const dispatch = useDispatch();
@@ -203,7 +204,7 @@ const Contact = () => {
                 </h5>
                 <p
                   style={{ color: "#495057", marginBottom: "20px" }}
-                  className="contact-address contact-info-selectable"
+                  className="selectable-contact"
                   data-contact-info="address"
                 >
                   3 Sahyog Complex, Man Sarovar Circle
@@ -298,26 +299,26 @@ const Contact = () => {
                 </h5>
                 <p
                   style={{ color: "#495057", marginBottom: "8px" }}
-                  className="contact-phone contact-info-selectable"
+                  className="selectable-contact"
                   data-contact-info="phone"
                 >
                   <a
                     href="tel:+917698913354"
                     style={{ textDecoration: "none", color: "#495057" }}
-                    className="contact-info-selectable"
+                    className="selectable-contact"
                   >
                     +91 76989 13354
                   </a>
                 </p>
                 <p
                   style={{ color: "#495057", marginBottom: "20px" }}
-                  className="contact-phone contact-info-selectable"
+                  className="selectable-contact"
                   data-contact-info="phone"
                 >
                   <a
                     href="tel:+919106018508"
                     style={{ textDecoration: "none", color: "#495057" }}
-                    className="contact-info-selectable"
+                    className="selectable-contact"
                   >
                     +91 91060 18508
                   </a>
@@ -412,13 +413,13 @@ const Contact = () => {
                 </h5>
                 <p
                   style={{ color: "#495057", marginBottom: "20px" }}
-                  className="contact-email contact-info-selectable"
+                  className="selectable-contact"
                   data-contact-info="email"
                 >
                   <a
                     href="mailto:hkmedicalamroli@gmail.com"
                     style={{ textDecoration: "none", color: "#495057" }}
-                    className="contact-info-selectable"
+                    className="selectable-contact"
                   >
                     hkmedicalamroli@gmail.com
                   </a>

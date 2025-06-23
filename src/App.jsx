@@ -17,10 +17,11 @@ import Header from "./components/layout/Header.jsx";
 import Footer from "./components/layout/Footer.jsx";
 import LoadingSpinner from "./components/common/LoadingSpinner.jsx";
 import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
-import CrossTabSync from "./components/common/CrossTabSync.jsx";
 import RealTimeSync from "./components/common/RealTimeSync.jsx";
 import RealTimeStatus from "./components/common/RealTimeStatus.jsx";
 import SocketDiagnostic from "./components/common/SocketDiagnostic.jsx";
+import SessionStatus from "./components/common/SessionStatus.jsx";
+import SecurityLayer from "./components/common/SecurityLayer.jsx";
 
 // Pages
 import Home from "./pages/Home.jsx";
@@ -66,6 +67,7 @@ import socketClient from "./utils/socketClient.simple";
 
 // Styles
 import "./App.css";
+import "./styles/SecurityStyles.css";
 
 // ScrollToTop Component
 const ScrollToTop = () => {
@@ -227,7 +229,7 @@ function App() {
     <Router>
       <ErrorBoundary>
         <div className="App">
-          <CrossTabSync />
+          <SecurityLayer />
           <RealTimeSync />
           <ScrollToTop />
           <Header />
@@ -458,6 +460,9 @@ function App() {
           </main>
           {/* Footer displayed on all pages */}
           <Footer />
+
+          {/* Session Status Debug Component (Development Only) - Hidden for production */}
+          {/* <SessionStatus showDebug={process.env.NODE_ENV === 'development'} /> */}
 
           {/* Socket diagnostic tool route handled separately */}
         </div>

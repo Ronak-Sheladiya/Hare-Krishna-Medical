@@ -10,13 +10,13 @@ const ProfessionalLoading = ({
   const getSizeConfig = () => {
     switch (size) {
       case "sm":
-        return { logoSize: 50, containerSize: 100, fontSize: "0.9rem" };
+        return { logoSize: 40, containerSize: 80, fontSize: "0.9rem" };
       case "lg":
-        return { logoSize: 90, containerSize: 180, fontSize: "1.2rem" };
+        return { logoSize: 70, containerSize: 140, fontSize: "1.2rem" };
       case "xl":
-        return { logoSize: 130, containerSize: 260, fontSize: "1.4rem" };
+        return { logoSize: 90, containerSize: 180, fontSize: "1.4rem" };
       default:
-        return { logoSize: 70, containerSize: 140, fontSize: "1rem" };
+        return { logoSize: 55, containerSize: 110, fontSize: "1rem" };
     }
   };
 
@@ -55,72 +55,109 @@ const ProfessionalLoading = ({
 
   return (
     <div style={containerStyle}>
-      {/* Rotating Logo Container */}
-      <div style={{ position: "relative" }}>
+      {/* Centered Loading Animation with Logo */}
+      <div
+        style={{
+          position: "relative",
+          marginBottom: "20px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: containerSize + 60,
+          height: containerSize + 60,
+        }}
+      >
         {/* Outer Rotating Ring */}
         <div
           style={{
-            width: containerSize,
-            height: containerSize,
-            border: `4px solid ${color}20`,
-            borderTop: `4px solid ${color}`,
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: containerSize + 30,
+            height: containerSize + 30,
+            border: `3px solid transparent`,
+            borderTop: `3px solid ${color}`,
+            borderRight: `3px solid ${color}60`,
             borderRadius: "50%",
-            animation: "spin 1.5s linear infinite",
+            animation: "spin 2s linear infinite",
+            filter: `drop-shadow(0 4px 12px ${color}40)`,
+            zIndex: 1,
+          }}
+        />
+
+        {/* Company Logo - Perfectly Centered */}
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: logoSize + 20,
+            height: logoSize + 20,
+            background: "white",
+            borderRadius: "50%",
+            border: `3px solid ${color}30`,
+            boxShadow: `0 8px 32px ${color}20, 0 4px 16px rgba(0,0,0,0.08)`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            position: "relative",
-            filter: `drop-shadow(0 4px 8px ${color}30)`,
+            animation: "logoFloat 2.5s ease-in-out infinite",
+            zIndex: 3,
           }}
         >
-          {/* Inner White Circle with Logo */}
+          <img
+            src="https://cdn.builder.io/api/v1/assets/72c59d801d5945d4830160c2c2f8a610/hk-34b526?format=webp&width=800"
+            alt="Hare Krishna Medical"
+            style={{
+              width: logoSize,
+              height: logoSize,
+              objectFit: "contain",
+              animation: "logoSpin 3s ease-in-out infinite",
+            }}
+            onError={(e) => {
+              e.target.style.display = "none";
+              e.target.nextSibling.style.display = "flex";
+            }}
+          />
+          {/* Fallback when image fails to load */}
           <div
             style={{
-              width: logoSize + 30,
-              height: logoSize + 30,
-              background: "white",
+              display: "none",
+              width: logoSize,
+              height: logoSize,
+              background: `linear-gradient(135deg, ${color}, ${color}dd)`,
               borderRadius: "50%",
-              border: `3px solid ${color}25`,
-              boxShadow: `0 12px 40px ${color}25, inset 0 2px 4px rgba(255,255,255,0.8)`,
-              display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              animation: "logoFloat 2s ease-in-out infinite",
+              color: "white",
+              fontWeight: "900",
+              fontSize: logoSize / 2.5,
+              fontFamily: "Arial, sans-serif",
             }}
           >
-            <img
-              src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
-              alt="Loading"
-              style={{
-                width: logoSize,
-                height: logoSize,
-                objectFit: "contain",
-                animation: "pulse 1.5s ease-in-out infinite",
-              }}
-              onError={(e) => {
-                e.target.style.display = "none";
-                e.target.nextSibling.style.display = "flex";
-              }}
-            />
-            {/* Fallback when image fails to load */}
-            <div
-              style={{
-                display: "none",
-                width: logoSize,
-                height: logoSize,
-                background: `linear-gradient(135deg, ${color}, ${color}dd)`,
-                borderRadius: "50%",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontWeight: "bold",
-                fontSize: logoSize / 3,
-              }}
-            >
-              HK
-            </div>
+            HK
           </div>
         </div>
+
+        {/* Outer Rotating Ring */}
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: containerSize + 30,
+            height: containerSize + 30,
+            border: `3px solid transparent`,
+            borderTop: `3px solid ${color}`,
+            borderRight: `3px solid ${color}60`,
+            borderRadius: "50%",
+            animation: "spin 2s linear infinite",
+            filter: `drop-shadow(0 4px 12px ${color}40)`,
+            zIndex: 1,
+          }}
+        />
 
         {/* Decorative Dots */}
         <div
@@ -129,9 +166,10 @@ const ProfessionalLoading = ({
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: containerSize + 40,
-            height: containerSize + 40,
+            width: containerSize + 50,
+            height: containerSize + 50,
             pointerEvents: "none",
+            zIndex: 0,
           }}
         >
           {[0, 60, 120, 180, 240, 300].map((rotation, index) => (
@@ -187,22 +225,30 @@ const ProfessionalLoading = ({
         @keyframes logoFloat {
           0%, 100% {
             transform: translateY(0px) scale(1);
-            box-shadow: 0 12px 40px ${color}25, inset 0 2px 4px rgba(255,255,255,0.8);
+            box-shadow: 0 16px 64px ${color}25, 0 8px 32px rgba(0,0,0,0.1);
           }
           50% {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 16px 48px ${color}35, inset 0 2px 4px rgba(255,255,255,0.9);
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 20px 72px ${color}35, 0 12px 40px rgba(0,0,0,0.15);
           }
         }
 
-        @keyframes pulse {
+        @keyframes logoSpin {
           0%, 100% {
-            transform: scale(1) rotate(0deg);
+            transform: rotate(0deg) scale(1);
             opacity: 1;
           }
+          25% {
+            transform: rotate(2deg) scale(1.02);
+            opacity: 0.95;
+          }
           50% {
-            transform: scale(1.08) rotate(2deg);
+            transform: rotate(0deg) scale(1.05);
             opacity: 0.9;
+          }
+          75% {
+            transform: rotate(-2deg) scale(1.02);
+            opacity: 0.95;
           }
         }
 

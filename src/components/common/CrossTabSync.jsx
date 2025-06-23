@@ -17,12 +17,13 @@ const CrossTabSync = () => {
   useEffect(() => {
     // Handle storage events (cross-tab communication)
     const handleStorageChange = (e) => {
+      // Handle auth events
       if (e.key === "auth-event" && e.newValue) {
         try {
           const authEvent = JSON.parse(e.newValue);
 
-          // Ignore old events (older than 5 seconds)
-          if (Date.now() - authEvent.timestamp > 5000) {
+          // Ignore old events (older than 2 seconds)
+          if (Date.now() - authEvent.timestamp > 2000) {
             return;
           }
 
@@ -33,9 +34,7 @@ const CrossTabSync = () => {
                 dispatch(
                   loginSuccess({
                     user: authEvent.user,
-                    rememberMe:
-                      authEvent.rememberMe ||
-                      localStorage.getItem("user") !== null,
+                    rememberMe: authEvent.rememberMe || false,
                     skipRedirect: true, // Skip redirect for cross-tab sync
                   }),
                 );
@@ -45,10 +44,6 @@ const CrossTabSync = () => {
             case "LOGOUT":
               if (isAuthenticated) {
                 dispatch(logout());
-                // Clear the auth event to prevent loops
-                setTimeout(() => {
-                  localStorage.removeItem("auth-event");
-                }, 100);
               }
               break;
 
@@ -57,6 +52,56 @@ const CrossTabSync = () => {
           }
         } catch (error) {
           console.warn("Error parsing auth event:", error);
+        }
+      }
+
+      // Handle direct storage changes
+      if (e.key === "isAuthenticated") {
+        if (e.newValue === "false" || e.newValue === null) {
+          // User logged out in another tab
+          if (isAuthenticated) {
+            dispatch(logout());
+          }
+        } else if (e.newValue === "true" && !isAuthenticated) {
+          // User logged in in another tab - trigger auto-login
+          const storedUser =
+            localStorage.getItem("user") || sessionStorage.getItem("user");
+          if (storedUser) {
+            try {
+              const userData = JSON.parse(storedUser);
+              dispatch(
+                loginSuccess({
+                  user: userData,
+                  rememberMe: localStorage.getItem("user") !== null,
+                  skipRedirect: true,
+                }),
+              );
+            } catch (error) {
+              console.warn("Error parsing stored user for auto-login:", error);
+            }
+          }
+        }
+      }
+
+      // Handle user data changes
+      if (e.key === "user") {
+        if (e.newValue === null && isAuthenticated) {
+          // User data cleared - logout
+          dispatch(logout());
+        } else if (e.newValue && !isAuthenticated) {
+          // User data added - auto-login
+          try {
+            const userData = JSON.parse(e.newValue);
+            dispatch(
+              loginSuccess({
+                user: userData,
+                rememberMe: localStorage.getItem("user") !== null,
+                skipRedirect: true,
+              }),
+            );
+          } catch (error) {
+            console.warn("Error parsing user data:", error);
+          }
         }
       }
     };
@@ -70,10 +115,9 @@ const CrossTabSync = () => {
     };
   }, [dispatch, isAuthenticated, user]);
 
-  // Check for session validity on focus and detect changes in storage
+  // Enhanced session checking for auto-login/logout
   useEffect(() => {
-    const handleFocus = () => {
-      // Check if user is still authenticated when tab gains focus
+    const checkSession = () => {
       const storedUser =
         localStorage.getItem("user") || sessionStorage.getItem("user");
       const isStoredAuth =
@@ -94,15 +138,15 @@ const CrossTabSync = () => {
         return elapsed > maxAge;
       };
 
+      // Auto-login logic
       if (!isAuthenticated && storedUser && isStoredAuth && !isExpired()) {
-        // Auto-login if valid session exists
         try {
           const userData = JSON.parse(storedUser);
           dispatch(
             loginSuccess({
               user: userData,
               rememberMe: localStorage.getItem("user") !== null,
-              skipRedirect: true, // Skip redirect for auto-login
+              skipRedirect: true,
             }),
           );
         } catch (error) {
@@ -110,31 +154,57 @@ const CrossTabSync = () => {
           // Clear corrupted data
           localStorage.removeItem("user");
           sessionStorage.removeItem("user");
+          localStorage.removeItem("isAuthenticated");
+          sessionStorage.removeItem("isAuthenticated");
         }
-      } else if (
+      }
+
+      // Auto-logout logic
+      else if (
         isAuthenticated &&
         (!storedUser || !isStoredAuth || isExpired())
       ) {
-        // Logout if no valid session
         dispatch(logout());
       }
     };
 
-    // Check for visibility changes (tab switching)
+    // Check session immediately
+    checkSession();
+
+    // Set up periodic session checks (every 30 seconds)
+    const intervalId = setInterval(checkSession, 30000);
+
+    // Handle focus events
+    const handleFocus = () => {
+      checkSession();
+    };
+
+    // Handle visibility changes
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        handleFocus();
+        checkSession();
+      }
+    };
+
+    // Handle page load/reload
+    const handleBeforeUnload = () => {
+      // Update login time on page unload to keep session alive
+      if (isAuthenticated) {
+        const storage = localStorage.getItem("user")
+          ? localStorage
+          : sessionStorage;
+        storage.setItem("loginTime", Date.now().toString());
       }
     };
 
     window.addEventListener("focus", handleFocus);
+    window.addEventListener("beforeunload", handleBeforeUnload);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    // Check immediately on mount
-    handleFocus();
-
     return () => {
+      clearInterval(intervalId);
       window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [dispatch, isAuthenticated]);

@@ -347,24 +347,58 @@ const Header = () => {
           color: #6c757d !important;
           font-weight: 500;
           transition: all 0.3s ease;
-          padding: 8px 12px !important;
-          border-radius: 8px;
-          margin: 0 2px;
+          padding: 10px 16px !important;
+          border-radius: 25px;
+          margin: 0 4px;
           display: flex;
           align-items: center;
+          position: relative;
+          text-decoration: none;
         }
 
         .nav-link-custom:hover {
           color: #e63946 !important;
-          background-color: rgba(230, 57, 70, 0.1);
-          transform: translateY(-1px);
+          background: linear-gradient(
+            135deg,
+            rgba(230, 57, 70, 0.1),
+            rgba(230, 57, 70, 0.05)
+          );
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(230, 57, 70, 0.2);
         }
 
         .nav-link-custom.active {
-          color: #e63946 !important;
+          color: white !important;
           font-weight: 600;
-          background-color: rgba(230, 57, 70, 0.15);
-          border-bottom: 2px solid #e63946;
+          background: linear-gradient(135deg, #e63946, #dc3545);
+          box-shadow: 0 4px 15px rgba(230, 57, 70, 0.4);
+          transform: translateY(-1px);
+        }
+
+        .nav-link-custom.active::before {
+          content: "";
+          position: absolute;
+          top: -2px;
+          left: -2px;
+          right: -2px;
+          bottom: -2px;
+          background: linear-gradient(135deg, #e63946, #dc3545);
+          border-radius: 27px;
+          z-index: -1;
+          opacity: 0.3;
+          animation: activeGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes activeGlow {
+          0%,
+          100% {
+            opacity: 0.3;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.5;
+            transform: scale(1.02);
+          }
         }
 
         .dropdown-toggle::after {

@@ -13,6 +13,14 @@ const store = configureStore({
     messages: messageSlice,
     notifications: notificationSlice,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ["auth/loginSuccess", "auth/updateUser"],
+        ignoredPaths: ["auth.user.profileImage"],
+      },
+    }),
+  devTools: process.env.NODE_ENV !== "production",
 });
 
 export default store;

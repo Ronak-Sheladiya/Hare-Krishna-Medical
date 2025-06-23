@@ -143,16 +143,7 @@ const authSlice = createSlice({
       // Store user data and token
       setStoredUser(user, rememberMe, token);
 
-      // Broadcast login to other tabs
-      window.localStorage.setItem(
-        "auth-event",
-        JSON.stringify({
-          type: "LOGIN",
-          user,
-          rememberMe,
-          timestamp: Date.now(),
-        }),
-      );
+      // Cross-tab broadcasting is now handled by crossTabSessionManager
 
       // Handle redirect after login (only if not a cross-tab sync)
       if (!skipRedirect) {
@@ -190,14 +181,7 @@ const authSlice = createSlice({
       // Clear stored data
       clearStoredUser();
 
-      // Broadcast logout to other tabs
-      window.localStorage.setItem(
-        "auth-event",
-        JSON.stringify({
-          type: "LOGOUT",
-          timestamp: Date.now(),
-        }),
-      );
+      // Cross-tab broadcasting is now handled by crossTabSessionManager
     },
     clearError: (state) => {
       state.error = null;
@@ -239,16 +223,27 @@ const authSlice = createSlice({
     },
     syncFromStorage: (state, action) => {
       // Sync auth state from localStorage/sessionStorage (for cross-tab sync)
-      const { user, isAuthenticated, rememberMe } = action.payload;
-      if (isAuthenticated && user) {
-        state.isAuthenticated = true;
-        state.user = user;
-        state.rememberMe = rememberMe;
-        state.error = null;
-      } else {
+      try {
+        const { user, isAuthenticated, rememberMe } = action.payload || {};
+        if (isAuthenticated && user) {
+          state.isAuthenticated = true;
+          state.user = user;
+          state.rememberMe = rememberMe || false;
+          state.error = null;
+          state.loading = false;
+        } else {
+          state.isAuthenticated = false;
+          state.user = null;
+          state.rememberMe = false;
+          state.loading = false;
+        }
+      } catch (error) {
+        console.warn("Error syncing auth state:", error);
         state.isAuthenticated = false;
         state.user = null;
         state.rememberMe = false;
+        state.loading = false;
+        state.error = "Authentication sync error";
       }
     },
   },
