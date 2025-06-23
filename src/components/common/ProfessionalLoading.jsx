@@ -126,54 +126,7 @@ const ProfessionalLoading = ({
             zIndex: 1,
           }}
         >
-          {/* Inner White Circle with Logo */}
-          <div
-            style={{
-              width: logoSize + 30,
-              height: logoSize + 30,
-              background: "white",
-              borderRadius: "50%",
-              border: `3px solid ${color}25`,
-              boxShadow: `0 12px 40px ${color}25, inset 0 2px 4px rgba(255,255,255,0.8)`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              animation: "logoFloat 2s ease-in-out infinite",
-            }}
-          >
-            <img
-              src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
-              alt="Loading"
-              style={{
-                width: logoSize,
-                height: logoSize,
-                objectFit: "contain",
-                animation: "pulse 1.5s ease-in-out infinite",
-              }}
-              onError={(e) => {
-                e.target.style.display = "none";
-                e.target.nextSibling.style.display = "flex";
-              }}
-            />
-            {/* Fallback when image fails to load */}
-            <div
-              style={{
-                display: "none",
-                width: logoSize,
-                height: logoSize,
-                background: `linear-gradient(135deg, ${color}, ${color}dd)`,
-                borderRadius: "50%",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontWeight: "bold",
-                fontSize: logoSize / 3,
-              }}
-            >
-              HK
-            </div>
-          </div>
-        </div>
+        }
 
         {/* Decorative Dots */}
         <div
