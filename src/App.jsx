@@ -20,6 +20,7 @@ import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
 import RealTimeSync from "./components/common/RealTimeSync.jsx";
 import RealTimeStatus from "./components/common/RealTimeStatus.jsx";
 import SocketDiagnostic from "./components/common/SocketDiagnostic.jsx";
+import SessionStatus from "./components/common/SessionStatus.jsx";
 
 // Pages
 import Home from "./pages/Home.jsx";
