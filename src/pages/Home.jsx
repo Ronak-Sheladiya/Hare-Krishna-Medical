@@ -63,7 +63,7 @@ const Home = () => {
   };
 
   useEffect(() => {
-    // In a real app, this would fetch featured products from API
+    fetchFeaturedProducts();
   }, [dispatch]);
 
   return (
