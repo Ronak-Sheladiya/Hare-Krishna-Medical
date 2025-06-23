@@ -132,6 +132,30 @@ const authSlice = createSlice({
 
       // Store user data
       setStoredUser(user, rememberMe);
+
+      // Broadcast login to other tabs
+      window.localStorage.setItem(
+        "auth-event",
+        JSON.stringify({
+          type: "LOGIN",
+          user,
+          timestamp: Date.now(),
+        }),
+      );
+
+      // Handle redirect after login
+      const redirectUrl = sessionStorage.getItem("redirectAfterLogin");
+      if (
+        redirectUrl &&
+        redirectUrl !== "/login" &&
+        redirectUrl !== "/register"
+      ) {
+        sessionStorage.removeItem("redirectAfterLogin");
+        // Use setTimeout to allow Redux state to update
+        setTimeout(() => {
+          window.location.href = redirectUrl;
+        }, 100);
+      }
     },
     loginFailure: (state, action) => {
       state.loading = false;
@@ -151,6 +175,15 @@ const authSlice = createSlice({
 
       // Clear stored data
       clearStoredUser();
+
+      // Broadcast logout to other tabs
+      window.localStorage.setItem(
+        "auth-event",
+        JSON.stringify({
+          type: "LOGOUT",
+          timestamp: Date.now(),
+        }),
+      );
     },
     clearError: (state) => {
       state.error = null;
