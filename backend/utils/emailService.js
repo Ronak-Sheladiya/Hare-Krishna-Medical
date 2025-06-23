@@ -53,7 +53,7 @@ class EmailService {
             <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px; text-align: center;">
               <p style="color: #888; font-size: 14px; margin: 0;">
                 📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat<br>
-                📞 +91 76989 13354 | 📧 harekrishnamedical@gmail.com
+                📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
               </p>
             </div>
           </div>
