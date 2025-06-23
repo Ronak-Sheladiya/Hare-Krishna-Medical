@@ -450,9 +450,9 @@ const AdminMessages = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredMessages.map((message) => (
+                  {filteredMessages.map((message, index) => (
                     <tr
-                      key={message._id}
+                      key={message._id || `message-${index}`}
                       className={!message.isRead ? "table-warning" : ""}
                     >
                       <td>
