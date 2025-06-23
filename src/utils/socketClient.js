@@ -1,10 +1,10 @@
-// Safe import for socket.io-client
+// Import socket.io-client with error handling
 let io;
 try {
-  const socketIOClient = await import("socket.io-client");
-  io = socketIOClient.io;
+  const socketIO = require("socket.io-client");
+  io = socketIO.io || socketIO.default || socketIO;
 } catch (error) {
-  console.warn("Socket.io-client not available:", error);
+  console.warn("Socket.io-client not available, using fallback:", error);
   // Fallback no-op function
   io = () => ({
     on: () => {},
@@ -12,6 +12,7 @@ try {
     emit: () => {},
     connect: () => {},
     disconnect: () => {},
+    id: null,
   });
 }
 
