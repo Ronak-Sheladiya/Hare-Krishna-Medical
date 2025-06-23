@@ -51,7 +51,8 @@ import InvoiceVerify from "./pages/InvoiceVerify.jsx";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
 import VerificationStatus from "./pages/VerificationStatus.jsx";
 import NotFound from "./pages/NotFound.jsx";
-import socketClient from "./utils/socketClient";
+// Use simple socket client until socket.io-client is installed
+import socketClient from "./utils/socketClient.simple";
 
 // Styles
 import "./App.css";

@@ -1,26 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
-// Import socketClient with error handling
-let socketClient = null;
-
-// Only import in browser environment
-if (typeof window !== "undefined") {
-  try {
-    // Dynamic import to handle missing dependency gracefully
-    import("../utils/socketClient")
-      .then((module) => {
-        socketClient = module.default;
-      })
-      .catch((error) => {
-        console.warn(
-          "SocketClient not available. Install socket.io-client: npm install socket.io-client",
-        );
-      });
-  } catch (error) {
-    console.warn("Failed to import socketClient:", error);
-  }
-}
+// Use simple socket client until socket.io-client is installed
+import socketClient from "../utils/socketClient.simple";
 
 export const useRealTime = () => {
   const { user, token } = useSelector((state) => state.auth);
