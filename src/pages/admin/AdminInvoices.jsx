@@ -148,18 +148,49 @@ const AdminInvoices = () => {
 
   const handlePrintInvoice = async (invoice) => {
     try {
+      // Close modal first
+      setShowViewModal(false);
+
       // Generate QR code if not exists
       let qrCodeDataURL = null;
       if (!invoice.qrCode) {
         const qrText = JSON.stringify({
+          type: "invoice_verification",
           invoice_id: invoice.invoiceId,
           order_id: invoice.orderId,
-          total: invoice.totalAmount,
-          customer: invoice.customerName,
+          customer_name: invoice.customerName,
+          total_amount: `₹${invoice.totalAmount.toFixed(2)}`,
+          invoice_date: invoice.orderDate,
+          payment_status: invoice.status,
+          verify_url: `${window.location.origin}/invoice/${invoice.orderId}`,
+          company: "Hare Krishna Medical",
+          location: "Surat, Gujarat, India",
+          phone: "+91 76989 13354",
+          email: "harekrishnamedical@gmail.com",
+          generated_at: new Date().toISOString(),
         });
-        qrCodeDataURL = await QRCode.toDataURL(qrText, { width: 180 });
+        qrCodeDataURL = await QRCode.toDataURL(qrText, {
+          width: 180,
+          margin: 2,
+          color: {
+            dark: "#1a202c",
+            light: "#ffffff",
+          },
+          errorCorrectionLevel: "M",
+        });
       }
 
+      // Use centralized print function
+      await printInvoice(invoice, qrCodeDataURL || invoice.qrCode);
+    } catch (error) {
+      console.error("Print error:", error);
+      alert("Error printing invoice. Please try again.");
+    }
+  };
+
+  // Centralized print function
+  const printInvoice = async (invoiceData, qrCode) => {
+    try {
       // Create a temporary div for printing
       const tempDiv = document.createElement("div");
       tempDiv.style.position = "absolute";
@@ -175,8 +206,8 @@ const AdminInvoices = () => {
       const root = createRoot(tempDiv);
       root.render(
         React.createElement(OfficialInvoiceDesign, {
-          invoiceData: invoice,
-          qrCode: qrCodeDataURL || invoice.qrCode,
+          invoiceData: invoiceData,
+          qrCode: qrCode,
           forPrint: true,
         }),
       );
@@ -184,17 +215,41 @@ const AdminInvoices = () => {
       // Wait for rendering
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Print using original method
-      const originalContents = document.body.innerHTML;
-      document.body.innerHTML = tempDiv.innerHTML;
-      window.print();
-      document.body.innerHTML = originalContents;
+      // Print using window.print()
+      const printWindow = window.open("", "_blank");
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Invoice ${invoiceData.invoiceId}</title>
+            <style>
+              @page {
+                size: A4;
+                margin: 10mm;
+              }
+              body {
+                margin: 0;
+                font-family: Arial, sans-serif;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+            </style>
+          </head>
+          <body>
+            ${tempDiv.innerHTML}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
 
       // Cleanup
       document.body.removeChild(tempDiv);
-      window.location.reload();
     } catch (error) {
-      console.error("Print error:", error);
+      console.error("Centralized print error:", error);
+      throw error;
     }
   };
 
@@ -444,11 +499,17 @@ const AdminInvoices = () => {
       {/* Invoice View Modal */}
       <Modal
         show={showViewModal}
-        onHide={() => setShowViewModal(false)}
+        onHide={() => {
+          setShowViewModal(false);
+          setSelectedInvoice(null);
+        }}
         size="xl"
+        backdrop="static"
+        keyboard={true}
       >
         <Modal.Header closeButton>
           <Modal.Title>
+            <i className="bi bi-receipt me-2"></i>
             Invoice Preview - {selectedInvoice?.invoiceId}
           </Modal.Title>
         </Modal.Header>
@@ -477,7 +538,14 @@ const AdminInvoices = () => {
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowViewModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setShowViewModal(false);
+              setSelectedInvoice(null);
+            }}
+          >
+            <i className="bi bi-x-lg me-2"></i>
             Close
           </Button>
           <Button
