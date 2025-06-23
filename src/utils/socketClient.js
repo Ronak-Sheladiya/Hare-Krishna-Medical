@@ -1,35 +1,53 @@
-// Real-time socket client for live updates
+// Real-time socket client with robust error handling
 let io = null;
+let socketAvailable = false;
 
-// Try to import socket.io-client
-try {
-  if (typeof window !== "undefined") {
-    // Check if socket.io-client is available
-    import("socket.io-client")
-      .then((socketio) => {
-        io = socketio.io;
-      })
-      .catch(() => {
-        console.info(
-          "Socket.io-client not installed. Install with: npm install socket.io-client",
-        );
-        // Create mock io for development
-        io = () => ({
-          on: (event, callback) =>
-            console.log(`Mock socket listening for: ${event}`),
-          off: (event) =>
-            console.log(`Mock socket removed listener for: ${event}`),
-          emit: (event, data) =>
-            console.log(`Mock socket emitting: ${event}`, data),
-          connect: () => console.log("Mock socket connected"),
-          disconnect: () => console.log("Mock socket disconnected"),
-          id: "mock-socket-id",
-          connected: false,
-        });
-      });
-  }
-} catch (error) {
-  console.warn("Socket.io-client not available:", error);
+// Create a mock socket for fallback
+const createMockSocket = () => ({
+  on: (event, callback) => {
+    // Store callback for potential future use
+    if (typeof callback === "function") {
+      console.debug(`Mock socket registered listener for: ${event}`);
+    }
+    return this;
+  },
+  off: (event) => {
+    console.debug(`Mock socket removed listener for: ${event}`);
+    return this;
+  },
+  emit: (event, data) => {
+    console.debug(`Mock socket emitting: ${event}`, data);
+    return this;
+  },
+  connect: () => {
+    console.debug("Mock socket connected");
+    return this;
+  },
+  disconnect: () => {
+    console.debug("Mock socket disconnected");
+    return this;
+  },
+  connected: false,
+  id: "mock-socket-id",
+});
+
+// Try to import socket.io-client with proper error handling
+if (typeof window !== "undefined") {
+  import("socket.io-client")
+    .then((socketio) => {
+      io = socketio.io;
+      socketAvailable = true;
+      console.debug("Socket.io-client loaded successfully");
+    })
+    .catch((error) => {
+      console.info("Socket.io-client not available:", error.message);
+      io = createMockSocket;
+      socketAvailable = false;
+    });
+} else {
+  // Server-side rendering fallback
+  io = createMockSocket;
+  socketAvailable = false;
 }
 
 class SocketClient {
