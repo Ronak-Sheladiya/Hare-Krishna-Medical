@@ -158,9 +158,6 @@ const AdminInvoices = () => {
 
   const handlePrintInvoice = async (invoice) => {
     try {
-      // Close modal first
-      setShowViewModal(false);
-
       // Generate QR code if not exists
       let qrCodeDataURL = null;
       if (!invoice.qrCode) {
@@ -192,9 +189,96 @@ const AdminInvoices = () => {
 
       // Use centralized print function
       await printInvoice(invoice, qrCodeDataURL || invoice.qrCode);
+
+      setAlertMessage("Invoice printed successfully!");
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
     } catch (error) {
       console.error("Print error:", error);
       setAlertMessage("Error printing invoice. Please try again.");
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
+    }
+  };
+
+  const handleDownloadInvoice = async (invoice) => {
+    try {
+      // Generate QR code if not exists
+      let qrCodeDataURL = null;
+      if (!invoice.qrCode) {
+        const qrText = JSON.stringify({
+          type: "invoice_verification",
+          invoice_id: invoice.invoiceId,
+          order_id: invoice.orderId,
+          customer_name: invoice.customerName,
+          total_amount: `₹${invoice.totalAmount.toFixed(2)}`,
+          invoice_date: invoice.orderDate,
+          payment_status: invoice.status,
+          verify_url: `${window.location.origin}/invoice/${invoice.orderId}`,
+          company: "Hare Krishna Medical",
+          location: "Surat, Gujarat, India",
+          phone: "+91 76989 13354",
+          email: "harekrishnamedical@gmail.com",
+          generated_at: new Date().toISOString(),
+        });
+        qrCodeDataURL = await QRCode.toDataURL(qrText, {
+          width: 180,
+          margin: 2,
+          color: {
+            dark: "#1a202c",
+            light: "#ffffff",
+          },
+          errorCorrectionLevel: "M",
+        });
+      }
+
+      // Use centralized download function
+      await downloadInvoice(invoice, qrCodeDataURL || invoice.qrCode);
+
+      setAlertMessage("Invoice downloaded successfully!");
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
+    } catch (error) {
+      console.error("Download error:", error);
+      setAlertMessage("Error downloading invoice. Please try again.");
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
+    }
+  };
+
+  const handlePaymentStatusChange = async (
+    invoiceId,
+    newStatus,
+    newMethod = null,
+  ) => {
+    try {
+      // Update local state immediately for real-time UI
+      setInvoices((prevInvoices) =>
+        prevInvoices.map((invoice) =>
+          invoice.id === invoiceId
+            ? {
+                ...invoice,
+                status: newStatus,
+                paymentStatus: newStatus === "Paid" ? "Completed" : "Pending",
+                ...(newMethod && { paymentMethod: newMethod }),
+              }
+            : invoice,
+        ),
+      );
+
+      // Here you would make API call to backend to update database
+      // const response = await fetch(`/api/invoices/${invoiceId}/payment-status`, {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ status: newStatus, method: newMethod })
+      // });
+
+      setAlertMessage(`Payment status updated to ${newStatus} successfully!`);
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
+    } catch (error) {
+      console.error("Status update error:", error);
+      setAlertMessage("Error updating payment status. Please try again.");
       setShowAlert(true);
       setTimeout(() => setShowAlert(false), 3000);
     }
@@ -235,13 +319,13 @@ const AdminInvoices = () => {
           <head>
             <title>Invoice ${invoiceData.invoiceId}</title>
             <style>
-              @page { 
-                size: A4; 
-                margin: 10mm; 
+              @page {
+                size: A4;
+                margin: 10mm;
               }
-              body { 
-                margin: 0; 
-                font-family: Arial, sans-serif; 
+              body {
+                margin: 0;
+                font-family: Arial, sans-serif;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
               }
