@@ -16,31 +16,10 @@ export const PageHeroSection = ({
   // Auto-determine icon if not provided
   const displayIcon = icon || getPageIcon(location.pathname);
 
-  // Auto-determine color scheme based on path
-  let colorContext = iconContext;
-  if (iconContext === "default") {
-    const path = location.pathname.toLowerCase();
-    if (path.includes("admin")) colorContext = "admin";
-    else if (path.includes("user")) colorContext = "user";
-    else if (path.includes("login") || path.includes("register"))
-      colorContext = "auth";
-    else if (path.includes("invoice")) colorContext = "invoice";
-    else if (path.includes("error") || path.includes("denied"))
-      colorContext = "error";
-  }
-
-  const iconGradient = getIconColor(colorContext);
+  // Always use red medical theme for all pages
+  const iconGradient = "rgba(255, 255, 255, 0.9)";
   const heroBackground =
-    background ||
-    (colorContext === "admin"
-      ? "linear-gradient(135deg, #343a40 0%, #495057 100%)"
-      : colorContext === "user"
-        ? "linear-gradient(135deg, #17a2b8 0%, #007bff 100%)"
-        : colorContext === "invoice"
-          ? "linear-gradient(135deg, #28a745 0%, #20c997 100%)"
-          : colorContext === "error"
-            ? "linear-gradient(135deg, #dc3545 0%, #c82333 100%)"
-            : "linear-gradient(135deg, #e63946 0%, #dc3545 100%)");
+    background || "linear-gradient(135deg, #e63946 0%, #dc3545 100%)";
 
   return (
     <section
@@ -135,7 +114,7 @@ export const PageHeroSection = ({
             transform: translateY(-8px) scale(1.05);
           }
         }
-        
+
         @media (max-width: 768px) {
           .hero-section h1 {
             font-size: 2.5rem !important;
