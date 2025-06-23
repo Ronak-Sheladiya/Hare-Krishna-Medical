@@ -43,9 +43,12 @@ const Header = () => {
     return user.role === 1 ? "Admin" : "User";
   };
 
-  const getDashboardLink = () => {
-    if (!user) return "/";
-    return user.role === 1 ? "/admin/dashboard" : "/user/dashboard";
+  const handleDashboardClick = (e) => {
+    e.preventDefault();
+    if (!user) return;
+    const dashboardPath =
+      user.role === 1 ? "/admin/dashboard" : "/user/dashboard";
+    navigate(dashboardPath);
   };
 
   return (
