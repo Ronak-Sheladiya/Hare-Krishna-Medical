@@ -39,70 +39,59 @@ const AdminDashboard = () => {
   const [recentOrders, setRecentOrders] = useState([]);
   const [lowStockProducts, setLowStockProducts] = useState([]);
 
-  const API_BASE_URL =
-    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-
   // Fetch dashboard data
   const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      const token = localStorage.getItem("token");
-      const headers = {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-      };
+    // Fetch all required data using the safe API client
+    const [statsResult, ordersResult, productsResult] = await Promise.all([
+      safeApiCall(() => api.get("/api/analytics/dashboard-stats"), {}),
+      safeApiCall(
+        () => api.get("/api/orders?limit=5&sort=createdAt&order=desc"),
+        [],
+      ),
+      safeApiCall(() => api.get("/api/products?limit=10&stock=low"), []),
+    ]);
 
-      // Fetch all required data
-      const [statsRes, ordersRes, productsRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/analytics/dashboard-stats`, {
-          headers,
-        }).catch(() => null),
-        fetch(`${API_BASE_URL}/api/orders?limit=5&sort=createdAt&order=desc`, {
-          headers,
-        }).catch(() => null),
-        fetch(`${API_BASE_URL}/api/products?limit=10&stock=low`, {
-          headers,
-        }).catch(() => null),
-      ]);
-
-      // Process stats
-      if (statsRes && statsRes.ok) {
-        const statsData = await statsRes.json();
-        if (statsData.success) {
-          setDashboardStats((prev) => ({
-            ...prev,
-            ...statsData.data,
-            unreadMessages: unreadCount || 0,
-          }));
-        }
-      }
-
-      // Process recent orders
-      if (ordersRes && ordersRes.ok) {
-        const ordersData = await ordersRes.json();
-        if (ordersData.success) {
-          setRecentOrders(ordersData.data || []);
-        }
-      }
-
-      // Process low stock products
-      if (productsRes && productsRes.ok) {
-        const productsData = await productsRes.json();
-        if (productsData.success) {
-          const lowStock = (productsData.data || []).filter(
-            (product) => product.stock <= (product.lowStockThreshold || 10),
-          );
-          setLowStockProducts(lowStock);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-      setError("Unable to load dashboard data");
-    } finally {
-      setLoading(false);
+    // Process stats
+    if (statsResult.success && statsResult.data?.data) {
+      setDashboardStats((prev) => ({
+        ...prev,
+        ...statsResult.data.data,
+        unreadMessages: unreadCount || 0,
+      }));
     }
+
+    // Process recent orders
+    if (ordersResult.success && ordersResult.data?.data) {
+      setRecentOrders(ordersResult.data.data);
+    }
+
+    // Process low stock products
+    if (productsResult.success && productsResult.data?.data) {
+      const products = Array.isArray(productsResult.data.data)
+        ? productsResult.data.data
+        : productsResult.data.data.products || [];
+
+      const lowStock = products.filter(
+        (product) => product.stock <= (product.lowStockThreshold || 10),
+      );
+      setLowStockProducts(lowStock);
+    }
+
+    // Set error only if all API calls failed
+    if (
+      !statsResult.success &&
+      !ordersResult.success &&
+      !productsResult.success
+    ) {
+      setError(
+        "Unable to load dashboard data. Please check if the backend server is running.",
+      );
+    }
+
+    setLoading(false);
   };
 
   useEffect(() => {
