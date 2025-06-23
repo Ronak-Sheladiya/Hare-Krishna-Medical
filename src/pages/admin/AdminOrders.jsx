@@ -265,7 +265,7 @@ const AdminOrders = () => {
       <PageHeroSection
         title="Order Management"
         description="Manage and track all customer orders"
-        icon="📦"
+        icon={<i className="bi bi-box-seam"></i>}
       />
 
       <Container className="py-5">
@@ -362,10 +362,12 @@ const AdminOrders = () => {
               <Col md={3}>
                 <div className="d-flex gap-2">
                   <ThemeButton variant="outline" onClick={exportToExcel}>
-                    📊 Export Excel
+                    <i className="bi bi-file-earmark-excel me-2"></i>
+                    Export Excel
                   </ThemeButton>
                   <ThemeButton variant="outline" onClick={fetchOrders}>
-                    🔄 Refresh
+                    <i className="bi bi-arrow-clockwise me-2"></i>
+                    Refresh
                   </ThemeButton>
                 </div>
               </Col>
