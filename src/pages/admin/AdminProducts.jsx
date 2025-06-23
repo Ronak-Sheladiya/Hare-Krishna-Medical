@@ -1448,6 +1448,70 @@ const AdminProducts = () => {
           </Toast.Body>
         </Toast>
       </ToastContainer>
+
+      <style jsx>{`
+        .image-preview-container {
+          border: 2px dashed #e63946;
+          border-radius: 8px;
+          padding: 16px;
+          background-color: rgba(230, 57, 70, 0.05);
+        }
+
+        .form-control:focus {
+          border-color: #e63946;
+          box-shadow: 0 0 0 0.2rem rgba(230, 57, 70, 0.25);
+        }
+
+        .btn-primary {
+          background-color: #e63946;
+          border-color: #e63946;
+        }
+
+        .btn-primary:hover {
+          background-color: #d32535;
+          border-color: #d32535;
+        }
+
+        .btn-outline-primary {
+          color: #e63946;
+          border-color: #e63946;
+        }
+
+        .btn-outline-primary:hover {
+          background-color: #e63946;
+          border-color: #e63946;
+        }
+
+        .nav-pills .nav-link.active {
+          background-color: #e63946;
+        }
+
+        .table-light {
+          background-color: rgba(230, 57, 70, 0.05);
+        }
+
+        .text-primary {
+          color: #e63946 !important;
+        }
+
+        .border-primary {
+          border-color: #e63946 !important;
+        }
+
+        .bg-primary {
+          background-color: #e63946 !important;
+        }
+
+        .current-images img:hover {
+          transform: scale(1.05);
+          transition: transform 0.3s ease;
+        }
+
+        .image-preview-container img:hover {
+          transform: scale(1.05);
+          transition: transform 0.3s ease;
+        }
+      `}</style>
     </div>
   );
 };
