@@ -486,7 +486,7 @@ const TermsConditions = () => {
                     Contact our support team for clarification on any terms or
                     conditions.
                     <br />
-                    <strong>harekrishnamedical@gmail.com</strong>
+                    <strong>hkmedicalamroli@gmail.com</strong>
                   </div>
                 </Card.Body>
               </Card>
