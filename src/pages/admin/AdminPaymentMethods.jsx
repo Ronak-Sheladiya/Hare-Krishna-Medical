@@ -47,69 +47,58 @@ const AdminPaymentMethods = () => {
 
   // Fetch payment methods
   const fetchPaymentMethods = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${API_BASE_URL}/api/admin/payment-methods`,
+    const { success, data, error } = await safeApiCall(
+      () => api.get("/api/admin/payment-methods"),
+      [],
+    );
+
+    if (success && data?.data) {
+      setPaymentMethods(data.data);
+    } else {
+      // If API doesn't exist or fails, use default methods
+      setPaymentMethods([
         {
-          headers: {
-            "Content-Type": "application/json",
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
+          _id: "1",
+          name: "Cash on Delivery",
+          type: "cod",
+          isActive: true,
+          description: "Pay when you receive the product",
+          processingFee: 0,
+          minAmount: 0,
+          maxAmount: 5000,
         },
-      );
+        {
+          _id: "2",
+          name: "Online Payment",
+          type: "online",
+          isActive: true,
+          description: "Pay securely using cards or net banking",
+          processingFee: 2.5,
+          minAmount: 100,
+          maxAmount: 100000,
+        },
+        {
+          _id: "3",
+          name: "UPI Payment",
+          type: "upi",
+          isActive: true,
+          description: "Pay using UPI apps like GPay, PhonePe",
+          processingFee: 0,
+          minAmount: 1,
+          maxAmount: 100000,
+        },
+      ]);
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setPaymentMethods(data.data || []);
-        } else {
-          setError(data.message || "Failed to fetch payment methods");
-        }
-      } else {
-        // If API doesn't exist, use default methods
-        setPaymentMethods([
-          {
-            _id: "1",
-            name: "Cash on Delivery",
-            type: "cod",
-            isActive: true,
-            description: "Pay when you receive the product",
-            processingFee: 0,
-            minAmount: 0,
-            maxAmount: 5000,
-          },
-          {
-            _id: "2",
-            name: "Online Payment",
-            type: "online",
-            isActive: true,
-            description: "Pay securely using cards or net banking",
-            processingFee: 2.5,
-            minAmount: 100,
-            maxAmount: 100000,
-          },
-          {
-            _id: "3",
-            name: "UPI Payment",
-            type: "upi",
-            isActive: true,
-            description: "Pay using UPI apps like GPay, PhonePe",
-            processingFee: 0,
-            minAmount: 1,
-            maxAmount: 100000,
-          },
-        ]);
+      // Only show error if we can't provide fallback data
+      if (error && !success) {
+        console.warn("Payment methods API not available, using defaults");
       }
-    } catch (error) {
-      console.error("Error fetching payment methods:", error);
-      setError("Unable to load payment methods");
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
   useEffect(() => {
