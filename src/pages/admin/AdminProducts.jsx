@@ -440,56 +440,76 @@ const AdminProducts = () => {
 
           {/* Filters */}
           <Row className="mb-4">
-            <Col lg={4}>
-              <InputGroup>
-                <InputGroup.Text>
-                  <i className="bi bi-search"></i>
-                </InputGroup.Text>
-                <Form.Control
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </InputGroup>
-            </Col>
-            <Col lg={3}>
-              <Form.Select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
+            <Col lg={12}>
+              <ThemeCard
+                title="Search & Filter"
+                icon="bi-funnel"
+                className="mb-4"
               >
-                <option value="">All Categories</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </Form.Select>
-            </Col>
-            <Col lg={3}>
-              <Form.Select
-                value={stockFilter}
-                onChange={(e) => setStockFilter(e.target.value)}
-              >
-                <option value="">All Stock Levels</option>
-                <option value="in-stock">In Stock</option>
-                <option value="low-stock">Low Stock</option>
-                <option value="out-of-stock">Out of Stock</option>
-              </Form.Select>
-            </Col>
-            <Col lg={2}>
-              <Button
-                variant="outline-secondary"
-                onClick={() => {
-                  setSearchTerm("");
-                  setCategoryFilter("");
-                  setStockFilter("");
-                  setCurrentPage(1);
-                }}
-                className="w-100"
-              >
-                Clear
-              </Button>
+                <Row>
+                  <Col lg={4} className="mb-3 mb-lg-0">
+                    <Form.Label className="text-muted small">
+                      Search Products
+                    </Form.Label>
+                    <InputGroup>
+                      <InputGroup.Text>
+                        <i className="bi bi-search"></i>
+                      </InputGroup.Text>
+                      <Form.Control
+                        type="text"
+                        placeholder="Search by name or company..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </InputGroup>
+                  </Col>
+                  <Col lg={3} className="mb-3 mb-lg-0">
+                    <Form.Label className="text-muted small">
+                      Category
+                    </Form.Label>
+                    <Form.Select
+                      value={categoryFilter}
+                      onChange={(e) => setCategoryFilter(e.target.value)}
+                    >
+                      <option value="">All Categories</option>
+                      {categories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Col>
+                  <Col lg={3} className="mb-3 mb-lg-0">
+                    <Form.Label className="text-muted small">
+                      Stock Level
+                    </Form.Label>
+                    <Form.Select
+                      value={stockFilter}
+                      onChange={(e) => setStockFilter(e.target.value)}
+                    >
+                      <option value="">All Stock Levels</option>
+                      <option value="in-stock">In Stock (10+)</option>
+                      <option value="low-stock">Low Stock (1-10)</option>
+                      <option value="out-of-stock">Out of Stock</option>
+                    </Form.Select>
+                  </Col>
+                  <Col lg={2} className="d-flex align-items-end">
+                    <ThemeButton
+                      variant="outline"
+                      onClick={() => {
+                        setSearchTerm("");
+                        setCategoryFilter("");
+                        setStockFilter("");
+                        setCurrentPage(1);
+                      }}
+                      className="w-100"
+                      icon="bi-x-circle"
+                    >
+                      Clear
+                    </ThemeButton>
+                  </Col>
+                </Row>
+              </ThemeCard>
             </Col>
           </Row>
 
