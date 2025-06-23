@@ -193,6 +193,7 @@ function App() {
         <div className="App">
           <ScrollToTop />
           <GlobalSecurity />
+          <DevModeIndicator />
           <Header />
           <main>
             <Routes>
