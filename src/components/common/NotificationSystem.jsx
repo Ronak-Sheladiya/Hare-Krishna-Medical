@@ -29,16 +29,32 @@ const NotificationSystem = () => {
 
   // Load real notifications from API
   useEffect(() => {
+    let isApiAvailable = true;
+    let retryCount = 0;
+    const maxRetries = 3;
+
     const loadNotifications = async () => {
+      // Skip if API is known to be unavailable
+      if (!isApiAvailable && retryCount >= maxRetries) {
+        return;
+      }
+
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
         const response = await fetch(
           `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/api/admin/notifications`,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+              "Content-Type": "application/json",
             },
+            signal: controller.signal,
           },
         );
+
+        clearTimeout(timeoutId);
 
         if (response.ok) {
           const data = await response.json();
@@ -47,18 +63,60 @@ const NotificationSystem = () => {
               type: "notifications/loadNotifications",
               payload: data.data,
             });
+            isApiAvailable = true;
+            retryCount = 0; // Reset retry count on success
           }
+        } else if (response.status === 404) {
+          // Endpoint not found, mark API as unavailable
+          isApiAvailable = false;
+          console.info("Notifications endpoint not available (404)");
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
       } catch (error) {
-        console.warn("Failed to load notifications:", error);
+        retryCount++;
+
+        if (error.name === "AbortError") {
+          console.warn("Notification loading timed out");
+        } else if (error.message.includes("Failed to fetch")) {
+          console.warn("Backend API not available for notifications");
+          isApiAvailable = false;
+        } else {
+          console.warn("Failed to load notifications:", error.message);
+        }
+
+        // Stop trying after max retries
+        if (retryCount >= maxRetries) {
+          isApiAvailable = false;
+          console.info(
+            "Notifications: Maximum retries reached, switching to offline mode",
+          );
+        }
       }
     };
 
     if (user?.role === 1) {
       loadNotifications();
-      // Reload notifications every 5 minutes
-      const interval = setInterval(loadNotifications, 5 * 60 * 1000);
-      return () => clearInterval(interval);
+
+      // Only set up interval if API is available
+      let interval;
+      if (isApiAvailable) {
+        // Reload notifications every 5 minutes, but only if API is available
+        interval = setInterval(
+          () => {
+            if (isApiAvailable) {
+              loadNotifications();
+            }
+          },
+          5 * 60 * 1000,
+        );
+      }
+
+      return () => {
+        if (interval) {
+          clearInterval(interval);
+        }
+      };
     }
   }, [dispatch, user]);
 
