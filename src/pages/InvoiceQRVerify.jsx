@@ -203,7 +203,9 @@ const InvoiceQRVerify = () => {
                       <Button
                         variant="light"
                         size="sm"
-                        onClick={() => navigate(`/invoice/${invoice._id}`)}
+                        onClick={() =>
+                          navigate(`/invoice/${invoice.orderId || invoice._id}`)
+                        }
                       >
                         <i className="bi bi-eye me-2"></i>
                         View Full Invoice
