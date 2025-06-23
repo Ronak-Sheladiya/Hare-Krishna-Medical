@@ -244,24 +244,112 @@ function App() {
               />
 
               {/* Admin Routes */}
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/products" element={<AdminProducts />} />
-              <Route path="/admin/orders" element={<AdminOrders />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
-              <Route path="/admin/analytics" element={<AdminAnalytics />} />
-              <Route path="/admin/messages" element={<AdminMessages />} />
-              <Route path="/admin/invoices" element={<AdminInvoices />} />
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/products"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminProducts />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/orders"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminOrders />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminUsers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/analytics"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminAnalytics />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/messages"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminMessages />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/invoices"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminInvoices />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/admin/payment-methods"
-                element={<AdminPaymentMethods />}
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminPaymentMethods />
+                  </ProtectedRoute>
+                }
               />
-              <Route path="/admin/backend-docs" element={<BackendDocs />} />
+              <Route
+                path="/admin/backend-docs"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <BackendDocs />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* User Routes */}
-              <Route path="/user/dashboard" element={<UserDashboard />} />
-              <Route path="/user/orders" element={<UserOrders />} />
-              <Route path="/user/invoices" element={<UserInvoices />} />
-              <Route path="/user/profile" element={<UserProfile />} />
+              <Route
+                path="/user/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <UserDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/user/orders"
+                element={
+                  <ProtectedRoute>
+                    <UserOrders />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/user/invoices"
+                element={
+                  <ProtectedRoute>
+                    <UserInvoices />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/user/profile"
+                element={
+                  <ProtectedRoute>
+                    <UserProfile />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/user/*"
                 element={
