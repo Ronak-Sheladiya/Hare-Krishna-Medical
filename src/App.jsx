@@ -46,7 +46,6 @@ import BackendDocs from "./pages/BackendDocs.jsx";
 import InvoiceView from "./pages/InvoiceView.jsx";
 import OrderDetails from "./pages/OrderDetails.jsx";
 import UserGuide from "./pages/UserGuide.jsx";
-import BackendDocs from "./pages/BackendDocs.jsx";
 import LocalSetupGuide from "./pages/LocalSetupGuide.jsx";
 import InvoiceVerify from "./pages/InvoiceVerify.jsx";
 import InvoiceQRVerify from "./pages/InvoiceQRVerify.jsx";
