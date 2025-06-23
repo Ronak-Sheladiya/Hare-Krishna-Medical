@@ -97,7 +97,7 @@ const invoiceSchema = new mongoose.Schema(
   },
 );
 
-// Generate invoice ID
+// Generate invoice ID and QR code
 invoiceSchema.pre("save", async function (next) {
   if (!this.invoiceId) {
     const year = new Date().getFullYear();
@@ -109,22 +109,26 @@ invoiceSchema.pre("save", async function (next) {
     this.invoiceId = `HKM-INV-${year}-${month}${day}-${random}`;
   }
 
-  // Generate QR code if not exists
-  if (!this.qrCode && this.invoiceId) {
+  // Always generate/update QR code for invoice
+  if (this.invoiceId) {
     try {
-      // Create direct verification URL for QR code
-      const verificationUrl = `${process.env.FRONTEND_URL}/invoice-verify/${this.invoiceId}`;
+      // Create public verification URL for QR code
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+      const verificationUrl = `${frontendUrl}/invoice-verify/${this.invoiceId}`;
 
-      // Store additional data for verification
+      // Store comprehensive data for verification
       this.qrCodeData = JSON.stringify({
         invoice_id: this.invoiceId,
-        customer_name: this.customerDetails.fullName,
+        customer_name: this.customerDetails?.fullName || "Customer",
         total_amount: this.total,
         verification_url: verificationUrl,
+        invoice_url: `${frontendUrl}/invoice-details/${this.invoiceId}`,
         generated_at: new Date().toISOString(),
+        company: "Hare Krishna Medical",
+        type: "invoice_verification",
       });
 
-      // Generate QR code with direct URL
+      // Generate high-quality QR code with verification URL
       this.qrCode = await QRCode.toDataURL(verificationUrl, {
         width: 180,
         margin: 2,
@@ -136,6 +140,9 @@ invoiceSchema.pre("save", async function (next) {
       });
     } catch (error) {
       console.error("QR Code generation error:", error);
+      // Don't fail the save if QR generation fails
+      this.qrCode = null;
+      this.qrCodeData = null;
     }
   }
 

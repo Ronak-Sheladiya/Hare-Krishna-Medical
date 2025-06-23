@@ -288,15 +288,19 @@ router.post(
         });
       }
 
-      // Generate new QR code with direct verification URL
-      const verificationUrl = `${process.env.FRONTEND_URL}/invoice-verify/${invoice.invoiceId}`;
+      // Generate new QR code with public verification URL
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+      const verificationUrl = `${frontendUrl}/invoice-verify/${invoice.invoiceId}`;
 
       invoice.qrCodeData = JSON.stringify({
         invoice_id: invoice.invoiceId,
-        customer_name: invoice.customerDetails.fullName,
+        customer_name: invoice.customerDetails?.fullName || "Customer",
         total_amount: invoice.total,
         verification_url: verificationUrl,
+        invoice_url: `${frontendUrl}/invoice-details/${invoice.invoiceId}`,
         generated_at: new Date().toISOString(),
+        company: "Hare Krishna Medical",
+        type: "invoice_verification",
       });
 
       invoice.qrCode = await QRCode.toDataURL(verificationUrl, {
@@ -317,6 +321,7 @@ router.post(
         data: {
           qrCode: invoice.qrCode,
           qrCodeData: invoice.qrCodeData,
+          verificationUrl,
         },
       });
     } catch (error) {
@@ -329,6 +334,80 @@ router.post(
     }
   },
 );
+
+// @route   GET /api/invoices/:id/qr
+// @desc    Get QR code for invoice (generate if not exists)
+// @access  Private
+router.get("/:id/qr", auth, validateObjectId("id"), async (req, res) => {
+  try {
+    let filter = { _id: req.params.id };
+
+    // Non-admin users can only access their own invoices
+    if (req.user.role !== 1) {
+      filter.user = req.user.id;
+    }
+
+    const invoice = await Invoice.findOne(filter);
+
+    if (!invoice) {
+      return res.status(404).json({
+        success: false,
+        message: "Invoice not found",
+      });
+    }
+
+    // Generate QR code if it doesn't exist
+    if (!invoice.qrCode && invoice.invoiceId) {
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+      const verificationUrl = `${frontendUrl}/invoice-verify/${invoice.invoiceId}`;
+
+      try {
+        invoice.qrCodeData = JSON.stringify({
+          invoice_id: invoice.invoiceId,
+          customer_name: invoice.customerDetails?.fullName || "Customer",
+          total_amount: invoice.total,
+          verification_url: verificationUrl,
+          invoice_url: `${frontendUrl}/invoice-details/${invoice.invoiceId}`,
+          generated_at: new Date().toISOString(),
+          company: "Hare Krishna Medical",
+          type: "invoice_verification",
+        });
+
+        invoice.qrCode = await QRCode.toDataURL(verificationUrl, {
+          width: 180,
+          margin: 2,
+          color: {
+            dark: "#1a202c",
+            light: "#ffffff",
+          },
+          errorCorrectionLevel: "M",
+        });
+
+        await invoice.save();
+      } catch (qrError) {
+        console.error("QR generation error:", qrError);
+      }
+    }
+
+    res.json({
+      success: true,
+      data: {
+        qrCode: invoice.qrCode,
+        qrCodeData: invoice.qrCodeData,
+        verificationUrl: invoice.qrCodeData
+          ? JSON.parse(invoice.qrCodeData).verification_url
+          : null,
+      },
+    });
+  } catch (error) {
+    console.error("Get QR error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to get QR code",
+      error: error.message,
+    });
+  }
+});
 
 // @route   GET /api/invoices/admin/all
 // @desc    Get all invoices (Admin)
