@@ -51,7 +51,7 @@ export const apiCall = async (endpoint, options = {}) => {
 
         let response;
         try {
-          response = await fetch(`${API_BASE_URL}${endpoint}`, {
+          response = await originalFetch(`${API_BASE_URL}${endpoint}`, {
             ...config,
             signal: controller.signal,
           });
