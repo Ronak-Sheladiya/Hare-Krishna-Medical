@@ -953,6 +953,39 @@ const UserProfile = () => {
           transform: translateY(-2px);
           transition: all 0.3s ease;
         }
+
+        .profile-avatar {
+          border: 3px solid rgba(230, 57, 70, 0.2);
+          transition: all 0.3s ease;
+        }
+
+        .profile-avatar:hover {
+          border-color: #e63946;
+          box-shadow: 0 8px 32px rgba(230, 57, 70, 0.4) !important;
+        }
+
+        #profile-image-input {
+          display: none;
+        }
+
+        .image-upload-hint {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: rgba(0, 0, 0, 0.7);
+          color: white;
+          text-align: center;
+          font-size: 0.7rem;
+          padding: 4px;
+          border-radius: 0 0 50% 50%;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .profile-avatar:hover .image-upload-hint {
+          opacity: 1;
+        }
       `}</style>
     </div>
   );
