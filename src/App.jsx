@@ -202,6 +202,10 @@ function App() {
                 path="/invoice-verify/:invoiceId"
                 element={<InvoiceVerify />}
               />
+              <Route
+                path="/qr/invoice/:invoiceId"
+                element={<InvoiceQRVerify />}
+              />
               <Route path="/verify-email/:token" element={<VerifyEmail />} />
               <Route
                 path="/verification-status"
