@@ -54,7 +54,7 @@ const InvoiceView = () => {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [invoiceData]);
+  }, []);
 
   const fetchInvoiceData = async () => {
     setLoading(true);
@@ -121,6 +121,11 @@ const InvoiceView = () => {
   };
 
   const handlePrint = () => {
+    if (!invoice || !invoiceData) {
+      alert("Invoice data is still loading. Please wait and try again.");
+      return;
+    }
+
     const invoiceElement = document.getElementById("invoice-content");
     if (!invoiceElement) {
       alert(
@@ -504,32 +509,35 @@ const InvoiceView = () => {
     );
   }
 
-  const invoiceData = {
-    invoiceId: invoice.invoiceId || invoiceId,
-    orderId: invoice.order?.orderId || invoice.orderId,
-    orderDate: new Date(
-      invoice.invoiceDate || invoice.createdAt,
-    ).toLocaleDateString("en-IN"),
-    orderTime: new Date(
-      invoice.invoiceDate || invoice.createdAt,
-    ).toLocaleTimeString("en-IN"),
-    customerDetails: {
-      fullName: invoice.customerDetails?.fullName || invoice.customerName,
-      email: invoice.customerDetails?.email || invoice.customerEmail,
-      mobile: invoice.customerDetails?.mobile || invoice.customerMobile,
-      address: invoice.customerDetails?.address || invoice.customerAddress,
-      city: invoice.customerDetails?.city || invoice.customerCity,
-      state: invoice.customerDetails?.state || invoice.customerState,
-      pincode: invoice.customerDetails?.pincode || invoice.customerPincode,
-    },
-    items: invoice.items || [],
-    subtotal: invoice.subtotal || invoice.total,
-    shipping: invoice.shipping || 0,
-    total: invoice.total || invoice.totalAmount,
-    paymentMethod: invoice.paymentMethod || "COD",
-    paymentStatus: invoice.paymentStatus || invoice.status,
-    status: invoice.status || invoice.paymentStatus,
-  };
+  // Create invoiceData only when invoice is loaded
+  const invoiceData = invoice
+    ? {
+        invoiceId: invoice.invoiceId || invoiceId,
+        orderId: invoice.order?.orderId || invoice.orderId,
+        orderDate: new Date(
+          invoice.invoiceDate || invoice.createdAt,
+        ).toLocaleDateString("en-IN"),
+        orderTime: new Date(
+          invoice.invoiceDate || invoice.createdAt,
+        ).toLocaleTimeString("en-IN"),
+        customerDetails: {
+          fullName: invoice.customerDetails?.fullName || invoice.customerName,
+          email: invoice.customerDetails?.email || invoice.customerEmail,
+          mobile: invoice.customerDetails?.mobile || invoice.customerMobile,
+          address: invoice.customerDetails?.address || invoice.customerAddress,
+          city: invoice.customerDetails?.city || invoice.customerCity,
+          state: invoice.customerDetails?.state || invoice.customerState,
+          pincode: invoice.customerDetails?.pincode || invoice.customerPincode,
+        },
+        items: invoice.items || [],
+        subtotal: invoice.subtotal || invoice.total,
+        shipping: invoice.shipping || 0,
+        total: invoice.total || invoice.totalAmount,
+        paymentMethod: invoice.paymentMethod || "COD",
+        paymentStatus: invoice.paymentStatus || invoice.status,
+        status: invoice.status || invoice.paymentStatus,
+      }
+    : null;
 
   return (
     <div
@@ -551,7 +559,7 @@ const InvoiceView = () => {
             <Col md={6} className="mb-2 mb-md-0">
               <h4 className="text-white mb-0 fw-bold">
                 <i className="bi bi-receipt me-2"></i>
-                Invoice {invoiceData.invoiceId}
+                Invoice {invoiceData?.invoiceId || invoiceId}
               </h4>
               <small className="text-white-50">
                 Professional Invoice Verification & Download
@@ -703,24 +711,24 @@ const InvoiceView = () => {
                   <div className="mb-2">
                     <strong>Invoice ID:</strong>{" "}
                     <span style={{ color: "#e63946" }}>
-                      {invoiceData.invoiceId}
+                      {invoiceData?.invoiceId || invoiceId}
                     </span>
                   </div>
                   <div className="mb-2">
-                    <strong>Date:</strong> {invoiceData.orderDate}
+                    <strong>Date:</strong> {invoiceData?.orderDate || "N/A"}
                   </div>
                   <div>
                     <strong>Status:</strong>{" "}
                     <Badge
                       bg={
-                        invoiceData.paymentStatus === "Completed" ||
-                        invoiceData.status === "paid"
+                        invoiceData?.paymentStatus === "Completed" ||
+                        invoiceData?.status === "paid"
                           ? "success"
                           : "warning"
                       }
                     >
-                      {invoiceData.paymentStatus ||
-                        invoiceData.status ||
+                      {invoiceData?.paymentStatus ||
+                        invoiceData?.status ||
                         "Pending"}
                     </Badge>
                   </div>
@@ -757,13 +765,13 @@ const InvoiceView = () => {
                   <div style={{ lineHeight: "1.8" }}>
                     <div>
                       <strong>
-                        {invoiceData.customerDetails.fullName || "Customer"}
+                        {invoiceData?.customerDetails?.fullName || "Customer"}
                       </strong>
                     </div>
-                    <div>{invoiceData.customerDetails.email}</div>
-                    <div>{invoiceData.customerDetails.mobile}</div>
+                    <div>{invoiceData?.customerDetails?.email || "N/A"}</div>
+                    <div>{invoiceData?.customerDetails?.mobile || "N/A"}</div>
                     <div className="mt-2 text-muted">
-                      {invoiceData.customerDetails.address && (
+                      {invoiceData?.customerDetails?.address && (
                         <small>
                           {invoiceData.customerDetails.address},{" "}
                           {invoiceData.customerDetails.city},{" "}
@@ -798,20 +806,21 @@ const InvoiceView = () => {
                   </h5>
                   <div style={{ lineHeight: "1.8" }}>
                     <div>
-                      <strong>Method:</strong> {invoiceData.paymentMethod}
+                      <strong>Method:</strong>{" "}
+                      {invoiceData?.paymentMethod || "COD"}
                     </div>
                     <div>
                       <strong>Status:</strong>{" "}
                       <Badge
                         bg={
-                          invoiceData.paymentStatus === "Completed" ||
-                          invoiceData.status === "paid"
+                          invoiceData?.paymentStatus === "Completed" ||
+                          invoiceData?.status === "paid"
                             ? "success"
                             : "warning"
                         }
                       >
-                        {invoiceData.paymentStatus ||
-                          invoiceData.status ||
+                        {invoiceData?.paymentStatus ||
+                          invoiceData?.status ||
                           "Pending"}
                       </Badge>
                     </div>
@@ -824,7 +833,7 @@ const InvoiceView = () => {
                           fontSize: "1.1rem",
                         }}
                       >
-                        ₹{parseFloat(invoiceData.total || 0).toFixed(2)}
+                        ₹{parseFloat(invoiceData?.total || 0).toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -911,7 +920,7 @@ const InvoiceView = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {invoiceData.items?.map((item, index) => (
+                      {invoiceData?.items?.map((item, index) => (
                         <tr key={index}>
                           <td
                             style={{
@@ -1048,7 +1057,7 @@ const InvoiceView = () => {
                             fontSize: "11px",
                           }}
                         >
-                          ₹{parseFloat(invoiceData.subtotal || 0).toFixed(2)}
+                          ₹{parseFloat(invoiceData?.subtotal || 0).toFixed(2)}
                         </td>
                       </tr>
                       <tr>
@@ -1091,9 +1100,9 @@ const InvoiceView = () => {
                             background: "#f8f9fa",
                           }}
                         >
-                          {invoiceData.shipping === 0
+                          {(invoiceData?.shipping || 0) === 0
                             ? "FREE"
-                            : `₹${parseFloat(invoiceData.shipping).toFixed(2)}`}
+                            : `₹${parseFloat(invoiceData?.shipping || 0).toFixed(2)}`}
                         </td>
                       </tr>
                       <tr>
@@ -1118,7 +1127,7 @@ const InvoiceView = () => {
                             color: "white",
                           }}
                         >
-                          ₹{parseFloat(invoiceData.total || 0).toFixed(2)}
+                          ₹{parseFloat(invoiceData?.total || 0).toFixed(2)}
                         </td>
                       </tr>
                     </tbody>
@@ -1157,7 +1166,7 @@ const InvoiceView = () => {
               </p>
               <div style={{ fontSize: "9px", color: "#999", marginTop: "5px" }}>
                 Generated: {new Date().toLocaleString()} | Invoice ID:{" "}
-                {invoiceData.invoiceId}
+                {invoiceData?.invoiceId || invoiceId}
               </div>
             </div>
           </div>
