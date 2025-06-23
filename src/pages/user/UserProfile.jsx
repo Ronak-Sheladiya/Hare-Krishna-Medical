@@ -39,6 +39,9 @@ const UserProfile = () => {
     profileImage: "",
   });
 
+  const [profileImageFile, setProfileImageFile] = useState(null);
+  const [profileImagePreview, setProfileImagePreview] = useState("");
+
   // Address Information State
   const [addressInfo, setAddressInfo] = useState({
     street: "",
@@ -82,6 +85,44 @@ const UserProfile = () => {
     setTimeout(() => {
       setAlert({ show: false, message: "", variant: "" });
     }, 5000);
+  };
+
+  const handleProfileImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        showAlert("Please select a valid image file", "danger");
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB limit
+        showAlert("Image size must be less than 5MB", "danger");
+        return;
+      }
+
+      setProfileImageFile(file);
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfileImagePreview(e.target.result);
+        setPersonalInfo({
+          ...personalInfo,
+          profileImage: e.target.result,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeProfileImage = () => {
+    setProfileImageFile(null);
+    setProfileImagePreview("");
+    setPersonalInfo({
+      ...personalInfo,
+      profileImage: "",
+    });
   };
 
   const handlePersonalInfoSubmit = async (e) => {
@@ -184,36 +225,91 @@ const UserProfile = () => {
               >
                 <Row>
                   <Col md={3} className="text-center">
-                    <div
-                      className="profile-avatar mx-auto mb-3"
-                      style={{
-                        width: "120px",
-                        height: "120px",
-                        borderRadius: "50%",
-                        background: "linear-gradient(135deg, #e63946, #dc3545)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "white",
-                        fontSize: "3rem",
-                        boxShadow: "0 8px 32px rgba(230, 57, 70, 0.3)",
-                      }}
-                    >
-                      {personalInfo.profileImage ? (
-                        <img
-                          src={personalInfo.profileImage}
-                          alt="Profile"
+                    <div className="position-relative d-inline-block mb-3">
+                      <div
+                        className="profile-avatar"
+                        style={{
+                          width: "120px",
+                          height: "120px",
+                          borderRadius: "50%",
+                          background: personalInfo.profileImage
+                            ? "transparent"
+                            : "linear-gradient(135deg, #e63946, #dc3545)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "white",
+                          fontSize: "3rem",
+                          boxShadow: "0 8px 32px rgba(230, 57, 70, 0.3)",
+                          cursor: "pointer",
+                          transition: "transform 0.3s ease",
+                          overflow: "hidden",
+                        }}
+                        onClick={() =>
+                          document.getElementById("profile-image-input").click()
+                        }
+                        onMouseOver={(e) =>
+                          (e.currentTarget.style.transform = "scale(1.05)")
+                        }
+                        onMouseOut={(e) =>
+                          (e.currentTarget.style.transform = "scale(1)")
+                        }
+                      >
+                        {personalInfo.profileImage ? (
+                          <img
+                            src={personalInfo.profileImage}
+                            alt="Profile"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              borderRadius: "50%",
+                              objectFit: "cover",
+                            }}
+                          />
+                        ) : (
+                          <i className="bi bi-person-fill"></i>
+                        )}
+                        <div
+                          className="position-absolute bottom-0 end-0"
                           style={{
-                            width: "100%",
-                            height: "100%",
+                            background: "#e63946",
                             borderRadius: "50%",
-                            objectFit: "cover",
+                            width: "32px",
+                            height: "32px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            border: "3px solid white",
                           }}
-                        />
-                      ) : (
-                        <i className="bi bi-person-fill"></i>
-                      )}
+                        >
+                          <i
+                            className="bi bi-camera text-white"
+                            style={{ fontSize: "14px" }}
+                          ></i>
+                        </div>
+                      </div>
+                      <input
+                        type="file"
+                        id="profile-image-input"
+                        accept="image/*"
+                        onChange={handleProfileImageChange}
+                        style={{ display: "none" }}
+                      />
                     </div>
+
+                    {personalInfo.profileImage && (
+                      <div className="mb-2">
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={removeProfileImage}
+                        >
+                          <i className="bi bi-trash me-1"></i>
+                          Remove Photo
+                        </Button>
+                      </div>
+                    )}
+
                     <h5 className="mb-1">
                       {personalInfo.fullName || "User Name"}
                     </h5>
