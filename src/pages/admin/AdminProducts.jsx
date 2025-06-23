@@ -395,7 +395,8 @@ const AdminProducts = () => {
                 <Row>
                   <Col lg={8}>
                     <p className="text-muted mb-3">
-                      Add new products, update inventory, and manage your medical store catalog
+                      Add new products, update inventory, and manage your
+                      medical store catalog
                     </p>
                   </Col>
                   <Col lg={4} className="text-end">
@@ -425,7 +426,11 @@ const AdminProducts = () => {
           {error && (
             <Row className="mb-4">
               <Col lg={12}>
-                <Alert variant="danger" dismissible onClose={() => setError(null)}>
+                <Alert
+                  variant="danger"
+                  dismissible
+                  onClose={() => setError(null)}
+                >
                   <i className="bi bi-exclamation-triangle me-2"></i>
                   {error}
                 </Alert>
@@ -662,7 +667,7 @@ const AdminProducts = () => {
             </div>
           )}
         </Container>
-      </section>
+      </ThemeSection>
 
       {/* Add Product Modal */}
       <Modal
