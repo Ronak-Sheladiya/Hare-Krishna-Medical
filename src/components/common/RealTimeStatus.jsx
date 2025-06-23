@@ -144,17 +144,18 @@ const RealTimeStatus = ({ position = "fixed" }) => {
       case "mock":
         return {
           variant: "info",
-          icon: "bi-gear",
-          text: "Mock",
+          icon: "bi-cpu",
+          text: "Demo",
           tooltip:
-            "Running in mock mode. Install socket.io-client for real-time features.",
+            "Running in demo mode. Real-time features are simulated. For production, ensure backend WebSocket server is running.",
         };
       case "error":
         return {
-          variant: "secondary",
+          variant: "warning",
           icon: "bi-exclamation-triangle",
-          text: "Error",
-          tooltip: "Real-time connection error. Check console for details.",
+          text: "Limited",
+          tooltip:
+            "Real-time connection unavailable. App functions normally but without live updates. Check if backend server is running with WebSocket support.",
         };
       default:
         return {
