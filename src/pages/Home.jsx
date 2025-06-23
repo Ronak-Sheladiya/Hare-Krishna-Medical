@@ -21,7 +21,7 @@ const Home = () => {
 
   // Fetch featured products from API
   const API_BASE_URL =
-    process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
   const fetchFeaturedProducts = async () => {
     try {
