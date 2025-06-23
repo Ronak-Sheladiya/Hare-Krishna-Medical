@@ -107,37 +107,34 @@ const AdminProducts = () => {
     setShowToast(true);
   };
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (page = currentPage) => {
     setLoading(true);
     setError(null);
-
-    const queryParams = new URLSearchParams({
-      page: currentPage,
-      limit: productsPerPage,
-      ...(searchTerm && { search: searchTerm }),
-      ...(categoryFilter && { category: categoryFilter }),
-      ...(stockFilter && { stockFilter: stockFilter }),
-    });
 
     const {
       success,
       data,
       error: apiError,
-    } = await safeApiCall(() => api.get(`/api/products?${queryParams}`), {
-      products: [],
-      pagination: { totalProducts: 0, totalPages: 1 },
-    });
+    } = await safeApiCall(
+      () =>
+        api.get(
+          `/api/products?page=${page}&limit=${productsPerPage}&admin=true`,
+        ),
+      [],
+    );
 
-    if (success && data) {
-      const productsData = data.data || data;
-      setProducts(productsData.products || []);
-      setTotalPages(productsData.pagination?.totalPages || 1);
-      setTotalProducts(productsData.pagination?.totalProducts || 0);
+    if (success && data?.data) {
+      const productsData = Array.isArray(data.data)
+        ? data.data
+        : data.data.products || [];
+      setProducts(productsData);
+      setTotalProducts(data.data.total || productsData.length);
+      setTotalPages(
+        Math.ceil((data.data.total || productsData.length) / productsPerPage),
+      );
     } else {
       setError(apiError || "Failed to fetch products");
       setProducts([]);
-      setTotalPages(1);
-      setTotalProducts(0);
     }
 
     setLoading(false);
@@ -145,124 +142,58 @@ const AdminProducts = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [currentPage, searchTerm, categoryFilter, stockFilter]);
+  }, [currentPage]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const handleSubmit = async (e, isEdit = false) => {
+    e.preventDefault();
+    setActionLoading(true);
 
-  const validateForm = () => {
-    const errors = {};
-
-    if (!formData.name.trim()) {
-      errors.name = "Product name is required";
-    }
-
-    if (!formData.company.trim()) {
-      errors.company = "Company name is required";
-    }
-
-    if (!formData.description.trim()) {
-      errors.description = "Description is required";
-    }
-
-    if (!formData.price || parseFloat(formData.price) <= 0) {
-      errors.price = "Valid price is required (must be greater than 0)";
-    }
-
-    if (!formData.stock || parseInt(formData.stock) < 0) {
-      errors.stock = "Valid stock quantity is required (cannot be negative)";
-    }
-
-    if (!formData.category) {
-      errors.category = "Category selection is required";
-    }
-
-    if (!formData.weight.trim()) {
-      errors.weight = "Weight is required";
-    }
-
-    return errors;
-  };
-
-  const handleAddProduct = async () => {
-    const errors = validateForm();
-
-    if (Object.keys(errors).length > 0) {
-      showNotification(Object.values(errors)[0], "danger");
+    if (!formData.name || !formData.price || !formData.stock) {
+      showNotification("Please fill in all required fields", "danger");
+      setActionLoading(false);
       return;
     }
 
-    setActionLoading(true);
+    const productData = {
+      ...formData,
+      price: parseFloat(formData.price),
+      originalPrice:
+        parseFloat(formData.originalPrice) || parseFloat(formData.price),
+      stock: parseInt(formData.stock),
+    };
 
-    const {
-      success,
-      data,
-      error: apiError,
-    } = await safeApiCall(() => api.post("/api/products", formData), null);
+    const { success, error: apiError } = isEdit
+      ? await safeApiCall(() =>
+          api.put(`/api/products/${selectedProduct._id}`, productData),
+        )
+      : await safeApiCall(() => api.post("/api/products", productData));
 
-    if (success && data) {
-      const productData = data.data || data;
-      setProducts((prev) => [productData, ...prev]);
+    if (success) {
+      await fetchProducts();
+      resetForm();
       setShowAddModal(false);
-      resetForm();
-      showNotification("Product added successfully!", "success");
-    } else {
-      showNotification(apiError || "Failed to add product", "danger");
-    }
-
-    setActionLoading(false);
-  };
-
-  const handleEditProduct = async () => {
-    const errors = validateForm();
-
-    if (Object.keys(errors).length > 0) {
-      showNotification(Object.values(errors)[0], "danger");
-      return;
-    }
-
-    setActionLoading(true);
-
-    const {
-      success,
-      data,
-      error: apiError,
-    } = await safeApiCall(
-      () => api.put(`/api/products/${selectedProduct._id}`, formData),
-      null,
-    );
-
-    if (success && data) {
-      const productData = data.data || data;
-      setProducts((prev) =>
-        prev.map((product) =>
-          product._id === selectedProduct._id ? productData : product,
-        ),
-      );
       setShowEditModal(false);
-      resetForm();
-      showNotification("Product updated successfully!", "success");
+      showNotification(
+        `Product ${isEdit ? "updated" : "added"} successfully!`,
+        "success",
+      );
     } else {
-      showNotification(apiError || "Failed to update product", "danger");
+      showNotification(
+        apiError || `Failed to ${isEdit ? "update" : "add"} product`,
+        "danger",
+      );
     }
 
     setActionLoading(false);
   };
 
-  const handleDeleteProduct = async () => {
+  const handleDelete = async () => {
     if (!productToDelete) return;
 
     setActionLoading(true);
 
-    const {
-      success,
-      data,
-      error: apiError,
-    } = await safeApiCall(
-      () => api.delete(`/api/products/${productToDelete._id}`),
-      null,
+    const { success, error: apiError } = await safeApiCall(() =>
+      api.delete(`/api/products/${productToDelete._id}`),
     );
 
     if (success) {
@@ -347,6 +278,7 @@ const AdminProducts = () => {
     return new Date(dateString).toLocaleDateString();
   };
 
+  // Apply filters
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -395,7 +327,8 @@ const AdminProducts = () => {
                 <Row>
                   <Col lg={8}>
                     <p className="text-muted mb-3">
-                      Add new products, update inventory, and manage your medical store catalog
+                      Add new products, update inventory, and manage your
+                      medical store catalog
                     </p>
                   </Col>
                   <Col lg={4} className="text-end">
@@ -425,7 +358,11 @@ const AdminProducts = () => {
           {error && (
             <Row className="mb-4">
               <Col lg={12}>
-                <Alert variant="danger" dismissible onClose={() => setError(null)}>
+                <Alert
+                  variant="danger"
+                  dismissible
+                  onClose={() => setError(null)}
+                >
                   <i className="bi bi-exclamation-triangle me-2"></i>
                   {error}
                 </Alert>
@@ -436,10 +373,16 @@ const AdminProducts = () => {
           {/* Filters */}
           <Row className="mb-4">
             <Col lg={12}>
-              <ThemeCard title="Search & Filter" icon="bi-funnel" className="mb-4">
+              <ThemeCard
+                title="Search & Filter"
+                icon="bi-funnel"
+                className="mb-4"
+              >
                 <Row>
                   <Col lg={4} className="mb-3 mb-lg-0">
-                    <Form.Label className="text-muted small">Search Products</Form.Label>
+                    <Form.Label className="text-muted small">
+                      Search Products
+                    </Form.Label>
                     <InputGroup>
                       <InputGroup.Text>
                         <i className="bi bi-search"></i>
@@ -453,7 +396,9 @@ const AdminProducts = () => {
                     </InputGroup>
                   </Col>
                   <Col lg={3} className="mb-3 mb-lg-0">
-                    <Form.Label className="text-muted small">Category</Form.Label>
+                    <Form.Label className="text-muted small">
+                      Category
+                    </Form.Label>
                     <Form.Select
                       value={categoryFilter}
                       onChange={(e) => setCategoryFilter(e.target.value)}
@@ -467,7 +412,9 @@ const AdminProducts = () => {
                     </Form.Select>
                   </Col>
                   <Col lg={3} className="mb-3 mb-lg-0">
-                    <Form.Label className="text-muted small">Stock Level</Form.Label>
+                    <Form.Label className="text-muted small">
+                      Stock Level
+                    </Form.Label>
                     <Form.Select
                       value={stockFilter}
                       onChange={(e) => setStockFilter(e.target.value)}
@@ -506,170 +453,171 @@ const AdminProducts = () => {
                 icon="bi-box"
                 className="table-card"
               >
-                <div className="p-0">
-              {loading ? (
-                <div className="text-center py-4">
-                  <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </Spinner>
-                </div>
-              ) : filteredProducts.length > 0 ? (
-                <div className="table-responsive">
-                  <Table className="mb-0">
-                    <thead className="table-light">
-                      <tr>
-                        <th>Product</th>
-                        <th>Category</th>
-                        <th>Price</th>
-                        <th>Stock</th>
-                        <th>Status</th>
-                        <th>Updated</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredProducts.map((product) => (
-                        <tr key={product._id}>
-                          <td>
-                            <div className="d-flex align-items-center">
-                              <div
-                                className="bg-medical-blue text-white rounded me-3 d-flex align-items-center justify-content-center"
-                                style={{ width: "50px", height: "50px" }}
-                              >
-                                <i className="bi bi-capsule"></i>
-                              </div>
-                              <div>
-                                <div className="fw-bold">{product.name}</div>
-                                <small className="text-muted">
-                                  {product.company}
-                                </small>
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <Badge bg="secondary">{product.category}</Badge>
-                          </td>
-                          <td>
-                            <div>
-                              <span className="fw-bold text-medical-red">
-                                {formatCurrency(product.price)}
-                              </span>
-                              {product.originalPrice &&
-                                product.originalPrice > product.price && (
+                {loading ? (
+                  <div className="text-center py-4">
+                    <Spinner animation="border" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </Spinner>
+                  </div>
+                ) : filteredProducts.length > 0 ? (
+                  <>
+                    <div className="table-responsive">
+                      <Table className="mb-0">
+                        <thead className="table-light">
+                          <tr>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th>Updated</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredProducts.map((product) => (
+                            <tr key={product._id}>
+                              <td>
+                                <div className="d-flex align-items-center">
+                                  <div
+                                    className="bg-medical-blue text-white rounded me-3 d-flex align-items-center justify-content-center"
+                                    style={{ width: "50px", height: "50px" }}
+                                  >
+                                    <i className="bi bi-capsule"></i>
+                                  </div>
                                   <div>
-                                    <small className="text-muted text-decoration-line-through">
-                                      {formatCurrency(product.originalPrice)}
+                                    <div className="fw-bold">
+                                      {product.name}
+                                    </div>
+                                    <small className="text-muted">
+                                      {product.company}
                                     </small>
                                   </div>
-                                )}
-                            </div>
-                          </td>
-                          <td>
-                            <span className="fw-bold">{product.stock}</span>
-                          </td>
-                          <td>{getStockBadge(product.stock)}</td>
-                          <td>
-                            <small className="text-muted">
-                              {formatDate(product.updatedAt)}
-                            </small>
-                          </td>
-                          <td>
-                            <div className="btn-group" role="group">
-                              <Button
-                                size="sm"
-                                variant="outline-primary"
-                                onClick={() => handleViewClick(product)}
-                                className="btn-medical-outline"
+                                </div>
+                              </td>
+                              <td>
+                                <Badge bg="secondary">{product.category}</Badge>
+                              </td>
+                              <td>
+                                <div>
+                                  <strong>
+                                    {formatCurrency(product.price)}
+                                  </strong>
+                                  {product.originalPrice !== product.price && (
+                                    <div>
+                                      <small className="text-decoration-line-through text-muted">
+                                        {formatCurrency(product.originalPrice)}
+                                      </small>
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                              <td>
+                                <div className="text-center">
+                                  <div className="fw-bold">{product.stock}</div>
+                                </div>
+                              </td>
+                              <td>{getStockBadge(product.stock)}</td>
+                              <td>{formatDate(product.updatedAt)}</td>
+                              <td>
+                                <div className="d-flex gap-1">
+                                  <Button
+                                    size="sm"
+                                    variant="outline-primary"
+                                    onClick={() => handleViewClick(product)}
+                                    title="View Details"
+                                  >
+                                    <i className="bi bi-eye"></i>
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline-success"
+                                    onClick={() => handleEditClick(product)}
+                                    title="Edit Product"
+                                  >
+                                    <i className="bi bi-pencil"></i>
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline-danger"
+                                    onClick={() =>
+                                      confirmDeleteProduct(product)
+                                    }
+                                    title="Delete Product"
+                                  >
+                                    <i className="bi bi-trash"></i>
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Table>
+                    </div>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <div className="d-flex justify-content-center mt-4">
+                        <Pagination>
+                          <Pagination.First
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(1)}
+                          />
+                          <Pagination.Prev
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(currentPage - 1)}
+                          />
+
+                          {Array.from({ length: totalPages }, (_, i) => i + 1)
+                            .slice(
+                              Math.max(0, currentPage - 3),
+                              Math.min(totalPages, currentPage + 2),
+                            )
+                            .map((pageNumber) => (
+                              <Pagination.Item
+                                key={pageNumber}
+                                active={pageNumber === currentPage}
+                                onClick={() => setCurrentPage(pageNumber)}
                               >
-                                <i className="bi bi-eye"></i>
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline-warning"
-                                onClick={() => handleEditClick(product)}
-                              >
-                                <i className="bi bi-pencil"></i>
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline-danger"
-                                onClick={() => confirmDeleteProduct(product)}
-                                disabled={actionLoading}
-                              >
-                                <i className="bi bi-trash"></i>
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </div>
-              ) : (
-                <div className="text-center py-5">
-                  <i
-                    className="bi bi-box text-muted"
-                    style={{ fontSize: "3rem" }}
-                  ></i>
-                  <h5 className="text-muted mt-3">No products found</h5>
-                  <p className="text-muted">
-                    {searchTerm || categoryFilter || stockFilter
-                      ? "Try adjusting your filters"
-                      : "No products have been added yet"}
-                  </p>
-                  <Button
-                    variant="primary"
-                    onClick={handleAddClick}
-                    className="btn-medical-primary"
-                  >
-                    <i className="bi bi-plus-circle me-2"></i>
-                    Add First Product
-                  </Button>
-                </div>
-              )}
-            </Card.Body>
-          </Card>
+                                {pageNumber}
+                              </Pagination.Item>
+                            ))}
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="d-flex justify-content-center mt-4">
-              <Pagination>
-                <Pagination.First
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(1)}
-                />
-                <Pagination.Prev
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                />
-
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const startPage = Math.max(1, currentPage - 2);
-                  const pageNumber = startPage + i;
-
-                  if (pageNumber > totalPages) return null;
-
-                  return (
-                    <Pagination.Item
-                      key={pageNumber}
-                      active={pageNumber === currentPage}
-                      onClick={() => setCurrentPage(pageNumber)}
-                    >
-                      {pageNumber}
-                    </Pagination.Item>
-                  );
-                })}
-
-                <Pagination.Next
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                />
-                <Pagination.Last
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(totalPages)}
-                />
-              </Pagination>
-                </div>
+                          <Pagination.Next
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                          />
+                          <Pagination.Last
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(totalPages)}
+                          />
+                        </Pagination>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-5">
+                    <div className="text-muted">
+                      <i className="bi bi-box display-1"></i>
+                      <h5 className="mt-3">No products found</h5>
+                      <p>
+                        {searchTerm || categoryFilter || stockFilter
+                          ? "Try adjusting your filters"
+                          : "Add your first product to get started"}
+                      </p>
+                      {!(searchTerm || categoryFilter || stockFilter) && (
+                        <ThemeButton
+                          variant="primary"
+                          onClick={handleAddClick}
+                          icon="bi-plus-circle"
+                          className="mt-3"
+                        >
+                          Add Your First Product
+                        </ThemeButton>
+                      )}
+                    </div>
+                  </div>
+                )}
               </ThemeCard>
             </Col>
           </Row>
@@ -686,31 +634,32 @@ const AdminProducts = () => {
           <Modal.Title>Add New Product</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
+          <Form onSubmit={(e) => handleSubmit(e, false)}>
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>Product Name *</Form.Label>
                   <Form.Control
                     type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
                     placeholder="Enter product name"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     required
                   />
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Company *</Form.Label>
+                  <Form.Label>Company</Form.Label>
                   <Form.Control
                     type="text"
-                    name="company"
-                    value={formData.company}
-                    onChange={handleInputChange}
                     placeholder="Enter company name"
-                    required
+                    value={formData.company}
+                    onChange={(e) =>
+                      setFormData({ ...formData, company: e.target.value })
+                    }
                   />
                 </Form.Group>
               </Col>
@@ -720,48 +669,45 @@ const AdminProducts = () => {
               <Col md={4}>
                 <Form.Group className="mb-3">
                   <Form.Label>Price *</Form.Label>
-                  <InputGroup>
-                    <InputGroup.Text>₹</InputGroup.Text>
-                    <Form.Control
-                      type="number"
-                      name="price"
-                      value={formData.price}
-                      onChange={handleInputChange}
-                      placeholder="0.00"
-                      step="0.01"
-                      min="0"
-                      required
-                    />
-                  </InputGroup>
+                  <Form.Control
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={formData.price}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
+                    required
+                  />
                 </Form.Group>
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
                   <Form.Label>Original Price</Form.Label>
-                  <InputGroup>
-                    <InputGroup.Text>₹</InputGroup.Text>
-                    <Form.Control
-                      type="number"
-                      name="originalPrice"
-                      value={formData.originalPrice}
-                      onChange={handleInputChange}
-                      placeholder="0.00"
-                      step="0.01"
-                      min="0"
-                    />
-                  </InputGroup>
+                  <Form.Control
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={formData.originalPrice}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        originalPrice: e.target.value,
+                      })
+                    }
+                  />
                 </Form.Group>
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Stock Quantity *</Form.Label>
+                  <Form.Label>Stock *</Form.Label>
                   <Form.Control
                     type="number"
-                    name="stock"
-                    value={formData.stock}
-                    onChange={handleInputChange}
                     placeholder="0"
-                    min="0"
+                    value={formData.stock}
+                    onChange={(e) =>
+                      setFormData({ ...formData, stock: e.target.value })
+                    }
                     required
                   />
                 </Form.Group>
@@ -771,12 +717,12 @@ const AdminProducts = () => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Category *</Form.Label>
+                  <Form.Label>Category</Form.Label>
                   <Form.Select
-                    name="category"
                     value={formData.category}
-                    onChange={handleInputChange}
-                    required
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
                   >
                     <option value="">Select Category</option>
                     {categories.map((category) => (
@@ -789,29 +735,29 @@ const AdminProducts = () => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Weight/Size *</Form.Label>
+                  <Form.Label>Weight</Form.Label>
                   <Form.Control
                     type="text"
-                    name="weight"
+                    placeholder="e.g., 500mg, 10ml"
                     value={formData.weight}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 500mg, 100ml, 50 tablets"
-                    required
+                    onChange={(e) =>
+                      setFormData({ ...formData, weight: e.target.value })
+                    }
                   />
                 </Form.Group>
               </Col>
             </Row>
 
             <Form.Group className="mb-3">
-              <Form.Label>Description *</Form.Label>
+              <Form.Label>Description</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
                 placeholder="Enter product description"
-                required
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
               />
             </Form.Group>
 
@@ -819,11 +765,12 @@ const AdminProducts = () => {
               <Form.Label>Benefits</Form.Label>
               <Form.Control
                 as="textarea"
-                rows={3}
-                name="benefits"
+                rows={2}
+                placeholder="Enter product benefits"
                 value={formData.benefits}
-                onChange={handleInputChange}
-                placeholder="List product benefits (one per line)"
+                onChange={(e) =>
+                  setFormData({ ...formData, benefits: e.target.value })
+                }
               />
             </Form.Group>
 
@@ -832,34 +779,35 @@ const AdminProducts = () => {
               <Form.Control
                 as="textarea"
                 rows={2}
-                name="usage"
-                value={formData.usage}
-                onChange={handleInputChange}
                 placeholder="Enter usage instructions"
+                value={formData.usage}
+                onChange={(e) =>
+                  setFormData({ ...formData, usage: e.target.value })
+                }
               />
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowAddModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowAddModal(false)}
+            disabled={actionLoading}
+          >
             Cancel
           </Button>
           <Button
             variant="primary"
-            onClick={handleAddProduct}
+            onClick={(e) => handleSubmit(e, false)}
             disabled={actionLoading}
-            className="btn-medical-primary"
           >
             {actionLoading ? (
               <>
-                <Spinner animation="border" size="sm" className="me-2" />
+                <Spinner size="sm" className="me-2" />
                 Adding...
               </>
             ) : (
-              <>
-                <i className="bi bi-plus-circle me-2"></i>
-                Add Product
-              </>
+              "Add Product"
             )}
           </Button>
         </Modal.Footer>
@@ -875,32 +823,33 @@ const AdminProducts = () => {
           <Modal.Title>Edit Product</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {/* Same form as Add Modal */}
-          <Form>
+          <Form onSubmit={(e) => handleSubmit(e, true)}>
+            {/* Same form structure as Add Modal */}
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>Product Name *</Form.Label>
                   <Form.Control
                     type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
                     placeholder="Enter product name"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     required
                   />
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Company *</Form.Label>
+                  <Form.Label>Company</Form.Label>
                   <Form.Control
                     type="text"
-                    name="company"
-                    value={formData.company}
-                    onChange={handleInputChange}
                     placeholder="Enter company name"
-                    required
+                    value={formData.company}
+                    onChange={(e) =>
+                      setFormData({ ...formData, company: e.target.value })
+                    }
                   />
                 </Form.Group>
               </Col>
@@ -910,48 +859,45 @@ const AdminProducts = () => {
               <Col md={4}>
                 <Form.Group className="mb-3">
                   <Form.Label>Price *</Form.Label>
-                  <InputGroup>
-                    <InputGroup.Text>₹</InputGroup.Text>
-                    <Form.Control
-                      type="number"
-                      name="price"
-                      value={formData.price}
-                      onChange={handleInputChange}
-                      placeholder="0.00"
-                      step="0.01"
-                      min="0"
-                      required
-                    />
-                  </InputGroup>
+                  <Form.Control
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={formData.price}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
+                    required
+                  />
                 </Form.Group>
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
                   <Form.Label>Original Price</Form.Label>
-                  <InputGroup>
-                    <InputGroup.Text>₹</InputGroup.Text>
-                    <Form.Control
-                      type="number"
-                      name="originalPrice"
-                      value={formData.originalPrice}
-                      onChange={handleInputChange}
-                      placeholder="0.00"
-                      step="0.01"
-                      min="0"
-                    />
-                  </InputGroup>
+                  <Form.Control
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={formData.originalPrice}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        originalPrice: e.target.value,
+                      })
+                    }
+                  />
                 </Form.Group>
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Stock Quantity *</Form.Label>
+                  <Form.Label>Stock *</Form.Label>
                   <Form.Control
                     type="number"
-                    name="stock"
-                    value={formData.stock}
-                    onChange={handleInputChange}
                     placeholder="0"
-                    min="0"
+                    value={formData.stock}
+                    onChange={(e) =>
+                      setFormData({ ...formData, stock: e.target.value })
+                    }
                     required
                   />
                 </Form.Group>
@@ -961,12 +907,12 @@ const AdminProducts = () => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Category *</Form.Label>
+                  <Form.Label>Category</Form.Label>
                   <Form.Select
-                    name="category"
                     value={formData.category}
-                    onChange={handleInputChange}
-                    required
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
                   >
                     <option value="">Select Category</option>
                     {categories.map((category) => (
@@ -979,77 +925,53 @@ const AdminProducts = () => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Weight/Size *</Form.Label>
+                  <Form.Label>Weight</Form.Label>
                   <Form.Control
                     type="text"
-                    name="weight"
+                    placeholder="e.g., 500mg, 10ml"
                     value={formData.weight}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 500mg, 100ml, 50 tablets"
-                    required
+                    onChange={(e) =>
+                      setFormData({ ...formData, weight: e.target.value })
+                    }
                   />
                 </Form.Group>
               </Col>
             </Row>
 
             <Form.Group className="mb-3">
-              <Form.Label>Description *</Form.Label>
+              <Form.Label>Description</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
                 placeholder="Enter product description"
-                required
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Benefits</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                name="benefits"
-                value={formData.benefits}
-                onChange={handleInputChange}
-                placeholder="List product benefits (one per line)"
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Usage Instructions</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={2}
-                name="usage"
-                value={formData.usage}
-                onChange={handleInputChange}
-                placeholder="Enter usage instructions"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
               />
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowEditModal(false)}
+            disabled={actionLoading}
+          >
             Cancel
           </Button>
           <Button
             variant="primary"
-            onClick={handleEditProduct}
+            onClick={(e) => handleSubmit(e, true)}
             disabled={actionLoading}
-            className="btn-medical-primary"
           >
             {actionLoading ? (
               <>
-                <Spinner animation="border" size="sm" className="me-2" />
+                <Spinner size="sm" className="me-2" />
                 Updating...
               </>
             ) : (
-              <>
-                <i className="bi bi-check-circle me-2"></i>
-                Update Product
-              </>
+              "Update Product"
             )}
           </Button>
         </Modal.Footer>
@@ -1066,92 +988,55 @@ const AdminProducts = () => {
         </Modal.Header>
         <Modal.Body>
           {selectedProduct && (
-            <div>
-              <Row>
-                <Col md={8}>
-                  <h4>{selectedProduct.name}</h4>
-                  <p className="text-muted">{selectedProduct.company}</p>
-                  <Badge bg="secondary" className="me-2">
-                    {selectedProduct.category}
-                  </Badge>
-                  {getStockBadge(selectedProduct.stock)}
-                </Col>
-                <Col md={4} className="text-end">
-                  <h3 className="text-medical-red">
-                    {formatCurrency(selectedProduct.price)}
-                  </h3>
-                  {selectedProduct.originalPrice &&
-                    selectedProduct.originalPrice > selectedProduct.price && (
-                      <p className="text-muted text-decoration-line-through">
-                        {formatCurrency(selectedProduct.originalPrice)}
-                      </p>
-                    )}
-                </Col>
-              </Row>
-
-              <hr />
-
-              <Row>
-                <Col md={6}>
-                  <p>
-                    <strong>Stock:</strong> {selectedProduct.stock} units
-                  </p>
-                  <p>
-                    <strong>Weight/Size:</strong> {selectedProduct.weight}
-                  </p>
-                  <p>
-                    <strong>Added:</strong>{" "}
-                    {formatDate(selectedProduct.createdAt)}
-                  </p>
-                </Col>
-                <Col md={6}>
-                  <p>
-                    <strong>Category:</strong> {selectedProduct.category}
-                  </p>
-                  <p>
-                    <strong>Company:</strong> {selectedProduct.company}
-                  </p>
-                  <p>
-                    <strong>Updated:</strong>{" "}
-                    {formatDate(selectedProduct.updatedAt)}
-                  </p>
-                </Col>
-              </Row>
-
-              <hr />
-
-              <h6>Description</h6>
-              <p className="text-muted">{selectedProduct.description}</p>
-
-              {selectedProduct.benefits && (
-                <>
-                  <h6>Benefits</h6>
-                  <p className="text-muted">{selectedProduct.benefits}</p>
-                </>
-              )}
-
-              {selectedProduct.usage && (
-                <>
-                  <h6>Usage Instructions</h6>
-                  <p className="text-muted">{selectedProduct.usage}</p>
-                </>
-              )}
-            </div>
+            <Row>
+              <Col md={12}>
+                <Card className="border-0">
+                  <Card.Body>
+                    <Row>
+                      <Col md={6}>
+                        <h5 className="text-primary">{selectedProduct.name}</h5>
+                        <p className="text-muted">{selectedProduct.company}</p>
+                        <hr />
+                        <p>
+                          <strong>Category:</strong> {selectedProduct.category}
+                        </p>
+                        <p>
+                          <strong>Price:</strong>{" "}
+                          {formatCurrency(selectedProduct.price)}
+                        </p>
+                        <p>
+                          <strong>Stock:</strong> {selectedProduct.stock} units
+                        </p>
+                        <p>
+                          <strong>Weight:</strong>{" "}
+                          {selectedProduct.weight || "N/A"}
+                        </p>
+                      </Col>
+                      <Col md={6}>
+                        <h6>Description</h6>
+                        <p className="text-muted">
+                          {selectedProduct.description ||
+                            "No description available"}
+                        </p>
+                        <h6>Benefits</h6>
+                        <p className="text-muted">
+                          {selectedProduct.benefits || "No benefits listed"}
+                        </p>
+                        <h6>Usage</h6>
+                        <p className="text-muted">
+                          {selectedProduct.usage || "No usage instructions"}
+                        </p>
+                      </Col>
+                    </Row>
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
           )}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowViewModal(false)}>
             Close
-          </Button>
-          <Button
-            variant="warning"
-            onClick={() => {
-              setShowViewModal(false);
-              handleEditClick(selectedProduct);
-            }}
-          >
-            <i className="bi bi-pencil me-2"></i>
-            Edit Product
           </Button>
         </Modal.Footer>
       </Modal>
@@ -1167,36 +1052,35 @@ const AdminProducts = () => {
         </Modal.Header>
         <Modal.Body>
           <div className="text-center">
-            <i
-              className="bi bi-exclamation-triangle text-warning"
-              style={{ fontSize: "3rem" }}
-            ></i>
-            <h5 className="mt-3">Are you sure?</h5>
-            <p className="text-muted">
-              This action will permanently delete{" "}
-              <strong>{productToDelete?.name}</strong>. This cannot be undone.
+            <i className="bi bi-exclamation-triangle display-1 text-warning mb-3"></i>
+            <h5>Are you sure?</h5>
+            <p>
+              Do you really want to delete{" "}
+              <strong>{productToDelete?.name}</strong>? This action cannot be
+              undone.
             </p>
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowDeleteModal(false)}
+            disabled={actionLoading}
+          >
             Cancel
           </Button>
           <Button
             variant="danger"
-            onClick={handleDeleteProduct}
+            onClick={handleDelete}
             disabled={actionLoading}
           >
             {actionLoading ? (
               <>
-                <Spinner animation="border" size="sm" className="me-2" />
+                <Spinner size="sm" className="me-2" />
                 Deleting...
               </>
             ) : (
-              <>
-                <i className="bi bi-trash me-2"></i>
-                Delete Product
-              </>
+              "Delete Product"
             )}
           </Button>
         </Modal.Footer>
@@ -1209,17 +1093,22 @@ const AdminProducts = () => {
           onClose={() => setShowToast(false)}
           delay={4000}
           autohide
-          bg={toastType}
         >
-          <Toast.Header>
+          <Toast.Header
+            className={
+              toastType === "success"
+                ? "bg-success text-white"
+                : toastType === "danger"
+                  ? "bg-danger text-white"
+                  : "bg-info text-white"
+            }
+          >
             <strong className="me-auto">
               {toastType === "success"
                 ? "Success"
                 : toastType === "danger"
                   ? "Error"
-                  : toastType === "warning"
-                    ? "Warning"
-                    : "Info"}
+                  : "Info"}
             </strong>
           </Toast.Header>
           <Toast.Body className={toastType === "success" ? "text-white" : ""}>
