@@ -53,6 +53,10 @@ class SocketClient {
     }
 
     try {
+      // Create real-time connection
+      const socketUrl =
+        import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+
       // Ensure io is available
       if (!io || typeof io !== "function") {
         console.warn(
