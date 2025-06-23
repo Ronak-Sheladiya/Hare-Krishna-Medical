@@ -217,6 +217,10 @@ const Header = () => {
 
                     {user?.role === 1 && (
                       <>
+                        <Dropdown.Item as={Link} to="/admin/users">
+                          <i className="bi bi-people me-2"></i>
+                          Manage Users
+                        </Dropdown.Item>
                         <Dropdown.Item as={Link} to="/admin/products">
                           <i className="bi bi-box me-2"></i>
                           Manage Products
