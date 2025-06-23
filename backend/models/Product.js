@@ -58,13 +58,13 @@ const productSchema = new mongoose.Schema(
     },
     images: {
       type: [String],
-      required: [true, 'At least one product image is required'],
+      required: [true, "At least one product image is required"],
       validate: {
-        validator: function(arr) {
+        validator: function (arr) {
           return arr && arr.length > 0 && arr.length <= 5;
         },
-        message: 'Product must have between 1 and 5 images'
-      }
+        message: "Product must have between 1 and 5 images",
+      },
     },
     // Legacy image structure - keeping for backward compatibility
     imageUrls: [
@@ -74,7 +74,6 @@ const productSchema = new mongoose.Schema(
         alt: String,
       },
     ],
-    specifications: {
     specifications: {
       composition: String,
       dosage: String,
