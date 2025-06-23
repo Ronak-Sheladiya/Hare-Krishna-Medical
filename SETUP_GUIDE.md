@@ -400,7 +400,15 @@ If everything is set up correctly, you should see:
 1. **Frontend**: React application at http://localhost:3000
 2. **Backend**: Express server at http://localhost:5000
 3. **Database**: MongoDB connected and running
-4. **Features**: All application features working properly
+4. **Development Indicator**: In development mode, you'll see a notification in the top-right corner showing backend connection status
+5. **Features**: All application features working properly
+
+### Development Mode Features
+
+- **Backend Status Indicator**: Shows if the backend API is connected
+- **Graceful Degradation**: App works even when backend is not available
+- **Error Handling**: Proper error messages and fallback states
+- **Empty States**: Informative messages when no data is available
 
 Congratulations! Your Hare Krishna Medical Store is now running locally. You can now:
 
