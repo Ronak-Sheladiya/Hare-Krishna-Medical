@@ -15,6 +15,7 @@ import {
   Badge,
 } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
+import { updateUser } from "../../store/slices/authSlice";
 import {
   PageHeroSection,
   ThemeCard,
@@ -24,6 +25,7 @@ import {
 
 const UserProfile = () => {
   const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState("personal");
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, message: "", variant: "" });
@@ -132,6 +134,19 @@ const UserProfile = () => {
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Update Redux store with new user data including profile image
+      dispatch(
+        updateUser({
+          name: personalInfo.fullName,
+          fullName: personalInfo.fullName,
+          mobile: personalInfo.mobile,
+          dateOfBirth: personalInfo.dateOfBirth,
+          gender: personalInfo.gender,
+          profileImage: personalInfo.profileImage,
+        }),
+      );
+
       showAlert("Personal information updated successfully!", "success");
     } catch (error) {
       showAlert("Failed to update information. Please try again.", "danger");
