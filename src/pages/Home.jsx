@@ -178,7 +178,6 @@ const Home = () => {
                       e.target.style.transform = "translateY(0)";
                     }}
                   >
-                    <i className="bi bi-lightbulb-fill"></i>
                     Learn More
                   </Button>
                 </div>
