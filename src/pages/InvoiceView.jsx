@@ -40,29 +40,8 @@ const InvoiceView = () => {
     }
   }, [invoiceId]);
 
-  // Add print event listeners for better print handling
+  // Add Ctrl+P keyboard shortcut to use our custom print function
   useEffect(() => {
-    const handleBeforePrint = () => {
-      const invoiceElement = document.getElementById("invoice-content");
-      if (invoiceElement) {
-        invoiceElement.classList.add("printing");
-        document.body.classList.add("printing");
-      }
-    };
-
-    const handleAfterPrint = () => {
-      const invoiceElement = document.getElementById("invoice-content");
-      if (invoiceElement) {
-        invoiceElement.classList.remove("printing");
-        document.body.classList.remove("printing");
-      }
-    };
-
-    // Add event listeners for browser print dialog
-    window.addEventListener("beforeprint", handleBeforePrint);
-    window.addEventListener("afterprint", handleAfterPrint);
-
-    // Also handle Ctrl+P keyboard shortcut
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "p") {
         e.preventDefault();
@@ -73,11 +52,9 @@ const InvoiceView = () => {
     document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      window.removeEventListener("beforeprint", handleBeforePrint);
-      window.removeEventListener("afterprint", handleAfterPrint);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [invoiceData]);
 
   const fetchInvoiceData = async () => {
     setLoading(true);
@@ -144,7 +121,6 @@ const InvoiceView = () => {
   };
 
   const handlePrint = () => {
-    // Ensure the content is properly loaded before printing
     const invoiceElement = document.getElementById("invoice-content");
     if (!invoiceElement) {
       alert(
@@ -153,27 +129,222 @@ const InvoiceView = () => {
       return;
     }
 
-    // Add print-ready class for better styling
-    invoiceElement.classList.add("printing");
-    document.body.classList.add("printing");
+    try {
+      // Create a new window for printing
+      const printWindow = window.open("", "_blank", "width=800,height=1000");
 
-    // Small delay to ensure styles are applied
-    setTimeout(() => {
-      try {
-        window.print();
-      } catch (error) {
-        console.error("Print failed:", error);
-        alert(
-          "Print failed. Please try again or use your browser's print function (Ctrl+P).",
-        );
-      } finally {
-        // Clean up classes after printing
-        setTimeout(() => {
-          invoiceElement.classList.remove("printing");
-          document.body.classList.remove("printing");
-        }, 1000);
+      if (!printWindow) {
+        alert("Please allow pop-ups for this site to enable printing.");
+        return;
       }
-    }, 300);
+
+      // Generate the complete invoice HTML with A4 safe margins
+      const invoiceHTML = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Invoice ${invoiceData.invoiceId}</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+            <style>
+              @page {
+                size: A4 portrait;
+                margin: 20px;
+              }
+
+              body {
+                font-family: 'Segoe UI', Arial, sans-serif;
+                line-height: 1.4;
+                color: #333;
+                background: white;
+                margin: 0;
+                padding: 20px;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+
+              .invoice-container {
+                width: 100%;
+                max-width: 210mm;
+                min-height: 257mm;
+                max-height: 257mm;
+                margin: 0 auto;
+                background: white;
+                overflow: hidden;
+                font-size: 11px;
+              }
+
+              .invoice-header {
+                background: linear-gradient(135deg, #e63946, #dc3545) !important;
+                color: white !important;
+                padding: 20px !important;
+                margin-bottom: 15px !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+
+              .customer-section, .payment-section {
+                background: #f8f9fa !important;
+                border: 1px solid #e9ecef !important;
+                border-radius: 5px !important;
+                padding: 15px !important;
+                margin-bottom: 15px !important;
+                page-break-inside: avoid !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+
+              .customer-section {
+                border-left: 4px solid #e63946 !important;
+              }
+
+              .payment-section {
+                border-left: 4px solid #28a745 !important;
+              }
+
+              .table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 15px;
+                font-size: 10px;
+              }
+
+              .table th {
+                background: #e63946 !important;
+                color: white !important;
+                padding: 8px !important;
+                border: 1px solid #dee2e6 !important;
+                font-weight: bold !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+
+              .table td {
+                padding: 6px 8px !important;
+                border: 1px solid #dee2e6 !important;
+              }
+
+              .table-striped tbody tr:nth-of-type(odd) {
+                background-color: #f8f9fa !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+
+              .bg-danger {
+                background: #e63946 !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+
+              .text-success {
+                color: #28a745 !important;
+              }
+
+              .badge-success {
+                background: #28a745 !important;
+                color: white !important;
+                padding: 2px 6px;
+                border-radius: 3px;
+                font-size: 9px;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+
+              .badge-warning {
+                background: #ffc107 !important;
+                color: #000 !important;
+                padding: 2px 6px;
+                border-radius: 3px;
+                font-size: 9px;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+
+              .qr-code-container {
+                text-align: center;
+                padding: 10px;
+              }
+
+              .qr-code-container img {
+                width: 80px;
+                height: 80px;
+                border: 2px solid #e63946;
+                border-radius: 5px;
+              }
+
+              h1 { font-size: 20px; margin-bottom: 8px; }
+              h2 { font-size: 18px; margin-bottom: 6px; }
+              h3 { font-size: 16px; margin-bottom: 5px; }
+              h4 { font-size: 14px; margin-bottom: 4px; }
+              h5 { font-size: 12px; margin-bottom: 3px; }
+              h6 { font-size: 11px; margin-bottom: 2px; }
+
+              .row {
+                display: flex;
+                flex-wrap: wrap;
+                margin: 0 -10px;
+              }
+
+              .col-6 {
+                flex: 0 0 50%;
+                max-width: 50%;
+                padding: 0 10px;
+              }
+
+              .col-8 {
+                flex: 0 0 66.66%;
+                max-width: 66.66%;
+                padding: 0 10px;
+              }
+
+              .col-4 {
+                flex: 0 0 33.33%;
+                max-width: 33.33%;
+                padding: 0 10px;
+              }
+
+              .mb-3 { margin-bottom: 15px; }
+              .mb-4 { margin-bottom: 20px; }
+              .text-end { text-align: right; }
+              .text-center { text-align: center; }
+              .fw-bold { font-weight: bold; }
+            </style>
+          </head>
+          <body>
+            ${invoiceElement.innerHTML}
+            <script>
+              window.onload = function() {
+                setTimeout(function() {
+                  window.print();
+                  window.close();
+                }, 500);
+              };
+
+              // Handle print events
+              window.onbeforeprint = function() {
+                console.log('Starting print...');
+              };
+
+              window.onafterprint = function() {
+                console.log('Print completed...');
+                window.close();
+              };
+            </script>
+          </body>
+        </html>
+      `;
+
+      // Write the HTML to the new window
+      printWindow.document.open();
+      printWindow.document.write(invoiceHTML);
+      printWindow.document.close();
+    } catch (error) {
+      console.error("Print failed:", error);
+      alert("Print failed. Please ensure pop-ups are allowed and try again.");
+    }
   };
 
   const handleDownloadPDF = async () => {
@@ -433,12 +604,15 @@ const InvoiceView = () => {
           className="invoice-a4"
           style={{
             width: "210mm",
-            minHeight: "297mm",
+            maxHeight: "257mm", // A4 height minus 40px (20px top + 20px bottom margins)
+            minHeight: "257mm",
             margin: "0 auto",
             background: "white",
             boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
             borderRadius: "8px",
             overflow: "hidden",
+            padding: "20px", // 20px safe margin inside the container
+            boxSizing: "border-box",
           }}
         >
           {/* Company Header */}
@@ -446,8 +620,9 @@ const InvoiceView = () => {
             style={{
               background: "linear-gradient(135deg, #e63946, #dc3545)",
               color: "white",
-              padding: "30px",
+              padding: "20px",
               position: "relative",
+              margin: "-20px -20px 15px -20px", // Extend to container edges, add bottom margin
             }}
           >
             <Row className="align-items-center">
@@ -555,14 +730,14 @@ const InvoiceView = () => {
           </div>
 
           {/* Content Body */}
-          <div style={{ padding: "30px" }}>
+          <div style={{ padding: "0 0 15px 0" }}>
             {/* Customer Information */}
-            <Row className="mb-4">
+            <Row className="mb-3">
               <Col lg={6}>
                 <div
                   style={{
                     background: "#f8f9fa",
-                    padding: "20px",
+                    padding: "15px",
                     borderRadius: "8px",
                     border: "2px solid #e9ecef",
                     borderLeft: "4px solid #e63946",
@@ -604,7 +779,7 @@ const InvoiceView = () => {
                 <div
                   style={{
                     background: "#f8f9fa",
-                    padding: "20px",
+                    padding: "15px",
                     borderRadius: "8px",
                     border: "2px solid #e9ecef",
                     borderLeft: "4px solid #28a745",
@@ -658,7 +833,7 @@ const InvoiceView = () => {
             </Row>
 
             {/* Items Table */}
-            <div className="mb-4">
+            <div className="mb-3">
               <h5
                 style={{
                   color: "#333",
@@ -683,8 +858,9 @@ const InvoiceView = () => {
                         <th
                           style={{
                             border: "none",
-                            padding: "12px",
-                            minWidth: "40px",
+                            padding: "8px",
+                            minWidth: "30px",
+                            fontSize: "11px",
                           }}
                         >
                           #
@@ -692,8 +868,9 @@ const InvoiceView = () => {
                         <th
                           style={{
                             border: "none",
-                            padding: "12px",
-                            minWidth: "200px",
+                            padding: "8px",
+                            minWidth: "180px",
+                            fontSize: "11px",
                           }}
                         >
                           Description
@@ -701,9 +878,10 @@ const InvoiceView = () => {
                         <th
                           style={{
                             border: "none",
-                            padding: "12px",
+                            padding: "8px",
                             textAlign: "center",
-                            minWidth: "60px",
+                            minWidth: "50px",
+                            fontSize: "11px",
                           }}
                         >
                           Qty
@@ -711,9 +889,10 @@ const InvoiceView = () => {
                         <th
                           style={{
                             border: "none",
-                            padding: "12px",
+                            padding: "8px",
                             textAlign: "right",
-                            minWidth: "80px",
+                            minWidth: "70px",
+                            fontSize: "11px",
                           }}
                         >
                           Price
@@ -721,9 +900,10 @@ const InvoiceView = () => {
                         <th
                           style={{
                             border: "none",
-                            padding: "12px",
+                            padding: "8px",
                             textAlign: "right",
-                            minWidth: "90px",
+                            minWidth: "80px",
+                            fontSize: "11px",
                           }}
                         >
                           Total
@@ -733,43 +913,55 @@ const InvoiceView = () => {
                     <tbody>
                       {invoiceData.items?.map((item, index) => (
                         <tr key={index}>
-                          <td style={{ padding: "12px", fontWeight: "600" }}>
+                          <td
+                            style={{
+                              padding: "8px",
+                              fontWeight: "600",
+                              fontSize: "11px",
+                            }}
+                          >
                             {index + 1}
                           </td>
-                          <td style={{ padding: "12px" }}>
+                          <td style={{ padding: "8px", fontSize: "11px" }}>
                             <div>
                               <strong>{item.name || item.productName}</strong>
                             </div>
                             {item.description && (
-                              <small className="text-muted d-block">
+                              <small
+                                className="text-muted d-block"
+                                style={{ fontSize: "10px" }}
+                              >
                                 {item.description}
                               </small>
                             )}
                           </td>
                           <td
                             style={{
-                              padding: "12px",
+                              padding: "8px",
                               textAlign: "center",
                               fontWeight: "600",
+                              fontSize: "11px",
                             }}
                           >
                             {item.quantity}
                           </td>
                           <td
                             style={{
-                              padding: "12px",
+                              padding: "8px",
                               textAlign: "right",
                               fontWeight: "600",
+                              fontSize: "11px",
                             }}
                           >
                             ₹{parseFloat(item.price || 0).toFixed(2)}
                           </td>
                           <td
                             style={{
-                              padding: "12px",
+                              padding: "8px",
                               textAlign: "right",
                               fontWeight: "700",
                               color: "#28a745",
+                              fontSize: "11px",
                             }}
                           >
                             ₹
@@ -792,7 +984,7 @@ const InvoiceView = () => {
                   <div
                     style={{
                       background: "#f8f9fa",
-                      padding: "20px",
+                      padding: "15px",
                       borderRadius: "8px",
                       border: "2px solid #e9ecef",
                       textAlign: "center",
@@ -806,11 +998,11 @@ const InvoiceView = () => {
                       src={qrCode}
                       alt="Invoice QR Code"
                       style={{
-                        width: "120px",
-                        height: "120px",
-                        border: "3px solid #e63946",
-                        borderRadius: "8px",
-                        boxShadow: "0 4px 16px rgba(230, 57, 70, 0.3)",
+                        width: "80px",
+                        height: "80px",
+                        border: "2px solid #e63946",
+                        borderRadius: "5px",
+                        boxShadow: "0 2px 8px rgba(230, 57, 70, 0.3)",
                       }}
                     />
                     <p
@@ -839,19 +1031,21 @@ const InvoiceView = () => {
                       <tr>
                         <td
                           style={{
-                            padding: "12px 20px",
+                            padding: "8px 15px",
                             fontWeight: "600",
                             background: "#f8f9fa",
+                            fontSize: "11px",
                           }}
                         >
                           Subtotal:
                         </td>
                         <td
                           style={{
-                            padding: "12px 20px",
+                            padding: "8px 15px",
                             textAlign: "right",
                             fontWeight: "600",
                             background: "#f8f9fa",
+                            fontSize: "11px",
                           }}
                         >
                           ₹{parseFloat(invoiceData.subtotal || 0).toFixed(2)}
@@ -905,9 +1099,9 @@ const InvoiceView = () => {
                       <tr>
                         <td
                           style={{
-                            padding: "15px 20px",
+                            padding: "10px 15px",
                             fontWeight: "900",
-                            fontSize: "1.1rem",
+                            fontSize: "12px",
                             background: "#e63946",
                             color: "white",
                           }}
@@ -916,10 +1110,10 @@ const InvoiceView = () => {
                         </td>
                         <td
                           style={{
-                            padding: "15px 20px",
+                            padding: "10px 15px",
                             textAlign: "right",
                             fontWeight: "900",
-                            fontSize: "1.2rem",
+                            fontSize: "13px",
                             background: "#e63946",
                             color: "white",
                           }}
@@ -935,29 +1129,33 @@ const InvoiceView = () => {
 
             {/* Footer */}
             <div
-              className="mt-4 pt-3"
+              className="mt-3 pt-2"
               style={{
-                borderTop: "2px solid #e9ecef",
+                borderTop: "1px solid #e9ecef",
                 textAlign: "center",
                 color: "#666",
-                fontSize: "14px",
+                fontSize: "11px",
               }}
             >
-              <p style={{ marginBottom: "8px", fontWeight: "600" }}>
+              <p
+                style={{
+                  marginBottom: "5px",
+                  fontWeight: "600",
+                  fontSize: "10px",
+                }}
+              >
                 <i
-                  className="bi bi-shield-check me-2"
+                  className="bi bi-shield-check me-1"
                   style={{ color: "#28a745" }}
                 ></i>
                 This is a digitally verified invoice and does not require a
                 signature.
               </p>
-              <p style={{ marginBottom: "0", fontSize: "12px" }}>
+              <p style={{ marginBottom: "0", fontSize: "10px" }}>
                 Thank you for choosing Hare Krishna Medical - Your Trusted
                 Health Partner
               </p>
-              <div
-                style={{ fontSize: "10px", color: "#999", marginTop: "10px" }}
-              >
+              <div style={{ fontSize: "9px", color: "#999", marginTop: "5px" }}>
                 Generated: {new Date().toLocaleString()} | Invoice ID:{" "}
                 {invoiceData.invoiceId}
               </div>
