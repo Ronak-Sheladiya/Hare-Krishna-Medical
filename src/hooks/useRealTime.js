@@ -3,15 +3,23 @@ import { useSelector } from "react-redux";
 
 // Import socketClient with error handling
 let socketClient = null;
-try {
-  if (typeof window !== "undefined") {
-    const socketModule = await import("../utils/socketClient");
-    socketClient = socketModule.default;
+
+// Only import in browser environment
+if (typeof window !== "undefined") {
+  try {
+    // Dynamic import to handle missing dependency gracefully
+    import("../utils/socketClient")
+      .then((module) => {
+        socketClient = module.default;
+      })
+      .catch((error) => {
+        console.warn(
+          "SocketClient not available. Install socket.io-client: npm install socket.io-client",
+        );
+      });
+  } catch (error) {
+    console.warn("Failed to import socketClient:", error);
   }
-} catch (error) {
-  console.warn(
-    "SocketClient not available. Install socket.io-client: npm install socket.io-client",
-  );
 }
 
 export const useRealTime = () => {
