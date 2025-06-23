@@ -96,10 +96,20 @@ const NotificationSystem = () => {
         const socketClient = socketModule.default;
 
         if (socketClient && typeof socketClient.connect === "function") {
+          // Check connection status first
+          const status = socketClient.getConnectionStatus();
+
+          if (status.fallbackMode) {
+            console.info(
+              "Socket in fallback mode, notifications will work but without real-time updates",
+            );
+            return;
+          }
+
           // Connect socket for real-time notifications
           const socket = socketClient.connect();
 
-          if (socket) {
+          if (socket && !socket.id?.includes("mock")) {
             // Listen for real-time notifications
             socket.on("admin_notification", (notificationData) => {
               if (!isMounted) return;
