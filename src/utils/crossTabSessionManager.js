@@ -24,7 +24,7 @@ class CrossTabSessionManager {
     if (this.isInitialized) return;
 
     console.log(
-      `🔄 Initializing cross-tab session manager for tab: ${this.tabId}`,
+      `🔄 [HK Medical] Initializing cross-tab session manager for tab: ${this.tabId}`,
     );
 
     this.setupBroadcastChannel();
@@ -33,6 +33,13 @@ class CrossTabSessionManager {
     this.checkInitialSession();
 
     this.isInitialized = true;
+
+    // Add a test message to verify it's working
+    setTimeout(() => {
+      console.log(
+        `✅ [HK Medical] Cross-tab session manager ready for tab: ${this.tabId}`,
+      );
+    }, 1000);
   }
 
   setupBroadcastChannel() {
