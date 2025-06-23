@@ -210,6 +210,7 @@ function App() {
               <Route path="/localsetup-guide" element={<LocalSetupGuide />} />
               <Route path="/navigation-test" element={<NavigationTest />} />
               <Route path="/button-fixer" element={<ButtonFixer />} />
+              <Route path="/cart" element={<Cart />} />
               <Route path="/order" element={<Order />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
