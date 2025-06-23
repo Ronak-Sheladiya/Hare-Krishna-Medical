@@ -119,8 +119,8 @@ export const apiCall = async (endpoint, options = {}) => {
 export const api = {
   get: async (endpoint, options = {}) => {
     const result = await apiCall(endpoint, { method: "GET", ...options });
-    if (result.success === false) {
-      throw new Error(result.error);
+    if (result && result.success === false) {
+      throw new Error(result.error || "API call failed");
     }
     return result;
   },
@@ -131,8 +131,8 @@ export const api = {
       body: JSON.stringify(data),
       ...options,
     });
-    if (result.success === false) {
-      throw new Error(result.error);
+    if (result && result.success === false) {
+      throw new Error(result.error || "API call failed");
     }
     return result;
   },
@@ -143,8 +143,8 @@ export const api = {
       body: JSON.stringify(data),
       ...options,
     });
-    if (result.success === false) {
-      throw new Error(result.error);
+    if (result && result.success === false) {
+      throw new Error(result.error || "API call failed");
     }
     return result;
   },
@@ -155,16 +155,16 @@ export const api = {
       body: JSON.stringify(data),
       ...options,
     });
-    if (result.success === false) {
-      throw new Error(result.error);
+    if (result && result.success === false) {
+      throw new Error(result.error || "API call failed");
     }
     return result;
   },
 
   delete: async (endpoint, options = {}) => {
     const result = await apiCall(endpoint, { method: "DELETE", ...options });
-    if (result.success === false) {
-      throw new Error(result.error);
+    if (result && result.success === false) {
+      throw new Error(result.error || "API call failed");
     }
     return result;
   },
