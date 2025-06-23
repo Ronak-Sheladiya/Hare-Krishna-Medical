@@ -458,6 +458,9 @@ function App() {
           {/* Footer displayed on all pages */}
           <Footer />
 
+          {/* Session Status Debug Component (Development Only) */}
+          <SessionStatus showDebug={process.env.NODE_ENV === "development"} />
+
           {/* Socket diagnostic tool route handled separately */}
         </div>
       </ErrorBoundary>
