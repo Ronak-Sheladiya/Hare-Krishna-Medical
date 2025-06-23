@@ -47,23 +47,34 @@ export const apiCall = async (endpoint, options = {}) => {
       }
       return { success: true, data: await response.text() };
     } else {
-      // Handle HTTP errors
+      // Handle HTTP errors - return error object instead of throwing
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(
-        errorData.message || `HTTP ${response.status}: ${response.statusText}`,
-      );
+      return {
+        success: false,
+        error:
+          errorData.message ||
+          `HTTP ${response.status}: ${response.statusText}`,
+        status: response.status,
+      };
     }
   } catch (error) {
     clearTimeout(timeoutId);
 
-    // Handle different types of errors
+    // Return error object instead of throwing
+    let errorMessage = "Unknown error occurred";
     if (error.name === "AbortError") {
-      throw new Error("Request timed out");
+      errorMessage = "Request timed out";
     } else if (error.message === "Failed to fetch") {
-      throw new Error("Network error - backend API not available");
+      errorMessage = "Network error - backend API not available";
     } else {
-      throw error;
+      errorMessage = error.message;
     }
+
+    return {
+      success: false,
+      error: errorMessage,
+      originalError: error,
+    };
   }
 };
 
