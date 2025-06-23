@@ -56,6 +56,7 @@ import InvoiceQRVerify from "./pages/InvoiceQRVerify.jsx";
 import AdminPaymentMethods from "./pages/admin/AdminPaymentMethods.jsx";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
 import VerificationStatus from "./pages/VerificationStatus.jsx";
+import AccessDenied from "./pages/AccessDenied.jsx";
 import NotFound from "./pages/NotFound.jsx";
 // Use simple socket client until socket.io-client is installed
 import socketClient from "./utils/socketClient.simple";
