@@ -239,16 +239,27 @@ const authSlice = createSlice({
     },
     syncFromStorage: (state, action) => {
       // Sync auth state from localStorage/sessionStorage (for cross-tab sync)
-      const { user, isAuthenticated, rememberMe } = action.payload;
-      if (isAuthenticated && user) {
-        state.isAuthenticated = true;
-        state.user = user;
-        state.rememberMe = rememberMe;
-        state.error = null;
-      } else {
+      try {
+        const { user, isAuthenticated, rememberMe } = action.payload || {};
+        if (isAuthenticated && user) {
+          state.isAuthenticated = true;
+          state.user = user;
+          state.rememberMe = rememberMe || false;
+          state.error = null;
+          state.loading = false;
+        } else {
+          state.isAuthenticated = false;
+          state.user = null;
+          state.rememberMe = false;
+          state.loading = false;
+        }
+      } catch (error) {
+        console.warn("Error syncing auth state:", error);
         state.isAuthenticated = false;
         state.user = null;
         state.rememberMe = false;
+        state.loading = false;
+        state.error = "Authentication sync error";
       }
     },
   },
