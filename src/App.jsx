@@ -88,7 +88,7 @@ const ScrollToTop = () => {
 };
 
 // Protected Route Component
-const ProtectedRoute = ({ children, adminOnly = false }) => {
+const ProtectedRoute = ({ children, adminOnly = false, userOnly = false }) => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const location = useLocation();
 
@@ -99,6 +99,44 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
 
   if (adminOnly && user?.role !== 1) {
     return <Navigate to="/user/dashboard" replace />;
+  }
+
+  if (userOnly && user?.role === 1) {
+    // Admin trying to access user-only route - show access denied
+    return (
+      <div className="container py-5">
+        <div className="row justify-content-center">
+          <div className="col-md-6 text-center">
+            <div className="card">
+              <div className="card-body p-5">
+                <i className="bi bi-shield-exclamation display-1 text-danger mb-4"></i>
+                <h3 className="text-danger mb-3">Access Denied</h3>
+                <p className="text-muted mb-4">
+                  This section is restricted to regular users only. As an admin,
+                  please use the admin dashboard.
+                </p>
+                <div className="d-flex gap-2 justify-content-center">
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => (window.location.href = "/admin/dashboard")}
+                  >
+                    <i className="bi bi-speedometer2 me-2"></i>
+                    Go to Admin Dashboard
+                  </button>
+                  <button
+                    className="btn btn-outline-secondary"
+                    onClick={() => window.history.back()}
+                  >
+                    <i className="bi bi-arrow-left me-2"></i>
+                    Go Back
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return children;
@@ -338,7 +376,7 @@ function App() {
               <Route
                 path="/user/dashboard"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute userOnly>
                     <UserDashboard />
                   </ProtectedRoute>
                 }
