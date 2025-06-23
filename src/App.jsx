@@ -190,8 +190,6 @@ function App() {
       <ErrorBoundary>
         <div className="App">
           <ScrollToTop />
-          <GlobalSecurity />
-          <SimpleDevIndicator />
           <Header />
           <main>
             <Routes>
