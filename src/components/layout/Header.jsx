@@ -30,7 +30,7 @@ const Header = () => {
   const handleLogout = () => {
     dispatch(logout());
     setShowLogoutModal(false);
-    navigate("/");
+    navigate("/", { replace: true });
   };
 
   const getUserDisplayName = () => {
