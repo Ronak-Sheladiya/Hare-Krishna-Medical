@@ -243,7 +243,7 @@ const AdminInvoices = () => {
       <PageHeroSection
         title="Invoice Management"
         description="Manage and track all customer invoices"
-        icon="🧾"
+        icon={<i className="bi bi-receipt"></i>}
       />
 
       <Container className="py-5">
@@ -311,11 +311,16 @@ const AdminInvoices = () => {
                         Exporting...
                       </>
                     ) : (
+                      <>
+                        <i className="bi bi-file-earmark-excel me-2"></i>
+                        Export Excel
+                      </>
                       "📊 Export Excel"
                     )}
                   </ThemeButton>
                   <ThemeButton variant="outline" onClick={fetchInvoices}>
-                    🔄 Refresh
+                    <i className="bi bi-arrow-clockwise me-2"></i>
+                    Refresh
                   </ThemeButton>
                 </div>
               </Col>
