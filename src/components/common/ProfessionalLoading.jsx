@@ -55,22 +55,75 @@ const ProfessionalLoading = ({
 
   return (
     <div style={containerStyle}>
-      {/* Rotating Logo Container */}
-      <div style={{ position: "relative" }}>
-        {/* Outer Rotating Ring */}
+      {/* Brand Logo and Loading Animation */}
+      <div style={{ position: "relative", marginBottom: "20px" }}>
+        {/* Company Logo */}
         <div
           style={{
-            width: containerSize,
-            height: containerSize,
-            border: `4px solid ${color}20`,
-            borderTop: `4px solid ${color}`,
+            width: logoSize + 40,
+            height: logoSize + 40,
+            background: "white",
             borderRadius: "50%",
-            animation: "spin 1.5s linear infinite",
+            border: `4px solid ${color}25`,
+            boxShadow: `0 16px 64px ${color}25, 0 8px 32px rgba(0,0,0,0.1)`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             position: "relative",
-            filter: `drop-shadow(0 4px 8px ${color}30)`,
+            animation: "logoFloat 2.5s ease-in-out infinite",
+            zIndex: 2,
+          }}
+        >
+          <img
+            src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
+            alt="Hare Krishna Medical"
+            style={{
+              width: logoSize,
+              height: logoSize,
+              objectFit: "contain",
+              animation: "logoSpin 3s ease-in-out infinite",
+            }}
+            onError={(e) => {
+              e.target.style.display = "none";
+              e.target.nextSibling.style.display = "flex";
+            }}
+          />
+          {/* Fallback when image fails to load */}
+          <div
+            style={{
+              display: "none",
+              width: logoSize,
+              height: logoSize,
+              background: `linear-gradient(135deg, ${color}, ${color}dd)`,
+              borderRadius: "50%",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "white",
+              fontWeight: "900",
+              fontSize: logoSize / 2.5,
+              fontFamily: "Arial, sans-serif",
+            }}
+          >
+            HK
+          </div>
+        </div>
+
+        {/* Outer Rotating Ring */}
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: containerSize,
+            height: containerSize,
+            border: `3px solid transparent`,
+            borderTop: `3px solid ${color}`,
+            borderRight: `3px solid ${color}60`,
+            borderRadius: "50%",
+            animation: "spin 2s linear infinite",
+            filter: `drop-shadow(0 4px 12px ${color}40)`,
+            zIndex: 1,
           }}
         >
           {/* Inner White Circle with Logo */}
