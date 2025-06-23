@@ -1,6 +1,10 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { loginSuccess, logout } from "../../store/slices/authSlice";
+import {
+  loginSuccess,
+  logout,
+  syncFromStorage,
+} from "../../store/slices/authSlice";
 
 /**
  * CrossTabSync Component
@@ -8,7 +12,7 @@ import { loginSuccess, logout } from "../../store/slices/authSlice";
  */
 const CrossTabSync = () => {
   const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     // Handle storage events (cross-tab communication)
@@ -17,18 +21,21 @@ const CrossTabSync = () => {
         try {
           const authEvent = JSON.parse(e.newValue);
 
-          // Ignore old events (older than 5 seconds)
-          if (Date.now() - authEvent.timestamp > 5000) {
+          // Ignore old events (older than 10 seconds)
+          if (Date.now() - authEvent.timestamp > 10000) {
             return;
           }
 
           switch (authEvent.type) {
             case "LOGIN":
-              if (!isAuthenticated) {
+              if (!isAuthenticated || !user) {
                 dispatch(
                   loginSuccess({
                     user: authEvent.user,
-                    rememberMe: localStorage.getItem("user") !== null,
+                    rememberMe:
+                      authEvent.rememberMe ||
+                      localStorage.getItem("user") !== null,
+                    skipRedirect: true, // Skip redirect for cross-tab sync
                   }),
                 );
               }
@@ -56,7 +63,7 @@ const CrossTabSync = () => {
     return () => {
       window.removeEventListener("storage", handleStorageChange);
     };
-  }, [dispatch, isAuthenticated]);
+  }, [dispatch, isAuthenticated, user]);
 
   // Check for session validity on focus
   useEffect(() => {
