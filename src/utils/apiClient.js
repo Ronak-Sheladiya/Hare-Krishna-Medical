@@ -136,10 +136,7 @@ export const api = {
 // Utility function for handling API calls with error logging
 export const safeApiCall = async (apiFunction, fallbackValue = null) => {
   try {
-    const result = await Promise.resolve(apiFunction()).catch((error) => {
-      // Catch any errors from the API function itself
-      throw error;
-    });
+    const result = await apiFunction();
     return { success: true, data: result.data || result, error: null };
   } catch (error) {
     // Handle all types of errors gracefully
