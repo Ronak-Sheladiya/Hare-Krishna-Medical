@@ -15,6 +15,7 @@ import ProfessionalLoading from "../components/common/ProfessionalLoading";
 import { refreshSession } from "../store/slices/authSlice";
 import { api, safeApiCall } from "../utils/apiClient";
 import { getDemoInvoice, isDemoInvoice } from "../utils/demoInvoiceData";
+import "../styles/InvoicePrintA4.css";
 
 const InvoiceView = () => {
   const { orderId } = useParams();
@@ -99,20 +100,83 @@ const InvoiceView = () => {
             <title>Invoice ${invoice?.invoiceNumber || orderId}</title>
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
             <style>
-              @media print {
-                body { margin: 0; color: black !important; font-size: 12px; }
-                .no-print { display: none !important; }
+              @page {
+                size: A4;
+                margin: 15mm;
               }
-              body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.4; }
-              .invoice-header { background: #e63946 !important; color: white !important; }
+              @media print {
+                body {
+                  margin: 0;
+                  color: black !important;
+                  font-size: 11px;
+                  line-height: 1.3;
+                  -webkit-print-color-adjust: exact;
+                  print-color-adjust: exact;
+                }
+                .no-print { display: none !important; }
+                .page-break { page-break-before: always; }
+                .invoice-content {
+                  max-height: 90vh;
+                  overflow: hidden;
+                  display: block;
+                }
+                .invoice-header {
+                  padding: 15px !important;
+                  margin-bottom: 10px !important;
+                }
+                .company-info {
+                  font-size: 10px !important;
+                  line-height: 1.2 !important;
+                }
+                .invoice-title {
+                  font-size: 28px !important;
+                  margin-bottom: 10px !important;
+                }
+                .customer-info, .payment-info {
+                  padding: 12px !important;
+                  margin-bottom: 8px !important;
+                }
+                .table {
+                  font-size: 10px !important;
+                  margin-bottom: 8px !important;
+                }
+                .table th, .table td {
+                  padding: 4px 6px !important;
+                  border: 1px solid #dee2e6 !important;
+                  line-height: 1.2 !important;
+                }
+                .total-section {
+                  margin-top: 8px !important;
+                }
+                .footer-text {
+                  font-size: 9px !important;
+                  margin-top: 10px !important;
+                  border-top: 1px solid #dee2e6 !important;
+                  padding-top: 8px !important;
+                }
+              }
+              body {
+                font-family: 'Segoe UI', Arial, sans-serif;
+                line-height: 1.3;
+                color: #333;
+                font-size: 12px;
+              }
+              .invoice-header {
+                background: #e63946 !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
               .text-medical-red { color: #e63946 !important; }
               .text-success { color: #28a745 !important; }
-              .company-logo { max-width: 80px; }
-              .table th, .table td { padding: 8px; border: 1px solid #dee2e6; }
+              .company-logo { max-width: 60px; height: auto; }
+              .table th, .table td { padding: 6px; border: 1px solid #dee2e6; }
             </style>
           </head>
           <body>
-            ${printContent.innerHTML}
+            <div class="invoice-content">
+              ${printContent.innerHTML}
+            </div>
             <script>
               window.onload = function() {
                 setTimeout(function() {
@@ -128,9 +192,117 @@ const InvoiceView = () => {
     }
   };
 
-  const handleDownload = () => {
-    // For now, trigger print which allows save as PDF
-    handlePrint();
+  const handleDownload = async () => {
+    try {
+      // Create a hidden iframe for PDF generation
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
+
+      const printContent = document.getElementById("invoice-print-content");
+      if (!printContent) {
+        alert("Invoice content not found");
+        return;
+      }
+
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      iframeDoc.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Invoice ${invoice?.invoiceNumber || orderId}</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+            <style>
+              @page {
+                size: A4;
+                margin: 15mm;
+              }
+              body {
+                font-family: 'Segoe UI', Arial, sans-serif;
+                line-height: 1.3;
+                color: #333;
+                font-size: 11px;
+                margin: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              .invoice-header {
+                background: #e63946 !important;
+                color: white !important;
+                padding: 15px !important;
+                margin-bottom: 10px !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              .company-info {
+                font-size: 10px !important;
+                line-height: 1.2 !important;
+              }
+              .invoice-title {
+                font-size: 28px !important;
+                margin-bottom: 10px !important;
+              }
+              .customer-info, .payment-info {
+                padding: 12px !important;
+                margin-bottom: 8px !important;
+              }
+              .table {
+                font-size: 10px !important;
+                margin-bottom: 8px !important;
+              }
+              .table th, .table td {
+                padding: 4px 6px !important;
+                border: 1px solid #dee2e6 !important;
+                line-height: 1.2 !important;
+              }
+              .total-section {
+                margin-top: 8px !important;
+              }
+              .footer-text {
+                font-size: 9px !important;
+                margin-top: 10px !important;
+                border-top: 1px solid #dee2e6 !important;
+                padding-top: 8px !important;
+              }
+              .text-medical-red { color: #e63946 !important; }
+              .text-success { color: #28a745 !important; }
+              .company-logo { max-width: 60px; height: auto; }
+              .no-print { display: none !important; }
+            </style>
+          </head>
+          <body>
+            ${printContent.innerHTML}
+          </body>
+        </html>
+      `);
+      iframeDoc.close();
+
+      // Wait for content to load
+      setTimeout(() => {
+        try {
+          // Create download link
+          const filename = `Invoice_${invoice?.invoiceNumber || orderId}_${new Date().toISOString().split("T")[0]}.pdf`;
+
+          // Use browser's built-in save as PDF functionality
+          iframe.contentWindow.print();
+
+          // Clean up
+          setTimeout(() => {
+            document.body.removeChild(iframe);
+          }, 1000);
+        } catch (error) {
+          console.error("Download failed:", error);
+          alert(
+            "Download feature requires a PDF library. Using print instead.",
+          );
+          handlePrint();
+        }
+      }, 1000);
+    } catch (error) {
+      console.error("Download preparation failed:", error);
+      alert("Download preparation failed. Using print instead.");
+      handlePrint();
+    }
   };
 
   const renderAuthActions = () => {
@@ -421,7 +593,7 @@ const InvoiceView = () => {
         </Row>
 
         {/* Invoice Content */}
-        <div id="invoice-print-content">
+        <div id="invoice-print-content" className="invoice-print-content">
           <Row>
             <Col lg={12}>
               <Card
@@ -568,9 +740,10 @@ const InvoiceView = () => {
 
                 <Card.Body className="p-4">
                   {/* Customer & Payment Info */}
-                  <Row className="mb-4">
+                  <Row className="mb-4 customer-payment-row">
                     <Col lg={6}>
                       <div
+                        className="customer-info"
                         style={{
                           background: "#f8f9fa",
                           borderRadius: "12px",
@@ -613,6 +786,7 @@ const InvoiceView = () => {
                     </Col>
                     <Col lg={6}>
                       <div
+                        className="payment-info"
                         style={{
                           background: "#f8f9fa",
                           borderRadius: "12px",
@@ -672,7 +846,7 @@ const InvoiceView = () => {
                   </Row>
 
                   {/* Items Table */}
-                  <div className="mb-4">
+                  <div className="mb-4 invoice-items">
                     <h5
                       style={{
                         color: "#333",
@@ -789,7 +963,7 @@ const InvoiceView = () => {
                   </div>
 
                   {/* Total Section */}
-                  <Row className="justify-content-end">
+                  <Row className="justify-content-end total-section">
                     <Col lg={6}>
                       <div
                         style={{
@@ -906,7 +1080,7 @@ const InvoiceView = () => {
 
                   {/* Footer */}
                   <div
-                    className="mt-5 pt-4"
+                    className="mt-5 pt-4 invoice-footer"
                     style={{
                       borderTop: "2px solid #e9ecef",
                       textAlign: "center",
