@@ -39,7 +39,7 @@ const AdminDashboard = () => {
   const [lowStockProducts, setLowStockProducts] = useState([]);
 
   const API_BASE_URL =
-    process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
   // Fetch dashboard data
   const fetchDashboardData = async () => {
