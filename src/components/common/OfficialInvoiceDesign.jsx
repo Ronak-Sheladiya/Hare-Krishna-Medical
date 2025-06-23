@@ -33,7 +33,9 @@ const OfficialInvoiceDesign = ({ invoiceData, qrCode, forPrint = false }) => {
             <div style="flex: 1;">
               <div style="display: flex; align-items: center; margin-bottom: 15px;">
                 <div style="position: relative; margin-right: 20px;">
-                  <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800" alt="Hare Krishna Medical Logo" style="height: 80px; width: 80px; background: white; padding: 10px; border-radius: 12px; border: 3px solid rgba(255,255,255,0.8); box-shadow: 0 4px 16px rgba(0,0,0,0.1); object-fit: contain;" onerror="this.style.display='none';" />
+                  <div style="background: white; border-radius: 50%; padding: 12px; border: 3px solid rgba(255,255,255,0.9); box-shadow: 0 6px 20px rgba(0,0,0,0.15);">
+                    <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800" alt="Hare Krishna Medical Logo" style="height: 56px; width: 56px; object-fit: contain; border-radius: 50%;" onerror="this.style.display='none';" />
+                  </div>
                   <div style="position: absolute; top: -5px; right: -5px; width: 20px; height: 20px; background: #27ae60; border-radius: 50%; border: 2px solid white;"></div>
                 </div>
                 <div>
