@@ -266,6 +266,10 @@ function App() {
               <Route path="/admin/analytics" element={<AdminAnalytics />} />
               <Route path="/admin/messages" element={<AdminMessages />} />
               <Route path="/admin/invoices" element={<AdminInvoices />} />
+              <Route
+                path="/admin/payment-methods"
+                element={<AdminPaymentMethods />}
+              />
               <Route path="/admin/backend-docs" element={<BackendDocs />} />
 
               {/* User Routes */}
