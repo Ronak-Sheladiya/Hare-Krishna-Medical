@@ -288,25 +288,18 @@ router.post(
         });
       }
 
-      // Generate new QR code
-      const qrData = {
-        type: "invoice_verification",
-        invoice_id: invoice.invoiceId,
-        order_id: invoice.order?.toString() || "",
-        customer_name: invoice.customerDetails.fullName,
-        total_amount: `₹${invoice.total.toFixed(2)}`,
-        invoice_date: invoice.invoiceDate.toISOString().split("T")[0],
-        payment_status: invoice.paymentStatus,
-        verify_url: `${process.env.FRONTEND_URL}/invoice/${invoice.invoiceId}`,
-        company: "Hare Krishna Medical",
-        location: "Surat, Gujarat, India",
-        phone: "+91 76989 13354",
-        email: "harekrishnamedical@gmail.com",
-        generated_at: new Date().toISOString(),
-      };
+      // Generate new QR code with direct verification URL
+      const verificationUrl = `${process.env.FRONTEND_URL}/invoice-verify/${invoice.invoiceId}`;
 
-      invoice.qrCodeData = JSON.stringify(qrData);
-      invoice.qrCode = await QRCode.toDataURL(invoice.qrCodeData, {
+      invoice.qrCodeData = JSON.stringify({
+        invoice_id: invoice.invoiceId,
+        customer_name: invoice.customerDetails.fullName,
+        total_amount: invoice.total,
+        verification_url: verificationUrl,
+        generated_at: new Date().toISOString(),
+      });
+
+      invoice.qrCode = await QRCode.toDataURL(verificationUrl, {
         width: 180,
         margin: 2,
         color: {

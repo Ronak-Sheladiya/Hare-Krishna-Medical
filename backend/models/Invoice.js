@@ -109,24 +109,20 @@ invoiceSchema.pre("save", async function (next) {
   // Generate QR code if not exists
   if (!this.qrCode && this.invoiceId) {
     try {
-      const qrData = {
-        type: "invoice_verification",
-        invoice_id: this.invoiceId,
-        order_id: this.order ? this.order.toString() : "",
-        customer_name: this.customerDetails.fullName,
-        total_amount: `₹${this.total.toFixed(2)}`,
-        invoice_date: this.invoiceDate.toISOString().split("T")[0],
-        payment_status: this.paymentStatus,
-        verify_url: `${process.env.FRONTEND_URL}/invoice/${this.invoiceId}`,
-        company: "Hare Krishna Medical",
-        location: "Surat, Gujarat, India",
-        phone: "+91 76989 13354",
-        email: "harekrishnamedical@gmail.com",
-        generated_at: new Date().toISOString(),
-      };
+      // Create direct verification URL for QR code
+      const verificationUrl = `${process.env.FRONTEND_URL}/invoice-verify/${this.invoiceId}`;
 
-      this.qrCodeData = JSON.stringify(qrData);
-      this.qrCode = await QRCode.toDataURL(this.qrCodeData, {
+      // Store additional data for verification
+      this.qrCodeData = JSON.stringify({
+        invoice_id: this.invoiceId,
+        customer_name: this.customerDetails.fullName,
+        total_amount: this.total,
+        verification_url: verificationUrl,
+        generated_at: new Date().toISOString(),
+      });
+
+      // Generate QR code with direct URL
+      this.qrCode = await QRCode.toDataURL(verificationUrl, {
         width: 180,
         margin: 2,
         color: {
