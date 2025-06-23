@@ -65,69 +65,77 @@ const Header = () => {
               }}
             />
             <div className="brand-text-container d-none d-md-block">
-              <h1 className="brand-title mb-0">
-                <span
+              <div className="brand-stacked">
+                <div
                   style={{
                     color: "#E63946",
                     fontWeight: "700",
-                    fontSize: "1.6rem",
+                    fontSize: "1.8rem",
                     fontFamily: "'Poppins', sans-serif",
                     letterSpacing: "-0.5px",
+                    lineHeight: "1.2",
+                    textAlign: "center",
                   }}
                 >
                   Hare Krishna
-                </span>
-                <span
+                </div>
+                <div
                   style={{
-                    color: "#2B4C7E",
+                    color: "#E63946",
                     fontWeight: "600",
-                    fontSize: "1.6rem",
+                    fontSize: "1.4rem",
                     fontFamily: "'Poppins', sans-serif",
-                    marginLeft: "0.4rem",
                     letterSpacing: "-0.3px",
+                    lineHeight: "1",
+                    textAlign: "center",
+                    marginTop: "-2px",
                   }}
                 >
                   Medical
-                </span>
-              </h1>
+                </div>
+              </div>
               <p
                 className="brand-tagline mb-0"
                 style={{
-                  color: "#6C757D",
-                  fontSize: "0.75rem",
+                  color: "#E63946",
+                  fontSize: "0.7rem",
                   fontWeight: "500",
                   letterSpacing: "0.5px",
                   textTransform: "uppercase",
-                  marginTop: "-2px",
+                  marginTop: "2px",
                   fontFamily: "'Inter', sans-serif",
+                  textAlign: "center",
+                  opacity: "0.8",
                 }}
               >
                 Healthcare Excellence
               </p>
             </div>
             {/* Mobile Brand Text */}
-            <div className="d-md-none">
-              <span
+            <div className="d-md-none text-center">
+              <div
                 style={{
                   color: "#E63946",
                   fontWeight: "700",
-                  fontSize: "1.2rem",
+                  fontSize: "1rem",
                   fontFamily: "'Poppins', sans-serif",
+                  lineHeight: "1.2",
                 }}
               >
-                HK
-              </span>
-              <span
+                Hare Krishna
+              </div>
+              <div
                 style={{
-                  color: "#2B4C7E",
+                  color: "#E63946",
                   fontWeight: "600",
-                  fontSize: "1.2rem",
+                  fontSize: "0.8rem",
                   fontFamily: "'Poppins', sans-serif",
-                  marginLeft: "0.2rem",
+                  lineHeight: "1",
+                  marginTop: "-2px",
                 }}
               >
                 Medical
-              </span>
+              </div>
             </div>
           </Navbar.Brand>
 
