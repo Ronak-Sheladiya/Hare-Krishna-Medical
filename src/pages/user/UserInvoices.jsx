@@ -258,7 +258,7 @@ const UserInvoices = () => {
       <PageHeroSection
         title="My Invoices"
         description="View and download your purchase invoices"
-        icon="🧾"
+        icon={<i className="bi bi-receipt"></i>}
       />
 
       <Container className="py-5">
@@ -364,14 +364,16 @@ const UserInvoices = () => {
                     onClick={() => setShowBulkModal(true)}
                     disabled={filteredInvoices.length === 0}
                   >
-                    📥 Bulk Download
+                    <i className="bi bi-download me-2"></i>
+                    Bulk Download
                   </ThemeButton>
                   <ThemeButton
                     variant="outline"
                     size="sm"
                     onClick={fetchUserInvoices}
                   >
-                    🔄 Refresh
+                    <i className="bi bi-arrow-clockwise me-2"></i>
+                    Refresh
                   </ThemeButton>
                 </div>
               </Col>
