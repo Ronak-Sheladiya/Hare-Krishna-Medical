@@ -121,7 +121,7 @@ const Header = () => {
             <Nav className="ms-auto d-flex align-items-center">
               {/* Cart */}
               <Nav.Link as={Link} to="/cart" className="position-relative me-3">
-                <i className="bi bi-cart3 fs-5"></i>
+                <i className="bi bi-bag-heart fs-5"></i>
                 {totalItems > 0 && (
                   <Badge
                     bg="danger"
