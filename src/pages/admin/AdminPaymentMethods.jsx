@@ -56,7 +56,7 @@ const AdminPaymentMethods = () => {
 
     const { success, data, error } = await safeApiCall(
       () => api.get("/api/admin/payment-methods"),
-      []
+      [],
     );
 
     if (success && data?.data) {
@@ -316,7 +316,10 @@ const AdminPaymentMethods = () => {
               <ThemeCard>
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
-                    <h5 className="mb-1" style={{ color: "#333", fontWeight: "700" }}>
+                    <h5
+                      className="mb-1"
+                      style={{ color: "#333", fontWeight: "700" }}
+                    >
                       <i className="bi bi-gear me-2"></i>
                       Manage Payment Options
                     </h5>
@@ -335,273 +338,286 @@ const AdminPaymentMethods = () => {
             </Col>
           </Row>
 
-      {error && (
-        <Row className="mb-4">
-          <Col>
-            <Alert variant="danger" className="d-flex align-items-center">
-              <i className="bi bi-exclamation-triangle me-2"></i>
-              {error}
-              <Button
-                variant="outline-danger"
-                size="sm"
-                className="ms-auto"
-                onClick={fetchPaymentMethods}
-              >
-                Retry
-              </Button>
-            </Alert>
-          </Col>
-        </Row>
-      )}
-
-      <Row>
-        <Col>
-          <Card>
-            <Card.Header>
-              <h5 className="mb-0">
-                <i className="bi bi-credit-card me-2"></i>
-                Available Payment Methods
-              </h5>
-            </Card.Header>
-            <Card.Body>
-              {paymentMethods.length > 0 ? (
-                <Table responsive hover>
-                  <thead>
-                    <tr>
-                      <th>Method Name</th>
-                      <th>Type</th>
-                      <th>Status</th>
-                      <th>Processing Fee</th>
-                      <th>Limits</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {paymentMethods.map((method) => (
-                      <tr key={method._id}>
-                        <td>
-                          <div>
-                            <strong>{method.name}</strong>
-                            {method.description && (
-                              <div>
-                                <small className="text-muted">
-                                  {method.description}
-                                </small>
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                        <td>
-                          <Badge bg={getTypeBadge(method.type)}>
-                            {getTypeLabel(method.type)}
-                          </Badge>
-                        </td>
-                        <td>
-                          <Badge bg={method.isActive ? "success" : "danger"}>
-                            {method.isActive ? "Active" : "Inactive"}
-                          </Badge>
-                        </td>
-                        <td>
-                          {method.processingFee > 0
-                            ? `${method.processingFee}%`
-                            : "Free"}
-                        </td>
-                        <td>
-                          <small>
-                            Min: ₹{method.minAmount || 0}
-                            <br />
-                            Max: ₹{method.maxAmount || "No limit"}
-                          </small>
-                        </td>
-                        <td>
-                          <div className="d-flex gap-2">
-                            <Button
-                              variant="outline-primary"
-                              size="sm"
-                              onClick={() => handleShowModal(method)}
-                            >
-                              <i className="bi bi-pencil"></i>
-                            </Button>
-                            <Button
-                              variant={
-                                method.isActive
-                                  ? "outline-warning"
-                                  : "outline-success"
-                              }
-                              size="sm"
-                              onClick={() =>
-                                handleToggleStatus(method._id, method.isActive)
-                              }
-                            >
-                              <i
-                                className={
-                                  method.isActive ? "bi bi-pause" : "bi bi-play"
-                                }
-                              ></i>
-                            </Button>
-                            <Button
-                              variant="outline-danger"
-                              size="sm"
-                              onClick={() => handleDelete(method._id)}
-                            >
-                              <i className="bi bi-trash"></i>
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              ) : (
-                <div className="text-center py-5">
-                  <i
-                    className="bi bi-credit-card text-muted"
-                    style={{ fontSize: "3rem" }}
-                  ></i>
-                  <h5 className="mt-3 text-muted">No Payment Methods</h5>
-                  <p className="text-muted">
-                    Add payment methods to allow customers to pay for orders.
-                  </p>
-                  <Button variant="primary" onClick={() => handleShowModal()}>
-                    Add First Payment Method
-                  </Button>
-                </div>
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Add/Edit Modal */}
-      <Modal show={showModal} onHide={handleCloseModal} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {editingMethod ? "Edit Payment Method" : "Add Payment Method"}
-          </Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleSubmit}>
-          <Modal.Body>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Method Name *</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Credit/Debit Card"
-                    required
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Payment Type *</Form.Label>
-                  <Form.Select
-                    name="type"
-                    value={formData.type}
-                    onChange={handleInputChange}
-                    required
+          {error && (
+            <Row className="mb-4">
+              <Col>
+                <Alert variant="danger" className="d-flex align-items-center">
+                  <i className="bi bi-exclamation-triangle me-2"></i>
+                  {error}
+                  <Button
+                    variant="outline-danger"
+                    size="sm"
+                    className="ms-auto"
+                    onClick={fetchPaymentMethods}
                   >
-                    {paymentTypes.map((type) => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
+                    Retry
+                  </Button>
+                </Alert>
               </Col>
             </Row>
+          )}
 
-            <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={2}
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                placeholder="Brief description of this payment method"
-              />
-            </Form.Group>
+          <Row>
+            <Col>
+              <Card>
+                <Card.Header>
+                  <h5 className="mb-0">
+                    <i className="bi bi-credit-card me-2"></i>
+                    Available Payment Methods
+                  </h5>
+                </Card.Header>
+                <Card.Body>
+                  {paymentMethods.length > 0 ? (
+                    <Table responsive hover>
+                      <thead>
+                        <tr>
+                          <th>Method Name</th>
+                          <th>Type</th>
+                          <th>Status</th>
+                          <th>Processing Fee</th>
+                          <th>Limits</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {paymentMethods.map((method) => (
+                          <tr key={method._id}>
+                            <td>
+                              <div>
+                                <strong>{method.name}</strong>
+                                {method.description && (
+                                  <div>
+                                    <small className="text-muted">
+                                      {method.description}
+                                    </small>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                            <td>
+                              <Badge bg={getTypeBadge(method.type)}>
+                                {getTypeLabel(method.type)}
+                              </Badge>
+                            </td>
+                            <td>
+                              <Badge
+                                bg={method.isActive ? "success" : "danger"}
+                              >
+                                {method.isActive ? "Active" : "Inactive"}
+                              </Badge>
+                            </td>
+                            <td>
+                              {method.processingFee > 0
+                                ? `${method.processingFee}%`
+                                : "Free"}
+                            </td>
+                            <td>
+                              <small>
+                                Min: ₹{method.minAmount || 0}
+                                <br />
+                                Max: ₹{method.maxAmount || "No limit"}
+                              </small>
+                            </td>
+                            <td>
+                              <div className="d-flex gap-2">
+                                <Button
+                                  variant="outline-primary"
+                                  size="sm"
+                                  onClick={() => handleShowModal(method)}
+                                >
+                                  <i className="bi bi-pencil"></i>
+                                </Button>
+                                <Button
+                                  variant={
+                                    method.isActive
+                                      ? "outline-warning"
+                                      : "outline-success"
+                                  }
+                                  size="sm"
+                                  onClick={() =>
+                                    handleToggleStatus(
+                                      method._id,
+                                      method.isActive,
+                                    )
+                                  }
+                                >
+                                  <i
+                                    className={
+                                      method.isActive
+                                        ? "bi bi-pause"
+                                        : "bi bi-play"
+                                    }
+                                  ></i>
+                                </Button>
+                                <Button
+                                  variant="outline-danger"
+                                  size="sm"
+                                  onClick={() => handleDelete(method._id)}
+                                >
+                                  <i className="bi bi-trash"></i>
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  ) : (
+                    <div className="text-center py-5">
+                      <i
+                        className="bi bi-credit-card text-muted"
+                        style={{ fontSize: "3rem" }}
+                      ></i>
+                      <h5 className="mt-3 text-muted">No Payment Methods</h5>
+                      <p className="text-muted">
+                        Add payment methods to allow customers to pay for
+                        orders.
+                      </p>
+                      <Button
+                        variant="primary"
+                        onClick={() => handleShowModal()}
+                      >
+                        Add First Payment Method
+                      </Button>
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
 
-            <Row>
-              <Col md={4}>
+          {/* Add/Edit Modal */}
+          <Modal show={showModal} onHide={handleCloseModal} size="lg">
+            <Modal.Header closeButton>
+              <Modal.Title>
+                {editingMethod ? "Edit Payment Method" : "Add Payment Method"}
+              </Modal.Title>
+            </Modal.Header>
+            <Form onSubmit={handleSubmit}>
+              <Modal.Body>
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Method Name *</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        placeholder="e.g., Credit/Debit Card"
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Payment Type *</Form.Label>
+                      <Form.Select
+                        name="type"
+                        value={formData.type}
+                        onChange={handleInputChange}
+                        required
+                      >
+                        {paymentTypes.map((type) => (
+                          <option key={type.value} value={type.value}>
+                            {type.label}
+                          </option>
+                        ))}
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
                 <Form.Group className="mb-3">
-                  <Form.Label>Processing Fee (%)</Form.Label>
-                  <InputGroup>
-                    <Form.Control
-                      type="number"
-                      name="processingFee"
-                      value={formData.processingFee}
-                      onChange={handleInputChange}
-                      min="0"
-                      max="100"
-                      step="0.1"
-                    />
-                    <InputGroup.Text>%</InputGroup.Text>
-                  </InputGroup>
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Minimum Amount (₹)</Form.Label>
+                  <Form.Label>Description</Form.Label>
                   <Form.Control
-                    type="number"
-                    name="minAmount"
-                    value={formData.minAmount}
+                    as="textarea"
+                    rows={2}
+                    name="description"
+                    value={formData.description}
                     onChange={handleInputChange}
-                    min="0"
+                    placeholder="Brief description of this payment method"
                   />
                 </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Maximum Amount (₹)</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="maxAmount"
-                    value={formData.maxAmount}
-                    onChange={handleInputChange}
-                    min="0"
-                  />
-                  <Form.Text className="text-muted">
-                    Leave 0 for no limit
-                  </Form.Text>
-                </Form.Group>
-              </Col>
-            </Row>
 
-            <Form.Group className="mb-3">
-              <Form.Check
-                type="checkbox"
-                name="isActive"
-                checked={formData.isActive}
-                onChange={handleInputChange}
-                label="Enable this payment method"
-              />
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseModal}>
-              Cancel
-            </Button>
-            <Button
-              variant="primary"
-              type="submit"
-              disabled={saving}
-              className="d-flex align-items-center"
-            >
-              {saving && (
-                <Spinner animation="border" size="sm" className="me-2" />
-              )}
-              {editingMethod ? "Update Method" : "Add Method"}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
-    </Container>
+                <Row>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Processing Fee (%)</Form.Label>
+                      <InputGroup>
+                        <Form.Control
+                          type="number"
+                          name="processingFee"
+                          value={formData.processingFee}
+                          onChange={handleInputChange}
+                          min="0"
+                          max="100"
+                          step="0.1"
+                        />
+                        <InputGroup.Text>%</InputGroup.Text>
+                      </InputGroup>
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Minimum Amount (₹)</Form.Label>
+                      <Form.Control
+                        type="number"
+                        name="minAmount"
+                        value={formData.minAmount}
+                        onChange={handleInputChange}
+                        min="0"
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Maximum Amount (₹)</Form.Label>
+                      <Form.Control
+                        type="number"
+                        name="maxAmount"
+                        value={formData.maxAmount}
+                        onChange={handleInputChange}
+                        min="0"
+                      />
+                      <Form.Text className="text-muted">
+                        Leave 0 for no limit
+                      </Form.Text>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Form.Group className="mb-3">
+                  <Form.Check
+                    type="checkbox"
+                    name="isActive"
+                    checked={formData.isActive}
+                    onChange={handleInputChange}
+                    label="Enable this payment method"
+                  />
+                </Form.Group>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={handleCloseModal}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  type="submit"
+                  disabled={saving}
+                  className="d-flex align-items-center"
+                >
+                  {saving && (
+                    <Spinner animation="border" size="sm" className="me-2" />
+                  )}
+                  {editingMethod ? "Update Method" : "Add Method"}
+                </Button>
+              </Modal.Footer>
+            </Form>
+          </Modal>
+        </Container>
+      </ThemeSection>
+    </div>
   );
 };
 
