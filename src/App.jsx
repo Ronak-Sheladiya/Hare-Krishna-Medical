@@ -48,6 +48,8 @@ import InvoiceView from "./pages/InvoiceView.jsx";
 import OrderDetails from "./pages/OrderDetails.jsx";
 import UserGuide from "./pages/UserGuide.jsx";
 import InvoiceVerify from "./pages/InvoiceVerify.jsx";
+import InvoiceQRVerify from "./pages/InvoiceQRVerify.jsx";
+import AdminPaymentMethods from "./pages/admin/AdminPaymentMethods.jsx";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
 import VerificationStatus from "./pages/VerificationStatus.jsx";
 import NotFound from "./pages/NotFound.jsx";
