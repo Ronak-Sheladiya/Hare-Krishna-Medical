@@ -315,7 +315,6 @@ const AdminInvoices = () => {
                         <i className="bi bi-file-earmark-excel me-2"></i>
                         Export Excel
                       </>
-                      "📊 Export Excel"
                     )}
                   </ThemeButton>
                   <ThemeButton variant="outline" onClick={fetchInvoices}>
