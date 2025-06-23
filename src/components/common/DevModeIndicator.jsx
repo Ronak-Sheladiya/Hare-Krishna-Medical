@@ -7,10 +7,13 @@ const DevModeIndicator = () => {
   const [showIndicator, setShowIndicator] = useState(false);
 
   useEffect(() => {
+    // Temporarily disabled to prevent API errors
     // Only show in development mode
     if (!import.meta.env.DEV) return;
 
-    checkBackendStatus();
+    // Disable API check for now to prevent errors
+    // checkBackendStatus();
+    setBackendStatus("disconnected");
     setShowIndicator(true);
 
     // Hide after 10 seconds
