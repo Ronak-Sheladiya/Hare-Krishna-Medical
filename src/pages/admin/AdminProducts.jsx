@@ -669,8 +669,10 @@ const AdminProducts = () => {
                   onClick={() => setCurrentPage(totalPages)}
                 />
               </Pagination>
-            </div>
-          )}
+                </div>
+              </ThemeCard>
+            </Col>
+          </Row>
         </Container>
       </ThemeSection>
 
