@@ -704,7 +704,7 @@ const UserGuide = () => {
                             }}
                           >
                             <li>Update personal information</li>
-                            <li>Change password and security settings</li>
+                            <li>Change password</li>
                             <li>Manage delivery addresses</li>
                             <li>Update contact preferences</li>
                           </ul>
@@ -723,8 +723,8 @@ const UserGuide = () => {
                           <h6
                             style={{ color: "#6f42c1", marginBottom: "12px" }}
                           >
-                            <i className="bi bi-shield-check me-2"></i>
-                            Security Settings
+                            <i className="bi bi-clock-history me-2"></i>
+                            Order History
                           </h6>
                           <ul
                             style={{
@@ -733,10 +733,10 @@ const UserGuide = () => {
                               paddingLeft: "20px",
                             }}
                           >
-                            <li>Two-factor authentication</li>
-                            <li>Login activity monitoring</li>
-                            <li>Privacy settings management</li>
-                            <li>Data download and deletion</li>
+                            <li>View all previous orders</li>
+                            <li>Track current order status</li>
+                            <li>Reorder previous purchases</li>
+                            <li>Download order invoices</li>
                           </ul>
                         </Card.Body>
                       </Card>
