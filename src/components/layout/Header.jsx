@@ -56,11 +56,79 @@ const Header = () => {
             <img
               src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
               alt="Hare Krishna Medical"
-              className="medical-logo me-2"
+              className="medical-logo me-3"
+              style={{
+                width: "45px",
+                height: "45px",
+                borderRadius: "8px",
+                boxShadow: "0 2px 8px rgba(230, 57, 70, 0.15)",
+              }}
             />
-            <span className="fw-bold text-dark d-none d-md-inline">
-              Hare Krishna Medical
-            </span>
+            <div className="brand-text-container d-none d-md-block">
+              <h1 className="brand-title mb-0">
+                <span
+                  style={{
+                    color: "#E63946",
+                    fontWeight: "700",
+                    fontSize: "1.6rem",
+                    fontFamily: "'Poppins', sans-serif",
+                    letterSpacing: "-0.5px",
+                  }}
+                >
+                  Hare Krishna
+                </span>
+                <span
+                  style={{
+                    color: "#2B4C7E",
+                    fontWeight: "600",
+                    fontSize: "1.6rem",
+                    fontFamily: "'Poppins', sans-serif",
+                    marginLeft: "0.4rem",
+                    letterSpacing: "-0.3px",
+                  }}
+                >
+                  Medical
+                </span>
+              </h1>
+              <p
+                className="brand-tagline mb-0"
+                style={{
+                  color: "#6C757D",
+                  fontSize: "0.75rem",
+                  fontWeight: "500",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                  marginTop: "-2px",
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              >
+                Healthcare Excellence
+              </p>
+            </div>
+            {/* Mobile Brand Text */}
+            <div className="d-md-none">
+              <span
+                style={{
+                  color: "#E63946",
+                  fontWeight: "700",
+                  fontSize: "1.2rem",
+                  fontFamily: "'Poppins', sans-serif",
+                }}
+              >
+                HK
+              </span>
+              <span
+                style={{
+                  color: "#2B4C7E",
+                  fontWeight: "600",
+                  fontSize: "1.2rem",
+                  fontFamily: "'Poppins', sans-serif",
+                  marginLeft: "0.2rem",
+                }}
+              >
+                Medical
+              </span>
+            </div>
           </Navbar.Brand>
 
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
