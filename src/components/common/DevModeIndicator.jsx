@@ -23,9 +23,20 @@ const DevModeIndicator = () => {
 
   const checkBackendStatus = async () => {
     try {
-      await api.get("/api/health", { timeout: 3000 });
-      setBackendStatus("connected");
+      // Use safeApiCall to properly handle all error types
+      const result = await import("../../utils/apiClient").then(
+        ({ safeApiCall, api }) =>
+          safeApiCall(() => api.get("/api/health", { timeout: 3000 }), null),
+      );
+
+      if (result.success) {
+        setBackendStatus("connected");
+      } else {
+        setBackendStatus("disconnected");
+      }
     } catch (error) {
+      // Fallback error handling
+      console.warn("Backend status check failed:", error);
       setBackendStatus("disconnected");
     }
   };
