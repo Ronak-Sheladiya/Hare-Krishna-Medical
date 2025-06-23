@@ -453,6 +453,9 @@ function App() {
 
           {/* Real-time connection status indicator */}
           <RealTimeStatus />
+
+          {/* Socket diagnostic tool (admin only, shows on connection issues) */}
+          <SocketDiagnostic />
         </div>
       </ErrorBoundary>
     </Router>
