@@ -19,6 +19,12 @@ import {
 import { Link } from "react-router-dom";
 import { useRealTime } from "../../hooks/useRealTime";
 import { api, safeApiCall } from "../../utils/apiClient";
+import {
+  PageHeroSection,
+  ThemeCard,
+  ThemeButton,
+  ThemeSection,
+} from "../../components/common/ConsistentTheme";
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
