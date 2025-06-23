@@ -270,8 +270,8 @@ const Order = () => {
             : paymentMethod === "online"
               ? "Online Payment"
               : "UPI Payment",
-        paymentStatus: "Paid",
-        status: "Confirmed",
+        paymentStatus: "Pending",
+        status: "Pending",
       };
 
       // Create a temporary div and render the professional invoice
@@ -372,7 +372,7 @@ const Order = () => {
                 <div style="margin-bottom: 8px;"><strong style="color: #e74c3c;">Order No:</strong> ${orderDetails.orderId}</div>
                 <div style="margin-bottom: 8px;"><strong style="color: #e74c3c;">Date:</strong> ${orderDetails.orderDate}</div>
                 <div style="margin-bottom: 8px;"><strong style="color: #e74c3c;">Time:</strong> ${orderDetails.orderTime}</div>
-                <div><strong style="color: #e74c3c;">Status:</strong> <span style="background: #27ae60; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px;">Delivered</span></div>
+                <div><strong style="color: #e74c3c;">Status:</strong> <span style="background: #ffc107; color: black; padding: 3px 8px; border-radius: 12px; font-size: 11px;">Pending</span></div>
               </div>
             </div>
           </div>

@@ -13,7 +13,7 @@ const OfficialInvoiceDesign = ({ invoiceData, qrCode, forPrint = false }) => {
     total,
     paymentMethod,
     paymentStatus,
-    status = "Delivered",
+    status = "Pending",
   } = invoiceData;
 
   // Calculate totals

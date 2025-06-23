@@ -22,7 +22,7 @@ const ProfessionalInvoice = ({
     total,
     paymentMethod,
     paymentStatus,
-    status = "Delivered",
+    status = "Pending",
   } = invoiceData;
 
   // Generate QR Code with comprehensive invoice data or use provided QR
