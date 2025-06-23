@@ -207,6 +207,7 @@ function App() {
               <Route path="/user-guide" element={<UserGuide />} />
               <Route path="/backend-docs" element={<BackendDocs />} />
               <Route path="/localsetup-guide" element={<LocalSetupGuide />} />
+              <Route path="/navigation-test" element={<NavigationTest />} />
               <Route path="/order" element={<Order />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
