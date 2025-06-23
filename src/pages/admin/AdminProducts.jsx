@@ -879,63 +879,6 @@ const AdminProducts = () => {
               />
             </Form.Group>
 
-
-                            style={{
-                              width: "100%",
-                              height: "100px",
-                              objectFit: "cover",
-                            }}
-                          />
-                        </Col>
-                      ))}
-                    </Row>
-                  </div>
-                )}
-
-              {/* New Image Previews */}
-              {imagePreviewUrls.length > 0 && (
-                <div className="image-preview-container">
-                  <label className="form-label small text-muted">
-                    New Images Preview:
-                  </label>
-                  <Row className="g-2">
-                    {imagePreviewUrls.map((url, index) => (
-                      <Col xs={6} md={4} lg={3} key={index}>
-                        <div className="position-relative">
-                          <img
-                            src={url}
-                            alt={`Preview ${index + 1}`}
-                            className="img-fluid rounded border"
-                            style={{
-                              width: "100%",
-                              height: "100px",
-                              objectFit: "cover",
-                            }}
-                          />
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            className="position-absolute top-0 end-0 m-1 rounded-circle"
-                            style={{
-                              width: "24px",
-                              height: "24px",
-                              padding: "0",
-                            }}
-                            onClick={() => removeImage(index)}
-                          >
-                            <i
-                              className="bi bi-x"
-                              style={{ fontSize: "12px" }}
-                            ></i>
-                          </Button>
-                        </div>
-                      </Col>
-                    ))}
-                  </Row>
-                </div>
-              )}
-            </Form.Group>
-
             <Form.Group className="mb-3">
               <Form.Label>
                 Product Benefits <span className="text-danger">*</span>
