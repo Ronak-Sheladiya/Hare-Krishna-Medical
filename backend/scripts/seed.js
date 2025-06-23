@@ -418,6 +418,10 @@ const seedDatabase = async () => {
     console.log("\n🔐 Admin Login Credentials:");
     console.log("   Email: admin@harekrishnamedical.com");
     console.log("   Password: admin123");
+    console.log("   Email: ronaksheladiya652@gmail.com");
+    console.log("   Password: admin@123");
+    console.log("   Email: mayurgajera097@gmail.com");
+    console.log("   Password: admin@123");
 
     console.log("\n👤 Test User Credentials:");
     console.log("   Email: john@example.com");
