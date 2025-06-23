@@ -5,6 +5,50 @@ const API_BASE_URL =
 // Store original fetch to avoid external interference
 const originalFetch = window.fetch.bind(window);
 
+// XMLHttpRequest fallback for extreme cases of external interference
+const xhrFallback = (url, options = {}) => {
+  return new Promise((resolve) => {
+    try {
+      const xhr = new XMLHttpRequest();
+      const method = options.method || "GET";
+
+      xhr.open(method, url, true);
+
+      // Set headers
+      if (options.headers) {
+        Object.entries(options.headers).forEach(([key, value]) => {
+          xhr.setRequestHeader(key, value);
+        });
+      }
+
+      // Set timeout
+      xhr.timeout = options.timeout || DEFAULT_CONFIG.timeout;
+
+      xhr.onload = () => {
+        const response = {
+          ok: xhr.status >= 200 && xhr.status < 300,
+          status: xhr.status,
+          statusText: xhr.statusText,
+          headers: {
+            get: (name) => xhr.getResponseHeader(name),
+          },
+          json: () => Promise.resolve(JSON.parse(xhr.responseText)),
+          text: () => Promise.resolve(xhr.responseText),
+        };
+        resolve(response);
+      };
+
+      xhr.onerror = () => resolve(null);
+      xhr.ontimeout = () => resolve(null);
+      xhr.onabort = () => resolve(null);
+
+      xhr.send(options.body || null);
+    } catch (error) {
+      resolve(null);
+    }
+  });
+};
+
 // Default configuration
 const DEFAULT_CONFIG = {
   timeout: 8000, // 8 seconds
