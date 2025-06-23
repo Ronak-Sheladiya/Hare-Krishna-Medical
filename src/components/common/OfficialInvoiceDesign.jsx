@@ -151,20 +151,49 @@ const OfficialInvoiceDesign = ({ invoiceData, qrCode, forPrint = false }) => {
           </div>
         </div>
 
-        <!-- Footer Section -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+        <!-- Footer Section with Enhanced QR Design -->
+        <div style="display: flex; justify-content: space-between; align-items: stretch; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 20px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e0e0e0;">
           <div style="flex: 1;">
-            <h5 style="font-size: 14px; font-weight: bold; margin: 0 0 10px 0; color: #333;">Thank You for Your Business!</h5>
-            <div style="font-size: 11px; line-height: 1.5; color: #666;">
-              <div><strong>Terms:</strong> Payment due within 30 days</div>
-              <div>Goods once sold will not be taken back</div>
-              <div>Subject to Gujarat jurisdiction only</div>
-              <div style="margin-top: 8px;"><strong>Contact:</strong> hkmedicalamroli@gmail.com | +91 76989 13354</div>
+            <h5 style="font-size: 16px; font-weight: bold; margin: 0 0 12px 0; color: #e63946;">🙏 Thank You for Your Business!</h5>
+            <div style="font-size: 12px; line-height: 1.6; color: #444;">
+              <div style="background: white; padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #e63946;">
+                <strong>Terms & Conditions:</strong><br>
+                • Payment due within 30 days<br>
+                • Goods once sold will not be taken back<br>
+                • Subject to Gujarat jurisdiction only
+              </div>
+              <div style="display: flex; align-items: center; margin-top: 10px; font-size: 11px;">
+                <span style="background: #e63946; color: white; padding: 4px 8px; border-radius: 12px; margin-right: 8px; font-weight: bold;">📞 24/7 Support</span>
+                <span>hkmedicalamroli@gmail.com | +91 76989 13354</span>
+              </div>
             </div>
           </div>
-          <div style="text-align: center; margin-left: 20px;">
-            ${qrCode ? `<img src="${qrCode}" alt="QR Code" style="width: 120px; height: 120px; border: 2px solid #e63946; border-radius: 8px; padding: 3px; background: white;" />` : '<div style="width: 120px; height: 120px; border: 2px solid #e63946; border-radius: 8px; padding: 3px; background: white; display: flex; align-items: center; justify-content: center; color: #333; font-size: 10px; font-weight: bold;">QR CODE</div>'}
-            <div style="font-size: 10px; margin-top: 5px; color: #666;">Scan to Verify</div>
+
+          <!-- Enhanced QR Code Section -->
+          <div style="margin-left: 25px; text-align: center; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
+            <div style="margin-bottom: 10px;">
+              <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800" alt="Logo" style="height: 30px; width: 30px; object-fit: contain;" onerror="this.style.display='none';" />
+            </div>
+            ${
+              qrCode
+                ? `
+              <img src="${qrCode}" alt="Invoice QR Code" style="width: 120px; height: 120px; border: 3px solid #e63946; border-radius: 12px; padding: 4px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+              <div style="margin-top: 10px;">
+                <div style="font-size: 11px; font-weight: bold; color: #e63946;">📱 SCAN TO VERIFY</div>
+                <div style="font-size: 9px; color: #666; margin-top: 2px;">Invoice #${invoiceId}</div>
+              </div>
+            `
+                : `
+              <div style="width: 120px; height: 120px; border: 3px dashed #e63946; border-radius: 12px; background: linear-gradient(45deg, #f8f9fa 25%, transparent 25%), linear-gradient(-45deg, #f8f9fa 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f8f9fa 75%), linear-gradient(-45deg, transparent 75%, #f8f9fa 75%); background-size: 8px 8px; background-position: 0 0, 0 4px, 4px -4px, -4px 0px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #e63946;">
+                <div style="font-size: 14px; margin-bottom: 5px;">📱</div>
+                <div style="font-size: 10px; font-weight: bold; text-align: center; line-height: 1.2;">QR CODE<br>PLACEHOLDER</div>
+              </div>
+              <div style="margin-top: 10px;">
+                <div style="font-size: 11px; font-weight: bold; color: #e63946;">VERIFICATION CODE</div>
+                <div style="font-size: 9px; color: #666; margin-top: 2px;">Invoice #${invoiceId}</div>
+              </div>
+            `
+            }
           </div>
         </div>
 
