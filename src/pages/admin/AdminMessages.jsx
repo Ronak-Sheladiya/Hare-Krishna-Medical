@@ -32,6 +32,12 @@ import {
   getRelativeTime,
   sortByDateDesc,
 } from "../../utils/dateUtils";
+import { api, safeApiCall } from "../../utils/apiClient";
+import {
+  PageHeroSection,
+  ThemeCard,
+  ThemeButton,
+} from "../../components/common/ConsistentTheme";
 import * as XLSX from "xlsx";
 
 const AdminMessages = () => {
@@ -39,6 +45,8 @@ const AdminMessages = () => {
   const { messages } = useSelector((state) => state.messages);
 
   const [filteredMessages, setFilteredMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
@@ -46,678 +54,600 @@ const AdminMessages = () => {
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [replyText, setReplyText] = useState("");
   const [sending, setSending] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastVariant, setToastVariant] = useState("success");
 
+  // Fetch all messages
+  const fetchMessages = async () => {
+    setLoading(true);
+    setError(null);
+
+    const {
+      success,
+      data,
+      error: apiError,
+    } = await safeApiCall(() => api.get("/api/admin/messages"), []);
+
+    if (success && data) {
+      const messagesData = data.data || data;
+      const sortedMessages = sortByDateDesc(messagesData, "createdAt");
+      dispatch(setMessages(sortedMessages));
+    } else {
+      setError(apiError || "Failed to load messages");
+      // Keep current messages state for offline mode
+    }
+
+    setLoading(false);
+  };
+
+  // Mark message as read
+  const handleMarkAsRead = async (messageId) => {
+    const { success, error: apiError } = await safeApiCall(
+      () => api.patch(`/api/admin/messages/${messageId}/read`),
+      null,
+    );
+
+    if (success) {
+      dispatch(markMessageAsRead(messageId));
+      showToastMessage("Message marked as read", "success");
+    } else {
+      showToastMessage(apiError || "Failed to mark message as read", "danger");
+    }
+  };
+
+  // Mark message as unread
+  const handleMarkAsUnread = async (messageId) => {
+    const { success, error: apiError } = await safeApiCall(
+      () => api.patch(`/api/admin/messages/${messageId}/unread`),
+      null,
+    );
+
+    if (success) {
+      dispatch(markMessageAsUnread(messageId));
+      showToastMessage("Message marked as unread", "success");
+    } else {
+      showToastMessage(
+        apiError || "Failed to mark message as unread",
+        "danger",
+      );
+    }
+  };
+
+  // Delete message
+  const handleDeleteMessage = async (messageId) => {
+    if (!window.confirm("Are you sure you want to delete this message?")) {
+      return;
+    }
+
+    const { success, error: apiError } = await safeApiCall(
+      () => api.delete(`/api/admin/messages/${messageId}`),
+      null,
+    );
+
+    if (success) {
+      dispatch(deleteMessage(messageId));
+      showToastMessage("Message deleted successfully", "success");
+    } else {
+      showToastMessage(apiError || "Failed to delete message", "danger");
+    }
+  };
+
+  // Update message status
+  const handleUpdateStatus = async (messageId, newStatus) => {
+    const { success, error: apiError } = await safeApiCall(
+      () =>
+        api.patch(`/api/admin/messages/${messageId}/status`, {
+          status: newStatus,
+        }),
+      null,
+    );
+
+    if (success) {
+      dispatch(updateMessageStatus({ messageId, status: newStatus }));
+      showToastMessage(`Message status updated to ${newStatus}`, "success");
+    } else {
+      showToastMessage(apiError || "Failed to update message status", "danger");
+    }
+  };
+
+  // Send reply
+  const handleSendReply = async () => {
+    if (!replyText.trim()) return;
+
+    setSending(true);
+    const { success, error: apiError } = await safeApiCall(
+      () =>
+        api.post(`/api/admin/messages/${selectedMessage._id}/reply`, {
+          reply: replyText,
+        }),
+      null,
+    );
+
+    if (success) {
+      dispatch(
+        replyToMessage({
+          messageId: selectedMessage._id,
+          reply: replyText,
+          repliedAt: getCurrentISOString(),
+        }),
+      );
+      setReplyText("");
+      setShowReplyModal(false);
+      showToastMessage("Reply sent successfully", "success");
+    } else {
+      showToastMessage(apiError || "Failed to send reply", "danger");
+    }
+
+    setSending(false);
+  };
+
+  // Mark all as read
+  const handleMarkAllAsRead = async () => {
+    const { success, error: apiError } = await safeApiCall(
+      () => api.patch("/api/admin/messages/mark-all-read"),
+      null,
+    );
+
+    if (success) {
+      dispatch(markAllAsRead());
+      showToastMessage("All messages marked as read", "success");
+    } else {
+      showToastMessage(apiError || "Failed to mark all as read", "danger");
+    }
+  };
+
+  // Export messages to Excel
+  const exportToExcel = () => {
+    try {
+      const exportData = filteredMessages.map((message) => ({
+        Name: message.name,
+        Email: message.email,
+        Subject: message.subject,
+        Message: message.message,
+        Status: message.status,
+        Priority: message.priority,
+        "Created Date": formatDateTime(message.createdAt),
+        "Read Status": message.isRead ? "Read" : "Unread",
+        Reply: message.reply || "No reply",
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Messages");
+      XLSX.writeFile(
+        wb,
+        `messages-${new Date().toISOString().split("T")[0]}.xlsx`,
+      );
+      showToastMessage("Messages exported successfully", "success");
+    } catch (error) {
+      console.error("Error exporting messages:", error);
+      showToastMessage("Failed to export messages", "danger");
+    }
+  };
+
+  // Show toast message
+  const showToastMessage = (message, variant) => {
+    setToastMessage(message);
+    setToastVariant(variant);
+    setShowToast(true);
+  };
+
+  // Filter messages
   useEffect(() => {
-    let filtered = [...messages];
+    let filtered = messages;
 
-    // Apply search filter
     if (searchTerm) {
       filtered = filtered.filter(
         (message) =>
-          message.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          message.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          message.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          message.message.toLowerCase().includes(searchTerm.toLowerCase()),
+          message.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          message.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          message.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          message.message?.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
-    // Apply status filter
     if (statusFilter) {
       filtered = filtered.filter((message) => message.status === statusFilter);
     }
 
-    // Apply priority filter
     if (priorityFilter) {
       filtered = filtered.filter(
         (message) => message.priority === priorityFilter,
       );
     }
 
-    // Sort by date (newest first)
-    filtered = sortByDateDesc(filtered, "createdAt");
-
     setFilteredMessages(filtered);
   }, [messages, searchTerm, statusFilter, priorityFilter]);
 
-  const handleMarkAsRead = (messageId) => {
-    dispatch(markMessageAsRead(messageId));
-  };
+  useEffect(() => {
+    fetchMessages();
+  }, []);
 
-  const handleMarkAsUnread = (messageId) => {
-    dispatch(markMessageAsUnread(messageId));
-  };
-
-  const handleDeleteMessage = (messageId) => {
-    if (window.confirm("Are you sure you want to delete this message?")) {
-      dispatch(deleteMessage(messageId));
+  const getPriorityBadgeColor = (priority) => {
+    switch (priority?.toLowerCase()) {
+      case "high":
+        return "danger";
+      case "medium":
+        return "warning";
+      case "low":
+        return "success";
+      default:
+        return "secondary";
     }
   };
 
-  const handleStatusChange = (messageId, newStatus) => {
-    dispatch(updateMessageStatus({ messageId, status: newStatus }));
-  };
-
-  const handleReply = (message) => {
-    setSelectedMessage(message);
-    setReplyText("");
-    setShowReplyModal(true);
-    if (!message.isRead) {
-      dispatch(markMessageAsRead(message.id));
+  const getStatusBadgeColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case "resolved":
+        return "success";
+      case "pending":
+        return "warning";
+      case "in_progress":
+        return "info";
+      case "closed":
+        return "secondary";
+      default:
+        return "primary";
     }
   };
 
-  const handleSendReply = async () => {
-    if (!replyText.trim()) {
-      alert("Please enter a reply message");
-      return;
-    }
-
-    setSending(true);
-    try {
-      // Simulate sending email
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      dispatch(
-        replyToMessage({
-          messageId: selectedMessage.id,
-          reply: replyText,
-          repliedAt: getCurrentISOString(),
-        }),
-      );
-
-      dispatch(
-        updateMessageStatus({
-          messageId: selectedMessage.id,
-          status: "Replied",
-        }),
-      );
-
-      setShowReplyModal(false);
-      setSelectedMessage(null);
-      setReplyText("");
-    } catch (error) {
-      alert("Failed to send reply. Please try again.");
-    } finally {
-      setSending(false);
-    }
-  };
-
-  const getPriorityBadge = (priority) => {
-    const variants = {
-      High: "danger",
-      Medium: "warning",
-      Low: "success",
-    };
-    return <Badge bg={variants[priority] || "secondary"}>{priority}</Badge>;
-  };
-
-  const getStatusBadge = (status) => {
-    const variants = {
-      Open: "primary",
-      "In Progress": "info",
-      Replied: "success",
-      Closed: "secondary",
-    };
-    return <Badge bg={variants[status] || "secondary"}>{status}</Badge>;
-  };
-
-  const formatDate = (date) => {
-    return formatDateTime(date);
-  };
-
-  const unreadCount = messages.filter((m) => !m.isRead).length;
-  const totalMessages = messages.length;
-
-  const handleExportToExcel = () => {
-    try {
-      // Prepare data for export
-      const exportData = filteredMessages.map((message, index) => ({
-        "Sr. No.": index + 1,
-        "Customer Name": message.name,
-        Email: message.email,
-        Mobile: message.mobile || "N/A",
-        Subject: message.subject,
-        Message: message.message,
-        Priority: message.priority,
-        Status: message.status,
-        "Read Status": message.isRead ? "Read" : "Unread",
-        "Created Date": formatDateTime(message.createdAt),
-        Reply: message.reply || "No reply yet",
-        "Replied Date": message.repliedAt
-          ? formatDateTime(message.repliedAt)
-          : "Not replied",
-      }));
-
-      // Create workbook and worksheet
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(exportData);
-
-      // Set column widths
-      const columnWidths = [
-        { wch: 8 }, // Sr. No.
-        { wch: 20 }, // Customer Name
-        { wch: 30 }, // Email
-        { wch: 15 }, // Mobile
-        { wch: 25 }, // Subject
-        { wch: 50 }, // Message
-        { wch: 10 }, // Priority
-        { wch: 12 }, // Status
-        { wch: 12 }, // Read Status
-        { wch: 18 }, // Created Date
-        { wch: 40 }, // Reply
-        { wch: 18 }, // Replied Date
-      ];
-      worksheet["!cols"] = columnWidths;
-
-      // Add worksheet to workbook
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Messages");
-
-      // Generate filename with current date
-      const currentDate = new Date().toISOString().split("T")[0];
-      const filename = `HKM-Messages-${currentDate}.xlsx`;
-
-      // Save file
-      XLSX.writeFile(workbook, filename);
-
-      // Show success notification
-      alert(
-        `Messages exported successfully!\nFile: ${filename}\nTotal records: ${exportData.length}`,
-      );
-    } catch (error) {
-      console.error("Export error:", error);
-      alert("Failed to export messages. Please try again.");
-    }
-  };
+  if (loading) {
+    return (
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "60vh" }}
+      >
+        <Spinner animation="border" variant="danger" />
+        <span className="ms-2">Loading messages...</span>
+      </div>
+    );
+  }
 
   return (
-    <div className="fade-in admin-page-content" data-page="admin">
-      {/* Hero Section - About Us Red Theme */}
-      <section
-        style={{
-          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
-          paddingTop: "80px",
-          paddingBottom: "80px",
-          color: "white",
-        }}
-      >
-        <Container>
-          <Row className="text-center">
-            <Col lg={12}>
-              <h1
-                style={{
-                  fontSize: "3rem",
-                  fontWeight: "800",
-                  marginBottom: "20px",
-                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
-                }}
-              >
-                Manage Messages
-              </h1>
-              <p
-                style={{
-                  fontSize: "1.2rem",
-                  opacity: "0.9",
-                  maxWidth: "600px",
-                  margin: "0 auto",
-                }}
-              >
-                Handle customer inquiries and support requests
-              </p>
-            </Col>
-          </Row>
-        </Container>
-      </section>
+    <div className="fade-in">
+      <PageHeroSection
+        title="Message Management"
+        description="Manage customer inquiries and support messages"
+        icon="💬"
+      />
 
-      {/* Messages Management Content */}
-      <section
-        style={{
-          background: "#f8f9fa",
-          paddingTop: "80px",
-          paddingBottom: "80px",
-          minHeight: "60vh",
-        }}
-      >
-        <Container>
-          {/* Header */}
-          <Row className="mb-4">
-            <Col lg={8}>
-              <h2 style={{ color: "#333333", fontWeight: "700" }}>
-                Message Management
-              </h2>
-              <p style={{ color: "#495057" }}>
-                Manage customer inquiries from the contact form
-              </p>
-            </Col>
-            <Col lg={4} className="text-end">
-              <div className="d-flex gap-3 align-items-center justify-content-end">
-                <div className="text-center">
-                  <div
-                    style={{
-                      fontSize: "1.5rem",
-                      fontWeight: "700",
-                      color: "#e63946",
-                    }}
-                  >
-                    {unreadCount}
-                  </div>
-                  <small style={{ color: "#495057" }}>Unread</small>
-                </div>
-                <div className="text-center">
-                  <div
-                    style={{
-                      fontSize: "1.5rem",
-                      fontWeight: "700",
-                      color: "#343a40",
-                    }}
-                  >
-                    {totalMessages}
-                  </div>
-                  <small style={{ color: "#495057" }}>Total</small>
-                </div>
-              </div>
-            </Col>
-          </Row>
+      <Container className="py-5">
+        {error && (
+          <Alert variant="warning" className="mb-4">
+            <Alert.Heading>Offline Mode</Alert.Heading>
+            <p>{error}</p>
+            <ThemeButton variant="outline" onClick={fetchMessages}>
+              Try Again
+            </ThemeButton>
+          </Alert>
+        )}
 
-          {/* Filters */}
-          <Row className="mb-4">
-            <Col lg={4} className="mb-3">
-              <InputGroup>
-                <InputGroup.Text>
-                  <i className="bi bi-search"></i>
-                </InputGroup.Text>
-                <Form.Control
-                  type="text"
-                  placeholder="Search messages..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </InputGroup>
-            </Col>
-            <Col lg={2} className="mb-3">
-              <Form.Select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="">All Status</option>
-                <option value="Open">Open</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Replied">Replied</option>
-                <option value="Closed">Closed</option>
-              </Form.Select>
-            </Col>
-            <Col lg={2} className="mb-3">
-              <Form.Select
-                value={priorityFilter}
-                onChange={(e) => setPriorityFilter(e.target.value)}
-              >
-                <option value="">All Priority</option>
-                <option value="High">High</option>
-                <option value="Medium">Medium</option>
-                <option value="Low">Low</option>
-              </Form.Select>
-            </Col>
-            <Col lg={4} className="mb-3">
-              <div className="d-flex gap-2">
-                <Button
-                  variant="outline-secondary"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setStatusFilter("");
-                    setPriorityFilter("");
-                  }}
+        {/* Summary Cards */}
+        <Row className="mb-4">
+          <Col md={3}>
+            <ThemeCard className="text-center">
+              <Card.Body>
+                <h4 className="text-danger">{messages.length}</h4>
+                <small className="text-muted">Total Messages</small>
+              </Card.Body>
+            </ThemeCard>
+          </Col>
+          <Col md={3}>
+            <ThemeCard className="text-center">
+              <Card.Body>
+                <h4 className="text-warning">
+                  {messages.filter((m) => !m.isRead).length}
+                </h4>
+                <small className="text-muted">Unread Messages</small>
+              </Card.Body>
+            </ThemeCard>
+          </Col>
+          <Col md={3}>
+            <ThemeCard className="text-center">
+              <Card.Body>
+                <h4 className="text-info">
+                  {messages.filter((m) => m.status === "pending").length}
+                </h4>
+                <small className="text-muted">Pending Messages</small>
+              </Card.Body>
+            </ThemeCard>
+          </Col>
+          <Col md={3}>
+            <ThemeCard className="text-center">
+              <Card.Body>
+                <h4 className="text-success">
+                  {messages.filter((m) => m.status === "resolved").length}
+                </h4>
+                <small className="text-muted">Resolved Messages</small>
+              </Card.Body>
+            </ThemeCard>
+          </Col>
+        </Row>
+
+        {/* Filters and Actions */}
+        <ThemeCard className="mb-4">
+          <Card.Body>
+            <Row>
+              <Col md={3}>
+                <InputGroup>
+                  <Form.Control
+                    type="text"
+                    placeholder="Search messages..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </InputGroup>
+              </Col>
+              <Col md={2}>
+                <Form.Select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
                 >
-                  <i className="bi bi-arrow-clockwise me-1"></i>
-                  Clear Filters
-                </Button>
-                <Button
-                  variant="outline-primary"
-                  style={{ color: "#e63946", borderColor: "#e63946" }}
-                  onClick={handleExportToExcel}
-                  title="Export messages to Excel"
+                  <option value="">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="closed">Closed</option>
+                </Form.Select>
+              </Col>
+              <Col md={2}>
+                <Form.Select
+                  value={priorityFilter}
+                  onChange={(e) => setPriorityFilter(e.target.value)}
                 >
-                  <i className="bi bi-download me-1"></i>
-                  Export to Excel
-                </Button>
-              </div>
-            </Col>
-          </Row>
+                  <option value="">All Priority</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </Form.Select>
+              </Col>
+              <Col md={5}>
+                <div className="d-flex gap-2">
+                  <ThemeButton
+                    variant="outline"
+                    size="sm"
+                    onClick={handleMarkAllAsRead}
+                  >
+                    ✅ Mark All Read
+                  </ThemeButton>
+                  <ThemeButton
+                    variant="outline"
+                    size="sm"
+                    onClick={exportToExcel}
+                  >
+                    📊 Export Excel
+                  </ThemeButton>
+                  <ThemeButton
+                    variant="outline"
+                    size="sm"
+                    onClick={fetchMessages}
+                  >
+                    🔄 Refresh
+                  </ThemeButton>
+                </div>
+              </Col>
+            </Row>
+          </Card.Body>
+        </ThemeCard>
 
-          {/* Messages Table */}
-          <Row>
-            <Col lg={12}>
-              <Card
-                style={{
-                  border: "none",
-                  borderRadius: "12px",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                }}
-              >
-                <Card.Body style={{ padding: "0" }}>
-                  {filteredMessages.length === 0 ? (
-                    <div
-                      className="text-center"
-                      style={{ padding: "60px 20px" }}
+        {/* Messages Table */}
+        <ThemeCard>
+          <Card.Header className="bg-gradient text-white d-flex justify-content-between align-items-center">
+            <h5 className="mb-0">All Messages ({filteredMessages.length})</h5>
+          </Card.Header>
+          <Card.Body className="p-0">
+            {filteredMessages.length > 0 ? (
+              <Table responsive hover className="mb-0">
+                <thead className="table-light">
+                  <tr>
+                    <th>Sender</th>
+                    <th>Subject</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredMessages.map((message) => (
+                    <tr
+                      key={message._id}
+                      className={!message.isRead ? "table-warning" : ""}
                     >
-                      <i
-                        className="bi bi-inbox display-1 mb-3"
-                        style={{ color: "#e9ecef" }}
-                      ></i>
-                      <h4 style={{ color: "#495057" }}>No messages found</h4>
-                      <p style={{ color: "#6c757d" }}>
-                        {searchTerm || statusFilter || priorityFilter
-                          ? "Try adjusting your search criteria"
-                          : "Customer messages will appear here"}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="table-responsive">
-                      <Table className="mb-0">
-                        <thead
-                          style={{
-                            background: "#f8f9fa",
-                            borderBottom: "2px solid #e9ecef",
-                          }}
-                        >
-                          <tr>
-                            <th style={{ padding: "16px", fontWeight: "600" }}>
-                              Customer
-                            </th>
-                            <th style={{ padding: "16px", fontWeight: "600" }}>
-                              Subject
-                            </th>
-                            <th style={{ padding: "16px", fontWeight: "600" }}>
-                              Priority
-                            </th>
-                            <th style={{ padding: "16px", fontWeight: "600" }}>
-                              Status
-                            </th>
-                            <th style={{ padding: "16px", fontWeight: "600" }}>
-                              Date
-                            </th>
-                            <th style={{ padding: "16px", fontWeight: "600" }}>
-                              Actions
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredMessages.map((message) => (
-                            <tr
-                              key={message.id}
-                              style={{
-                                backgroundColor: message.isRead
-                                  ? "#ffffff"
-                                  : "#f8f9fa",
-                                borderBottom: "1px solid #e9ecef",
+                      <td>
+                        <div>
+                          <div className="fw-bold">{message.name}</div>
+                          <small className="text-muted">{message.email}</small>
+                        </div>
+                      </td>
+                      <td>
+                        <div>
+                          <div className="fw-bold">{message.subject}</div>
+                          <small className="text-muted">
+                            {message.message?.substring(0, 50)}...
+                          </small>
+                        </div>
+                      </td>
+                      <td>
+                        <Badge bg={getPriorityBadgeColor(message.priority)}>
+                          {message.priority || "Medium"}
+                        </Badge>
+                      </td>
+                      <td>
+                        <Badge bg={getStatusBadgeColor(message.status)}>
+                          {message.status || "Pending"}
+                        </Badge>
+                      </td>
+                      <td>
+                        <div>
+                          <div>{formatDateTime(message.createdAt)}</div>
+                          <small className="text-muted">
+                            {getRelativeTime(message.createdAt)}
+                          </small>
+                        </div>
+                      </td>
+                      <td>
+                        <Dropdown>
+                          <Dropdown.Toggle
+                            variant="outline-secondary"
+                            size="sm"
+                            className="border-0"
+                          >
+                            Actions
+                          </Dropdown.Toggle>
+                          <Dropdown.Menu>
+                            <Dropdown.Item
+                              onClick={() => {
+                                setSelectedMessage(message);
+                                setShowReplyModal(true);
                               }}
                             >
-                              <td style={{ padding: "16px" }}>
-                                <div>
-                                  <div
-                                    style={{
-                                      fontWeight: message.isRead
-                                        ? "500"
-                                        : "700",
-                                      color: "#333333",
-                                      marginBottom: "4px",
-                                    }}
-                                  >
-                                    {message.name}
-                                    {!message.isRead && (
-                                      <Badge
-                                        bg="primary"
-                                        className="ms-2"
-                                        style={{
-                                          fontSize: "8px",
-                                          padding: "2px 6px",
-                                        }}
-                                      >
-                                        NEW
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  <div
-                                    style={{
-                                      fontSize: "12px",
-                                      color: "#6c757d",
-                                    }}
-                                  >
-                                    {message.email}
-                                  </div>
-                                  {message.mobile && (
-                                    <div
-                                      style={{
-                                        fontSize: "12px",
-                                        color: "#6c757d",
-                                      }}
-                                    >
-                                      📱 {message.mobile}
-                                    </div>
-                                  )}
-                                </div>
-                              </td>
-                              <td style={{ padding: "16px" }}>
-                                <div
-                                  style={{
-                                    fontWeight: "500",
-                                    color: "#333333",
-                                    marginBottom: "4px",
-                                  }}
-                                >
-                                  {message.subject}
-                                </div>
-                                <div
-                                  style={{
-                                    fontSize: "12px",
-                                    color: "#6c757d",
-                                    maxWidth: "200px",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap",
-                                  }}
-                                >
-                                  {message.message}
-                                </div>
-                              </td>
-                              <td style={{ padding: "16px" }}>
-                                {getPriorityBadge(message.priority)}
-                              </td>
-                              <td style={{ padding: "16px" }}>
-                                <Dropdown>
-                                  <Dropdown.Toggle
-                                    as="div"
-                                    style={{ cursor: "pointer" }}
-                                  >
-                                    {getStatusBadge(message.status)}
-                                  </Dropdown.Toggle>
-                                  <Dropdown.Menu>
-                                    <Dropdown.Item
-                                      onClick={() =>
-                                        handleStatusChange(message.id, "Open")
-                                      }
-                                    >
-                                      Open
-                                    </Dropdown.Item>
-                                    <Dropdown.Item
-                                      onClick={() =>
-                                        handleStatusChange(
-                                          message.id,
-                                          "In Progress",
-                                        )
-                                      }
-                                    >
-                                      In Progress
-                                    </Dropdown.Item>
-                                    <Dropdown.Item
-                                      onClick={() =>
-                                        handleStatusChange(
-                                          message.id,
-                                          "Replied",
-                                        )
-                                      }
-                                    >
-                                      Replied
-                                    </Dropdown.Item>
-                                    <Dropdown.Item
-                                      onClick={() =>
-                                        handleStatusChange(message.id, "Closed")
-                                      }
-                                    >
-                                      Closed
-                                    </Dropdown.Item>
-                                  </Dropdown.Menu>
-                                </Dropdown>
-                              </td>
-                              <td
-                                style={{
-                                  padding: "16px",
-                                  fontSize: "12px",
-                                  color: "#6c757d",
-                                }}
+                              💬 Reply
+                            </Dropdown.Item>
+                            <Dropdown.Divider />
+                            {!message.isRead ? (
+                              <Dropdown.Item
+                                onClick={() => handleMarkAsRead(message._id)}
                               >
-                                {formatDate(message.createdAt)}
-                              </td>
-                              <td style={{ padding: "16px" }}>
-                                <div className="d-flex gap-1">
-                                  <Button
-                                    size="sm"
-                                    variant="outline-primary"
-                                    onClick={() => handleReply(message)}
-                                    title="Reply"
-                                    style={{
-                                      borderColor: "#e63946",
-                                      color: "#e63946",
-                                    }}
-                                  >
-                                    <i className="bi bi-reply"></i>
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant={
-                                      message.isRead
-                                        ? "outline-secondary"
-                                        : "outline-info"
-                                    }
-                                    onClick={() =>
-                                      message.isRead
-                                        ? handleMarkAsUnread(message.id)
-                                        : handleMarkAsRead(message.id)
-                                    }
-                                    title={
-                                      message.isRead
-                                        ? "Mark as Unread"
-                                        : "Mark as Read"
-                                    }
-                                  >
-                                    <i
-                                      className={
-                                        message.isRead
-                                          ? "bi bi-envelope"
-                                          : "bi bi-envelope-open"
-                                      }
-                                    ></i>
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline-danger"
-                                    onClick={() =>
-                                      handleDeleteMessage(message.id)
-                                    }
-                                    title="Delete"
-                                  >
-                                    <i className="bi bi-trash"></i>
-                                  </Button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </Table>
-                    </div>
-                  )}
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        </Container>
-      </section>
-
-      {/* Reply Modal */}
-      <Modal
-        show={showReplyModal}
-        onHide={() => setShowReplyModal(false)}
-        size="lg"
-      >
-        <Modal.Header
-          closeButton
-          style={{ background: "linear-gradient(135deg, #e63946, #dc3545)" }}
-        >
-          <Modal.Title style={{ color: "#ffffff" }}>
-            <i className="bi bi-reply me-2"></i>
-            Reply to {selectedMessage?.name}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ padding: "30px" }}>
-          {selectedMessage && (
-            <div style={{ marginBottom: "20px" }}>
-              <Card style={{ background: "#f8f9fa", border: "none" }}>
-                <Card.Body>
-                  <h6 style={{ color: "#e63946", marginBottom: "10px" }}>
-                    Original Message:
-                  </h6>
-                  <p style={{ marginBottom: "10px" }}>
-                    <strong>Subject:</strong> {selectedMessage.subject}
-                  </p>
-                  <p style={{ marginBottom: "0", fontSize: "14px" }}>
-                    {selectedMessage.message}
-                  </p>
-                </Card.Body>
-              </Card>
-            </div>
-          )}
-
-          <Form.Group>
-            <Form.Label style={{ fontWeight: "600" }}>Your Reply:</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={6}
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              placeholder="Type your reply here..."
-              style={{
-                borderRadius: "8px",
-                border: "2px solid #e9ecef",
-                padding: "12px",
-              }}
-            />
-          </Form.Group>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="outline-secondary"
-            onClick={() => setShowReplyModal(false)}
-            disabled={sending}
-          >
-            Cancel
-          </Button>
-          <Button
-            style={{ background: "#e63946", border: "none" }}
-            onClick={handleSendReply}
-            disabled={sending}
-          >
-            {sending ? (
-              <>
-                <Spinner size="sm" className="me-2" />
-                Sending...
-              </>
+                                ✅ Mark as Read
+                              </Dropdown.Item>
+                            ) : (
+                              <Dropdown.Item
+                                onClick={() => handleMarkAsUnread(message._id)}
+                              >
+                                📧 Mark as Unread
+                              </Dropdown.Item>
+                            )}
+                            <Dropdown.Divider />
+                            <Dropdown.Item
+                              onClick={() =>
+                                handleUpdateStatus(message._id, "in_progress")
+                              }
+                            >
+                              🔄 In Progress
+                            </Dropdown.Item>
+                            <Dropdown.Item
+                              onClick={() =>
+                                handleUpdateStatus(message._id, "resolved")
+                              }
+                            >
+                              ✅ Resolve
+                            </Dropdown.Item>
+                            <Dropdown.Item
+                              onClick={() =>
+                                handleUpdateStatus(message._id, "closed")
+                              }
+                            >
+                              🔒 Close
+                            </Dropdown.Item>
+                            <Dropdown.Divider />
+                            <Dropdown.Item
+                              onClick={() => handleDeleteMessage(message._id)}
+                              className="text-danger"
+                            >
+                              🗑️ Delete
+                            </Dropdown.Item>
+                          </Dropdown.Menu>
+                        </Dropdown>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
             ) : (
-              <>
-                <i className="bi bi-send me-2"></i>
-                Send Reply
-              </>
+              <div className="text-center py-5">
+                <div className="mb-3">
+                  <span style={{ fontSize: "4rem" }}>💬</span>
+                </div>
+                <h5>No Messages Found</h5>
+                <p className="text-muted">
+                  {error
+                    ? "Unable to load messages. Please check your connection."
+                    : "No messages match your current filters."}
+                </p>
+                {error && (
+                  <ThemeButton onClick={fetchMessages}>Try Again</ThemeButton>
+                )}
+              </div>
             )}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+          </Card.Body>
+        </ThemeCard>
+
+        {/* Reply Modal */}
+        <Modal
+          show={showReplyModal}
+          onHide={() => setShowReplyModal(false)}
+          size="lg"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Reply to Message</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {selectedMessage && (
+              <div>
+                <div className="mb-3">
+                  <strong>From:</strong> {selectedMessage.name} (
+                  {selectedMessage.email})
+                </div>
+                <div className="mb-3">
+                  <strong>Subject:</strong> {selectedMessage.subject}
+                </div>
+                <div className="mb-3">
+                  <strong>Original Message:</strong>
+                  <div className="border p-3 bg-light rounded">
+                    {selectedMessage.message}
+                  </div>
+                </div>
+                <Form.Group>
+                  <Form.Label>Your Reply:</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={5}
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    placeholder="Type your reply here..."
+                  />
+                </Form.Group>
+              </div>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowReplyModal(false)}
+            >
+              Cancel
+            </Button>
+            <ThemeButton onClick={handleSendReply} disabled={sending}>
+              {sending ? (
+                <>
+                  <Spinner animation="border" size="sm" className="me-1" />
+                  Sending...
+                </>
+              ) : (
+                "📤 Send Reply"
+              )}
+            </ThemeButton>
+          </Modal.Footer>
+        </Modal>
+
+        {/* Toast Notifications */}
+        <ToastContainer position="top-end" className="p-3">
+          <Toast
+            show={showToast}
+            onClose={() => setShowToast(false)}
+            delay={3000}
+            autohide
+            bg={toastVariant}
+          >
+            <Toast.Header>
+              <strong className="me-auto">Messages</strong>
+            </Toast.Header>
+            <Toast.Body className="text-white">{toastMessage}</Toast.Body>
+          </Toast>
+        </ToastContainer>
+      </Container>
     </div>
   );
 };
