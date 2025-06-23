@@ -61,7 +61,7 @@ const ProfessionalInvoice = ({
           company: "Hare Krishna Medical",
           location: "Surat, Gujarat, India",
           phone: "+91 76989 13354",
-          email: "harekrishnamedical@gmail.com",
+          email: "hkmedicalamroli@gmail.com",
           generated_at: new Date().toISOString(),
         };
 
