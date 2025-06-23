@@ -345,14 +345,14 @@ const AdminPaymentMethods = () => {
                 <Alert variant="danger" className="d-flex align-items-center">
                   <i className="bi bi-exclamation-triangle me-2"></i>
                   {error}
-                  <Button
-                    variant="outline-danger"
+                  <ThemeButton
+                    variant="outline"
                     size="sm"
                     className="ms-auto"
                     onClick={fetchPaymentMethods}
                   >
                     Retry
-                  </Button>
+                  </ThemeButton>
                 </Alert>
               </Col>
             </Row>
