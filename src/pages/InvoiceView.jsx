@@ -622,19 +622,22 @@ Generated: ${new Date().toLocaleString()}
                             marginRight: "20px",
                           }}
                         >
-                          <i
-                            className="bi bi-receipt-cutoff"
-                            style={{ fontSize: "28px" }}
-                          ></i>
-                      <img
-                        src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
-                        alt="Hare Krishna Medical"
-                        style={{
-                          width: "60px",
-                          height: "60px",
-                          marginRight: "15px",
-                        }}
-                      />
+                          <img
+                            src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
+                            alt="Hare Krishna Medical"
+                            style={{
+                              width: "60px",
+                              height: "60px",
+                              marginRight: "15px",
+                            }}
+                          />
+                          <p
+                            style={{
+                              fontSize: "1.5rem",
+                              fontWeight: "700",
+                              margin: "0",
+                              color: "white",
+                              textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
                             }}
                           >
                             {invoice?.invoiceId} • Order {invoice?.orderId}
@@ -711,7 +714,11 @@ Generated: ${new Date().toLocaleString()}
                         {isAuthenticated && (
                           <EnhancedButton
                             variant="outline"
-                            to={user?.role === 1 ? "/admin/orders" : "/user/orders"}
+                            to={
+                              user?.role === 1
+                                ? "/admin/orders"
+                                : "/user/orders"
+                            }
                             icon="bi bi-box-seam"
                             size="sm"
                           >
