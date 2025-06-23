@@ -66,6 +66,9 @@ import NotFound from "./pages/NotFound.jsx";
 // Use simple socket client until socket.io-client is installed
 import socketClient from "./utils/socketClient.simple";
 
+// Invoice Service
+import invoiceService from "./services/InvoiceService";
+
 // Styles
 import "./App.css";
 import "./styles/SecurityStyles.css";
@@ -170,6 +173,10 @@ function App() {
   useEffect(() => {
     // Initialize session manager and set loading to false immediately
     sessionManager; // This initializes the session manager
+
+    // Initialize centralized invoice service
+    invoiceService.init();
+
     setLoading(false);
   }, []);
 

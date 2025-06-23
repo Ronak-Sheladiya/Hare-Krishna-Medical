@@ -17,6 +17,8 @@ import { refreshSession } from "../store/slices/authSlice";
 import { api, safeApiCall } from "../utils/apiClient";
 import { getDemoInvoice, isDemoInvoice } from "../utils/demoInvoiceData";
 import OfficialInvoiceDesign from "../components/common/OfficialInvoiceDesign";
+import InvoiceActions from "../components/common/InvoiceActions";
+import invoiceService from "../services/InvoiceService";
 import "../styles/InvoicePrintA4.css";
 
 const InvoiceDetails = () => {
@@ -91,7 +93,11 @@ const InvoiceDetails = () => {
     setLoading(false);
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
+    await invoiceService.printInvoice(invoice);
+  };
+
+  const handlePrintLegacy = () => {
     const printContent = document.getElementById("invoice-print-content");
     if (printContent) {
       const printWindow = window.open("", "_blank");
@@ -195,6 +201,10 @@ const InvoiceDetails = () => {
   };
 
   const handleDownload = async () => {
+    await invoiceService.downloadInvoice(invoice);
+  };
+
+  const handleDownloadLegacy = async () => {
     try {
       // Create a hidden iframe for PDF generation
       const iframe = document.createElement("iframe");
@@ -583,24 +593,13 @@ const InvoiceDetails = () => {
               <Card.Body className="p-3">
                 <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
                   <div className="d-flex gap-2 flex-wrap">
-                    <Button
-                      variant="outline-primary"
-                      onClick={handlePrint}
-                      className="print-button"
-                      style={{ borderRadius: "8px", fontWeight: "600" }}
-                    >
-                      <i className="bi bi-printer me-2"></i>
-                      Print Invoice
-                    </Button>
-                    <Button
-                      variant="outline-success"
-                      onClick={handleDownload}
-                      className="print-button"
-                      style={{ borderRadius: "8px", fontWeight: "600" }}
-                    >
-                      <i className="bi bi-download me-2"></i>
-                      Save as PDF
-                    </Button>
+                    <InvoiceActions
+                      invoice={invoice}
+                      variant="buttons"
+                      size="md"
+                      showLabels={true}
+                      className="d-flex gap-2"
+                    />
                   </div>
                   <div className="d-flex gap-2 flex-wrap">
                     {renderAuthActions()}
