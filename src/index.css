@@ -477,3 +477,54 @@ html {
 .btn:focus {
   box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
 }
+
+/* Security Base Styles */
+body {
+  /* Prevent text selection by default */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  /* Prevent context menu */
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Disable image dragging globally */
+img {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
+
+/* Prevent zooming on mobile */
+@media (max-width: 768px) {
+  body {
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+}
+
+/* Security message for disabled features */
+.security-message {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(230, 57, 70, 0.9);
+  color: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 12px;
+  z-index: 9999;
+  display: none;
+}
+
+/* Console styling for security warnings */
+.console-warning {
+  display: none;
+}
