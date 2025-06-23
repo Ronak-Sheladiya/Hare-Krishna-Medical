@@ -440,7 +440,7 @@ const AdminMessages = () => {
             {filteredMessages.length > 0 ? (
               <Table responsive hover className="mb-0">
                 <thead className="table-light">
-                  <tr>
+                  <tr key="messages-header">
                     <th>Sender</th>
                     <th>Subject</th>
                     <th>Priority</th>
