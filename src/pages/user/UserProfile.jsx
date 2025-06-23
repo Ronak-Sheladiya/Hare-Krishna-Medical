@@ -11,8 +11,16 @@ import {
   Nav,
   Modal,
   Spinner,
+  InputGroup,
+  Badge,
 } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
+import {
+  PageHeroSection,
+  ThemeCard,
+  ThemeButton,
+  ThemeSection,
+} from "../../components/common/ConsistentTheme";
 
 const UserProfile = () => {
   const { user } = useSelector((state) => state.auth);
