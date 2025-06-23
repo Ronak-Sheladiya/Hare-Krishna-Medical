@@ -8,12 +8,106 @@ import {
   Tab,
   Badge,
   Button,
+  Accordion,
+  Alert,
 } from "react-bootstrap";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
 const BackendDocs = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [showCopyAlert, setShowCopyAlert] = useState(false);
+  const [copiedFile, setCopiedFile] = useState("");
+
+  // Copy to clipboard function
+  const copyToClipboard = (text, fileName) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedFile(fileName);
+      setShowCopyAlert(true);
+      setTimeout(() => setShowCopyAlert(false), 2000);
+    });
+  };
+
+  // Code component with copy button
+  const CodeBlock = ({ title, code, language = "javascript", fileName }) => (
+    <Card className="mb-4" style={{ borderRadius: "12px" }}>
+      <Card.Header
+        style={{
+          background: "linear-gradient(135deg, #343a40, #495057)",
+          color: "white",
+          borderRadius: "12px 12px 0 0",
+        }}
+      >
+        <div className="d-flex justify-content-between align-items-center">
+          <h6 className="mb-0">
+            <i className="bi bi-file-earmark-code me-2"></i>
+            {title}
+          </h6>
+          <Button
+            variant="outline-light"
+            size="sm"
+            onClick={() => copyToClipboard(code, fileName)}
+            style={{ borderRadius: "6px" }}
+          >
+            <i className="bi bi-clipboard me-2"></i>
+            Copy Code
+          </Button>
+        </div>
+      </Card.Header>
+      <Card.Body style={{ padding: "0" }}>
+        <pre
+          style={{
+            background: "#f8f9fa",
+            margin: "0",
+            padding: "20px",
+            borderRadius: "0 0 12px 12px",
+            overflow: "auto",
+            fontSize: "14px",
+            lineHeight: "1.5",
+            color: "#333",
+          }}
+        >
+          <code>{code}</code>
+        </pre>
+      </Card.Body>
+    </Card>
+  );
+
+  // Terminal command component
+  const TerminalCommand = ({ command, output, description }) => (
+    <Card className="mb-3" style={{ borderRadius: "8px" }}>
+      <Card.Body style={{ padding: "15px" }}>
+        <div className="mb-2">
+          <strong>{description}</strong>
+        </div>
+        <div
+          style={{
+            background: "#1e1e1e",
+            color: "#00ff00",
+            padding: "10px",
+            borderRadius: "6px",
+            fontFamily: "monospace",
+            fontSize: "14px",
+          }}
+        >
+          <div style={{ color: "#ffff00" }}>$ {command}</div>
+          {output && (
+            <div style={{ color: "#ffffff", marginTop: "5px" }}>{output}</div>
+          )}
+        </div>
+        <Button
+          variant="outline-primary"
+          size="sm"
+          onClick={() => copyToClipboard(command, "command")}
+          className="mt-2"
+          style={{ borderRadius: "6px" }}
+        >
+          <i className="bi bi-clipboard me-1"></i>
+          Copy Command
+        </Button>
+      </Card.Body>
+    </Card>
+  );
 
   const downloadDocumentation = async () => {
     try {
@@ -48,2158 +142,1887 @@ const BackendDocs = () => {
       pdf.save("hare-krishna-medical-backend-docs.pdf");
     } catch (error) {
       console.error("Error generating PDF:", error);
-      // Fallback to text download
-      const element = document.createElement("a");
-      const file = new Blob([documentationText], { type: "text/plain" });
-      element.href = URL.createObjectURL(file);
-      element.download = "hare-krishna-medical-backend-docs.txt";
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
     }
   };
 
-  const documentationText = `
-HARE KRISHNA MEDICAL - COMPREHENSIVE BACKEND IMPLEMENTATION GUIDE
-================================================================
-
-This document provides comprehensive backend implementation requirements for the Hare Krishna Medical website.
-Updated with enhanced invoice QR codes, A4 print optimization, and complete user guide system.
-
-LATEST UPDATES (January 2024):
-==============================
-- Enhanced QR Code generation with 180px width for better scanning
-- A4 print layout optimization with 10px margins for full page coverage
-- Comprehensive User Guide system implementation
-- Improved invoice verification and digital authentication
-- Enhanced mobile QR scanning compatibility
-
-1. TECHNOLOGY STACK
-==================
-Backend Framework: Node.js with Express.js
-Database: MongoDB with Mongoose ODM
-Authentication: JWT (JSON Web Tokens) + Session Management + Cookies
-File Storage: AWS S3 or Cloudinary for images
-Payment Gateway: Razorpay or Stripe
-Email Service: Nodemailer with Gmail/SendGrid (Admin Reply System)
-SMS Service: Twilio or Fast2SMS
-PDF Generation: PDFKit (server-side) for secure invoices
-Export: xlsx library for Excel exports
-QR Code: qrcode library for invoice QR codes (Enhanced with larger size)
-Security: bcryptjs, helmet, express-rate-limit, express-validator
-Print Optimization: CSS @page rules for A4 print layout
-
-2. DATABASE SCHEMA
-=================
-
-Users Collection:
-{
-  _id: ObjectId,
-  fullName: String (required),
-  email: String (required, unique),
-  mobile: String (required),
-  password: String (hashed),
-  role: Number (0: User, 1: Admin),
-  address: {
-    street: String,
-    city: String,
-    state: String,
-    pincode: String
+  // Backend code examples
+  const backendCodes = {
+    packageJson: `{
+  "name": "hare-krishna-medical-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Hare Krishna Medical Store",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "test": "jest",
+    "seed": "node scripts/seed.js"
   },
-  profileImage: String (URL),
-  isActive: Boolean (default: true),
-  emailVerified: Boolean (default: false),
-  mobileVerified: Boolean (default: false),
-  createdAt: Date,
-  updatedAt: Date
-}
-
-Products Collection:
-{
-  _id: ObjectId,
-  name: String (required),
-  description: String,
-  company: String,
-  price: Number (required),
-  discountPrice: Number,
-  stock: Number (required),
-  images: [String] (URLs),
-  prescription: Boolean (default: false),
-  tags: [String],
-  isActive: Boolean (default: true),
-  createdAt: Date,
-  updatedAt: Date
-}
-
-Orders Collection:
-{
-  _id: ObjectId,
-  orderId: String (unique),
-  userId: ObjectId (ref: Users),
-  items: [{
-    productId: ObjectId (ref: Products),
-    name: String,
-    price: Number,
-    quantity: Number,
-    total: Number
-  }],
-  subtotal: Number,
-  tax: Number,
-  shipping: Number,
-  total: Number,
-  paymentMethod: String (COD, Online),
-  paymentStatus: String (Paid, Unpaid, Partial),
-  amountPaid: Number (default: 0),
-  amountDue: Number,
-  shippingAddress: {
-    fullName: String,
-    mobile: String,
-    address: String,
-    city: String,
-    state: String,
-    pincode: String
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.5.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "express-rate-limit": "^6.10.0",
+    "express-validator": "^7.0.1",
+    "nodemailer": "^6.9.4",
+    "multer": "^1.4.5",
+    "cloudinary": "^1.40.0",
+    "razorpay": "^2.9.2",
+    "qrcode": "^1.5.3",
+    "xlsx": "^0.18.5",
+    "pdfkit": "^0.13.0",
+    "twilio": "^4.15.0",
+    "dotenv": "^16.3.1"
   },
-  orderStatus: String (Pending, Confirmed, Shipped, Delivered, Cancelled),
-  trackingId: String,
-  notes: String,
-  createdAt: Date,
-  updatedAt: Date
-}
-
-Messages Collection:
-{
-  _id: ObjectId,
-  name: String (required),
-  email: String (required),
-  mobile: String,
-  subject: String,
-  message: String (required),
-  isRead: Boolean (default: false),
-  reply: String,
-  repliedBy: ObjectId (ref: Users),
-  repliedAt: Date,
-  priority: String (Low, Medium, High),
-  status: String (Open, In Progress, Resolved),
-  emailSent: Boolean (default: false),
-  emailSentAt: Date,
-  adminEmail: String, // Email from which reply was sent
-  createdAt: Date,
-  updatedAt: Date
-}
-
-Sessions Collection:
-{
-  _id: ObjectId,
-  userId: ObjectId (ref: Users),
-  sessionToken: String (unique),
-  deviceInfo: String,
-  ipAddress: String,
-  isActive: Boolean (default: true),
-  expiresAt: Date,
-  createdAt: Date,
-  lastActivity: Date
-}
-
-Invoices Collection:
-{
-  _id: ObjectId,
-  invoiceId: String (unique, secure),
-  orderId: ObjectId (ref: Orders),
-  userId: ObjectId (ref: Users),
-  qrCode: String (encoded verification URL),
-  securityHash: String (invoice verification hash),
-  isValid: Boolean (default: true),
-  downloadCount: Number (default: 0),
-  lastAccessed: Date,
-  generatedBy: ObjectId (ref: Users),
-  modificationLog: [{
-    action: String,
-    modifiedBy: ObjectId (ref: Users),
-    timestamp: Date,
-    previousData: Object
-  }],
-  invoiceData: Object, // Encrypted invoice data
-  qrCode: String, // QR code data
-  issuedAt: Date,
-  isValid: Boolean (default: true),
-  accessCount: Number (default: 0),
-  lastAccessed: Date,
-  securityHash: String, // Security validation hash
-  createdAt: Date,
-  updatedAt: Date
-}
-
-Categories Collection:
-{
-  _id: ObjectId,
-  name: String (required, unique),
-  description: String,
-  image: String (URL),
-  isActive: Boolean (default: true),
-  createdAt: Date,
-  updatedAt: Date
-}
-
-3. API ENDPOINTS
-===============
-
-Authentication APIs:
-POST /api/auth/register
-POST /api/auth/login
-POST /api/auth/verify-email
-POST /api/auth/verify-mobile
-POST /api/auth/forgot-password
-POST /api/auth/reset-password
-POST /api/auth/logout
-GET /api/auth/profile
-PUT /api/auth/profile
-
-Product APIs:
-GET /api/products (with pagination, filtering, search)
-GET /api/products/:id
-POST /api/products (Admin only)
-PUT /api/products/:id (Admin only)
-DELETE /api/products/:id (Admin only)
-GET /api/categories
-POST /api/categories (Admin only)
-
-Order APIs:
-GET /api/orders (Admin: all, User: own orders)
-GET /api/orders/:id
-POST /api/orders
-PUT /api/orders/:id/status (Admin only)
-PUT /api/orders/:id/payment (Admin only)
-GET /api/orders/:id/invoice
-
-Message APIs:
-GET /api/messages (Admin only)
-GET /api/messages/:id (Admin only)
-POST /api/messages (Contact form)
-PUT /api/messages/:id/read (Admin only)
-PUT /api/messages/:id/reply (Admin only)
-DELETE /api/messages/:id (Admin only)
-
-Analytics APIs:
-GET /api/analytics/dashboard (Admin only)
-GET /api/analytics/sales (Admin only)
-GET /api/analytics/products (Admin only)
-GET /api/analytics/customers (Admin only)
-
-4. MIDDLEWARE REQUIREMENTS
-=========================
-
-Authentication Middleware:
-- Verify JWT tokens
-- Extract user information
-- Handle token expiration
-
-Authorization Middleware:
-- Role-based access control
-- Admin-only route protection
-- User-specific data access
-
-Validation Middleware:
-- Request body validation
-- File upload validation
-- Sanitize input data
-
-Rate Limiting:
-- API rate limiting
-- Login attempt limiting
-- Prevent brute force attacks
-
-5. PAYMENT INTEGRATION
-=====================
-
-Razorpay Integration:
-1. Create order on backend
-2. Generate payment link
-3. Handle payment webhook
-4. Update order status
-5. Send confirmation email
-
-COD Implementation:
-1. Mark payment as "Unpaid"
-2. Calculate amount due
-3. Allow partial payments
-4. Update payment status
-
-6. EMAIL NOTIFICATIONS
-=====================
-
-Registration Welcome Email
-Order Confirmation Email
-Payment Confirmation Email
-Shipping Notification Email
-Delivery Confirmation Email
-Password Reset Email
-Admin Alert Emails
-
-7. SMS NOTIFICATIONS
-===================
-
-OTP for mobile verification
-Order status updates
-Delivery notifications
-Payment reminders
-
-8. FILE UPLOAD HANDLING
-======================
-
-Product Images:
-- Multiple image upload
-- Image resizing/optimization
-- Cloud storage integration
-- URL generation
-
-Profile Images:
-- Single image upload
-- Avatar resizing
-- Default image handling
-
-9. SECURITY MEASURES
-===================
-
-Password Hashing: bcryptjs
-Input Validation: Joi or express-validator
-SQL Injection Prevention: Mongoose ODM
-XSS Protection: helmet.js
-CORS Configuration: cors middleware
-Environment Variables: dotenv
-API Security: Rate limiting, request validation
-
-10. QR CODE ENHANCEMENT & INVOICE OPTIMIZATION
-==============================================
-
-QR Code Generation (Enhanced):
-{
-  width: 180,           // Increased from 120px for better mobile scanning
-  margin: 2,
-  color: {
-    dark: "#1a202c",
-    light: "#ffffff"
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "jest": "^29.6.2",
+    "supertest": "^6.3.3"
   },
-  errorCorrectionLevel: "M",
-  data: {
-    type: "invoice_verification",
-    invoice_id: String,
-    order_id: String,
-    customer_name: String,
-    total_amount: String,
-    invoice_date: String,
-    payment_status: String,
-    verify_url: String,
-    company: "Hare Krishna Medical",
-    location: "Surat, Gujarat, India",
-    phone: "+91 76989 13354",
-    email: "harekrishnamedical@gmail.com",
-    generated_at: ISO_String
+  "engines": {
+    "node": ">=16.0.0"
   }
-}
-
-A4 Print Optimization:
-- Page margins: 10px (optimized for full A4 coverage)
-- Print dimensions: 287mm height (accounting for margins)
-- CSS @page rules for consistent printing
-- Enhanced QR code size: 140px x 140px in print view
-- Responsive layout for both screen and print media
-
-Invoice Verification Endpoint:
-GET /api/invoice/verify/:qrCode
-- Decodes QR code data
-- Validates invoice authenticity
-- Returns invoice details and verification status
-- Prevents fraudulent invoice creation
-
-11. USER GUIDE SYSTEM IMPLEMENTATION
-=====================================
-
-Frontend User Guide Features:
-- Interactive navigation with smooth scrolling
-- Section-based content organization
-- Responsive design matching brand aesthetics
-- Step-by-step tutorials with visual guides
-- FAQ system with collapsible sections
-- Quick action buttons for common tasks
-
-Guide Sections:
-1. Getting Started (Account creation, Product browsing, Cart management, Order placement)
-2. Shopping Guide (Product search, Details, Cart, Checkout)
-3. Account Management (Profile, Order history, Notifications, Wishlist)
-4. Order Tracking (Status explanations, Delivery updates, Issue resolution)
-5. Invoices & QR Codes (Digital access, QR verification, Print optimization)
-6. Support & FAQ (Common questions, Contact info, Troubleshooting)
-
-API Endpoints for User Guide:
-GET /api/guide/sections        - Get all guide sections
-GET /api/guide/search/:query   - Search guide content
-POST /api/guide/feedback       - Submit guide feedback
-GET /api/guide/analytics       - Track guide usage
-
-12. ERROR HANDLING
-=================
-
-Global Error Handler:
-- Catch all unhandled errors
-- Log errors appropriately
-- Return consistent error responses
-- Handle async errors
-
-Custom Error Classes:
-- ValidationError
-- AuthenticationError
-- AuthorizationError
-- NotFoundError
-
-11. LOGGING AND MONITORING
-=========================
-
-Application Logs:
-- Request/Response logging
-- Error logging
-- User activity logs
-- Performance metrics
-
-Database Monitoring:
-- Query performance
-- Connection pooling
-- Index optimization
-
-12. DEPLOYMENT CONSIDERATIONS
-============================
-
-Environment Setup:
-- Production environment variables
-- Database connection strings
-- Third-party API keys
-- SSL certificate configuration
-
-Performance Optimization:
-- Database indexing
-- Caching strategies
-- CDN integration
-- Image optimization
-
-Backup Strategy:
-- Regular database backups
-- File storage backups
-- Recovery procedures
-
-13. ENHANCED SECURITY FEATURES (NEW REQUIREMENTS)
-================================================
-
-Invoice Security:
-- Server-side invoice generation only
-- Encrypted invoice data storage
-- Digital signature verification
-- QR code verification system
-- Invoice access logging
-- Modification audit trail
-- Print attempts logging
-- Unauthorized access prevention
-
-Frontend Security Measures:
-- Disable right-click context menu on invoices
-- Prevent keyboard shortcuts (F12, Ctrl+Shift+I, Ctrl+U)
-- Disable text selection on sensitive documents
-- Watermark protected documents
-- Session-based access control
-
-Data Protection:
-- Encrypt sensitive customer data
-- Secure payment information handling
-- GDPR compliance measures
-- Data retention policies
-- Secure data deletion
-
-API Security:
-- Request signature validation
-- IP whitelisting for admin operations
-- Captcha integration for contact forms
-- Brute force protection
-- Session hijacking prevention
-
-14. MESSAGE MANAGEMENT SYSTEM (NEW REQUIREMENTS)
-==============================================
-
-Enhanced Message Features:
-- Priority levels (Low, Medium, High, Critical)
-- Message categories (General, Support, Complaint, Inquiry)
-- Auto-reply system
-- Email integration for replies
-- Message templates
-- Bulk operations
-- Export to Excel functionality
-- Advanced filtering and search
-
-Admin Reply System:
-- Rich text editor for replies
-- Email notification to customer
-- Reply templates
-- Internal notes
-- Message status tracking
-- Response time analytics
-
-15. EXPORT FUNCTIONALITY (NEW REQUIREMENTS)
-==========================================
-
-Excel Export Features:
-- Messages export with filters
-- Orders export with date range
-- Products export with stock levels
-- Customer data export
-- Analytics data export
-- Custom report generation
-
-Export Security:
-- Admin-only access
-- Export attempt logging
-- Data sanitization before export
-- Password-protected exports
-- Expiring download links
-
-16. INVOICE MANAGEMENT SYSTEM (NEW REQUIREMENTS)
-==============================================
-
-Secure Invoice Generation:
-- Server-side PDF generation
-- Unique invoice IDs with security hashes
-- QR code verification URLs
-- Digital watermarks
-- Tamper-proof design
-
-Invoice API Endpoints:
-POST /api/invoices/generate
-GET /api/invoices/:id/verify
-GET /api/invoices/:id/download
-PUT /api/invoices/:id/invalidate
-GET /api/invoices/list (Admin only)
-DELETE /api/invoices/:id (Admin only)
-
-Invoice Verification:
-- QR code scanning verification
-- Hash-based integrity checking
-- Access logging and monitoring
-- Invalid invoice detection
-- Fraud prevention measures
-
-17. ORDER SECURITY ENHANCEMENTS (NEW REQUIREMENTS)
-==============================================
-
-Order Protection:
-- Order modification audit trail
-- Admin-only order editing
-- Status change logging
-- Payment verification
-- Secure order ID generation
-
-Order Verification:
-- Cross-reference with invoice data
-- Payment status validation
-- Delivery confirmation
-- Customer verification
-
-18. CART AND PRICING UPDATES (NEW REQUIREMENTS)
-=============================================
-
-Updated Pricing Structure:
-- Free shipping on all orders
-- Tax included in product prices
-- No additional charges
-- Transparent pricing display
-
-Cart API Updates:
-POST /api/cart/add
-GET /api/cart
-PUT /api/cart/update
-DELETE /api/cart/remove
-POST /api/cart/checkout (with new pricing)
-
-19. ANALYTICS AND MONITORING (NEW REQUIREMENTS)
-==============================================
-
-Security Analytics:
-- Failed login attempts tracking
-- Suspicious activity detection
-- Invoice access patterns
-- Admin action logging
-- Security incident reporting
-
-Business Analytics:
-- Sales reports with tax breakdown
-- Customer behavior analysis
-- Product performance metrics
-- Order fulfillment analytics
-- Revenue tracking
-
-20. NOTIFICATION SYSTEM ENHANCEMENTS (NEW REQUIREMENTS)
-=======================================================
-
-Admin Notifications:
-- New message alerts
-- Security incident alerts
-- Low stock notifications
-- Payment confirmations
-- Order status updates
-
-Customer Notifications:
-- Order confirmations
-- Invoice generation alerts
-- Shipping updates
-- Delivery confirmations
-- Security alerts (if applicable)
-
-21. BACKUP AND RECOVERY (NEW REQUIREMENTS)
-==========================================
-
-Data Backup:
-- Automated daily backups
-- Encrypted backup storage
-- Point-in-time recovery
-- Customer data protection
-- Invoice archive system
-
-Security Backup:
-- Audit log backups
-- Security event logs
-- Access pattern backups
-- Recovery procedures
-
-22. COMPLIANCE AND LEGAL (NEW REQUIREMENTS)
-===========================================
-
-Healthcare Compliance:
-- Medical product regulations
-- Prescription handling
-- Patient data protection
-- Regulatory reporting
-
-Legal Requirements:
-- Terms and conditions enforcement
-- Privacy policy compliance
-- Data protection laws
-- Invoice legal requirements
-- Tax compliance
-
-23. PERFORMANCE OPTIMIZATION (NEW REQUIREMENTS)
-==============================================
-
-Database Optimization:
-- Index optimization for security queries
-- Query performance monitoring
-- Connection pooling
-- Cache invalidation strategies
-
-Security Performance:
-- Fast authentication
-- Quick invoice generation
-- Efficient QR code processing
-- Optimized security checks
-
-24. TESTING REQUIREMENTS
-========================
-
-Unit Testing:
-- Controller functions
-- Model validations
-- Utility functions
-
-Integration Testing:
-- API endpoint testing
-- Database operations
-- Third-party integrations
-
-14. ADMIN FEATURES IMPLEMENTATION
-================================
-
-Dashboard Analytics:
-- Real-time statistics
-- Revenue tracking
-- Order analytics
-- Customer insights
-
-Product Management:
-- CRUD operations
-- Bulk uploads
-- Inventory tracking
-- Category management
-
-Order Management:
-- Order processing
-- Status updates
-- Payment tracking
-- Invoice generation
-
-User Management:
-- User accounts
-- Role management
-- Activity monitoring
-
-Message Management:
-- Contact form messages
-- Response handling
-- Priority system
-- Status tracking
-
-15. USER FEATURES IMPLEMENTATION
-===============================
-
-Profile Management:
-- Personal information
-- Address management
-- Password changes
-- Order history
-
-Shopping Features:
-- Product browsing
-- Cart management
-- Checkout process
-- Payment processing
-
-Order Tracking:
-- Order status
-- Tracking information
-- Invoice access
-- Reorder functionality
-
-16. ADDITIONAL FEATURES
-======================
-
-Search Functionality:
-- Product search
-- Category filtering
-- Price range filtering
-- Sorting options
-
-Notification System:
-- Real-time notifications
-- Email subscriptions
-- SMS preferences
-- Push notifications
-
-Invoice Generation:
-- PDF invoice creation
-- QR code integration
-- Email delivery
-- Download functionality
-
-This documentation provides a comprehensive guide for implementing the backend system for Hare Krishna Medical website. Each section should be implemented following best practices and industry standards.
-  `;
-
-  return (
-    <div className="section-padding">
-      <Container>
-        <Row>
-          <Col lg={12}>
-            <div className="text-center mb-5">
-              <h1 className="section-title">Backend Implementation Guide</h1>
-              <p className="section-subtitle">
-                Comprehensive documentation for developers implementing the Hare
-                Krishna Medical backend system
-              </p>
-              <Button
-                onClick={downloadDocumentation}
-                className="btn-medical-primary"
-              >
-                <i className="bi bi-download me-2"></i>
-                Download Complete Documentation
-              </Button>
-            </div>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col lg={12}>
-            <Card className="medical-card">
-              <Card.Body className="p-0">
-                <Tab.Container activeKey={activeTab} onSelect={setActiveTab}>
-                  <Nav variant="tabs" className="border-bottom">
-                    <Nav.Item>
-                      <Nav.Link eventKey="overview">Overview</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                      <Nav.Link eventKey="structure">File Structure</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                      <Nav.Link eventKey="database">Database Schema</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                      <Nav.Link eventKey="apis">API Endpoints</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                      <Nav.Link eventKey="security">Security</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                      <Nav.Link eventKey="deployment">Deployment</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                      <Nav.Link eventKey="implementation">
-                        Implementation Guide
-                      </Nav.Link>
-                    </Nav.Item>
-                  </Nav>
-
-                  <Tab.Content className="p-4" id="documentation-content">
-                    <Tab.Pane eventKey="overview">
-                      <h3 className="text-medical-red mb-4">
-                        Technology Stack & Architecture
-                      </h3>
-
-                      <div className="tech-stack mb-4">
-                        <h5>Recommended Technology Stack</h5>
-                        <Row>
-                          <Col md={6}>
-                            <div className="tech-item">
-                              <Badge bg="primary" className="me-2">
-                                Backend
-                              </Badge>
-                              <span>Node.js with Express.js</span>
-                            </div>
-                            <div className="tech-item">
-                              <Badge bg="success" className="me-2">
-                                Database
-                              </Badge>
-                              <span>MongoDB with Mongoose ODM</span>
-                            </div>
-                            <div className="tech-item">
-                              <Badge bg="warning" className="me-2">
-                                Authentication
-                              </Badge>
-                              <span>JWT (JSON Web Tokens)</span>
-                            </div>
-                            <div className="tech-item">
-                              <Badge bg="info" className="me-2">
-                                Storage
-                              </Badge>
-                              <span>AWS S3 or Cloudinary</span>
-                            </div>
-                          </Col>
-                          <Col md={6}>
-                            <div className="tech-item">
-                              <Badge bg="danger" className="me-2">
-                                Payment
-                              </Badge>
-                              <span>Razorpay or Stripe</span>
-                            </div>
-                            <div className="tech-item">
-                              <Badge bg="secondary" className="me-2">
-                                Email
-                              </Badge>
-                              <span>Nodemailer with Gmail/SendGrid</span>
-                            </div>
-                            <div className="tech-item">
-                              <Badge bg="dark" className="me-2">
-                                SMS
-                              </Badge>
-                              <span>Twilio or Fast2SMS</span>
-                            </div>
-                            <div className="tech-item">
-                              <Badge bg="light" className="me-2 text-dark">
-                                PDF
-                              </Badge>
-                              <span>PDFKit or jsPDF</span>
-                            </div>
-                          </Col>
-                        </Row>
-                      </div>
-
-                      <div className="features-overview">
-                        <h5>Core Features to Implement</h5>
-                        <Row>
-                          <Col md={4}>
-                            <h6 className="text-medical-blue">
-                              User Management
-                            </h6>
-                            <ul className="feature-list">
-                              <li>User registration & login</li>
-                              <li>Email & mobile verification</li>
-                              <li>Profile management</li>
-                              <li>Password reset</li>
-                              <li>Role-based access</li>
-                            </ul>
-                          </Col>
-                          <Col md={4}>
-                            <h6 className="text-medical-blue">
-                              Product Management
-                            </h6>
-                            <ul className="feature-list">
-                              <li>Product CRUD operations</li>
-                              <li>Category management</li>
-                              <li>Inventory tracking</li>
-                              <li>Image upload & storage</li>
-                              <li>Search & filtering</li>
-                            </ul>
-                          </Col>
-                          <Col md={4}>
-                            <h6 className="text-medical-blue">
-                              Order Processing
-                            </h6>
-                            <ul className="feature-list">
-                              <li>Shopping cart</li>
-                              <li>Checkout process</li>
-                              <li>Payment processing</li>
-                              <li>Order tracking</li>
-                              <li>Invoice generation</li>
-                            </ul>
-                          </Col>
-                        </Row>
-                      </div>
-                    </Tab.Pane>
-
-                    <Tab.Pane eventKey="structure">
-                      <h3 className="text-medical-red mb-4">
-                        Project File Structure
-                      </h3>
-
-                      <div className="structure-section">
-                        <h5>Frontend (React.js) Structure</h5>
-                        <div className="code-block">
-                          <pre>{`src/
-├── components/
-│   ├── common/
-│   │   ├── LoadingSpinner.jsx          # Loading animations
-│   │   └── PaymentOptions.jsx          # Payment method selection
-│   ├── layout/
-│   │   ├── Footer.jsx                  # Site footer
-│   │   └── Header.jsx                  # Navigation header
-│   ├── products/
-│   │   ├── ProductCard.jsx             # Product display cards
-│   │   └── ProductFilters.jsx          # Product filtering
-│   └── ui/                             # Shadcn UI components
-├── hooks/
-│   ├── use-mobile.tsx                  # Mobile detection hook
-│   └── use-toast.ts                    # Toast notifications
-├── lib/
-│   └── utils.ts                        # Utility functions
-├── pages/
-│   ├── admin/
-│   │   ├── AddProduct.jsx              # Product creation form
-│   │   ├── AdminAnalytics.jsx          # Charts & analytics
-│   │   ├── AdminInvoices.jsx           # Invoice management
-│   │   ├── AdminMessages.jsx           # Customer messages
-│   │   ├── AdminOrders.jsx             # Order management
-│   │   ├── AdminProducts.jsx           # Product management
-│   │   └── AdminUsers.jsx              # User management
-│   ├── user/
-│   │   ├── UserInvoices.jsx            # User invoice history
-│   │   ├── UserOrders.jsx              # User order history
-│   │   └── UserProfile.jsx             # Profile editing
-│   ├── About.jsx                       # About page
-│   ├── AdminDashboard.jsx              # Admin dashboard
-│   ├── BackendDocs.jsx                 # This documentation
-│   ├── Cart.jsx                        # Shopping cart
-│   ├── Contact.jsx                     # Contact form
-│   ├── ForgotPassword.jsx              # Password reset
-│   ├── Home.jsx                        # Homepage
-│   ├── InvoiceView.jsx                 # Invoice display
-│   ├── Login.jsx                       # User login
-│   ├── NotFound.jsx                    # 404 page
-│   ├── Order.jsx                       # Order placement
-│   ├── PrivacyPolicy.jsx               # Privacy policy
-│   ├── ProductDetails.jsx              # Product details
-│   ├── Products.jsx                    # Product catalog
-│   ├── Register.jsx                    # User registration
-│   ├── TermsConditions.jsx             # Terms & conditions
-│   └── UserDashboard.jsx               # User dashboard
-├── store/
-│   ├── slices/
-│   │   ├── authSlice.js                # Authentication state
-│   │   ├── cartSlice.js                # Shopping cart state
-│   │   ├── messageSlice.js             # Messages state
-│   │   └── productsSlice.js            # Products state
-│   └── store.js                        # Redux store config
-├── App.css                             # Global styles
-├── App.jsx                             # Main app component
-├── index.css                           # Base styles
-└── main.jsx                            # React entry point`}</pre>
-                        </div>
-                      </div>
-
-                      <div className="structure-section">
-                        <h5>Backend (Node.js) Structure</h5>
-                        <div className="code-block">
-                          <pre>{`backend/
-├── controllers/
-│   ├── authController.js               # Authentication logic
-│   ├── orderController.js              # Order management
-│   ├── productController.js            # Product operations
-│   ├── messageController.js            # Contact messages
-│   └── userController.js               # User management
-├── middleware/
-│   ├── auth.js                         # JWT authentication
-│   ├── validation.js                   # Input validation
-│   ├── upload.js                       # File upload handling
-│   └── rateLimiter.js                  # Rate limiting
-├── models/
-│   ├── User.js                         # User schema
-│   ├── Product.js                      # Product schema
-│   ├── Order.js                        # Order schema
-│   ├── Message.js                      # Message schema
-│   └── Category.js                     # Category schema
-├── routes/
-│   ├── auth.js                         # Authentication routes
-│   ├── products.js                     # Product routes
-│   ├── orders.js                       # Order routes
-│   ├── messages.js                     # Message routes
-│   └── users.js                        # User routes
-├── utils/
-│   ├── email.js                        # Email sending
-│   ├── sms.js                          # SMS sending
-│   ├── payment.js                      # Payment processing
-│   └── pdf.js                          # PDF generation
-├── config/
-│   ├── database.js                     # MongoDB connection
-│   ├── cloudinary.js                   # Image storage
-│   └── payment.js                      # Payment gateway
-├── uploads/                            # Temporary file storage
-├── .env                               # Environment variables
-├── app.js                             # Express app setup
-└── server.js                         # Server entry point`}</pre>
-                        </div>
-                      </div>
-
-                      <div className="structure-section">
-                        <h5>Key File Descriptions</h5>
-                        <div className="file-descriptions">
-                          <h6 className="text-medical-blue mb-3">
-                            Frontend Files:
-                          </h6>
-                          <ul className="file-list">
-                            <li>
-                              <strong>App.jsx:</strong> Main application
-                              component with routing
-                            </li>
-                            <li>
-                              <strong>store/store.js:</strong> Redux store
-                              configuration
-                            </li>
-                            <li>
-                              <strong>pages/Home.jsx:</strong> Homepage with
-                              featured products
-                            </li>
-                            <li>
-                              <strong>pages/ProductDetails.jsx:</strong> Product
-                              detail view with cart
-                            </li>
-                            <li>
-                              <strong>pages/Cart.jsx:</strong> Shopping cart
-                              management
-                            </li>
-                            <li>
-                              <strong>pages/Order.jsx:</strong> Order placement
-                              with payment
-                            </li>
-                            <li>
-                              <strong>pages/InvoiceView.jsx:</strong> Invoice
-                              display and download
-                            </li>
-                            <li>
-                              <strong>
-                                components/common/PaymentOptions.jsx:
-                              </strong>{" "}
-                              Payment method selection
-                            </li>
-                            <li>
-                              <strong>pages/admin/*:</strong> Admin panel pages
-                            </li>
-                            <li>
-                              <strong>pages/user/*:</strong> User dashboard
-                              pages
-                            </li>
-                          </ul>
-
-                          <h6 className="text-medical-blue mb-3 mt-4">
-                            Backend Files:
-                          </h6>
-                          <ul className="file-list">
-                            <li>
-                              <strong>server.js:</strong> Express server
-                              initialization
-                            </li>
-                            <li>
-                              <strong>models/User.js:</strong> User data schema
-                              and methods
-                            </li>
-                            <li>
-                              <strong>models/Product.js:</strong> Product data
-                              schema
-                            </li>
-                            <li>
-                              <strong>models/Order.js:</strong> Order data
-                              schema with payment info
-                            </li>
-                            <li>
-                              <strong>controllers/authController.js:</strong>{" "}
-                              Login, register, JWT handling
-                            </li>
-                            <li>
-                              <strong>controllers/orderController.js:</strong>{" "}
-                              Order CRUD operations
-                            </li>
-                            <li>
-                              <strong>controllers/productController.js:</strong>{" "}
-                              Product management
-                            </li>
-                            <li>
-                              <strong>middleware/auth.js:</strong> JWT
-                              verification middleware
-                            </li>
-                            <li>
-                              <strong>routes/*:</strong> API endpoint
-                              definitions
-                            </li>
-                            <li>
-                              <strong>utils/email.js:</strong> Email
-                              notification system
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-
-                      <div className="structure-section">
-                        <h5>Environment Configuration</h5>
-                        <div className="code-block">
-                          <pre>{`.env file contents:
-# Database
-MONGODB_URI=mongodb://localhost:27017/hare-krishna-medical
-DB_NAME=hare_krishna_medical
-
-# JWT
-JWT_SECRET=your_jwt_secret_key
-JWT_REFRESH_SECRET=your_refresh_secret
-JWT_EXPIRE=15m
-JWT_REFRESH_EXPIRE=7d
-
-# Email
-EMAIL_SERVICE=gmail
-EMAIL_USER=harekrishnamedical@gmail.com
-EMAIL_PASS=your_app_password
-
-# SMS
-SMS_API_KEY=your_sms_api_key
-SMS_SENDER_ID=HKMED
-
-# Payment
-RAZORPAY_KEY_ID=your_razorpay_key_id
-RAZORPAY_KEY_SECRET=your_razorpay_secret
-
-# File Storage
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-
-# Server
-PORT=5000
-NODE_ENV=production`}</pre>
-                        </div>
-                      </div>
-                    </Tab.Pane>
-
-                    <Tab.Pane eventKey="database">
-                      <h3 className="text-medical-red mb-4">
-                        Database Schema Design
-                      </h3>
-
-                      <div className="schema-section">
-                        <h5>Users Collection</h5>
-                        <div className="code-block">
-                          <pre>{`{
-  _id: ObjectId,
-  fullName: String (required),
-  email: String (required, unique),
-  mobile: String (required),
-  password: String (hashed),
-  role: Number (0: User, 1: Admin),
-  address: {
-    street: String,
-    city: String,
-    state: String,
-    pincode: String
-  },
-  profileImage: String (URL),
-  isActive: Boolean (default: true),
-  emailVerified: Boolean (default: false),
-  mobileVerified: Boolean (default: false),
-  createdAt: Date,
-  updatedAt: Date
-}`}</pre>
-                        </div>
-                      </div>
-
-                      <div className="schema-section">
-                        <h5>Products Collection</h5>
-                        <div className="code-block">
-                          <pre>{`{
-  _id: ObjectId,
-  name: String (required),
-  description: String,
-  company: String,
-  category: String,
-  price: Number (required),
-  discountPrice: Number,
-  stock: Number (required),
-  images: [String] (URLs),
-  prescription: Boolean (default: false),
-  tags: [String],
-  isActive: Boolean (default: true),
-  createdAt: Date,
-  updatedAt: Date
-}`}</pre>
-                        </div>
-                      </div>
-
-                      <div className="schema-section">
-                        <h5>Orders Collection</h5>
-                        <div className="code-block">
-                          <pre>{`{
-  _id: ObjectId,
-  orderId: String (unique),
-  userId: ObjectId (ref: Users),
-  items: [{
-    productId: ObjectId (ref: Products),
-    name: String,
-    price: Number,
-    quantity: Number,
-    total: Number
-  }],
-  paymentMethod: String (COD, Online),
-  paymentStatus: String (Paid, Unpaid, Partial),
-  amountPaid: Number (default: 0),
-  amountDue: Number,
-  orderStatus: String,
-  createdAt: Date
-}`}</pre>
-                        </div>
-                      </div>
-
-                      <div className="schema-section">
-                        <h5>Messages Collection</h5>
-                        <div className="code-block">
-                          <pre>{`{
-  _id: ObjectId,
-  name: String (required),
-  email: String (required),
-  mobile: String,
-  subject: String,
-  message: String (required),
-  isRead: Boolean (default: false),
-  reply: String,
-  repliedBy: ObjectId (ref: Users),
-  priority: String (Low, Medium, High),
-  status: String (Open, In Progress, Resolved),
-  createdAt: Date
-}`}</pre>
-                        </div>
-                      </div>
-                    </Tab.Pane>
-
-                    <Tab.Pane eventKey="apis">
-                      <h3 className="text-medical-red mb-4">API Endpoints</h3>
-
-                      <div className="api-section">
-                        <h5>Authentication APIs</h5>
-                        <div className="api-list">
-                          <div className="api-item">
-                            <Badge bg="success">POST</Badge>
-                            <span>/api/auth/register</span>
-                            <small>User registration</small>
-                          </div>
-                          <div className="api-item">
-                            <Badge bg="success">POST</Badge>
-                            <span>/api/auth/login</span>
-                            <small>User login</small>
-                          </div>
-                          <div className="api-item">
-                            <Badge bg="success">POST</Badge>
-                            <span>/api/auth/forgot-password</span>
-                            <small>Password reset request</small>
-                          </div>
-                          <div className="api-item">
-                            <Badge bg="primary">GET</Badge>
-                            <span>/api/auth/profile</span>
-                            <small>Get user profile</small>
-                          </div>
-                          <div className="api-item">
-                            <Badge bg="warning">PUT</Badge>
-                            <span>/api/auth/profile</span>
-                            <small>Update user profile</small>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="api-section">
-                        <h5>Product APIs</h5>
-                        <div className="api-list">
-                          <div className="api-item">
-                            <Badge bg="primary">GET</Badge>
-                            <span>/api/products</span>
-                            <small>
-                              Get products with pagination & filters
-                            </small>
-                          </div>
-                          <div className="api-item">
-                            <Badge bg="primary">GET</Badge>
-                            <span>/api/products/:id</span>
-                            <small>Get single product</small>
-                          </div>
-                          <div className="api-item">
-                            <Badge bg="success">POST</Badge>
-                            <span>/api/products</span>
-                            <small>Create product (Admin only)</small>
-                          </div>
-                          <div className="api-item">
-                            <Badge bg="warning">PUT</Badge>
-                            <span>/api/products/:id</span>
-                            <small>Update product (Admin only)</small>
-                          </div>
-                          <div className="api-item">
-                            <Badge bg="danger">DELETE</Badge>
-                            <span>/api/products/:id</span>
-                            <small>Delete product (Admin only)</small>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="api-section">
-                        <h5>Order APIs</h5>
-                        <div className="api-list">
-                          <div className="api-item">
-                            <Badge bg="primary">GET</Badge>
-                            <span>/api/orders</span>
-                            <small>Get orders (Admin: all, User: own)</small>
-                          </div>
-                          <div className="api-item">
-                            <Badge bg="success">POST</Badge>
-                            <span>/api/orders</span>
-                            <small>Create new order</small>
-                          </div>
-                          <div className="api-item">
-                            <Badge bg="warning">PUT</Badge>
-                            <span>/api/orders/:id/payment</span>
-                            <small>Update payment status (Admin)</small>
-                          </div>
-                          <div className="api-item">
-                            <Badge bg="primary">GET</Badge>
-                            <span>/api/orders/:id/invoice</span>
-                            <small>Generate invoice PDF</small>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="api-section">
-                        <h5>Message APIs</h5>
-                        <div className="api-list">
-                          <div className="api-item">
-                            <Badge bg="primary">GET</Badge>
-                            <span>/api/messages</span>
-                            <small>Get all messages (Admin only)</small>
-                          </div>
-                          <div className="api-item">
-                            <Badge bg="success">POST</Badge>
-                            <span>/api/messages</span>
-                            <small>Send contact message</small>
-                          </div>
-                          <div className="api-item">
-                            <Badge bg="warning">PUT</Badge>
-                            <span>/api/messages/:id/read</span>
-                            <small>Mark message as read (Admin)</small>
-                          </div>
-                          <div className="api-item">
-                            <Badge bg="warning">PUT</Badge>
-                            <span>/api/messages/:id/reply</span>
-                            <small>Reply to message (Admin)</small>
-                          </div>
-                        </div>
-                      </div>
-                    </Tab.Pane>
-
-                    <Tab.Pane eventKey="security">
-                      <h3 className="text-medical-red mb-4">
-                        Security Implementation
-                      </h3>
-
-                      <div className="security-section">
-                        <h5>Authentication & Authorization</h5>
-                        <ul className="security-list">
-                          <li>
-                            <strong>JWT Tokens:</strong> Use secure, signed JSON
-                            Web Tokens for authentication
-                          </li>
-                          <li>
-                            <strong>Password Hashing:</strong> Use bcryptjs with
-                            salt rounds {">"}= 12
-                          </li>
-                          <li>
-                            <strong>Role-based Access:</strong> Implement
-                            middleware for admin/user role checking
-                          </li>
-                          <li>
-                            <strong>Token Expiration:</strong> Set appropriate
-                            token expiry times (15min access, 7d refresh)
-                          </li>
-                        </ul>
-                      </div>
-
-                      <div className="security-section">
-                        <h5>Input Validation & Sanitization</h5>
-                        <ul className="security-list">
-                          <li>
-                            <strong>Request Validation:</strong> Use Joi or
-                            express-validator for all endpoints
-                          </li>
-                          <li>
-                            <strong>SQL Injection:</strong> Mongoose ODM
-                            provides protection, use parameterized queries
-                          </li>
-                          <li>
-                            <strong>XSS Protection:</strong> Implement helmet.js
-                            and sanitize HTML input
-                          </li>
-                          <li>
-                            <strong>File Upload Security:</strong> Validate file
-                            types, sizes, and scan for malware
-                          </li>
-                        </ul>
-                      </div>
-
-                      <div className="security-section">
-                        <h5>API Security</h5>
-                        <ul className="security-list">
-                          <li>
-                            <strong>Rate Limiting:</strong> Implement
-                            express-rate-limit for API endpoints
-                          </li>
-                          <li>
-                            <strong>CORS Configuration:</strong> Configure
-                            proper CORS policies
-                          </li>
-                          <li>
-                            <strong>Environment Variables:</strong> Store
-                            sensitive data in .env files
-                          </li>
-                          <li>
-                            <strong>Error Handling:</strong> Don't expose
-                            sensitive information in error messages
-                          </li>
-                        </ul>
-                      </div>
-
-                      <div className="security-section">
-                        <h5>Data Protection</h5>
-                        <ul className="security-list">
-                          <li>
-                            <strong>HTTPS:</strong> Force HTTPS in production
-                            environment
-                          </li>
-                          <li>
-                            <strong>Database Security:</strong> Use MongoDB
-                            Atlas or secure self-hosted instances
-                          </li>
-                          <li>
-                            <strong>Backup Encryption:</strong> Encrypt database
-                            backups
-                          </li>
-                          <li>
-                            <strong>Access Logs:</strong> Log all access
-                            attempts and suspicious activities
-                          </li>
-                        </ul>
-                      </div>
-                    </Tab.Pane>
-
-                    <Tab.Pane eventKey="deployment">
-                      <h3 className="text-medical-red mb-4">
-                        Deployment Guide
-                      </h3>
-
-                      <div className="deployment-section">
-                        <h5>Environment Setup</h5>
-                        <div className="code-block">
-                          <pre>{`# Required Environment Variables
-NODE_ENV=production
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/harekrish-medical
-JWT_SECRET=your-secret-key
-JWT_REFRESH_SECRET=your-refresh-secret
-
-# Email Configuration
-EMAIL_SERVICE=gmail
-EMAIL_USER=harekrishnamedical@gmail.com
-EMAIL_PASS=your-app-password
-
-# SMS Configuration
-SMS_API_KEY=your-sms-api-key
-SMS_SENDER_ID=HKMED
-
-# Payment Gateway
-RAZORPAY_KEY_ID=your-key-id
-RAZORPAY_KEY_SECRET=your-key-secret
-
-# File Storage
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
-S3_BUCKET_NAME=hkmed-assets`}</pre>
-                        </div>
-                      </div>
-
-                      <div className="deployment-section">
-                        <h5>Server Configuration</h5>
-                        <ul className="deployment-list">
-                          <li>
-                            <strong>Node.js Version:</strong> Use LTS version
-                            (18.x or 20.x)
-                          </li>
-                          <li>
-                            <strong>Process Management:</strong> Use PM2 for
-                            production process management
-                          </li>
-                          <li>
-                            <strong>Reverse Proxy:</strong> Configure Nginx for
-                            load balancing and SSL
-                          </li>
-                          <li>
-                            <strong>SSL Certificate:</strong> Use Let's Encrypt
-                            for free SSL certificates
-                          </li>
-                          <li>
-                            <strong>Database:</strong> MongoDB Atlas for managed
-                            database or secure self-hosted
-                          </li>
-                        </ul>
-                      </div>
-
-                      <div className="deployment-section">
-                        <h5>Performance Optimization</h5>
-                        <ul className="deployment-list">
-                          <li>
-                            <strong>Database Indexing:</strong> Create indexes
-                            for frequently queried fields
-                          </li>
-                          <li>
-                            <strong>Caching:</strong> Implement Redis for
-                            session and data caching
-                          </li>
-                          <li>
-                            <strong>CDN:</strong> Use CloudFlare or AWS
-                            CloudFront for static assets
-                          </li>
-                          <li>
-                            <strong>Image Optimization:</strong> Compress and
-                            resize images automatically
-                          </li>
-                          <li>
-                            <strong>API Pagination:</strong> Implement proper
-                            pagination for large datasets
-                          </li>
-                        </ul>
-                      </div>
-
-                      <div className="deployment-section">
-                        <h5>Monitoring & Backup</h5>
-                        <ul className="deployment-list">
-                          <li>
-                            <strong>Application Monitoring:</strong> Use tools
-                            like New Relic or DataDog
-                          </li>
-                          <li>
-                            <strong>Error Tracking:</strong> Implement Sentry
-                            for error monitoring
-                          </li>
-                          <li>
-                            <strong>Log Management:</strong> Use ELK stack or
-                            similar for log analysis
-                          </li>
-                          <li>
-                            <strong>Database Backup:</strong> Automated daily
-                            backups with retention policy
-                          </li>
-                          <li>
-                            <strong>Health Checks:</strong> Implement health
-                            check endpoints for monitoring
-                          </li>
-                        </ul>
-                      </div>
-                    </Tab.Pane>
-
-                    <Tab.Pane eventKey="implementation">
-                      <h3 className="text-medical-red mb-4">
-                        AI Backend Implementation Guide
-                      </h3>
-
-                      <div className="implementation-section">
-                        <h5>Quick Start Implementation Prompt</h5>
-                        <div className="alert alert-info">
-                          <h6>
-                            📋 Copy and paste this prompt to any AI assistant
-                            (ChatGPT, Claude, etc.)
-                          </h6>
-                        </div>
-                        <div className="code-block">
-                          <pre>{`🚀 HARE KRISHNA MEDICAL - BACKEND IMPLEMENTATION PROMPT
-
-Create a complete Node.js backend for a medical e-commerce website with the following requirements:
-
-## 🎯 CORE FEATURES NEEDED:
-✅ User Authentication (JWT, bcrypt, email verification)
-✅ Product Management (CRUD, categories, inventory)
-✅ Order Processing (COD, Online payments, status tracking)
-✅ Invoice Generation (PDF creation, QR codes)
-✅ Message System (Contact forms, admin replies)
-✅ File Upload (Product images, profile pictures)
-✅ Real-time Notifications (Socket.io for admin alerts)
-✅ Payment Integration (Razorpay/Stripe webhook handling)
-
-## 🗄️ DATABASE SCHEMA:
-- Users (with roles: 0=User, 1=Admin)
-- Products (with stock, pricing, categories)
-- Orders (with payment status, delivery tracking)
-- Messages (contact form with admin responses)
-- Categories (product categorization)
-
-## 🛡️ SECURITY REQUIREMENTS:
-- Password hashing with bcrypt (salt rounds >= 12)
-- JWT authentication with refresh tokens
-- Input validation (Joi/express-validator)
-- Rate limiting for API endpoints
-- File upload security (type validation, size limits)
-- CORS configuration for frontend
-
-## 📦 TECH STACK:
-- Framework: Express.js with Node.js
-- Database: MongoDB with Mongoose ODM
-- Authentication: JWT (jsonwebtoken)
-- File Storage: Multer + Cloudinary/AWS S3
-- Email: Nodemailer with Gmail/SendGrid
-- PDF: PDFKit or jsPDF
-- Real-time: Socket.io
-- Payment: Razorpay/Stripe
-
-## 🚀 SPECIFIC ENDPOINTS NEEDED:
-Auth: /api/auth/register, /api/auth/login, /api/auth/forgot-password
-Products: /api/products (GET/POST/PUT/DELETE with admin protection)
-Orders: /api/orders (with payment status updates)
-Messages: /api/messages (contact form + admin replies)
-Upload: /api/upload (secure file handling)
-Analytics: /api/analytics/* (admin dashboard data)
-
-## 🔧 IMPLEMENTATION DETAILS:
-1. Create proper folder structure (controllers, models, routes, middleware)
-2. Implement comprehensive error handling
-3. Add request logging and security headers
-4. Set up proper environment configuration
-5. Include seed data for testing
-6. Add comprehensive API documentation
-7. Implement proper validation for all endpoints
-8. Add pagination for large datasets
-
-## 📧 EMAIL TEMPLATES NEEDED:
-- Welcome email for new users
-- Order confirmation emails
-- Payment confirmation emails
-- Password reset emails
-- Admin notification emails
-
-## 🎨 FRONTEND INTEGRATION:
-The frontend is built with React.js, Redux Toolkit, and Bootstrap. Ensure:
-- Proper CORS setup for React development server
-- Consistent API response format
-- Error handling that matches frontend expectations
-- File upload endpoints that work with form-data
-
-## 🌟 BONUS FEATURES:
-- Automatic low stock alerts
-- Email notifications for order status
-- SMS integration for OTP verification
-- Advanced analytics for admin dashboard
-- Bulk operations for admin management
-
-Generate a complete, production-ready backend with proper error handling, security measures, and comprehensive API documentation. Include setup instructions and environment configuration examples.`}</pre>
-                        </div>
-                      </div>
-
-                      <div className="implementation-section">
-                        <h5>Step-by-Step Implementation Guide</h5>
-
-                        <div className="step-item mb-4">
-                          <h6 className="text-medical-blue">
-                            Step 1: Project Setup
-                          </h6>
-                          <div className="code-block">
-                            <pre>{`# Initialize new Node.js project
-mkdir hare-krishna-medical-backend
-cd hare-krishna-medical-backend
-npm init -y
-
-# Install essential dependencies
-npm install express mongoose bcryptjs jsonwebtoken
-npm install multer cloudinary nodemailer cors helmet
-npm install express-rate-limit express-validator
-npm install dotenv morgan compression
-npm install razorpay stripe socket.io
-
-# Install development dependencies
-npm install --save-dev nodemon concurrently jest supertest`}</pre>
-                          </div>
-                        </div>
-
-                        <div className="step-item mb-4">
-                          <h6 className="text-medical-blue">
-                            Step 2: Environment Configuration
-                          </h6>
-                          <div className="code-block">
-                            <pre>{`# Create .env file with these variables:
-NODE_ENV=development
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/hare-krishna-medical
-JWT_SECRET=your-super-secret-jwt-key-here
-JWT_REFRESH_SECRET=your-refresh-token-secret
-JWT_EXPIRE=15m
-JWT_REFRESH_EXPIRE=7d
-
-# Email Configuration
-EMAIL_SERVICE=gmail
-EMAIL_USER=harekrishnamedical@gmail.com
-EMAIL_PASS=your-gmail-app-password
-
-# SMS Configuration (Optional)
-SMS_API_KEY=your-sms-api-key
-SMS_SENDER_ID=HKMED
-
-# Payment Gateway
-RAZORPAY_KEY_ID=rzp_test_your_key_id
-RAZORPAY_KEY_SECRET=your_key_secret
-
-# File Storage
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-
-# Frontend URL
-CLIENT_URL=http://localhost:3000
-ADMIN_EMAIL=admin@harekrishnamedical.com`}</pre>
-                          </div>
-                        </div>
-
-                        <div className="step-item mb-4">
-                          <h6 className="text-medical-blue">
-                            Step 3: Database Models
-                          </h6>
-                          <p className="text-muted mb-2">
-                            Create these Mongoose schemas in models/ folder:
-                          </p>
-                          <ul className="list-unstyled">
-                            <li>
-                              📄 <strong>User.js:</strong> User authentication
-                              and profile data
-                            </li>
-                            <li>
-                              📄 <strong>Product.js:</strong> Product catalog
-                              with inventory
-                            </li>
-                            <li>
-                              📄 <strong>Order.js:</strong> Order management
-                              with payment tracking
-                            </li>
-                            <li>
-                              📄 <strong>Message.js:</strong> Contact form
-                              messages
-                            </li>
-                            <li>
-                              📄 <strong>Category.js:</strong> Product
-                              categorization
-                            </li>
-                          </ul>
-                        </div>
-
-                        <div className="step-item mb-4">
-                          <h6 className="text-medical-blue">
-                            Step 4: API Controllers
-                          </h6>
-                          <p className="text-muted mb-2">
-                            Implement these controllers:
-                          </p>
-                          <ul className="list-unstyled">
-                            <li>
-                              🔐 <strong>authController.js:</strong> Login,
-                              register, password reset
-                            </li>
-                            <li>
-                              📦 <strong>productController.js:</strong> Product
-                              CRUD operations
-                            </li>
-                            <li>
-                              🛒 <strong>orderController.js:</strong> Order
-                              processing and tracking
-                            </li>
-                            <li>
-                              💬 <strong>messageController.js:</strong> Contact
-                              form handling
-                            </li>
-                            <li>
-                              👥 <strong>userController.js:</strong> User
-                              management (admin)
-                            </li>
-                            <li>
-                              📊 <strong>analyticsController.js:</strong>{" "}
-                              Dashboard statistics
-                            </li>
-                          </ul>
-                        </div>
-
-                        <div className="step-item mb-4">
-                          <h6 className="text-medical-blue">
-                            Step 5: Middleware Implementation
-                          </h6>
-                          <div className="code-block">
-                            <pre>{`// Essential middleware for security and functionality:
-
-// auth.js - JWT Authentication
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-
-// validation.js - Input Validation
-const { body, validationResult } = require('express-validator');
-
-// upload.js - File Upload Security
-const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
-
-// rateLimiter.js - API Rate Limiting
+}`,
+
+    serverJs: `const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+require('dotenv').config();
 
-// errorHandler.js - Global Error Handling
-const errorHandler = (err, req, res, next) => {
-  // Comprehensive error handling logic
-};`}</pre>
-                          </div>
-                        </div>
+const app = express();
 
-                        <div className="step-item mb-4">
-                          <h6 className="text-medical-blue">
-                            Step 6: Payment Integration
-                          </h6>
-                          <div className="code-block">
-                            <pre>{`// Razorpay integration example:
-const Razorpay = require('razorpay');
+// Security Middleware
+app.use(helmet());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET
+// Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.'
+});
+app.use('/api/', limiter);
+
+// Body Parser Middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Database Connection
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('✅ Connected to MongoDB'))
+.catch(err => console.error('❌ MongoDB connection error:', err));
+
+// Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/products', require('./routes/products'));
+app.use('/api/orders', require('./routes/orders'));
+app.use('/api/invoices', require('./routes/invoices'));
+app.use('/api/messages', require('./routes/messages'));
+app.use('/api/analytics', require('./routes/analytics'));
+app.use('/api/upload', require('./routes/upload'));
+
+// Health Check
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV
+  });
 });
 
-// Create order endpoint
-app.post('/api/payments/create-order', async (req, res) => {
-  const { amount, currency = 'INR' } = req.body;
-
-  const options = {
-    amount: amount * 100, // Convert to paise
-    currency,
-    receipt: Date.now().toString()
-  };
-
-  const order = await razorpay.orders.create(options);
-  res.json(order);
+// Error Handling Middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    message: 'Something went wrong!',
+    error: process.env.NODE_ENV === 'development' ? err.message : 'Internal Server Error'
+  });
 });
 
-// Webhook for payment verification
-app.post('/api/payments/webhook', (req, res) => {
-  // Verify payment signature and update order status
-});`}</pre>
-                          </div>
-                        </div>
+// 404 Handler
+app.use('*', (req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
 
-                        <div className="step-item mb-4">
-                          <h6 className="text-medical-blue">
-                            Step 7: Real-time Features
-                          </h6>
-                          <div className="code-block">
-                            <pre>{`// Socket.io for real-time admin notifications:
-const socketIo = require('socket.io');
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(\`🚀 Server running on port \${PORT}\`);
+});
 
-const io = socketIo(server, {
-  cors: {
-    origin: process.env.CLIENT_URL,
-    methods: ["GET", "POST"]
+module.exports = app;`,
+
+    userModel: `const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+
+const userSchema = new mongoose.Schema({
+  fullName: {
+    type: String,
+    required: [true, 'Full name is required'],
+    trim: true,
+    maxlength: [100, 'Name cannot be more than 100 characters']
+  },
+  email: {
+    type: String,
+    required: [true, 'Email is required'],
+    unique: true,
+    lowercase: true,
+    match: [/^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$/, 'Please enter a valid email']
+  },
+  mobile: {
+    type: String,
+    required: [true, 'Mobile number is required'],
+    match: [/^[6-9]\\d{9}$/, 'Please enter a valid mobile number']
+  },
+  password: {
+    type: String,
+    required: [true, 'Password is required'],
+    minlength: [6, 'Password must be at least 6 characters']
+  },
+  role: {
+    type: Number,
+    default: 0, // 0: User, 1: Admin
+    enum: [0, 1]
+  },
+  address: {
+    street: { type: String, required: true },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    pincode: { 
+      type: String, 
+      required: true,
+      match: [/^\\d{6}$/, 'Please enter a valid pincode']
+    }
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  emailVerified: {
+    type: Boolean,
+    default: false
+  },
+  mobileVerified: {
+    type: Boolean,
+    default: false
+  },
+  lastLogin: {
+    type: Date,
+    default: Date.now
+  },
+  loginAttempts: {
+    type: Number,
+    default: 0
+  },
+  lockUntil: Date,
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
+  emailVerificationToken: String,
+  emailVerificationExpires: Date
+}, {
+  timestamps: true
+});
+
+// Indexes
+userSchema.index({ email: 1 });
+userSchema.index({ mobile: 1 });
+userSchema.index({ role: 1 });
+
+// Virtual for account lock
+userSchema.virtual('isLocked').get(function() {
+  return !!(this.lockUntil && this.lockUntil > Date.now());
+});
+
+// Pre-save middleware to hash password
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  
+  try {
+    const salt = await bcrypt.genSalt(12);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
   }
 });
 
-// Emit notifications to admin
-const notifyAdmin = (notification) => {
-  io.to('admin-room').emit('notification', notification);
+// Method to compare password
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  try {
+    return await bcrypt.compare(candidatePassword, this.password);
+  } catch (error) {
+    throw new Error('Password comparison failed');
+  }
 };
 
-// Usage in controllers:
-// New order notification
-notifyAdmin({
-  type: 'order',
-  title: 'New Order Received',
-  message: \`Order #\${order.orderId} has been placed\`,
-  timestamp: new Date()
-});`}</pre>
-                          </div>
-                        </div>
-                      </div>
+// Method to increment login attempts
+userSchema.methods.incLoginAttempts = function() {
+  // If we have a previous lock that has expired, restart at 1
+  if (this.lockUntil && this.lockUntil < Date.now()) {
+    return this.updateOne({
+      $unset: { lockUntil: 1 },
+      $set: { loginAttempts: 1 }
+    });
+  }
+  
+  const updates = { $inc: { loginAttempts: 1 } };
+  
+  // Lock account after 5 attempts for 2 hours
+  if (this.loginAttempts + 1 >= 5 && !this.isLocked) {
+    updates.$set = { lockUntil: Date.now() + 2 * 60 * 60 * 1000 };
+  }
+  
+  return this.updateOne(updates);
+};
 
-                      <div className="implementation-section">
-                        <h5>Production Deployment Checklist</h5>
-                        <div className="checklist">
-                          <div className="form-check">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              id="env-vars"
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor="env-vars"
-                            >
-                              ✅ Environment variables properly configured
-                            </label>
-                          </div>
-                          <div className="form-check">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              id="database"
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor="database"
-                            >
-                              ✅ MongoDB database setup (Atlas recommended)
-                            </label>
-                          </div>
-                          <div className="form-check">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              id="ssl"
-                            />
-                            <label className="form-check-label" htmlFor="ssl">
-                              ✅ SSL certificate configured (HTTPS)
-                            </label>
-                          </div>
-                          <div className="form-check">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              id="cors"
-                            />
-                            <label className="form-check-label" htmlFor="cors">
-                              ✅ CORS properly configured for production
-                            </label>
-                          </div>
-                          <div className="form-check">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              id="rate-limit"
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor="rate-limit"
-                            >
-                              ✅ Rate limiting implemented
-                            </label>
-                          </div>
-                          <div className="form-check">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              id="error-logging"
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor="error-logging"
-                            >
-                              ✅ Error logging and monitoring setup
-                            </label>
-                          </div>
-                          <div className="form-check">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              id="backup"
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor="backup"
-                            >
-                              ✅ Database backup strategy implemented
-                            </label>
-                          </div>
-                          <div className="form-check">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              id="testing"
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor="testing"
-                            >
-                              ✅ API endpoints thoroughly tested
-                            </label>
-                          </div>
-                        </div>
-                      </div>
+// Method to reset login attempts
+userSchema.methods.resetLoginAttempts = function() {
+  return this.updateOne({
+    $unset: { loginAttempts: 1, lockUntil: 1 }
+  });
+};
 
-                      <div className="implementation-section">
-                        <h5>Helpful Resources</h5>
-                        <div className="resources-grid">
-                          <div className="resource-card">
-                            <h6>📚 Documentation</h6>
-                            <ul className="small">
-                              <li>Express.js Official Docs</li>
-                              <li>Mongoose ODM Guide</li>
-                              <li>JWT.io Documentation</li>
-                              <li>Razorpay API Docs</li>
-                            </ul>
-                          </div>
-                          <div className="resource-card">
-                            <h6>🛠️ Testing Tools</h6>
-                            <ul className="small">
-                              <li>Postman for API testing</li>
-                              <li>Jest for unit testing</li>
-                              <li>Supertest for integration tests</li>
-                              <li>MongoDB Compass for database</li>
-                            </ul>
-                          </div>
-                          <div className="resource-card">
-                            <h6>🚀 Deployment</h6>
-                            <ul className="small">
-                              <li>Heroku (Free tier available)</li>
-                              <li>Railway (Easy deployment)</li>
-                              <li>DigitalOcean (VPS)</li>
-                              <li>AWS EC2 (Scalable)</li>
-                            </ul>
-                          </div>
+// Transform output
+userSchema.methods.toJSON = function() {
+  const user = this.toObject();
+  delete user.password;
+  delete user.resetPasswordToken;
+  delete user.resetPasswordExpires;
+  delete user.emailVerificationToken;
+  delete user.emailVerificationExpires;
+  delete user.loginAttempts;
+  delete user.lockUntil;
+  return user;
+};
+
+module.exports = mongoose.model('User', userSchema);`,
+
+    productModel: `const mongoose = require('mongoose');
+
+const productSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'Product name is required'],
+    trim: true,
+    maxlength: [200, 'Product name cannot exceed 200 characters']
+  },
+  company: {
+    type: String,
+    required: [true, 'Company name is required'],
+    trim: true
+  },
+  description: {
+    type: String,
+    required: [true, 'Product description is required'],
+    maxlength: [2000, 'Description cannot exceed 2000 characters']
+  },
+  price: {
+    type: Number,
+    required: [true, 'Price is required'],
+    min: [0, 'Price cannot be negative']
+  },
+  originalPrice: {
+    type: Number,
+    default: function() { return this.price; }
+  },
+  category: {
+    type: String,
+    required: [true, 'Category is required'],
+    enum: [
+      'Pain Relief',
+      'Vitamins',
+      'Cough & Cold',
+      'First Aid',
+      'Equipment',
+      'Ayurvedic',
+      'Baby Care',
+      'Personal Care',
+      'Other'
+    ]
+  },
+  stock: {
+    type: Number,
+    required: [true, 'Stock quantity is required'],
+    min: [0, 'Stock cannot be negative'],
+    default: 0
+  },
+  lowStockThreshold: {
+    type: Number,
+    default: 10
+  },
+  sku: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
+  images: [{
+    url: { type: String, required: true },
+    altText: String,
+    isPrimary: { type: Boolean, default: false }
+  }],
+  specifications: {
+    weight: String,
+    dimensions: String,
+    ingredients: String,
+    dosage: String,
+    sideEffects: String,
+    contraindications: String,
+    manufacturer: String,
+    mfgDate: Date,
+    expiryDate: Date,
+    batchNumber: String
+  },
+  tags: [String],
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  isFeatured: {
+    type: Boolean,
+    default: false
+  },
+  requiresPrescription: {
+    type: Boolean,
+    default: false
+  },
+  ratings: {
+    average: { type: Number, default: 0, min: 0, max: 5 },
+    count: { type: Number, default: 0 }
+  },
+  sales: {
+    totalSold: { type: Number, default: 0 },
+    revenue: { type: Number, default: 0 }
+  },
+  seo: {
+    metaTitle: String,
+    metaDescription: String,
+    keywords: [String]
+  }
+}, {
+  timestamps: true
+});
+
+// Indexes
+productSchema.index({ name: 'text', description: 'text', company: 'text' });
+productSchema.index({ category: 1 });
+productSchema.index({ price: 1 });
+productSchema.index({ stock: 1 });
+productSchema.index({ isActive: 1 });
+productSchema.index({ isFeatured: 1 });
+productSchema.index({ 'ratings.average': -1 });
+productSchema.index({ 'sales.totalSold': -1 });
+productSchema.index({ createdAt: -1 });
+
+// Virtual for discount percentage
+productSchema.virtual('discountPercentage').get(function() {
+  if (this.originalPrice && this.originalPrice > this.price) {
+    return Math.round(((this.originalPrice - this.price) / this.originalPrice) * 100);
+  }
+  return 0;
+});
+
+// Virtual for stock status
+productSchema.virtual('stockStatus').get(function() {
+  if (this.stock === 0) return 'out_of_stock';
+  if (this.stock <= this.lowStockThreshold) return 'low_stock';
+  return 'in_stock';
+});
+
+// Virtual for primary image
+productSchema.virtual('primaryImage').get(function() {
+  if (this.images && this.images.length > 0) {
+    const primary = this.images.find(img => img.isPrimary);
+    return primary || this.images[0];
+  }
+  return null;
+});
+
+// Pre-save middleware to generate SKU
+productSchema.pre('save', function(next) {
+  if (!this.sku) {
+    const prefix = this.category.substring(0, 3).toUpperCase();
+    const timestamp = Date.now().toString().substring(8);
+    this.sku = \`HKM-\${prefix}-\${timestamp}\`;
+  }
+  next();
+});
+
+// Method to update stock
+productSchema.methods.updateStock = function(quantity, operation = 'subtract') {
+  if (operation === 'subtract') {
+    this.stock = Math.max(0, this.stock - quantity);
+  } else if (operation === 'add') {
+    this.stock += quantity;
+  }
+  return this.save();
+};
+
+// Method to update sales
+productSchema.methods.updateSales = function(quantity, amount) {
+  this.sales.totalSold += quantity;
+  this.sales.revenue += amount;
+  return this.save();
+};
+
+// Static method to find low stock products
+productSchema.statics.findLowStock = function() {
+  return this.find({
+    $expr: { $lte: ['$stock', '$lowStockThreshold'] },
+    isActive: true
+  });
+};
+
+// Static method to search products
+productSchema.statics.searchProducts = function(query, options = {}) {
+  const {
+    category,
+    minPrice,
+    maxPrice,
+    inStock = true,
+    sort = 'createdAt',
+    page = 1,
+    limit = 20
+  } = options;
+
+  const filter = { isActive: true };
+
+  if (query) {
+    filter.$text = { $search: query };
+  }
+
+  if (category) {
+    filter.category = category;
+  }
+
+  if (minPrice || maxPrice) {
+    filter.price = {};
+    if (minPrice) filter.price.$gte = minPrice;
+    if (maxPrice) filter.price.$lte = maxPrice;
+  }
+
+  if (inStock) {
+    filter.stock = { $gt: 0 };
+  }
+
+  const skip = (page - 1) * limit;
+
+  return this.find(filter)
+    .sort(sort)
+    .skip(skip)
+    .limit(limit);
+};
+
+module.exports = mongoose.model('Product', productSchema);`,
+
+    orderModel: `const mongoose = require('mongoose');
+
+const orderItemSchema = new mongoose.Schema({
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product',
+    required: true
+  },
+  name: { type: String, required: true },
+  company: { type: String, required: true },
+  price: { type: Number, required: true },
+  quantity: { 
+    type: Number, 
+    required: true, 
+    min: [1, 'Quantity must be at least 1']
+  },
+  total: { type: Number, required: true }
+});
+
+const orderSchema = new mongoose.Schema({
+  orderId: {
+    type: String,
+    unique: true,
+    required: true
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  customerDetails: {
+    fullName: { type: String, required: true },
+    email: { type: String, required: true },
+    mobile: { type: String, required: true },
+    address: { type: String, required: true },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    pincode: { type: String, required: true }
+  },
+  items: [orderItemSchema],
+  pricing: {
+    subtotal: { type: Number, required: true },
+    shipping: { type: Number, default: 0 },
+    tax: { type: Number, default: 0 },
+    discount: { type: Number, default: 0 },
+    total: { type: Number, required: true }
+  },
+  payment: {
+    method: {
+      type: String,
+      required: true,
+      enum: ['COD', 'Online', 'Card', 'UPI', 'NetBanking', 'Wallet']
+    },
+    status: {
+      type: String,
+      default: 'Pending',
+      enum: ['Pending', 'Completed', 'Failed', 'Refunded', 'Cancelled']
+    },
+    transactionId: String,
+    paidAt: Date,
+    refundId: String,
+    refundedAt: Date
+  },
+  status: {
+    type: String,
+    default: 'Pending',
+    enum: ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned']
+  },
+  statusHistory: [{
+    status: String,
+    timestamp: { type: Date, default: Date.now },
+    note: String,
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }
+  }],
+  shipping: {
+    address: {
+      street: String,
+      city: String,
+      state: String,
+      pincode: String
+    },
+    method: { type: String, default: 'Standard' },
+    trackingNumber: String,
+    estimatedDelivery: Date,
+    actualDelivery: Date,
+    carrier: String
+  },
+  notes: {
+    customer: String,
+    admin: String,
+    delivery: String
+  },
+  invoice: {
+    invoiceId: String,
+    generatedAt: Date,
+    qrCode: String
+  },
+  cancellation: {
+    reason: String,
+    cancelledBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    cancelledAt: Date,
+    refundStatus: {
+      type: String,
+      enum: ['Pending', 'Processed', 'Completed']
+    }
+  }
+}, {
+  timestamps: true
+});
+
+// Indexes
+orderSchema.index({ orderId: 1 });
+orderSchema.index({ user: 1 });
+orderSchema.index({ status: 1 });
+orderSchema.index({ 'payment.status': 1 });
+orderSchema.index({ createdAt: -1 });
+orderSchema.index({ 'customerDetails.email': 1 });
+orderSchema.index({ 'customerDetails.mobile': 1 });
+
+// Pre-save middleware to generate orderId
+orderSchema.pre('save', function(next) {
+  if (!this.orderId) {
+    const timestamp = Date.now().toString();
+    const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+    this.orderId = \`HKM\${timestamp.substring(8)}\${random}\`;
+  }
+  next();
+});
+
+// Method to add status update
+orderSchema.methods.updateStatus = function(newStatus, note = '', updatedBy = null) {
+  this.status = newStatus;
+  this.statusHistory.push({
+    status: newStatus,
+    note,
+    updatedBy,
+    timestamp: new Date()
+  });
+
+  // Auto-update payment status for certain order statuses
+  if (newStatus === 'Delivered' && this.payment.method === 'COD') {
+    this.payment.status = 'Completed';
+    this.payment.paidAt = new Date();
+  }
+
+  return this.save();
+};
+
+// Method to cancel order
+orderSchema.methods.cancelOrder = function(reason, cancelledBy) {
+  this.status = 'Cancelled';
+  this.cancellation = {
+    reason,
+    cancelledBy,
+    cancelledAt: new Date(),
+    refundStatus: this.payment.status === 'Completed' ? 'Pending' : null
+  };
+  
+  this.statusHistory.push({
+    status: 'Cancelled',
+    note: \`Order cancelled: \${reason}\`,
+    updatedBy: cancelledBy,
+    timestamp: new Date()
+  });
+
+  return this.save();
+};
+
+// Method to calculate totals
+orderSchema.methods.calculateTotals = function() {
+  this.pricing.subtotal = this.items.reduce((sum, item) => sum + item.total, 0);
+  this.pricing.total = this.pricing.subtotal + this.pricing.shipping + this.pricing.tax - this.pricing.discount;
+  return this;
+};
+
+// Static method to get orders by status
+orderSchema.statics.getOrdersByStatus = function(status) {
+  return this.find({ status }).populate('user', 'fullName email mobile');
+};
+
+// Static method to get daily sales
+orderSchema.statics.getDailySales = function(date = new Date()) {
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);
+  
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  return this.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: startOfDay, $lte: endOfDay },
+        status: { $nin: ['Cancelled', 'Returned'] }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalOrders: { $sum: 1 },
+        totalRevenue: { $sum: '$pricing.total' },
+        averageOrderValue: { $avg: '$pricing.total' }
+      }
+    }
+  ]);
+};
+
+module.exports = mongoose.model('Order', orderSchema);`,
+
+    authRoutes: `const express = require('express');
+const router = express.Router();
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { body, validationResult } = require('express-validator');
+const rateLimit = require('express-rate-limit');
+const User = require('../models/User');
+const auth = require('../middleware/auth');
+const sendEmail = require('../utils/sendEmail');
+
+// Rate limiting for auth routes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 requests per windowMs
+  message: 'Too many authentication attempts, please try again later.'
+});
+
+// @route   POST /api/auth/register
+// @desc    Register a new user
+// @access  Public
+router.post('/register', [
+  authLimiter,
+  body('fullName').trim().isLength({ min: 2, max: 100 }).withMessage('Name must be between 2-100 characters'),
+  body('email').isEmail().normalizeEmail().withMessage('Please enter a valid email'),
+  body('mobile').matches(/^[6-9]\\d{9}$/).withMessage('Please enter a valid mobile number'),
+  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  body('address.street').notEmpty().withMessage('Street address is required'),
+  body('address.city').notEmpty().withMessage('City is required'),
+  body('address.state').notEmpty().withMessage('State is required'),
+  body('address.pincode').matches(/^\\d{6}$/).withMessage('Please enter a valid pincode')
+], async (req, res) => {
+  try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation errors',
+        errors: errors.array()
+      });
+    }
+
+    const { fullName, email, mobile, password, address } = req.body;
+
+    // Check if user already exists
+    const existingUser = await User.findOne({
+      $or: [{ email }, { mobile }]
+    });
+
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'User already exists with this email or mobile number'
+      });
+    }
+
+    // Create new user
+    const user = new User({
+      fullName,
+      email,
+      mobile,
+      password,
+      address
+    });
+
+    await user.save();
+
+    // Generate JWT token
+    const payload = {
+      user: {
+        id: user._id,
+        role: user.role
+      }
+    };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    // Send welcome email
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: 'Welcome to Hare Krishna Medical',
+        template: 'welcome',
+        data: { fullName: user.fullName }
+      });
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'User registered successfully',
+      token,
+      user: user.toJSON()
+    });
+
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during registration'
+    });
+  }
+});
+
+// @route   POST /api/auth/login
+// @desc    Login user
+// @access  Public
+router.post('/login', [
+  authLimiter,
+  body('email').isEmail().normalizeEmail().withMessage('Please enter a valid email'),
+  body('password').notEmpty().withMessage('Password is required')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation errors',
+        errors: errors.array()
+      });
+    }
+
+    const { email, password } = req.body;
+
+    // Find user by email
+    const user = await User.findOne({ email, isActive: true });
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+
+    // Check if account is locked
+    if (user.isLocked) {
+      return res.status(423).json({
+        success: false,
+        message: 'Account temporarily locked due to too many failed login attempts'
+      });
+    }
+
+    // Compare password
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      await user.incLoginAttempts();
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+
+    // Reset login attempts on successful login
+    if (user.loginAttempts > 0) {
+      await user.resetLoginAttempts();
+    }
+
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
+
+    // Generate JWT token
+    const payload = {
+      user: {
+        id: user._id,
+        role: user.role
+      }
+    };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({
+      success: true,
+      message: 'Login successful',
+      token,
+      user: user.toJSON()
+    });
+
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during login'
+    });
+  }
+});
+
+// @route   GET /api/auth/me
+// @desc    Get current user
+// @access  Private
+router.get('/me', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    res.json({
+      success: true,
+      user
+    });
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+});
+
+// @route   POST /api/auth/forgot-password
+// @desc    Send password reset email
+// @access  Public
+router.post('/forgot-password', [
+  authLimiter,
+  body('email').isEmail().normalizeEmail().withMessage('Please enter a valid email')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation errors',
+        errors: errors.array()
+      });
+    }
+
+    const { email } = req.body;
+    const user = await User.findOne({ email, isActive: true });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found with this email'
+      });
+    }
+
+    // Generate reset token
+    const resetToken = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    // Send reset email
+    const resetUrl = \`\${process.env.FRONTEND_URL}/reset-password?token=\${resetToken}\`;
+    
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: 'Password Reset Request - Hare Krishna Medical',
+        template: 'passwordReset',
+        data: {
+          fullName: user.fullName,
+          resetUrl,
+          expiresIn: '1 hour'
+        }
+      });
+
+      res.json({
+        success: true,
+        message: 'Password reset email sent successfully'
+      });
+    } catch (emailError) {
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+      await user.save();
+      
+      throw emailError;
+    }
+
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error sending password reset email'
+    });
+  }
+});
+
+// @route   POST /api/auth/reset-password
+// @desc    Reset password with token
+// @access  Public
+router.post('/reset-password', [
+  body('token').notEmpty().withMessage('Reset token is required'),
+  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation errors',
+        errors: errors.array()
+      });
+    }
+
+    const { token, password } = req.body;
+
+    // Verify token
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired reset token'
+      });
+    }
+
+    // Find user with valid reset token
+    const user = await User.findOne({
+      _id: decoded.userId,
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+      isActive: true
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired reset token'
+      });
+    }
+
+    // Update password
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    user.loginAttempts = 0;
+    user.lockUntil = undefined;
+    
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password reset successfully'
+    });
+
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during password reset'
+    });
+  }
+});
+
+// @route   POST /api/auth/change-password
+// @desc    Change password for authenticated user
+// @access  Private
+router.post('/change-password', [
+  auth,
+  body('currentPassword').notEmpty().withMessage('Current password is required'),
+  body('newPassword').isLength({ min: 6 }).withMessage('New password must be at least 6 characters')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation errors',
+        errors: errors.array()
+      });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.user.id);
+
+    // Verify current password
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current password is incorrect'
+      });
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password changed successfully'
+    });
+
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during password change'
+    });
+  }
+});
+
+module.exports = router;`,
+
+    envExample: `# Server Configuration
+NODE_ENV=development
+PORT=5000
+
+# Database
+MONGODB_URI=mongodb://localhost:27017/hare-krishna-medical
+
+# JWT
+JWT_SECRET=your-super-secret-jwt-key-here
+
+# Frontend URL
+FRONTEND_URL=http://localhost:3000
+
+# Email Configuration (Gmail)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+
+# Cloudinary (Image Upload)
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+
+# Razorpay (Payment Gateway)
+RAZORPAY_KEY_ID=your-razorpay-key-id
+RAZORPAY_KEY_SECRET=your-razorpay-key-secret
+
+# Twilio (SMS)
+TWILIO_ACCOUNT_SID=your-twilio-account-sid
+TWILIO_AUTH_TOKEN=your-twilio-auth-token
+TWILIO_PHONE_NUMBER=your-twilio-phone-number
+
+# Security
+BCRYPT_ROUNDS=12
+SESSION_SECRET=your-session-secret
+
+# Rate Limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# File Upload
+MAX_FILE_SIZE=10485760
+ALLOWED_FILE_TYPES=image/jpeg,image/png,image/gif,image/webp`,
+  };
+
+  return (
+    <div className="fade-in">
+      {/* Copy Alert */}
+      {showCopyAlert && (
+        <div
+          style={{
+            position: "fixed",
+            top: "20px",
+            right: "20px",
+            zIndex: 9999,
+          }}
+        >
+          <Alert
+            variant="success"
+            style={{
+              borderRadius: "12px",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+            }}
+          >
+            <i className="bi bi-check-circle me-2"></i>
+            {copiedFile} copied to clipboard!
+          </Alert>
+        </div>
+      )}
+
+      <section
+        style={{
+          paddingTop: "2rem",
+          paddingBottom: "2rem",
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+        }}
+      >
+        <Container>
+          {/* Enhanced Header */}
+          <Row className="mb-4">
+            <Col lg={12}>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "20px",
+                  background: "linear-gradient(135deg, #343a40, #495057)",
+                  color: "white",
+                  boxShadow: "0 15px 50px rgba(52, 58, 64, 0.3)",
+                }}
+              >
+                <Card.Body style={{ padding: "30px" }}>
+                  <Row className="align-items-center">
+                    <Col lg={8}>
+                      <div className="d-flex align-items-center">
+                        <div
+                          style={{
+                            width: "60px",
+                            height: "60px",
+                            background: "rgba(255, 255, 255, 0.2)",
+                            borderRadius: "50%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            marginRight: "20px",
+                          }}
+                        >
+                          <i
+                            className="bi bi-code-slash"
+                            style={{ fontSize: "28px" }}
+                          ></i>
+                        </div>
+                        <div>
+                          <h1
+                            style={{
+                              fontWeight: "800",
+                              marginBottom: "5px",
+                              fontSize: "2.2rem",
+                            }}
+                          >
+                            Backend Documentation
+                          </h1>
+                          <p
+                            style={{
+                              opacity: "0.9",
+                              marginBottom: "0",
+                              fontSize: "1.1rem",
+                            }}
+                          >
+                            Complete implementation guide with code examples
+                          </p>
                         </div>
                       </div>
+                    </Col>
+                    <Col lg={4} className="text-end">
+                      <Button
+                        variant="light"
+                        onClick={downloadDocumentation}
+                        style={{
+                          borderRadius: "8px",
+                          fontWeight: "600",
+                          padding: "12px 24px",
+                        }}
+                      >
+                        <i className="bi bi-download me-2"></i>
+                        Download PDF
+                      </Button>
+                    </Col>
+                  </Row>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
+          <div id="documentation-content">
+            <Tab.Container activeKey={activeTab} onSelect={setActiveTab}>
+              <Row>
+                <Col lg={3}>
+                  <Card
+                    style={{
+                      border: "none",
+                      borderRadius: "16px",
+                      boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                      position: "sticky",
+                      top: "20px",
+                    }}
+                  >
+                    <Card.Header
+                      style={{
+                        background: "linear-gradient(135deg, #e63946, #dc3545)",
+                        color: "white",
+                        borderRadius: "16px 16px 0 0",
+                        padding: "20px",
+                      }}
+                    >
+                      <h6 className="mb-0" style={{ fontWeight: "700" }}>
+                        <i className="bi bi-list-ul me-2"></i>
+                        Navigation
+                      </h6>
+                    </Card.Header>
+                    <Card.Body style={{ padding: "20px" }}>
+                      <Nav variant="pills" className="flex-column">
+                        <Nav.Item className="mb-2">
+                          <Nav.Link
+                            eventKey="overview"
+                            style={{
+                              borderRadius: "8px",
+                              fontWeight: "600",
+                              color:
+                                activeTab === "overview" ? "white" : "#333",
+                              background:
+                                activeTab === "overview"
+                                  ? "linear-gradient(135deg, #e63946, #dc3545)"
+                                  : "transparent",
+                            }}
+                          >
+                            <i className="bi bi-info-circle me-2"></i>
+                            Overview
+                          </Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item className="mb-2">
+                          <Nav.Link
+                            eventKey="setup"
+                            style={{
+                              borderRadius: "8px",
+                              fontWeight: "600",
+                              color: activeTab === "setup" ? "white" : "#333",
+                              background:
+                                activeTab === "setup"
+                                  ? "linear-gradient(135deg, #e63946, #dc3545)"
+                                  : "transparent",
+                            }}
+                          >
+                            <i className="bi bi-gear me-2"></i>
+                            Project Setup
+                          </Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item className="mb-2">
+                          <Nav.Link
+                            eventKey="models"
+                            style={{
+                              borderRadius: "8px",
+                              fontWeight: "600",
+                              color: activeTab === "models" ? "white" : "#333",
+                              background:
+                                activeTab === "models"
+                                  ? "linear-gradient(135deg, #e63946, #dc3545)"
+                                  : "transparent",
+                            }}
+                          >
+                            <i className="bi bi-database me-2"></i>
+                            Database Models
+                          </Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item className="mb-2">
+                          <Nav.Link
+                            eventKey="routes"
+                            style={{
+                              borderRadius: "8px",
+                              fontWeight: "600",
+                              color: activeTab === "routes" ? "white" : "#333",
+                              background:
+                                activeTab === "routes"
+                                  ? "linear-gradient(135deg, #e63946, #dc3545)"
+                                  : "transparent",
+                            }}
+                          >
+                            <i className="bi bi-arrow-left-right me-2"></i>
+                            API Routes
+                          </Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item className="mb-2">
+                          <Nav.Link
+                            eventKey="deployment"
+                            style={{
+                              borderRadius: "8px",
+                              fontWeight: "600",
+                              color:
+                                activeTab === "deployment" ? "white" : "#333",
+                              background:
+                                activeTab === "deployment"
+                                  ? "linear-gradient(135deg, #e63946, #dc3545)"
+                                  : "transparent",
+                            }}
+                          >
+                            <i className="bi bi-cloud-upload me-2"></i>
+                            Deployment
+                          </Nav.Link>
+                        </Nav.Item>
+                      </Nav>
+                    </Card.Body>
+                  </Card>
+                </Col>
+
+                <Col lg={9}>
+                  <Tab.Content>
+                    {/* Overview Tab */}
+                    <Tab.Pane eventKey="overview">
+                      <Card
+                        style={{
+                          border: "none",
+                          borderRadius: "16px",
+                          boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                        }}
+                      >
+                        <Card.Header
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #17a2b8, #20c997)",
+                            color: "white",
+                            borderRadius: "16px 16px 0 0",
+                            padding: "20px",
+                          }}
+                        >
+                          <h5 className="mb-0" style={{ fontWeight: "700" }}>
+                            <i className="bi bi-info-circle me-2"></i>
+                            Project Overview
+                          </h5>
+                        </Card.Header>
+                        <Card.Body style={{ padding: "30px" }}>
+                          <div className="mb-4">
+                            <h6>🎯 Project Features</h6>
+                            <Row>
+                              <Col md={6}>
+                                <ul style={{ paddingLeft: "20px" }}>
+                                  <li>User Authentication & Authorization</li>
+                                  <li>Product Management System</li>
+                                  <li>Order Processing & Tracking</li>
+                                  <li>Invoice Generation with QR Codes</li>
+                                  <li>Payment Gateway Integration</li>
+                                  <li>Real-time Analytics Dashboard</li>
+                                </ul>
+                              </Col>
+                              <Col md={6}>
+                                <ul style={{ paddingLeft: "20px" }}>
+                                  <li>Admin Panel with Role Management</li>
+                                  <li>Email & SMS Notifications</li>
+                                  <li>File Upload & Cloud Storage</li>
+                                  <li>RESTful API with Validation</li>
+                                  <li>Security & Rate Limiting</li>
+                                  <li>Comprehensive Error Handling</li>
+                                </ul>
+                              </Col>
+                            </Row>
+                          </div>
+
+                          <div className="mb-4">
+                            <h6>🛠️ Technology Stack</h6>
+                            <Row>
+                              <Col md={4}>
+                                <Card
+                                  style={{
+                                    border: "1px solid #e9ecef",
+                                    borderRadius: "8px",
+                                    marginBottom: "15px",
+                                  }}
+                                >
+                                  <Card.Body style={{ padding: "15px" }}>
+                                    <h6 style={{ color: "#e63946" }}>
+                                      Backend
+                                    </h6>
+                                    <ul style={{ fontSize: "14px", margin: 0 }}>
+                                      <li>Node.js + Express.js</li>
+                                      <li>MongoDB + Mongoose</li>
+                                      <li>JWT Authentication</li>
+                                    </ul>
+                                  </Card.Body>
+                                </Card>
+                              </Col>
+                              <Col md={4}>
+                                <Card
+                                  style={{
+                                    border: "1px solid #e9ecef",
+                                    borderRadius: "8px",
+                                    marginBottom: "15px",
+                                  }}
+                                >
+                                  <Card.Body style={{ padding: "15px" }}>
+                                    <h6 style={{ color: "#28a745" }}>
+                                      Security
+                                    </h6>
+                                    <ul style={{ fontSize: "14px", margin: 0 }}>
+                                      <li>Helmet.js</li>
+                                      <li>Rate Limiting</li>
+                                      <li>Input Validation</li>
+                                    </ul>
+                                  </Card.Body>
+                                </Card>
+                              </Col>
+                              <Col md={4}>
+                                <Card
+                                  style={{
+                                    border: "1px solid #e9ecef",
+                                    borderRadius: "8px",
+                                    marginBottom: "15px",
+                                  }}
+                                >
+                                  <Card.Body style={{ padding: "15px" }}>
+                                    <h6 style={{ color: "#17a2b8" }}>
+                                      Integrations
+                                    </h6>
+                                    <ul style={{ fontSize: "14px", margin: 0 }}>
+                                      <li>Razorpay Payments</li>
+                                      <li>Cloudinary Storage</li>
+                                      <li>Nodemailer + Twilio</li>
+                                    </ul>
+                                  </Card.Body>
+                                </Card>
+                              </Col>
+                            </Row>
+                          </div>
+
+                          <Alert variant="info" style={{ borderRadius: "8px" }}>
+                            <Alert.Heading style={{ fontSize: "16px" }}>
+                              💡 Getting Started
+                            </Alert.Heading>
+                            <p style={{ marginBottom: 0 }}>
+                              This documentation provides complete code examples
+                              for implementing the Hare Krishna Medical backend.
+                              Each section includes working code with copy
+                              buttons for easy implementation. Start with the
+                              Project Setup tab to begin implementation.
+                            </p>
+                          </Alert>
+                        </Card.Body>
+                      </Card>
+                    </Tab.Pane>
+
+                    {/* Project Setup Tab */}
+                    <Tab.Pane eventKey="setup">
+                      <Card
+                        style={{
+                          border: "none",
+                          borderRadius: "16px",
+                          boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                        }}
+                      >
+                        <Card.Header
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #28a745, #20c997)",
+                            color: "white",
+                            borderRadius: "16px 16px 0 0",
+                            padding: "20px",
+                          }}
+                        >
+                          <h5 className="mb-0" style={{ fontWeight: "700" }}>
+                            <i className="bi bi-gear me-2"></i>
+                            Project Setup & Installation
+                          </h5>
+                        </Card.Header>
+                        <Card.Body style={{ padding: "30px" }}>
+                          <h6>📦 Step 1: Initialize Project</h6>
+                          <TerminalCommand
+                            command="mkdir hare-krishna-medical-backend && cd hare-krishna-medical-backend"
+                            output="Directory created successfully"
+                            description="Create project directory"
+                          />
+
+                          <TerminalCommand
+                            command="npm init -y"
+                            output="Wrote to package.json"
+                            description="Initialize Node.js project"
+                          />
+
+                          <h6>📋 Step 2: Package.json Configuration</h6>
+                          <CodeBlock
+                            title="package.json"
+                            fileName="package.json"
+                            code={backendCodes.packageJson}
+                          />
+
+                          <h6>⚙️ Step 3: Install Dependencies</h6>
+                          <TerminalCommand
+                            command="npm install express mongoose bcryptjs jsonwebtoken cors helmet express-rate-limit express-validator nodemailer multer cloudinary razorpay qrcode xlsx pdfkit twilio dotenv"
+                            output="added 157 packages, and audited 158 packages in 45s"
+                            description="Install production dependencies"
+                          />
+
+                          <TerminalCommand
+                            command="npm install --save-dev nodemon jest supertest"
+                            output="added 23 packages, and audited 181 packages in 12s"
+                            description="Install development dependencies"
+                          />
+
+                          <h6>🔧 Step 4: Environment Configuration</h6>
+                          <CodeBlock
+                            title=".env (Environment Variables)"
+                            fileName=".env"
+                            code={backendCodes.envExample}
+                          />
+
+                          <h6>🗂️ Step 5: Project Structure</h6>
+                          <TerminalCommand
+                            command="mkdir models routes middleware utils config"
+                            output="Directories created"
+                            description="Create folder structure"
+                          />
+
+                          <Alert
+                            variant="warning"
+                            style={{ borderRadius: "8px" }}
+                          >
+                            <Alert.Heading style={{ fontSize: "16px" }}>
+                              🔒 Security Note
+                            </Alert.Heading>
+                            <p style={{ marginBottom: 0 }}>
+                              Never commit your .env file to version control.
+                              Add it to .gitignore and use environment-specific
+                              configurations for different deployment
+                              environments.
+                            </p>
+                          </Alert>
+                        </Card.Body>
+                      </Card>
+                    </Tab.Pane>
+
+                    {/* Database Models Tab */}
+                    <Tab.Pane eventKey="models">
+                      <Card
+                        style={{
+                          border: "none",
+                          borderRadius: "16px",
+                          boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                        }}
+                      >
+                        <Card.Header
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #6f42c1, #6610f2)",
+                            color: "white",
+                            borderRadius: "16px 16px 0 0",
+                            padding: "20px",
+                          }}
+                        >
+                          <h5 className="mb-0" style={{ fontWeight: "700" }}>
+                            <i className="bi bi-database me-2"></i>
+                            Database Models & Schemas
+                          </h5>
+                        </Card.Header>
+                        <Card.Body style={{ padding: "30px" }}>
+                          <Accordion defaultActiveKey="0">
+                            <Accordion.Item eventKey="0">
+                              <Accordion.Header>
+                                👤 User Model (models/User.js)
+                              </Accordion.Header>
+                              <Accordion.Body>
+                                <CodeBlock
+                                  title="User Model with Authentication"
+                                  fileName="models/User.js"
+                                  code={backendCodes.userModel}
+                                />
+                              </Accordion.Body>
+                            </Accordion.Item>
+
+                            <Accordion.Item eventKey="1">
+                              <Accordion.Header>
+                                🛍️ Product Model (models/Product.js)
+                              </Accordion.Header>
+                              <Accordion.Body>
+                                <CodeBlock
+                                  title="Product Model with Search & Inventory"
+                                  fileName="models/Product.js"
+                                  code={backendCodes.productModel}
+                                />
+                              </Accordion.Body>
+                            </Accordion.Item>
+
+                            <Accordion.Item eventKey="2">
+                              <Accordion.Header>
+                                📦 Order Model (models/Order.js)
+                              </Accordion.Header>
+                              <Accordion.Body>
+                                <CodeBlock
+                                  title="Order Model with Status Tracking"
+                                  fileName="models/Order.js"
+                                  code={backendCodes.orderModel}
+                                />
+                              </Accordion.Body>
+                            </Accordion.Item>
+                          </Accordion>
+
+                          <Alert
+                            variant="info"
+                            style={{ borderRadius: "8px", marginTop: "20px" }}
+                          >
+                            <Alert.Heading style={{ fontSize: "16px" }}>
+                              📊 Database Indexes
+                            </Alert.Heading>
+                            <p style={{ marginBottom: 0 }}>
+                              All models include optimized database indexes for
+                              better query performance. The User model includes
+                              security features like account locking and
+                              password reset functionality.
+                            </p>
+                          </Alert>
+                        </Card.Body>
+                      </Card>
+                    </Tab.Pane>
+
+                    {/* API Routes Tab */}
+                    <Tab.Pane eventKey="routes">
+                      <Card
+                        style={{
+                          border: "none",
+                          borderRadius: "16px",
+                          boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                        }}
+                      >
+                        <Card.Header
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #fd7e14, #ffc107)",
+                            color: "white",
+                            borderRadius: "16px 16px 0 0",
+                            padding: "20px",
+                          }}
+                        >
+                          <h5 className="mb-0" style={{ fontWeight: "700" }}>
+                            <i className="bi bi-arrow-left-right me-2"></i>
+                            API Routes & Server Setup
+                          </h5>
+                        </Card.Header>
+                        <Card.Body style={{ padding: "30px" }}>
+                          <h6>🚀 Main Server File</h6>
+                          <CodeBlock
+                            title="Server Configuration (server.js)"
+                            fileName="server.js"
+                            code={backendCodes.serverJs}
+                          />
+
+                          <h6>🔐 Authentication Routes</h6>
+                          <CodeBlock
+                            title="Authentication Routes (routes/auth.js)"
+                            fileName="routes/auth.js"
+                            code={backendCodes.authRoutes}
+                          />
+
+                          <h6>📋 API Endpoints Overview</h6>
+                          <Row>
+                            <Col md={6}>
+                              <Card
+                                style={{
+                                  border: "1px solid #e9ecef",
+                                  borderRadius: "8px",
+                                  marginBottom: "15px",
+                                }}
+                              >
+                                <Card.Body style={{ padding: "15px" }}>
+                                  <h6 style={{ color: "#e63946" }}>
+                                    🔐 Auth Routes
+                                  </h6>
+                                  <ul style={{ fontSize: "14px", margin: 0 }}>
+                                    <li>POST /api/auth/register</li>
+                                    <li>POST /api/auth/login</li>
+                                    <li>GET /api/auth/me</li>
+                                    <li>POST /api/auth/forgot-password</li>
+                                    <li>POST /api/auth/reset-password</li>
+                                  </ul>
+                                </Card.Body>
+                              </Card>
+                            </Col>
+                            <Col md={6}>
+                              <Card
+                                style={{
+                                  border: "1px solid #e9ecef",
+                                  borderRadius: "8px",
+                                  marginBottom: "15px",
+                                }}
+                              >
+                                <Card.Body style={{ padding: "15px" }}>
+                                  <h6 style={{ color: "#28a745" }}>
+                                    🛍️ Product Routes
+                                  </h6>
+                                  <ul style={{ fontSize: "14px", margin: 0 }}>
+                                    <li>GET /api/products</li>
+                                    <li>GET /api/products/:id</li>
+                                    <li>POST /api/products (Admin)</li>
+                                    <li>PUT /api/products/:id (Admin)</li>
+                                    <li>DELETE /api/products/:id (Admin)</li>
+                                  </ul>
+                                </Card.Body>
+                              </Card>
+                            </Col>
+                          </Row>
+
+                          <h6>🔧 Starting the Server</h6>
+                          <TerminalCommand
+                            command="npm run dev"
+                            output="🚀 Server running on port 5000"
+                            description="Start development server with nodemon"
+                          />
+
+                          <TerminalCommand
+                            command="npm start"
+                            output="🚀 Server running on port 5000"
+                            description="Start production server"
+                          />
+                        </Card.Body>
+                      </Card>
+                    </Tab.Pane>
+
+                    {/* Deployment Tab */}
+                    <Tab.Pane eventKey="deployment">
+                      <Card
+                        style={{
+                          border: "none",
+                          borderRadius: "16px",
+                          boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                        }}
+                      >
+                        <Card.Header
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #dc3545, #e63946)",
+                            color: "white",
+                            borderRadius: "16px 16px 0 0",
+                            padding: "20px",
+                          }}
+                        >
+                          <h5 className="mb-0" style={{ fontWeight: "700" }}>
+                            <i className="bi bi-cloud-upload me-2"></i>
+                            Deployment Guide
+                          </h5>
+                        </Card.Header>
+                        <Card.Body style={{ padding: "30px" }}>
+                          <h6>🌐 Heroku Deployment</h6>
+                          <TerminalCommand
+                            command="heroku create hare-krishna-medical-api"
+                            output="Creating app... done, ⬢ hare-krishna-medical-api"
+                            description="Create Heroku app"
+                          />
+
+                          <TerminalCommand
+                            command="heroku config:set NODE_ENV=production"
+                            output="Setting NODE_ENV and restarting ⬢ hare-krishna-medical-api... done"
+                            description="Set environment variables"
+                          />
+
+                          <h6>🐳 Docker Deployment</h6>
+                          <CodeBlock
+                            title="Dockerfile"
+                            fileName="Dockerfile"
+                            code={`FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY . .
+
+EXPOSE 5000
+
+USER node
+
+CMD ["npm", "start"]`}
+                          />
+
+                          <TerminalCommand
+                            command="docker build -t hare-krishna-medical-api ."
+                            output="Successfully built abc123def456"
+                            description="Build Docker image"
+                          />
+
+                          <TerminalCommand
+                            command="docker run -p 5000:5000 --env-file .env hare-krishna-medical-api"
+                            output="🚀 Server running on port 5000"
+                            description="Run Docker container"
+                          />
+
+                          <h6>☁️ MongoDB Atlas Setup</h6>
+                          <TerminalCommand
+                            command="mongo 'mongodb+srv://cluster0.abc123.mongodb.net/hare-krishna-medical' --username your-username"
+                            output="MongoDB shell version v5.0.0"
+                            description="Connect to MongoDB Atlas"
+                          />
+
+                          <Alert
+                            variant="success"
+                            style={{ borderRadius: "8px" }}
+                          >
+                            <Alert.Heading style={{ fontSize: "16px" }}>
+                              ✅ Production Checklist
+                            </Alert.Heading>
+                            <ul style={{ marginBottom: 0 }}>
+                              <li>Environment variables configured</li>
+                              <li>Database connection secured</li>
+                              <li>SSL certificates installed</li>
+                              <li>Rate limiting enabled</li>
+                              <li>Monitoring and logging setup</li>
+                              <li>Backup strategy implemented</li>
+                            </ul>
+                          </Alert>
+                        </Card.Body>
+                      </Card>
                     </Tab.Pane>
                   </Tab.Content>
-                </Tab.Container>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-
-      <style>{`
-        /* File Structure Styles */
-        .structure-section {
-          margin-bottom: 30px;
-        }
-
-        .file-descriptions .file-list {
-          list-style: none;
-          padding-left: 0;
-        }
-
-        .file-descriptions .file-list li {
-          padding: 8px 0;
-          border-bottom: 1px solid #f8f9fa;
-          position: relative;
-          padding-left: 25px;
-        }
-
-        .file-descriptions .file-list li:before {
-          content: "📄";
-          position: absolute;
-          left: 0;
-          top: 8px;
-        }
-
-        .file-descriptions .file-list li:last-child {
-          border-bottom: none;
-        }
-
-        .tech-item {
-          margin-bottom: 10px;
-          display: flex;
-          align-items: center;
-        }
-
-        .feature-list {
-          list-style: none;
-          padding-left: 0;
-        }
-
-        .feature-list li {
-          padding: 5px 0;
-          position: relative;
-          padding-left: 20px;
-        }
-
-        .feature-list li:before {
-          content: "✓";
-          position: absolute;
-          left: 0;
-          color: var(--medical-red);
-          font-weight: bold;
-        }
-
-        .code-block {
-          background: #f8f9fa;
-          border: 1px solid #e9ecef;
-          border-radius: 5px;
-          padding: 15px;
-          margin: 15px 0;
-        }
-
-        .code-block pre {
-          margin: 0;
-          font-size: 14px;
-          color: #495057;
-        }
-
-        .schema-section, .api-section, .security-section, .deployment-section {
-          margin-bottom: 30px;
-        }
-
-        .api-item {
-          display: flex;
-          align-items: center;
-          padding: 10px 0;
-          border-bottom: 1px solid #f8f9fa;
-        }
-
-        .api-item .badge {
-          margin-right: 15px;
-          min-width: 60px;
-        }
-
-        .api-item span {
-          font-family: monospace;
-          margin-right: 15px;
-          font-weight: bold;
-        }
-
-        .api-item small {
-          color: #6c757d;
-        }
-
-        .security-list, .deployment-list {
-          list-style: none;
-          padding-left: 0;
-        }
-
-        .security-list li, .deployment-list li {
-          padding: 8px 0;
-          border-bottom: 1px solid #f8f9fa;
-          position: relative;
-          padding-left: 25px;
-        }
-
-        .security-list li:before, .deployment-list li:before {
-          content: "•";
-          position: absolute;
-          left: 0;
-          color: var(--medical-red);
-          font-weight: bold;
-          font-size: 1.2rem;
-        }
-      `}</style>
+                </Col>
+              </Row>
+            </Tab.Container>
+          </div>
+        </Container>
+      </section>
     </div>
   );
 };
