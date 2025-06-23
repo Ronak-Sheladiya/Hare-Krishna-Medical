@@ -29,62 +29,45 @@ const UserDashboard = () => {
 
   const [recentOrders, setRecentOrders] = useState([]);
 
-  const API_BASE_URL =
-    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-
   // Fetch user dashboard data
   const fetchUserData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      const token = localStorage.getItem("token");
-      const headers = {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-      };
+    // Fetch user orders and stats using safe API calls
+    const [ordersResult, statsResult] = await Promise.all([
+      safeApiCall(() => api.get("/api/orders/user/recent?limit=3"), []),
+      safeApiCall(() => api.get("/api/users/dashboard-stats"), {}),
+    ]);
 
-      // Fetch user orders and stats
-      const [ordersRes, statsRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/orders/user/recent?limit=3`, {
-          headers,
-        }).catch(() => null),
-        fetch(`${API_BASE_URL}/api/users/dashboard-stats`, {
-          headers,
-        }).catch(() => null),
-      ]);
+    // Process orders
+    if (ordersResult.success && ordersResult.data?.data) {
+      setRecentOrders(ordersResult.data.data);
+    }
 
-      // Process orders
-      if (ordersRes && ordersRes.ok) {
-        const ordersData = await ordersRes.json();
-        if (ordersData.success) {
-          setRecentOrders(ordersData.data || []);
-        }
-      }
-
-      // Process stats
-      if (statsRes && statsRes.ok) {
-        const statsData = await statsRes.json();
-        if (statsData.success) {
-          setUserStats((prev) => ({
-            ...prev,
-            ...statsData.data,
-          }));
-        }
-      }
-
-      // Get cart products count from localStorage or Redux
-      const cartItems = JSON.parse(localStorage.getItem("cartItems") || "[]");
+    // Process stats
+    if (statsResult.success && statsResult.data?.data) {
       setUserStats((prev) => ({
         ...prev,
-        cartProducts: cartItems.length,
+        ...statsResult.data.data,
       }));
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      setError("Unable to load dashboard data");
-    } finally {
-      setLoading(false);
     }
+
+    // Get cart products count from localStorage or Redux
+    const cartItems = JSON.parse(localStorage.getItem("cartItems") || "[]");
+    setUserStats((prev) => ({
+      ...prev,
+      cartProducts: cartItems.length,
+    }));
+
+    // Only show error if both API calls failed
+    if (!ordersResult.success && !statsResult.success) {
+      setError(
+        "Unable to load dashboard data. Please check if the backend server is running.",
+      );
+    }
+
+    setLoading(false);
   };
 
   useEffect(() => {
