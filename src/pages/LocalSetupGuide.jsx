@@ -711,14 +711,31 @@ npm run dev
                     </h6>
                   </Card.Header>
                   <Card.Body>
-                    <p>
-                      <strong>Email:</strong> admin@harekrishnamedical.com
-                    </p>
-                    <p>
-                      <strong>Password:</strong> admin123
-                    </p>
+                    <div className="mb-3">
+                      <p>
+                        <strong>Primary Admin:</strong>
+                      </p>
+                      <p>
+                        <strong>Email:</strong> admin@gmail.com
+                      </p>
+                      <p>
+                        <strong>Password:</strong> Ronak@95865
+                      </p>
+                    </div>
+                    <div className="mb-3">
+                      <p>
+                        <strong>Alternative Admin:</strong>
+                      </p>
+                      <p>
+                        <strong>Email:</strong> ronaksheladiya652@gmail.com
+                      </p>
+                      <p>
+                        <strong>Password:</strong> admin@123
+                      </p>
+                    </div>
                     <p className="text-muted small mb-0">
-                      Full access: manage products, orders, users, analytics
+                      Full access: manage products, orders, users, analytics,
+                      real-time dashboard
                     </p>
                   </Card.Body>
                 </Card>
@@ -728,18 +745,35 @@ npm run dev
                   <Card.Header className="bg-primary text-white">
                     <h6 className="mb-0">
                       <i className="bi bi-person me-2"></i>
-                      User Login
+                      Customer Login
                     </h6>
                   </Card.Header>
                   <Card.Body>
-                    <p>
-                      <strong>Email:</strong> john@example.com
-                    </p>
-                    <p>
-                      <strong>Password:</strong> user123
-                    </p>
+                    <div className="mb-3">
+                      <p>
+                        <strong>Test Customer:</strong>
+                      </p>
+                      <p>
+                        <strong>Email:</strong> user@example.com
+                      </p>
+                      <p>
+                        <strong>Password:</strong> password123
+                      </p>
+                    </div>
+                    <div className="mb-3">
+                      <p>
+                        <strong>Mobile Login:</strong>
+                      </p>
+                      <p>
+                        <strong>Mobile:</strong> 9876543210
+                      </p>
+                      <p>
+                        <strong>Password:</strong> password123
+                      </p>
+                    </div>
                     <p className="text-muted small mb-0">
-                      Customer access: place orders, view invoices, profile
+                      Customer access: shopping, orders, invoices, profile
+                      management
                     </p>
                   </Card.Body>
                 </Card>
