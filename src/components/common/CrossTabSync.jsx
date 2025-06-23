@@ -17,18 +17,19 @@ const CrossTabSync = () => {
   useEffect(() => {
     // Handle storage events (cross-tab communication)
     const handleStorageChange = (e) => {
-      if (e.key === "auth-event") {
+      if (e.key === "auth-event" && e.newValue) {
         try {
           const authEvent = JSON.parse(e.newValue);
 
-          // Ignore old events (older than 10 seconds)
-          if (Date.now() - authEvent.timestamp > 10000) {
+          // Ignore old events (older than 5 seconds)
+          if (Date.now() - authEvent.timestamp > 5000) {
             return;
           }
 
           switch (authEvent.type) {
             case "LOGIN":
-              if (!isAuthenticated || !user) {
+              // Only sync if current tab is not authenticated or has different user
+              if (!isAuthenticated || !user || user.id !== authEvent.user.id) {
                 dispatch(
                   loginSuccess({
                     user: authEvent.user,
@@ -44,6 +45,10 @@ const CrossTabSync = () => {
             case "LOGOUT":
               if (isAuthenticated) {
                 dispatch(logout());
+                // Clear the auth event to prevent loops
+                setTimeout(() => {
+                  localStorage.removeItem("auth-event");
+                }, 100);
               }
               break;
 
