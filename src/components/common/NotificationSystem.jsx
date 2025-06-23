@@ -27,95 +27,100 @@ const NotificationSystem = () => {
     return null;
   }
 
-  // Load real notifications from API
+  // Load real notifications from API with robust error handling
   useEffect(() => {
+    let isMounted = true;
     let isApiAvailable = true;
-    let retryCount = 0;
-    const maxRetries = 3;
+    let failureCount = 0;
+    const maxFailures = 2;
 
     const loadNotifications = async () => {
-      // Skip if API is known to be unavailable
-      if (!isApiAvailable && retryCount >= maxRetries) {
+      // Skip if component unmounted or API marked as unavailable
+      if (!isMounted || !isApiAvailable) {
         return;
       }
 
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        // Use the robust apiClient instead of direct fetch
+        const { api, safeApiCall } = await import("../../utils/apiClient");
 
-        const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/api/admin/notifications`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
-              "Content-Type": "application/json",
-            },
-            signal: controller.signal,
-          },
+        const { success, data, error } = await safeApiCall(
+          () => api.get("/api/admin/notifications"),
+          [],
         );
 
-        clearTimeout(timeoutId);
+        if (!isMounted) return; // Check if component is still mounted
 
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.data) {
-            dispatch({
-              type: "notifications/loadNotifications",
-              payload: data.data,
-            });
-            isApiAvailable = true;
-            retryCount = 0; // Reset retry count on success
-          }
-        } else if (response.status === 404) {
-          // Endpoint not found, mark API as unavailable
-          isApiAvailable = false;
-          console.info("Notifications endpoint not available (404)");
+        if (success && data) {
+          const notificationsData = data.data || data || [];
+          dispatch({
+            type: "notifications/loadNotifications",
+            payload: Array.isArray(notificationsData) ? notificationsData : [],
+          });
+
+          // Reset failure count on success
+          failureCount = 0;
+          isApiAvailable = true;
         } else {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          // API call failed but didn't throw
+          failureCount++;
+          if (failureCount >= maxFailures) {
+            isApiAvailable = false;
+            console.info(
+              "Notifications: API not available, switching to offline mode",
+            );
+          }
         }
       } catch (error) {
-        retryCount++;
+        if (!isMounted) return;
 
-        if (error.name === "AbortError") {
-          console.warn("Notification loading timed out");
-        } else if (error.message.includes("Failed to fetch")) {
-          console.warn("Backend API not available for notifications");
-          isApiAvailable = false;
-        } else {
-          console.warn("Failed to load notifications:", error.message);
-        }
+        failureCount++;
+        console.warn(
+          "Notifications loading failed:",
+          error.message || "Unknown error",
+        );
 
-        // Stop trying after max retries
-        if (retryCount >= maxRetries) {
+        if (failureCount >= maxFailures) {
           isApiAvailable = false;
-          console.info(
-            "Notifications: Maximum retries reached, switching to offline mode",
-          );
+          console.info("Notifications: Too many failures, disabling API calls");
         }
       }
     };
 
     if (user?.role === 1) {
-      loadNotifications();
+      // Initial load with a small delay to prevent immediate errors
+      const initialTimeout = setTimeout(() => {
+        if (isMounted) {
+          loadNotifications();
+        }
+      }, 1000);
 
-      // Only set up interval if API is available
-      let interval;
-      if (isApiAvailable) {
-        // Reload notifications every 5 minutes, but only if API is available
-        interval = setInterval(
-          () => {
-            if (isApiAvailable) {
-              loadNotifications();
-            }
-          },
-          5 * 60 * 1000,
-        );
-      }
+      // Set up interval only if we haven't failed too many times
+      let interval = null;
+      const setupInterval = () => {
+        if (isApiAvailable && isMounted) {
+          interval = setInterval(
+            () => {
+              if (isApiAvailable && isMounted) {
+                loadNotifications();
+              } else if (interval) {
+                clearInterval(interval);
+                interval = null;
+              }
+            },
+            5 * 60 * 1000,
+          ); // 5 minutes
+        }
+      };
+
+      // Setup interval after initial load
+      const intervalTimeout = setTimeout(setupInterval, 2000);
 
       return () => {
-        if (interval) {
-          clearInterval(interval);
-        }
+        isMounted = false;
+        if (initialTimeout) clearTimeout(initialTimeout);
+        if (intervalTimeout) clearTimeout(intervalTimeout);
+        if (interval) clearInterval(interval);
       };
     }
   }, [dispatch, user]);
