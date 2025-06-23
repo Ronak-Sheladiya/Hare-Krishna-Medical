@@ -17,7 +17,7 @@ import { getDemoInvoice, isDemoInvoice } from "../utils/demoInvoiceData";
 import invoiceService from "../services/InvoiceService";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import "../styles/InvoicePrintA4.css";
+import "../styles/InvoiceA4.css";
 
 const InvoiceView = () => {
   const { invoiceId } = useParams();

@@ -55,7 +55,6 @@ import LocalSetupGuide from "./pages/LocalSetupGuide.jsx";
 import NavigationTest from "./components/common/NavigationTest.jsx";
 import ButtonFixer from "./components/common/ButtonFixer.jsx";
 import FunctionalityTest from "./components/common/FunctionalityTest.jsx";
-import InvoiceQRVerify from "./pages/InvoiceQRVerify.jsx";
 import AdminPaymentMethods from "./pages/admin/AdminPaymentMethods.jsx";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
 import VerificationStatus from "./pages/VerificationStatus.jsx";
@@ -246,10 +245,7 @@ function App() {
               <Route path="/products" element={<Products />} />
               <Route path="/product/:id" element={<ProductDetails />} />
               <Route path="/invoice/:invoiceId" element={<InvoiceView />} />
-              <Route
-                path="/qr/invoice/:invoiceId"
-                element={<InvoiceQRVerify />}
-              />
+
               <Route path="/verify-email/:token" element={<VerifyEmail />} />
               <Route
                 path="/verification-status"
