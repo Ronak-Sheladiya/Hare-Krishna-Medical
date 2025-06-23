@@ -143,28 +143,7 @@ const authSlice = createSlice({
       // Store user data and token
       setStoredUser(user, rememberMe, token);
 
-      // Broadcast login to other tabs (only if not a cross-tab sync)
-      if (!skipRedirect) {
-        try {
-          window.localStorage.setItem(
-            "auth-event",
-            JSON.stringify({
-              type: "LOGIN",
-              user,
-              rememberMe,
-              timestamp: Date.now(),
-            }),
-          );
-          // Clear event after a short delay to prevent accumulation
-          setTimeout(() => {
-            try {
-              window.localStorage.removeItem("auth-event");
-            } catch (e) {}
-          }, 1000);
-        } catch (e) {
-          console.warn("Failed to broadcast login event:", e);
-        }
-      }
+      // Cross-tab broadcasting is now handled by crossTabSessionManager
 
       // Handle redirect after login (only if not a cross-tab sync)
       if (!skipRedirect) {
