@@ -426,19 +426,14 @@ const AdminPaymentMethods = () => {
                           </td>
                           <td>
                             <div className="d-flex gap-2">
-                              <Button
-                                variant="outline-primary"
+                              <ThemeButton
+                                variant="outline"
                                 size="sm"
                                 onClick={() => handleShowModal(method)}
-                              >
-                                <i className="bi bi-pencil"></i>
-                              </Button>
-                              <Button
-                                variant={
-                                  method.isActive
-                                    ? "outline-warning"
-                                    : "outline-success"
-                                }
+                                icon="bi bi-pencil"
+                              ></ThemeButton>
+                              <ThemeButton
+                                variant="outline"
                                 size="sm"
                                 onClick={() =>
                                   handleToggleStatus(
@@ -446,22 +441,16 @@ const AdminPaymentMethods = () => {
                                     method.isActive,
                                   )
                                 }
-                              >
-                                <i
-                                  className={
-                                    method.isActive
-                                      ? "bi bi-pause"
-                                      : "bi bi-play"
-                                  }
-                                ></i>
-                              </Button>
-                              <Button
-                                variant="outline-danger"
+                                icon={
+                                  method.isActive ? "bi bi-pause" : "bi bi-play"
+                                }
+                              ></ThemeButton>
+                              <ThemeButton
+                                variant="outline"
                                 size="sm"
                                 onClick={() => handleDelete(method._id)}
-                              >
-                                <i className="bi bi-trash"></i>
-                              </Button>
+                                icon="bi bi-trash"
+                              ></ThemeButton>
                             </div>
                           </td>
                         </tr>
