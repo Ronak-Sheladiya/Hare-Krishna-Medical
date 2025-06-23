@@ -156,7 +156,7 @@ const OfficialInvoiceDesign = ({ invoiceData, qrCode, forPrint = false }) => {
             </div>
           </div>
           <div style="text-align: center; margin-left: 20px;">
-            ${qrCode ? `<img src="${qrCode}" alt="QR Code" style="width: 70px; height: 70px; border: 2px solid #e63946; border-radius: 8px; padding: 3px; background: white;" />` : '<div style="width: 70px; height: 70px; border: 2px solid #e63946; border-radius: 8px; padding: 3px; background: white; display: flex; align-items: center; justify-content: center; color: #333; font-size: 10px; font-weight: bold;">QR CODE</div>'}
+            ${qrCode ? `<img src="${qrCode}" alt="QR Code" style="width: 120px; height: 120px; border: 2px solid #e63946; border-radius: 8px; padding: 3px; background: white;" />` : '<div style="width: 120px; height: 120px; border: 2px solid #e63946; border-radius: 8px; padding: 3px; background: white; display: flex; align-items: center; justify-content: center; color: #333; font-size: 10px; font-weight: bold;">QR CODE</div>'}
             <div style="font-size: 10px; margin-top: 5px; color: #666;">Scan to Verify</div>
           </div>
         </div>

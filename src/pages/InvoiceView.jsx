@@ -1,91 +1,225 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Button, Alert } from "react-bootstrap";
-import { useParams, Link, Navigate } from "react-router-dom";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Button,
+  Alert,
+  Badge,
+  Spinner,
+} from "react-bootstrap";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import OfficialInvoiceDesign from "../components/common/OfficialInvoiceDesign.jsx";
-import {
-  viewInvoice,
-  printInvoice,
-  downloadInvoice,
-  generateInvoiceQR,
-  createInvoiceData,
-} from "../utils/invoiceUtils.js";
 
 const InvoiceView = () => {
   const { orderId } = useParams();
+  const navigate = useNavigate();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [qrCode, setQrCode] = useState("");
   const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [verificationStatus, setVerificationStatus] = useState(null);
 
-  // Remove authentication check to allow QR verification by anyone
-  // Anyone can verify invoice by scanning QR without login
+  // Enhanced Button Component
+  const EnhancedButton = ({
+    children,
+    variant = "primary",
+    onClick,
+    icon,
+    style = {},
+    size = "md",
+    disabled = false,
+    to,
+  }) => {
+    const baseStyle = {
+      borderRadius: size === "lg" ? "12px" : "8px",
+      padding:
+        size === "lg" ? "12px 24px" : size === "sm" ? "6px 12px" : "8px 16px",
+      fontWeight: "600",
+      transition: "all 0.3s ease",
+      border: "none",
+      position: "relative",
+      overflow: "hidden",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      opacity: disabled ? 0.6 : 1,
+      cursor: disabled ? "not-allowed" : "pointer",
+      textDecoration: "none",
+      ...style,
+    };
+
+    const variants = {
+      primary: {
+        background: "linear-gradient(135deg, #e63946, #dc3545)",
+        color: "white",
+        boxShadow: "0 4px 15px rgba(230, 57, 70, 0.3)",
+      },
+      success: {
+        background: "linear-gradient(135deg, #28a745, #20c997)",
+        color: "white",
+        boxShadow: "0 4px 15px rgba(40, 167, 69, 0.3)",
+      },
+      info: {
+        background: "linear-gradient(135deg, #17a2b8, #20c997)",
+        color: "white",
+        boxShadow: "0 4px 15px rgba(23, 162, 184, 0.3)",
+      },
+      outline: {
+        background: "transparent",
+        border: "2px solid #e63946",
+        color: "#e63946",
+      },
+    };
+
+    const currentStyle = { ...baseStyle, ...variants[variant] };
+
+    const handleHover = (e, isHover) => {
+      if (disabled) return;
+      if (isHover) {
+        e.target.style.transform = "translateY(-2px)";
+        if (variant === "outline") {
+          e.target.style.background = "#e63946";
+          e.target.style.color = "white";
+        }
+      } else {
+        e.target.style.transform = "translateY(0)";
+        if (variant === "outline") {
+          e.target.style.background = "transparent";
+          e.target.style.color = "#e63946";
+        }
+      }
+    };
+
+    const content = (
+      <>
+        {icon && <i className={`${icon} me-2`}></i>}
+        {children}
+      </>
+    );
+
+    if (to) {
+      return (
+        <Link
+          to={to}
+          style={currentStyle}
+          onMouseEnter={(e) => handleHover(e, true)}
+          onMouseLeave={(e) => handleHover(e, false)}
+        >
+          {content}
+        </Link>
+      );
+    }
+
+    return (
+      <button
+        style={currentStyle}
+        onClick={onClick}
+        disabled={disabled}
+        onMouseEnter={(e) => handleHover(e, true)}
+        onMouseLeave={(e) => handleHover(e, false)}
+      >
+        {content}
+      </button>
+    );
+  };
 
   // Mock invoice data - in real app, this would be fetched from API
   useEffect(() => {
     const fetchInvoice = async () => {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const mockInvoice = {
-        orderId: orderId || "HKM12345678",
-        invoiceId: `INV${orderId?.slice(-6) || "123456"}`,
-        customerDetails: {
-          fullName: "John Doe",
-          email: "john.doe@example.com",
-          mobile: "+91 9876543210",
-          address: "123 Medical Street",
-          city: "Surat",
-          state: "Gujarat",
-          pincode: "395007",
-        },
-        items: [
-          {
-            id: 1,
-            name: "Paracetamol Tablets 500mg",
-            company: "Hare Krishna Pharma",
-            quantity: 2,
-            price: 25.99,
-            total: 51.98,
-          },
-          {
-            id: 2,
-            name: "Vitamin D3 Capsules",
-            company: "Health Plus",
-            quantity: 1,
-            price: 45.5,
-            total: 45.5,
-          },
-        ],
-        subtotal: 97.48,
-        shipping: 0,
-        tax: 4.87,
-        total: 102.35,
-        orderDate: "2024-01-15",
-        orderTime: "14:30:25",
-        status: "Delivered",
-        paymentMethod: "Cash on Delivery",
-        paymentStatus: "Paid",
-      };
-
-      setInvoice(mockInvoice);
-      setLoading(false);
-
-      // Generate QR code for this specific invoice
+      setLoading(true);
       try {
-        const invoiceUrl = `${window.location.origin}/invoice/${orderId}`;
-        const qrCodeDataURL = await QRCode.toDataURL(invoiceUrl, {
-          width: 200,
-          margin: 2,
-          color: {
-            dark: "#000000",
-            light: "#FFFFFF",
+        // Simulate API call
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+
+        // Check if invoice exists
+        if (!orderId || orderId === "invalid") {
+          setVerificationStatus("invalid");
+          setLoading(false);
+          return;
+        }
+
+        const mockInvoice = {
+          orderId: orderId || "HKM12345678",
+          invoiceId: `HKM-INV-2024-${orderId?.slice(-3) || "001"}`,
+          customerDetails: {
+            fullName: "John Doe",
+            email: "john.doe@example.com",
+            mobile: "+91 9876543210",
+            address: "123 Medical Street, Rander Road",
+            city: "Surat",
+            state: "Gujarat",
+            pincode: "395007",
           },
-        });
-        setQrCode(qrCodeDataURL);
+          items: [
+            {
+              id: 1,
+              name: "Paracetamol Tablets 500mg",
+              company: "Hare Krishna Pharma",
+              quantity: 2,
+              price: 25.99,
+            },
+            {
+              id: 2,
+              name: "Vitamin D3 Capsules",
+              company: "Health Plus",
+              quantity: 1,
+              price: 45.5,
+            },
+          ],
+          subtotal: 97.48,
+          shipping: 0,
+          total: 102.35,
+          paymentMethod: "Cash on Delivery",
+          paymentStatus: "Completed",
+          status: "Delivered",
+          orderDate: "2024-01-15",
+          orderTime: "14:30:25",
+          deliveryDate: "2024-01-17",
+          trackingNumber: "TRK123456789",
+        };
+
+        // Generate QR code for verification
+        const qrData = {
+          type: "invoice_verification",
+          invoice_id: mockInvoice.invoiceId,
+          order_id: mockInvoice.orderId,
+          customer_name: mockInvoice.customerDetails.fullName,
+          total_amount: `₹${mockInvoice.total.toFixed(2)}`,
+          verification_url: `${window.location.origin}/invoice/${mockInvoice.orderId}`,
+          verified_at: new Date().toISOString(),
+        };
+
+        // In real app, generate actual QR code
+        const qrCodeURL = `data:image/svg+xml,${encodeURIComponent(`
+          <svg width="180" height="180" xmlns="http://www.w3.org/2000/svg">
+            <rect width="180" height="180" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2"/>
+            <text x="90" y="90" text-anchor="middle" dy="0.3em" font-family="Arial" font-size="12" fill="#6c757d">
+              QR Code
+            </text>
+            <text x="90" y="110" text-anchor="middle" dy="0.3em" font-family="Arial" font-size="10" fill="#6c757d">
+              ${mockInvoice.invoiceId}
+            </text>
+          </svg>
+        `)}`;
+
+        setInvoice(mockInvoice);
+        setQrCode(qrCodeURL);
+        setVerificationStatus("verified");
+        setAlertMessage("Invoice verified successfully!");
+        setShowAlert(true);
+
+        // Auto-hide alert after 5 seconds
+        setTimeout(() => setShowAlert(false), 5000);
       } catch (error) {
-        console.error("Error generating QR code:", error);
+        console.error("Error fetching invoice:", error);
+        setVerificationStatus("error");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -94,300 +228,504 @@ const InvoiceView = () => {
 
   const handlePrintInvoice = async () => {
     if (!invoice) return;
-    const invoiceData = createInvoiceData(invoice);
-    await printInvoice(invoiceData, qrCode);
-  };
 
-  const handleDownloadPDF = async () => {
-    if (!invoice) return;
-    const invoiceData = createInvoiceData(invoice);
-    const success = await downloadInvoice(invoiceData, qrCode);
-    if (success) {
+    try {
+      // Create a temporary div for printing
+      const tempDiv = document.createElement("div");
+      tempDiv.style.position = "absolute";
+      tempDiv.style.left = "-9999px";
+      tempDiv.style.width = "210mm";
+      tempDiv.style.backgroundColor = "white";
+      document.body.appendChild(tempDiv);
+
+      // Import and render OfficialInvoiceDesign component
+      const React = (await import("react")).default;
+      const { createRoot } = await import("react-dom/client");
+
+      const root = createRoot(tempDiv);
+      root.render(
+        React.createElement(OfficialInvoiceDesign, {
+          invoiceData: invoice,
+          qrCode: qrCode,
+          forPrint: true,
+        }),
+      );
+
+      // Wait for rendering
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Use original print process
+      const originalContents = document.body.innerHTML;
+      document.body.innerHTML = tempDiv.innerHTML;
+      window.print();
+      document.body.innerHTML = originalContents;
+
+      // Cleanup
+      document.body.removeChild(tempDiv);
+
+      // Reload to restore original content
+      window.location.reload();
+    } catch (error) {
+      console.error("Print error:", error);
+      setAlertMessage("Error printing invoice. Please try again.");
       setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3000);
     }
   };
 
-  // Create the same colorful invoice HTML as in Order.jsx
-  const createColorfulInvoiceHTML = () => {
-    if (!invoice) return "";
+  const handleDownloadInvoice = () => {
+    if (!invoice) return;
 
-    return `
-      <div style="font-family: Arial, sans-serif; padding: 20px; background: white; max-width: 210mm; margin: 0 auto;">
-        <!-- Header Section - Colorful Design -->
-        <div style="background: linear-gradient(135deg, #ff6b6b 0%, #e74c3c 100%); color: white; padding: 25px; border-radius: 15px 15px 0 0; margin-bottom: 0;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <!-- Left Side - Company Info -->
-            <div style="flex: 1;">
-              <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                <img src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/invoice_hkm12345678-1-e0e726" alt="Logo" style="height: 70px; width: auto; margin-right: 20px; background: white; padding: 10px; border-radius: 10px;" onerror="this.src='https://via.placeholder.com/70x70?text=HKM';" />
-                <div>
-                  <h1 style="font-size: 28px; font-weight: bold; margin: 0; line-height: 1.2; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">HARE KRISHNA MEDICAL</h1>
-                  <p style="font-size: 14px; margin: 5px 0; opacity: 0.9;">Your Trusted Health Partner</p>
-                </div>
-              </div>
-              <div style="font-size: 12px; line-height: 1.6; opacity: 0.95;">
-                <div>📍 3 Sahyog Complex, Man Sarovar circle</div>
-                <div>🏙️ Amroli, 394107, Gujarat, India</div>
-                <div>📞 +91 76989 13354 | +91 91060 18508</div>
-                <div>📧 harekrishnamedical@gmail.com</div>
-              </div>
-            </div>
-            <!-- Right Side - Invoice Info -->
-            <div style="text-align: right; min-width: 250px;">
-              <h1 style="font-size: 42px; font-weight: bold; margin: 0 0 20px 0; text-shadow: 3px 3px 6px rgba(0,0,0,0.3);">INVOICE</h1>
-              <div style="background: rgba(255,255,255,0.95); color: #333; padding: 20px; border-radius: 10px; font-size: 13px; text-align: left; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
-                <div style="margin-bottom: 8px;"><strong style="color: #e74c3c;">Invoice No:</strong> ${invoice.invoiceId}</div>
-                <div style="margin-bottom: 8px;"><strong style="color: #e74c3c;">Order No:</strong> ${invoice.orderId}</div>
-                <div style="margin-bottom: 8px;"><strong style="color: #e74c3c;">Date:</strong> ${invoice.orderDate}</div>
-                <div style="margin-bottom: 8px;"><strong style="color: #e74c3c;">Time:</strong> ${invoice.orderTime}</div>
-                <div><strong style="color: #e74c3c;">Status:</strong> <span style="background: #27ae60; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px;">Delivered</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
+    // Create downloadable content
+    const invoiceContent = `
+HARE KRISHNA MEDICAL - INVOICE
+===============================
 
-        <!-- Customer Information Section - Colorful -->
-        <div style="display: flex; gap: 20px; margin-bottom: 25px; margin-top: 0;">
-          <!-- Bill To - Blue Theme -->
-          <div style="flex: 1; background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; padding: 20px; border-radius: 0 0 0 15px;">
-            <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 15px 0; text-transform: uppercase; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">📍 BILL TO:</h3>
-            <div style="font-size: 13px; line-height: 1.8;">
-              <div style="font-weight: bold; margin-bottom: 8px; font-size: 15px;">${invoice.customerDetails.fullName}</div>
-              <div>📧 ${invoice.customerDetails.email}</div>
-              <div>📱 ${invoice.customerDetails.mobile}</div>
-              <div>🏠 ${invoice.customerDetails.address}</div>
-              <div>🏙️ ${invoice.customerDetails.city}, ${invoice.customerDetails.state} ${invoice.customerDetails.pincode}</div>
-            </div>
-          </div>
-          <!-- Ship To - Green Theme -->
-          <div style="flex: 1; background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; padding: 20px; border-radius: 0 0 15px 0;">
-            <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 15px 0; text-transform: uppercase; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">🚚 SHIP TO:</h3>
-            <div style="font-size: 13px; line-height: 1.8;">
-              <div style="font-weight: bold; margin-bottom: 8px; font-size: 15px;">${invoice.customerDetails.fullName}</div>
-              <div>🏠 ${invoice.customerDetails.address}</div>
-              <div>🏙️ ${invoice.customerDetails.city}, ${invoice.customerDetails.state} ${invoice.customerDetails.pincode}</div>
-              <div style="margin-top: 12px;"><strong>💳 Payment:</strong> ${invoice.paymentMethod}</div>
-              <div><strong>✅ Status:</strong> <span style="background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 8px;">${invoice.paymentStatus}</span></div>
-            </div>
-          </div>
-        </div>
+Invoice ID: ${invoice.invoiceId}
+Order ID: ${invoice.orderId}
+Date: ${invoice.orderDate} ${invoice.orderTime}
 
-        <!-- Items Table - Colorful Design -->
-        <div style="margin-bottom: 25px;">
-          <div style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; padding: 15px 25px; font-size: 18px; font-weight: bold; text-align: center; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">🛒 ORDERED ITEMS</div>
-          <table style="width: 100%; border-collapse: collapse; border: 3px solid #9b59b6;">
-            <thead>
-              <tr style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white;">
-                <th style="border: 2px solid #e67e22; padding: 15px 10px; font-size: 13px; font-weight: bold; text-align: center; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">S.No</th>
-                <th style="border: 2px solid #e67e22; padding: 15px 10px; font-size: 13px; font-weight: bold; text-align: left; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">🏥 Description</th>
-                <th style="border: 2px solid #e67e22; padding: 15px 10px; font-size: 13px; font-weight: bold; text-align: center; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">Qty</th>
-                <th style="border: 2px solid #e67e22; padding: 15px 10px; font-size: 13px; font-weight: bold; text-align: right; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">💰 Price (₹)</th>
-                <th style="border: 2px solid #e67e22; padding: 15px 10px; font-size: 13px; font-weight: bold; text-align: right; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">💵 Amount (��)</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${invoice.items
-                .map(
-                  (item, index) => `
-                <tr style="background-color: ${index % 2 === 0 ? "#f8f9fa" : "white"};">
-                  <td style="border: 1px solid #ddd; padding: 12px 8px; font-size: 12px; text-align: center; font-weight: bold; color: #9b59b6;">${index + 1}</td>
-                  <td style="border: 1px solid #ddd; padding: 12px 8px; font-size: 12px;">
-                    <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">${item.name}</div>
-                    <div style="color: #7f8c8d; font-size: 11px; font-style: italic;">🏢 ${item.company || "Medical Product"}</div>
-                  </td>
-                  <td style="border: 1px solid #ddd; padding: 12px 8px; font-size: 12px; text-align: center;">
-                    <span style="background: #3498db; color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;">${item.quantity}</span>
-                  </td>
-                  <td style="border: 1px solid #ddd; padding: 12px 8px; font-size: 12px; text-align: right; color: #27ae60; font-weight: bold;">₹${item.price.toFixed(2)}</td>
-                  <td style="border: 1px solid #ddd; padding: 12px 8px; font-size: 13px; text-align: right; font-weight: bold; color: #e74c3c;">₹${(item.price * item.quantity).toFixed(2)}</td>
-                </tr>
-              `,
-                )
-                .join("")}
-            </tbody>
-          </table>
-        </div>
+Customer Details:
+${invoice.customerDetails.fullName}
+${invoice.customerDetails.email}
+${invoice.customerDetails.mobile}
+${invoice.customerDetails.address}
+${invoice.customerDetails.city}, ${invoice.customerDetails.state} ${invoice.customerDetails.pincode}
 
-        <!-- Totals Section - Colorful -->
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 25px;">
-          <div style="min-width: 350px;">
-            <table style="width: 100%; border-collapse: collapse; border: 3px solid #e74c3c; border-radius: 10px; overflow: hidden;">
-              <tbody>
-                <tr>
-                  <td style="background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%); border: 1px solid #bdc3c7; padding: 12px 15px; font-size: 13px; font-weight: bold; color: #2c3e50;">📊 Subtotal:</td>
-                  <td style="background: #ecf0f1; border: 1px solid #bdc3c7; padding: 12px 15px; font-size: 13px; text-align: right; color: #2c3e50; font-weight: bold;">₹${invoice.subtotal.toFixed(2)}</td>
-                </tr>
-                <tr>
-                  <td style="background: linear-gradient(135deg, #d5f4e6 0%, #a2d9ce 100%); border: 1px solid #a2d9ce; padding: 12px 15px; font-size: 13px; font-weight: bold; color: #27ae60;">🚚 Shipping:</td>
-                  <td style="background: #d5f4e6; border: 1px solid #a2d9ce; padding: 12px 15px; font-size: 13px; text-align: right; color: #27ae60; font-weight: bold;">${invoice.shipping === 0 ? "FREE 🎉" : `₹${invoice.shipping.toFixed(2)}`}</td>
-                </tr>
-                <tr>
-                  <td style="background: linear-gradient(135deg, #fdeaa7 0%, #f39c12 100%); border: 1px solid #f39c12; padding: 12px 15px; font-size: 13px; font-weight: bold; color: #f39c12;">📋 Tax (5%):</td>
-                  <td style="background: #fdeaa7; border: 1px solid #f39c12; padding: 12px 15px; font-size: 13px; text-align: right; color: #f39c12; font-weight: bold;">₹${invoice.tax.toFixed(2)}</td>
-                </tr>
-                <tr>
-                  <td style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); border: 3px solid #c0392b; padding: 18px 15px; font-size: 16px; font-weight: bold; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">💎 TOTAL:</td>
-                  <td style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); border: 3px solid #c0392b; padding: 18px 15px; font-size: 18px; text-align: right; font-weight: bold; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">₹${invoice.total.toFixed(2)}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+Items:
+${invoice.items.map((item) => `${item.name} x${item.quantity} - ₹${(item.price * item.quantity).toFixed(2)}`).join("\n")}
 
-        <!-- Footer Section - Colorful -->
-        <div style="background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="flex: 1;">
-              <h4 style="font-size: 18px; font-weight: bold; margin: 0 0 15px 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">🙏 Thank You for Your Business! 🙏</h4>
-              <div style="font-size: 12px; line-height: 1.8;">
-                <div style="margin-bottom: 10px;"><strong style="color: #f39c12;">📋 Terms & Conditions:</strong></div>
-                <div>✅ Payment due within 30 days</div>
-                <div>❌ Goods once sold will not be taken back</div>
-                <div>⚖️ Subject to Gujarat jurisdiction only</div>
-                <div style="margin-top: 12px;"><strong style="color: #3498db;">📞 Contact:</strong> harekrishnamedical@gmail.com | +91 76989 13354</div>
-              </div>
-            </div>
-            <div style="text-align: center; margin-left: 25px;">
-              ${qrCode ? `<img src="${qrCode}" alt="QR Code" style="width: 90px; height: 90px; border: 3px solid #3498db; border-radius: 10px; padding: 5px; background: white;" />` : '<div style="width: 90px; height: 90px; border: 3px solid #3498db; border-radius: 10px; padding: 5px; background: white; display: flex; align-items: center; justify-content: center; color: #333; font-weight: bold;">QR CODE</div>'}
-              <div style="font-size: 11px; margin-top: 8px; color: #ecf0f1;">📱 Scan for Online Verification</div>
-            </div>
-          </div>
-        </div>
+Subtotal: ₹${invoice.subtotal.toFixed(2)}
+Shipping: ${invoice.shipping === 0 ? "FREE" : `₹${invoice.shipping.toFixed(2)}`}
+Total: ₹${invoice.total.toFixed(2)}
 
-        <!-- Computer Generated Note -->
-        <div style="text-align: center; margin-top: 25px; font-size: 11px; color: #7f8c8d; background: #ecf0f1; padding: 12px; border-radius: 8px; border: 1px solid #bdc3c7;">
-          🖥️ This is a computer generated invoice. No physical signature required.<br />
-          📅 Generated on: ${new Date().toLocaleString()}
-        </div>
-      </div>
+Payment Method: ${invoice.paymentMethod}
+Status: ${invoice.status}
+
+This is a computer-generated invoice.
+Generated: ${new Date().toLocaleString()}
     `;
+
+    const element = document.createElement("a");
+    const file = new Blob([invoiceContent], { type: "text/plain" });
+    element.href = URL.createObjectURL(file);
+    element.download = `invoice-${invoice.invoiceId}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
   };
 
   if (loading) {
     return (
-      <Container className="text-center my-5">
-        <div
-          className="d-flex justify-content-center align-items-center"
-          style={{ height: "300px" }}
+      <div className="fade-in">
+        <section
+          style={{
+            paddingTop: "4rem",
+            paddingBottom: "4rem",
+            minHeight: "100vh",
+            background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
-          <div className="text-center">
-            <div className="spinner-border text-medical-red" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-            <p className="mt-3">Loading invoice...</p>
-          </div>
-        </div>
-      </Container>
+          <Container>
+            <Row className="justify-content-center">
+              <Col lg={6} className="text-center">
+                <Card
+                  style={{
+                    border: "none",
+                    borderRadius: "20px",
+                    boxShadow: "0 15px 50px rgba(0, 0, 0, 0.1)",
+                    padding: "40px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "80px",
+                      height: "80px",
+                      background: "linear-gradient(135deg, #e63946, #dc3545)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      margin: "0 auto 30px",
+                    }}
+                  >
+                    <Spinner
+                      animation="border"
+                      style={{ color: "white", width: "40px", height: "40px" }}
+                    />
+                  </div>
+                  <h3
+                    style={{
+                      color: "#333",
+                      fontWeight: "700",
+                      marginBottom: "15px",
+                    }}
+                  >
+                    Verifying Invoice
+                  </h3>
+                  <p style={{ color: "#6c757d", marginBottom: "0" }}>
+                    Please wait while we verify and load your invoice details...
+                  </p>
+                </Card>
+              </Col>
+            </Row>
+          </Container>
+        </section>
+      </div>
     );
   }
 
-  if (!invoice) {
+  if (verificationStatus === "invalid") {
     return (
-      <Container className="text-center my-5">
-        <Alert variant="danger" className="text-center">
-          <h4>Invoice Not Found</h4>
-          <p>The requested invoice could not be found.</p>
-          <Button as={Link} to="/" className="btn-medical-primary">
-            Go Home
-          </Button>
-        </Alert>
-      </Container>
+      <div className="fade-in">
+        <section
+          style={{
+            paddingTop: "4rem",
+            paddingBottom: "4rem",
+            minHeight: "100vh",
+            background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Container>
+            <Row className="justify-content-center">
+              <Col lg={6} className="text-center">
+                <Card
+                  style={{
+                    border: "none",
+                    borderRadius: "20px",
+                    boxShadow: "0 15px 50px rgba(0, 0, 0, 0.1)",
+                    padding: "40px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "80px",
+                      height: "80px",
+                      background: "linear-gradient(135deg, #dc3545, #e63946)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      margin: "0 auto 30px",
+                    }}
+                  >
+                    <i
+                      className="bi bi-exclamation-triangle"
+                      style={{ fontSize: "40px", color: "white" }}
+                    ></i>
+                  </div>
+                  <h3
+                    style={{
+                      color: "#dc3545",
+                      fontWeight: "700",
+                      marginBottom: "15px",
+                    }}
+                  >
+                    Invoice Not Found
+                  </h3>
+                  <p
+                    style={{
+                      color: "#6c757d",
+                      marginBottom: "30px",
+                      lineHeight: "1.6",
+                    }}
+                  >
+                    The invoice you're looking for doesn't exist or may have
+                    been removed. Please check the invoice ID and try again.
+                  </p>
+                  <div className="d-flex gap-3 justify-content-center">
+                    <EnhancedButton variant="primary" to="/" icon="bi bi-house">
+                      Go Home
+                    </EnhancedButton>
+                    <EnhancedButton
+                      variant="outline"
+                      to="/contact"
+                      icon="bi bi-envelope"
+                    >
+                      Contact Support
+                    </EnhancedButton>
+                  </div>
+                </Card>
+              </Col>
+            </Row>
+          </Container>
+        </section>
+      </div>
+    );
+  }
+
+  if (verificationStatus === "error") {
+    return (
+      <div className="fade-in">
+        <section
+          style={{
+            paddingTop: "4rem",
+            paddingBottom: "4rem",
+            minHeight: "100vh",
+            background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Container>
+            <Row className="justify-content-center">
+              <Col lg={6} className="text-center">
+                <Card
+                  style={{
+                    border: "none",
+                    borderRadius: "20px",
+                    boxShadow: "0 15px 50px rgba(0, 0, 0, 0.1)",
+                    padding: "40px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "80px",
+                      height: "80px",
+                      background: "linear-gradient(135deg, #ffc107, #fd7e14)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      margin: "0 auto 30px",
+                    }}
+                  >
+                    <i
+                      className="bi bi-wifi-off"
+                      style={{ fontSize: "40px", color: "white" }}
+                    ></i>
+                  </div>
+                  <h3
+                    style={{
+                      color: "#fd7e14",
+                      fontWeight: "700",
+                      marginBottom: "15px",
+                    }}
+                  >
+                    Connection Error
+                  </h3>
+                  <p
+                    style={{
+                      color: "#6c757d",
+                      marginBottom: "30px",
+                      lineHeight: "1.6",
+                    }}
+                  >
+                    Unable to verify invoice at the moment. Please check your
+                    internet connection and try again.
+                  </p>
+                  <EnhancedButton
+                    variant="primary"
+                    onClick={() => window.location.reload()}
+                    icon="bi bi-arrow-clockwise"
+                  >
+                    Try Again
+                  </EnhancedButton>
+                </Card>
+              </Col>
+            </Row>
+          </Container>
+        </section>
+      </div>
     );
   }
 
   return (
-    <div className="fade-in" data-page="invoice">
-      {/* Hero Section */}
+    <div className="fade-in">
       <section
         style={{
-          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
-          paddingTop: "80px",
-          paddingBottom: "80px",
-          color: "white",
+          paddingTop: "2rem",
+          paddingBottom: "2rem",
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
         }}
       >
         <Container>
-          <Row className="text-center">
-            <Col lg={12}>
-              <h1
-                style={{
-                  fontSize: "3rem",
-                  fontWeight: "800",
-                  marginBottom: "20px",
-                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
-                }}
-              >
-                Invoice Details
-              </h1>
-              <p
-                style={{
-                  fontSize: "1.2rem",
-                  opacity: "0.9",
-                  maxWidth: "600px",
-                  margin: "0 auto",
-                }}
-              >
-                Your complete invoice and order information
-              </p>
-            </Col>
-          </Row>
-        </Container>
-      </section>
-
-      {/* Invoice Content */}
-      <section
-        style={{
-          background: "#f8f9fa",
-          paddingTop: "80px",
-          paddingBottom: "80px",
-        }}
-      >
-        <Container>
+          {/* Success Alert */}
           {showAlert && (
-            <Alert variant="success" className="mb-4">
-              <i className="bi bi-check-circle me-2"></i>
-              PDF downloaded successfully!
-            </Alert>
+            <Row className="mb-4">
+              <Col lg={12}>
+                <Alert
+                  variant="success"
+                  style={{
+                    borderRadius: "12px",
+                    border: "none",
+                    background: "linear-gradient(135deg, #d4edda, #c3e6cb)",
+                    borderLeft: "5px solid #28a745",
+                  }}
+                  onClose={() => setShowAlert(false)}
+                  dismissible
+                >
+                  <Alert.Heading
+                    style={{ fontSize: "18px", fontWeight: "700" }}
+                  >
+                    <i className="bi bi-check-circle me-2"></i>
+                    Verification Successful!
+                  </Alert.Heading>
+                  <p style={{ marginBottom: "0", color: "#155724" }}>
+                    {alertMessage}
+                  </p>
+                </Alert>
+              </Col>
+            </Row>
           )}
 
-          {/* Action Buttons */}
+          {/* Header */}
           <Row className="mb-4">
-            <Col lg={12} className="text-center">
-              <div className="d-flex gap-3 justify-content-center flex-wrap">
-                <Button
-                  onClick={handleDownloadPDF}
-                  className="btn-medical-primary"
-                  size="lg"
-                  disabled={!invoice}
-                >
-                  <i className="bi bi-download me-2"></i>
-                  Download PDF
-                </Button>
-                <Button
-                  onClick={() => handlePrintInvoice()}
-                  variant="outline-primary"
-                  className="btn-medical-outline"
-                  size="lg"
-                >
-                  <i className="bi bi-printer me-2"></i>
-                  Print Invoice
-                </Button>
-                <Button
-                  as={Link}
-                  to="/user/invoices"
-                  variant="outline-secondary"
-                  className="btn-medical-outline"
-                  size="lg"
-                >
-                  <i className="bi bi-arrow-left me-2"></i>
-                  Back to Invoices
-                </Button>
-              </div>
+            <Col lg={12}>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "20px",
+                  background: "linear-gradient(135deg, #e63946, #dc3545)",
+                  color: "white",
+                  boxShadow: "0 15px 50px rgba(230, 57, 70, 0.3)",
+                }}
+              >
+                <Card.Body style={{ padding: "30px" }}>
+                  <Row className="align-items-center">
+                    <Col lg={8}>
+                      <div className="d-flex align-items-center mb-3">
+                        <div
+                          style={{
+                            width: "60px",
+                            height: "60px",
+                            background: "rgba(255, 255, 255, 0.2)",
+                            borderRadius: "50%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            marginRight: "20px",
+                          }}
+                        >
+                          <i
+                            className="bi bi-receipt-cutoff"
+                            style={{ fontSize: "28px" }}
+                          ></i>
+                        </div>
+                        <div>
+                          <h1
+                            style={{
+                              fontWeight: "800",
+                              marginBottom: "5px",
+                              fontSize: "2.2rem",
+                            }}
+                          >
+                            Invoice Verified
+                          </h1>
+                          <p
+                            style={{
+                              opacity: "0.9",
+                              marginBottom: "0",
+                              fontSize: "1.1rem",
+                            }}
+                          >
+                            {invoice?.invoiceId} • Order {invoice?.orderId}
+                          </p>
+                        </div>
+                      </div>
+                    </Col>
+                    <Col lg={4} className="text-end">
+                      <Badge
+                        style={{
+                          background: "rgba(40, 167, 69, 0.9)",
+                          color: "white",
+                          padding: "10px 20px",
+                          borderRadius: "25px",
+                          fontSize: "14px",
+                          fontWeight: "600",
+                        }}
+                      >
+                        <i className="bi bi-shield-check me-2"></i>
+                        Verified Invoice
+                      </Badge>
+                    </Col>
+                  </Row>
+                </Card.Body>
+              </Card>
             </Col>
           </Row>
 
-          {/* Official Invoice Display */}
+          {/* Invoice Actions */}
+          <Row className="mb-4">
+            <Col lg={12}>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                }}
+              >
+                <Card.Body style={{ padding: "20px" }}>
+                  <Row className="align-items-center">
+                    <Col lg={6}>
+                      <h6
+                        style={{
+                          color: "#333",
+                          fontWeight: "700",
+                          marginBottom: "5px",
+                        }}
+                      >
+                        <i className="bi bi-tools me-2"></i>
+                        Invoice Actions
+                      </h6>
+                      <small style={{ color: "#6c757d" }}>
+                        Print, download, or verify this invoice
+                      </small>
+                    </Col>
+                    <Col lg={6}>
+                      <div className="d-flex gap-2 justify-content-end">
+                        <EnhancedButton
+                          variant="success"
+                          onClick={handlePrintInvoice}
+                          icon="bi bi-printer"
+                          size="sm"
+                        >
+                          Print
+                        </EnhancedButton>
+                        <EnhancedButton
+                          variant="info"
+                          onClick={handleDownloadInvoice}
+                          icon="bi bi-download"
+                          size="sm"
+                        >
+                          Download
+                        </EnhancedButton>
+                        {isAuthenticated && (
+                          <EnhancedButton
+                            variant="outline"
+                            to="/user/orders"
+                            icon="bi bi-box-seam"
+                            size="sm"
+                          >
+                            My Orders
+                          </EnhancedButton>
+                        )}
+                        {!isAuthenticated && (
+                          <EnhancedButton
+                            variant="outline"
+                            to="/login"
+                            icon="bi bi-person"
+                            size="sm"
+                          >
+                            Login
+                          </EnhancedButton>
+                        )}
+                      </div>
+                    </Col>
+                  </Row>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
+          {/* Invoice Display */}
           <Row>
             <Col lg={12}>
               <Card
@@ -399,113 +737,73 @@ const InvoiceView = () => {
                 }}
               >
                 <Card.Body style={{ padding: "0" }}>
-                  <div id="invoice-content">
-                    <OfficialInvoiceDesign
-                      invoiceData={{
-                        invoiceId: invoice.invoiceId,
-                        orderId: invoice.orderId,
-                        orderDate: invoice.orderDate,
-                        orderTime: invoice.orderTime,
-                        customerDetails: invoice.customerDetails,
-                        items: invoice.items,
-                        subtotal: invoice.subtotal,
-                        shipping: invoice.shipping,
-                        total: invoice.total,
-                        paymentMethod: invoice.paymentMethod,
-                        paymentStatus: invoice.paymentStatus,
-                        status: invoice.status,
+                  {invoice && (
+                    <div
+                      id="invoice-display"
+                      style={{
+                        background: "white",
+                        minHeight: "600px",
                       }}
-                      qrCode={qrCode}
-                      forPrint={false}
-                    />
-                  </div>
+                    >
+                      <OfficialInvoiceDesign
+                        invoiceData={invoice}
+                        qrCode={qrCode}
+                        forPrint={false}
+                      />
+                    </div>
+                  )}
                 </Card.Body>
               </Card>
             </Col>
           </Row>
 
-          {/* QR Code Display */}
-          {qrCode && (
-            <Row className="mt-4">
-              <Col lg={12} className="text-center">
-                <Card
-                  style={{
-                    border: "none",
-                    borderRadius: "16px",
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
-                    padding: "30px",
-                  }}
-                >
-                  <h5 style={{ color: "#e63946", marginBottom: "20px" }}>
-                    📱 Invoice Verification QR Code
-                  </h5>
-                  <img
-                    src={qrCode}
-                    alt="Invoice QR Code"
-                    style={{
-                      width: "200px",
-                      height: "200px",
-                      border: "3px solid #e63946",
-                      borderRadius: "15px",
-                      padding: "10px",
-                      background: "white",
-                    }}
-                  />
-                  <p style={{ color: "#6c757d", marginTop: "15px" }}>
-                    Scan this QR code to verify invoice authenticity
-                  </p>
-                </Card>
-              </Col>
-            </Row>
-          )}
+          {/* Footer Actions */}
+          <Row className="mt-4">
+            <Col lg={12} className="text-center">
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  background: "#f8f9fa",
+                  padding: "20px",
+                }}
+              >
+                <div style={{ marginBottom: "15px" }}>
+                  <small style={{ color: "#6c757d" }}>
+                    Need help? Contact Hare Krishna Medical support
+                  </small>
+                </div>
+                <div className="d-flex gap-3 justify-content-center">
+                  <EnhancedButton
+                    variant="outline"
+                    to="/contact"
+                    icon="bi bi-envelope"
+                    size="sm"
+                  >
+                    Contact Support
+                  </EnhancedButton>
+                  <EnhancedButton
+                    variant="outline"
+                    to="/user-guide"
+                    icon="bi bi-book"
+                    size="sm"
+                  >
+                    User Guide
+                  </EnhancedButton>
+                  <EnhancedButton
+                    variant="outline"
+                    to="/"
+                    icon="bi bi-house"
+                    size="sm"
+                  >
+                    Back to Home
+                  </EnhancedButton>
+                </div>
+              </Card>
+            </Col>
+          </Row>
         </Container>
       </section>
-
-      {/* Print-optimized CSS */}
-      <style>{`
-        @media print {
-          .no-print {
-            display: none !important;
-          }
-
-          .medical-header,
-          .medical-footer,
-          nav,
-          .navbar {
-            display: none !important;
-          }
-
-          .container {
-            max-width: 100% !important;
-            padding: 0 !important;
-            margin: 0 !important;
-          }
-
-          .card,
-          .medical-card {
-            box-shadow: none !important;
-            border: none !important;
-          }
-
-          body {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            color-adjust: exact !important;
-            background: white !important;
-          }
-
-          @page {
-            margin: 0;
-            size: A4;
-          }
-
-          * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            color-adjust: exact !important;
-          }
-        }
-      `}</style>
     </div>
   );
 };

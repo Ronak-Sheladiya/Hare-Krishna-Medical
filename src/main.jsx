@@ -4,6 +4,7 @@ import { Provider } from "react-redux";
 import store from "./store/store.js";
 import App from "./App.jsx";
 import "./index.css";
+import "./utils/errorHandler.js"; // Initialize global error handling
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

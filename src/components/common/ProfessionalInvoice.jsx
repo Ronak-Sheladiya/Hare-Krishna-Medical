@@ -67,7 +67,7 @@ const ProfessionalInvoice = ({
 
         const qrText = JSON.stringify(qrData);
         const qrDataURL = await QRCode.toDataURL(qrText, {
-          width: 120,
+          width: 180,
           margin: 2,
           color: {
             dark: "#1a202c",
@@ -112,7 +112,7 @@ const ProfessionalInvoice = ({
     <style>
       @page {
         size: A4;
-        margin: 20px;
+        margin: 10px;
       }
 
       * {
@@ -134,10 +134,10 @@ const ProfessionalInvoice = ({
       .simple-invoice {
         width: 100%;
         max-width: 210mm;
-        min-height: 297mm;
+        min-height: 287mm;
         margin: 0 auto;
         background: white;
-        padding: 20px;
+        padding: 15px;
       }
 
       /* Clean Header - About Us Color Palette */
@@ -393,16 +393,16 @@ const ProfessionalInvoice = ({
       }
 
       .qr-code {
-        width: 100px;
-        height: 100px;
+        width: 140px;
+        height: 140px;
         border: 1px solid #ddd;
         border-radius: 5px;
         margin-bottom: 5px;
       }
 
       .qr-placeholder {
-        width: 100px;
-        height: 100px;
+        width: 140px;
+        height: 140px;
         border: 2px dashed #ccc;
         border-radius: 5px;
         display: flex;

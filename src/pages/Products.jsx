@@ -8,120 +8,126 @@ import {
   Card,
   InputGroup,
   Badge,
+  Alert,
+  Spinner,
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../store/slices/cartSlice.js";
-import { setProducts, updateFilters } from "../store/slices/productsSlice.js";
+import {
+  setProducts,
+  setFeaturedProducts,
+  updateFilters,
+  setLoading,
+  setError,
+} from "../store/slices/productsSlice.js";
 import ProductCard from "../components/products/ProductCard.jsx";
 
 const Products = () => {
   const dispatch = useDispatch();
-  const { products, filters } = useSelector((state) => state.products);
+  const { products, featuredProducts, filters, loading, error } = useSelector(
+    (state) => state.products,
+  );
   const [filteredProducts, setFilteredProducts] = useState([]);
 
-  // Mock products data
-  const mockProducts = [
-    {
-      id: 1,
-      name: "Paracetamol Tablets 500mg",
-      company: "Hare Krishna Pharma",
-      price: 25.99,
-      originalPrice: 30.99,
-      images: [
-        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Paracetamol+1",
-        "https://via.placeholder.com/300x250/cccccc/666666?text=Paracetamol+2",
-        "https://via.placeholder.com/300x250/b3b3b3/666666?text=Paracetamol+3",
-      ],
-      description:
-        "Effective pain relief and fever reducer for adults and children",
-      benefits: ["Quick pain relief", "Reduces fever", "Gentle on stomach"],
-      usage: "Take 1-2 tablets every 4-6 hours as needed",
-      weight: "50 tablets",
-      inStock: true,
-    },
-    {
-      id: 2,
-      name: "Vitamin D3 Capsules 60000 IU",
-      company: "Health Plus",
-      price: 45.5,
-      originalPrice: 55.0,
-      images: [
-        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Vitamin+D3+1",
-        "https://via.placeholder.com/300x250/cccccc/666666?text=Vitamin+D3+2",
-      ],
-      description: "Essential vitamin for bone health and immunity",
-      benefits: ["Stronger bones", "Better immunity", "Improved mood"],
-      usage: "One capsule weekly or as directed by physician",
-      weight: "4 capsules",
-      inStock: true,
-    },
-    {
-      id: 3,
-      name: "Cough Syrup Honey Based",
-      company: "Wellness Care",
-      price: 35.75,
-      originalPrice: 42.0,
-      images: [
-        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Cough+Syrup+1",
-        "https://via.placeholder.com/300x250/cccccc/666666?text=Cough+Syrup+2",
-      ],
-      description: "Natural cough relief formula with honey and herbs",
-      benefits: ["Soothes throat", "Reduces cough", "Natural ingredients"],
-      usage: "2 teaspoons 3 times daily after meals",
-      weight: "100ml",
-      inStock: true,
-    },
-    {
-      id: 4,
-      name: "Antiseptic Liquid 500ml",
-      company: "Safe Guard",
-      price: 28.0,
-      originalPrice: 35.0,
-      images: [
-        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Antiseptic+1",
-      ],
-      description: "Multipurpose antiseptic for wound care and cleaning",
-      benefits: ["Kills 99.9% germs", "Prevents infection", "Multipurpose use"],
-      usage: "Dilute with water and apply to affected area",
-      weight: "500ml",
-      inStock: true,
-    },
-    {
-      id: 5,
-      name: "Blood Pressure Monitor Digital",
-      company: "Med Tech",
-      price: 1299.99,
-      originalPrice: 1599.99,
-      images: [
-        "https://via.placeholder.com/300x250/e6e6e6/666666?text=BP+Monitor+1",
-        "https://via.placeholder.com/300x250/cccccc/666666?text=BP+Monitor+2",
-      ],
-      description: "Accurate digital blood pressure monitor for home use",
-      benefits: ["Easy to use", "Memory storage", "Large display"],
-      usage: "Place cuff on arm and press start button",
-      weight: "500g",
-      inStock: true,
-    },
-    {
-      id: 6,
-      name: "Protein Powder Chocolate",
-      company: "Nutri Health",
-      price: 899.0,
-      originalPrice: 1099.0,
-      images: [
-        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Protein+1",
-      ],
-      description: "High-quality whey protein for muscle building",
-      benefits: ["Muscle growth", "Post-workout recovery", "Great taste"],
-      usage: "Mix 1 scoop with 250ml water or milk",
-      weight: "1kg",
-      inStock: false,
-    },
+  const API_BASE_URL =
+    process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+
+  // Categories for filtering
+  const categories = [
+    "Pain Relief",
+    "Vitamins",
+    "Cough & Cold",
+    "First Aid",
+    "Medical Devices",
+    "Supplements",
+    "Antibiotics",
+    "Diabetes Care",
+    "Heart Health",
+    "Digestive Health",
   ];
 
+  // Fetch products from API
+  const fetchProducts = async () => {
+    try {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+
+      const queryParams = new URLSearchParams({
+        ...(filters.search && { search: filters.search }),
+        ...(filters.category && { category: filters.category }),
+        ...(filters.priceSort && { sort: filters.priceSort }),
+        limit: 50, // Get more products for better filtering
+      });
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/products/public?${queryParams}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (!response.ok) {
+        // If API fails, don't show error - just show empty state
+        console.warn("Products API not available, using empty state");
+        dispatch(setProducts([]));
+        dispatch(setFeaturedProducts([]));
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        dispatch(setProducts(data.data.products || []));
+        // Get featured products (first 6 products or products marked as featured)
+        const featured =
+          data.data.featured || data.data.products?.slice(0, 6) || [];
+        dispatch(setFeaturedProducts(featured));
+      } else {
+        console.warn("Products API response not successful");
+        dispatch(setProducts([]));
+        dispatch(setFeaturedProducts([]));
+      }
+    } catch (error) {
+      console.warn("Error fetching products:", error);
+      // Don't show error to user - gracefully degrade to empty state
+      dispatch(setProducts([]));
+      dispatch(setFeaturedProducts([]));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  // Fetch featured products separately
+  const fetchFeaturedProducts = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/products/featured`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          dispatch(setFeaturedProducts(data.data || []));
+        }
+      }
+    } catch (error) {
+      console.warn("Error fetching featured products:", error);
+    }
+  };
+
   useEffect(() => {
-    dispatch(setProducts(mockProducts));
-  }, [dispatch]);
+    fetchProducts();
+    fetchFeaturedProducts();
+  }, []);
+
+  useEffect(() => {
+    // Re-fetch when filters change
+    fetchProducts();
+  }, [filters.search, filters.category, filters.priceSort]);
 
   useEffect(() => {
     let filtered = [...products];
@@ -130,400 +136,418 @@ const Products = () => {
     if (filters.search) {
       filtered = filtered.filter(
         (product) =>
-          product.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+          product.name?.toLowerCase().includes(filters.search.toLowerCase()) ||
           product.company
-            .toLowerCase()
+            ?.toLowerCase()
             .includes(filters.search.toLowerCase()) ||
           product.description
-            .toLowerCase()
+            ?.toLowerCase()
             .includes(filters.search.toLowerCase()),
+      );
+    }
+
+    // Apply category filter
+    if (filters.category) {
+      filtered = filtered.filter(
+        (product) => product.category === filters.category,
       );
     }
 
     // Apply price sorting
     if (filters.priceSort === "low-to-high") {
-      filtered.sort((a, b) => a.price - b.price);
+      filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
     } else if (filters.priceSort === "high-to-low") {
-      filtered.sort((a, b) => b.price - a.price);
+      filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
     }
 
     setFilteredProducts(filtered);
   }, [products, filters]);
 
-  const handleAddToCart = (product) => {
-    dispatch(addToCart(product));
-  };
-
-  const handleSearchChange = (e) => {
-    dispatch(updateFilters({ search: e.target.value }));
-  };
-
   const handleFilterChange = (filterType, value) => {
     dispatch(updateFilters({ [filterType]: value }));
   };
 
+  const clearFilters = () => {
+    dispatch(
+      updateFilters({
+        search: "",
+        category: "",
+        priceSort: "",
+      }),
+    );
+  };
+
+  const handleAddToCart = (product) => {
+    // Convert API product format to cart format
+    const cartItem = {
+      id: product._id || product.id,
+      name: product.name,
+      price: product.price,
+      originalPrice: product.originalPrice,
+      images: product.images || [],
+      company: product.company,
+      inStock: product.stock > 0,
+      stock: product.stock,
+    };
+
+    dispatch(addToCart(cartItem));
+  };
+
+  const getStockStatus = (stock) => {
+    if (!stock || stock === 0) return "Out of Stock";
+    if (stock <= 10) return "Low Stock";
+    return "In Stock";
+  };
+
+  const getStockBadge = (stock) => {
+    if (!stock || stock === 0) return <Badge bg="danger">Out of Stock</Badge>;
+    if (stock <= 10) return <Badge bg="warning">Low Stock</Badge>;
+    return <Badge bg="success">In Stock</Badge>;
+  };
+
   return (
     <div className="fade-in">
-      {/* Hero Section - Matching About Us */}
-      <section
-        style={{
-          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
-          paddingTop: "80px",
-          paddingBottom: "80px",
-          color: "white",
-        }}
-      >
+      {/* Hero Section */}
+      <section className="medical-hero-sm">
         <Container>
-          <Row className="text-center">
-            <Col lg={12}>
-              <h1
-                style={{
-                  fontSize: "3rem",
-                  fontWeight: "800",
-                  marginBottom: "20px",
-                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
-                }}
-              >
-                Our Medical Products
+          <Row className="align-items-center">
+            <Col lg={6}>
+              <h1 className="display-5 fw-bold text-dark mb-3">
+                Medical Products
               </h1>
-              <p
-                style={{
-                  fontSize: "1.2rem",
-                  opacity: "0.9",
-                  maxWidth: "600px",
-                  margin: "0 auto",
-                }}
-              >
-                Quality healthcare products for your medical needs
+              <p className="lead text-muted mb-4">
+                Discover our comprehensive range of quality medical products,
+                medicines, and healthcare essentials for your wellness needs.
               </p>
+            </Col>
+            <Col lg={6} className="text-center">
+              <img
+                src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_products_hero-a1b2c3?format=webp&width=600"
+                alt="Medical Products"
+                className="img-fluid"
+                style={{ maxHeight: "300px" }}
+              />
             </Col>
           </Row>
         </Container>
       </section>
 
       {/* Filters Section */}
-      <section
-        style={{
-          background: "#ffffff",
-          paddingTop: "60px",
-          paddingBottom: "40px",
-        }}
-      >
+      <section className="section-padding-sm bg-light">
         <Container>
           <Row className="mb-4">
-            <Col lg={8} md={8} className="mb-3">
-              <InputGroup className="search-container">
-                <InputGroup.Text
-                  style={{
-                    background: "white",
-                    borderColor: "#e63946",
-                    color: "#e63946",
-                  }}
-                >
-                  <i className="bi bi-search"></i>
-                </InputGroup.Text>
-                <Form.Control
-                  type="text"
-                  placeholder="Search products, brands..."
-                  value={filters.search}
-                  onChange={handleSearchChange}
-                  style={{
-                    borderColor: "#e63946",
-                    borderLeft: "none",
-                  }}
-                />
-              </InputGroup>
-            </Col>
-            <Col lg={4} md={4} className="mb-3">
-              <Form.Select
-                value={filters.priceSort}
-                onChange={(e) =>
-                  handleFilterChange("priceSort", e.target.value)
-                }
-                style={{
-                  borderColor: "#e63946",
-                }}
-              >
-                <option value="">Sort by Price</option>
-                <option value="low-to-high">Low to High</option>
-                <option value="high-to-low">High to Low</option>
-              </Form.Select>
+            <Col lg={12}>
+              <Card className="medical-card">
+                <Card.Body>
+                  <Row className="align-items-center">
+                    <Col lg={4}>
+                      <InputGroup>
+                        <InputGroup.Text>
+                          <i className="bi bi-search"></i>
+                        </InputGroup.Text>
+                        <Form.Control
+                          type="text"
+                          placeholder="Search products..."
+                          value={filters.search}
+                          onChange={(e) =>
+                            handleFilterChange("search", e.target.value)
+                          }
+                        />
+                      </InputGroup>
+                    </Col>
+                    <Col lg={3}>
+                      <Form.Select
+                        value={filters.category}
+                        onChange={(e) =>
+                          handleFilterChange("category", e.target.value)
+                        }
+                      >
+                        <option value="">All Categories</option>
+                        {categories.map((category) => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                      </Form.Select>
+                    </Col>
+                    <Col lg={3}>
+                      <Form.Select
+                        value={filters.priceSort}
+                        onChange={(e) =>
+                          handleFilterChange("priceSort", e.target.value)
+                        }
+                      >
+                        <option value="">Sort by Price</option>
+                        <option value="low-to-high">Price: Low to High</option>
+                        <option value="high-to-low">Price: High to Low</option>
+                      </Form.Select>
+                    </Col>
+                    <Col lg={2}>
+                      <Button
+                        variant="outline-secondary"
+                        onClick={clearFilters}
+                        className="w-100"
+                      >
+                        Clear Filters
+                      </Button>
+                    </Col>
+                  </Row>
+                </Card.Body>
+              </Card>
             </Col>
           </Row>
 
-          {/* View Controls */}
-          <Row className="mb-4">
-            <Col lg={6}>
-              <p className="text-muted mb-0">
-                Showing {filteredProducts.length} of {products.length} products
-              </p>
-            </Col>
-            <Col lg={6} className="text-end">
-              <div className="btn-group" role="group">
-                <Button
-                  variant={
-                    filters.viewMode === "card"
-                      ? "primary"
-                      : "outline-secondary"
-                  }
-                  onClick={() => handleFilterChange("viewMode", "card")}
-                  style={{
-                    backgroundColor:
-                      filters.viewMode === "card" ? "#e63946" : "transparent",
-                    borderColor: "#e63946",
-                    color: filters.viewMode === "card" ? "white" : "#e63946",
-                  }}
-                  title="Grid View"
-                >
-                  <i className="bi bi-grid3x3-gap me-1"></i>
-                  <i className="bi bi-folder2-open"></i>
-                </Button>
-                <Button
-                  variant={
-                    filters.viewMode === "list"
-                      ? "primary"
-                      : "outline-secondary"
-                  }
-                  onClick={() => handleFilterChange("viewMode", "list")}
-                  style={{
-                    backgroundColor:
-                      filters.viewMode === "list" ? "#e63946" : "transparent",
-                    borderColor: "#e63946",
-                    color: filters.viewMode === "list" ? "white" : "#e63946",
-                  }}
-                  title="List View"
-                >
-                  <i className="bi bi-list me-1"></i>
-                  <i className="bi bi-folder-symlink"></i>
-                </Button>
+          {/* Results Summary */}
+          <Row className="mb-3">
+            <Col lg={12}>
+              <div className="d-flex justify-content-between align-items-center">
+                <h5 className="mb-0">
+                  {loading ? (
+                    <span>Loading products...</span>
+                  ) : (
+                    <span>
+                      {filteredProducts.length} Product
+                      {filteredProducts.length !== 1 ? "s" : ""} Found
+                      {filters.search && ` for "${filters.search}"`}
+                      {filters.category && ` in ${filters.category}`}
+                    </span>
+                  )}
+                </h5>
+                <div className="d-flex align-items-center">
+                  <Form.Check
+                    type="switch"
+                    id="view-mode-switch"
+                    label={
+                      filters.viewMode === "card" ? "Card View" : "List View"
+                    }
+                    checked={filters.viewMode === "list"}
+                    onChange={(e) =>
+                      handleFilterChange(
+                        "viewMode",
+                        e.target.checked ? "list" : "card",
+                      )
+                    }
+                  />
+                </div>
               </div>
             </Col>
           </Row>
         </Container>
       </section>
 
-      {/* Products Grid/List */}
-      <section
-        style={{
-          background: "#f8f9fa",
-          paddingTop: "60px",
-          paddingBottom: "80px",
-        }}
-      >
+      {/* Products Section */}
+      <section className="section-padding">
         <Container>
-          {filteredProducts.length === 0 ? (
-            <Row>
-              <Col lg={12} className="text-center">
-                <Card
-                  style={{
-                    border: "2px solid #f8f9fa",
-                    borderRadius: "16px",
-                    padding: "50px",
-                    textAlign: "center",
-                    boxShadow: "0 8px 25px rgba(0,0,0,0.05)",
-                  }}
-                >
-                  <i
-                    className="bi bi-search display-1 mb-3"
-                    style={{ color: "#e9ecef" }}
-                  ></i>
-                  <h4 style={{ color: "#495057" }}>No products found</h4>
-                  <p style={{ color: "#6c757d" }}>
-                    Try adjusting your search criteria
-                  </p>
-                  <Button
-                    onClick={() =>
-                      dispatch(
-                        updateFilters({
-                          search: "",
-                          priceSort: "",
-                        }),
-                      )
-                    }
-                    style={{
-                      background: "#e63946",
-                      border: "none",
-                      borderRadius: "8px",
-                      padding: "12px 24px",
-                    }}
-                  >
-                    Clear Filters
-                  </Button>
-                </Card>
-              </Col>
-            </Row>
-          ) : filters.viewMode === "card" ? (
+          {loading ? (
+            <div className="text-center py-5">
+              <Spinner animation="border" role="status" size="lg">
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
+              <p className="mt-3 text-muted">Loading products...</p>
+            </div>
+          ) : error ? (
+            <Alert variant="warning" className="text-center">
+              <i className="bi bi-exclamation-triangle me-2"></i>
+              Unable to load products. Please try again later.
+              <Button
+                variant="outline-primary"
+                size="sm"
+                className="ms-3"
+                onClick={() => fetchProducts()}
+              >
+                Retry
+              </Button>
+            </Alert>
+          ) : filteredProducts.length > 0 ? (
             <Row>
               {filteredProducts.map((product) => (
-                <Col lg={3} md={6} className="mb-4" key={product.id}>
-                  <ProductCard
-                    product={product}
-                    onAddToCart={handleAddToCart}
-                  />
+                <Col
+                  key={product._id || product.id}
+                  lg={filters.viewMode === "list" ? 12 : 4}
+                  md={filters.viewMode === "list" ? 12 : 6}
+                  className="mb-4"
+                >
+                  {filters.viewMode === "list" ? (
+                    // List View
+                    <Card className="medical-card h-100">
+                      <Row className="g-0">
+                        <Col md={3}>
+                          <div className="position-relative">
+                            <img
+                              src={
+                                product.images?.[0] ||
+                                `https://via.placeholder.com/300x200/e6e6e6/666666?text=${encodeURIComponent(product.name || "Product")}`
+                              }
+                              alt={product.name}
+                              className="img-fluid h-100 w-100"
+                              style={{ objectFit: "cover", minHeight: "200px" }}
+                            />
+                            {product.originalPrice &&
+                              product.originalPrice > product.price && (
+                                <Badge
+                                  bg="danger"
+                                  className="position-absolute top-0 start-0 m-2"
+                                >
+                                  {Math.round(
+                                    ((product.originalPrice - product.price) /
+                                      product.originalPrice) *
+                                      100,
+                                  )}
+                                  % OFF
+                                </Badge>
+                              )}
+                          </div>
+                        </Col>
+                        <Col md={9}>
+                          <Card.Body className="d-flex flex-column h-100">
+                            <div className="flex-grow-1">
+                              <div className="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                  <h5 className="card-title text-medical-blue">
+                                    {product.name}
+                                  </h5>
+                                  <p className="text-muted small mb-1">
+                                    {product.company}
+                                  </p>
+                                </div>
+                                <div className="text-end">
+                                  <div className="fw-bold text-medical-red fs-5">
+                                    ₹{(product.price || 0).toFixed(2)}
+                                  </div>
+                                  {product.originalPrice &&
+                                    product.originalPrice > product.price && (
+                                      <small className="text-muted text-decoration-line-through">
+                                        ₹{product.originalPrice.toFixed(2)}
+                                      </small>
+                                    )}
+                                </div>
+                              </div>
+
+                              <div className="mb-2">
+                                <Badge bg="secondary" className="me-2">
+                                  {product.category || "General"}
+                                </Badge>
+                                {getStockBadge(product.stock)}
+                              </div>
+
+                              <p className="card-text text-muted">
+                                {product.description ||
+                                  "Quality medical product for your health needs."}
+                              </p>
+
+                              {product.benefits &&
+                                product.benefits.length > 0 && (
+                                  <ul className="list-unstyled small text-muted">
+                                    {product.benefits
+                                      .slice(0, 3)
+                                      .map((benefit, index) => (
+                                        <li key={index}>
+                                          <i className="bi bi-check-circle-fill text-success me-2"></i>
+                                          {benefit}
+                                        </li>
+                                      ))}
+                                  </ul>
+                                )}
+                            </div>
+
+                            <div className="mt-3">
+                              <div className="d-flex gap-2">
+                                <Button
+                                  variant="primary"
+                                  onClick={() => handleAddToCart(product)}
+                                  disabled={
+                                    !product.stock || product.stock === 0
+                                  }
+                                  className="btn-medical-primary flex-grow-1"
+                                >
+                                  <i className="bi bi-cart-plus me-2"></i>
+                                  {!product.stock || product.stock === 0
+                                    ? "Out of Stock"
+                                    : "Add to Cart"}
+                                </Button>
+                                <Button
+                                  variant="outline-primary"
+                                  href={`/products/${product._id || product.id}`}
+                                  className="btn-medical-outline"
+                                >
+                                  <i className="bi bi-eye me-2"></i>
+                                  View
+                                </Button>
+                              </div>
+                            </div>
+                          </Card.Body>
+                        </Col>
+                      </Row>
+                    </Card>
+                  ) : (
+                    // Card View
+                    <ProductCard
+                      product={product}
+                      onAddToCart={() => handleAddToCart(product)}
+                    />
+                  )}
                 </Col>
               ))}
             </Row>
           ) : (
-            <Row>
-              <Col lg={12}>
-                {filteredProducts.map((product) => (
-                  <Card
-                    key={product.id}
-                    style={{
-                      border: "2px solid #f8f9fa",
-                      borderRadius: "16px",
-                      marginBottom: "20px",
-                      boxShadow: "0 8px 25px rgba(0,0,0,0.05)",
-                      transition: "all 0.3s ease",
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.borderColor = "#e63946";
-                      e.currentTarget.style.transform = "translateY(-2px)";
-                      e.currentTarget.style.boxShadow =
-                        "0 12px 35px rgba(230, 57, 70, 0.15)";
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.borderColor = "#f8f9fa";
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow =
-                        "0 8px 25px rgba(0,0,0,0.05)";
-                    }}
-                  >
-                    <Row className="g-0">
-                      <Col md={3}>
-                        <Card.Img
-                          variant="top"
-                          src={product.images[0]}
-                          className="h-100"
-                          style={{
-                            objectFit: "cover",
-                            borderRadius: "16px 0 0 16px",
-                          }}
-                        />
-                      </Col>
-                      <Col md={9}>
-                        <Card.Body style={{ padding: "30px" }}>
-                          <Row>
-                            <Col md={8}>
-                              <h5
-                                style={{
-                                  color: "#333333",
-                                  fontWeight: "700",
-                                  marginBottom: "8px",
-                                }}
-                              >
-                                {product.name}
-                              </h5>
-                              <p
-                                style={{
-                                  color: "#6c757d",
-                                  marginBottom: "8px",
-                                  fontSize: "14px",
-                                }}
-                              >
-                                by {product.company}
-                              </p>
-                              <p
-                                style={{
-                                  color: "#495057",
-                                  marginBottom: "12px",
-                                  fontSize: "13px",
-                                }}
-                              >
-                                {product.description}
-                              </p>
-                              <div className="mb-2">
-                                {product.inStock ? (
-                                  <Badge
-                                    style={{
-                                      background: "#38a169",
-                                      color: "white",
-                                      padding: "6px 12px",
-                                      borderRadius: "20px",
-                                    }}
-                                  >
-                                    In Stock
-                                  </Badge>
-                                ) : (
-                                  <Badge
-                                    style={{
-                                      background: "#e63946",
-                                      color: "white",
-                                      padding: "6px 12px",
-                                      borderRadius: "20px",
-                                    }}
-                                  >
-                                    Out of Stock
-                                  </Badge>
-                                )}
-                              </div>
-                            </Col>
-                            <Col md={4} className="text-end">
-                              <div className="mb-3">
-                                <span
-                                  style={{
-                                    fontSize: "1.5rem",
-                                    fontWeight: "700",
-                                    color: "#e63946",
-                                  }}
-                                >
-                                  ₹{product.price}
-                                </span>
-                                {product.originalPrice && (
-                                  <span
-                                    style={{
-                                      color: "#6c757d",
-                                      textDecoration: "line-through",
-                                      marginLeft: "8px",
-                                    }}
-                                  >
-                                    ₹{product.originalPrice}
-                                  </span>
-                                )}
-                              </div>
-                              <div className="d-grid gap-2">
-                                <Button
-                                  onClick={() => handleAddToCart(product)}
-                                  disabled={!product.inStock}
-                                  style={{
-                                    background: product.inStock
-                                      ? "#e63946"
-                                      : "#6c757d",
-                                    border: "none",
-                                    borderRadius: "8px",
-                                    padding: "12px 24px",
-                                    fontWeight: "600",
-                                  }}
-                                >
-                                  {product.inStock
-                                    ? "Add to Cart"
-                                    : "Out of Stock"}
-                                </Button>
-                                <Button
-                                  variant="outline-secondary"
-                                  size="sm"
-                                  href={`/products/${product.id}`}
-                                  style={{
-                                    borderColor: "#e63946",
-                                    color: "#e63946",
-                                    borderRadius: "8px",
-                                  }}
-                                >
-                                  View Details
-                                </Button>
-                              </div>
-                            </Col>
-                          </Row>
-                        </Card.Body>
-                      </Col>
-                    </Row>
-                  </Card>
-                ))}
-              </Col>
-            </Row>
+            // Empty State
+            <div className="text-center py-5">
+              <i
+                className="bi bi-box text-muted"
+                style={{ fontSize: "4rem" }}
+              ></i>
+              <h4 className="text-muted mt-3">No Products Found</h4>
+              <p className="text-muted">
+                {filters.search || filters.category
+                  ? "Try adjusting your search filters to find more products."
+                  : "Products will be available soon. Please check back later."}
+              </p>
+              {(filters.search || filters.category) && (
+                <Button
+                  variant="primary"
+                  onClick={clearFilters}
+                  className="btn-medical-primary"
+                >
+                  <i className="bi bi-arrow-clockwise me-2"></i>
+                  Clear Filters
+                </Button>
+              )}
+            </div>
           )}
         </Container>
       </section>
+
+      {/* Featured Products Section */}
+      {featuredProducts.length > 0 && (
+        <section className="section-padding bg-light">
+          <Container>
+            <Row className="mb-4">
+              <Col lg={12} className="text-center">
+                <h2 className="fw-bold text-medical-blue">Featured Products</h2>
+                <p className="text-muted">
+                  Discover our most popular and recommended medical products
+                </p>
+              </Col>
+            </Row>
+            <Row>
+              {featuredProducts.slice(0, 6).map((product) => (
+                <Col
+                  key={`featured-${product._id || product.id}`}
+                  lg={4}
+                  md={6}
+                  className="mb-4"
+                >
+                  <ProductCard
+                    product={product}
+                    onAddToCart={() => handleAddToCart(product)}
+                    featured={true}
+                  />
+                </Col>
+              ))}
+            </Row>
+          </Container>
+        </section>
+      )}
     </div>
   );
 };
