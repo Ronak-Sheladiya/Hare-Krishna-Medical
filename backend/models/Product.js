@@ -66,6 +66,14 @@ const productSchema = new mongoose.Schema(
         message: 'Product must have between 1 and 5 images'
       }
     },
+    // Legacy image structure - keeping for backward compatibility
+    imageUrls: [
+      {
+        url: String,
+        public_id: String,
+        alt: String,
+      },
+    ],
     specifications: {
     specifications: {
       composition: String,
