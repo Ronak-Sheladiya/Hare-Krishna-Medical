@@ -13,6 +13,7 @@ import {
 import { useDispatch } from "react-redux";
 import { addMessage } from "../store/slices/messageSlice";
 import { getCurrentISOString } from "../utils/dateUtils";
+import { PageHeroSection } from "../components/common/ConsistentTheme";
 
 const Contact = () => {
   const dispatch = useDispatch();
