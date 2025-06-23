@@ -85,7 +85,7 @@ const Login = () => {
       // Check for admin credentials
       if (
         (emailOrMobile === "admin@gmail.com" && password === "Ronak@95865") ||
-        (emailOrMobile === "ronaksheladiya62@gmail.com" &&
+        (emailOrMobile === "ronaksheladiya652@gmail.com" &&
           password === "admin@123") ||
         (emailOrMobile === "mayurgajera098@gmail.com" &&
           password === "admin@123")
@@ -93,13 +93,13 @@ const Login = () => {
         const adminUser = {
           id: 1,
           fullName:
-            emailOrMobile === "ronaksheladiya62@gmail.com"
+            emailOrMobile === "ronaksheladiya652@gmail.com"
               ? "Ronak Sheladiya"
               : emailOrMobile === "mayurgajera098@gmail.com"
                 ? "Mayur Gajera"
                 : "Admin",
           name:
-            emailOrMobile === "ronaksheladiya62@gmail.com"
+            emailOrMobile === "ronaksheladiya652@gmail.com"
               ? "Ronak Sheladiya"
               : emailOrMobile === "mayurgajera098@gmail.com"
                 ? "Mayur Gajera"
