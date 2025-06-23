@@ -538,9 +538,38 @@ const UserInvoices = () => {
           <Modal.Body>
             {selectedInvoice && (
               <OfficialInvoiceDesign
-                invoice={selectedInvoice}
+                invoiceData={{
+                  invoiceId: selectedInvoice.invoiceId || selectedInvoice._id,
+                  orderId: selectedInvoice.orderId,
+                  orderDate: new Date(
+                    selectedInvoice.createdAt,
+                  ).toLocaleDateString("en-IN"),
+                  orderTime: new Date(
+                    selectedInvoice.createdAt,
+                  ).toLocaleTimeString("en-IN"),
+                  customerDetails: {
+                    fullName: selectedInvoice.customerName,
+                    email: selectedInvoice.customerEmail,
+                    mobile: selectedInvoice.customerMobile,
+                    address: selectedInvoice.customerAddress,
+                    city: selectedInvoice.customerCity,
+                    state: selectedInvoice.customerState,
+                    pincode: selectedInvoice.customerPincode,
+                  },
+                  items: selectedInvoice.items || [],
+                  subtotal:
+                    selectedInvoice.subtotal || selectedInvoice.totalAmount,
+                  shipping: selectedInvoice.shipping || 0,
+                  total: selectedInvoice.totalAmount,
+                  paymentMethod: selectedInvoice.paymentMethod || "COD",
+                  paymentStatus:
+                    selectedInvoice.paymentStatus || selectedInvoice.status,
+                  status: selectedInvoice.status,
+                }}
+                qrCode={selectedInvoice.qrCode}
                 onPrint={() => handlePrintInvoice(selectedInvoice)}
                 onDownload={() => handleDownloadInvoice(selectedInvoice)}
+                showActionButtons={true}
               />
             )}
           </Modal.Body>
