@@ -209,11 +209,22 @@ function App() {
               <Route path="/user-guide" element={<UserGuide />} />
               <Route path="/backend-docs" element={<BackendDocs />} />
               <Route path="/localsetup-guide" element={<LocalSetupGuide />} />
-              <Route path="/navigation-test" element={<NavigationTest />} />
+              <Route
+                path="/navigation-test"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <NavigationTest />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/button-fixer" element={<ButtonFixer />} />
               <Route
                 path="/functionality-test"
-                element={<FunctionalityTest />}
+                element={
+                  <ProtectedRoute adminOnly>
+                    <FunctionalityTest />
+                  </ProtectedRoute>
+                }
               />
               <Route path="/cart" element={<Cart />} />
               <Route path="/order" element={<Order />} />

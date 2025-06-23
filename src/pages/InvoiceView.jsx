@@ -128,95 +128,95 @@ const InvoiceView = () => {
     );
   };
 
-  // Mock invoice data - in real app, this would be fetched from API
+  // Fetch real invoice data from API
   useEffect(() => {
     const fetchInvoice = async () => {
       setLoading(true);
       try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-
-        // Check if invoice exists
-        if (!orderId || orderId === "invalid") {
+        if (!orderId) {
           setVerificationStatus("invalid");
           setLoading(false);
           return;
         }
 
-        const mockInvoice = {
-          orderId: orderId || "HKM12345678",
-          invoiceId: `HKM-INV-2024-${orderId?.slice(-3) || "001"}`,
-          customerDetails: {
-            fullName: "John Doe",
-            email: "john.doe@example.com",
-            mobile: "+91 9876543210",
-            address: "123 Medical Street, Rander Road",
-            city: "Surat",
-            state: "Gujarat",
-            pincode: "395007",
+        // Try to fetch from API first
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/api/invoices/${orderId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+            },
           },
-          items: [
-            {
-              id: 1,
-              name: "Paracetamol Tablets 500mg",
-              company: "Hare Krishna Pharma",
-              quantity: 2,
-              price: 25.99,
-            },
-            {
-              id: 2,
-              name: "Vitamin D3 Capsules",
-              company: "Health Plus",
-              quantity: 1,
-              price: 45.5,
-            },
-          ],
-          subtotal: 97.48,
-          shipping: 0,
-          total: 102.35,
-          paymentMethod: "Cash on Delivery",
-          paymentStatus: "Completed",
-          status: "Delivered",
-          orderDate: "2024-01-15",
-          orderTime: "14:30:25",
-          deliveryDate: "2024-01-17",
-          trackingNumber: "TRK123456789",
-        };
+        );
 
-        // Generate QR code for verification
-        const qrData = {
-          type: "invoice_verification",
-          invoice_id: mockInvoice.invoiceId,
-          order_id: mockInvoice.orderId,
-          customer_name: mockInvoice.customerDetails.fullName,
-          total_amount: `₹${mockInvoice.total.toFixed(2)}`,
-          verification_url: `${window.location.origin}/invoice/${mockInvoice.orderId}`,
-          verified_at: new Date().toISOString(),
-        };
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            const invoiceData = data.data;
 
-        // In real app, generate actual QR code
-        const qrCodeURL = `data:image/svg+xml,${encodeURIComponent(`
-          <svg width="180" height="180" xmlns="http://www.w3.org/2000/svg">
-            <rect width="180" height="180" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2"/>
-            <text x="90" y="90" text-anchor="middle" dy="0.3em" font-family="Arial" font-size="12" fill="#6c757d">
-              QR Code
-            </text>
-            <text x="90" y="110" text-anchor="middle" dy="0.3em" font-family="Arial" font-size="10" fill="#6c757d">
-              ${mockInvoice.invoiceId}
-            </text>
-          </svg>
-        `)}`;
+            // Ensure tax is 0 and statuses are correct for real data
+            const processedInvoiceData = {
+              ...invoiceData,
+              tax: 0,
+              status: invoiceData.status || "Pending",
+              paymentStatus: invoiceData.paymentStatus || "Pending",
+            };
 
-        setInvoice(mockInvoice);
-        setQrCode(qrCodeURL);
-        setVerificationStatus("verified");
-        setAlertMessage("Invoice verified successfully!");
-        setShowAlert(true);
+            // Generate real QR code
+            try {
+              const QRCode = (await import("qrcode")).default;
+              const qrData = {
+                type: "invoice_verification",
+                invoice_id:
+                  processedInvoiceData.invoiceId || processedInvoiceData._id,
+                order_id: processedInvoiceData.orderId,
+                customer_name:
+                  processedInvoiceData.customerName ||
+                  processedInvoiceData.customerDetails?.fullName,
+                total_amount: `₹${processedInvoiceData.total.toFixed(2)}`,
+                verification_url: `${window.location.origin}/qr/invoice/${processedInvoiceData._id}`,
+                verified_at: new Date().toISOString(),
+              };
 
-        // Auto-hide alert after 5 seconds
-        setTimeout(() => setShowAlert(false), 5000);
+              const qrCodeURL = await QRCode.toDataURL(JSON.stringify(qrData));
+              setQrCode(qrCodeURL);
+            } catch (qrError) {
+              console.warn("QR Code generation failed:", qrError);
+              // Fallback to placeholder
+              setQrCode(
+                `data:image/svg+xml,${encodeURIComponent(`
+                <svg width="180" height="180" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="180" height="180" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2"/>
+                  <text x="90" y="90" text-anchor="middle" dy="0.3em" font-family="Arial" font-size="12" fill="#6c757d">
+                    QR Code
+                  </text>
+                </svg>
+              `)}`,
+              );
+            }
+
+            setInvoice(processedInvoiceData);
+            setVerificationStatus("verified");
+            setAlertMessage("Invoice loaded from database successfully!");
+            setShowAlert(true);
+            setTimeout(() => setShowAlert(false), 5000);
+          } else {
+            setError(data.message || "Invoice not found");
+            setVerificationStatus("not_found");
+          }
+        } else if (response.status === 404) {
+          setError("Invoice not found");
+          setVerificationStatus("not_found");
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
       } catch (error) {
         console.error("Error fetching invoice:", error);
+        setError(
+          "Unable to load invoice. Please check your connection and try again.",
+        );
         setVerificationStatus("error");
       } finally {
         setLoading(false);
@@ -230,45 +230,63 @@ const InvoiceView = () => {
     if (!invoice) return;
 
     try {
-      // Create a temporary div for printing
-      const tempDiv = document.createElement("div");
-      tempDiv.style.position = "absolute";
-      tempDiv.style.left = "-9999px";
-      tempDiv.style.width = "210mm";
-      tempDiv.style.backgroundColor = "white";
-      document.body.appendChild(tempDiv);
+      // Get the invoice display element
+      const invoiceElement = document.getElementById("invoice-display");
+      if (!invoiceElement) {
+        throw new Error("Invoice display not found");
+      }
 
-      // Import and render OfficialInvoiceDesign component
-      const React = (await import("react")).default;
-      const { createRoot } = await import("react-dom/client");
+      // Create a new window for printing
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) {
+        throw new Error("Popup blocked. Please allow popups and try again.");
+      }
 
-      const root = createRoot(tempDiv);
-      root.render(
-        React.createElement(OfficialInvoiceDesign, {
-          invoiceData: invoice,
-          qrCode: qrCode,
-          forPrint: true,
-        }),
-      );
+      // Create print-friendly HTML
+      const printHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Invoice ${invoice.invoiceId || invoice._id}</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: Arial, sans-serif; background: white; }
+            .print-container { padding: 20px; max-width: 210mm; margin: 0 auto; }
+            .no-print { display: none !important; }
+            @media print {
+              body { margin: 0; }
+              .print-container { padding: 10mm; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="print-container">
+            ${invoiceElement.innerHTML}
+          </div>
+        </body>
+        </html>
+      `;
 
-      // Wait for rendering
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Write HTML to print window
+      printWindow.document.write(printHTML);
+      printWindow.document.close();
 
-      // Use original print process
-      const originalContents = document.body.innerHTML;
-      document.body.innerHTML = tempDiv.innerHTML;
-      window.print();
-      document.body.innerHTML = originalContents;
+      // Wait for content to load
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 500);
+      };
 
-      // Cleanup
-      document.body.removeChild(tempDiv);
-
-      // Reload to restore original content
-      window.location.reload();
+      setAlertMessage("Opening print dialog...");
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
     } catch (error) {
       console.error("Print error:", error);
-      setAlertMessage("Error printing invoice. Please try again.");
+      setAlertMessage(`Print error: ${error.message}`);
       setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 5000);
     }
   };
 

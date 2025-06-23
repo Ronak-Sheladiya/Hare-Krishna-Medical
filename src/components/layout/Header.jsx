@@ -106,18 +106,6 @@ const Header = () => {
               >
                 Contact
               </Nav.Link>
-              {process.env.NODE_ENV === "development" && (
-                <Nav.Link
-                  as={Link}
-                  to="/functionality-test"
-                  className={
-                    isActiveRoute("/functionality-test") ? "active" : ""
-                  }
-                  style={{ color: "#e63946" }}
-                >
-                  🔧 Test
-                </Nav.Link>
-              )}
             </Nav>
 
             <Nav className="ms-auto d-flex align-items-center">
@@ -216,6 +204,18 @@ const Header = () => {
                         <Dropdown.Item as={Link} to="/admin/messages">
                           <i className="bi bi-envelope me-2"></i>
                           Messages
+                        </Dropdown.Item>
+                        <Dropdown.Divider />
+                        <Dropdown.Header>
+                          <small className="text-muted">Admin Tools</small>
+                        </Dropdown.Header>
+                        <Dropdown.Item as={Link} to="/functionality-test">
+                          <i className="bi bi-gear me-2"></i>
+                          Functionality Test
+                        </Dropdown.Item>
+                        <Dropdown.Item as={Link} to="/navigation-test">
+                          <i className="bi bi-list-ul me-2"></i>
+                          Navigation Test
                         </Dropdown.Item>
                       </>
                     )}

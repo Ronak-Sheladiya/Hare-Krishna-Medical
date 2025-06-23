@@ -13,7 +13,6 @@ import {
   markAllAsRead,
   removeNotification,
   hideToast,
-  simulateNotifications,
 } from "../../store/slices/notificationSlice";
 
 const NotificationSystem = () => {
@@ -28,17 +27,103 @@ const NotificationSystem = () => {
     return null;
   }
 
-  // Simulate real-time notifications every 30 seconds (for demo)
+  // Load real notifications from API with robust error handling
   useEffect(() => {
-    const interval = setInterval(() => {
-      // Only simulate notifications if there are less than 10 unread
-      if (unreadCount < 10 && Math.random() > 0.7) {
-        dispatch(simulateNotifications());
-      }
-    }, 30000);
+    let isMounted = true;
+    let isApiAvailable = true;
+    let failureCount = 0;
+    const maxFailures = 2;
 
-    return () => clearInterval(interval);
-  }, [dispatch, unreadCount]);
+    const loadNotifications = async () => {
+      // Skip if component unmounted or API marked as unavailable
+      if (!isMounted || !isApiAvailable) {
+        return;
+      }
+
+      try {
+        // Use the robust apiClient instead of direct fetch
+        const { api, safeApiCall } = await import("../../utils/apiClient");
+
+        const { success, data, error } = await safeApiCall(
+          () => api.get("/api/admin/notifications"),
+          [],
+        );
+
+        if (!isMounted) return; // Check if component is still mounted
+
+        if (success && data) {
+          const notificationsData = data.data || data || [];
+          dispatch({
+            type: "notifications/loadNotifications",
+            payload: Array.isArray(notificationsData) ? notificationsData : [],
+          });
+
+          // Reset failure count on success
+          failureCount = 0;
+          isApiAvailable = true;
+        } else {
+          // API call failed but didn't throw
+          failureCount++;
+          if (failureCount >= maxFailures) {
+            isApiAvailable = false;
+            console.info(
+              "Notifications: API not available, switching to offline mode",
+            );
+          }
+        }
+      } catch (error) {
+        if (!isMounted) return;
+
+        failureCount++;
+        console.warn(
+          "Notifications loading failed:",
+          error.message || "Unknown error",
+        );
+
+        if (failureCount >= maxFailures) {
+          isApiAvailable = false;
+          console.info("Notifications: Too many failures, disabling API calls");
+        }
+      }
+    };
+
+    if (user?.role === 1) {
+      // Initial load with a small delay to prevent immediate errors
+      const initialTimeout = setTimeout(() => {
+        if (isMounted) {
+          loadNotifications();
+        }
+      }, 1000);
+
+      // Set up interval only if we haven't failed too many times
+      let interval = null;
+      const setupInterval = () => {
+        if (isApiAvailable && isMounted) {
+          interval = setInterval(
+            () => {
+              if (isApiAvailable && isMounted) {
+                loadNotifications();
+              } else if (interval) {
+                clearInterval(interval);
+                interval = null;
+              }
+            },
+            5 * 60 * 1000,
+          ); // 5 minutes
+        }
+      };
+
+      // Setup interval after initial load
+      const intervalTimeout = setTimeout(setupInterval, 2000);
+
+      return () => {
+        isMounted = false;
+        if (initialTimeout) clearTimeout(initialTimeout);
+        if (intervalTimeout) clearTimeout(intervalTimeout);
+        if (interval) clearInterval(interval);
+      };
+    }
+  }, [dispatch, user]);
 
   const handleMarkAsRead = (id) => {
     dispatch(markAsRead(id));

@@ -60,34 +60,11 @@ const InvoiceQRVerify = () => {
         setError("Invoice not found or has been deleted");
         setVerificationStatus("not_found");
       } else {
-        // If API is not available, create mock invoice for demo
-        const mockInvoice = {
-          _id: invoiceId,
-          invoiceNumber: `INV-${invoiceId.slice(-8).toUpperCase()}`,
-          customerName: "Demo Customer",
-          customerEmail: "customer@example.com",
-          customerPhone: "+91 9876543210",
-          items: [
-            {
-              name: "Sample Medicine",
-              quantity: 2,
-              price: 25.5,
-              total: 51.0,
-            },
-          ],
-          subtotal: 51.0,
-          tax: 2.55,
-          total: 53.55,
-          status: "paid",
-          issueDate: new Date().toISOString(),
-          dueDate: new Date(
-            Date.now() + 30 * 24 * 60 * 60 * 1000,
-          ).toISOString(),
-          isVerified: true,
-          qrGenerated: true,
-        };
-        setInvoice(mockInvoice);
-        setVerificationStatus("verified");
+        // If API is not available, set error status
+        setError(
+          "Unable to connect to server. Please check your connection and try again.",
+        );
+        setVerificationStatus("error");
       }
     } catch (error) {
       console.error("Error verifying invoice:", error);
@@ -388,18 +365,16 @@ const InvoiceQRVerify = () => {
                           </strong>
                         </td>
                       </tr>
-                      {invoice.tax > 0 && (
-                        <tr>
-                          <td colSpan="3">
-                            <strong>Tax:</strong>
-                          </td>
-                          <td className="text-end">
-                            <strong>
-                              ₹{parseFloat(invoice.tax).toFixed(2)}
-                            </strong>
-                          </td>
-                        </tr>
-                      )}
+                      <tr>
+                        <td colSpan="3">
+                          <strong>Tax:</strong>
+                        </td>
+                        <td className="text-end">
+                          <strong className="text-success">
+                            Included in product price
+                          </strong>
+                        </td>
+                      </tr>
                       <tr className="table-primary">
                         <td colSpan="3">
                           <strong>Total Amount:</strong>
