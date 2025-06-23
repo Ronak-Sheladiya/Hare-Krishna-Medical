@@ -83,11 +83,28 @@ const Login = () => {
       const { emailOrMobile, password } = formData;
 
       // Check for admin credentials
-      if (emailOrMobile === "admin@gmail.com" && password === "Ronak@95865") {
+      if (
+        (emailOrMobile === "admin@gmail.com" && password === "Ronak@95865") ||
+        (emailOrMobile === "ronaksheladiya62@gmail.com" &&
+          password === "admin@123") ||
+        (emailOrMobile === "mayurgajera098@gmail.com" &&
+          password === "admin@123")
+      ) {
         const adminUser = {
           id: 1,
-          name: "Admin",
-          email: "admin@gmail.com",
+          fullName:
+            emailOrMobile === "ronaksheladiya62@gmail.com"
+              ? "Ronak Sheladiya"
+              : emailOrMobile === "mayurgajera098@gmail.com"
+                ? "Mayur Gajera"
+                : "Admin",
+          name:
+            emailOrMobile === "ronaksheladiya62@gmail.com"
+              ? "Ronak Sheladiya"
+              : emailOrMobile === "mayurgajera098@gmail.com"
+                ? "Mayur Gajera"
+                : "Admin",
+          email: emailOrMobile,
           role: 1, // Admin role
           profileImage: null,
         };
@@ -110,6 +127,7 @@ const Login = () => {
       ) {
         const user = {
           id: 2,
+          fullName: "John Doe",
           name: "John Doe",
           email: "user@example.com",
           mobile: "9876543210",
@@ -139,6 +157,18 @@ const Login = () => {
       type: "Admin",
       email: "admin@gmail.com",
       password: "Ronak@95865",
+      description: "Access admin dashboard",
+    },
+    {
+      type: "Admin (Ronak)",
+      email: "ronaksheladiya62@gmail.com",
+      password: "admin@123",
+      description: "Access admin dashboard",
+    },
+    {
+      type: "Admin (Mayur)",
+      email: "mayurgajera098@gmail.com",
+      password: "admin@123",
       description: "Access admin dashboard",
     },
     {

@@ -155,6 +155,7 @@ const Register = () => {
     setTimeout(() => {
       const newUser = {
         id: Date.now(),
+        fullName: formData.fullName,
         name: formData.fullName,
         email: formData.email,
         mobile: formData.mobile,
