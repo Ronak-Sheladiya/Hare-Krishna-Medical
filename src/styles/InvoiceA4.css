@@ -1,27 +1,30 @@
 /* A4 Invoice Print Styles */
 @media print {
   /* Reset all margins and padding for print */
-  * {
+  html,
+  body {
     margin: 0 !important;
     padding: 0 !important;
     box-sizing: border-box !important;
+    font-family: "Segoe UI", Arial, sans-serif !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   /* Page setup for A4 */
   @page {
     size: A4 portrait;
-    margin: 0;
-    padding: 0;
+    margin: 10mm;
   }
 
   /* Hide everything except invoice content */
   body * {
-    visibility: hidden;
+    visibility: hidden !important;
   }
 
   #invoice-content,
   #invoice-content * {
-    visibility: visible;
+    visibility: visible !important;
   }
 
   /* Position invoice content to fill A4 page */
@@ -30,17 +33,19 @@
     left: 0 !important;
     top: 0 !important;
     width: 210mm !important;
-    height: 297mm !important;
+    min-height: 277mm !important;
+    max-height: 277mm !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 15mm !important;
     box-shadow: none !important;
     border-radius: 0 !important;
     border: none !important;
     background: white !important;
-    font-size: 10px !important;
-    line-height: 1.3 !important;
-    page-break-inside: avoid;
-    overflow: hidden !important;
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+    page-break-inside: avoid !important;
+    overflow: visible !important;
+    transform: none !important;
   }
 
   /* Hide non-print elements */
@@ -209,15 +214,77 @@
   line-height: 1.4;
   color: #333;
   position: relative;
+  overflow: hidden;
 }
 
-/* Responsive design for smaller screens */
+/* Responsive design for tablets */
+@media (max-width: 1024px) {
+  .invoice-a4 {
+    width: 95%;
+    margin: 10px auto;
+    min-height: auto;
+    max-width: 750px;
+  }
+}
+
+/* Responsive design for mobile devices */
 @media (max-width: 768px) {
   .invoice-a4 {
     width: 100%;
     min-height: auto;
-    margin: 10px;
+    margin: 5px auto;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 0;
+  }
+
+  .invoice-a4 .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .invoice-a4 .col-lg-6 {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    margin-bottom: 15px !important;
+  }
+
+  .invoice-a4 h1 {
+    font-size: 1.8rem !important;
+  }
+
+  .invoice-a4 h5 {
+    font-size: 1rem !important;
+  }
+
+  .invoice-a4 .table {
+    font-size: 11px !important;
+  }
+
+  .invoice-a4 .table th,
+  .invoice-a4 .table td {
+    padding: 8px 4px !important;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .invoice-a4 {
+    font-size: 12px;
+    line-height: 1.3;
+  }
+
+  .invoice-a4 .table {
+    font-size: 10px !important;
+  }
+
+  .invoice-a4 .table th,
+  .invoice-a4 .table td {
+    padding: 6px 2px !important;
+  }
+
+  .qr-code-container img {
+    width: 80px !important;
+    height: 80px !important;
   }
 }
 
