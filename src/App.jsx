@@ -21,6 +21,7 @@ import RealTimeSync from "./components/common/RealTimeSync.jsx";
 import RealTimeStatus from "./components/common/RealTimeStatus.jsx";
 import SocketDiagnostic from "./components/common/SocketDiagnostic.jsx";
 import SessionStatus from "./components/common/SessionStatus.jsx";
+import SecurityLayer from "./components/common/SecurityLayer.jsx";
 
 // Pages
 import Home from "./pages/Home.jsx";
@@ -66,6 +67,7 @@ import socketClient from "./utils/socketClient.simple";
 
 // Styles
 import "./App.css";
+import "./styles/SecurityStyles.css";
 
 // ScrollToTop Component
 const ScrollToTop = () => {
@@ -227,6 +229,7 @@ function App() {
     <Router>
       <ErrorBoundary>
         <div className="App">
+          <SecurityLayer />
           <RealTimeSync />
           <ScrollToTop />
           <Header />

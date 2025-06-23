@@ -348,7 +348,7 @@ const InvoiceView = () => {
                 <Button
                   variant="light"
                   onClick={handlePrint}
-                  className="no-print"
+                  className="no-print print-button"
                   style={{ borderRadius: "8px", fontWeight: "600" }}
                 >
                   <i className="bi bi-printer me-2"></i>
@@ -357,7 +357,7 @@ const InvoiceView = () => {
                 <Button
                   variant="outline-light"
                   onClick={handleDownload}
-                  className="no-print"
+                  className="no-print print-button"
                   style={{ borderRadius: "8px", fontWeight: "600" }}
                 >
                   <i className="bi bi-download me-2"></i>
@@ -387,6 +387,7 @@ const InvoiceView = () => {
                     <Button
                       variant="outline-primary"
                       onClick={handlePrint}
+                      className="print-button"
                       style={{ borderRadius: "8px", fontWeight: "600" }}
                     >
                       <i className="bi bi-printer me-2"></i>
@@ -395,6 +396,7 @@ const InvoiceView = () => {
                     <Button
                       variant="outline-success"
                       onClick={handleDownload}
+                      className="print-button"
                       style={{ borderRadius: "8px", fontWeight: "600" }}
                     >
                       <i className="bi bi-download me-2"></i>
