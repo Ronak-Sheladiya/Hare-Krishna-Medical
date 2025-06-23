@@ -123,7 +123,7 @@ const authSlice = createSlice({
       state.error = null;
     },
     loginSuccess: (state, action) => {
-      const { user, rememberMe = false } = action.payload;
+      const { user, rememberMe = false, skipRedirect = false } = action.payload;
       state.loading = false;
       state.isAuthenticated = true;
       state.user = user;
@@ -139,22 +139,26 @@ const authSlice = createSlice({
         JSON.stringify({
           type: "LOGIN",
           user,
+          rememberMe,
           timestamp: Date.now(),
         }),
       );
 
-      // Handle redirect after login
-      const redirectUrl = sessionStorage.getItem("redirectAfterLogin");
-      if (
-        redirectUrl &&
-        redirectUrl !== "/login" &&
-        redirectUrl !== "/register"
-      ) {
-        sessionStorage.removeItem("redirectAfterLogin");
-        // Use setTimeout to allow Redux state to update
-        setTimeout(() => {
-          window.location.href = redirectUrl;
-        }, 100);
+      // Handle redirect after login (only if not a cross-tab sync)
+      if (!skipRedirect) {
+        const redirectUrl = sessionStorage.getItem("redirectAfterLogin");
+        if (
+          redirectUrl &&
+          redirectUrl !== "/login" &&
+          redirectUrl !== "/register" &&
+          redirectUrl !== "/access-denied"
+        ) {
+          sessionStorage.removeItem("redirectAfterLogin");
+          // Use setTimeout to allow Redux state to update
+          setTimeout(() => {
+            window.location.href = redirectUrl;
+          }, 100);
+        }
       }
     },
     loginFailure: (state, action) => {
