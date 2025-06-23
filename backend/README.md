@@ -119,13 +119,15 @@ backend/
 │   ├── User.js              # User schema
 │   ├── Product.js           # Product schema
 │   ├── Order.js             # Order schema
-│   └── Invoice.js           # Invoice schema
+│   ├── Invoice.js           # Invoice schema
+│   └── Verification.js      # Email/mobile verification schema
 ├── routes/
 │   ├── auth.js              # Authentication routes
 │   ├── users.js             # User management routes
 │   ├── products.js          # Product CRUD routes
 │   ├── orders.js            # Order processing routes
 │   ├── invoices.js          # Invoice management routes
+│   ├── verification.js      # Email/mobile verification routes
 │   ├── analytics.js         # Analytics & reporting routes
 │   ├── messages.js          # Contact & messaging routes
 │   └── upload.js            # File upload routes
@@ -198,6 +200,15 @@ Authorization: Bearer <your-jwt-token>
 - `PUT /api/users/admin/:id/status` - Update user status (Admin)
 - `PUT /api/users/admin/:id/role` - Update user role (Admin)
 
+### Verification
+
+- `POST /api/verification/send-email-verification` - Send email verification link
+- `GET /api/verification/verify-email/:token` - Verify email with token (Public)
+- `POST /api/verification/send-mobile-otp` - Send mobile OTP
+- `POST /api/verification/verify-mobile-otp` - Verify mobile OTP
+- `GET /api/verification/status` - Get verification status
+- `POST /api/verification/resend-email` - Resend email verification
+
 ### Analytics
 
 - `GET /api/analytics/dashboard` - Get dashboard statistics (Admin)
@@ -268,6 +279,77 @@ The API supports real-time updates using Socket.io:
 - QR code integration
 - Payment status tracking
 - PDF generation support
+
+### Verification Model
+
+- Email and mobile verification workflow
+- OTP generation and validation
+- Verification status tracking
+- Security measures and rate limiting
+
+## 🔗 QR Code Enhancements
+
+### Direct Invoice Verification
+
+QR codes on invoices now contain direct links to invoice verification pages:
+
+- **QR Content**: Direct URL to `/invoice-verify/:invoiceId`
+- **Public Access**: No authentication required for invoice verification
+- **Mobile Friendly**: Optimized for mobile scanning and viewing
+- **Secure**: Invoice verification through backend validation
+
+### Implementation
+
+```javascript
+// QR code contains direct verification URL
+const verificationUrl = `${FRONTEND_URL}/invoice-verify/${invoiceId}`;
+
+// Generate QR code with direct URL
+const qrCode = await QRCode.toDataURL(verificationUrl, {
+  width: 180,
+  margin: 2,
+  errorCorrectionLevel: "M",
+});
+```
+
+## ⚡ Real-time Features
+
+### Frontend Integration
+
+The frontend includes Socket.io client integration for real-time updates:
+
+```javascript
+import socketClient from "./utils/socketClient";
+
+// Connect when user authenticates
+socketClient.connect(token, userRole);
+
+// Listen for real-time events
+socketClient.on("new-order", (data) => {
+  // Handle new order notification
+});
+```
+
+### Admin Real-time Events
+
+- `new-user-registered` - New user registration notifications
+- `new-order` - Instant order notifications with sound alerts
+- `payment-status-updated` - Real-time payment status changes
+- `stock-updated` - Low stock alerts and inventory updates
+- `new-message` - Contact form message notifications
+
+### User Real-time Events
+
+- `order-created` - Order confirmation notifications
+- `order-status-changed` - Delivery status updates
+- `payment-status-changed` - Payment confirmation updates
+
+### Notification System
+
+- Browser push notifications for critical updates
+- Sound alerts for admin notifications
+- Visual indicators in dashboard for new events
+- Auto-refresh dashboard data without page reload
 
 ## 🧪 Testing
 
