@@ -226,6 +226,7 @@ function App() {
       <ErrorBoundary>
         <div className="App">
           <CrossTabSync />
+          <RealTimeSync />
           <ScrollToTop />
           <Header />
           <main>
