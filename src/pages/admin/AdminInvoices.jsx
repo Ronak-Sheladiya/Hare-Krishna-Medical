@@ -1148,7 +1148,7 @@ const AdminInvoices = () => {
                             </small>
                           </td>
                           <td style={{ padding: "15px" }}>
-                            <div className="d-flex gap-2">
+                            <div className="d-flex gap-1 flex-wrap">
                               <Button
                                 variant="outline-primary"
                                 size="sm"
@@ -1157,6 +1157,7 @@ const AdminInvoices = () => {
                                   borderRadius: "6px",
                                   fontWeight: "600",
                                 }}
+                                title="View Invoice"
                               >
                                 <i className="bi bi-eye"></i>
                               </Button>
@@ -1168,9 +1169,99 @@ const AdminInvoices = () => {
                                   borderRadius: "6px",
                                   fontWeight: "600",
                                 }}
+                                title="Print Invoice"
                               >
                                 <i className="bi bi-printer"></i>
                               </Button>
+                              <Button
+                                variant="outline-info"
+                                size="sm"
+                                onClick={() => handleDownloadInvoice(invoice)}
+                                style={{
+                                  borderRadius: "6px",
+                                  fontWeight: "600",
+                                }}
+                                title="Download PDF"
+                              >
+                                <i className="bi bi-download"></i>
+                              </Button>
+                              <Dropdown>
+                                <Dropdown.Toggle
+                                  variant="outline-warning"
+                                  size="sm"
+                                  style={{
+                                    borderRadius: "6px",
+                                    fontWeight: "600",
+                                    border: "1px solid #ffc107",
+                                  }}
+                                  title="Change Payment Status"
+                                >
+                                  <i className="bi bi-gear"></i>
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                  <Dropdown.Header>
+                                    Payment Status
+                                  </Dropdown.Header>
+                                  <Dropdown.Item
+                                    onClick={() =>
+                                      handlePaymentStatusChange(
+                                        invoice.id,
+                                        "Paid",
+                                      )
+                                    }
+                                    className={
+                                      invoice.status === "Paid" ? "active" : ""
+                                    }
+                                  >
+                                    <i className="bi bi-check-circle text-success me-2"></i>
+                                    Mark as Paid
+                                  </Dropdown.Item>
+                                  <Dropdown.Item
+                                    onClick={() =>
+                                      handlePaymentStatusChange(
+                                        invoice.id,
+                                        "Pending",
+                                      )
+                                    }
+                                    className={
+                                      invoice.status === "Pending"
+                                        ? "active"
+                                        : ""
+                                    }
+                                  >
+                                    <i className="bi bi-clock text-warning me-2"></i>
+                                    Mark as Pending
+                                  </Dropdown.Item>
+                                  <Dropdown.Divider />
+                                  <Dropdown.Header>
+                                    Payment Method
+                                  </Dropdown.Header>
+                                  <Dropdown.Item
+                                    onClick={() =>
+                                      handlePaymentStatusChange(
+                                        invoice.id,
+                                        invoice.status,
+                                        "Online",
+                                      )
+                                    }
+                                  >
+                                    <i className="bi bi-credit-card text-primary me-2"></i>
+                                    Change to Online
+                                  </Dropdown.Item>
+                                  <Dropdown.Item
+                                    onClick={() =>
+                                      handlePaymentStatusChange(
+                                        invoice.id,
+                                        invoice.status,
+                                        "COD",
+                                      )
+                                    }
+                                  >
+                                    <i className="bi bi-cash text-success me-2"></i>
+                                    Change to COD
+                                  </Dropdown.Item>
+                                </Dropdown.Menu>
+                              </Dropdown>
                             </div>
                           </td>
                         </tr>
