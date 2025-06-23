@@ -26,7 +26,7 @@ class ErrorHandler {
       });
 
       // Don't prevent default for development
-      if (process.env.NODE_ENV === "production") {
+      if (import.meta.env.PROD) {
         event.preventDefault();
       }
     });
