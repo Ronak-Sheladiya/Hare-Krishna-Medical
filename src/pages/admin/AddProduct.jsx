@@ -8,12 +8,20 @@ import {
   Form,
   Alert,
   Modal,
+  Toast,
+  ToastContainer,
+  Spinner,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { api, safeApiCall } from "../../utils/apiClient";
 
 const AddProduct = () => {
   const navigate = useNavigate();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     company: "",
@@ -31,10 +39,12 @@ const AddProduct = () => {
     batchNo: "",
     mfgDate: "",
     expDate: "",
-    images: [],
   });
   const [errors, setErrors] = useState({});
   const [productId, setProductId] = useState("");
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState([]);
+  const [imageUploadError, setImageUploadError] = useState("");
 
   const categories = [
     "Pain Relief",
@@ -49,6 +59,12 @@ const AddProduct = () => {
     "Diabetes Care",
   ];
 
+  const showNotification = (message, type = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -61,20 +77,48 @@ const AddProduct = () => {
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    // In a real app, you would upload these to a server
-    // For now, we'll just create object URLs
-    const imageUrls = files.map((file) => URL.createObjectURL(file));
-    setFormData((prev) => ({
-      ...prev,
-      images: [...prev.images, ...imageUrls].slice(0, 5), // Max 5 images
-    }));
+    setImageUploadError("");
+
+    // Validate file types and sizes
+    const validFiles = [];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) {
+        setImageUploadError("Only image files are allowed");
+        continue;
+      }
+      if (file.size > maxSize) {
+        setImageUploadError("Image files must be less than 5MB");
+        continue;
+      }
+      validFiles.push(file);
+    }
+
+    if (validFiles.length > 0) {
+      const newImageFiles = [...imageFiles, ...validFiles].slice(0, 5);
+      const newPreviewUrls = [...imagePreviewUrls];
+
+      validFiles.forEach((file) => {
+        if (newPreviewUrls.length < 5) {
+          newPreviewUrls.push(URL.createObjectURL(file));
+        }
+      });
+
+      setImageFiles(newImageFiles);
+      setImagePreviewUrls(newPreviewUrls.slice(0, 5));
+    }
   };
 
   const removeImage = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-    }));
+    const newImageFiles = imageFiles.filter((_, i) => i !== index);
+    const newPreviewUrls = imagePreviewUrls.filter((_, i) => i !== index);
+
+    // Revoke the object URL to prevent memory leaks
+    URL.revokeObjectURL(imagePreviewUrls[index]);
+
+    setImageFiles(newImageFiles);
+    setImagePreviewUrls(newPreviewUrls);
   };
 
   const validateForm = () => {
@@ -118,36 +162,91 @@ const AddProduct = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const generateProductId = () => {
-    return "PRD" + Date.now().toString().slice(-8);
+  const uploadImages = async () => {
+    if (imageFiles.length === 0) return [];
+
+    try {
+      const uploadedUrls = [];
+
+      for (const file of imageFiles) {
+        const formData = new FormData();
+        formData.append("image", file);
+
+        const { success, data, error } = await safeApiCall(
+          () =>
+            api.post("/api/upload/image", formData, {
+              headers: { "Content-Type": "multipart/form-data" },
+            }),
+          null,
+        );
+
+        if (success && data?.url) {
+          uploadedUrls.push(data.url);
+        } else {
+          console.warn("Image upload failed:", error);
+          // Use placeholder for failed uploads
+          uploadedUrls.push("/placeholder.svg");
+        }
+      }
+
+      return uploadedUrls;
+    } catch (error) {
+      console.error("Error uploading images:", error);
+      showNotification("Some images failed to upload", "warning");
+      return imageFiles.map(() => "/placeholder.svg");
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) {
+      showNotification("Please fix the errors in the form", "error");
       return;
     }
 
-    // Generate product ID
-    const newProductId = generateProductId();
-    setProductId(newProductId);
+    setSubmitting(true);
 
-    // In a real app, this would be an API call
-    console.log("New Product Data:", {
-      id: newProductId,
-      ...formData,
-      price: parseFloat(formData.price),
-      originalPrice: formData.originalPrice
-        ? parseFloat(formData.originalPrice)
-        : null,
-      stock: parseInt(formData.stock),
-      status: parseInt(formData.stock) > 0 ? "Active" : "Out of Stock",
-      createdDate: new Date().toISOString().split("T")[0],
-    });
+    try {
+      // Upload images first
+      const imageUrls = await uploadImages();
 
-    // Show success modal
-    setShowSuccessModal(true);
+      // Prepare product data
+      const productData = {
+        ...formData,
+        price: parseFloat(formData.price),
+        originalPrice: formData.originalPrice
+          ? parseFloat(formData.originalPrice)
+          : null,
+        stock: parseInt(formData.stock),
+        images: imageUrls,
+        status: parseInt(formData.stock) > 0 ? "Active" : "Out of Stock",
+      };
+
+      // Submit to API
+      const { success, data, error } = await safeApiCall(
+        () => api.post("/api/admin/products", productData),
+        null,
+      );
+
+      if (success && data) {
+        const newProductId =
+          data.data?._id || data._id || Date.now().toString();
+        setProductId(newProductId);
+        setShowSuccessModal(true);
+        showNotification("Product added successfully!", "success");
+      } else {
+        throw new Error(error || "Failed to add product");
+      }
+    } catch (error) {
+      console.error("Error adding product:", error);
+      showNotification(
+        error.message || "Failed to add product. Please try again.",
+        "error",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleSuccessClose = () => {
@@ -170,11 +269,11 @@ const AddProduct = () => {
       batchNo: "",
       mfgDate: "",
       expDate: "",
-      images: [],
     });
     setProductId("");
-    // Optionally navigate back to products list
-    // navigate("/admin/products");
+    setImageFiles([]);
+    setImagePreviewUrls([]);
+    setErrors({});
   };
 
   return (
@@ -489,22 +588,26 @@ const AddProduct = () => {
                         multiple
                         accept="image/*"
                         onChange={handleImageUpload}
-                        disabled={formData.images.length >= 5}
+                        disabled={imageFiles.length >= 5}
+                        isInvalid={!!imageUploadError}
                       />
+                      <Form.Control.Feedback type="invalid">
+                        {imageUploadError}
+                      </Form.Control.Feedback>
                       <Form.Text className="text-muted">
                         Upload up to 5 product images. First image will be the
-                        main product image.
+                        main product image. Max 5MB per image.
                       </Form.Text>
                     </Form.Group>
 
-                    {formData.images.length > 0 && (
+                    {imagePreviewUrls.length > 0 && (
                       <div>
                         <h6>Uploaded Images:</h6>
                         <div className="d-flex flex-wrap gap-2">
-                          {formData.images.map((image, index) => (
+                          {imagePreviewUrls.map((imageUrl, index) => (
                             <div key={index} className="position-relative">
                               <img
-                                src={image}
+                                src={imageUrl}
                                 alt={`Product ${index + 1}`}
                                 style={{
                                   width: "80px",
@@ -558,15 +661,32 @@ const AddProduct = () => {
                         type="submit"
                         className="btn-medical-primary"
                         size="lg"
+                        disabled={submitting}
                       >
-                        <i className="bi bi-plus-circle me-2"></i>
-                        Add Product
+                        {submitting ? (
+                          <>
+                            <Spinner
+                              as="span"
+                              animation="border"
+                              size="sm"
+                              role="status"
+                              className="me-2"
+                            />
+                            Adding Product...
+                          </>
+                        ) : (
+                          <>
+                            <i className="bi bi-plus-circle me-2"></i>
+                            Add Product
+                          </>
+                        )}
                       </Button>
                       <Button
                         type="button"
                         variant="outline-secondary"
                         onClick={() => navigate("/admin/products")}
                         className="btn-medical-outline"
+                        disabled={submitting}
                       >
                         <i className="bi bi-x-circle me-2"></i>
                         Cancel
@@ -604,9 +724,11 @@ const AddProduct = () => {
             Your new product has been successfully added to the medical
             inventory.
           </p>
-          <div className="alert alert-info">
-            <strong>Product ID:</strong> {productId}
-          </div>
+          {productId && (
+            <div className="alert alert-info">
+              <strong>Product ID:</strong> {productId}
+            </div>
+          )}
         </Modal.Body>
         <Modal.Footer className="justify-content-center">
           <div className="d-flex gap-2">
@@ -629,6 +751,32 @@ const AddProduct = () => {
           </div>
         </Modal.Footer>
       </Modal>
+
+      {/* Toast Notifications */}
+      <ToastContainer position="top-end" className="p-3">
+        <Toast
+          show={showToast}
+          onClose={() => setShowToast(false)}
+          delay={4000}
+          autohide
+          bg={toastType === "error" ? "danger" : toastType}
+        >
+          <Toast.Header>
+            <strong className="me-auto">
+              {toastType === "success"
+                ? "Success"
+                : toastType === "error"
+                  ? "Error"
+                  : toastType === "warning"
+                    ? "Warning"
+                    : "Info"}
+            </strong>
+          </Toast.Header>
+          <Toast.Body className={toastType === "error" ? "text-white" : ""}>
+            {toastMessage}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
     </div>
   );
 };

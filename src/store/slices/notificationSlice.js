@@ -69,66 +69,116 @@ const notificationSlice = createSlice({
       state.showToast = false;
     },
 
-    // Simulate real-time notifications for demo
-    simulateNotifications: (state) => {
-      const demoNotifications = [
-        {
-          type: "order",
-          title: "New Order Received",
-          message: "Order #HKM12345690 has been placed",
-          icon: "bi-bag-check",
-          color: "success",
-          actionUrl: "/admin/orders",
-        },
-        {
-          type: "message",
-          title: "New Customer Message",
-          message: "You have a new message from Sarah Wilson",
-          icon: "bi-envelope",
-          color: "info",
-          actionUrl: "/admin/messages",
-        },
-        {
-          type: "stock",
-          title: "Low Stock Alert",
-          message: "Paracetamol Tablets are running low (5 left)",
-          icon: "bi-exclamation-triangle",
-          color: "warning",
-          actionUrl: "/admin/products",
-        },
-        {
-          type: "payment",
-          title: "Payment Received",
-          message: "Payment of ₹245.80 received for Order #HKM12345685",
-          icon: "bi-credit-card",
-          color: "success",
-          actionUrl: "/admin/orders",
-        },
-        {
-          type: "user",
-          title: "New User Registration",
-          message: "Alex Johnson has registered on your website",
-          icon: "bi-person-plus",
-          color: "primary",
-          actionUrl: "/admin/users",
-        },
-      ];
-
-      // Add a random notification
-      const randomNotification =
-        demoNotifications[Math.floor(Math.random() * demoNotifications.length)];
-
+    // Real-time notification handlers
+    addOrderNotification: (state, action) => {
+      const { orderId, customerName, totalAmount } = action.payload;
       const notification = {
         id: Date.now(),
         timestamp: new Date().toISOString(),
         isRead: false,
-        ...randomNotification,
+        type: "order",
+        title: "New Order Received",
+        message: `Order ${orderId} from ${customerName} - ₹${totalAmount}`,
+        icon: "bi-bag-check",
+        color: "success",
+        actionUrl: "/admin/orders",
       };
 
       state.notifications.unshift(notification);
       state.unreadCount += 1;
       state.lastNotification = notification;
       state.showToast = true;
+    },
+
+    addStockNotification: (state, action) => {
+      const { productName, currentStock, threshold } = action.payload;
+      const notification = {
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        isRead: false,
+        type: "stock",
+        title: "Low Stock Alert",
+        message: `${productName} is running low (${currentStock} left, threshold: ${threshold})`,
+        icon: "bi-exclamation-triangle",
+        color: "warning",
+        actionUrl: "/admin/products",
+      };
+
+      state.notifications.unshift(notification);
+      state.unreadCount += 1;
+      state.lastNotification = notification;
+      state.showToast = true;
+    },
+
+    addMessageNotification: (state, action) => {
+      const { senderName, subject } = action.payload;
+      const notification = {
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        isRead: false,
+        type: "message",
+        title: "New Message",
+        message: `Message from ${senderName}: ${subject}`,
+        icon: "bi-envelope",
+        color: "info",
+        actionUrl: "/admin/messages",
+      };
+
+      state.notifications.unshift(notification);
+      state.unreadCount += 1;
+      state.lastNotification = notification;
+      state.showToast = true;
+    },
+
+    addPaymentNotification: (state, action) => {
+      const { orderId, amount, method } = action.payload;
+      const notification = {
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        isRead: false,
+        type: "payment",
+        title: "Payment Received",
+        message: `Payment of ₹${amount} received for Order ${orderId} via ${method}`,
+        icon: "bi-credit-card",
+        color: "success",
+        actionUrl: "/admin/orders",
+      };
+
+      state.notifications.unshift(notification);
+      state.unreadCount += 1;
+      state.lastNotification = notification;
+      state.showToast = true;
+    },
+
+    addUserNotification: (state, action) => {
+      const { userName, action: userAction } = action.payload;
+      const notification = {
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        isRead: false,
+        type: "user",
+        title:
+          userAction === "register" ? "New User Registration" : "User Activity",
+        message:
+          userAction === "register"
+            ? `${userName} has registered on your website`
+            : `${userName} has ${userAction}`,
+        icon: "bi-person-plus",
+        color: "primary",
+        actionUrl: "/admin/users",
+      };
+
+      state.notifications.unshift(notification);
+      state.unreadCount += 1;
+      state.lastNotification = notification;
+      state.showToast = true;
+    },
+
+    // Batch load notifications from API
+    loadNotifications: (state, action) => {
+      const notifications = action.payload || [];
+      state.notifications = notifications;
+      state.unreadCount = notifications.filter((n) => !n.isRead).length;
     },
   },
 });
@@ -140,7 +190,12 @@ export const {
   removeNotification,
   clearAllNotifications,
   hideToast,
-  simulateNotifications,
+  addOrderNotification,
+  addStockNotification,
+  addMessageNotification,
+  addPaymentNotification,
+  addUserNotification,
+  loadNotifications,
 } = notificationSlice.actions;
 
 export default notificationSlice.reducer;

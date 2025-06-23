@@ -209,7 +209,14 @@ function App() {
               <Route path="/user-guide" element={<UserGuide />} />
               <Route path="/backend-docs" element={<BackendDocs />} />
               <Route path="/localsetup-guide" element={<LocalSetupGuide />} />
-              <Route path="/navigation-test" element={<NavigationTest />} />
+              <Route
+                path="/navigation-test"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <NavigationTest />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/button-fixer" element={<ButtonFixer />} />
               <Route
                 path="/functionality-test"

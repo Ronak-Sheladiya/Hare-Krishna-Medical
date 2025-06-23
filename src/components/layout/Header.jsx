@@ -217,6 +217,18 @@ const Header = () => {
                           <i className="bi bi-envelope me-2"></i>
                           Messages
                         </Dropdown.Item>
+                        <Dropdown.Divider />
+                        <Dropdown.Header>
+                          <small className="text-muted">Admin Tools</small>
+                        </Dropdown.Header>
+                        <Dropdown.Item as={Link} to="/functionality-test">
+                          <i className="bi bi-gear me-2"></i>
+                          Functionality Test
+                        </Dropdown.Item>
+                        <Dropdown.Item as={Link} to="/navigation-test">
+                          <i className="bi bi-list-ul me-2"></i>
+                          Navigation Test
+                        </Dropdown.Item>
                       </>
                     )}
 

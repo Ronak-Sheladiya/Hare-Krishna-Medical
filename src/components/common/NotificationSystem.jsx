@@ -28,17 +28,40 @@ const NotificationSystem = () => {
     return null;
   }
 
-  // Simulate real-time notifications every 30 seconds (for demo)
+  // Load real notifications from API
   useEffect(() => {
-    const interval = setInterval(() => {
-      // Only simulate notifications if there are less than 10 unread
-      if (unreadCount < 10 && Math.random() > 0.7) {
-        dispatch(simulateNotifications());
-      }
-    }, 30000);
+    const loadNotifications = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/api/admin/notifications`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
 
-    return () => clearInterval(interval);
-  }, [dispatch, unreadCount]);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            dispatch({
+              type: "notifications/loadNotifications",
+              payload: data.data,
+            });
+          }
+        }
+      } catch (error) {
+        console.warn("Failed to load notifications:", error);
+      }
+    };
+
+    if (user?.role === 1) {
+      loadNotifications();
+      // Reload notifications every 5 minutes
+      const interval = setInterval(loadNotifications, 5 * 60 * 1000);
+      return () => clearInterval(interval);
+    }
+  }, [dispatch, user]);
 
   const handleMarkAsRead = (id) => {
     dispatch(markAsRead(id));
