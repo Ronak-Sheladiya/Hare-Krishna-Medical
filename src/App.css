@@ -384,25 +384,178 @@ body.modal-open {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-/* Responsive design improvements */
-@media (max-width: 768px) {
+/* Enhanced Responsive Design */
+@media (max-width: 1200px) {
+  .container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media (max-width: 992px) {
   .section-padding {
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
   }
 
   .cart-summary-sticky,
   .order-summary-sticky {
     position: relative;
     top: auto;
+    margin-bottom: 2rem;
+  }
+
+  .d-lg-flex {
+    display: none !important;
+  }
+
+  .row {
+    margin-left: -0.75rem;
+    margin-right: -0.75rem;
+  }
+
+  .row > * {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .section-padding {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
   }
 
   .contact-form-card .card-header {
-    padding: 1.5rem;
+    padding: 1.5rem 1rem;
   }
 
   .contact-form-card .card-body {
-    padding: 1.5rem;
+    padding: 1.5rem 1rem;
+  }
+
+  .medical-card {
+    margin-bottom: 1rem;
+  }
+
+  .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .btn-group .btn {
+    width: auto;
+    margin-bottom: 0;
+  }
+
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .navbar-brand h4 {
+    font-size: 1.1rem;
+  }
+
+  .navbar-brand small {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .section-padding {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .medical-header {
+    padding: 0.5rem 0;
+  }
+
+  .medical-logo {
+    width: 35px !important;
+    height: 35px !important;
+  }
+
+  .navbar-brand h4 {
+    font-size: 1rem;
+  }
+
+  .btn {
+    font-size: 0.875rem;
+    padding: 0.5rem;
+  }
+
+  .card {
+    margin-bottom: 1rem;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  .modal-dialog {
+    margin: 0.25rem;
+  }
+
+  .container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .row {
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+  }
+
+  .row > * {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  /* Fix for navbar collapse on very small screens */
+  .navbar-collapse {
+    margin-top: 1rem;
+    border-top: 1px solid #e9ecef;
+    padding-top: 1rem;
+  }
+
+  /* Ensure dropdowns work properly on mobile */
+  .dropdown-menu {
+    position: static !important;
+    float: none;
+    width: 100%;
+    margin: 0.125rem 0 0;
+    font-size: 0.875rem;
+    box-shadow: none;
+    border: 1px solid #e9ecef;
+  }
+}
+
+/* Specific responsive fixes for common patterns */
+@media (max-width: 480px) {
+  .d-flex.gap-2,
+  .d-flex.gap-3 {
+    flex-direction: column;
+    gap: 0.5rem !important;
+  }
+
+  .text-nowrap {
+    white-space: normal !important;
+  }
+
+  .table th,
+  .table td {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.25rem;
   }
 }
 
