@@ -56,13 +56,17 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 5,
     },
-    images: [
-      {
-        url: String,
-        public_id: String,
-        alt: String,
-      },
-    ],
+    images: {
+      type: [String],
+      required: [true, 'At least one product image is required'],
+      validate: {
+        validator: function(arr) {
+          return arr && arr.length > 0 && arr.length <= 5;
+        },
+        message: 'Product must have between 1 and 5 images'
+      }
+    },
+    specifications: {
     specifications: {
       composition: String,
       dosage: String,
