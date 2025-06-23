@@ -51,154 +51,136 @@ const Header = () => {
   return (
     <>
       <Navbar expand="lg" className="medical-header" sticky="top">
-        <Container>
-          {/* Logo Section */}
-          <Navbar.Brand as={Link} to="/" className="d-flex align-items-center">
-            <img
-              src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
-              alt="Hare Krishna Medical"
-              className="medical-logo me-3"
-              style={{
-                width: "60px",
-                height: "60px",
-                borderRadius: "12px",
-                boxShadow: "0 4px 12px rgba(230, 57, 70, 0.2)",
-              }}
-            />
-            <div className="brand-text-container d-none d-md-block">
-              <div className="brand-stacked">
-                <div
+        <Container fluid className="px-4">
+          <div className="header-3-part-layout">
+            {/* LEFT SECTION - Logo and Brand */}
+            <div className="header-left">
+              <Navbar.Brand as={Link} to="/" className="d-flex align-items-center">
+                <img
+                  src="https://cdn.builder.io/api/v1/assets/ec4b3f82f1ac4275b8bfc1756fcac420/medical_logo-e586be?format=webp&width=800"
+                  alt="Hare Krishna Medical"
+                  className="medical-logo me-3"
                   style={{
+                    width: "60px",
+                    height: "60px",
+                    borderRadius: "12px",
+                    boxShadow: "0 4px 12px rgba(230, 57, 70, 0.2)"
+                  }}
+                />
+                <div className="brand-text-container d-none d-md-block">
+                  <div className="brand-stacked">
+                    <div style={{
+                      color: "#E63946",
+                      fontWeight: "700",
+                      fontSize: "1.8rem",
+                      fontFamily: "'Poppins', sans-serif",
+                      letterSpacing: "-0.5px",
+                      lineHeight: "1.2",
+                      textAlign: "left"
+                    }}>
+                      Hare Krishna
+                    </div>
+                    <div style={{
+                      color: "#E63946",
+                      fontWeight: "600",
+                      fontSize: "1.4rem",
+                      fontFamily: "'Poppins', sans-serif",
+                      letterSpacing: "-0.3px",
+                      lineHeight: "1",
+                      textAlign: "left",
+                      marginTop: "-2px"
+                    }}>
+                      Medical
+                    </div>
+                  </div>
+                </div>
+                {/* Mobile Brand Text */}
+                <div className="d-md-none">
+                  <div style={{
                     color: "#E63946",
                     fontWeight: "700",
-                    fontSize: "1.8rem",
+                    fontSize: "1rem",
                     fontFamily: "'Poppins', sans-serif",
-                    letterSpacing: "-0.5px",
-                    lineHeight: "1.2",
-                    textAlign: "center",
-                  }}
-                >
-                  Hare Krishna
-                </div>
-                <div
-                  style={{
+                    lineHeight: "1.2"
+                  }}>
+                    Hare Krishna
+                  </div>
+                  <div style={{
                     color: "#E63946",
                     fontWeight: "600",
-                    fontSize: "1.4rem",
+                    fontSize: "0.8rem",
                     fontFamily: "'Poppins', sans-serif",
-                    letterSpacing: "-0.3px",
                     lineHeight: "1",
-                    textAlign: "center",
-                    marginTop: "-2px",
-                  }}
-                >
-                  Medical
+                    marginTop: "-2px"
+                  }}>
+                    Medical
+                  </div>
                 </div>
-              </div>
+              </Navbar.Brand>
             </div>
-            {/* Mobile Brand Text */}
-            <div className="d-md-none text-center">
-              <div
-                style={{
-                  color: "#E63946",
-                  fontWeight: "700",
-                  fontSize: "1rem",
-                  fontFamily: "'Poppins', sans-serif",
-                  lineHeight: "1.2",
-                }}
-              >
-                Hare Krishna
-              </div>
-              <div
-                style={{
-                  color: "#E63946",
-                  fontWeight: "600",
-                  fontSize: "0.8rem",
-                  fontFamily: "'Poppins', sans-serif",
-                  lineHeight: "1",
-                  marginTop: "-2px",
-                }}
-              >
-                Medical
-              </div>
+
+            {/* CENTER SECTION - Navigation Links */}
+            <div className="header-center d-none d-lg-flex">
+              <Nav className="navigation-links">
+                <Nav.Link
+                  as={Link}
+                  to="/"
+                  className={`nav-item-custom ${isActiveRoute("/") ? "active" : ""}`}
+                >
+                  Home
+                </Nav.Link>
+                <Nav.Link
+                  as={Link}
+                  to="/products"
+                  className={`nav-item-custom ${
+                    isActiveRoute("/products") ||
+                    location.pathname.startsWith("/products/")
+                      ? "active"
+                      : ""
+                  }`}
+                >
+                  Products
+                </Nav.Link>
+                <Nav.Link
+                  as={Link}
+                  to="/about"
+                  className={`nav-item-custom ${isActiveRoute("/about") ? "active" : ""}`}
+                >
+                  About Us
+                </Nav.Link>
+                <Nav.Link
+                  as={Link}
+                  to="/contact"
+                  className={`nav-item-custom ${isActiveRoute("/contact") ? "active" : ""}`}
+                >
+                  Contact
+                </Nav.Link>
+              </Nav>
             </div>
-          </Navbar.Brand>
 
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-            {/* Navigation Links */}
-            <Nav className="medical-nav me-auto">
-              <Nav.Link
-                as={Link}
-                to="/"
-                className={isActiveRoute("/") ? "active" : ""}
-              >
-                <i className="bi bi-house me-1 d-lg-none"></i>
-                Home
-              </Nav.Link>
-              <Nav.Link
-                as={Link}
-                to="/products"
-                className={
-                  isActiveRoute("/products") ||
-                  location.pathname.startsWith("/products/")
-                    ? "active"
-                    : ""
-                }
-              >
-                <i className="bi bi-grid3x3-gap me-1 d-lg-none"></i>
-                Products
-              </Nav.Link>
-              <Nav.Link
-                as={Link}
-                to="/about"
-                className={isActiveRoute("/about") ? "active" : ""}
-              >
-                <i className="bi bi-info-circle me-1 d-lg-none"></i>
-                About Us
-              </Nav.Link>
-              <Nav.Link
-                as={Link}
-                to="/contact"
-                className={isActiveRoute("/contact") ? "active" : ""}
-              >
-                <i className="bi bi-telephone me-1 d-lg-none"></i>
-                Contact
-              </Nav.Link>
-            </Nav>
+            {/* RIGHT SECTION - Cart and User Actions */}
+            <div className="header-right">
+              <div className="d-flex align-items-center gap-3">
+                {/* Cart Icon */}
+                <Link
+                  to="/cart"
+                  className="cart-icon-wrapper position-relative"
+                >
+                  <div className="cart-icon">
+                    <i className="bi bi-cart3"></i>
+                    {totalItems > 0 && (
+                      <Badge
+                        bg="danger"
+                        className="cart-badge position-absolute"
+                      >
+                        {totalItems}
+                      </Badge>
+                    )}
+                  </div>
+                </Link>
 
-            {/* Right side - Cart and Auth */}
-            <Nav className="d-flex align-items-center">
-              {/* Cart Icon */}
-              <Nav.Link
-                as={Link}
-                to="/cart"
-                className="position-relative me-3 cart-link"
-              >
-                <i className="bi bi-cart3 fs-5"></i>
-                {totalItems > 0 && (
-                  <Badge
-                    bg="danger"
-                    className="cart-badge position-absolute"
-                    style={{
-                      top: "-8px",
-                      right: "-8px",
-                      fontSize: "0.75rem",
-                      minWidth: "20px",
-                      height: "20px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      borderRadius: "50%",
-                    }}
-                  >
-                    {totalItems}
-                  </Badge>
-                )}
-              </Nav.Link>
-
-              {/* Real-time Notifications for Admin */}
-              {isAuthenticated && user?.role === 1 && <NotificationSystem />}
+                {/* Real-time Notifications for Admin */}
+                {isAuthenticated && user?.role === 1 && <NotificationSystem />}
 
               {/* Authentication Buttons/User Menu */}
               {isAuthenticated ? (
@@ -329,6 +311,55 @@ const Header = () => {
                   </Button>
                 </div>
               )}
+
+              {/* Mobile Menu Toggle */}
+              <Navbar.Toggle
+                aria-controls="mobile-navbar-nav"
+                className="d-lg-none ms-2"
+              />
+            </div>
+          </div>
+
+          {/* Mobile Navigation Collapse */}
+          <Navbar.Collapse id="mobile-navbar-nav" className="d-lg-none">
+            <Nav className="mobile-nav mt-3">
+              <Nav.Link
+                as={Link}
+                to="/"
+                className={`mobile-nav-item ${isActiveRoute("/") ? "active" : ""}`}
+              >
+                <i className="bi bi-house me-2"></i>
+                Home
+              </Nav.Link>
+              <Nav.Link
+                as={Link}
+                to="/products"
+                className={`mobile-nav-item ${
+                  isActiveRoute("/products") ||
+                  location.pathname.startsWith("/products/")
+                    ? "active"
+                    : ""
+                }`}
+              >
+                <i className="bi bi-grid3x3-gap me-2"></i>
+                Products
+              </Nav.Link>
+              <Nav.Link
+                as={Link}
+                to="/about"
+                className={`mobile-nav-item ${isActiveRoute("/about") ? "active" : ""}`}
+              >
+                <i className="bi bi-info-circle me-2"></i>
+                About Us
+              </Nav.Link>
+              <Nav.Link
+                as={Link}
+                to="/contact"
+                className={`mobile-nav-item ${isActiveRoute("/contact") ? "active" : ""}`}
+              >
+                <i className="bi bi-telephone me-2"></i>
+                Contact
+              </Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>
