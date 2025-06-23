@@ -115,8 +115,8 @@ const ProfessionalLoading = ({
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: containerSize,
-            height: containerSize,
+            width: containerSize + 30,
+            height: containerSize + 30,
             border: `3px solid transparent`,
             borderTop: `3px solid ${color}`,
             borderRight: `3px solid ${color}60`,
@@ -134,9 +134,10 @@ const ProfessionalLoading = ({
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: containerSize + 40,
-            height: containerSize + 40,
+            width: containerSize + 50,
+            height: containerSize + 50,
             pointerEvents: "none",
+            zIndex: 0,
           }}
         >
           {[0, 60, 120, 180, 240, 300].map((rotation, index) => (
