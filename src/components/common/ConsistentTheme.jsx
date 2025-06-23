@@ -1,12 +1,41 @@
 import React from "react";
 import { Card, Button } from "react-bootstrap";
+import { useLocation } from "react-router-dom";
+import { getPageIcon, getIconColor, ProfessionalIcon } from "./PageIcon.jsx";
 
-// Hero Section Component - Consistent across all pages
+// Hero Section Component - Consistent across all pages with professional icons
 export const PageHeroSection = ({
   title,
   subtitle,
-  icon = "bi-shield-check",
-}) => (
+  icon = null,
+  iconContext = "default",
+  background = null,
+}) => {
+  const location = useLocation();
+
+  // Auto-determine icon if not provided
+  const displayIcon = icon || getPageIcon(location.pathname);
+
+  // Auto-determine color scheme based on path
+  let colorContext = iconContext;
+  if (iconContext === "default") {
+    const path = location.pathname.toLowerCase();
+    if (path.includes("admin")) colorContext = "admin";
+    else if (path.includes("user")) colorContext = "user";
+    else if (path.includes("login") || path.includes("register")) colorContext = "auth";
+    else if (path.includes("invoice")) colorContext = "invoice";
+    else if (path.includes("error") || path.includes("denied")) colorContext = "error";
+  }
+
+  const iconGradient = getIconColor(colorContext);
+  const heroBackground = background ||
+    (colorContext === "admin" ? "linear-gradient(135deg, #343a40 0%, #495057 100%)" :
+     colorContext === "user" ? "linear-gradient(135deg, #17a2b8 0%, #007bff 100%)" :
+     colorContext === "invoice" ? "linear-gradient(135deg, #28a745 0%, #20c997 100%)" :
+     colorContext === "error" ? "linear-gradient(135deg, #dc3545 0%, #c82333 100%)" :
+     "linear-gradient(135deg, #e63946 0%, #dc3545 100%)");
+
+  return (
   <section
     style={{
       background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
