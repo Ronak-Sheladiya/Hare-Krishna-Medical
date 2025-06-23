@@ -6,7 +6,7 @@ const OfficialInvoiceDesign = ({
   forPrint = false,
   onPrint,
   onDownload,
-  showActionButtons = true
+  showActionButtons = true,
 }) => {
   const {
     invoiceId,
@@ -79,7 +79,8 @@ const OfficialInvoiceDesign = ({
         iframe.style.display = "none";
         document.body.appendChild(iframe);
 
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        const iframeDoc =
+          iframe.contentDocument || iframe.contentWindow.document;
         iframeDoc.write(`
           <!DOCTYPE html>
           <html>
@@ -106,7 +107,7 @@ const OfficialInvoiceDesign = ({
 
   const createOfficialInvoiceHTML = () => {
     return `
-      <div id="invoice-print-content" style="font-family: Arial, sans-serif; padding: ${forPrint ? "5px" : "15px"}; background: white; max-width: 210mm; margin: 0 auto; ${forPrint ? "height: auto; min-height: auto; transform: scale(0.85); transform-origin: top;" : ""}">`;
+      <div id="invoice-print-content" style="font-family: Arial, sans-serif; padding: ${forPrint ? "5px" : "15px"}; background: white; max-width: 210mm; margin: 0 auto; ${forPrint ? "height: auto; min-height: auto; transform: scale(0.85); transform-origin: top;" : ""}">
         <!-- Header Section - Simple Design -->
         <div style="background: #e63946; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -281,7 +282,9 @@ const OfficialInvoiceDesign = ({
         </div>
 
         <!-- Action Buttons (only show when not printing) -->
-        ${!forPrint && showActionButtons ? `
+        ${
+          !forPrint && showActionButtons
+            ? `
         <div class="no-print" style="margin-top: 20px; text-align: center; padding: 20px; background: #f8f9fa; border-radius: 12px; border: 1px solid #e9ecef;">
           <h6 style="margin-bottom: 15px; color: #333; font-weight: 600;">Invoice Actions</h6>
           <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
@@ -294,7 +297,9 @@ const OfficialInvoiceDesign = ({
           </div>
           <p style="margin-top: 10px; font-size: 12px; color: #666; margin-bottom: 0;">Use the buttons above to print or download this invoice</p>
         </div>
-        ` : ''}
+        `
+            : ""
+        }
 
         <!-- Computer Generated Note -->
         <div style="text-align: center; margin-top: 10px; font-size: 10px; color: #888; background: #f8f9fa; padding: 8px; border-radius: 5px;">
