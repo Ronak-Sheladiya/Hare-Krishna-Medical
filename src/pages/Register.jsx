@@ -36,7 +36,6 @@ const Register = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otp, setOtp] = useState("");
-  const [demoOtp] = useState("123456"); // Demo OTP for testing
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -219,32 +218,8 @@ const Register = () => {
         console.log("Backend verification not available, using demo mode");
       }
 
-      // Demo OTP verification
-      if (otp === demoOtp) {
-        setShowOtpModal(false);
-        setShowSuccessModal(true);
-
-        setTimeout(() => {
-          const newUser = {
-            id: Date.now(),
-            fullName: formData.fullName,
-            name: formData.fullName,
-            email: formData.email,
-            mobile: formData.mobile,
-            gender: formData.gender,
-            age: formData.age,
-            role: 0,
-            emailVerified: true,
-            profileImage: null,
-          };
-
-          dispatch(loginSuccess({ user: newUser, rememberMe: false }));
-          setShowSuccessModal(false);
-          navigate("/user/dashboard");
-        }, 2000);
-      } else {
-        alert("Invalid OTP. Please use: " + demoOtp);
-      }
+      // Fallback verification failed
+      alert("OTP verification failed. Backend not available.");
     } catch (error) {
       console.error("OTP verification error:", error);
       alert("OTP verification failed. Please try again.");
@@ -273,11 +248,11 @@ const Register = () => {
         console.log("Backend not available, using demo mode");
       }
 
-      // Demo mode
-      alert(`Demo OTP: ${demoOtp} (sent to ${formData.email})`);
+      // Fallback mode
+      alert(`OTP resent to ${formData.email} (backend not available)`);
     } catch (error) {
       console.error("Resend OTP error:", error);
-      alert(`Demo OTP: ${demoOtp}`);
+      alert("Failed to resend OTP. Please try again later.");
     }
   };
 
@@ -571,16 +546,6 @@ const Register = () => {
             <p className="text-muted">
               We've sent a 6-digit OTP to <strong>{formData.email}</strong>
             </p>
-            <div
-              className="alert alert-info"
-              style={{
-                fontSize: "14px",
-                padding: "10px",
-                marginBottom: "15px",
-              }}
-            >
-              <strong>Demo OTP:</strong> {demoOtp}
-            </div>
           </div>
 
           <Form.Group className="mb-3">
