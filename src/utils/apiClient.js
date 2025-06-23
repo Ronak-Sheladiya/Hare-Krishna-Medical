@@ -10,70 +10,107 @@ const DEFAULT_CONFIG = {
   },
 };
 
-// Create a fetch wrapper with timeout and error handling
+// Create a fetch wrapper with timeout and error handling - NEVER THROWS
 export const apiCall = async (endpoint, options = {}) => {
-  const config = {
-    ...DEFAULT_CONFIG,
-    ...options,
-    headers: {
-      ...DEFAULT_CONFIG.headers,
-      ...options.headers,
-    },
-  };
-
-  // Add authentication token if available
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  // Create abort controller for timeout
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), config.timeout);
-
+  // Wrap everything in try-catch to ensure no errors escape
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...config,
-      signal: controller.signal,
-    });
+    const config = {
+      ...DEFAULT_CONFIG,
+      ...options,
+      headers: {
+        ...DEFAULT_CONFIG.headers,
+        ...options.headers,
+      },
+    };
+
+    // Add authentication token if available
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+
+    // Create abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      try {
+        controller.abort();
+      } catch (e) {
+        // Ignore abort errors
+      }
+    }, config.timeout);
+
+    let response;
+    try {
+      response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...config,
+        signal: controller.signal,
+      });
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+
+      // Handle fetch errors immediately
+      let errorMessage = "Network error - backend API not available";
+      if (fetchError.name === "AbortError") {
+        errorMessage = "Request timed out";
+      } else if (fetchError.message) {
+        errorMessage = fetchError.message;
+      }
+
+      return {
+        success: false,
+        error: errorMessage,
+        originalError: fetchError,
+      };
+    }
 
     clearTimeout(timeoutId);
 
     // Handle different response statuses
     if (response.ok) {
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
-        return await response.json();
+      try {
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          return data;
+        }
+        const textData = await response.text();
+        return { success: true, data: textData };
+      } catch (parseError) {
+        return {
+          success: false,
+          error: "Failed to parse response",
+          originalError: parseError,
+        };
       }
-      return { success: true, data: await response.text() };
     } else {
-      // Handle HTTP errors - return error object instead of throwing
-      const errorData = await response.json().catch(() => ({}));
-      return {
-        success: false,
-        error:
-          errorData.message ||
-          `HTTP ${response.status}: ${response.statusText}`,
-        status: response.status,
-      };
+      // Handle HTTP errors
+      try {
+        const errorData = await response.json();
+        return {
+          success: false,
+          error:
+            errorData.message ||
+            `HTTP ${response.status}: ${response.statusText}`,
+          status: response.status,
+        };
+      } catch (parseError) {
+        return {
+          success: false,
+          error: `HTTP ${response.status}: ${response.statusText}`,
+          status: response.status,
+        };
+      }
     }
-  } catch (error) {
-    clearTimeout(timeoutId);
-
-    // Return error object instead of throwing
-    let errorMessage = "Unknown error occurred";
-    if (error.name === "AbortError") {
-      errorMessage = "Request timed out";
-    } else if (error.message === "Failed to fetch") {
-      errorMessage = "Network error - backend API not available";
-    } else {
-      errorMessage = error.message;
-    }
-
+  } catch (globalError) {
+    // Final safety net - should never reach here
     return {
       success: false,
-      error: errorMessage,
-      originalError: error,
+      error: "Unexpected error occurred",
+      originalError: globalError,
     };
   }
 };
