@@ -6,15 +6,11 @@ import { useSelector } from "react-redux";
 const UserDashboard = () => {
   const { user } = useSelector((state) => state.auth);
 
-  // Mock user data - enhanced
+  // Mock user data - simplified
   const userStats = {
-    totalOrders: 12,
     pendingOrders: 2,
-    deliveredOrders: 9,
-    totalSpent: 2450.75,
     recentInvoices: 3,
-    savedProducts: 8,
-    loyaltyPoints: 150,
+    cartProducts: 5,
   };
 
   const recentOrders = [
@@ -349,20 +345,8 @@ const UserDashboard = () => {
             </Col>
           </Row>
 
-          {/* Enhanced Statistics Cards */}
-          <Row className="mb-5 g-4">
-            <Col lg={4} md={6}>
-              <CircularStatCard
-                icon="bi bi-bag-check-fill"
-                value={userStats.totalOrders}
-                label="Total Orders"
-                gradient="linear-gradient(135deg, #e63946, #dc3545)"
-                badge="All time"
-                description="Your complete order history"
-                isLarge={true}
-              />
-            </Col>
-
+          {/* Enhanced Statistics Cards - Only 3 Cards */}
+          <Row className="mb-5 g-4 justify-content-center">
             <Col lg={4} md={6}>
               <CircularStatCard
                 icon="bi bi-clock-history"
@@ -371,61 +355,31 @@ const UserDashboard = () => {
                 gradient="linear-gradient(135deg, #ffc107, #fd7e14)"
                 badge="In progress"
                 description="Orders being processed"
+                isLarge={true}
               />
             </Col>
 
             <Col lg={4} md={6}>
               <CircularStatCard
-                icon="bi bi-truck"
-                value={userStats.deliveredOrders}
-                label="Delivered Orders"
-                gradient="linear-gradient(135deg, #28a745, #20c997)"
-                badge="Completed"
-                description="Successfully delivered"
-              />
-            </Col>
-          </Row>
-
-          {/* Secondary Stats */}
-          <Row className="mb-5 g-4">
-            <Col lg={3} md={6}>
-              <CircularStatCard
-                icon="bi bi-currency-rupee"
-                value={`₹${(userStats.totalSpent / 1000).toFixed(1)}k`}
-                label="Total Spent"
-                gradient="linear-gradient(135deg, #6f42c1, #6610f2)"
-                description="Lifetime spending"
-              />
-            </Col>
-
-            <Col lg={3} md={6}>
-              <CircularStatCard
                 icon="bi bi-receipt"
                 value={userStats.recentInvoices}
                 label="Recent Invoices"
                 gradient="linear-gradient(135deg, #17a2b8, #20c997)"
-                description="Available downloads"
+                badge="Available"
+                description="Ready for download"
+                isLarge={true}
               />
             </Col>
 
-            <Col lg={3} md={6}>
+            <Col lg={4} md={6}>
               <CircularStatCard
-                icon="bi bi-heart-fill"
-                value={userStats.savedProducts}
-                label="Saved Products"
-                gradient="linear-gradient(135deg, #dc3545, #e63946)"
-                description="Your wishlist items"
-              />
-            </Col>
-
-            <Col lg={3} md={6}>
-              <CircularStatCard
-                icon="bi bi-star-fill"
-                value={userStats.loyaltyPoints}
-                label="Loyalty Points"
-                gradient="linear-gradient(135deg, #fd7e14, #ffc107)"
-                badge="Redeem now"
-                description="Earn more rewards"
+                icon="bi bi-cart-plus"
+                value={userStats.cartProducts}
+                label="Cart Products"
+                gradient="linear-gradient(135deg, #e63946, #dc3545)"
+                badge="Ready to buy"
+                description="Items in your shopping cart"
+                isLarge={true}
               />
             </Col>
           </Row>
@@ -606,7 +560,7 @@ const UserDashboard = () => {
                 </Card.Body>
               </Card>
 
-              {/* Health Tips */}
+              {/* User Guide Quick Access */}
               <Card
                 style={{
                   border: "none",
@@ -616,15 +570,15 @@ const UserDashboard = () => {
               >
                 <Card.Header
                   style={{
-                    background: "linear-gradient(135deg, #28a745, #20c997)",
+                    background: "linear-gradient(135deg, #6f42c1, #6610f2)",
                     color: "white",
                     borderRadius: "25px 25px 0 0",
                     padding: "20px 25px",
                   }}
                 >
                   <h6 className="mb-0" style={{ fontWeight: "700" }}>
-                    <i className="bi bi-heart-pulse me-2"></i>
-                    Health Tip of the Day
+                    <i className="bi bi-book me-2"></i>
+                    Need Help?
                   </h6>
                 </Card.Header>
                 <Card.Body style={{ padding: "25px" }}>
@@ -633,7 +587,7 @@ const UserDashboard = () => {
                       style={{
                         width: "60px",
                         height: "60px",
-                        background: "linear-gradient(135deg, #28a745, #20c997)",
+                        background: "linear-gradient(135deg, #6f42c1, #6610f2)",
                         borderRadius: "50%",
                         display: "flex",
                         alignItems: "center",
@@ -642,7 +596,7 @@ const UserDashboard = () => {
                       }}
                     >
                       <i
-                        className="bi bi-droplet"
+                        className="bi bi-question-circle"
                         style={{ fontSize: "24px", color: "white" }}
                       ></i>
                     </div>
@@ -653,7 +607,7 @@ const UserDashboard = () => {
                         color: "#333",
                       }}
                     >
-                      Stay Hydrated
+                      User Guide
                     </h6>
                     <p
                       style={{
@@ -663,8 +617,8 @@ const UserDashboard = () => {
                         marginBottom: "15px",
                       }}
                     >
-                      Drink at least 8 glasses of water daily to maintain
-                      optimal health and boost your immune system.
+                      Learn how to use all features including order tracking,
+                      invoice management, and more.
                     </p>
                     <EnhancedButton
                       variant="outline"
@@ -676,7 +630,7 @@ const UserDashboard = () => {
                       }}
                       icon="bi bi-book"
                     >
-                      More Tips
+                      View Guide
                     </EnhancedButton>
                   </div>
                 </Card.Body>
