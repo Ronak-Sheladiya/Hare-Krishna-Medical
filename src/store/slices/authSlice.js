@@ -181,24 +181,7 @@ const authSlice = createSlice({
       // Clear stored data
       clearStoredUser();
 
-      // Broadcast logout to other tabs
-      try {
-        window.localStorage.setItem(
-          "auth-event",
-          JSON.stringify({
-            type: "LOGOUT",
-            timestamp: Date.now(),
-          }),
-        );
-        // Clear event after a short delay
-        setTimeout(() => {
-          try {
-            window.localStorage.removeItem("auth-event");
-          } catch (e) {}
-        }, 1000);
-      } catch (e) {
-        console.warn("Failed to broadcast logout event:", e);
-      }
+      // Cross-tab broadcasting is now handled by crossTabSessionManager
     },
     clearError: (state) => {
       state.error = null;
