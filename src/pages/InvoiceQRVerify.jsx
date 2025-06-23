@@ -427,9 +427,24 @@ const InvoiceQRVerify = () => {
                       <i className="bi bi-house me-2"></i>
                       Back to Home
                     </Button>
+                    {isAuthenticated && (
+                      <Button
+                        variant="outline-primary"
+                        onClick={() =>
+                          navigate(
+                            user?.role === 1 ? "/admin/orders" : "/user/orders",
+                          )
+                        }
+                      >
+                        <i className="bi bi-bag me-2"></i>
+                        {user?.role === 1 ? "Manage Orders" : "My Orders"}
+                      </Button>
+                    )}
                     <Button
                       variant="primary"
-                      onClick={() => navigate(`/invoice/${invoice._id}`)}
+                      onClick={() =>
+                        navigate(`/invoice/${invoice.orderId || invoice._id}`)
+                      }
                     >
                       <i className="bi bi-eye me-2"></i>
                       View Full Invoice
