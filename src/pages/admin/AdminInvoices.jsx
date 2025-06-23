@@ -23,8 +23,18 @@ import OfficialInvoiceDesign from "../../components/common/OfficialInvoiceDesign
 import { formatDateTime, getRelativeTime } from "../../utils/dateUtils";
 
 const AdminInvoices = () => {
-  // Mock invoice data - in real app, this would come from API
-  const [invoices, setInvoices] = useState([
+  const [invoices, setInvoices] = useState([]);
+  const [filteredInvoices, setFilteredInvoices] = useState([]);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [paymentFilter, setPaymentFilter] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  // Mock invoice data with enhanced fields
+  const mockInvoices = [
     {
       id: 1,
       invoiceId: "HKM-INV-2024-001",
@@ -32,9 +42,22 @@ const AdminInvoices = () => {
       customerName: "John Smith",
       customerEmail: "john.smith@email.com",
       customerMobile: "+91 9876543210",
+      customerDetails: {
+        fullName: "John Smith",
+        email: "john.smith@email.com",
+        mobile: "+91 9876543210",
+        address: "123 Main Street, Surat",
+        city: "Surat",
+        state: "Gujarat",
+        pincode: "395007",
+      },
       totalAmount: 235.5,
+      subtotal: 220.0,
+      shipping: 0,
+      tax: 15.5,
       status: "Paid",
       paymentMethod: "Online",
+      paymentStatus: "Completed",
       orderDate: "2024-01-15",
       orderTime: "10:30 AM",
       createdAt: "2024-01-15T10:30:00Z",
@@ -51,18 +74,10 @@ const AdminInvoices = () => {
           name: "Vitamin D3 Capsules",
           company: "Health Plus",
           price: 45.5,
-          quantity: 4,
+          quantity: 1,
         },
       ],
-      customerDetails: {
-        fullName: "John Smith",
-        email: "john.smith@email.com",
-        mobile: "+91 9876543210",
-        address: "123 Main Street, Apartment 4B",
-        city: "Surat",
-        state: "Gujarat",
-        pincode: "395007",
-      },
+      qrCode: null,
     },
     {
       id: 2,
@@ -71,91 +86,63 @@ const AdminInvoices = () => {
       customerName: "Jane Doe",
       customerEmail: "jane.doe@email.com",
       customerMobile: "+91 9123456789",
+      customerDetails: {
+        fullName: "Jane Doe",
+        email: "jane.doe@email.com",
+        mobile: "+91 9123456789",
+        address: "456 Oak Avenue, Ahmedabad",
+        city: "Ahmedabad",
+        state: "Gujarat",
+        pincode: "380001",
+      },
       totalAmount: 156.75,
-      status: "Unpaid",
+      subtotal: 145.0,
+      shipping: 50,
+      tax: 11.75,
+      status: "Pending",
       paymentMethod: "COD",
-      orderDate: "2024-01-15",
+      paymentStatus: "Pending",
+      orderDate: "2024-01-14",
       orderTime: "02:15 PM",
-      createdAt: "2024-01-15T14:15:00Z",
+      createdAt: "2024-01-14T14:15:00Z",
       items: [
         {
           id: 3,
           name: "Cough Syrup",
           company: "Wellness Care",
           price: 35.75,
-          quantity: 3,
-        },
-        {
-          id: 4,
-          name: "Antiseptic Liquid",
-          company: "Safe Guard",
-          price: 28.0,
-          quantity: 2,
-        },
-      ],
-      customerDetails: {
-        fullName: "Jane Doe",
-        email: "jane.doe@email.com",
-        mobile: "+91 9123456789",
-        address: "456 Oak Avenue, Building C",
-        city: "Ahmedabad",
-        state: "Gujarat",
-        pincode: "380001",
-      },
-    },
-    {
-      id: 3,
-      invoiceId: "HKM-INV-2024-003",
-      orderId: "HKM12345680",
-      customerName: "Mike Johnson",
-      customerEmail: "mike.j@company.com",
-      customerMobile: "+91 9988776655",
-      totalAmount: 89.25,
-      status: "Paid",
-      paymentMethod: "Online",
-      orderDate: "2024-01-14",
-      orderTime: "11:45 AM",
-      createdAt: "2024-01-14T11:45:00Z",
-      items: [
-        {
-          id: 1,
-          name: "Paracetamol Tablets",
-          company: "Hare Krishna Pharma",
-          price: 25.99,
-          quantity: 1,
-        },
-        {
-          id: 5,
-          name: "Digital Thermometer",
-          company: "MedTech",
-          price: 63.26,
           quantity: 1,
         },
       ],
-      customerDetails: {
-        fullName: "Mike Johnson",
-        email: "mike.j@company.com",
-        mobile: "+91 9988776655",
-        address: "789 Business District, Floor 12",
-        city: "Vadodara",
-        state: "Gujarat",
-        pincode: "390001",
-      },
+      qrCode: null,
     },
-  ]);
+  ];
 
-  const [filteredInvoices, setFilteredInvoices] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [paymentFilter, setPaymentFilter] = useState("");
-  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
-  const [exportLoading, setExportLoading] = useState(false);
+  // Enhanced statistics
+  const invoiceStats = {
+    totalInvoices: mockInvoices.length,
+    paidInvoices: mockInvoices.filter((inv) => inv.status === "Paid").length,
+    pendingInvoices: mockInvoices.filter((inv) => inv.status === "Pending")
+      .length,
+    totalRevenue: mockInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0),
+    averageInvoiceValue:
+      mockInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0) /
+      mockInvoices.length,
+    onlinePayments: mockInvoices.filter((inv) => inv.paymentMethod === "Online")
+      .length,
+    codPayments: mockInvoices.filter((inv) => inv.paymentMethod === "COD")
+      .length,
+  };
 
   useEffect(() => {
-    let filtered = [...invoices];
+    setInvoices(mockInvoices);
+    setFilteredInvoices(mockInvoices);
+  }, []);
 
-    // Apply search filter
+  // Enhanced filtering
+  useEffect(() => {
+    let filtered = invoices;
+
     if (searchTerm) {
       filtered = filtered.filter(
         (invoice) =>
@@ -170,88 +157,219 @@ const AdminInvoices = () => {
       );
     }
 
-    // Apply status filter
     if (statusFilter) {
       filtered = filtered.filter((invoice) => invoice.status === statusFilter);
     }
 
-    // Apply payment method filter
     if (paymentFilter) {
       filtered = filtered.filter(
         (invoice) => invoice.paymentMethod === paymentFilter,
       );
     }
 
-    // Sort by date (newest first)
-    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
     setFilteredInvoices(filtered);
-  }, [invoices, searchTerm, statusFilter, paymentFilter]);
+  }, [searchTerm, statusFilter, paymentFilter, invoices]);
 
-  const handleViewInvoice = async (invoice) => {
-    try {
-      // Generate QR code for the invoice
-      const verifyUrl = `${window.location.origin}/invoice/${invoice.orderId}`;
-      const qrDataURL = await QRCode.toDataURL(verifyUrl, {
-        width: 120,
-        margin: 2,
-        color: {
-          dark: "#1a202c",
-          light: "#ffffff",
-        },
-        errorCorrectionLevel: "M",
-      });
+  // Enhanced Button Component
+  const EnhancedButton = ({
+    children,
+    variant = "primary",
+    onClick,
+    icon,
+    style = {},
+    size = "md",
+    disabled = false,
+  }) => {
+    const baseStyle = {
+      borderRadius: size === "lg" ? "12px" : "8px",
+      padding:
+        size === "lg" ? "12px 24px" : size === "sm" ? "6px 12px" : "8px 16px",
+      fontWeight: "600",
+      transition: "all 0.3s ease",
+      border: "none",
+      position: "relative",
+      overflow: "hidden",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      opacity: disabled ? 0.6 : 1,
+      cursor: disabled ? "not-allowed" : "pointer",
+      ...style,
+    };
 
-      // Add QR code to invoice data
-      const invoiceWithQR = {
-        ...invoice,
-        qrCode: qrDataURL,
-      };
+    const variants = {
+      primary: {
+        background: "linear-gradient(135deg, #e63946, #dc3545)",
+        color: "white",
+        boxShadow: "0 4px 15px rgba(230, 57, 70, 0.3)",
+      },
+      success: {
+        background: "linear-gradient(135deg, #28a745, #20c997)",
+        color: "white",
+        boxShadow: "0 4px 15px rgba(40, 167, 69, 0.3)",
+      },
+      info: {
+        background: "linear-gradient(135deg, #17a2b8, #20c997)",
+        color: "white",
+        boxShadow: "0 4px 15px rgba(23, 162, 184, 0.3)",
+      },
+      warning: {
+        background: "linear-gradient(135deg, #ffc107, #fd7e14)",
+        color: "white",
+        boxShadow: "0 4px 15px rgba(255, 193, 7, 0.3)",
+      },
+      outline: {
+        background: "transparent",
+        border: "2px solid #e63946",
+        color: "#e63946",
+      },
+    };
 
-      setSelectedInvoice(invoiceWithQR);
-      setShowInvoiceModal(true);
-    } catch (error) {
-      console.error("Error generating QR code:", error);
-      setSelectedInvoice(invoice);
-      setShowInvoiceModal(true);
-    }
+    const currentStyle = { ...baseStyle, ...variants[variant] };
+
+    const handleHover = (e, isHover) => {
+      if (disabled) return;
+      if (isHover) {
+        e.target.style.transform = "translateY(-2px)";
+        if (variant === "outline") {
+          e.target.style.background = "#e63946";
+          e.target.style.color = "white";
+        }
+      } else {
+        e.target.style.transform = "translateY(0)";
+        if (variant === "outline") {
+          e.target.style.background = "transparent";
+          e.target.style.color = "#e63946";
+        }
+      }
+    };
+
+    return (
+      <button
+        style={currentStyle}
+        onClick={onClick}
+        disabled={disabled}
+        onMouseEnter={(e) => handleHover(e, true)}
+        onMouseLeave={(e) => handleHover(e, false)}
+      >
+        {icon && <i className={`${icon} me-2`}></i>}
+        {children}
+      </button>
+    );
   };
 
-  const handleDownloadInvoice = async (invoice) => {
+  // Circular Stat Card Component
+  const CircularStatCard = ({
+    icon,
+    value,
+    label,
+    gradient,
+    badge,
+    description,
+  }) => (
+    <Card
+      style={{
+        border: "none",
+        borderRadius: "20px",
+        background: "linear-gradient(135deg, #ffffff, #f8f9fa)",
+        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+        transition: "all 0.3s ease",
+        height: "100%",
+      }}
+      onMouseOver={(e) => {
+        e.currentTarget.style.transform = "translateY(-5px)";
+        e.currentTarget.style.boxShadow = "0 15px 45px rgba(0, 0, 0, 0.15)";
+      }}
+      onMouseOut={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "0 8px 32px rgba(0, 0, 0, 0.1)";
+      }}
+    >
+      <Card.Body className="text-center" style={{ padding: "30px" }}>
+        <div
+          style={{
+            width: "80px",
+            height: "80px",
+            background: gradient,
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 20px",
+            boxShadow: "0 8px 25px rgba(0, 0, 0, 0.2)",
+          }}
+        >
+          <i className={icon} style={{ fontSize: "30px", color: "white" }}></i>
+        </div>
+
+        <h2
+          style={{
+            color: "#333",
+            fontWeight: "800",
+            marginBottom: "8px",
+            fontSize: "2rem",
+          }}
+        >
+          {typeof value === "number" && value > 1000
+            ? `${(value / 1000).toFixed(1)}k`
+            : typeof value === "number" && value % 1 !== 0
+              ? value.toFixed(1)
+              : value}
+        </h2>
+
+        <h6
+          style={{
+            color: "#6c757d",
+            marginBottom: "12px",
+            fontWeight: "600",
+            fontSize: "12px",
+            textTransform: "uppercase",
+            letterSpacing: "1px",
+          }}
+        >
+          {label}
+        </h6>
+
+        {description && (
+          <p
+            style={{
+              color: "#8e9297",
+              fontSize: "11px",
+              marginBottom: badge ? "12px" : "0",
+              lineHeight: "1.4",
+            }}
+          >
+            {description}
+          </p>
+        )}
+
+        {badge && (
+          <Badge
+            style={{
+              background: "linear-gradient(135deg, #28a745, #20c997)",
+              color: "white",
+              padding: "4px 10px",
+              borderRadius: "15px",
+              fontSize: "10px",
+              fontWeight: "600",
+            }}
+          >
+            {badge}
+          </Badge>
+        )}
+      </Card.Body>
+    </Card>
+  );
+
+  const handleViewInvoice = (invoice) => {
+    setSelectedInvoice(invoice);
+    setShowViewModal(true);
+  };
+
+  const handlePrintInvoice = async (invoice) => {
+    setLoading(true);
     try {
-      // Generate QR code for verification
-      const verifyUrl = `${window.location.origin}/invoice/${invoice.orderId}`;
-      const qrDataURL = await QRCode.toDataURL(verifyUrl, {
-        width: 120,
-        margin: 2,
-        color: {
-          dark: "#1a202c",
-          light: "#ffffff",
-        },
-        errorCorrectionLevel: "M",
-      });
-
-      // Create invoice data
-      const invoiceData = {
-        invoiceId: invoice.invoiceId,
-        orderId: invoice.orderId,
-        orderDate: invoice.orderDate,
-        orderTime: invoice.orderTime,
-        customerDetails: invoice.customerDetails,
-        items: invoice.items,
-        subtotal: invoice.items.reduce(
-          (sum, item) => sum + item.price * item.quantity,
-          0,
-        ),
-        shipping: 0,
-        total: invoice.totalAmount,
-        paymentMethod: invoice.paymentMethod,
-        paymentStatus: invoice.status,
-        status: "Delivered",
-        qrCode: qrDataURL,
-      };
-
-      // Create temporary element with invoice
+      // Create a temporary div for printing
       const tempDiv = document.createElement("div");
       tempDiv.style.position = "absolute";
       tempDiv.style.left = "-9999px";
@@ -266,183 +384,78 @@ const AdminInvoices = () => {
       const root = createRoot(tempDiv);
       root.render(
         React.createElement(OfficialInvoiceDesign, {
-          invoiceData,
-          qrCode: qrDataURL,
+          invoiceData: invoice,
+          qrCode: invoice.qrCode,
           forPrint: true,
         }),
       );
 
       // Wait for rendering
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Generate PDF
-      const canvas = await html2canvas(tempDiv, {
-        scale: 2.5,
-        logging: false,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-      });
+      // Print
+      const printWindow = window.open("", "_blank");
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Invoice ${invoice.invoiceId}</title>
+            <style>
+              @page { size: A4; margin: 10mm; }
+              body { margin: 0; font-family: Arial, sans-serif; }
+            </style>
+          </head>
+          <body>
+            ${tempDiv.innerHTML}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
 
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      if (imgHeight > pageHeight) {
-        const scaleFactor = (pageHeight - 5) / imgHeight;
-        const scaledWidth = imgWidth * scaleFactor;
-        const scaledHeight = pageHeight - 5;
-        const xOffset = (imgWidth - scaledWidth) / 2;
-        pdf.addImage(imgData, "PNG", xOffset, 2.5, scaledWidth, scaledHeight);
-      } else {
-        const yOffset = (pageHeight - imgHeight) / 2;
-        pdf.addImage(imgData, "PNG", 0, yOffset, imgWidth, imgHeight);
-      }
-
-      // Download with invoice ID as filename
-      pdf.save(`${invoice.invoiceId}.pdf`);
-
-      // Clean up
-      root.unmount();
+      // Cleanup
       document.body.removeChild(tempDiv);
-
-      // Show success message
-      alert("Official Invoice downloaded successfully!");
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      alert("Error generating PDF. Please try again.");
+      console.error("Print error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleExportExcel = async () => {
-    setExportLoading(true);
-
+  const handleExportToExcel = () => {
+    setIsExporting(true);
     try {
-      // Prepare data for Excel export
       const exportData = filteredInvoices.map((invoice) => ({
         "Invoice ID": invoice.invoiceId,
         "Order ID": invoice.orderId,
         "Customer Name": invoice.customerName,
         "Customer Email": invoice.customerEmail,
-        Mobile: invoice.customerMobile,
-        "Total Amount (₹)": invoice.totalAmount.toFixed(2),
-        "Payment Status": invoice.status,
+        "Total Amount": `₹${invoice.totalAmount}`,
+        Status: invoice.status,
         "Payment Method": invoice.paymentMethod,
-        "Order Date": invoice.orderDate,
-        "Order Time": invoice.orderTime,
-        "Items Count": invoice.items.length,
-        "Customer City": invoice.customerDetails.city,
-        "Customer State": invoice.customerDetails.state,
-        "Customer Pincode": invoice.customerDetails.pincode,
-        "Created At": formatDateTime(invoice.createdAt),
+        Date: invoice.orderDate,
+        Time: invoice.orderTime,
       }));
 
-      // Create workbook and worksheet
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(exportData);
-
-      // Set column widths
-      const columnWidths = [
-        { wch: 20 }, // Invoice ID
-        { wch: 15 }, // Order ID
-        { wch: 20 }, // Customer Name
-        { wch: 25 }, // Customer Email
-        { wch: 15 }, // Mobile
-        { wch: 15 }, // Total Amount
-        { wch: 12 }, // Payment Status
-        { wch: 15 }, // Payment Method
-        { wch: 12 }, // Order Date
-        { wch: 12 }, // Order Time
-        { wch: 12 }, // Items Count
-        { wch: 15 }, // City
-        { wch: 15 }, // State
-        { wch: 10 }, // Pincode
-        { wch: 20 }, // Created At
-      ];
-      worksheet["!cols"] = columnWidths;
-
-      // Add worksheet to workbook
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Invoices");
-
-      // Generate file name with current date
-      const currentDate = new Date().toISOString().split("T")[0];
-      const fileName = `Hare_Krishna_Medical_Invoices_${currentDate}.xlsx`;
-
-      // Export file
-      XLSX.writeFile(workbook, fileName);
-
-      // Show success message (you can replace with toast notification)
-      alert(`Excel file "${fileName}" has been downloaded successfully!`);
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Invoices");
+      XLSX.writeFile(
+        wb,
+        `invoices-${new Date().toISOString().split("T")[0]}.xlsx`,
+      );
     } catch (error) {
-      console.error("Export failed:", error);
-      alert("Failed to export Excel file. Please try again.");
+      console.error("Export error:", error);
     } finally {
-      setExportLoading(false);
+      setIsExporting(false);
     }
-  };
-
-  const handlePrintInvoice = () => {
-    if (!selectedInvoice) return;
-
-    const invoiceContent = document.getElementById(
-      "admin-invoice-content",
-    ).innerHTML;
-
-    // Create print-specific HTML content
-    const printContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Official Invoice ${selectedInvoice.invoiceId}</title>
-          <style>
-            @page { size: A4; margin: 0.5in; }
-            body {
-              margin: 0;
-              padding: 0;
-              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            * {
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-              color-adjust: exact !important;
-            }
-          </style>
-        </head>
-        <body>
-          ${invoiceContent}
-        </body>
-      </html>
-    `;
-
-    // Create temporary iframe for printing
-    const printFrame = document.createElement("iframe");
-    printFrame.style.position = "absolute";
-    printFrame.style.top = "-10000px";
-    printFrame.style.left = "-10000px";
-    document.body.appendChild(printFrame);
-
-    printFrame.contentDocument.write(printContent);
-    printFrame.contentDocument.close();
-
-    // Wait for content to load then print
-    setTimeout(() => {
-      printFrame.contentWindow.focus();
-      printFrame.contentWindow.print();
-      // Clean up after printing
-      setTimeout(() => {
-        document.body.removeChild(printFrame);
-      }, 1000);
-    }, 500);
   };
 
   const getStatusVariant = (status) => {
     switch (status) {
       case "Paid":
         return "success";
-      case "Unpaid":
+      case "Pending":
         return "warning";
       case "Overdue":
         return "danger";
@@ -451,195 +464,211 @@ const AdminInvoices = () => {
     }
   };
 
-  const getPaymentMethodBadge = (method) => {
-    switch (method) {
-      case "Online":
-        return "primary";
-      case "COD":
-        return "info";
-      default:
-        return "secondary";
-    }
-  };
-
-  const statistics = {
-    total: invoices.length,
-    paid: invoices.filter((inv) => inv.status === "Paid").length,
-    unpaid: invoices.filter((inv) => inv.status === "Unpaid").length,
-    totalRevenue: invoices
-      .filter((inv) => inv.status === "Paid")
-      .reduce((sum, inv) => sum + inv.totalAmount, 0),
-  };
-
   return (
     <div className="fade-in">
-      <section className="section-padding-sm">
+      <section
+        style={{
+          paddingTop: "2rem",
+          paddingBottom: "2rem",
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+        }}
+      >
         <Container>
-          {/* Header */}
+          {/* Enhanced Header */}
           <Row className="mb-4">
             <Col lg={12}>
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <h2>
-                    <i className="bi bi-receipt-cutoff me-2"></i>
+                  <h1
+                    style={{
+                      color: "#333",
+                      fontWeight: "800",
+                      marginBottom: "10px",
+                      fontSize: "2.5rem",
+                    }}
+                  >
                     Invoice Management
-                  </h2>
-                  <p className="text-muted">
-                    Manage all customer invoices and payment records
+                  </h1>
+                  <p
+                    style={{
+                      color: "#6c757d",
+                      fontSize: "1.1rem",
+                      marginBottom: "0",
+                    }}
+                  >
+                    Manage and track all customer invoices with advanced
+                    analytics
                   </p>
                 </div>
-                <div className="d-flex gap-2">
-                  <Button
-                    onClick={handleExportExcel}
-                    disabled={exportLoading || filteredInvoices.length === 0}
-                    className="btn-medical-primary"
+                <div className="d-flex gap-3">
+                  <EnhancedButton
+                    variant="success"
+                    onClick={handleExportToExcel}
+                    icon="bi bi-download"
+                    disabled={isExporting}
                   >
-                    {exportLoading ? (
-                      <>
-                        <Spinner size="sm" className="me-2" />
-                        Exporting...
-                      </>
-                    ) : (
-                      <>
-                        <i className="bi bi-file-earmark-excel me-2"></i>
-                        Export Excel
-                      </>
-                    )}
-                  </Button>
+                    {isExporting ? "Exporting..." : "Export Excel"}
+                  </EnhancedButton>
+                  <EnhancedButton
+                    variant="info"
+                    onClick={() => window.location.reload()}
+                    icon="bi bi-arrow-clockwise"
+                  >
+                    Refresh
+                  </EnhancedButton>
                 </div>
               </div>
             </Col>
           </Row>
 
-          {/* Statistics Cards */}
-          <Row className="mb-4">
-            <Col lg={3} md={6} className="mb-3">
-              <Card className="medical-card h-100">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <h3 className="text-primary">{statistics.total}</h3>
-                      <p className="text-muted mb-0">Total Invoices</p>
-                    </div>
-                    <div className="bg-primary text-white rounded-circle p-3">
-                      <i className="bi bi-receipt fs-4"></i>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
+          {/* Enhanced Statistics Cards */}
+          <Row className="mb-5 g-4">
+            <Col lg={2} md={4} sm={6}>
+              <CircularStatCard
+                icon="bi bi-receipt-cutoff"
+                value={invoiceStats.totalInvoices}
+                label="Total Invoices"
+                gradient="linear-gradient(135deg, #e63946, #dc3545)"
+                description="All time invoices"
+              />
             </Col>
 
-            <Col lg={3} md={6} className="mb-3">
-              <Card className="medical-card h-100">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <h3 className="text-success">{statistics.paid}</h3>
-                      <p className="text-muted mb-0">Paid Invoices</p>
-                    </div>
-                    <div className="bg-success text-white rounded-circle p-3">
-                      <i className="bi bi-check-circle fs-4"></i>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
+            <Col lg={2} md={4} sm={6}>
+              <CircularStatCard
+                icon="bi bi-check-circle"
+                value={invoiceStats.paidInvoices}
+                label="Paid Invoices"
+                gradient="linear-gradient(135deg, #28a745, #20c997)"
+                badge="Completed"
+                description="Successfully paid"
+              />
             </Col>
 
-            <Col lg={3} md={6} className="mb-3">
-              <Card className="medical-card h-100">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <h3 className="text-warning">{statistics.unpaid}</h3>
-                      <p className="text-muted mb-0">Unpaid Invoices</p>
-                    </div>
-                    <div className="bg-warning text-white rounded-circle p-3">
-                      <i className="bi bi-hourglass-split fs-4"></i>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
+            <Col lg={2} md={4} sm={6}>
+              <CircularStatCard
+                icon="bi bi-clock-history"
+                value={invoiceStats.pendingInvoices}
+                label="Pending Invoices"
+                gradient="linear-gradient(135deg, #ffc107, #fd7e14)"
+                description="Awaiting payment"
+              />
             </Col>
 
-            <Col lg={3} md={6} className="mb-3">
-              <Card className="medical-card h-100">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <h3 className="text-medical-red">
-                        ₹{statistics.totalRevenue.toFixed(2)}
-                      </h3>
-                      <p className="text-muted mb-0">Total Revenue</p>
-                    </div>
-                    <div className="bg-medical-red text-white rounded-circle p-3">
-                      <i className="bi bi-currency-rupee fs-4"></i>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
+            <Col lg={2} md={4} sm={6}>
+              <CircularStatCard
+                icon="bi bi-currency-rupee"
+                value={`₹${(invoiceStats.totalRevenue / 1000).toFixed(1)}k`}
+                label="Total Revenue"
+                gradient="linear-gradient(135deg, #6f42c1, #6610f2)"
+                description="Total earnings"
+              />
+            </Col>
+
+            <Col lg={2} md={4} sm={6}>
+              <CircularStatCard
+                icon="bi bi-credit-card"
+                value={invoiceStats.onlinePayments}
+                label="Online Payments"
+                gradient="linear-gradient(135deg, #17a2b8, #20c997)"
+                description="Digital transactions"
+              />
+            </Col>
+
+            <Col lg={2} md={4} sm={6}>
+              <CircularStatCard
+                icon="bi bi-cash-coin"
+                value={invoiceStats.codPayments}
+                label="COD Payments"
+                gradient="linear-gradient(135deg, #fd7e14, #ffc107)"
+                description="Cash on delivery"
+              />
             </Col>
           </Row>
 
           {/* Filters and Search */}
           <Row className="mb-4">
             <Col lg={12}>
-              <Card className="medical-card">
-                <Card.Body>
-                  <Row>
-                    <Col lg={4} md={6} className="mb-3">
-                      <Form.Label>Search Invoices</Form.Label>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                }}
+              >
+                <Card.Body style={{ padding: "25px" }}>
+                  <Row className="g-3">
+                    <Col md={4}>
+                      <Form.Label style={{ fontWeight: "600", color: "#333" }}>
+                        Search Invoices
+                      </Form.Label>
                       <InputGroup>
                         <InputGroup.Text>
                           <i className="bi bi-search"></i>
                         </InputGroup.Text>
                         <Form.Control
                           type="text"
-                          placeholder="Search by Invoice ID, Order ID, or Customer..."
+                          placeholder="Search by invoice ID, order ID, customer..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
+                          style={{
+                            borderRadius: "0 8px 8px 0",
+                            border: "2px solid #e9ecef",
+                          }}
                         />
                       </InputGroup>
                     </Col>
 
-                    <Col lg={3} md={6} className="mb-3">
-                      <Form.Label>Payment Status</Form.Label>
+                    <Col md={3}>
+                      <Form.Label style={{ fontWeight: "600", color: "#333" }}>
+                        Filter by Status
+                      </Form.Label>
                       <Form.Select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
+                        style={{
+                          borderRadius: "8px",
+                          border: "2px solid #e9ecef",
+                        }}
                       >
-                        <option value="">All Status</option>
+                        <option value="">All Statuses</option>
                         <option value="Paid">Paid</option>
-                        <option value="Unpaid">Unpaid</option>
+                        <option value="Pending">Pending</option>
                         <option value="Overdue">Overdue</option>
                       </Form.Select>
                     </Col>
 
-                    <Col lg={3} md={6} className="mb-3">
-                      <Form.Label>Payment Method</Form.Label>
+                    <Col md={3}>
+                      <Form.Label style={{ fontWeight: "600", color: "#333" }}>
+                        Filter by Payment
+                      </Form.Label>
                       <Form.Select
                         value={paymentFilter}
                         onChange={(e) => setPaymentFilter(e.target.value)}
+                        style={{
+                          borderRadius: "8px",
+                          border: "2px solid #e9ecef",
+                        }}
                       >
-                        <option value="">All Methods</option>
+                        <option value="">All Payment Methods</option>
                         <option value="Online">Online</option>
                         <option value="COD">Cash on Delivery</option>
                       </Form.Select>
                     </Col>
 
-                    <Col lg={2} md={6} className="mb-3">
-                      <Form.Label>&nbsp;</Form.Label>
-                      <div className="d-grid">
-                        <Button
-                          variant="outline-secondary"
-                          onClick={() => {
-                            setSearchTerm("");
-                            setStatusFilter("");
-                            setPaymentFilter("");
-                          }}
-                        >
-                          Clear Filters
-                        </Button>
-                      </div>
+                    <Col md={2} className="d-flex align-items-end">
+                      <EnhancedButton
+                        variant="outline"
+                        onClick={() => {
+                          setSearchTerm("");
+                          setStatusFilter("");
+                          setPaymentFilter("");
+                        }}
+                        icon="bi bi-arrow-clockwise"
+                        style={{ width: "100%" }}
+                      >
+                        Reset
+                      </EnhancedButton>
                     </Col>
                   </Row>
                 </Card.Body>
@@ -647,129 +676,238 @@ const AdminInvoices = () => {
             </Col>
           </Row>
 
-          {/* Invoices Table */}
+          {/* Enhanced Invoices Table */}
           <Row>
             <Col lg={12}>
-              <Card className="medical-card">
-                <Card.Header className="bg-medical-light d-flex justify-content-between align-items-center">
-                  <h5 className="mb-0">
-                    <i className="bi bi-table me-2"></i>
-                    Invoices ({filteredInvoices.length})
-                  </h5>
+              <Card
+                style={{
+                  border: "none",
+                  borderRadius: "16px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                }}
+              >
+                <Card.Header
+                  style={{
+                    background: "linear-gradient(135deg, #e63946, #dc3545)",
+                    color: "white",
+                    borderRadius: "16px 16px 0 0",
+                    padding: "20px 25px",
+                  }}
+                >
+                  <div className="d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0" style={{ fontWeight: "700" }}>
+                      <i className="bi bi-receipt-cutoff me-2"></i>
+                      Invoice Records ({filteredInvoices.length})
+                    </h5>
+                    <Badge
+                      style={{
+                        background: "rgba(255,255,255,0.2)",
+                        color: "white",
+                        padding: "6px 12px",
+                        borderRadius: "15px",
+                        fontSize: "12px",
+                      }}
+                    >
+                      {filteredInvoices.length} of {invoices.length} invoices
+                    </Badge>
+                  </div>
                 </Card.Header>
-                <Card.Body className="p-0">
-                  {filteredInvoices.length > 0 ? (
-                    <div className="table-responsive">
-                      <Table className="mb-0">
-                        <thead className="table-light">
-                          <tr>
-                            <th>Invoice ID</th>
-                            <th>Customer</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                            <th>Payment</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredInvoices.map((invoice) => (
-                            <tr key={invoice.id}>
-                              <td>
-                                <div>
-                                  <strong>{invoice.invoiceId}</strong>
-                                  <br />
-                                  <small className="text-muted">
-                                    Order: {invoice.orderId}
-                                  </small>
-                                </div>
-                              </td>
-                              <td>
-                                <div>
-                                  <div className="fw-bold">
-                                    {invoice.customerName}
-                                  </div>
-                                  <small className="text-muted">
-                                    {invoice.customerEmail}
-                                  </small>
-                                  <br />
-                                  <small className="text-muted">
-                                    {invoice.customerMobile}
-                                  </small>
-                                </div>
-                              </td>
-                              <td>
-                                <span className="fw-bold">
-                                  ₹{invoice.totalAmount.toFixed(2)}
-                                </span>
-                                <br />
-                                <small className="text-muted">
-                                  {invoice.items.length} items
-                                </small>
-                              </td>
-                              <td>
-                                <Badge bg={getStatusVariant(invoice.status)}>
-                                  {invoice.status}
-                                </Badge>
-                              </td>
-                              <td>
-                                <Badge
-                                  bg={getPaymentMethodBadge(
-                                    invoice.paymentMethod,
-                                  )}
-                                >
-                                  {invoice.paymentMethod}
-                                </Badge>
-                              </td>
-                              <td>
-                                <div>
-                                  <div>{invoice.orderDate}</div>
-                                  <small className="text-muted">
-                                    {invoice.orderTime}
-                                  </small>
-                                  <br />
-                                  <small className="text-muted">
-                                    {getRelativeTime(invoice.createdAt)}
-                                  </small>
-                                </div>
-                              </td>
-                              <td>
-                                <div className="d-flex gap-1">
-                                  <Button
-                                    size="sm"
-                                    variant="outline-primary"
-                                    onClick={() => handleViewInvoice(invoice)}
-                                    title="View in popup"
-                                  >
-                                    <i className="bi bi-eye me-1"></i>
-                                    View
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline-success"
-                                    onClick={() =>
-                                      handleDownloadInvoice(invoice)
-                                    }
-                                    title="Download PDF directly"
-                                  >
-                                    <i className="bi bi-download me-1"></i>
-                                    Download
-                                  </Button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </Table>
-                    </div>
-                  ) : (
-                    <div className="text-center py-5">
-                      <i className="bi bi-receipt display-1 text-muted mb-3"></i>
-                      <h4>No Invoices Found</h4>
-                      <p className="text-muted">
-                        No invoices match your current filters. Try adjusting
-                        your search criteria.
-                      </p>
+                <Card.Body style={{ padding: "0" }}>
+                  <Table responsive hover style={{ marginBottom: "0" }}>
+                    <thead style={{ background: "#f8f9fa" }}>
+                      <tr>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                          }}
+                        >
+                          Invoice Details
+                        </th>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                          }}
+                        >
+                          Customer
+                        </th>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                          }}
+                        >
+                          Amount
+                        </th>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                          }}
+                        >
+                          Status
+                        </th>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                          }}
+                        >
+                          Payment
+                        </th>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                          }}
+                        >
+                          Date
+                        </th>
+                        <th
+                          style={{
+                            padding: "15px",
+                            fontWeight: "600",
+                            color: "#333",
+                          }}
+                        >
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredInvoices.map((invoice) => (
+                        <tr
+                          key={invoice.id}
+                          style={{ borderBottom: "1px solid #f1f3f4" }}
+                        >
+                          <td style={{ padding: "15px" }}>
+                            <div>
+                              <div
+                                style={{
+                                  fontWeight: "600",
+                                  marginBottom: "2px",
+                                }}
+                              >
+                                {invoice.invoiceId}
+                              </div>
+                              <small style={{ color: "#6c757d" }}>
+                                Order: {invoice.orderId}
+                              </small>
+                            </div>
+                          </td>
+                          <td style={{ padding: "15px" }}>
+                            <div>
+                              <div
+                                style={{
+                                  fontWeight: "600",
+                                  marginBottom: "2px",
+                                }}
+                              >
+                                {invoice.customerName}
+                              </div>
+                              <small style={{ color: "#6c757d" }}>
+                                {invoice.customerEmail}
+                              </small>
+                            </div>
+                          </td>
+                          <td style={{ padding: "15px" }}>
+                            <div
+                              style={{
+                                fontWeight: "700",
+                                color: "#28a745",
+                                fontSize: "16px",
+                              }}
+                            >
+                              ₹{invoice.totalAmount.toFixed(2)}
+                            </div>
+                          </td>
+                          <td style={{ padding: "15px" }}>
+                            <Badge
+                              bg={getStatusVariant(invoice.status)}
+                              style={{
+                                padding: "6px 12px",
+                                borderRadius: "15px",
+                                fontSize: "11px",
+                                fontWeight: "600",
+                              }}
+                            >
+                              {invoice.status}
+                            </Badge>
+                          </td>
+                          <td style={{ padding: "15px" }}>
+                            <span
+                              style={{
+                                background:
+                                  invoice.paymentMethod === "Online"
+                                    ? "#e7f3ff"
+                                    : "#fff3cd",
+                                color:
+                                  invoice.paymentMethod === "Online"
+                                    ? "#0066cc"
+                                    : "#856404",
+                                padding: "4px 8px",
+                                borderRadius: "6px",
+                                fontSize: "11px",
+                                fontWeight: "600",
+                              }}
+                            >
+                              {invoice.paymentMethod}
+                            </span>
+                          </td>
+                          <td style={{ padding: "15px" }}>
+                            <div
+                              style={{ fontSize: "14px", fontWeight: "600" }}
+                            >
+                              {invoice.orderDate}
+                            </div>
+                            <small style={{ color: "#6c757d" }}>
+                              {invoice.orderTime}
+                            </small>
+                          </td>
+                          <td style={{ padding: "15px" }}>
+                            <div className="d-flex gap-2">
+                              <EnhancedButton
+                                variant="info"
+                                size="sm"
+                                onClick={() => handleViewInvoice(invoice)}
+                                icon="bi bi-eye"
+                              >
+                                View
+                              </EnhancedButton>
+                              <EnhancedButton
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePrintInvoice(invoice)}
+                                disabled={loading}
+                                icon="bi bi-printer"
+                              >
+                                Print
+                              </EnhancedButton>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+
+                  {filteredInvoices.length === 0 && (
+                    <div
+                      className="text-center"
+                      style={{ padding: "60px 20px", color: "#6c757d" }}
+                    >
+                      <i
+                        className="bi bi-receipt"
+                        style={{ fontSize: "48px", marginBottom: "16px" }}
+                      ></i>
+                      <h5>No invoices found</h5>
+                      <p>Try adjusting your search or filter criteria</p>
                     </div>
                   )}
                 </Card.Body>
@@ -781,66 +919,97 @@ const AdminInvoices = () => {
 
       {/* Invoice View Modal */}
       <Modal
-        show={showInvoiceModal}
-        onHide={() => setShowInvoiceModal(false)}
-        size="lg"
-        centered
+        show={showViewModal}
+        onHide={() => setShowViewModal(false)}
+        size="xl"
       >
-        <Modal.Header closeButton>
-          <Modal.Title>
+        <Modal.Header
+          closeButton
+          style={{
+            background: "linear-gradient(135deg, #e63946, #dc3545)",
+            color: "white",
+          }}
+        >
+          <Modal.Title style={{ fontWeight: "700" }}>
             <i className="bi bi-receipt me-2"></i>
-            Invoice Details
+            Invoice Preview - {selectedInvoice?.invoiceId}
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body className="p-0">
+        <Modal.Body style={{ padding: "0" }}>
           {selectedInvoice && (
-            <div
-              className="invoice-preview"
-              style={{ maxHeight: "70vh", overflowY: "auto" }}
-            >
-              <div id="admin-invoice-content">
-                <OfficialInvoiceDesign
-                  invoiceData={{
-                    invoiceId: selectedInvoice.invoiceId,
-                    orderId: selectedInvoice.orderId,
-                    orderDate: selectedInvoice.orderDate,
-                    orderTime: selectedInvoice.orderTime,
-                    customerDetails: selectedInvoice.customerDetails,
-                    items: selectedInvoice.items,
-                    subtotal: selectedInvoice.items.reduce(
-                      (sum, item) => sum + item.price * item.quantity,
-                      0,
-                    ),
-                    shipping: 0,
-                    total: selectedInvoice.totalAmount,
-                    paymentMethod: selectedInvoice.paymentMethod,
-                    paymentStatus: selectedInvoice.status,
-                    status: "Delivered",
-                  }}
-                  qrCode={selectedInvoice.qrCode}
-                  forPrint={false}
-                />
-              </div>
+            <div id="admin-invoice-content">
+              <OfficialInvoiceDesign
+                invoiceData={{
+                  invoiceId: selectedInvoice.invoiceId,
+                  orderId: selectedInvoice.orderId,
+                  orderDate: selectedInvoice.orderDate,
+                  orderTime: selectedInvoice.orderTime,
+                  customerDetails: selectedInvoice.customerDetails,
+                  items: selectedInvoice.items,
+                  subtotal: selectedInvoice.subtotal,
+                  shipping: selectedInvoice.shipping,
+                  total: selectedInvoice.totalAmount,
+                  paymentMethod: selectedInvoice.paymentMethod,
+                  paymentStatus: selectedInvoice.paymentStatus,
+                  status: selectedInvoice.status,
+                }}
+                qrCode={selectedInvoice.qrCode}
+                forPrint={false}
+              />
             </div>
           )}
         </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="outline-secondary"
-            onClick={() => setShowInvoiceModal(false)}
+        <Modal.Footer style={{ background: "#f8f9fa" }}>
+          <EnhancedButton
+            variant="outline"
+            onClick={() => setShowViewModal(false)}
           >
             Close
-          </Button>
-          <Button
-            variant="primary"
-            onClick={handlePrintInvoice}
-            className="btn-medical-primary"
+          </EnhancedButton>
+          <EnhancedButton
+            variant="success"
+            onClick={() => handlePrintInvoice(selectedInvoice)}
+            disabled={loading}
+            icon="bi bi-printer"
           >
-            <i className="bi bi-printer me-2"></i>
-            Print Invoice
-          </Button>
+            {loading ? "Preparing..." : "Print Invoice"}
+          </EnhancedButton>
         </Modal.Footer>
       </Modal>
+
+      {/* Loading Overlay */}
+      {loading && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              padding: "30px",
+              borderRadius: "15px",
+              textAlign: "center",
+            }}
+          >
+            <Spinner
+              animation="border"
+              variant="primary"
+              style={{ marginBottom: "15px" }}
+            />
+            <div style={{ fontWeight: "600" }}>Preparing invoice...</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
