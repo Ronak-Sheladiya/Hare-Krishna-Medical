@@ -56,16 +56,16 @@ const ProfessionalLoading = ({
   return (
     <div style={containerStyle}>
       {/* Brand Logo and Loading Animation */}
-      <div style={{ position: "relative", marginBottom: "20px" }}>
+      <div style={{ position: "relative", marginBottom: "15px" }}>
         {/* Company Logo */}
         <div
           style={{
-            width: logoSize + 40,
-            height: logoSize + 40,
+            width: logoSize + 20,
+            height: logoSize + 20,
             background: "white",
             borderRadius: "50%",
-            border: `4px solid ${color}25`,
-            boxShadow: `0 16px 64px ${color}25, 0 8px 32px rgba(0,0,0,0.1)`,
+            border: `3px solid ${color}30`,
+            boxShadow: `0 8px 32px ${color}20, 0 4px 16px rgba(0,0,0,0.08)`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
