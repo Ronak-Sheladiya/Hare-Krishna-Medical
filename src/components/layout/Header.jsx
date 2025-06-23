@@ -64,6 +64,11 @@ const Header = () => {
                 padding: "8px",
                 border: "2px solid rgba(230, 57, 70, 0.1)",
                 boxShadow: "0 4px 16px rgba(230, 57, 70, 0.25)",
+                width: "60px",
+                height: "60px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
               <img
