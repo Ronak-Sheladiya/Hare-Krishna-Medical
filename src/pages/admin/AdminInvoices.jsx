@@ -21,432 +21,119 @@ import html2canvas from "html2canvas";
 import QRCode from "qrcode";
 import OfficialInvoiceDesign from "../../components/common/OfficialInvoiceDesign";
 import { formatDateTime, getRelativeTime } from "../../utils/dateUtils";
+import { api, safeApiCall } from "../../utils/apiClient";
+import {
+  PageHeroSection,
+  ThemeCard,
+  ThemeButton,
+} from "../../components/common/ConsistentTheme";
 
 const AdminInvoices = () => {
-  // Mock invoice data - in real app, this would come from API
-  const [invoices, setInvoices] = useState([
-    {
-      id: 1,
-      invoiceId: "HKM-INV-2024-001",
-      orderId: "HKM12345678",
-      customerName: "John Smith",
-      customerEmail: "john.smith@email.com",
-      customerMobile: "+91 9876543210",
-      totalAmount: 235.5,
-      status: "Paid",
-      paymentMethod: "Online",
-      orderDate: "2024-01-15",
-      orderTime: "10:30 AM",
-      createdAt: "2024-01-15T10:30:00Z",
-      items: [
-        {
-          id: 1,
-          name: "Paracetamol Tablets",
-          company: "Hare Krishna Pharma",
-          price: 25.99,
-          quantity: 2,
-        },
-        {
-          id: 2,
-          name: "Vitamin D3 Capsules",
-          company: "Health Plus",
-          price: 45.5,
-          quantity: 1,
-        },
-      ],
-      customerDetails: {
-        fullName: "John Smith",
-        email: "john.smith@email.com",
-        mobile: "+91 9876543210",
-        address: "123 Main Street, Surat",
-        city: "Surat",
-        state: "Gujarat",
-        pincode: "395007",
-      },
-      subtotal: 220.0,
-      shipping: 0,
-      tax: 15.5,
-      paymentStatus: "Completed",
-    },
-    {
-      id: 2,
-      invoiceId: "HKM-INV-2024-002",
-      orderId: "HKM12345679",
-      customerName: "Jane Doe",
-      customerEmail: "jane.doe@email.com",
-      customerMobile: "+91 9123456789",
-      totalAmount: 156.75,
-      status: "Pending",
-      paymentMethod: "COD",
-      orderDate: "2024-01-14",
-      orderTime: "02:15 PM",
-      createdAt: "2024-01-14T14:15:00Z",
-      items: [
-        {
-          id: 3,
-          name: "Cough Syrup",
-          company: "Wellness Care",
-          price: 35.75,
-          quantity: 1,
-        },
-      ],
-      customerDetails: {
-        fullName: "Jane Doe",
-        email: "jane.doe@email.com",
-        mobile: "+91 9123456789",
-        address: "456 Oak Avenue, Ahmedabad",
-        city: "Ahmedabad",
-        state: "Gujarat",
-        pincode: "380001",
-      },
-      subtotal: 145.0,
-      shipping: 50,
-      tax: 11.75,
-      paymentStatus: "Pending",
-    },
-  ]);
-
+  const [invoices, setInvoices] = useState([]);
   const [filteredInvoices, setFilteredInvoices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState("");
+  const [exporting, setExporting] = useState(false);
 
-  // Enhanced statistics
-  const invoiceStats = {
-    totalInvoices: invoices.length,
-    paidInvoices: invoices.filter((inv) => inv.status === "Paid").length,
-    pendingInvoices: invoices.filter((inv) => inv.status === "Pending").length,
-    totalRevenue: invoices.reduce((sum, inv) => sum + inv.totalAmount, 0),
-  };
+  // Fetch all invoices
+  const fetchInvoices = async () => {
+    setLoading(true);
+    setError(null);
 
-  useEffect(() => {
-    setFilteredInvoices(invoices);
-  }, [invoices]);
+    const {
+      success,
+      data,
+      error: apiError,
+    } = await safeApiCall(() => api.get("/api/admin/invoices"), []);
 
-  useEffect(() => {
-    let filtered = invoices;
-
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (invoice) =>
-          invoice.invoiceId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          invoice.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          invoice.customerName
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          invoice.customerEmail
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()),
-      );
+    if (success && data) {
+      const invoicesData = data.data || data;
+      setInvoices(invoicesData);
+      setFilteredInvoices(invoicesData);
+    } else {
+      setError(apiError || "Failed to load invoices");
+      // Keep empty state for offline mode
+      setInvoices([]);
+      setFilteredInvoices([]);
     }
 
-    if (statusFilter) {
-      filtered = filtered.filter((invoice) => invoice.status === statusFilter);
-    }
-
-    setFilteredInvoices(filtered);
-  }, [searchTerm, statusFilter, invoices]);
-
-  const handleViewInvoice = (invoice) => {
-    setSelectedInvoice(invoice);
-    setShowViewModal(true);
+    setLoading(false);
   };
 
-  const handlePrintInvoice = async (invoice) => {
-    try {
-      // Generate QR code if not exists
-      let qrCodeDataURL = null;
-      if (!invoice.qrCode) {
-        const qrText = JSON.stringify({
-          type: "invoice_verification",
-          invoice_id: invoice.invoiceId,
-          order_id: invoice.orderId,
-          customer_name: invoice.customerName,
-          total_amount: `₹${invoice.totalAmount.toFixed(2)}`,
-          invoice_date: invoice.orderDate,
-          payment_status: invoice.status,
-          verify_url: `${window.location.origin}/invoice/${invoice.orderId}`,
-          company: "Hare Krishna Medical",
-          location: "Surat, Gujarat, India",
-          phone: "+91 76989 13354",
-          email: "harekrishnamedical@gmail.com",
-          generated_at: new Date().toISOString(),
-        });
-        qrCodeDataURL = await QRCode.toDataURL(qrText, {
-          width: 180,
-          margin: 2,
-          color: {
-            dark: "#1a202c",
-            light: "#ffffff",
-          },
-          errorCorrectionLevel: "M",
-        });
-      }
+  // Update invoice status
+  const updateInvoiceStatus = async (invoiceId, newStatus) => {
+    const { success, error: apiError } = await safeApiCall(
+      () =>
+        api.patch(`/api/admin/invoices/${invoiceId}`, { status: newStatus }),
+      null,
+    );
 
-      // Use centralized print function
-      await printInvoice(invoice, qrCodeDataURL || invoice.qrCode);
-
-      setAlertMessage("Invoice printed successfully!");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3000);
-    } catch (error) {
-      console.error("Print error:", error);
-      setAlertMessage("Error printing invoice. Please try again.");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3000);
-    }
-  };
-
-  const handleDownloadInvoice = async (invoice) => {
-    try {
-      // Generate QR code if not exists
-      let qrCodeDataURL = null;
-      if (!invoice.qrCode) {
-        const qrText = JSON.stringify({
-          type: "invoice_verification",
-          invoice_id: invoice.invoiceId,
-          order_id: invoice.orderId,
-          customer_name: invoice.customerName,
-          total_amount: `₹${invoice.totalAmount.toFixed(2)}`,
-          invoice_date: invoice.orderDate,
-          payment_status: invoice.status,
-          verify_url: `${window.location.origin}/invoice/${invoice.orderId}`,
-          company: "Hare Krishna Medical",
-          location: "Surat, Gujarat, India",
-          phone: "+91 76989 13354",
-          email: "harekrishnamedical@gmail.com",
-          generated_at: new Date().toISOString(),
-        });
-        qrCodeDataURL = await QRCode.toDataURL(qrText, {
-          width: 180,
-          margin: 2,
-          color: {
-            dark: "#1a202c",
-            light: "#ffffff",
-          },
-          errorCorrectionLevel: "M",
-        });
-      }
-
-      // Use centralized download function
-      await downloadInvoice(invoice, qrCodeDataURL || invoice.qrCode);
-
-      setAlertMessage("Invoice downloaded successfully!");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3000);
-    } catch (error) {
-      console.error("Download error:", error);
-      setAlertMessage("Error downloading invoice. Please try again.");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3000);
-    }
-  };
-
-  const handlePaymentStatusChange = async (
-    invoiceId,
-    newStatus,
-    newMethod = null,
-  ) => {
-    try {
-      // Update local state immediately for real-time UI
-      setInvoices((prevInvoices) =>
-        prevInvoices.map((invoice) =>
-          invoice.id === invoiceId
-            ? {
-                ...invoice,
-                status: newStatus,
-                paymentStatus: newStatus === "Paid" ? "Completed" : "Pending",
-                ...(newMethod && { paymentMethod: newMethod }),
-              }
-            : invoice,
+    if (success) {
+      // Update local state
+      setInvoices((prev) =>
+        prev.map((inv) =>
+          inv._id === invoiceId ? { ...inv, status: newStatus } : inv,
         ),
       );
-
-      // Here you would make API call to backend to update database
-      // const response = await fetch(`/api/invoices/${invoiceId}/payment-status`, {
-      //   method: 'PUT',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ status: newStatus, method: newMethod })
-      // });
-
-      setAlertMessage(`Payment status updated to ${newStatus} successfully!`);
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3000);
-    } catch (error) {
-      console.error("Status update error:", error);
-      setAlertMessage("Error updating payment status. Please try again.");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3000);
+      setFilteredInvoices((prev) =>
+        prev.map((inv) =>
+          inv._id === invoiceId ? { ...inv, status: newStatus } : inv,
+        ),
+      );
+    } else {
+      alert(apiError || "Failed to update invoice status");
     }
   };
 
-  // Centralized print function
-  const printInvoice = async (invoiceData, qrCode) => {
+  // Generate QR code for invoice
+  const generateQRCode = async (invoice) => {
     try {
-      // Close modal first if open
-      setShowViewModal(false);
+      const qrData = {
+        invoiceId: invoice.invoiceId || invoice._id,
+        orderId: invoice.orderId,
+        amount: invoice.totalAmount,
+        date: invoice.createdAt,
+        verifyUrl: `${window.location.origin}/qr/invoice/${invoice.invoiceId || invoice._id}`,
+      };
 
-      // Create a temporary div for printing
-      const tempDiv = document.createElement("div");
-      tempDiv.style.position = "absolute";
-      tempDiv.style.left = "-9999px";
-      tempDiv.style.width = "210mm";
-      tempDiv.style.backgroundColor = "white";
-      document.body.appendChild(tempDiv);
-
-      // Import and render OfficialInvoiceDesign component
-      const React = (await import("react")).default;
-      const { createRoot } = await import("react-dom/client");
-
-      const root = createRoot(tempDiv);
-      root.render(
-        React.createElement(OfficialInvoiceDesign, {
-          invoiceData: invoiceData,
-          qrCode: qrCode,
-          forPrint: true,
-        }),
-      );
-
-      // Wait for rendering
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Print using window.print()
-      const printWindow = window.open("", "_blank");
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Invoice ${invoiceData.invoiceId}</title>
-            <style>
-              @page {
-                size: A4;
-                margin: 10mm;
-              }
-              body {
-                margin: 0;
-                font-family: Arial, sans-serif;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-            </style>
-          </head>
-          <body>
-            ${tempDiv.innerHTML}
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus();
-
-      // Delay before printing to ensure content is loaded
-      setTimeout(() => {
-        printWindow.print();
-        setTimeout(() => printWindow.close(), 1000);
-      }, 500);
-
-      // Cleanup
-      setTimeout(() => {
-        if (document.body.contains(tempDiv)) {
-          document.body.removeChild(tempDiv);
-        }
-      }, 2000);
-    } catch (error) {
-      console.error("Centralized print error:", error);
-      throw error;
-    }
-  };
-
-  // Centralized download function
-  const downloadInvoice = async (invoiceData, qrCode) => {
-    try {
-      // Close modal first if open
-      setShowViewModal(false);
-
-      // Create a temporary div for PDF generation
-      const tempDiv = document.createElement("div");
-      tempDiv.style.position = "absolute";
-      tempDiv.style.left = "-9999px";
-      tempDiv.style.width = "210mm";
-      tempDiv.style.backgroundColor = "white";
-      document.body.appendChild(tempDiv);
-
-      // Import and render OfficialInvoiceDesign component
-      const React = (await import("react")).default;
-      const { createRoot } = await import("react-dom/client");
-
-      const root = createRoot(tempDiv);
-      root.render(
-        React.createElement(OfficialInvoiceDesign, {
-          invoiceData: invoiceData,
-          qrCode: qrCode,
-          forPrint: true,
-        }),
-      );
-
-      // Wait for rendering
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Generate PDF using html2canvas and jsPDF
-      const canvas = await html2canvas(tempDiv, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-        logging: false,
+      const qrCodeDataUrl = await QRCode.toDataURL(JSON.stringify(qrData), {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: "#000000",
+          light: "#FFFFFF",
+        },
       });
 
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-
-      let position = 0;
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      // Download the PDF
-      pdf.save(
-        `Invoice-${invoiceData.invoiceId}-${new Date().toISOString().split("T")[0]}.pdf`,
-      );
-
-      // Cleanup
-      setTimeout(() => {
-        if (document.body.contains(tempDiv)) {
-          document.body.removeChild(tempDiv);
-        }
-      }, 1000);
+      setQrCodeUrl(qrCodeDataUrl);
+      setSelectedInvoice(invoice);
+      setShowQRModal(true);
     } catch (error) {
-      console.error("Centralized download error:", error);
-      throw error;
+      console.error("Error generating QR code:", error);
+      alert("Failed to generate QR code");
     }
   };
 
-  const handleExportToExcel = () => {
-    setIsExporting(true);
+  // Export to Excel
+  const exportToExcel = () => {
+    setExporting(true);
     try {
       const exportData = filteredInvoices.map((invoice) => ({
-        "Invoice ID": invoice.invoiceId,
+        "Invoice ID": invoice.invoiceId || invoice._id,
         "Order ID": invoice.orderId,
         "Customer Name": invoice.customerName,
         "Customer Email": invoice.customerEmail,
-        "Total Amount": `₹${invoice.totalAmount}`,
+        "Total Amount": invoice.totalAmount,
         Status: invoice.status,
         "Payment Method": invoice.paymentMethod,
-        Date: invoice.orderDate,
-        Time: invoice.orderTime,
+        "Created Date": formatDateTime(invoice.createdAt),
       }));
 
       const ws = XLSX.utils.json_to_sheet(exportData);
@@ -456,926 +143,374 @@ const AdminInvoices = () => {
         wb,
         `invoices-${new Date().toISOString().split("T")[0]}.xlsx`,
       );
-
-      setAlertMessage("Invoice data exported successfully!");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3000);
     } catch (error) {
-      console.error("Export error:", error);
-      setAlertMessage("Error exporting data. Please try again.");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3000);
+      console.error("Error exporting to Excel:", error);
+      alert("Failed to export to Excel");
     } finally {
-      setIsExporting(false);
+      setExporting(false);
     }
   };
 
-  const getStatusVariant = (status) => {
-    switch (status) {
-      case "Paid":
+  // Filter invoices based on search and filters
+  useEffect(() => {
+    let filtered = invoices;
+
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (invoice) =>
+          invoice.invoiceId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          invoice.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          invoice.customerName
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          invoice.customerEmail
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()),
+      );
+    }
+
+    if (statusFilter) {
+      filtered = filtered.filter((invoice) => invoice.status === statusFilter);
+    }
+
+    if (dateFilter) {
+      const today = new Date();
+      const filterDate = new Date(today);
+
+      switch (dateFilter) {
+        case "today":
+          filtered = filtered.filter((invoice) => {
+            const invoiceDate = new Date(invoice.createdAt);
+            return invoiceDate.toDateString() === today.toDateString();
+          });
+          break;
+        case "week":
+          filterDate.setDate(today.getDate() - 7);
+          filtered = filtered.filter(
+            (invoice) => new Date(invoice.createdAt) >= filterDate,
+          );
+          break;
+        case "month":
+          filterDate.setMonth(today.getMonth() - 1);
+          filtered = filtered.filter(
+            (invoice) => new Date(invoice.createdAt) >= filterDate,
+          );
+          break;
+      }
+    }
+
+    setFilteredInvoices(filtered);
+  }, [invoices, searchTerm, statusFilter, dateFilter]);
+
+  useEffect(() => {
+    fetchInvoices();
+  }, []);
+
+  const handleViewInvoice = (invoice) => {
+    setSelectedInvoice(invoice);
+    setShowViewModal(true);
+  };
+
+  const getStatusBadgeColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case "paid":
         return "success";
-      case "Pending":
+      case "pending":
         return "warning";
-      case "Overdue":
+      case "cancelled":
         return "danger";
+      case "refunded":
+        return "info";
       default:
         return "secondary";
     }
   };
 
+  if (loading) {
+    return (
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "60vh" }}
+      >
+        <Spinner animation="border" variant="danger" />
+        <span className="ms-2">Loading invoices...</span>
+      </div>
+    );
+  }
+
   return (
     <div className="fade-in">
-      <section
-        style={{
-          paddingTop: "2rem",
-          paddingBottom: "2rem",
-          minHeight: "100vh",
-          background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
-        }}
-      >
-        <Container>
-          {/* Alert */}
-          {showAlert && (
-            <Row className="mb-4">
-              <Col lg={12}>
-                <Alert
-                  variant={
-                    alertMessage.includes("Error") ? "danger" : "success"
-                  }
-                  onClose={() => setShowAlert(false)}
-                  dismissible
-                  style={{
-                    borderRadius: "12px",
-                    border: "none",
-                    background: alertMessage.includes("Error")
-                      ? "linear-gradient(135deg, #f8d7da, #f5c6cb)"
-                      : "linear-gradient(135deg, #d4edda, #c3e6cb)",
-                  }}
+      <PageHeroSection
+        title="Invoice Management"
+        description="Manage and track all customer invoices"
+        icon="🧾"
+      />
+
+      <Container className="py-5">
+        {error && (
+          <Alert variant="warning" className="mb-4">
+            <Alert.Heading>Offline Mode</Alert.Heading>
+            <p>{error}</p>
+            <ThemeButton variant="outline" onClick={fetchInvoices}>
+              Try Again
+            </ThemeButton>
+          </Alert>
+        )}
+
+        {/* Filters and Search */}
+        <ThemeCard className="mb-4">
+          <Card.Body>
+            <Row>
+              <Col md={3}>
+                <InputGroup>
+                  <Form.Control
+                    type="text"
+                    placeholder="Search invoices..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </InputGroup>
+              </Col>
+              <Col md={3}>
+                <Form.Select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
                 >
-                  <i
-                    className={`bi bi-${alertMessage.includes("Error") ? "exclamation-triangle" : "check-circle"} me-2`}
-                  ></i>
-                  {alertMessage}
-                </Alert>
+                  <option value="">All Status</option>
+                  <option value="Paid">Paid</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Cancelled">Cancelled</option>
+                  <option value="Refunded">Refunded</option>
+                </Form.Select>
+              </Col>
+              <Col md={3}>
+                <Form.Select
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                >
+                  <option value="">All Time</option>
+                  <option value="today">Today</option>
+                  <option value="week">This Week</option>
+                  <option value="month">This Month</option>
+                </Form.Select>
+              </Col>
+              <Col md={3}>
+                <div className="d-flex gap-2">
+                  <ThemeButton
+                    variant="outline"
+                    onClick={exportToExcel}
+                    disabled={exporting}
+                  >
+                    {exporting ? (
+                      <>
+                        <Spinner
+                          animation="border"
+                          size="sm"
+                          className="me-1"
+                        />
+                        Exporting...
+                      </>
+                    ) : (
+                      "📊 Export Excel"
+                    )}
+                  </ThemeButton>
+                  <ThemeButton variant="outline" onClick={fetchInvoices}>
+                    🔄 Refresh
+                  </ThemeButton>
+                </div>
               </Col>
             </Row>
-          )}
+          </Card.Body>
+        </ThemeCard>
 
-          {/* Enhanced Header */}
-          <Row className="mb-4">
-            <Col lg={12}>
-              <Card
-                style={{
-                  border: "none",
-                  borderRadius: "20px",
-                  background: "linear-gradient(135deg, #e63946, #dc3545)",
-                  color: "white",
-                  boxShadow: "0 15px 50px rgba(230, 57, 70, 0.3)",
-                }}
-              >
-                <Card.Body style={{ padding: "30px" }}>
-                  <Row className="align-items-center">
-                    <Col lg={8}>
-                      <div className="d-flex align-items-center">
-                        <div
-                          style={{
-                            width: "60px",
-                            height: "60px",
-                            background: "rgba(255, 255, 255, 0.2)",
-                            borderRadius: "50%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            marginRight: "20px",
-                          }}
-                        >
-                          <i
-                            className="bi bi-receipt-cutoff"
-                            style={{ fontSize: "28px" }}
-                          ></i>
-                        </div>
+        {/* Invoices Table */}
+        <ThemeCard>
+          <Card.Header className="bg-gradient text-white d-flex justify-content-between align-items-center">
+            <h5 className="mb-0">All Invoices ({filteredInvoices.length})</h5>
+          </Card.Header>
+          <Card.Body className="p-0">
+            {filteredInvoices.length > 0 ? (
+              <Table responsive hover className="mb-0">
+                <thead className="table-light">
+                  <tr>
+                    <th>Invoice ID</th>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Payment Method</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredInvoices.map((invoice) => (
+                    <tr key={invoice._id}>
+                      <td>
+                        <strong>{invoice.invoiceId || invoice._id}</strong>
+                      </td>
+                      <td>{invoice.orderId}</td>
+                      <td>
                         <div>
-                          <h1
-                            style={{
-                              fontWeight: "800",
-                              marginBottom: "5px",
-                              fontSize: "2.2rem",
-                            }}
-                          >
-                            Invoice Management
-                          </h1>
-                          <p
-                            style={{
-                              opacity: "0.9",
-                              marginBottom: "0",
-                              fontSize: "1.1rem",
-                            }}
-                          >
-                            Manage and track all customer invoices efficiently
-                          </p>
+                          <div className="fw-bold">{invoice.customerName}</div>
+                          <small className="text-muted">
+                            {invoice.customerEmail}
+                          </small>
                         </div>
-                      </div>
-                    </Col>
-                    <Col lg={4} className="text-end">
-                      <div className="d-flex gap-2 justify-content-end">
-                        <Button
-                          variant="light"
-                          onClick={handleExportToExcel}
-                          disabled={isExporting}
-                          style={{
-                            borderRadius: "8px",
-                            fontWeight: "600",
-                            padding: "8px 16px",
-                          }}
-                        >
-                          <i className="bi bi-download me-2"></i>
-                          {isExporting ? "Exporting..." : "Export"}
-                        </Button>
-                        <Button
-                          variant="outline-light"
-                          onClick={() => window.location.reload()}
-                          style={{
-                            borderRadius: "8px",
-                            fontWeight: "600",
-                            padding: "8px 16px",
-                          }}
-                        >
-                          <i className="bi bi-arrow-clockwise me-2"></i>
-                          Refresh
-                        </Button>
-                      </div>
-                    </Col>
-                  </Row>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-
-          {/* Enhanced Stats Cards */}
-          <Row className="mb-4 g-3">
-            <Col lg={3} md={6}>
-              <Card
-                style={{
-                  border: "none",
-                  borderRadius: "16px",
-                  background: "linear-gradient(135deg, #ffffff, #f8f9fa)",
-                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-                  transition: "all 0.3s ease",
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = "translateY(-5px)";
-                  e.currentTarget.style.boxShadow =
-                    "0 15px 45px rgba(0, 0, 0, 0.15)";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow =
-                    "0 8px 32px rgba(0, 0, 0, 0.1)";
-                }}
-              >
-                <Card.Body className="text-center" style={{ padding: "25px" }}>
-                  <div
-                    style={{
-                      width: "60px",
-                      height: "60px",
-                      background: "linear-gradient(135deg, #e63946, #dc3545)",
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      margin: "0 auto 15px",
-                      boxShadow: "0 8px 25px rgba(230, 57, 70, 0.3)",
-                    }}
-                  >
-                    <i
-                      className="bi bi-receipt-cutoff"
-                      style={{ fontSize: "24px", color: "white" }}
-                    ></i>
-                  </div>
-                  <h3
-                    style={{
-                      color: "#333",
-                      fontWeight: "800",
-                      marginBottom: "5px",
-                    }}
-                  >
-                    {invoiceStats.totalInvoices}
-                  </h3>
-                  <p
-                    style={{
-                      color: "#6c757d",
-                      fontSize: "14px",
-                      marginBottom: "0",
-                    }}
-                  >
-                    Total Invoices
-                  </p>
-                </Card.Body>
-              </Card>
-            </Col>
-
-            <Col lg={3} md={6}>
-              <Card
-                style={{
-                  border: "none",
-                  borderRadius: "16px",
-                  background: "linear-gradient(135deg, #ffffff, #f8f9fa)",
-                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-                  transition: "all 0.3s ease",
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = "translateY(-5px)";
-                  e.currentTarget.style.boxShadow =
-                    "0 15px 45px rgba(0, 0, 0, 0.15)";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow =
-                    "0 8px 32px rgba(0, 0, 0, 0.1)";
-                }}
-              >
-                <Card.Body className="text-center" style={{ padding: "25px" }}>
-                  <div
-                    style={{
-                      width: "60px",
-                      height: "60px",
-                      background: "linear-gradient(135deg, #28a745, #20c997)",
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      margin: "0 auto 15px",
-                      boxShadow: "0 8px 25px rgba(40, 167, 69, 0.3)",
-                    }}
-                  >
-                    <i
-                      className="bi bi-check-circle"
-                      style={{ fontSize: "24px", color: "white" }}
-                    ></i>
-                  </div>
-                  <h3
-                    style={{
-                      color: "#333",
-                      fontWeight: "800",
-                      marginBottom: "5px",
-                    }}
-                  >
-                    {invoiceStats.paidInvoices}
-                  </h3>
-                  <p
-                    style={{
-                      color: "#6c757d",
-                      fontSize: "14px",
-                      marginBottom: "0",
-                    }}
-                  >
-                    Paid Invoices
-                  </p>
-                </Card.Body>
-              </Card>
-            </Col>
-
-            <Col lg={3} md={6}>
-              <Card
-                style={{
-                  border: "none",
-                  borderRadius: "16px",
-                  background: "linear-gradient(135deg, #ffffff, #f8f9fa)",
-                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-                  transition: "all 0.3s ease",
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = "translateY(-5px)";
-                  e.currentTarget.style.boxShadow =
-                    "0 15px 45px rgba(0, 0, 0, 0.15)";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow =
-                    "0 8px 32px rgba(0, 0, 0, 0.1)";
-                }}
-              >
-                <Card.Body className="text-center" style={{ padding: "25px" }}>
-                  <div
-                    style={{
-                      width: "60px",
-                      height: "60px",
-                      background: "linear-gradient(135deg, #ffc107, #fd7e14)",
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      margin: "0 auto 15px",
-                      boxShadow: "0 8px 25px rgba(255, 193, 7, 0.3)",
-                    }}
-                  >
-                    <i
-                      className="bi bi-clock-history"
-                      style={{ fontSize: "24px", color: "white" }}
-                    ></i>
-                  </div>
-                  <h3
-                    style={{
-                      color: "#333",
-                      fontWeight: "800",
-                      marginBottom: "5px",
-                    }}
-                  >
-                    {invoiceStats.pendingInvoices}
-                  </h3>
-                  <p
-                    style={{
-                      color: "#6c757d",
-                      fontSize: "14px",
-                      marginBottom: "0",
-                    }}
-                  >
-                    Pending Invoices
-                  </p>
-                </Card.Body>
-              </Card>
-            </Col>
-
-            <Col lg={3} md={6}>
-              <Card
-                style={{
-                  border: "none",
-                  borderRadius: "16px",
-                  background: "linear-gradient(135deg, #ffffff, #f8f9fa)",
-                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-                  transition: "all 0.3s ease",
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = "translateY(-5px)";
-                  e.currentTarget.style.boxShadow =
-                    "0 15px 45px rgba(0, 0, 0, 0.15)";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow =
-                    "0 8px 32px rgba(0, 0, 0, 0.1)";
-                }}
-              >
-                <Card.Body className="text-center" style={{ padding: "25px" }}>
-                  <div
-                    style={{
-                      width: "60px",
-                      height: "60px",
-                      background: "linear-gradient(135deg, #6f42c1, #6610f2)",
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      margin: "0 auto 15px",
-                      boxShadow: "0 8px 25px rgba(111, 66, 193, 0.3)",
-                    }}
-                  >
-                    <i
-                      className="bi bi-currency-rupee"
-                      style={{ fontSize: "24px", color: "white" }}
-                    ></i>
-                  </div>
-                  <h3
-                    style={{
-                      color: "#333",
-                      fontWeight: "800",
-                      marginBottom: "5px",
-                    }}
-                  >
-                    ₹{(invoiceStats.totalRevenue / 1000).toFixed(1)}k
-                  </h3>
-                  <p
-                    style={{
-                      color: "#6c757d",
-                      fontSize: "14px",
-                      marginBottom: "0",
-                    }}
-                  >
-                    Total Revenue
-                  </p>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-
-          {/* Enhanced Filters */}
-          <Row className="mb-4">
-            <Col lg={12}>
-              <Card
-                style={{
-                  border: "none",
-                  borderRadius: "16px",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
-                }}
-              >
-                <Card.Body style={{ padding: "25px" }}>
-                  <Row className="g-3">
-                    <Col md={6}>
-                      <Form.Label style={{ fontWeight: "600", color: "#333" }}>
-                        <i className="bi bi-search me-2"></i>
-                        Search Invoices
-                      </Form.Label>
-                      <InputGroup>
-                        <InputGroup.Text style={{ borderColor: "#e9ecef" }}>
-                          <i className="bi bi-search"></i>
-                        </InputGroup.Text>
-                        <Form.Control
-                          type="text"
-                          placeholder="Search by invoice ID, order ID, customer..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          style={{
-                            borderRadius: "0 8px 8px 0",
-                            border: "2px solid #e9ecef",
-                          }}
-                        />
-                      </InputGroup>
-                    </Col>
-                    <Col md={3}>
-                      <Form.Label style={{ fontWeight: "600", color: "#333" }}>
-                        <i className="bi bi-funnel me-2"></i>
-                        Filter by Status
-                      </Form.Label>
-                      <Form.Select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        style={{
-                          borderRadius: "8px",
-                          border: "2px solid #e9ecef",
-                        }}
-                      >
-                        <option value="">All Statuses</option>
-                        <option value="Paid">Paid</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Overdue">Overdue</option>
-                      </Form.Select>
-                    </Col>
-                    <Col md={3} className="d-flex align-items-end">
-                      <Button
-                        variant="outline-secondary"
-                        onClick={() => {
-                          setSearchTerm("");
-                          setStatusFilter("");
-                        }}
-                        style={{
-                          width: "100%",
-                          borderRadius: "8px",
-                          fontWeight: "600",
-                        }}
-                      >
-                        <i className="bi bi-arrow-clockwise me-2"></i>
-                        Reset Filters
-                      </Button>
-                    </Col>
-                  </Row>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-
-          {/* Enhanced Invoice Table */}
-          <Row>
-            <Col lg={12}>
-              <Card
-                style={{
-                  border: "none",
-                  borderRadius: "16px",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
-                }}
-              >
-                <Card.Header
-                  style={{
-                    background: "linear-gradient(135deg, #343a40, #495057)",
-                    color: "white",
-                    borderRadius: "16px 16px 0 0",
-                    padding: "20px 25px",
-                  }}
-                >
-                  <div className="d-flex justify-content-between align-items-center">
-                    <h5 className="mb-0" style={{ fontWeight: "700" }}>
-                      <i className="bi bi-receipt-cutoff me-2"></i>
-                      Invoice Records ({filteredInvoices.length})
-                    </h5>
-                    <Badge
-                      style={{
-                        background: "rgba(255,255,255,0.2)",
-                        color: "white",
-                        padding: "6px 12px",
-                        borderRadius: "15px",
-                        fontSize: "12px",
-                      }}
-                    >
-                      {filteredInvoices.length} of {invoices.length} invoices
-                    </Badge>
-                  </div>
-                </Card.Header>
-                <Card.Body style={{ padding: "0" }}>
-                  <Table responsive hover style={{ marginBottom: "0" }}>
-                    <thead style={{ background: "#f8f9fa" }}>
-                      <tr>
-                        <th
-                          style={{
-                            padding: "15px",
-                            fontWeight: "600",
-                            color: "#333",
-                            borderBottom: "2px solid #e9ecef",
-                          }}
-                        >
-                          Invoice Details
-                        </th>
-                        <th
-                          style={{
-                            padding: "15px",
-                            fontWeight: "600",
-                            color: "#333",
-                            borderBottom: "2px solid #e9ecef",
-                          }}
-                        >
-                          Customer
-                        </th>
-                        <th
-                          style={{
-                            padding: "15px",
-                            fontWeight: "600",
-                            color: "#333",
-                            borderBottom: "2px solid #e9ecef",
-                          }}
-                        >
-                          Amount
-                        </th>
-                        <th
-                          style={{
-                            padding: "15px",
-                            fontWeight: "600",
-                            color: "#333",
-                            borderBottom: "2px solid #e9ecef",
-                          }}
-                        >
-                          Status
-                        </th>
-                        <th
-                          style={{
-                            padding: "15px",
-                            fontWeight: "600",
-                            color: "#333",
-                            borderBottom: "2px solid #e9ecef",
-                          }}
-                        >
-                          Payment
-                        </th>
-                        <th
-                          style={{
-                            padding: "15px",
-                            fontWeight: "600",
-                            color: "#333",
-                            borderBottom: "2px solid #e9ecef",
-                          }}
-                        >
-                          Date
-                        </th>
-                        <th
-                          style={{
-                            padding: "15px",
-                            fontWeight: "600",
-                            color: "#333",
-                            borderBottom: "2px solid #e9ecef",
-                          }}
-                        >
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredInvoices.map((invoice) => (
-                        <tr
-                          key={invoice.id}
-                          style={{
-                            borderBottom: "1px solid #f1f3f4",
-                            transition: "all 0.2s ease",
-                          }}
-                          onMouseOver={(e) => {
-                            e.currentTarget.style.backgroundColor = "#f8f9fa";
-                          }}
-                          onMouseOut={(e) => {
-                            e.currentTarget.style.backgroundColor =
-                              "transparent";
-                          }}
-                        >
-                          <td style={{ padding: "15px" }}>
-                            <div>
-                              <div
-                                style={{
-                                  fontWeight: "700",
-                                  marginBottom: "3px",
-                                  color: "#333",
-                                }}
-                              >
-                                {invoice.invoiceId}
-                              </div>
-                              <small style={{ color: "#6c757d" }}>
-                                Order: {invoice.orderId}
-                              </small>
-                            </div>
-                          </td>
-                          <td style={{ padding: "15px" }}>
-                            <div>
-                              <div
-                                style={{
-                                  fontWeight: "600",
-                                  marginBottom: "3px",
-                                  color: "#333",
-                                }}
-                              >
-                                {invoice.customerName}
-                              </div>
-                              <small style={{ color: "#6c757d" }}>
-                                {invoice.customerEmail}
-                              </small>
-                            </div>
-                          </td>
-                          <td style={{ padding: "15px" }}>
-                            <div
-                              style={{
-                                fontWeight: "700",
-                                color: "#28a745",
-                                fontSize: "16px",
-                              }}
+                      </td>
+                      <td>
+                        <strong>
+                          ₹{invoice.totalAmount?.toLocaleString()}
+                        </strong>
+                      </td>
+                      <td>
+                        <Badge bg={getStatusBadgeColor(invoice.status)}>
+                          {invoice.status}
+                        </Badge>
+                      </td>
+                      <td>{invoice.paymentMethod}</td>
+                      <td>
+                        <div>
+                          <div>{formatDateTime(invoice.createdAt)}</div>
+                          <small className="text-muted">
+                            {getRelativeTime(invoice.createdAt)}
+                          </small>
+                        </div>
+                      </td>
+                      <td>
+                        <Dropdown>
+                          <Dropdown.Toggle
+                            variant="outline-secondary"
+                            size="sm"
+                            className="border-0"
+                          >
+                            Actions
+                          </Dropdown.Toggle>
+                          <Dropdown.Menu>
+                            <Dropdown.Item
+                              onClick={() => handleViewInvoice(invoice)}
                             >
-                              ₹{invoice.totalAmount.toFixed(2)}
-                            </div>
-                          </td>
-                          <td style={{ padding: "15px" }}>
-                            <Badge
-                              bg={getStatusVariant(invoice.status)}
-                              style={{
-                                padding: "6px 12px",
-                                borderRadius: "15px",
-                                fontSize: "11px",
-                                fontWeight: "600",
-                              }}
+                              👁️ View Invoice
+                            </Dropdown.Item>
+                            <Dropdown.Item
+                              onClick={() => generateQRCode(invoice)}
                             >
-                              {invoice.status}
-                            </Badge>
-                          </td>
-                          <td style={{ padding: "15px" }}>
-                            <span
-                              style={{
-                                background:
-                                  invoice.paymentMethod === "Online"
-                                    ? "#e7f3ff"
-                                    : "#fff3cd",
-                                color:
-                                  invoice.paymentMethod === "Online"
-                                    ? "#0066cc"
-                                    : "#856404",
-                                padding: "4px 8px",
-                                borderRadius: "6px",
-                                fontSize: "11px",
-                                fontWeight: "600",
-                              }}
+                              📱 Generate QR
+                            </Dropdown.Item>
+                            <Dropdown.Divider />
+                            <Dropdown.Item
+                              onClick={() =>
+                                updateInvoiceStatus(invoice._id, "Paid")
+                              }
+                              disabled={invoice.status === "Paid"}
                             >
-                              {invoice.paymentMethod}
-                            </span>
-                          </td>
-                          <td style={{ padding: "15px" }}>
-                            <div
-                              style={{ fontSize: "14px", fontWeight: "600" }}
+                              ✅ Mark as Paid
+                            </Dropdown.Item>
+                            <Dropdown.Item
+                              onClick={() =>
+                                updateInvoiceStatus(invoice._id, "Cancelled")
+                              }
+                              disabled={invoice.status === "Cancelled"}
                             >
-                              {invoice.orderDate}
-                            </div>
-                            <small style={{ color: "#6c757d" }}>
-                              {invoice.orderTime}
-                            </small>
-                          </td>
-                          <td style={{ padding: "15px" }}>
-                            <div className="d-flex gap-1 flex-wrap">
-                              <Button
-                                variant="outline-primary"
-                                size="sm"
-                                onClick={() => handleViewInvoice(invoice)}
-                                style={{
-                                  borderRadius: "6px",
-                                  fontWeight: "600",
-                                }}
-                                title="View Invoice"
-                              >
-                                <i className="bi bi-eye"></i>
-                              </Button>
-                              <Button
-                                variant="outline-success"
-                                size="sm"
-                                onClick={() => handlePrintInvoice(invoice)}
-                                style={{
-                                  borderRadius: "6px",
-                                  fontWeight: "600",
-                                }}
-                                title="Print Invoice"
-                              >
-                                <i className="bi bi-printer"></i>
-                              </Button>
-                              <Button
-                                variant="outline-info"
-                                size="sm"
-                                onClick={() => handleDownloadInvoice(invoice)}
-                                style={{
-                                  borderRadius: "6px",
-                                  fontWeight: "600",
-                                }}
-                                title="Download PDF"
-                              >
-                                <i className="bi bi-download"></i>
-                              </Button>
-                              <Dropdown>
-                                <Dropdown.Toggle
-                                  variant="outline-warning"
-                                  size="sm"
-                                  style={{
-                                    borderRadius: "6px",
-                                    fontWeight: "600",
-                                    border: "1px solid #ffc107",
-                                  }}
-                                  title="Change Payment Status"
-                                >
-                                  <i className="bi bi-gear"></i>
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu>
-                                  <Dropdown.Header>
-                                    Payment Status
-                                  </Dropdown.Header>
-                                  <Dropdown.Item
-                                    onClick={() =>
-                                      handlePaymentStatusChange(
-                                        invoice.id,
-                                        "Paid",
-                                      )
-                                    }
-                                    className={
-                                      invoice.status === "Paid" ? "active" : ""
-                                    }
-                                  >
-                                    <i className="bi bi-check-circle text-success me-2"></i>
-                                    Mark as Paid
-                                  </Dropdown.Item>
-                                  <Dropdown.Item
-                                    onClick={() =>
-                                      handlePaymentStatusChange(
-                                        invoice.id,
-                                        "Pending",
-                                      )
-                                    }
-                                    className={
-                                      invoice.status === "Pending"
-                                        ? "active"
-                                        : ""
-                                    }
-                                  >
-                                    <i className="bi bi-clock text-warning me-2"></i>
-                                    Mark as Pending
-                                  </Dropdown.Item>
-                                  <Dropdown.Divider />
-                                  <Dropdown.Header>
-                                    Payment Method
-                                  </Dropdown.Header>
-                                  <Dropdown.Item
-                                    onClick={() =>
-                                      handlePaymentStatusChange(
-                                        invoice.id,
-                                        invoice.status,
-                                        "Online",
-                                      )
-                                    }
-                                  >
-                                    <i className="bi bi-credit-card text-primary me-2"></i>
-                                    Change to Online
-                                  </Dropdown.Item>
-                                  <Dropdown.Item
-                                    onClick={() =>
-                                      handlePaymentStatusChange(
-                                        invoice.id,
-                                        invoice.status,
-                                        "COD",
-                                      )
-                                    }
-                                  >
-                                    <i className="bi bi-cash text-success me-2"></i>
-                                    Change to COD
-                                  </Dropdown.Item>
-                                </Dropdown.Menu>
-                              </Dropdown>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
+                              ❌ Cancel Invoice
+                            </Dropdown.Item>
+                          </Dropdown.Menu>
+                        </Dropdown>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            ) : (
+              <div className="text-center py-5">
+                <div className="mb-3">
+                  <span style={{ fontSize: "4rem" }}>🧾</span>
+                </div>
+                <h5>No Invoices Found</h5>
+                <p className="text-muted">
+                  {error
+                    ? "Unable to load invoices. Please check your connection."
+                    : "No invoices match your current filters."}
+                </p>
+                {error && (
+                  <ThemeButton onClick={fetchInvoices}>Try Again</ThemeButton>
+                )}
+              </div>
+            )}
+          </Card.Body>
+        </ThemeCard>
 
-                  {filteredInvoices.length === 0 && (
-                    <div
-                      className="text-center"
-                      style={{ padding: "60px 20px", color: "#6c757d" }}
-                    >
-                      <i
-                        className="bi bi-receipt"
-                        style={{ fontSize: "48px", marginBottom: "16px" }}
-                      ></i>
-                      <h5>No invoices found</h5>
-                      <p>Try adjusting your search or filter criteria</p>
-                    </div>
-                  )}
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        </Container>
-      </section>
-
-      {/* Enhanced Invoice View Modal */}
-      <Modal
-        show={showViewModal}
-        onHide={() => {
-          setShowViewModal(false);
-          setSelectedInvoice(null);
-        }}
-        size="xl"
-        backdrop="static"
-        keyboard={true}
-      >
-        <Modal.Header
-          closeButton
-          style={{
-            background: "linear-gradient(135deg, #e63946, #dc3545)",
-            color: "white",
-            borderRadius: "0",
-          }}
+        {/* View Invoice Modal */}
+        <Modal
+          show={showViewModal}
+          onHide={() => setShowViewModal(false)}
+          size="lg"
         >
-          <Modal.Title style={{ fontWeight: "700" }}>
-            <i className="bi bi-receipt me-2"></i>
-            Invoice Preview - {selectedInvoice?.invoiceId}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="p-0">
-          {selectedInvoice && (
-            <div id="admin-invoice-content">
+          <Modal.Header closeButton>
+            <Modal.Title>Invoice Details</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {selectedInvoice && (
               <OfficialInvoiceDesign
-                invoiceData={{
-                  invoiceId: selectedInvoice.invoiceId,
-                  orderId: selectedInvoice.orderId,
-                  orderDate: selectedInvoice.orderDate,
-                  orderTime: selectedInvoice.orderTime,
-                  customerDetails: selectedInvoice.customerDetails,
-                  items: selectedInvoice.items,
-                  subtotal: selectedInvoice.subtotal,
-                  shipping: selectedInvoice.shipping,
-                  total: selectedInvoice.totalAmount,
-                  paymentMethod: selectedInvoice.paymentMethod,
-                  paymentStatus: selectedInvoice.paymentStatus,
-                  status: selectedInvoice.status,
+                invoice={selectedInvoice}
+                onPrint={() => window.print()}
+                onDownload={() => {
+                  // Implement download functionality
+                  console.log("Download invoice:", selectedInvoice);
                 }}
-                qrCode={selectedInvoice.qrCode}
-                forPrint={false}
               />
-            </div>
-          )}
-        </Modal.Body>
-        <Modal.Footer style={{ background: "#f8f9fa" }}>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setShowViewModal(false);
-              setSelectedInvoice(null);
-            }}
-            style={{
-              borderRadius: "8px",
-              fontWeight: "600",
-            }}
-          >
-            <i className="bi bi-x-lg me-2"></i>
-            Close
-          </Button>
-          <Button
-            variant="info"
-            onClick={() => handleDownloadInvoice(selectedInvoice)}
-            style={{
-              borderRadius: "8px",
-              fontWeight: "600",
-            }}
-          >
-            <i className="bi bi-download me-2"></i>
-            Download PDF
-          </Button>
-          <Button
-            variant="success"
-            onClick={() => handlePrintInvoice(selectedInvoice)}
-            style={{
-              borderRadius: "8px",
-              fontWeight: "600",
-            }}
-          >
-            <i className="bi bi-printer me-2"></i>
-            Print Invoice
-          </Button>
-        </Modal.Footer>
-      </Modal>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowViewModal(false)}>
+              Close
+            </Button>
+            <ThemeButton onClick={() => window.print()}>
+              🖨️ Print Invoice
+            </ThemeButton>
+          </Modal.Footer>
+        </Modal>
+
+        {/* QR Code Modal */}
+        <Modal show={showQRModal} onHide={() => setShowQRModal(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Invoice QR Code</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="text-center">
+            {qrCodeUrl && (
+              <div>
+                <img
+                  src={qrCodeUrl}
+                  alt="Invoice QR Code"
+                  className="img-fluid mb-3"
+                  style={{ maxWidth: "256px" }}
+                />
+                <p className="text-muted">
+                  Scan this QR code to verify invoice authenticity
+                </p>
+                <p className="small">
+                  Invoice: {selectedInvoice?.invoiceId || selectedInvoice?._id}
+                </p>
+              </div>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowQRModal(false)}>
+              Close
+            </Button>
+            <ThemeButton
+              onClick={() => {
+                const link = document.createElement("a");
+                link.download = `invoice-qr-${selectedInvoice?.invoiceId || selectedInvoice?._id}.png`;
+                link.href = qrCodeUrl;
+                link.click();
+              }}
+            >
+              📥 Download QR
+            </ThemeButton>
+          </Modal.Footer>
+        </Modal>
+      </Container>
     </div>
   );
 };
