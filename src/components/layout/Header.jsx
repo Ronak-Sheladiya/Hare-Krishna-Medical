@@ -439,7 +439,11 @@ const Header = () => {
           }
 
           .brand-text-container h4 {
-            font-size: 1.1rem;
+            font-size: 1.1rem !important;
+          }
+
+          .brand-text-container small {
+            font-size: 0.65rem !important;
           }
         }
       `}</style>
