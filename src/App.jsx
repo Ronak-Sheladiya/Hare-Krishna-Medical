@@ -18,7 +18,7 @@ import Footer from "./components/layout/Footer.jsx";
 import LoadingSpinner from "./components/common/LoadingSpinner.jsx";
 import GlobalSecurity from "./components/common/GlobalSecurity.jsx";
 import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
-import DevModeIndicator from "./components/common/DevModeIndicator.jsx";
+// import DevModeIndicator from "./components/common/DevModeIndicator.jsx"; // Temporarily disabled
 
 // Pages
 import Home from "./pages/Home.jsx";
