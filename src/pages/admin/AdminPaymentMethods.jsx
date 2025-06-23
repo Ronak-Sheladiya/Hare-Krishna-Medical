@@ -191,8 +191,8 @@ const AdminPaymentMethods = () => {
         <section
           style={{
             background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
-            paddingTop: "80px",
-            paddingBottom: "80px",
+            paddingTop: "40px",
+            paddingBottom: "40px",
             color: "white",
           }}
         >
@@ -201,24 +201,24 @@ const AdminPaymentMethods = () => {
               <Col lg={12}>
                 <div
                   style={{
-                    width: "80px",
-                    height: "80px",
+                    width: "60px",
+                    height: "60px",
                     background: "rgba(255,255,255,0.2)",
                     borderRadius: "50%",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    margin: "0 auto 24px",
-                    fontSize: "32px",
+                    margin: "0 auto 16px",
+                    fontSize: "24px",
                   }}
                 >
                   <i className="bi bi-credit-card"></i>
                 </div>
                 <h1
                   style={{
-                    fontSize: "3rem",
+                    fontSize: "2.5rem",
                     fontWeight: "800",
-                    marginBottom: "20px",
+                    marginBottom: "12px",
                     textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
                   }}
                 >
@@ -226,9 +226,9 @@ const AdminPaymentMethods = () => {
                 </h1>
                 <p
                   style={{
-                    fontSize: "1.2rem",
+                    fontSize: "1rem",
                     opacity: "0.9",
-                    maxWidth: "600px",
+                    maxWidth: "500px",
                     margin: "0 auto",
                   }}
                 >
@@ -258,8 +258,8 @@ const AdminPaymentMethods = () => {
       <section
         style={{
           background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
-          paddingTop: "80px",
-          paddingBottom: "80px",
+          paddingTop: "40px",
+          paddingBottom: "40px",
           color: "white",
         }}
       >
@@ -268,24 +268,24 @@ const AdminPaymentMethods = () => {
             <Col lg={12}>
               <div
                 style={{
-                  width: "80px",
-                  height: "80px",
+                  width: "60px",
+                  height: "60px",
                   background: "rgba(255,255,255,0.2)",
                   borderRadius: "50%",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  margin: "0 auto 24px",
-                  fontSize: "32px",
+                  margin: "0 auto 16px",
+                  fontSize: "24px",
                 }}
               >
                 <i className="bi bi-credit-card"></i>
               </div>
               <h1
                 style={{
-                  fontSize: "3rem",
+                  fontSize: "2.5rem",
                   fontWeight: "800",
-                  marginBottom: "20px",
+                  marginBottom: "12px",
                   textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
                 }}
               >
@@ -293,9 +293,9 @@ const AdminPaymentMethods = () => {
               </h1>
               <p
                 style={{
-                  fontSize: "1.2rem",
+                  fontSize: "1rem",
                   opacity: "0.9",
-                  maxWidth: "600px",
+                  maxWidth: "500px",
                   margin: "0 auto",
                 }}
               >
