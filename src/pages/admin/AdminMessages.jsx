@@ -498,6 +498,7 @@ const AdminMessages = () => {
                           </Dropdown.Toggle>
                           <Dropdown.Menu>
                             <Dropdown.Item
+                              key={`reply-${message._id}`}
                               onClick={() => {
                                 setSelectedMessage(message);
                                 setShowReplyModal(true);
@@ -505,22 +506,25 @@ const AdminMessages = () => {
                             >
                               💬 Reply
                             </Dropdown.Item>
-                            <Dropdown.Divider />
+                            <Dropdown.Divider key={`divider1-${message._id}`} />
                             {!message.isRead ? (
                               <Dropdown.Item
+                                key={`read-${message._id}`}
                                 onClick={() => handleMarkAsRead(message._id)}
                               >
                                 ✅ Mark as Read
                               </Dropdown.Item>
                             ) : (
                               <Dropdown.Item
+                                key={`unread-${message._id}`}
                                 onClick={() => handleMarkAsUnread(message._id)}
                               >
                                 📧 Mark as Unread
                               </Dropdown.Item>
                             )}
-                            <Dropdown.Divider />
+                            <Dropdown.Divider key={`divider2-${message._id}`} />
                             <Dropdown.Item
+                              key={`progress-${message._id}`}
                               onClick={() =>
                                 handleUpdateStatus(message._id, "in_progress")
                               }
@@ -528,6 +532,7 @@ const AdminMessages = () => {
                               🔄 In Progress
                             </Dropdown.Item>
                             <Dropdown.Item
+                              key={`resolve-${message._id}`}
                               onClick={() =>
                                 handleUpdateStatus(message._id, "resolved")
                               }
@@ -535,14 +540,16 @@ const AdminMessages = () => {
                               ✅ Resolve
                             </Dropdown.Item>
                             <Dropdown.Item
+                              key={`close-${message._id}`}
                               onClick={() =>
                                 handleUpdateStatus(message._id, "closed")
                               }
                             >
                               🔒 Close
                             </Dropdown.Item>
-                            <Dropdown.Divider />
+                            <Dropdown.Divider key={`divider3-${message._id}`} />
                             <Dropdown.Item
+                              key={`delete-${message._id}`}
                               onClick={() => handleDeleteMessage(message._id)}
                               className="text-danger"
                             >
