@@ -626,22 +626,15 @@ Generated: ${new Date().toLocaleString()}
                             className="bi bi-receipt-cutoff"
                             style={{ fontSize: "28px" }}
                           ></i>
-                        </div>
-                        <div>
-                          <h1
-                            style={{
-                              fontWeight: "800",
-                              marginBottom: "5px",
-                              fontSize: "2.2rem",
-                            }}
-                          >
-                            Invoice Verified
-                          </h1>
-                          <p
-                            style={{
-                              opacity: "0.9",
-                              marginBottom: "0",
-                              fontSize: "1.1rem",
+                      <img
+                        src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
+                        alt="Hare Krishna Medical"
+                        style={{
+                          width: "60px",
+                          height: "60px",
+                          marginRight: "15px",
+                        }}
+                      />
                             }}
                           >
                             {invoice?.invoiceId} • Order {invoice?.orderId}
@@ -718,11 +711,7 @@ Generated: ${new Date().toLocaleString()}
                         {isAuthenticated && (
                           <EnhancedButton
                             variant="outline"
-                            to={
-                              user?.role === 1
-                                ? "/admin/orders"
-                                : "/user/orders"
-                            }
+                            to={user?.role === 1 ? "/admin/orders" : "/user/orders"}
                             icon="bi bi-box-seam"
                             size="sm"
                           >
