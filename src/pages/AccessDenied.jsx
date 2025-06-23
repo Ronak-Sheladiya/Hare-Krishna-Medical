@@ -21,7 +21,7 @@ const AccessDenied = () => {
         subtitle: "Please log in to continue",
         message:
           "You need to be logged in to access this page. Please sign in with your credentials to continue.",
-        color: "#17a2b8",
+        color: "#e63946",
         actions: [
           {
             text: "Sign In",
@@ -46,7 +46,7 @@ const AccessDenied = () => {
         subtitle: "Restricted Area",
         message:
           "This area is restricted to administrators only. You don't have sufficient permissions to access this resource.",
-        color: "#dc3545",
+        color: "#e63946",
         actions: [
           {
             text: "User Dashboard",
@@ -71,7 +71,7 @@ const AccessDenied = () => {
         subtitle: "Admin Restriction",
         message:
           "This section is exclusively for regular users. As an administrator, you have access to enhanced management capabilities in the admin dashboard.",
-        color: "#fd7e14",
+        color: "#e63946",
         actions: [
           {
             text: "Admin Dashboard",
@@ -96,7 +96,7 @@ const AccessDenied = () => {
       subtitle: "Insufficient Permissions",
       message:
         "You don't have the necessary permissions to access this resource. Please contact your administrator if you believe this is an error.",
-      color: "#6c757d",
+      color: "#e63946",
       actions: [
         {
           text: "Go Home",
@@ -122,7 +122,7 @@ const AccessDenied = () => {
       <section
         style={{
           background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
-          minHeight: "40vh",
+          minHeight: "50vh",
           paddingTop: "80px",
           paddingBottom: "40px",
           position: "relative",
@@ -195,188 +195,118 @@ const AccessDenied = () => {
                   zIndex: 3,
                 }}
               >
-              {/* Animated Background Pattern */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: "150px",
-                  background: `linear-gradient(135deg, ${content.color}20 0%, ${content.color}10 100%)`,
-                  zIndex: 1,
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "-50px",
-                    right: "-50px",
-                    width: "150px",
-                    height: "150px",
-                    borderRadius: "50%",
-                    background: `${content.color}15`,
-                    animation: "float 6s ease-in-out infinite",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "50px",
-                    left: "-30px",
-                    width: "100px",
-                    height: "100px",
-                    borderRadius: "50%",
-                    background: `${content.color}10`,
-                    animation: "float 4s ease-in-out infinite reverse",
-                  }}
-                ></div>
-              </div>
-
-              <div
-                className="card-body p-5"
-                style={{ position: "relative", zIndex: 2 }}
-              >
-                {/* Icon with Pulse Animation */}
-                <div
-                  className="mb-4"
-                  style={{
-                    animation: "pulse 2s infinite",
-                    fontSize: "6rem",
-                    color: content.color,
-                  }}
-                >
-                  <i className={content.icon}></i>
-                </div>
-
-                {/* Title */}
-                <h1
-                  className="mb-3"
-                  style={{
-                    fontWeight: "800",
-                    color: content.color,
-                    fontSize: "2.5rem",
-                  }}
-                >
-                  {content.title}
-                </h1>
-
-                {/* Subtitle */}
-                <h5 className="text-muted mb-4" style={{ fontWeight: "600" }}>
-                  {content.subtitle}
-                </h5>
-
-                {/* Description */}
-                <p
-                  className="text-secondary mb-4 lead"
-                  style={{ fontSize: "1.1rem", lineHeight: "1.6" }}
-                >
-                  {content.message}
-                </p>
-
-                {/* User Info (if authenticated) */}
-                {isAuthenticated && user && (
-                  <div
-                    className="alert mb-4"
-                    style={{
-                      background: `${content.color}10`,
-                      border: `1px solid ${content.color}30`,
-                      borderRadius: "16px",
-                    }}
+                <div className="card-body p-5 text-center">
+                  {/* Description */}
+                  <p
+                    className="text-secondary mb-4 lead"
+                    style={{ fontSize: "1.1rem", lineHeight: "1.6" }}
                   >
-                    <div className="d-flex align-items-center">
-                      <i
-                        className="bi bi-person-circle me-3"
-                        style={{ fontSize: "1.5rem", color: content.color }}
-                      ></i>
-                      <div className="text-start">
-                        <div
-                          className="fw-bold"
-                          style={{ color: content.color }}
-                        >
-                          {user.fullName || user.name || "User"}
+                    {content.message}
+                  </p>
+
+                  {/* User Info (if authenticated) */}
+                  {isAuthenticated && user && (
+                    <div
+                      className="alert mb-4"
+                      style={{
+                        background: "rgba(230, 57, 70, 0.1)",
+                        border: "1px solid rgba(230, 57, 70, 0.3)",
+                        borderRadius: "16px",
+                        borderLeft: "4px solid #e63946",
+                      }}
+                    >
+                      <div className="d-flex align-items-center justify-content-center">
+                        <i
+                          className="bi bi-person-circle me-3"
+                          style={{ fontSize: "1.5rem", color: "#e63946" }}
+                        ></i>
+                        <div className="text-start">
+                          <div className="fw-bold" style={{ color: "#e63946" }}>
+                            {user.fullName || user.name || "User"}
+                          </div>
+                          <small className="text-muted">
+                            {user.email} •{" "}
+                            {user.role === 1 ? "Administrator" : "User"}
+                          </small>
                         </div>
-                        <small className="text-muted">
-                          {user.email} •{" "}
-                          {user.role === 1 ? "Administrator" : "User"}
-                        </small>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Attempted Path Info */}
+                  {attemptedPath && attemptedPath !== "/access-denied" && (
+                    <div className="mb-4">
+                      <small className="text-muted">
+                        <i className="bi bi-link-45deg me-1"></i>
+                        Attempted to access:{" "}
+                        <code className="bg-light px-2 py-1 rounded">
+                          {attemptedPath}
+                        </code>
+                      </small>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="d-flex gap-3 justify-content-center flex-wrap mb-4">
+                    {content.actions.map((action, index) => (
+                      <Button
+                        key={index}
+                        variant={action.variant}
+                        size="lg"
+                        onClick={action.action}
+                        className="px-4"
+                        style={{
+                          borderRadius: "16px",
+                          fontWeight: "600",
+                          transition: "all 0.3s ease",
+                          minWidth: "140px",
+                          background:
+                            action.variant === "primary"
+                              ? "linear-gradient(135deg, #e63946, #dc3545)"
+                              : undefined,
+                          border:
+                            action.variant === "primary" ? "none" : undefined,
+                        }}
+                      >
+                        <i className={`${action.icon} me-2`}></i>
+                        {action.text}
+                      </Button>
+                    ))}
+                  </div>
+
+                  {/* Additional Help */}
+                  <div className="pt-4 border-top">
+                    <div className="row g-3">
+                      <div className="col-md-6">
+                        <Link to="/contact" className="text-decoration-none">
+                          <div className="d-flex align-items-center justify-content-center text-muted">
+                            <i className="bi bi-headset me-2"></i>
+                            <small>Contact Support</small>
+                          </div>
+                        </Link>
+                      </div>
+                      <div className="col-md-6">
+                        <Link to="/user-guide" className="text-decoration-none">
+                          <div className="d-flex align-items-center justify-content-center text-muted">
+                            <i className="bi bi-book me-2"></i>
+                            <small>User Guide</small>
+                          </div>
+                        </Link>
                       </div>
                     </div>
                   </div>
-                )}
-
-                {/* Attempted Path Info */}
-                {attemptedPath && attemptedPath !== "/access-denied" && (
-                  <div className="mb-4">
-                    <small className="text-muted">
-                      <i className="bi bi-link-45deg me-1"></i>
-                      Attempted to access:{" "}
-                      <code className="bg-light px-2 py-1 rounded">
-                        {attemptedPath}
-                      </code>
-                    </small>
-                  </div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="d-flex gap-3 justify-content-center flex-wrap">
-                  {content.actions.map((action, index) => (
-                    <Button
-                      key={index}
-                      variant={action.variant}
-                      size="lg"
-                      onClick={action.action}
-                      className="px-4"
-                      style={{
-                        borderRadius: "16px",
-                        fontWeight: "600",
-                        transition: "all 0.3s ease",
-                        minWidth: "140px",
-                      }}
-                    >
-                      <i className={`${action.icon} me-2`}></i>
-                      {action.text}
-                    </Button>
-                  ))}
-                </div>
-
-                {/* Additional Help */}
-                <div className="mt-5 pt-4 border-top">
-                  <div className="row g-3">
-                    <div className="col-md-6">
-                      <Link to="/contact" className="text-decoration-none">
-                        <div className="d-flex align-items-center text-muted">
-                          <i className="bi bi-headset me-2"></i>
-                          <small>Contact Support</small>
-                        </div>
-                      </Link>
-                    </div>
-                    <div className="col-md-6">
-                      <Link to="/user-guide" className="text-decoration-none">
-                        <div className="d-flex align-items-center text-muted">
-                          <i className="bi bi-book me-2"></i>
-                          <small>User Guide</small>
-                        </div>
-                      </Link>
-                    </div>
-                  </div>
                 </div>
               </div>
-            </div>
-          </Col>
-        </Row>
-      </Container>
+            </Col>
+          </Row>
+        </Container>
+      </section>
 
       {/* CSS Animations */}
       <style>{`
         @keyframes pulse {
           0%, 100% { transform: scale(1); opacity: 1; }
           50% { transform: scale(1.1); opacity: 0.8; }
-        }
-
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
         }
 
         .btn:hover {
