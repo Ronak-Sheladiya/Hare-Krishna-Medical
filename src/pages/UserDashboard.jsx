@@ -1,34 +1,94 @@
-import React from "react";
-import { Container, Row, Col, Card, Button, Badge } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Button,
+  Badge,
+  Spinner,
+  Alert,
+} from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 const UserDashboard = () => {
   const { user } = useSelector((state) => state.auth);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock user data - simplified
-  const userStats = {
-    pendingOrders: 2,
-    recentInvoices: 3,
-    cartProducts: 5,
+  // Real user data state
+  const [userStats, setUserStats] = useState({
+    pendingOrders: 0,
+    recentInvoices: 0,
+    cartProducts: 0,
+    totalOrders: 0,
+    totalSpent: 0,
+  });
+
+  const [recentOrders, setRecentOrders] = useState([]);
+
+  const API_BASE_URL =
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
+  // Fetch user dashboard data
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const token = localStorage.getItem("token");
+      const headers = {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      };
+
+      // Fetch user orders and stats
+      const [ordersRes, statsRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/orders/user/recent?limit=3`, {
+          headers,
+        }).catch(() => null),
+        fetch(`${API_BASE_URL}/api/users/dashboard-stats`, {
+          headers,
+        }).catch(() => null),
+      ]);
+
+      // Process orders
+      if (ordersRes && ordersRes.ok) {
+        const ordersData = await ordersRes.json();
+        if (ordersData.success) {
+          setRecentOrders(ordersData.data || []);
+        }
+      }
+
+      // Process stats
+      if (statsRes && statsRes.ok) {
+        const statsData = await statsRes.json();
+        if (statsData.success) {
+          setUserStats((prev) => ({
+            ...prev,
+            ...statsData.data,
+          }));
+        }
+      }
+
+      // Get cart products count from localStorage or Redux
+      const cartItems = JSON.parse(localStorage.getItem("cartItems") || "[]");
+      setUserStats((prev) => ({
+        ...prev,
+        cartProducts: cartItems.length,
+      }));
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      setError("Unable to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const recentOrders = [
-    {
-      id: "HKM12345678",
-      date: "2024-01-15",
-      status: "Delivered",
-      amount: 235.5,
-      items: 3,
-    },
-    {
-      id: "HKM12345679",
-      date: "2024-01-12",
-      status: "Processing",
-      amount: 156.75,
-      items: 2,
-    },
-  ];
+  useEffect(() => {
+    fetchUserData();
+  }, []);
 
   const EnhancedButton = ({
     children,
@@ -146,6 +206,7 @@ const UserDashboard = () => {
     badge,
     description,
     isLarge = false,
+    isLoading = false,
   }) => (
     <Card
       style={{
@@ -184,13 +245,17 @@ const UserDashboard = () => {
             position: "relative",
           }}
         >
-          <i
-            className={icon}
-            style={{
-              fontSize: isLarge ? "50px" : "35px",
-              color: "white",
-            }}
-          ></i>
+          {isLoading ? (
+            <Spinner animation="border" size="sm" style={{ color: "white" }} />
+          ) : (
+            <i
+              className={icon}
+              style={{
+                fontSize: isLarge ? "50px" : "35px",
+                color: "white",
+              }}
+            ></i>
+          )}
           <div
             style={{
               position: "absolute",
@@ -221,9 +286,11 @@ const UserDashboard = () => {
             lineHeight: "1",
           }}
         >
-          {typeof value === "number" && value > 1000
-            ? `${(value / 1000).toFixed(1)}k`
-            : value}
+          {isLoading
+            ? "..."
+            : typeof value === "number" && value > 1000
+              ? `${(value / 1000).toFixed(1)}k`
+              : value}
         </h1>
 
         <h5
@@ -252,7 +319,7 @@ const UserDashboard = () => {
           </p>
         )}
 
-        {badge && (
+        {badge && !isLoading && (
           <Badge
             style={{
               background: "linear-gradient(135deg, #28a745, #20c997)",
@@ -270,6 +337,29 @@ const UserDashboard = () => {
       </Card.Body>
     </Card>
   );
+
+  const getStatusBadge = (status) => {
+    const statusConfig = {
+      pending: { variant: "warning", label: "Pending" },
+      confirmed: { variant: "info", label: "Confirmed" },
+      processing: { variant: "primary", label: "Processing" },
+      delivered: { variant: "success", label: "Delivered" },
+      cancelled: { variant: "danger", label: "Cancelled" },
+    };
+    const config = statusConfig[status?.toLowerCase()] || statusConfig.pending;
+    return <Badge bg={config.variant}>{config.label}</Badge>;
+  };
+
+  if (loading) {
+    return (
+      <Container className="py-5">
+        <div className="text-center">
+          <Spinner animation="border" role="status" size="lg" />
+          <p className="mt-3">Loading your dashboard...</p>
+        </div>
+      </Container>
+    );
+  }
 
   return (
     <div className="fade-in">
@@ -327,7 +417,7 @@ const UserDashboard = () => {
                     zIndex: 2,
                   }}
                 >
-                  Welcome back, {user?.name || "User"}! 👋
+                  Welcome back, {user?.name || user?.fullName || "User"}! 👋
                 </h1>
                 <p
                   style={{
@@ -345,6 +435,25 @@ const UserDashboard = () => {
             </Col>
           </Row>
 
+          {error && (
+            <Row className="mb-4">
+              <Col lg={12}>
+                <Alert variant="warning" className="d-flex align-items-center">
+                  <i className="bi bi-exclamation-triangle me-2"></i>
+                  {error}
+                  <Button
+                    variant="outline-warning"
+                    size="sm"
+                    className="ms-auto"
+                    onClick={fetchUserData}
+                  >
+                    Retry
+                  </Button>
+                </Alert>
+              </Col>
+            </Row>
+          )}
+
           {/* Enhanced Statistics Cards - Only 3 Cards */}
           <Row className="mb-5 g-4 justify-content-center">
             <Col lg={4} md={6}>
@@ -353,9 +462,12 @@ const UserDashboard = () => {
                 value={userStats.pendingOrders}
                 label="Pending Orders"
                 gradient="linear-gradient(135deg, #ffc107, #fd7e14)"
-                badge="In progress"
+                badge={
+                  userStats.pendingOrders > 0 ? "In progress" : "All up to date"
+                }
                 description="Orders being processed"
                 isLarge={true}
+                isLoading={loading}
               />
             </Col>
 
@@ -365,9 +477,12 @@ const UserDashboard = () => {
                 value={userStats.recentInvoices}
                 label="Recent Invoices"
                 gradient="linear-gradient(135deg, #17a2b8, #20c997)"
-                badge="Available"
+                badge={
+                  userStats.recentInvoices > 0 ? "Available" : "No invoices"
+                }
                 description="Ready for download"
                 isLarge={true}
+                isLoading={loading}
               />
             </Col>
 
@@ -377,9 +492,12 @@ const UserDashboard = () => {
                 value={userStats.cartProducts}
                 label="Cart Products"
                 gradient="linear-gradient(135deg, #e63946, #dc3545)"
-                badge="Ready to buy"
+                badge={
+                  userStats.cartProducts > 0 ? "Ready to buy" : "Cart empty"
+                }
                 description="Items in your shopping cart"
                 isLarge={true}
+                isLoading={loading}
               />
             </Col>
           </Row>
@@ -478,85 +596,110 @@ const UserDashboard = () => {
                   </h6>
                 </Card.Header>
                 <Card.Body style={{ padding: "20px" }}>
-                  {recentOrders.map((order) => (
-                    <div
-                      key={order.id}
-                      style={{
-                        background: "#f8f9fa",
-                        borderRadius: "15px",
-                        padding: "15px",
-                        marginBottom: "15px",
-                        transition: "all 0.3s ease",
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.transform = "translateY(-2px)";
-                        e.currentTarget.style.boxShadow =
-                          "0 5px 15px rgba(0, 0, 0, 0.1)";
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.transform = "translateY(0)";
-                        e.currentTarget.style.boxShadow = "none";
-                      }}
-                    >
-                      <div className="d-flex justify-content-between align-items-start mb-2">
-                        <code
+                  {recentOrders.length > 0 ? (
+                    <>
+                      {recentOrders.map((order) => (
+                        <div
+                          key={order._id || order.id}
                           style={{
-                            background: "white",
-                            padding: "4px 8px",
-                            borderRadius: "6px",
-                            fontSize: "11px",
-                            fontWeight: "600",
+                            background: "#f8f9fa",
+                            borderRadius: "15px",
+                            padding: "15px",
+                            marginBottom: "15px",
+                            transition: "all 0.3s ease",
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.transform =
+                              "translateY(-2px)";
+                            e.currentTarget.style.boxShadow =
+                              "0 5px 15px rgba(0, 0, 0, 0.1)";
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.transform = "translateY(0)";
+                            e.currentTarget.style.boxShadow = "none";
                           }}
                         >
-                          {order.id}
-                        </code>
-                        <Badge
-                          bg={
-                            order.status === "Delivered"
-                              ? "success"
-                              : order.status === "Processing"
-                                ? "warning"
-                                : "primary"
-                          }
-                          style={{ fontSize: "10px" }}
+                          <div className="d-flex justify-content-between align-items-start mb-2">
+                            <code
+                              style={{
+                                background: "white",
+                                padding: "4px 8px",
+                                borderRadius: "6px",
+                                fontSize: "11px",
+                                fontWeight: "600",
+                              }}
+                            >
+                              {order.orderNumber ||
+                                order._id?.slice(-8).toUpperCase()}
+                            </code>
+                            {getStatusBadge(order.status)}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: "12px",
+                              color: "#6c757d",
+                              marginBottom: "8px",
+                            }}
+                          >
+                            {new Date(
+                              order.createdAt || order.date,
+                            ).toLocaleDateString()}{" "}
+                            • {order.items?.length || order.itemCount || 0}{" "}
+                            items
+                          </div>
+                          <div
+                            style={{
+                              fontSize: "14px",
+                              fontWeight: "700",
+                              color: "#28a745",
+                            }}
+                          >
+                            ₹{order.total || order.amount || 0}
+                          </div>
+                        </div>
+                      ))}
+                      <div className="text-center">
+                        <EnhancedButton
+                          variant="outline"
+                          to="/user/orders"
+                          style={{
+                            padding: "8px 16px",
+                            fontSize: "12px",
+                            borderRadius: "12px",
+                          }}
+                          icon="bi bi-arrow-right"
                         >
-                          {order.status}
-                        </Badge>
+                          View All Orders
+                        </EnhancedButton>
                       </div>
-                      <div
+                    </>
+                  ) : (
+                    <div className="text-center py-3">
+                      <i
+                        className="bi bi-inbox"
+                        style={{ fontSize: "2rem", color: "#6c757d" }}
+                      ></i>
+                      <p
+                        className="mt-2 mb-0 text-muted"
+                        style={{ fontSize: "14px" }}
+                      >
+                        No recent orders found
+                      </p>
+                      <EnhancedButton
+                        variant="outline"
+                        to="/products"
                         style={{
+                          padding: "8px 16px",
                           fontSize: "12px",
-                          color: "#6c757d",
-                          marginBottom: "8px",
+                          borderRadius: "12px",
+                          marginTop: "10px",
                         }}
+                        icon="bi bi-cart-plus"
                       >
-                        {order.date} • {order.items} items
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "14px",
-                          fontWeight: "700",
-                          color: "#28a745",
-                        }}
-                      >
-                        ₹{order.amount}
-                      </div>
+                        Start Shopping
+                      </EnhancedButton>
                     </div>
-                  ))}
-                  <div className="text-center">
-                    <EnhancedButton
-                      variant="outline"
-                      to="/user/orders"
-                      style={{
-                        padding: "8px 16px",
-                        fontSize: "12px",
-                        borderRadius: "12px",
-                      }}
-                      icon="bi bi-arrow-right"
-                    >
-                      View All Orders
-                    </EnhancedButton>
-                  </div>
+                  )}
                 </Card.Body>
               </Card>
 
