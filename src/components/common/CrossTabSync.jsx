@@ -65,7 +65,7 @@ const CrossTabSync = () => {
     };
   }, [dispatch, isAuthenticated, user]);
 
-  // Check for session validity on focus
+  // Check for session validity on focus and detect changes in storage
   useEffect(() => {
     const handleFocus = () => {
       // Check if user is still authenticated when tab gains focus
@@ -74,30 +74,63 @@ const CrossTabSync = () => {
       const isStoredAuth =
         localStorage.getItem("isAuthenticated") === "true" ||
         sessionStorage.getItem("isAuthenticated") === "true";
+      const loginTime =
+        localStorage.getItem("loginTime") ||
+        sessionStorage.getItem("loginTime");
 
-      if (!isAuthenticated && storedUser && isStoredAuth) {
+      // Check if session has expired
+      const isExpired = () => {
+        if (!loginTime) return true;
+        const elapsed = Date.now() - parseInt(loginTime);
+        const isLocalStorage = localStorage.getItem("user") !== null;
+        const maxAge = isLocalStorage
+          ? 7 * 24 * 60 * 60 * 1000
+          : 4 * 60 * 60 * 1000;
+        return elapsed > maxAge;
+      };
+
+      if (!isAuthenticated && storedUser && isStoredAuth && !isExpired()) {
         // Auto-login if valid session exists
         try {
-          const user = JSON.parse(storedUser);
+          const userData = JSON.parse(storedUser);
           dispatch(
             loginSuccess({
-              user,
+              user: userData,
               rememberMe: localStorage.getItem("user") !== null,
+              skipRedirect: true, // Skip redirect for auto-login
             }),
           );
         } catch (error) {
           console.warn("Error auto-logging in:", error);
+          // Clear corrupted data
+          localStorage.removeItem("user");
+          sessionStorage.removeItem("user");
         }
+      } else if (
+        isAuthenticated &&
+        (!storedUser || !isStoredAuth || isExpired())
+      ) {
+        // Logout if no valid session
+        dispatch(logout());
+      }
+    };
+
+    // Check for visibility changes (tab switching)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        handleFocus();
       }
     };
 
     window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     // Check immediately on mount
     handleFocus();
 
     return () => {
       window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [dispatch, isAuthenticated]);
 
