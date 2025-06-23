@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Alert } from "react-bootstrap";
-import { api } from "../../utils/apiClient";
+import { api, safeApiCall } from "../../utils/apiClient";
 
 const DevModeIndicator = () => {
   const [backendStatus, setBackendStatus] = useState("checking");
