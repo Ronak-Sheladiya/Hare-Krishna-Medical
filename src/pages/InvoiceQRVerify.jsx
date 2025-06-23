@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
   Container,
   Row,
@@ -14,6 +15,7 @@ import {
 const InvoiceQRVerify = () => {
   const { invoiceId } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [invoice, setInvoice] = useState(null);
