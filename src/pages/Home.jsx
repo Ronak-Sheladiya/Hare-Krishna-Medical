@@ -121,22 +121,29 @@ const Home = () => {
                     to="/products"
                     size="lg"
                     style={{
-                      background: "#e63946",
+                      background: "linear-gradient(135deg, #e63946, #dc3545)",
                       border: "none",
-                      borderRadius: "8px",
-                      padding: "14px 28px",
+                      borderRadius: "12px",
+                      padding: "16px 32px",
                       fontSize: "16px",
                       fontWeight: "600",
-                      boxShadow: "0 4px 12px rgba(230, 57, 70, 0.3)",
+                      boxShadow: "0 6px 20px rgba(230, 57, 70, 0.3)",
                       transition: "all 0.3s ease",
+                      color: "white",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px"
                     }}
                     onMouseOver={(e) => {
-                      e.target.style.background = "#343a40";
+                      e.target.style.transform = "translateY(-2px)";
+                      e.target.style.boxShadow = "0 8px 25px rgba(230, 57, 70, 0.4)";
                     }}
                     onMouseOut={(e) => {
-                      e.target.style.background = "#e63946";
+                      e.target.style.transform = "translateY(0)";
+                      e.target.style.boxShadow = "0 6px 20px rgba(230, 57, 70, 0.3)";
                     }}
                   >
+                    <i className="bi bi-cart-plus-fill"></i>
                     Shop Now
                   </Button>
                   <Button
@@ -147,6 +154,15 @@ const Home = () => {
                     style={{
                       color: "#e63946",
                       borderColor: "#e63946",
+                      borderWidth: "2px",
+                      borderRadius: "12px",
+                      padding: "16px 32px",
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      transition: "all 0.3s ease",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px"
                       borderRadius: "8px",
                       padding: "14px 28px",
                       fontSize: "16px",
