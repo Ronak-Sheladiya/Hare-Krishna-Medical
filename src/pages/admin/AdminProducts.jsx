@@ -188,37 +188,25 @@ const AdminProducts = () => {
       return;
     }
 
-    try {
-      setActionLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/products`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+    setActionLoading(true);
 
-      if (!response.ok) {
-        throw new Error("Failed to add product");
-      }
+    const {
+      success,
+      data,
+      error: apiError,
+    } = await safeApiCall(() => api.post("/api/products", formData), null);
 
-      const data = await response.json();
-
-      if (data.success) {
-        setProducts((prev) => [data.data, ...prev]);
-        setShowAddModal(false);
-        resetForm();
-        showNotification("Product added successfully!", "success");
-      } else {
-        throw new Error(data.message || "Failed to add product");
-      }
-    } catch (error) {
-      console.error("Error adding product:", error);
-      showNotification(error.message, "danger");
-    } finally {
-      setActionLoading(false);
+    if (success && data) {
+      const productData = data.data || data;
+      setProducts((prev) => [productData, ...prev]);
+      setShowAddModal(false);
+      resetForm();
+      showNotification("Product added successfully!", "success");
+    } else {
+      showNotification(apiError || "Failed to add product", "danger");
     }
+
+    setActionLoading(false);
   };
 
   const handleEditProduct = async () => {
