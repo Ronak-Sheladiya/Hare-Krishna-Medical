@@ -56,15 +56,17 @@ const ProfessionalLoading = ({
   return (
     <div style={containerStyle}>
       {/* Centered Loading Animation with Logo */}
-      <div style={{
-        position: "relative",
-        marginBottom: "20px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: containerSize + 60,
-        height: containerSize + 60,
-      }}>
+      <div
+        style={{
+          position: "relative",
+          marginBottom: "20px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: containerSize + 60,
+          height: containerSize + 60,
+        }}
+      >
         {/* Outer Rotating Ring */}
         <div
           style={{
@@ -136,7 +138,7 @@ const ProfessionalLoading = ({
           >
             HK
           </div>
-        }
+        </div>
 
         {/* Outer Rotating Ring */}
         <div
