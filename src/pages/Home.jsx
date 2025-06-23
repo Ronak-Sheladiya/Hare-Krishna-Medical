@@ -18,56 +18,33 @@ const Home = () => {
   const navigate = useNavigate();
   const { featuredProducts } = useSelector((state) => state.products);
 
-  // Mock featured products - 4 products for single line
-  const defaultFeaturedProducts = [
-    {
-      id: 1,
-      name: "Paracetamol Tablets",
-      company: "Hare Krishna Pharma",
-      price: 25.99,
-      originalPrice: 30.99,
-      image:
-        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+1",
-      description: "Effective pain relief and fever reducer",
-      inStock: true,
-    },
-    {
-      id: 2,
-      name: "Vitamin D3 Capsules",
-      company: "Health Plus",
-      price: 45.5,
-      originalPrice: 55.0,
-      image:
-        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+2",
-      description: "Essential vitamin for bone health",
-      inStock: true,
-    },
-    {
-      id: 3,
-      name: "Cough Syrup",
-      company: "Wellness Care",
-      price: 35.75,
-      originalPrice: 42.0,
-      image:
-        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+3",
-      description: "Natural cough relief formula",
-      inStock: true,
-    },
-    {
-      id: 4,
-      name: "Antiseptic Liquid",
-      company: "Safe Guard",
-      price: 28.0,
-      originalPrice: 35.0,
-      image:
-        "https://via.placeholder.com/300x250/e6e6e6/666666?text=Medicine+4",
-      description: "Multipurpose antiseptic for wound care",
-      inStock: true,
-    },
-  ];
+  // Fetch featured products from API
+  const API_BASE_URL =
+    process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 
-  const productsToShow =
-    featuredProducts.length > 0 ? featuredProducts : defaultFeaturedProducts;
+  const fetchFeaturedProducts = async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/products/public?featured=true&limit=4`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          dispatch(setFeaturedProducts(data.data));
+        }
+      }
+    } catch (error) {
+      console.warn("Error fetching featured products:", error);
+    }
+  };
+
+  const productsToShow = featuredProducts.length > 0 ? featuredProducts : [];
 
   const handleAddToCart = (e, product) => {
     e.stopPropagation(); // Prevent card click navigation
