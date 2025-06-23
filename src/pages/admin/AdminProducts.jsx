@@ -395,8 +395,7 @@ const AdminProducts = () => {
                 <Row>
                   <Col lg={8}>
                     <p className="text-muted mb-3">
-                      Add new products, update inventory, and manage your
-                      medical store catalog
+                      Add new products, update inventory, and manage your medical store catalog
                     </p>
                   </Col>
                   <Col lg={4} className="text-end">
@@ -426,11 +425,7 @@ const AdminProducts = () => {
           {error && (
             <Row className="mb-4">
               <Col lg={12}>
-                <Alert
-                  variant="danger"
-                  dismissible
-                  onClose={() => setError(null)}
-                >
+                <Alert variant="danger" dismissible onClose={() => setError(null)}>
                   <i className="bi bi-exclamation-triangle me-2"></i>
                   {error}
                 </Alert>
@@ -441,16 +436,10 @@ const AdminProducts = () => {
           {/* Filters */}
           <Row className="mb-4">
             <Col lg={12}>
-              <ThemeCard
-                title="Search & Filter"
-                icon="bi-funnel"
-                className="mb-4"
-              >
+              <ThemeCard title="Search & Filter" icon="bi-funnel" className="mb-4">
                 <Row>
                   <Col lg={4} className="mb-3 mb-lg-0">
-                    <Form.Label className="text-muted small">
-                      Search Products
-                    </Form.Label>
+                    <Form.Label className="text-muted small">Search Products</Form.Label>
                     <InputGroup>
                       <InputGroup.Text>
                         <i className="bi bi-search"></i>
@@ -464,9 +453,7 @@ const AdminProducts = () => {
                     </InputGroup>
                   </Col>
                   <Col lg={3} className="mb-3 mb-lg-0">
-                    <Form.Label className="text-muted small">
-                      Category
-                    </Form.Label>
+                    <Form.Label className="text-muted small">Category</Form.Label>
                     <Form.Select
                       value={categoryFilter}
                       onChange={(e) => setCategoryFilter(e.target.value)}
@@ -480,9 +467,7 @@ const AdminProducts = () => {
                     </Form.Select>
                   </Col>
                   <Col lg={3} className="mb-3 mb-lg-0">
-                    <Form.Label className="text-muted small">
-                      Stock Level
-                    </Form.Label>
+                    <Form.Label className="text-muted small">Stock Level</Form.Label>
                     <Form.Select
                       value={stockFilter}
                       onChange={(e) => setStockFilter(e.target.value)}
@@ -514,14 +499,14 @@ const AdminProducts = () => {
           </Row>
 
           {/* Products Table */}
-          <Card className="medical-card">
-            <Card.Header className="bg-medical-light">
-              <h5 className="mb-0">
-                <i className="bi bi-box me-2"></i>
-                Products ({filteredProducts.length})
-              </h5>
-            </Card.Header>
-            <Card.Body className="p-0">
+          <Row>
+            <Col lg={12}>
+              <ThemeCard
+                title={`Products (${filteredProducts.length})`}
+                icon="bi-box"
+                className="table-card"
+              >
+                <div className="p-0">
               {loading ? (
                 <div className="text-center py-4">
                   <Spinner animation="border" role="status">
