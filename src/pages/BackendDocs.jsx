@@ -1906,6 +1906,431 @@ ALLOWED_FILE_TYPES=image/jpeg,image/png,image/gif,image/webp`,
                       </Card>
                     </Tab.Pane>
 
+                    {/* File Structure Tab */}
+                    <Tab.Pane eventKey="structure">
+                      <Card
+                        style={{
+                          border: "none",
+                          borderRadius: "16px",
+                          boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                        }}
+                      >
+                        <Card.Header
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #6f42c1, #6610f2)",
+                            color: "white",
+                            borderRadius: "16px 16px 0 0",
+                            padding: "20px",
+                          }}
+                        >
+                          <h5 className="mb-0" style={{ fontWeight: "700" }}>
+                            <i className="bi bi-folder-tree me-2"></i>
+                            Complete Project File Structure
+                          </h5>
+                        </Card.Header>
+                        <Card.Body style={{ padding: "30px" }}>
+                          <Row>
+                            <Col lg={6}>
+                              <h6 style={{ color: "#6f42c1", marginBottom: "15px" }}>
+                                <i className="bi bi-server me-2"></i>
+                                Backend Structure
+                              </h6>
+                              <Card style={{ background: "#f8f9fa", border: "none", borderRadius: "8px" }}>
+                                <Card.Body style={{ padding: "20px" }}>
+                                  <pre style={{
+                                    background: "transparent",
+                                    border: "none",
+                                    fontSize: "12px",
+                                    lineHeight: "1.4",
+                                    margin: 0,
+                                    color: "#333"
+                                  }}>
+{`hare-krishna-medical-backend/
+├── package.json
+├── server.js
+├── .env
+├── .gitignore
+├── README.md
+├── config/
+│   ├── database.js
+│   ├── cloudinary.js
+│   └── razorpay.js
+├── controllers/
+│   ├── authController.js
+│   ├── userController.js
+│   ├── productController.js
+│   ├── orderController.js
+│   ├── invoiceController.js
+│   ├── messageController.js
+│   ├── analyticsController.js
+│   └── uploadController.js
+├── middleware/
+│   ├── auth.js
+│   ├── validate.js
+│   ├── errorHandler.js
+│   └── upload.js
+├── models/
+│   ├── User.js
+│   ├── Product.js
+│   ├── Order.js
+│   ├── Invoice.js
+│   ├── Message.js
+│   └── Analytics.js
+├── routes/
+│   ├── auth.js
+│   ├── users.js
+│   ├── products.js
+│   ├── orders.js
+│   ├── invoices.js
+│   ├── messages.js
+│   ├── analytics.js
+│   └── upload.js
+├── utils/
+│   ├── emailService.js
+│   ├── smsService.js
+│   ├── qrGenerator.js
+│   ├── pdfGenerator.js
+│   ├── excelGenerator.js
+│   └── validators.js
+├── scripts/
+│   ├── seed.js
+│   └── backup.js
+└── tests/
+    ├── auth.test.js
+    ├── products.test.js
+    └── orders.test.js`}
+                                  </pre>
+                                  <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    onClick={() => copyToClipboard(`hare-krishna-medical-backend/
+├── package.json
+├── server.js
+├── .env
+├── .gitignore
+├── README.md
+├── config/
+│   ├── database.js
+│   ├── cloudinary.js
+│   └── razorpay.js
+├── controllers/
+│   ├── authController.js
+│   ├── userController.js
+│   ├── productController.js
+│   ├── orderController.js
+│   ├── invoiceController.js
+│   ├── messageController.js
+│   ├── analyticsController.js
+│   └── uploadController.js
+├── middleware/
+│   ├── auth.js
+│   ├── validate.js
+│   ├── errorHandler.js
+│   └── upload.js
+├── models/
+│   ├── User.js
+│   ├── Product.js
+│   ├── Order.js
+│   ├── Invoice.js
+│   ├── Message.js
+│   └── Analytics.js
+├── routes/
+│   ├── auth.js
+│   ├── users.js
+│   ├── products.js
+│   ├── orders.js
+│   ├── invoices.js
+│   ├── messages.js
+│   ├── analytics.js
+│   └── upload.js
+├── utils/
+│   ├── emailService.js
+│   ├── smsService.js
+│   ├── qrGenerator.js
+│   ├── pdfGenerator.js
+│   ├── excelGenerator.js
+│   └── validators.js
+├── scripts/
+│   ├── seed.js
+│   └── backup.js
+└── tests/
+    ├── auth.test.js
+    ├── products.test.js
+    └── orders.test.js`, "backend-structure")}
+                                    className="mt-3"
+                                    style={{ borderRadius: "6px" }}
+                                  >
+                                    <i className="bi bi-clipboard me-1"></i>
+                                    Copy Backend Structure
+                                  </Button>
+                                </Card.Body>
+                              </Card>
+                            </Col>
+
+                            <Col lg={6}>
+                              <h6 style={{ color: "#e63946", marginBottom: "15px" }}>
+                                <i className="bi bi-display me-2"></i>
+                                Frontend Structure
+                              </h6>
+                              <Card style={{ background: "#f8f9fa", border: "none", borderRadius: "8px" }}>
+                                <Card.Body style={{ padding: "20px" }}>
+                                  <pre style={{
+                                    background: "transparent",
+                                    border: "none",
+                                    fontSize: "12px",
+                                    lineHeight: "1.4",
+                                    margin: 0,
+                                    color: "#333"
+                                  }}>
+{`hare-krishna-medical-frontend/
+├── package.json
+├── index.html
+├── vite.config.js
+├── components.json
+├── public/
+│   ├── placeholder.svg
+│   └── robots.txt
+├── src/
+│   ├── main.jsx
+│   ├── App.jsx
+│   ├── App.css
+│   ├── index.css
+│   ├── components/
+│   │   ├── common/
+│   │   │   ├── GlobalSecurity.jsx
+│   │   │   ├── LoadingSpinner.jsx
+│   │   │   ├── NotificationSystem.jsx
+│   │   │   ├── OfficialInvoiceDesign.jsx
+│   │   │   ├── ProfessionalInvoice.jsx
+│   │   │   └── PaymentOptions.jsx
+│   │   ├── layout/
+│   │   │   ├── Header.jsx
+│   │   │   └── Footer.jsx
+│   │   └── products/
+│   │       ├── ProductCard.jsx
+│   │       └── ProductFilters.jsx
+│   ├── pages/
+│   │   ├── About.jsx
+│   │   ├── AdminDashboard.jsx
+│   │   ├── BackendDocs.jsx
+│   │   ├── Cart.jsx
+│   │   ├── Contact.jsx
+│   │   ├── ForgotPassword.jsx
+│   │   ├── Home.jsx
+│   │   ├── InvoiceView.jsx
+│   │   ├── Login.jsx
+│   │   ├── Order.jsx
+│   │   ├── OrderDetails.jsx
+│   │   ├── OrderTracking.jsx
+│   │   ├── ProductDetails.jsx
+│   │   ├── Products.jsx
+│   │   ├── Register.jsx
+│   │   ├── UserDashboard.jsx
+│   │   ├── UserGuide.jsx
+│   │   ├── admin/
+│   │   │   ├── AddProduct.jsx
+│   │   │   ├── AdminAnalytics.jsx
+│   │   │   ├── AdminInvoices.jsx
+│   │   │   ├── AdminMessages.jsx
+│   │   │   ├── AdminOrders.jsx
+│   │   │   ├── AdminProducts.jsx
+│   │   │   └── AdminUsers.jsx
+│   │   └── user/
+│   │       ├── UserInvoices.jsx
+│   │       ├── UserOrders.jsx
+│   │       └── UserProfile.jsx
+│   ├── store/
+│   │   ├── store.js
+│   │   └── slices/
+│   │       ├── authSlice.js
+│   │       ├── cartSlice.js
+│   │       ├── messageSlice.js
+│   │       ├── notificationSlice.js
+│   │       └── productsSlice.js
+│   ├── styles/
+���   │   └── ProfessionalInvoice.css
+│   └── utils/
+│       ├── dateUtils.js
+│       ├── invoiceUtils.js
+│       └── sessionManager.js
+└── README.md`}
+                                  </pre>
+                                  <Button
+                                    variant="outline-danger"
+                                    size="sm"
+                                    onClick={() => copyToClipboard(`hare-krishna-medical-frontend/
+├── package.json
+├── index.html
+├── vite.config.js
+├── components.json
+├── public/
+│   ├── placeholder.svg
+│   └── robots.txt
+├── src/
+│   ├── main.jsx
+│   ├── App.jsx
+│   ├── App.css
+│   ├── index.css
+│   ├── components/
+│   │   ├── common/
+│   │   │   ├── GlobalSecurity.jsx
+│   │   │   ├── LoadingSpinner.jsx
+│   │   │   ├── NotificationSystem.jsx
+│   │   │   ├── OfficialInvoiceDesign.jsx
+│   │   │   ├── ProfessionalInvoice.jsx
+│   │   │   └── PaymentOptions.jsx
+│   │   ├── layout/
+│   │   │   ├── Header.jsx
+│   │   │   └── Footer.jsx
+│   │   └── products/
+│   │       ├── ProductCard.jsx
+│   │       └── ProductFilters.jsx
+│   ├── pages/
+│   │   ├── About.jsx
+│   │   ├── AdminDashboard.jsx
+│   │   ├── BackendDocs.jsx
+│   │   ├── Cart.jsx
+│   │   ├── Contact.jsx
+│   │   ├── ForgotPassword.jsx
+│   │   ├── Home.jsx
+│   │   ├── InvoiceView.jsx
+│   │   ├── Login.jsx
+│   │   ├── Order.jsx
+│   │   ├── OrderDetails.jsx
+│   │   ├── OrderTracking.jsx
+│   │   ├── ProductDetails.jsx
+│   │   ├── Products.jsx
+│   │   ├── Register.jsx
+│   │   ├── UserDashboard.jsx
+│   │   ├── UserGuide.jsx
+│   │   ├── admin/
+│   │   │   ├── AddProduct.jsx
+│   │   │   ├── AdminAnalytics.jsx
+│   │   │   ├── AdminInvoices.jsx
+│   │   │   ├── AdminMessages.jsx
+│   │   │   ├── AdminOrders.jsx
+│   │   │   ├── AdminProducts.jsx
+│   │   │   └── AdminUsers.jsx
+│   │   └── user/
+│   │       ├── UserInvoices.jsx
+│   │       ├── UserOrders.jsx
+│   │       └── UserProfile.jsx
+│   ├── store/
+│   │   ├── store.js
+│   │   └── slices/
+│   │       ├── authSlice.js
+│   │       ├── cartSlice.js
+│   │       ├── messageSlice.js
+│   │       ├── notificationSlice.js
+│   │       └── productsSlice.js
+│   ├── styles/
+│   │   └── ProfessionalInvoice.css
+│   └── utils/
+│       ├── dateUtils.js
+│       ├── invoiceUtils.js
+│       └── sessionManager.js
+└── README.md`, "frontend-structure")}
+                                    className="mt-3"
+                                    style={{ borderRadius: "6px" }}
+                                  >
+                                    <i className="bi bi-clipboard me-1"></i>
+                                    Copy Frontend Structure
+                                  </Button>
+                                </Card.Body>
+                              </Card>
+                            </Col>
+                          </Row>
+
+                          <Row className="mt-4">
+                            <Col lg={12}>
+                              <h6 style={{ color: "#17a2b8", marginBottom: "15px" }}>
+                                <i className="bi bi-gear me-2"></i>
+                                Key File Descriptions
+                              </h6>
+                              <Accordion defaultActiveKey="0">
+                                <Accordion.Item eventKey="0">
+                                  <Accordion.Header>
+                                    <i className="bi bi-server me-2"></i>
+                                    Backend Key Files
+                                  </Accordion.Header>
+                                  <Accordion.Body>
+                                    <Row>
+                                      <Col md={6}>
+                                        <ul style={{ fontSize: "14px", lineHeight: "1.6" }}>
+                                          <li><strong>server.js</strong> - Main application entry point</li>
+                                          <li><strong>models/User.js</strong> - User schema with authentication</li>
+                                          <li><strong>models/Product.js</strong> - Product catalog management</li>
+                                          <li><strong>models/Order.js</strong> - Order processing schema</li>
+                                          <li><strong>models/Invoice.js</strong> - Invoice generation model</li>
+                                          <li><strong>routes/auth.js</strong> - Authentication endpoints</li>
+                                          <li><strong>routes/products.js</strong> - Product CRUD operations</li>
+                                        </ul>
+                                      </Col>
+                                      <Col md={6}>
+                                        <ul style={{ fontSize: "14px", lineHeight: "1.6" }}>
+                                          <li><strong>controllers/authController.js</strong> - User registration/login logic</li>
+                                          <li><strong>middleware/auth.js</strong> - JWT token verification</li>
+                                          <li><strong>utils/emailService.js</strong> - Nodemailer configuration</li>
+                                          <li><strong>utils/qrGenerator.js</strong> - QR code generation utility</li>
+                                          <li><strong>config/database.js</strong> - MongoDB connection setup</li>
+                                          <li><strong>config/cloudinary.js</strong> - Image upload configuration</li>
+                                          <li><strong>config/razorpay.js</strong> - Payment gateway setup</li>
+                                        </ul>
+                                      </Col>
+                                    </Row>
+                                  </Accordion.Body>
+                                </Accordion.Item>
+
+                                <Accordion.Item eventKey="1">
+                                  <Accordion.Header>
+                                    <i className="bi bi-display me-2"></i>
+                                    Frontend Key Files
+                                  </Accordion.Header>
+                                  <Accordion.Body>
+                                    <Row>
+                                      <Col md={6}>
+                                        <ul style={{ fontSize: "14px", lineHeight: "1.6" }}>
+                                          <li><strong>main.jsx</strong> - React application entry point</li>
+                                          <li><strong>App.jsx</strong> - Main app component with routing</li>
+                                          <li><strong>pages/AdminDashboard.jsx</strong> - Admin analytics dashboard</li>
+                                          <li><strong>pages/UserDashboard.jsx</strong> - User order management</li>
+                                          <li><strong>pages/admin/AdminInvoices.jsx</strong> - Invoice management</li>
+                                          <li><strong>components/common/OfficialInvoiceDesign.jsx</strong> - Invoice template</li>
+                                        </ul>
+                                      </Col>
+                                      <Col md={6}>
+                                        <ul style={{ fontSize: "14px", lineHeight: "1.6" }}>
+                                          <li><strong>store/store.js</strong> - Redux store configuration</li>
+                                          <li><strong>store/slices/authSlice.js</strong> - Authentication state</li>
+                                          <li><strong>store/slices/cartSlice.js</strong> - Shopping cart management</li>
+                                          <li><strong>utils/dateUtils.js</strong> - Date formatting utilities</li>
+                                          <li><strong>utils/invoiceUtils.js</strong> - Invoice processing helpers</li>
+                                          <li><strong>components/layout/Header.jsx</strong> - Navigation component</li>
+                                        </ul>
+                                      </Col>
+                                    </Row>
+                                  </Accordion.Body>
+                                </Accordion.Item>
+                              </Accordion>
+                            </Col>
+                          </Row>
+
+                          <Alert variant="info" style={{ borderRadius: "8px", marginTop: "20px" }}>
+                            <Alert.Heading style={{ fontSize: "16px" }}>
+                              <i className="bi bi-lightbulb me-2"></i>
+                              Implementation Order
+                            </Alert.Heading>
+                            <p style={{ marginBottom: 0, fontSize: "14px" }}>
+                              <strong>Backend:</strong> Start with server.js → models → routes → controllers → middleware → utils<br />
+                              <strong>Frontend:</strong> Start with main.jsx → App.jsx → store setup → pages → components → utils<br />
+                              <strong>Integration:</strong> Test endpoints → implement authentication → add features progressively
+                            </p>
+                          </Alert>
+                        </Card.Body>
+                      </Card>
+                    </Tab.Pane>
+
                     {/* Deployment Tab */}
                     <Tab.Pane eventKey="deployment">
                       <Card
