@@ -227,7 +227,6 @@ function App() {
     <Router>
       <ErrorBoundary>
         <div className="App">
-          <CrossTabSync />
           <RealTimeSync />
           <ScrollToTop />
           <Header />
