@@ -48,6 +48,7 @@ import OrderDetails from "./pages/OrderDetails.jsx";
 import UserGuide from "./pages/UserGuide.jsx";
 import LocalSetupGuide from "./pages/LocalSetupGuide.jsx";
 import InvoiceVerify from "./pages/InvoiceVerify.jsx";
+import NavigationTest from "./components/common/NavigationTest.jsx";
 import InvoiceQRVerify from "./pages/InvoiceQRVerify.jsx";
 import AdminPaymentMethods from "./pages/admin/AdminPaymentMethods.jsx";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
