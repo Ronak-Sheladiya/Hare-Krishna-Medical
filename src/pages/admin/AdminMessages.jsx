@@ -369,7 +369,7 @@ const AdminMessages = () => {
         <ThemeCard className="mb-4">
           <Card.Body>
             <Row>
-              <Col md={3}>
+              <Col md={3} key="search-col">
                 <InputGroup>
                   <Form.Control
                     type="text"
@@ -379,7 +379,7 @@ const AdminMessages = () => {
                   />
                 </InputGroup>
               </Col>
-              <Col md={2}>
+              <Col md={2} key="status-filter-col">
                 <Form.Select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
@@ -391,7 +391,7 @@ const AdminMessages = () => {
                   <option value="closed">Closed</option>
                 </Form.Select>
               </Col>
-              <Col md={2}>
+              <Col md={2} key="priority-filter-col">
                 <Form.Select
                   value={priorityFilter}
                   onChange={(e) => setPriorityFilter(e.target.value)}
@@ -402,7 +402,7 @@ const AdminMessages = () => {
                   <option value="low">Low</option>
                 </Form.Select>
               </Col>
-              <Col md={5}>
+              <Col md={5} key="actions-col">
                 <div className="d-flex gap-2">
                   <ThemeButton
                     variant="outline"
