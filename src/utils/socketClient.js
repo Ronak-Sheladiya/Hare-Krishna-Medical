@@ -1,4 +1,19 @@
-import { io } from "socket.io-client";
+// Safe import for socket.io-client
+let io;
+try {
+  const socketIOClient = await import("socket.io-client");
+  io = socketIOClient.io;
+} catch (error) {
+  console.warn("Socket.io-client not available:", error);
+  // Fallback no-op function
+  io = () => ({
+    on: () => {},
+    off: () => {},
+    emit: () => {},
+    connect: () => {},
+    disconnect: () => {},
+  });
+}
 
 class SocketClient {
   constructor() {
