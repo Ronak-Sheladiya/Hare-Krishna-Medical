@@ -1,4 +1,5 @@
 import React from "react";
+import { getUserImageUrl } from "../../utils/imageUtils";
 
 const UserAvatar = ({
   user,
@@ -35,10 +36,13 @@ const UserAvatar = ({
     boxShadow: showBorder ? "0 2px 8px rgba(230, 57, 70, 0.3)" : "none",
   };
 
-  if (user?.profileImage) {
+  const avatarUrl = getUserImageUrl(user);
+
+  // Check if we have a valid image URL (not the default avatar URL)
+  if (avatarUrl && !avatarUrl.includes("ui-avatars.com")) {
     return (
       <img
-        src={user.profileImage}
+        src={avatarUrl}
         alt={user.fullName || user.name || "User"}
         className={`user-avatar ${className}`}
         style={{
