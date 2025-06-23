@@ -248,41 +248,29 @@ const AdminProducts = () => {
   const handleDeleteProduct = async () => {
     if (!productToDelete) return;
 
-    try {
-      setActionLoading(true);
-      const response = await fetch(
-        `${API_BASE_URL}/api/products/${productToDelete._id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        },
+    setActionLoading(true);
+
+    const {
+      success,
+      data,
+      error: apiError,
+    } = await safeApiCall(
+      () => api.delete(`/api/products/${productToDelete._id}`),
+      null,
+    );
+
+    if (success) {
+      setProducts((prev) =>
+        prev.filter((product) => product._id !== productToDelete._id),
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete product");
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        setProducts((prev) =>
-          prev.filter((product) => product._id !== productToDelete._id),
-        );
-        setShowDeleteModal(false);
-        setProductToDelete(null);
-        showNotification("Product deleted successfully!", "success");
-      } else {
-        throw new Error(data.message || "Failed to delete product");
-      }
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      showNotification(error.message, "danger");
-    } finally {
-      setActionLoading(false);
+      setShowDeleteModal(false);
+      setProductToDelete(null);
+      showNotification("Product deleted successfully!", "success");
+    } else {
+      showNotification(apiError || "Failed to delete product", "danger");
     }
+
+    setActionLoading(false);
   };
 
   const resetForm = () => {
