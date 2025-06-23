@@ -14,6 +14,7 @@ import {
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { api, safeApiCall } from "../utils/apiClient";
 
 const AdminDashboard = () => {
   const { unreadCount } = useSelector((state) => state.messages);
