@@ -117,11 +117,17 @@ const Products = () => {
   // Fetch featured products separately
   const fetchFeaturedProducts = async () => {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
       const response = await fetch(`${API_BASE_URL}/api/products/featured`, {
         headers: {
           "Content-Type": "application/json",
         },
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
@@ -130,7 +136,14 @@ const Products = () => {
         }
       }
     } catch (error) {
-      console.warn("Error fetching featured products:", error);
+      if (error.name === "AbortError") {
+        console.warn("Featured products fetch timed out");
+      } else if (error.message === "Failed to fetch") {
+        console.warn("Backend API not available for featured products");
+      } else {
+        console.warn("Error fetching featured products:", error);
+      }
+      // Silently fail - don't disrupt the user experience
     }
   };
 
