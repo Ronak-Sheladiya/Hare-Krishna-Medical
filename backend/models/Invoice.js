@@ -1,0 +1,221 @@
+const mongoose = require("mongoose");
+const QRCode = require("qrcode");
+
+const invoiceSchema = new mongoose.Schema(
+  {
+    invoiceId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    order: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order",
+      required: true,
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    invoiceDate: {
+      type: Date,
+      default: Date.now,
+    },
+    dueDate: {
+      type: Date,
+      default: function () {
+        return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
+      },
+    },
+    items: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+        },
+        name: String,
+        price: Number,
+        mrp: Number,
+        quantity: Number,
+        total: Number,
+        image: String,
+      },
+    ],
+    customerDetails: {
+      fullName: String,
+      email: String,
+      mobile: String,
+      address: String,
+      city: String,
+      state: String,
+      pincode: String,
+    },
+    subtotal: Number,
+    tax: Number,
+    shipping: Number,
+    discount: Number,
+    total: Number,
+    status: {
+      type: String,
+      enum: ["Draft", "Sent", "Paid", "Overdue", "Cancelled"],
+      default: "Draft",
+    },
+    paymentMethod: String,
+    paymentStatus: {
+      type: String,
+      enum: ["Pending", "Completed", "Failed", "Refunded"],
+      default: "Pending",
+    },
+    paymentDate: Date,
+    qrCode: String,
+    qrCodeData: String,
+    notes: String,
+    terms: {
+      type: String,
+      default:
+        "Payment due within 30 days. Goods once sold will not be taken back. Subject to Gujarat jurisdiction only.",
+    },
+    invoiceUrl: String,
+    emailSent: {
+      type: Boolean,
+      default: false,
+    },
+    emailSentDate: Date,
+    remindersSent: [
+      {
+        date: Date,
+        type: String, // 'email', 'sms'
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  },
+);
+
+// Generate invoice ID
+invoiceSchema.pre("save", async function (next) {
+  if (!this.invoiceId) {
+    const year = new Date().getFullYear();
+    const month = String(new Date().getMonth() + 1).padStart(2, "0");
+    const day = String(new Date().getDate()).padStart(2, "0");
+    const random = Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(3, "0");
+    this.invoiceId = `HKM-INV-${year}-${month}${day}-${random}`;
+  }
+
+  // Generate QR code if not exists
+  if (!this.qrCode && this.invoiceId) {
+    try {
+      const qrData = {
+        type: "invoice_verification",
+        invoice_id: this.invoiceId,
+        order_id: this.order ? this.order.toString() : "",
+        customer_name: this.customerDetails.fullName,
+        total_amount: `₹${this.total.toFixed(2)}`,
+        invoice_date: this.invoiceDate.toISOString().split("T")[0],
+        payment_status: this.paymentStatus,
+        verify_url: `${process.env.FRONTEND_URL}/invoice/${this.invoiceId}`,
+        company: "Hare Krishna Medical",
+        location: "Surat, Gujarat, India",
+        phone: "+91 76989 13354",
+        email: "harekrishnamedical@gmail.com",
+        generated_at: new Date().toISOString(),
+      };
+
+      this.qrCodeData = JSON.stringify(qrData);
+      this.qrCode = await QRCode.toDataURL(this.qrCodeData, {
+        width: 180,
+        margin: 2,
+        color: {
+          dark: "#1a202c",
+          light: "#ffffff",
+        },
+        errorCorrectionLevel: "M",
+      });
+    } catch (error) {
+      console.error("QR Code generation error:", error);
+    }
+  }
+
+  next();
+});
+
+// Update payment status
+invoiceSchema.methods.updatePaymentStatus = function (status, method = null) {
+  this.paymentStatus = status;
+  if (method) {
+    this.paymentMethod = method;
+  }
+  if (status === "Completed") {
+    this.status = "Paid";
+    this.paymentDate = new Date();
+  }
+  return this.save();
+};
+
+// Mark as sent
+invoiceSchema.methods.markAsSent = function () {
+  this.status = "Sent";
+  this.emailSent = true;
+  this.emailSentDate = new Date();
+  return this.save();
+};
+
+// Add reminder
+invoiceSchema.methods.addReminder = function (type = "email") {
+  this.remindersSent.push({
+    date: new Date(),
+    type: type,
+  });
+  return this.save();
+};
+
+// Check if overdue
+invoiceSchema.methods.checkOverdue = function () {
+  if (this.status !== "Paid" && new Date() > this.dueDate) {
+    this.status = "Overdue";
+    return this.save();
+  }
+  return false;
+};
+
+// Static methods for analytics
+invoiceSchema.statics.getInvoiceStats = async function () {
+  const stats = await this.aggregate([
+    {
+      $group: {
+        _id: null,
+        totalInvoices: { $sum: 1 },
+        totalAmount: { $sum: "$total" },
+        paidInvoices: {
+          $sum: { $cond: [{ $eq: ["$status", "Paid"] }, 1, 0] },
+        },
+        pendingInvoices: {
+          $sum: { $cond: [{ $eq: ["$status", "Sent"] }, 1, 0] },
+        },
+        overdueInvoices: {
+          $sum: { $cond: [{ $eq: ["$status", "Overdue"] }, 1, 0] },
+        },
+        paidAmount: {
+          $sum: { $cond: [{ $eq: ["$status", "Paid"] }, "$total", 0] },
+        },
+      },
+    },
+  ]);
+
+  return (
+    stats[0] || {
+      totalInvoices: 0,
+      totalAmount: 0,
+      paidInvoices: 0,
+      pendingInvoices: 0,
+      overdueInvoices: 0,
+      paidAmount: 0,
+    }
+  );
+};
+
+module.exports = mongoose.model("Invoice", invoiceSchema);
