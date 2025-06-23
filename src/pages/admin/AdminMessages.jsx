@@ -33,11 +33,6 @@ import {
   sortByDateDesc,
 } from "../../utils/dateUtils";
 import { api, safeApiCall } from "../../utils/apiClient";
-import {
-  PageHeroSection,
-  ThemeCard,
-  ThemeButton,
-} from "../../components/common/ConsistentTheme";
 import * as XLSX from "xlsx";
 
 const AdminMessages = () => {
@@ -294,92 +289,367 @@ const AdminMessages = () => {
 
   if (loading) {
     return (
-      <div
-        className="d-flex justify-content-center align-items-center"
-        style={{ minHeight: "60vh" }}
-      >
-        <Spinner animation="border" variant="danger" />
-        <span className="ms-2">Loading messages...</span>
+      <div className="fade-in">
+        {/* Professional Hero Section */}
+        <section
+          style={{
+            background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
+            paddingTop: "80px",
+            paddingBottom: "80px",
+            color: "white",
+          }}
+        >
+          <Container>
+            <Row className="text-center">
+              <Col lg={12}>
+                <div
+                  style={{
+                    width: "80px",
+                    height: "80px",
+                    background: "rgba(255,255,255,0.2)",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "0 auto 24px",
+                    fontSize: "32px",
+                  }}
+                >
+                  <i className="bi bi-chat-left-text"></i>
+                </div>
+                <h1
+                  style={{
+                    fontSize: "3rem",
+                    fontWeight: "800",
+                    marginBottom: "20px",
+                    textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                  }}
+                >
+                  Message Management
+                </h1>
+                <p
+                  style={{
+                    fontSize: "1.2rem",
+                    opacity: "0.9",
+                    maxWidth: "600px",
+                    margin: "0 auto",
+                  }}
+                >
+                  Professional customer communication center
+                </p>
+              </Col>
+            </Row>
+          </Container>
+        </section>
+
+        <Container className="py-5">
+          <div
+            className="d-flex justify-content-center align-items-center"
+            style={{ minHeight: "40vh" }}
+          >
+            <Spinner animation="border" variant="danger" />
+            <span className="ms-3">Loading messages...</span>
+          </div>
+        </Container>
       </div>
     );
   }
 
   return (
     <div className="fade-in">
-      <PageHeroSection
-        title="Message Management"
-        description="Manage customer inquiries and support messages"
-        icon="💬"
-      />
+      {/* Professional Hero Section */}
+      <section
+        style={{
+          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+          color: "white",
+        }}
+      >
+        <Container>
+          <Row className="text-center">
+            <Col lg={12}>
+              <div
+                style={{
+                  width: "80px",
+                  height: "80px",
+                  background: "rgba(255,255,255,0.2)",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 24px",
+                  fontSize: "32px",
+                }}
+              >
+                <i className="bi bi-chat-left-text"></i>
+              </div>
+              <h1
+                style={{
+                  fontSize: "3rem",
+                  fontWeight: "800",
+                  marginBottom: "20px",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                }}
+              >
+                Message Management
+              </h1>
+              <p
+                style={{
+                  fontSize: "1.2rem",
+                  opacity: "0.9",
+                  maxWidth: "600px",
+                  margin: "0 auto",
+                }}
+              >
+                Professional customer communication center
+              </p>
+            </Col>
+          </Row>
+        </Container>
+      </section>
 
       <Container className="py-5">
         {error && (
           <Alert variant="warning" className="mb-4">
-            <Alert.Heading>Offline Mode</Alert.Heading>
+            <Alert.Heading>
+              <i className="bi bi-exclamation-triangle me-2"></i>
+              Offline Mode
+            </Alert.Heading>
             <p>{error}</p>
-            <ThemeButton variant="outline" onClick={fetchMessages}>
+            <Button
+              variant="outline-danger"
+              onClick={fetchMessages}
+              className="border-2"
+            >
+              <i className="bi bi-arrow-clockwise me-2"></i>
               Try Again
-            </ThemeButton>
+            </Button>
           </Alert>
         )}
 
-        {/* Summary Cards */}
-        <Row className="mb-4">
-          <Col md={3} key="total-messages">
-            <ThemeCard className="text-center">
-              <Card.Body>
-                <h4 className="text-danger">{messages.length}</h4>
-                <small className="text-muted">Total Messages</small>
-              </Card.Body>
-            </ThemeCard>
+        {/* Professional Statistics Cards */}
+        <Row className="mb-5">
+          <Col lg={3} md={6} className="mb-4">
+            <Card
+              style={{
+                border: "2px solid #f8f9fa",
+                borderRadius: "16px",
+                padding: "20px",
+                textAlign: "center",
+                height: "100%",
+                transition: "all 0.3s ease",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.borderColor = "#e63946";
+                e.currentTarget.style.transform = "translateY(-4px)";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 25px rgba(230, 57, 70, 0.2)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.borderColor = "#f8f9fa";
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <div
+                style={{
+                  width: "60px",
+                  height: "60px",
+                  background: "linear-gradient(135deg, #e63946, #dc3545)",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 16px",
+                  color: "white",
+                  fontSize: "24px",
+                }}
+              >
+                <i className="bi bi-chat-left"></i>
+              </div>
+              <h3 style={{ color: "#e63946", marginBottom: "8px" }}>
+                {messages.length}
+              </h3>
+              <p style={{ color: "#6c757d", marginBottom: "0" }}>
+                Total Messages
+              </p>
+            </Card>
           </Col>
-          <Col md={3} key="unread-messages">
-            <ThemeCard className="text-center">
-              <Card.Body>
-                <h4 className="text-warning">
-                  {messages.filter((m) => !m.isRead).length}
-                </h4>
-                <small className="text-muted">Unread Messages</small>
-              </Card.Body>
-            </ThemeCard>
+          <Col lg={3} md={6} className="mb-4">
+            <Card
+              style={{
+                border: "2px solid #f8f9fa",
+                borderRadius: "16px",
+                padding: "20px",
+                textAlign: "center",
+                height: "100%",
+                transition: "all 0.3s ease",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.borderColor = "#ffc107";
+                e.currentTarget.style.transform = "translateY(-4px)";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 25px rgba(255, 193, 7, 0.2)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.borderColor = "#f8f9fa";
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <div
+                style={{
+                  width: "60px",
+                  height: "60px",
+                  background: "linear-gradient(135deg, #ffc107, #e09000)",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 16px",
+                  color: "white",
+                  fontSize: "24px",
+                }}
+              >
+                <i className="bi bi-envelope"></i>
+              </div>
+              <h3 style={{ color: "#ffc107", marginBottom: "8px" }}>
+                {messages.filter((m) => !m.isRead).length}
+              </h3>
+              <p style={{ color: "#6c757d", marginBottom: "0" }}>
+                Unread Messages
+              </p>
+            </Card>
           </Col>
-          <Col md={3} key="pending-messages">
-            <ThemeCard className="text-center">
-              <Card.Body>
-                <h4 className="text-info">
-                  {messages.filter((m) => m.status === "pending").length}
-                </h4>
-                <small className="text-muted">Pending Messages</small>
-              </Card.Body>
-            </ThemeCard>
+          <Col lg={3} md={6} className="mb-4">
+            <Card
+              style={{
+                border: "2px solid #f8f9fa",
+                borderRadius: "16px",
+                padding: "20px",
+                textAlign: "center",
+                height: "100%",
+                transition: "all 0.3s ease",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.borderColor = "#17a2b8";
+                e.currentTarget.style.transform = "translateY(-4px)";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 25px rgba(23, 162, 184, 0.2)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.borderColor = "#f8f9fa";
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <div
+                style={{
+                  width: "60px",
+                  height: "60px",
+                  background: "linear-gradient(135deg, #17a2b8, #138496)",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 16px",
+                  color: "white",
+                  fontSize: "24px",
+                }}
+              >
+                <i className="bi bi-clock"></i>
+              </div>
+              <h3 style={{ color: "#17a2b8", marginBottom: "8px" }}>
+                {messages.filter((m) => m.status === "pending").length}
+              </h3>
+              <p style={{ color: "#6c757d", marginBottom: "0" }}>
+                Pending Messages
+              </p>
+            </Card>
           </Col>
-          <Col md={3} key="resolved-messages">
-            <ThemeCard className="text-center">
-              <Card.Body>
-                <h4 className="text-success">
-                  {messages.filter((m) => m.status === "resolved").length}
-                </h4>
-                <small className="text-muted">Resolved Messages</small>
-              </Card.Body>
-            </ThemeCard>
+          <Col lg={3} md={6} className="mb-4">
+            <Card
+              style={{
+                border: "2px solid #f8f9fa",
+                borderRadius: "16px",
+                padding: "20px",
+                textAlign: "center",
+                height: "100%",
+                transition: "all 0.3s ease",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.borderColor = "#28a745";
+                e.currentTarget.style.transform = "translateY(-4px)";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 25px rgba(40, 167, 69, 0.2)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.borderColor = "#f8f9fa";
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <div
+                style={{
+                  width: "60px",
+                  height: "60px",
+                  background: "linear-gradient(135deg, #28a745, #1e7e34)",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 16px",
+                  color: "white",
+                  fontSize: "24px",
+                }}
+              >
+                <i className="bi bi-check-circle"></i>
+              </div>
+              <h3 style={{ color: "#28a745", marginBottom: "8px" }}>
+                {messages.filter((m) => m.status === "resolved").length}
+              </h3>
+              <p style={{ color: "#6c757d", marginBottom: "0" }}>
+                Resolved Messages
+              </p>
+            </Card>
           </Col>
         </Row>
 
-        {/* Filters and Actions */}
-        <ThemeCard className="mb-4">
-          <Card.Body>
-            <Row>
-              <Col md={3} key="search-col">
+        {/* Professional Filters Section */}
+        <Card
+          className="mb-4"
+          style={{
+            border: "2px solid #f8f9fa",
+            borderRadius: "16px",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+          }}
+        >
+          <Card.Body style={{ padding: "30px" }}>
+            <Row className="align-items-center">
+              <Col lg={3} md={6} className="mb-3">
+                <Form.Label className="fw-bold mb-2">
+                  <i className="bi bi-search me-2"></i>
+                  Search Messages
+                </Form.Label>
                 <InputGroup>
+                  <InputGroup.Text>
+                    <i className="bi bi-search"></i>
+                  </InputGroup.Text>
                   <Form.Control
                     type="text"
                     placeholder="Search messages..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{ borderLeft: "none" }}
                   />
                 </InputGroup>
               </Col>
-              <Col md={2} key="status-filter-col">
+              <Col lg={2} md={6} className="mb-3">
+                <Form.Label className="fw-bold mb-2">
+                  <i className="bi bi-funnel me-2"></i>
+                  Status
+                </Form.Label>
                 <Form.Select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
@@ -391,7 +661,11 @@ const AdminMessages = () => {
                   <option value="closed">Closed</option>
                 </Form.Select>
               </Col>
-              <Col md={2} key="priority-filter-col">
+              <Col lg={2} md={6} className="mb-3">
+                <Form.Label className="fw-bold mb-2">
+                  <i className="bi bi-flag me-2"></i>
+                  Priority
+                </Form.Label>
                 <Form.Select
                   value={priorityFilter}
                   onChange={(e) => setPriorityFilter(e.target.value)}
@@ -402,66 +676,129 @@ const AdminMessages = () => {
                   <option value="low">Low</option>
                 </Form.Select>
               </Col>
-              <Col md={5} key="actions-col">
+              <Col lg={5} md={6} className="mb-3">
+                <Form.Label className="fw-bold mb-2">
+                  <i className="bi bi-gear me-2"></i>
+                  Actions
+                </Form.Label>
                 <div className="d-flex gap-2">
-                  <ThemeButton
-                    variant="outline"
+                  <Button
+                    variant="outline-success"
                     size="sm"
                     onClick={handleMarkAllAsRead}
+                    className="d-flex align-items-center"
                   >
-                    ✅ Mark All Read
-                  </ThemeButton>
-                  <ThemeButton
-                    variant="outline"
+                    <i className="bi bi-check2-all me-1"></i>
+                    Mark All Read
+                  </Button>
+                  <Button
+                    variant="outline-primary"
                     size="sm"
                     onClick={exportToExcel}
+                    className="d-flex align-items-center"
                   >
-                    📊 Export Excel
-                  </ThemeButton>
-                  <ThemeButton
-                    variant="outline"
+                    <i className="bi bi-file-earmark-excel me-1"></i>
+                    Export Excel
+                  </Button>
+                  <Button
+                    variant="outline-secondary"
                     size="sm"
                     onClick={fetchMessages}
+                    className="d-flex align-items-center"
                   >
-                    🔄 Refresh
-                  </ThemeButton>
+                    <i className="bi bi-arrow-clockwise me-1"></i>
+                    Refresh
+                  </Button>
                 </div>
               </Col>
             </Row>
           </Card.Body>
-        </ThemeCard>
+        </Card>
 
-        {/* Messages Table */}
-        <ThemeCard>
-          <Card.Header className="bg-gradient text-white d-flex justify-content-between align-items-center">
-            <h5 className="mb-0">All Messages ({filteredMessages.length})</h5>
+        {/* Professional Messages Table */}
+        <Card
+          style={{
+            border: "2px solid #f8f9fa",
+            borderRadius: "16px",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+            overflow: "hidden",
+          }}
+        >
+          <Card.Header
+            style={{
+              background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
+              color: "white",
+              padding: "20px 30px",
+              border: "none",
+            }}
+          >
+            <h5 className="mb-0 d-flex align-items-center">
+              <i className="bi bi-chat-left-text me-2"></i>
+              All Messages ({filteredMessages.length})
+            </h5>
           </Card.Header>
           <Card.Body className="p-0">
             {filteredMessages.length > 0 ? (
               <Table responsive hover className="mb-0">
-                <thead className="table-light">
+                <thead
+                  style={{
+                    backgroundColor: "#f8f9fa",
+                    borderBottom: "2px solid #dee2e6",
+                  }}
+                >
                   <tr key="messages-header">
-                    <th>Sender</th>
-                    <th>Subject</th>
-                    <th>Priority</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th>Actions</th>
+                    <th style={{ padding: "16px 20px", fontWeight: "600" }}>
+                      <i className="bi bi-person-circle me-2"></i>
+                      Sender
+                    </th>
+                    <th style={{ padding: "16px 20px", fontWeight: "600" }}>
+                      <i className="bi bi-chat-square-text me-2"></i>
+                      Subject
+                    </th>
+                    <th style={{ padding: "16px 20px", fontWeight: "600" }}>
+                      <i className="bi bi-flag me-2"></i>
+                      Priority
+                    </th>
+                    <th style={{ padding: "16px 20px", fontWeight: "600" }}>
+                      <i className="bi bi-circle me-2"></i>
+                      Status
+                    </th>
+                    <th style={{ padding: "16px 20px", fontWeight: "600" }}>
+                      <i className="bi bi-calendar me-2"></i>
+                      Date
+                    </th>
+                    <th style={{ padding: "16px 20px", fontWeight: "600" }}>
+                      <i className="bi bi-gear me-2"></i>
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredMessages.map((message, index) => (
                     <tr
                       key={message._id || `message-${index}`}
-                      className={!message.isRead ? "table-warning" : ""}
+                      style={{
+                        backgroundColor: !message.isRead
+                          ? "#fff3cd"
+                          : "transparent",
+                        borderLeft: !message.isRead
+                          ? "4px solid #ffc107"
+                          : "4px solid transparent",
+                      }}
                     >
-                      <td>
+                      <td style={{ padding: "16px 20px" }}>
                         <div>
-                          <div className="fw-bold">{message.name}</div>
-                          <small className="text-muted">{message.email}</small>
+                          <div className="fw-bold d-flex align-items-center">
+                            <i className="bi bi-person-fill me-2 text-muted"></i>
+                            {message.name}
+                          </div>
+                          <small className="text-muted d-flex align-items-center">
+                            <i className="bi bi-envelope me-1"></i>
+                            {message.email}
+                          </small>
                         </div>
                       </td>
-                      <td>
+                      <td style={{ padding: "16px 20px" }}>
                         <div>
                           <div className="fw-bold">{message.subject}</div>
                           <small className="text-muted">
@@ -469,31 +806,44 @@ const AdminMessages = () => {
                           </small>
                         </div>
                       </td>
-                      <td>
-                        <Badge bg={getPriorityBadgeColor(message.priority)}>
+                      <td style={{ padding: "16px 20px" }}>
+                        <Badge
+                          bg={getPriorityBadgeColor(message.priority)}
+                          style={{ fontSize: "12px", padding: "6px 12px" }}
+                        >
                           {message.priority || "Medium"}
                         </Badge>
                       </td>
-                      <td>
-                        <Badge bg={getStatusBadgeColor(message.status)}>
+                      <td style={{ padding: "16px 20px" }}>
+                        <Badge
+                          bg={getStatusBadgeColor(message.status)}
+                          style={{ fontSize: "12px", padding: "6px 12px" }}
+                        >
                           {message.status || "Pending"}
                         </Badge>
                       </td>
-                      <td>
+                      <td style={{ padding: "16px 20px" }}>
                         <div>
-                          <div>{formatDateTime(message.createdAt)}</div>
+                          <div className="fw-bold">
+                            {formatDateTime(message.createdAt)}
+                          </div>
                           <small className="text-muted">
                             {getRelativeTime(message.createdAt)}
                           </small>
                         </div>
                       </td>
-                      <td>
+                      <td style={{ padding: "16px 20px" }}>
                         <Dropdown>
                           <Dropdown.Toggle
                             variant="outline-secondary"
                             size="sm"
-                            className="border-0"
+                            style={{
+                              border: "2px solid #dee2e6",
+                              borderRadius: "8px",
+                              padding: "6px 12px",
+                            }}
                           >
+                            <i className="bi bi-three-dots me-1"></i>
                             Actions
                           </Dropdown.Toggle>
                           <Dropdown.Menu>
@@ -503,8 +853,10 @@ const AdminMessages = () => {
                                 setSelectedMessage(message);
                                 setShowReplyModal(true);
                               }}
+                              className="d-flex align-items-center"
                             >
-                              💬 Reply
+                              <i className="bi bi-reply me-2"></i>
+                              Reply
                             </Dropdown.Item>
                             <Dropdown.Divider
                               key={`divider1-${message._id || index}`}
@@ -513,15 +865,19 @@ const AdminMessages = () => {
                               <Dropdown.Item
                                 key={`read-${message._id || index}`}
                                 onClick={() => handleMarkAsRead(message._id)}
+                                className="d-flex align-items-center"
                               >
-                                ✅ Mark as Read
+                                <i className="bi bi-check me-2"></i>
+                                Mark as Read
                               </Dropdown.Item>
                             ) : (
                               <Dropdown.Item
                                 key={`unread-${message._id || index}`}
                                 onClick={() => handleMarkAsUnread(message._id)}
+                                className="d-flex align-items-center"
                               >
-                                📧 Mark as Unread
+                                <i className="bi bi-envelope me-2"></i>
+                                Mark as Unread
                               </Dropdown.Item>
                             )}
                             <Dropdown.Divider
@@ -532,24 +888,30 @@ const AdminMessages = () => {
                               onClick={() =>
                                 handleUpdateStatus(message._id, "in_progress")
                               }
+                              className="d-flex align-items-center"
                             >
-                              🔄 In Progress
+                              <i className="bi bi-arrow-clockwise me-2"></i>
+                              In Progress
                             </Dropdown.Item>
                             <Dropdown.Item
                               key={`resolve-${message._id || index}`}
                               onClick={() =>
                                 handleUpdateStatus(message._id, "resolved")
                               }
+                              className="d-flex align-items-center"
                             >
-                              ✅ Resolve
+                              <i className="bi bi-check-circle me-2"></i>
+                              Resolve
                             </Dropdown.Item>
                             <Dropdown.Item
                               key={`close-${message._id || index}`}
                               onClick={() =>
                                 handleUpdateStatus(message._id, "closed")
                               }
+                              className="d-flex align-items-center"
                             >
-                              🔒 Close
+                              <i className="bi bi-x-circle me-2"></i>
+                              Close
                             </Dropdown.Item>
                             <Dropdown.Divider
                               key={`divider3-${message._id || index}`}
@@ -557,9 +919,10 @@ const AdminMessages = () => {
                             <Dropdown.Item
                               key={`delete-${message._id || index}`}
                               onClick={() => handleDeleteMessage(message._id)}
-                              className="text-danger"
+                              className="text-danger d-flex align-items-center"
                             >
-                              🗑️ Delete
+                              <i className="bi bi-trash me-2"></i>
+                              Delete
                             </Dropdown.Item>
                           </Dropdown.Menu>
                         </Dropdown>
@@ -571,7 +934,22 @@ const AdminMessages = () => {
             ) : (
               <div className="text-center py-5">
                 <div className="mb-3">
-                  <span style={{ fontSize: "4rem" }}>💬</span>
+                  <div
+                    style={{
+                      width: "80px",
+                      height: "80px",
+                      background: "linear-gradient(135deg, #f8f9fa, #e9ecef)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      margin: "0 auto",
+                      fontSize: "32px",
+                      color: "#6c757d",
+                    }}
+                  >
+                    <i className="bi bi-chat-left-text"></i>
+                  </div>
                 </div>
                 <h5>No Messages Found</h5>
                 <p className="text-muted">
@@ -580,72 +958,124 @@ const AdminMessages = () => {
                     : "No messages match your current filters."}
                 </p>
                 {error && (
-                  <ThemeButton onClick={fetchMessages}>Try Again</ThemeButton>
+                  <Button variant="outline-danger" onClick={fetchMessages}>
+                    <i className="bi bi-arrow-clockwise me-2"></i>
+                    Try Again
+                  </Button>
                 )}
               </div>
             )}
           </Card.Body>
-        </ThemeCard>
+        </Card>
 
-        {/* Reply Modal */}
+        {/* Professional Reply Modal */}
         <Modal
           show={showReplyModal}
           onHide={() => setShowReplyModal(false)}
           size="lg"
+          style={{ zIndex: 1060 }}
         >
-          <Modal.Header closeButton>
-            <Modal.Title>Reply to Message</Modal.Title>
+          <Modal.Header
+            closeButton
+            style={{
+              background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
+              color: "white",
+              border: "none",
+            }}
+          >
+            <Modal.Title className="d-flex align-items-center">
+              <i className="bi bi-reply me-2"></i>
+              Reply to Message
+            </Modal.Title>
           </Modal.Header>
-          <Modal.Body>
+          <Modal.Body style={{ padding: "30px" }}>
             {selectedMessage && (
               <div>
-                <div className="mb-3">
-                  <strong>From:</strong> {selectedMessage.name} (
-                  {selectedMessage.email})
-                </div>
-                <div className="mb-3">
-                  <strong>Subject:</strong> {selectedMessage.subject}
-                </div>
-                <div className="mb-3">
-                  <strong>Original Message:</strong>
-                  <div className="border p-3 bg-light rounded">
-                    {selectedMessage.message}
+                <div className="mb-4 p-3 bg-light rounded">
+                  <div className="mb-2">
+                    <strong>
+                      <i className="bi bi-person-fill me-2"></i>
+                      From:
+                    </strong>{" "}
+                    {selectedMessage.name} ({selectedMessage.email})
+                  </div>
+                  <div className="mb-2">
+                    <strong>
+                      <i className="bi bi-chat-square-text me-2"></i>
+                      Subject:
+                    </strong>{" "}
+                    {selectedMessage.subject}
+                  </div>
+                  <div className="mb-3">
+                    <strong>
+                      <i className="bi bi-envelope me-2"></i>
+                      Original Message:
+                    </strong>
+                    <div
+                      className="border p-3 bg-white rounded mt-2"
+                      style={{ fontSize: "14px", lineHeight: "1.6" }}
+                    >
+                      {selectedMessage.message}
+                    </div>
                   </div>
                 </div>
                 <Form.Group>
-                  <Form.Label>Your Reply:</Form.Label>
+                  <Form.Label className="fw-bold">
+                    <i className="bi bi-pencil me-2"></i>
+                    Your Reply:
+                  </Form.Label>
                   <Form.Control
                     as="textarea"
                     rows={5}
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
-                    placeholder="Type your reply here..."
+                    placeholder="Type your professional reply here..."
+                    style={{
+                      border: "2px solid #dee2e6",
+                      borderRadius: "8px",
+                      padding: "12px",
+                    }}
                   />
                 </Form.Group>
               </div>
             )}
           </Modal.Body>
-          <Modal.Footer>
+          <Modal.Footer style={{ padding: "20px 30px" }}>
             <Button
               variant="secondary"
               onClick={() => setShowReplyModal(false)}
+              className="d-flex align-items-center"
             >
+              <i className="bi bi-x me-2"></i>
               Cancel
             </Button>
-            <ThemeButton onClick={handleSendReply} disabled={sending}>
+            <Button
+              variant="danger"
+              onClick={handleSendReply}
+              disabled={sending}
+              className="d-flex align-items-center"
+              style={{
+                background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
+                border: "none",
+                padding: "8px 20px",
+              }}
+            >
               {sending ? (
                 <>
-                  <Spinner animation="border" size="sm" className="me-1" />
+                  <Spinner animation="border" size="sm" className="me-2" />
                   Sending...
                 </>
               ) : (
-                "📤 Send Reply"
+                <>
+                  <i className="bi bi-send me-2"></i>
+                  Send Reply
+                </>
               )}
-            </ThemeButton>
+            </Button>
           </Modal.Footer>
         </Modal>
 
-        {/* Toast Notifications */}
+        {/* Professional Toast Notifications */}
         <ToastContainer position="top-end" className="p-3">
           <Toast
             show={showToast}
@@ -653,11 +1083,21 @@ const AdminMessages = () => {
             delay={3000}
             autohide
             bg={toastVariant}
+            style={{
+              borderRadius: "12px",
+              border: "none",
+              boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+            }}
           >
-            <Toast.Header>
-              <strong className="me-auto">Messages</strong>
+            <Toast.Header style={{ border: "none", paddingBottom: "8px" }}>
+              <div className="d-flex align-items-center">
+                <i className="bi bi-check-circle-fill me-2"></i>
+                <strong className="me-auto">Message Management</strong>
+              </div>
             </Toast.Header>
-            <Toast.Body className="text-white">{toastMessage}</Toast.Body>
+            <Toast.Body className="text-white" style={{ fontSize: "14px" }}>
+              {toastMessage}
+            </Toast.Body>
           </Toast>
         </ToastContainer>
       </Container>
