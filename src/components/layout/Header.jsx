@@ -57,11 +57,21 @@ const Header = () => {
         <Container>
           {/* Simplified Header Layout */}
           <Navbar.Brand as={Link} to="/" className="d-flex align-items-center">
-            <img
-              src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
-              alt="Hare Krishna Medical"
-              className="medical-logo me-3"
-            />
+            <div
+              style={{
+                background: "white",
+                borderRadius: "50%",
+                padding: "8px",
+                border: "2px solid rgba(230, 57, 70, 0.1)",
+                boxShadow: "0 4px 16px rgba(230, 57, 70, 0.25)",
+              }}
+            >
+              <img
+                src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
+                alt="Hare Krishna Medical"
+                className="medical-logo me-3"
+              />
+            </div>
             <div className="brand-text-container">
               <h4 className="mb-0 text-medical-red fw-bold">
                 Hare Krishna Medical
