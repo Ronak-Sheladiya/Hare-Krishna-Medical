@@ -217,44 +217,32 @@ const AdminProducts = () => {
       return;
     }
 
-    try {
-      setActionLoading(true);
-      const response = await fetch(
-        `${API_BASE_URL}/api/products/${selectedProduct._id}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        },
+    setActionLoading(true);
+
+    const {
+      success,
+      data,
+      error: apiError,
+    } = await safeApiCall(
+      () => api.put(`/api/products/${selectedProduct._id}`, formData),
+      null,
+    );
+
+    if (success && data) {
+      const productData = data.data || data;
+      setProducts((prev) =>
+        prev.map((product) =>
+          product._id === selectedProduct._id ? productData : product,
+        ),
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to update product");
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        setProducts((prev) =>
-          prev.map((product) =>
-            product._id === selectedProduct._id ? data.data : product,
-          ),
-        );
-        setShowEditModal(false);
-        resetForm();
-        showNotification("Product updated successfully!", "success");
-      } else {
-        throw new Error(data.message || "Failed to update product");
-      }
-    } catch (error) {
-      console.error("Error updating product:", error);
-      showNotification(error.message, "danger");
-    } finally {
-      setActionLoading(false);
+      setShowEditModal(false);
+      resetForm();
+      showNotification("Product updated successfully!", "success");
+    } else {
+      showNotification(apiError || "Failed to update product", "danger");
     }
+
+    setActionLoading(false);
   };
 
   const handleDeleteProduct = async () => {
