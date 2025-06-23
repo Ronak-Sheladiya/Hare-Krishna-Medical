@@ -304,10 +304,16 @@ const Header = () => {
       {/* Header Styling */}
       <style jsx>{`
         .medical-logo {
-          width: 45px;
-          height: 45px;
-          border-radius: 8px;
-          box-shadow: 0 2px 8px rgba(230, 57, 70, 0.2);
+          width: 60px;
+          height: 60px;
+          border-radius: 12px;
+          box-shadow: 0 4px 16px rgba(230, 57, 70, 0.25);
+          transition: all 0.3s ease;
+        }
+
+        .medical-logo:hover {
+          transform: scale(1.05);
+          box-shadow: 0 6px 20px rgba(230, 57, 70, 0.35);
         }
 
         .nav-link {
