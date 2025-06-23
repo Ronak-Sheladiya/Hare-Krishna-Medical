@@ -348,7 +348,9 @@ const ProductDetails = () => {
                         </span>
                       )}
                     </div>
-                    <small className="text-muted">Inclusive of all taxes</small>
+                    <small className="text-muted">
+                      Taxes included in product price
+                    </small>
                   </div>
 
                   {/* Stock Status */}

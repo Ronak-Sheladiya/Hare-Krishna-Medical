@@ -72,13 +72,13 @@ const OrderDetails = () => {
           ],
           subtotal: 97.48,
           shipping: 0,
-          tax: 4.87,
-          total: 102.35,
+          tax: 0,
+          total: 97.48,
           orderDate: "2024-01-15",
           orderTime: "14:30:25",
-          status: "Delivered",
+          status: "Pending",
           paymentMethod: "Cash on Delivery",
-          paymentStatus: "Paid",
+          paymentStatus: "Pending",
           trackingNumber: "TRK123456789",
           estimatedDelivery: "2024-01-18",
           orderNotes: "Please handle with care",
@@ -537,8 +537,10 @@ const OrderDetails = () => {
                       </span>
                     </div>
                     <div className="d-flex justify-content-between mb-3">
-                      <span>Tax (5%):</span>
-                      <span>₹{order.tax.toFixed(2)}</span>
+                      <span>Tax:</span>
+                      <span className="text-success">
+                        Included in product price
+                      </span>
                     </div>
                     <hr />
                     <div className="d-flex justify-content-between fw-bold fs-5">
