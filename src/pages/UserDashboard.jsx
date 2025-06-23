@@ -11,6 +11,7 @@ import {
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { api, safeApiCall } from "../utils/apiClient";
 
 const UserDashboard = () => {
   const { user } = useSelector((state) => state.auth);
