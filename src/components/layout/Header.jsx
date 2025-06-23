@@ -58,10 +58,10 @@ const Header = () => {
               alt="Hare Krishna Medical"
               className="medical-logo me-3"
               style={{
-                width: "45px",
-                height: "45px",
-                borderRadius: "8px",
-                boxShadow: "0 2px 8px rgba(230, 57, 70, 0.15)",
+                width: "60px",
+                height: "60px",
+                borderRadius: "12px",
+                boxShadow: "0 4px 12px rgba(230, 57, 70, 0.2)",
               }}
             />
             <div className="brand-text-container d-none d-md-block">
@@ -94,22 +94,6 @@ const Header = () => {
                   Medical
                 </div>
               </div>
-              <p
-                className="brand-tagline mb-0"
-                style={{
-                  color: "#E63946",
-                  fontSize: "0.7rem",
-                  fontWeight: "500",
-                  letterSpacing: "0.5px",
-                  textTransform: "uppercase",
-                  marginTop: "2px",
-                  fontFamily: "'Inter', sans-serif",
-                  textAlign: "center",
-                  opacity: "0.8",
-                }}
-              >
-                Healthcare Excellence
-              </p>
             </div>
             {/* Mobile Brand Text */}
             <div className="d-md-none text-center">
