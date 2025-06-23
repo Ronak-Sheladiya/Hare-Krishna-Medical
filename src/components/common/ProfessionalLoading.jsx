@@ -10,13 +10,13 @@ const ProfessionalLoading = ({
   const getSizeConfig = () => {
     switch (size) {
       case "sm":
-        return { logoSize: 50, containerSize: 100, fontSize: "0.9rem" };
+        return { logoSize: 40, containerSize: 80, fontSize: "0.9rem" };
       case "lg":
-        return { logoSize: 90, containerSize: 180, fontSize: "1.2rem" };
+        return { logoSize: 70, containerSize: 140, fontSize: "1.2rem" };
       case "xl":
-        return { logoSize: 130, containerSize: 260, fontSize: "1.4rem" };
+        return { logoSize: 90, containerSize: 180, fontSize: "1.4rem" };
       default:
-        return { logoSize: 70, containerSize: 140, fontSize: "1rem" };
+        return { logoSize: 55, containerSize: 110, fontSize: "1rem" };
     }
   };
 
