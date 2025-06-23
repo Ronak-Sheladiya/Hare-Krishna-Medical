@@ -6,9 +6,16 @@ class SocketClient {
     this.isConnected = false;
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
+    this.isBrowser = typeof window !== "undefined";
   }
 
   connect(token = null, role = 0) {
+    // Don't connect if not in browser environment
+    if (!this.isBrowser) {
+      console.warn("Socket.io client can only run in browser environment");
+      return null;
+    }
+
     if (this.socket && this.isConnected) {
       return this.socket;
     }
@@ -23,6 +30,7 @@ class SocketClient {
           },
           transports: ["websocket", "polling"],
           timeout: 20000,
+          forceNew: true,
         },
       );
 
@@ -95,7 +103,11 @@ class SocketClient {
       });
 
       // Dispatch custom event for components to listen
-      window.dispatchEvent(new CustomEvent("admin-new-user", { detail: data }));
+      if (this.isBrowser && typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("admin-new-user", { detail: data }),
+        );
+      }
     });
 
     // New order notifications
@@ -107,17 +119,21 @@ class SocketClient {
         tag: "new-order",
       });
 
-      window.dispatchEvent(
-        new CustomEvent("admin-new-order", { detail: data }),
-      );
+      if (this.isBrowser && typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("admin-new-order", { detail: data }),
+        );
+      }
     });
 
     // Order status updates
     this.socket.on("order-status-updated", (data) => {
       console.log("📦 Order status updated:", data);
-      window.dispatchEvent(
-        new CustomEvent("admin-order-status-updated", { detail: data }),
-      );
+      if (this.isBrowser && typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("admin-order-status-updated", { detail: data }),
+        );
+      }
     });
 
     // Payment status updates
@@ -129,54 +145,64 @@ class SocketClient {
         tag: "payment-update",
       });
 
-      window.dispatchEvent(
-        new CustomEvent("admin-payment-status-updated", { detail: data }),
-      );
-    });
-
-    // Product updates
-    this.socket.on("product-created", (data) => {
-      console.log("📦 Product created:", data);
-      window.dispatchEvent(
-        new CustomEvent("admin-product-created", { detail: data }),
-      );
-    });
-
-    this.socket.on("stock-updated", (data) => {
-      console.log("📊 Stock updated:", data);
-      if (data.product.stockStatus === "Low Stock") {
-        this.showNotification("Low Stock Alert", {
-          body: `${data.product.name} - Only ${data.product.stock} left`,
-          icon: "/favicon.ico",
-          tag: "low-stock",
-        });
+      if (this.isBrowser && typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("admin-payment-status-updated", { detail: data }),
+        );
       }
 
-      window.dispatchEvent(
-        new CustomEvent("admin-stock-updated", { detail: data }),
-      );
-    });
-
-    // Message notifications
-    this.socket.on("new-message", (data) => {
-      console.log("📧 New message:", data);
-      this.showNotification("New Message", {
-        body: `From: ${data.message.name} - ${data.message.subject}`,
-        icon: "/favicon.ico",
-        tag: "new-message",
+      // Product updates
+      this.socket.on("product-created", (data) => {
+        console.log("📦 Product created:", data);
+        if (this.isBrowser && typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("admin-product-created", { detail: data }),
+          );
+        }
       });
 
-      window.dispatchEvent(
-        new CustomEvent("admin-new-message", { detail: data }),
-      );
-    });
+      this.socket.on("stock-updated", (data) => {
+        console.log("📊 Stock updated:", data);
+        if (data.product.stockStatus === "Low Stock") {
+          this.showNotification("Low Stock Alert", {
+            body: `${data.product.name} - Only ${data.product.stock} left`,
+            icon: "/favicon.ico",
+            tag: "low-stock",
+          });
+        }
 
-    // User activity
-    this.socket.on("user-logged-in", (data) => {
-      console.log("🔐 User logged in:", data);
-      window.dispatchEvent(
-        new CustomEvent("admin-user-activity", { detail: data }),
-      );
+        if (this.isBrowser && typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("admin-stock-updated", { detail: data }),
+          );
+        }
+      });
+
+      // Message notifications
+      this.socket.on("new-message", (data) => {
+        console.log("📧 New message:", data);
+        this.showNotification("New Message", {
+          body: `From: ${data.message.name} - ${data.message.subject}`,
+          icon: "/favicon.ico",
+          tag: "new-message",
+        });
+
+        if (this.isBrowser && typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("admin-new-message", { detail: data }),
+          );
+        }
+      });
+
+      // User activity
+      this.socket.on("user-logged-in", (data) => {
+        console.log("🔐 User logged in:", data);
+        if (this.isBrowser && typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("admin-user-activity", { detail: data }),
+          );
+        }
+      });
     });
   }
 
@@ -192,53 +218,69 @@ class SocketClient {
         tag: "order-confirmed",
       });
 
-      window.dispatchEvent(
-        new CustomEvent("user-order-created", { detail: data }),
-      );
-    });
+      if (this.isBrowser && typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("user-order-created", { detail: data }),
+        );
+      }
 
-    this.socket.on("order-status-changed", (data) => {
-      console.log("📦 Order status changed:", data);
-      this.showNotification("Order Update", {
-        body: `Order ${data.orderNumber} is now ${data.newStatus}`,
-        icon: "/favicon.ico",
-        tag: "order-update",
+      this.socket.on("order-status-changed", (data) => {
+        console.log("📦 Order status changed:", data);
+        this.showNotification("Order Update", {
+          body: `Order ${data.orderNumber} is now ${data.newStatus}`,
+          icon: "/favicon.ico",
+          tag: "order-update",
+        });
+
+        if (this.isBrowser && typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("user-order-status-changed", { detail: data }),
+          );
+        }
       });
 
-      window.dispatchEvent(
-        new CustomEvent("user-order-status-changed", { detail: data }),
-      );
-    });
+      // Payment notifications
+      this.socket.on("payment-status-changed", (data) => {
+        console.log("💳 Payment status changed:", data);
+        this.showNotification("Payment Update", {
+          body: `Payment for ${data.invoiceNumber} is ${data.newStatus}`,
+          icon: "/favicon.ico",
+          tag: "payment-update",
+        });
 
-    // Payment notifications
-    this.socket.on("payment-status-changed", (data) => {
-      console.log("💳 Payment status changed:", data);
-      this.showNotification("Payment Update", {
-        body: `Payment for ${data.invoiceNumber} is ${data.newStatus}`,
-        icon: "/favicon.ico",
-        tag: "payment-update",
+        if (this.isBrowser && typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("user-payment-status-changed", { detail: data }),
+          );
+        }
       });
-
-      window.dispatchEvent(
-        new CustomEvent("user-payment-status-changed", { detail: data }),
-      );
     });
   }
 
   showNotification(title, options) {
-    // Check if notifications are supported and permitted
-    if ("Notification" in window && Notification.permission === "granted") {
-      new Notification(title, options);
-    } else if (
-      "Notification" in window &&
-      Notification.permission !== "denied"
-    ) {
-      // Request permission if not already requested
-      Notification.requestPermission().then((permission) => {
-        if (permission === "granted") {
+    // Only run in browser environment
+    if (!this.isBrowser) return;
+
+    try {
+      // Check if notifications are supported and permitted
+      if (typeof window !== "undefined" && "Notification" in window) {
+        if (Notification.permission === "granted") {
           new Notification(title, options);
+        } else if (Notification.permission !== "denied") {
+          // Request permission if not already requested
+          Notification.requestPermission()
+            .then((permission) => {
+              if (permission === "granted") {
+                new Notification(title, options);
+              }
+            })
+            .catch((error) => {
+              console.warn("Notification permission request failed:", error);
+            });
         }
-      });
+      }
+    } catch (error) {
+      console.warn("Notification API error:", error);
     }
   }
 
