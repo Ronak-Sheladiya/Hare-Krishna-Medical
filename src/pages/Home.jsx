@@ -25,23 +25,44 @@ const Home = () => {
 
   const fetchFeaturedProducts = async () => {
     try {
+      // Add timeout to fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
       const response = await fetch(
         `${API_BASE_URL}/api/products/public?featured=true&limit=4`,
         {
           headers: {
             "Content-Type": "application/json",
           },
+          signal: controller.signal,
         },
       );
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.data) {
           dispatch(setFeaturedProducts(data.data));
         }
+      } else {
+        console.warn("API response not OK:", response.status);
+        // Set empty array to show empty state
+        dispatch(setFeaturedProducts([]));
       }
     } catch (error) {
-      console.warn("Error fetching featured products:", error);
+      // Handle different types of errors
+      if (error.name === "AbortError") {
+        console.warn("Featured products fetch timed out");
+      } else if (error.message === "Failed to fetch") {
+        console.warn("Backend API not available - showing empty state");
+      } else {
+        console.warn("Error fetching featured products:", error);
+      }
+
+      // Always set empty array so component doesn't crash
+      dispatch(setFeaturedProducts([]));
     }
   };
 
