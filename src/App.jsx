@@ -16,9 +16,7 @@ import sessionManager from "./utils/sessionManager.js";
 import Header from "./components/layout/Header.jsx";
 import Footer from "./components/layout/Footer.jsx";
 import LoadingSpinner from "./components/common/LoadingSpinner.jsx";
-import GlobalSecurity from "./components/common/GlobalSecurity.jsx";
 import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
-import SimpleDevIndicator from "./components/common/SimpleDevIndicator.jsx";
 
 // Pages
 import Home from "./pages/Home.jsx";
