@@ -1307,13 +1307,57 @@ const AdminProducts = () => {
                             "No description available"}
                         </p>
                         <h6>Benefits</h6>
-                        <p className="text-muted">
-                          {selectedProduct.benefits || "No benefits listed"}
-                        </p>
-                        <h6>Usage</h6>
+                        {selectedProduct.benefits ? (
+                          <div className="text-muted">
+                            {selectedProduct.benefits.split("\n").map(
+                              (benefit, index) =>
+                                benefit.trim() && (
+                                  <div key={index} className="mb-1">
+                                    {benefit.startsWith("•")
+                                      ? benefit
+                                      : `• ${benefit}`}
+                                  </div>
+                                ),
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-muted">No benefits listed</p>
+                        )}
+
+                        <h6 className="mt-3">Usage</h6>
                         <p className="text-muted">
                           {selectedProduct.usage || "No usage instructions"}
                         </p>
+
+                        {/* Product Images */}
+                        {selectedProduct.images &&
+                          selectedProduct.images.length > 0 && (
+                            <>
+                              <h6 className="mt-3">Product Images</h6>
+                              <Row className="g-2">
+                                {selectedProduct.images.map(
+                                  (imageUrl, index) => (
+                                    <Col xs={6} md={4} key={index}>
+                                      <img
+                                        src={imageUrl}
+                                        alt={`Product ${index + 1}`}
+                                        className="img-fluid rounded border"
+                                        style={{
+                                          width: "100%",
+                                          height: "120px",
+                                          objectFit: "cover",
+                                          cursor: "pointer",
+                                        }}
+                                        onClick={() =>
+                                          window.open(imageUrl, "_blank")
+                                        }
+                                      />
+                                    </Col>
+                                  ),
+                                )}
+                              </Row>
+                            </>
+                          )}
                       </Col>
                     </Row>
                   </Card.Body>
