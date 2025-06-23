@@ -1,46 +1,17 @@
 import React from "react";
 import { Container, Row, Col, Button, Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { PageHeroSection } from "../components/common/ConsistentTheme";
 
 const About = () => {
   return (
     <div className="fade-in">
-      {/* Hero Section - Matching Contact Us */}
-      <section
-        style={{
-          background: "linear-gradient(135deg, #e63946 0%, #dc3545 100%)",
-          paddingTop: "80px",
-          paddingBottom: "80px",
-          color: "white",
-        }}
-      >
-        <Container>
-          <Row className="text-center">
-            <Col lg={12}>
-              <h1
-                style={{
-                  fontSize: "3rem",
-                  fontWeight: "800",
-                  marginBottom: "20px",
-                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
-                }}
-              >
-                About Hare Krishna Medical
-              </h1>
-              <p
-                style={{
-                  fontSize: "1.2rem",
-                  opacity: "0.9",
-                  maxWidth: "600px",
-                  margin: "0 auto",
-                }}
-              >
-                Your trusted partner in health and wellness since years
-              </p>
-            </Col>
-          </Row>
-        </Container>
-      </section>
+      {/* Professional Hero Section */}
+      <PageHeroSection
+        title="About Hare Krishna Medical"
+        subtitle="Your trusted partner in health and wellness, dedicated to serving our community with quality healthcare products and professional service."
+        iconContext="default"
+      />
 
       {/* Mission & Values Cards */}
       <section
