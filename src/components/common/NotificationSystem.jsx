@@ -27,12 +27,13 @@ const NotificationSystem = () => {
     return null;
   }
 
-  // Load real notifications from API with robust error handling
+  // Load real notifications from API with robust error handling and real-time updates
   useEffect(() => {
     let isMounted = true;
     let isApiAvailable = true;
     let failureCount = 0;
     const maxFailures = 2;
+    let socketConnection = null;
 
     const loadNotifications = async () => {
       // Skip if component unmounted or API marked as unavailable
@@ -87,11 +88,91 @@ const NotificationSystem = () => {
       }
     };
 
+    // Setup real-time socket connection for live notifications
+    const setupSocketConnection = async () => {
+      try {
+        // Try to import socket client
+        const socketModule = await import("../../utils/socketClient");
+        const socketClient = socketModule.default;
+
+        if (socketClient && typeof socketClient.on === "function") {
+          // Listen for real-time notifications
+          socketClient.on("admin_notification", (notificationData) => {
+            if (!isMounted) return;
+
+            const {
+              type,
+              title,
+              message,
+              orderId,
+              customerName,
+              totalAmount,
+              productName,
+              currentStock,
+              threshold,
+              senderName,
+              subject,
+              amount,
+              method,
+              userName,
+              action,
+            } = notificationData;
+
+            // Dispatch appropriate notification based on type
+            switch (type) {
+              case "order":
+                dispatch({
+                  type: "notifications/addOrderNotification",
+                  payload: { orderId, customerName, totalAmount },
+                });
+                break;
+              case "stock":
+                dispatch({
+                  type: "notifications/addStockNotification",
+                  payload: { productName, currentStock, threshold },
+                });
+                break;
+              case "message":
+                dispatch({
+                  type: "notifications/addMessageNotification",
+                  payload: { senderName, subject },
+                });
+                break;
+              case "payment":
+                dispatch({
+                  type: "notifications/addPaymentNotification",
+                  payload: { orderId, amount, method },
+                });
+                break;
+              case "user":
+                dispatch({
+                  type: "notifications/addUserNotification",
+                  payload: { userName, action },
+                });
+                break;
+              default:
+                // Generic notification
+                dispatch({
+                  type: "notifications/addNotification",
+                  payload: { type, title, message, ...notificationData },
+                });
+            }
+          });
+
+          socketConnection = socketClient;
+        }
+      } catch (error) {
+        console.warn("Socket connection for notifications failed:", error);
+        // Continue without real-time notifications
+      }
+    };
+
     if (user?.role === 1) {
       // Initial load with a small delay to prevent immediate errors
       const initialTimeout = setTimeout(() => {
         if (isMounted) {
           loadNotifications();
+          setupSocketConnection();
         }
       }, 1000);
 
@@ -121,6 +202,11 @@ const NotificationSystem = () => {
         if (initialTimeout) clearTimeout(initialTimeout);
         if (intervalTimeout) clearTimeout(intervalTimeout);
         if (interval) clearInterval(interval);
+
+        // Cleanup socket connection
+        if (socketConnection && typeof socketConnection.off === "function") {
+          socketConnection.off("admin_notification");
+        }
       };
     }
   }, [dispatch, user]);
