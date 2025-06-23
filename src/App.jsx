@@ -213,7 +213,11 @@ function App() {
               <Route path="/button-fixer" element={<ButtonFixer />} />
               <Route
                 path="/functionality-test"
-                element={<FunctionalityTest />}
+                element={
+                  <ProtectedRoute adminOnly>
+                    <FunctionalityTest />
+                  </ProtectedRoute>
+                }
               />
               <Route path="/cart" element={<Cart />} />
               <Route path="/order" element={<Order />} />

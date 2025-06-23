@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Row,
@@ -21,7 +21,42 @@ import {
 const Cart = () => {
   const dispatch = useDispatch();
   const { items, totalItems, totalAmount } = useSelector((state) => state.cart);
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
   const [showClearModal, setShowClearModal] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+
+  // Sync cart with server when user is authenticated
+  useEffect(() => {
+    const syncCartWithServer = async () => {
+      if (!isAuthenticated || !user || items.length === 0) return;
+
+      setSyncing(true);
+      try {
+        // Save cart to server for logged-in users
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}/api/cart/sync`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify({ items, totalItems, totalAmount }),
+          },
+        );
+
+        if (response.ok) {
+          console.log("Cart synced with server");
+        }
+      } catch (error) {
+        console.warn("Cart sync failed (offline mode):", error.message);
+      } finally {
+        setSyncing(false);
+      }
+    };
+
+    syncCartWithServer();
+  }, [items, totalItems, totalAmount, isAuthenticated, user]);
 
   const handleQuantityChange = (id, newQuantity) => {
     if (newQuantity <= 0) {

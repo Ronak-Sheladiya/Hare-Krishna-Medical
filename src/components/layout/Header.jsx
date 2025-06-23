@@ -106,7 +106,7 @@ const Header = () => {
               >
                 Contact
               </Nav.Link>
-              {process.env.NODE_ENV === "development" && (
+              {process.env.NODE_ENV === "development" && user?.role === 1 && (
                 <Nav.Link
                   as={Link}
                   to="/functionality-test"
