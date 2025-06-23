@@ -28,7 +28,7 @@ const NotFound = () => {
                     className="btn-medical-primary"
                     size="lg"
                   >
-                    <i className="bi bi-house me-2"></i>
+                    <i className="bi bi-house-heart-fill me-2"></i>
                     Go Home
                   </Button>
                   <Button
@@ -37,7 +37,7 @@ const NotFound = () => {
                     className="btn-medical-outline"
                     size="lg"
                   >
-                    <i className="bi bi-grid3x3-gap me-2"></i>
+                    <i className="bi bi-bag-heart me-2"></i>
                     Browse Products
                   </Button>
                 </div>
