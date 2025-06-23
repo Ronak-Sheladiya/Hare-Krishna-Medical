@@ -19,6 +19,7 @@ import LoadingSpinner from "./components/common/LoadingSpinner.jsx";
 import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
 import CrossTabSync from "./components/common/CrossTabSync.jsx";
 import RealTimeSync from "./components/common/RealTimeSync.jsx";
+import RealTimeStatus from "./components/common/RealTimeStatus.jsx";
 
 // Pages
 import Home from "./pages/Home.jsx";
