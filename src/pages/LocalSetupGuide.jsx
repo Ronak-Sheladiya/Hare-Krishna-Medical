@@ -954,6 +954,52 @@ netstat -ano | findstr :5173   # Windows`}</code>
 
             <Alert variant="info">
               <h6>
+                <i className="bi bi-wifi-off me-2"></i>
+                WebSocket Connection Issues
+              </h6>
+              <p>
+                <strong>Symptoms:</strong> "websocket error" or real-time
+                features not working
+              </p>
+              <p>
+                <strong>Solutions:</strong>
+              </p>
+              <ul>
+                <li>
+                  ✅ <strong>Backend Not Running:</strong> Ensure backend server
+                  is running on port 5000
+                </li>
+                <li>
+                  ✅ <strong>Environment Variables:</strong> Check
+                  VITE_SOCKET_URL and VITE_BACKEND_URL in .env
+                </li>
+                <li>
+                  ✅ <strong>CORS Issues:</strong> Verify FRONTEND_URL is
+                  correct in backend/.env
+                </li>
+                <li>
+                  ✅ <strong>Firewall/Proxy:</strong> Check if WebSocket
+                  connections are blocked
+                </li>
+                <li>
+                  ✅ <strong>Fallback Mode:</strong> App works in demo mode if
+                  real-time fails
+                </li>
+              </ul>
+              <div className="mt-2">
+                <strong>🔧 Quick Test:</strong>
+                <br />
+                <code>curl http://localhost:5000/health</code> (should return
+                OK)
+                <br />
+                <small className="text-muted">
+                  Real-time status indicator shows connection state
+                </small>
+              </div>
+            </Alert>
+
+            <Alert variant="info">
+              <h6>
                 <i className="bi bi-shield-exclamation me-2"></i>
                 JWT or Authentication Issues
               </h6>
