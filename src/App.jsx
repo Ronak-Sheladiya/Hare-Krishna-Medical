@@ -112,6 +112,7 @@ const AuthRoute = ({ children }) => {
 
 function App() {
   const [loading, setLoading] = useState(true);
+  const { user, token } = useSelector((state) => state.auth);
 
   useEffect(() => {
     // Simulate initial loading
@@ -127,6 +128,27 @@ function App() {
       // Session manager cleanup is handled by its own destructor
     };
   }, []);
+
+  // Socket connection management
+  useEffect(() => {
+    if (token && user) {
+      // Connect socket when user is authenticated
+      socketClient.connect(token, user.role);
+
+      // Request notification permission
+      if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+    } else {
+      // Disconnect socket when user logs out
+      socketClient.disconnect();
+    }
+
+    // Cleanup on unmount
+    return () => {
+      socketClient.disconnect();
+    };
+  }, [token, user]);
 
   if (loading) {
     return <LoadingSpinner />;
