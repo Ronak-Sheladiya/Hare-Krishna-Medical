@@ -156,18 +156,27 @@ const InvoiceView = () => {
           if (data.success && data.data) {
             const invoiceData = data.data;
 
+            // Ensure tax is 0 and statuses are correct for real data
+            const processedInvoiceData = {
+              ...invoiceData,
+              tax: 0,
+              status: invoiceData.status || "Pending",
+              paymentStatus: invoiceData.paymentStatus || "Pending",
+            };
+
             // Generate real QR code
             try {
               const QRCode = (await import("qrcode")).default;
               const qrData = {
                 type: "invoice_verification",
-                invoice_id: invoiceData.invoiceId || invoiceData._id,
-                order_id: invoiceData.orderId,
+                invoice_id:
+                  processedInvoiceData.invoiceId || processedInvoiceData._id,
+                order_id: processedInvoiceData.orderId,
                 customer_name:
-                  invoiceData.customerName ||
-                  invoiceData.customerDetails?.fullName,
-                total_amount: `₹${invoiceData.total.toFixed(2)}`,
-                verification_url: `${window.location.origin}/qr/invoice/${invoiceData._id}`,
+                  processedInvoiceData.customerName ||
+                  processedInvoiceData.customerDetails?.fullName,
+                total_amount: `₹${processedInvoiceData.total.toFixed(2)}`,
+                verification_url: `${window.location.origin}/qr/invoice/${processedInvoiceData._id}`,
                 verified_at: new Date().toISOString(),
               };
 
@@ -188,9 +197,9 @@ const InvoiceView = () => {
               );
             }
 
-            setInvoice(invoiceData);
+            setInvoice(processedInvoiceData);
             setVerificationStatus("verified");
-            setAlertMessage("Invoice verified successfully!");
+            setAlertMessage("Invoice loaded from database successfully!");
             setShowAlert(true);
             setTimeout(() => setShowAlert(false), 5000);
           } else {
