@@ -25,9 +25,11 @@ const InvoiceView = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
   const [downloading, setDownloading] = useState(false);
   const [qrCode, setQrCode] = useState(null);
+  const [pdfUrl, setPdfUrl] = useState(null);
+  const [pdfGenerating, setPdfGenerating] = useState(false);
 
   useEffect(() => {
     dispatch(refreshSession());
@@ -65,6 +67,12 @@ const InvoiceView = () => {
       if (demoInvoice) {
         setInvoice(demoInvoice);
         generateQRCode(invoiceId);
+
+        // Generate PDF for demo invoice too
+        setTimeout(() => {
+          generateInvoicePDF(demoInvoice);
+        }, 1000);
+
         setLoading(false);
         return;
       }
@@ -116,6 +124,40 @@ const InvoiceView = () => {
       }
     } catch (error) {
       console.error("QR generation failed:", error);
+    }
+  };
+
+  const generateInvoicePDF = async (invoiceData = null) => {
+    const dataToUse = invoiceData || invoice;
+    if (!dataToUse) return;
+
+    setPdfGenerating(true);
+    try {
+      const invoiceElement = document.getElementById("invoice-content");
+      if (!invoiceElement) {
+        throw new Error("Invoice content not found");
+      }
+
+      // Create PDF blob instead of downloading
+      const result = await pdfService.generateInvoicePDFBlob(
+        invoiceElement,
+        dataToUse,
+        {
+          onProgress: (message, progress) => {
+            console.log(`PDF Generation: ${message} (${progress}%)`);
+          },
+        },
+      );
+
+      if (result.success && result.blob) {
+        // Create object URL for PDF preview
+        const pdfObjectUrl = URL.createObjectURL(result.blob);
+        setPdfUrl(pdfObjectUrl);
+      }
+    } catch (error) {
+      console.error("PDF generation failed:", error);
+    } finally {
+      setPdfGenerating(false);
     }
   };
 
