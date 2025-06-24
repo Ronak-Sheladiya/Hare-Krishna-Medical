@@ -22,6 +22,7 @@ import RealTimeStatus from "./components/common/RealTimeStatus.jsx";
 import SocketDiagnostic from "./components/common/SocketDiagnostic.jsx";
 import SessionStatus from "./components/common/SessionStatus.jsx";
 import SecurityLayer from "./components/common/SecurityLayer.jsx";
+import CrossTabCartSync from "./components/common/CrossTabCartSync.jsx";
 
 // Pages
 import Home from "./pages/Home.jsx";
@@ -236,6 +237,7 @@ function App() {
         <div className="App">
           <SecurityLayer />
           <RealTimeSync />
+          <CrossTabCartSync />
           <ScrollToTop />
           <Header />
           <main>
