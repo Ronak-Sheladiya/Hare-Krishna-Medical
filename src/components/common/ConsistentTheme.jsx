@@ -16,10 +16,14 @@ export const PageHeroSection = ({
   // Auto-determine icon if not provided
   const displayIcon = icon || getPageIcon(location.pathname);
 
-  // Always use red medical theme for all pages
+  // Use dark red theme for all pages except home
   const iconGradient = "rgba(255, 255, 255, 0.9)";
+  const isHomePage = location.pathname === "/";
   const heroBackground =
-    background || "linear-gradient(135deg, #e63946 0%, #dc3545 100%)";
+    background ||
+    (isHomePage
+      ? "linear-gradient(135deg, #e63946 0%, #dc3545 100%)"
+      : "linear-gradient(135deg, #8B0000 0%, #A52A2A 25%, #DC143C 75%, #B22222 100%)");
 
   return (
     <section
