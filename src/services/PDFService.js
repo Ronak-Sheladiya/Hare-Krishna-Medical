@@ -91,31 +91,33 @@ class PDFService {
         this.defaultOptions.format,
       );
 
-      // Calculate dimensions
-      const imgWidth = 210; // A4 width in mm
+      // Calculate dimensions with 15px margins (approximately 5.3mm)
+      const margin = 5.3; // 15px converted to mm
+      const imgWidth = 210 - margin * 2; // A4 width minus margins
       const pageHeight = 297; // A4 height in mm
+      const availableHeight = pageHeight - margin * 2; // Available height minus margins
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
       let heightLeft = imgHeight;
-      let position = 0;
+      let position = margin; // Start with top margin
 
       if (onProgress) onProgress("Adding content to PDF...", 70);
 
-      // Add first page
-      if (imgHeight <= pageHeight) {
-        // Single page - center vertically
-        const yOffset = (pageHeight - imgHeight) / 2;
-        pdf.addImage(imgData, "PNG", 0, yOffset, imgWidth, imgHeight);
+      // Add first page with margins
+      if (imgHeight <= availableHeight) {
+        // Single page - center vertically within available space
+        const yOffset = margin + (availableHeight - imgHeight) / 2;
+        pdf.addImage(imgData, "PNG", margin, yOffset, imgWidth, imgHeight);
       } else {
-        // Multiple pages
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        // Multiple pages with margins
+        pdf.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
+        heightLeft -= availableHeight;
 
         while (heightLeft >= 0) {
-          position = heightLeft - imgHeight;
+          position = margin + (heightLeft - imgHeight);
           pdf.addPage();
-          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
+          pdf.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
+          heightLeft -= availableHeight;
         }
       }
 
@@ -162,27 +164,20 @@ class PDFService {
   }
 
   /**
-   * Generate invoice PDF with QR code
+   * Generate invoice PDF without additional QR code (invoice design already includes QR)
    */
   async generateInvoicePDF(invoiceElement, invoiceData, options = {}) {
     try {
       const {
         filename = `Invoice-${invoiceData.invoiceId || "Unknown"}.pdf`,
-        addQR = true,
+        addQR = false, // Disabled: Invoice design already includes QR code
         onProgress = null,
       } = options;
 
-      // Generate QR URL for invoice verification
-      let qrUrl = null;
-      if (addQR && invoiceData.invoiceId) {
-        qrUrl = `${window.location.origin}/invoice/${invoiceData.invoiceId}`;
-      }
-
+      // Don't add extra QR code for invoices since the design already includes one
       return await this.generatePDFFromElement(invoiceElement, {
         filename,
         addQR,
-        qrUrl,
-        qrPosition: { x: 170, y: 10, width: 30, height: 30 },
         onProgress,
       });
     } catch (error) {
