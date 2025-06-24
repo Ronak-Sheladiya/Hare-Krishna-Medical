@@ -236,8 +236,10 @@ const InvoiceVerify = () => {
   };
 
   const handleQRScanError = (error) => {
-    console.error('QR Scan Error:', error);
-    setError('Failed to scan QR code. Please try again or enter the invoice ID manually.');
+    console.error("QR Scan Error:", error);
+    setError(
+      "Failed to scan QR code. Please try again or enter the invoice ID manually.",
+    );
   };
 
   // Create invoice data for display
@@ -874,7 +876,11 @@ const InvoiceVerify = () => {
                         queries: +91 76989 13354 | hkmedicalamroli@gmail.com
                       </p>
                     </div>
-          )}
+                  </div>
+                </Col>
+              </Row>
+            </Container>
+          </section>
         </>
       )}
 
