@@ -23,8 +23,13 @@ const Login = () => {
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.auth);
 
-  // Get the intended redirect URL from state
-  const from = location.state?.from || null;
+  // Get the intended redirect URL from multiple sources
+  const from =
+    location.state?.from ||
+    location.state?.returnTo ||
+    sessionStorage.getItem("redirectAfterLogin") ||
+    localStorage.getItem("lastAttemptedUrl") ||
+    null;
 
   const [formData, setFormData] = useState({
     emailOrMobile: "",
