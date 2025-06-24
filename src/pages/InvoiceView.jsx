@@ -177,63 +177,10 @@ const InvoiceView = () => {
     }
   };
 
-  // Optimized print function without permission requests
+  // Redirect print functionality to verify page
   const handlePrint = () => {
-    if (pdfUrl) {
-      // Create print window immediately without asking permission
-      const printWindow = window.open(
-        pdfUrl,
-        "_blank",
-        "width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes",
-      );
-
-      if (printWindow) {
-        printWindow.document.title = `Invoice ${invoiceId} - Print`;
-
-        const setupPrintHandlers = () => {
-          const afterPrint = () => {
-            setTimeout(() => printWindow.close(), 500); // Faster close
-          };
-
-          printWindow.addEventListener("afterprint", afterPrint);
-          printWindow.addEventListener("beforeunload", () =>
-            printWindow.close(),
-          );
-        };
-
-        // Faster PDF loading and printing
-        printWindow.onload = () => {
-          setTimeout(() => {
-            setupPrintHandlers();
-            printWindow.focus();
-            printWindow.print();
-          }, 200); // Further reduced for faster printing
-        };
-
-        // Faster fallback
-        setTimeout(() => {
-          try {
-            setupPrintHandlers();
-            printWindow.focus();
-            printWindow.print();
-          } catch (error) {
-            console.log("Fallback print trigger:", error);
-          }
-        }, 500); // Further reduced fallback time
-
-        // Faster auto-close
-        setTimeout(() => {
-          if (printWindow && !printWindow.closed) {
-            printWindow.close();
-          }
-        }, 3000); // Reduced to 3 seconds for faster close
-      }
-    } else if (pdfGenerating) {
-      alert("PDF is still being generated. Please wait and try again.");
-    } else {
-      alert("PDF not available. Regenerating...");
-      generateInvoicePDF();
-    }
+    const verifyUrl = `/verify/${invoiceId}`;
+    window.open(verifyUrl, "_blank");
   };
 
   const handleDownloadPDF = async () => {
@@ -461,7 +408,6 @@ const InvoiceView = () => {
                 <Button
                   variant="outline-dark"
                   onClick={handlePrint}
-                  disabled={pdfGenerating}
                   style={{
                     fontWeight: "600",
                     borderRadius: "12px",
@@ -470,38 +416,20 @@ const InvoiceView = () => {
                     transition: "all 0.3s ease",
                   }}
                   onMouseOver={(e) => {
-                    if (!pdfGenerating) {
-                      e.target.style.background = "#343a40";
-                      e.target.style.color = "white";
-                      e.target.style.transform = "translateY(-2px)";
-                      e.target.style.boxShadow =
-                        "0 4px 15px rgba(52, 58, 64, 0.3)";
-                    }
+                    e.target.style.background = "#343a40";
+                    e.target.style.color = "white";
+                    e.target.style.transform = "translateY(-2px)";
+                    e.target.style.boxShadow =
+                      "0 4px 15px rgba(52, 58, 64, 0.3)";
                   }}
                   onMouseOut={(e) => {
-                    if (!pdfGenerating) {
-                      e.target.style.background = "transparent";
-                      e.target.style.color = "#343a40";
-                      e.target.style.transform = "translateY(0)";
-                      e.target.style.boxShadow = "none";
-                    }
+                    e.target.style.background = "transparent";
+                    e.target.style.color = "#343a40";
+                    e.target.style.transform = "translateY(0)";
+                    e.target.style.boxShadow = "none";
                   }}
                 >
-                  {pdfGenerating ? (
-                    <>
-                      <Spinner
-                        as="span"
-                        animation="border"
-                        size="sm"
-                        className="me-2"
-                      />
-                      Generating PDF...
-                    </>
-                  ) : (
-                    <>
-                      <i className="bi bi-printer me-2"></i>Print Invoice
-                    </>
-                  )}
+                  <i className="bi bi-printer me-2"></i>Print Invoice
                 </Button>
                 <Button
                   variant="dark"
@@ -660,7 +588,11 @@ const InvoiceView = () => {
                               INVOICE
                             </h3>
                             <p className="mb-1" style={{ fontSize: "0.9rem" }}>
-                              <strong>#{invoiceData?.invoiceId}</strong>
+                              <strong>Invoice #:</strong>{" "}
+                              {invoiceData?.invoiceId}
+                            </p>
+                            <p className="mb-1" style={{ fontSize: "0.9rem" }}>
+                              <strong>Order #:</strong> {invoiceData?.orderId}
                             </p>
                             <p
                               className="mb-0"
