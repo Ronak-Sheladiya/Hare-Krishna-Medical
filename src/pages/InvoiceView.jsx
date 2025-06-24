@@ -237,9 +237,7 @@ const InvoiceView = () => {
           if (printWindow && !printWindow.closed) {
             printWindow.close();
           }
-        }, 30000);
-      } else {
-        alert("Please allow pop-ups to print the invoice. Check your browser's pop-up blocker settings.");
+        }, 15000);
       }
     } else if (pdfGenerating) {
       alert("PDF is still being generated. Please wait and try again.");
