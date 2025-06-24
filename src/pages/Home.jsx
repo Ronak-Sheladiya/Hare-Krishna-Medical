@@ -625,11 +625,149 @@ const Home = () => {
         </Container>
       </section>
 
-      {/* CTA Section */}
+      {/* Invoice Verification Section */}
       <section
-        className="section-padding"
         style={{
-          background: "linear-gradient(135deg, #343a40 0%, #495057 100%)",
+          background: "linear-gradient(135deg, #f8f9fa, #e9ecef)",
+          paddingTop: "80px",
+          paddingBottom: "80px",
+        }}
+      >
+        <Container>
+          <Row className="justify-content-center text-center">
+            <Col lg={8}>
+              <div
+                style={{
+                  background: "white",
+                  padding: "60px 40px",
+                  borderRadius: "20px",
+                  boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
+                  border: "1px solid #e9ecef",
+                }}
+              >
+                <div className="mb-4">
+                  <div
+                    style={{
+                      width: "100px",
+                      height: "100px",
+                      background: "linear-gradient(135deg, #e63946, #dc3545)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      margin: "0 auto 30px",
+                      color: "white",
+                      fontSize: "3rem",
+                    }}
+                  >
+                    <i className="bi bi-shield-check"></i>
+                  </div>
+                  <h2
+                    style={{
+                      color: "#343a40",
+                      fontSize: "2.5rem",
+                      fontWeight: "700",
+                      marginBottom: "20px",
+                    }}
+                  >
+                    Verify Your Invoice
+                  </h2>
+                  <p
+                    style={{
+                      color: "#6c757d",
+                      fontSize: "1.2rem",
+                      marginBottom: "40px",
+                      lineHeight: "1.6",
+                    }}
+                  >
+                    Ensure authenticity and security by verifying your invoice.
+                    Enter your Invoice ID, Order ID, or scan the QR code to
+                    verify instantly.
+                  </p>
+                </div>
+
+                <div className="d-flex gap-3 justify-content-center flex-wrap">
+                  <Button
+                    as={Link}
+                    to="/verify"
+                    style={{
+                      background: "linear-gradient(135deg, #e63946, #dc3545)",
+                      border: "none",
+                      borderRadius: "12px",
+                      padding: "15px 30px",
+                      fontSize: "1.1rem",
+                      fontWeight: "600",
+                      transition: "all 0.3s ease",
+                      minWidth: "200px",
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.transform = "translateY(-3px)";
+                      e.target.style.boxShadow =
+                        "0 8px 25px rgba(230, 57, 70, 0.4)";
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.transform = "translateY(0)";
+                      e.target.style.boxShadow = "none";
+                    }}
+                  >
+                    <i className="bi bi-search me-2"></i>
+                    Verify Invoice
+                  </Button>
+                  <Button
+                    variant="outline-dark"
+                    style={{
+                      borderRadius: "12px",
+                      padding: "15px 30px",
+                      fontSize: "1.1rem",
+                      fontWeight: "600",
+                      border: "2px solid #343a40",
+                      transition: "all 0.3s ease",
+                      minWidth: "200px",
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.background = "#343a40";
+                      e.target.style.color = "white";
+                      e.target.style.transform = "translateY(-3px)";
+                      e.target.style.boxShadow =
+                        "0 8px 25px rgba(52, 58, 64, 0.3)";
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.background = "transparent";
+                      e.target.style.color = "#343a40";
+                      e.target.style.transform = "translateY(0)";
+                      e.target.style.boxShadow = "none";
+                    }}
+                    onClick={() =>
+                      alert("QR Scanner will open camera for scanning QR codes")
+                    }
+                  >
+                    <i className="bi bi-qr-code-scan me-2"></i>
+                    Scan QR Code
+                  </Button>
+                </div>
+
+                <div className="mt-4">
+                  <small
+                    style={{
+                      color: "#6c757d",
+                      fontSize: "0.9rem",
+                    }}
+                  >
+                    🔒 Secure verification system | ✓ Instant results | 🎯 100%
+                    authentic
+                  </small>
+                </div>
+              </div>
+            </Col>
+          </Row>
+        </Container>
+      </section>
+
+      {/* Contact Section */}
+      <section
+        style={{
+          background: "linear-gradient(135deg, #e63946, #dc3545)",
+          color: "white",
           paddingTop: "80px",
           paddingBottom: "80px",
         }}
