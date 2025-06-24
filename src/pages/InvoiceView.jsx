@@ -177,10 +177,63 @@ const InvoiceView = () => {
     }
   };
 
-  // Redirect print functionality to verify page
+  // COMPREHENSIVE PRINT FUNCTIONALITY - COPIED FROM VERIFY PAGE
   const handlePrint = () => {
-    const verifyUrl = `/verify/${invoiceId}`;
-    window.open(verifyUrl, "_blank");
+    if (pdfUrl) {
+      // Create print window immediately without asking permission
+      const printWindow = window.open(
+        pdfUrl,
+        "_blank",
+        "width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes",
+      );
+
+      if (printWindow) {
+        printWindow.document.title = `Invoice ${invoice?.invoiceId} - Print`;
+
+        const setupPrintHandlers = () => {
+          const afterPrint = () => {
+            setTimeout(() => printWindow.close(), 500); // Faster close
+          };
+
+          printWindow.addEventListener("afterprint", afterPrint);
+          printWindow.addEventListener("beforeunload", () =>
+            printWindow.close(),
+          );
+        };
+
+        // Faster PDF loading and printing
+        printWindow.onload = () => {
+          setTimeout(() => {
+            setupPrintHandlers();
+            printWindow.focus();
+            printWindow.print();
+          }, 200); // Further reduced for faster printing
+        };
+
+        // Faster fallback
+        setTimeout(() => {
+          try {
+            setupPrintHandlers();
+            printWindow.focus();
+            printWindow.print();
+          } catch (error) {
+            console.log("Fallback print trigger:", error);
+          }
+        }, 500); // Further reduced fallback time
+
+        // Faster auto-close
+        setTimeout(() => {
+          if (printWindow && !printWindow.closed) {
+            printWindow.close();
+          }
+        }, 3000); // Reduced to 3 seconds for faster close
+      }
+    } else if (pdfGenerating) {
+      alert("PDF is still being generated. Please wait and try again.");
+    } else {
+      alert("PDF not available. Regenerating...");
+      generateInvoicePDF();
+    }
   };
 
   const handleDownloadPDF = async () => {
