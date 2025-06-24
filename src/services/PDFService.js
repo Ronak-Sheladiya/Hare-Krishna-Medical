@@ -190,6 +190,96 @@ class PDFService {
   }
 
   /**
+   * Generate invoice PDF as blob for preview (without downloading)
+   */
+  async generateInvoicePDFBlob(invoiceElement, invoiceData, options = {}) {
+    try {
+      const {
+        addQR = false, // Disabled: Invoice design already includes QR code
+        onProgress = null,
+        quality = this.defaultOptions.quality,
+        scale = this.defaultOptions.scale,
+        backgroundColor = this.defaultOptions.backgroundColor,
+      } = options;
+
+      if (onProgress) onProgress("Preparing document...", 10);
+
+      // Generate canvas from element
+      const canvas = await html2canvas(invoiceElement, {
+        quality,
+        scale,
+        useCORS: this.defaultOptions.useCORS,
+        allowTaint: this.defaultOptions.allowTaint,
+        backgroundColor,
+        logging: false,
+        width: invoiceElement.scrollWidth,
+        height: invoiceElement.scrollHeight,
+      });
+
+      if (onProgress) onProgress("Processing canvas...", 40);
+
+      const imgData = canvas.toDataURL("image/png", quality);
+      const pdf = new jsPDF(
+        this.defaultOptions.orientation,
+        this.defaultOptions.unit,
+        this.defaultOptions.format,
+      );
+
+      // Calculate dimensions with 15px margins (approximately 5.3mm)
+      const margin = 5.3; // 15px converted to mm
+      const imgWidth = 210 - margin * 2; // A4 width minus margins
+      const pageHeight = 297; // A4 height in mm
+      const availableHeight = pageHeight - margin * 2; // Available height minus margins
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = margin; // Start with top margin
+
+      if (onProgress) onProgress("Adding content to PDF...", 70);
+
+      // Add first page with margins
+      if (imgHeight <= availableHeight) {
+        // Single page - center vertically within available space
+        const yOffset = margin + (availableHeight - imgHeight) / 2;
+        pdf.addImage(imgData, "PNG", margin, yOffset, imgWidth, imgHeight);
+      } else {
+        // Multiple pages with margins
+        pdf.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
+        heightLeft -= availableHeight;
+
+        while (heightLeft >= 0) {
+          position = margin + (heightLeft - imgHeight);
+          pdf.addPage();
+          pdf.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
+          heightLeft -= availableHeight;
+        }
+      }
+
+      if (onProgress) onProgress("Finalizing PDF...", 100);
+
+      // Return PDF as blob instead of downloading
+      const pdfBlob = pdf.output("blob");
+
+      return {
+        success: true,
+        blob: pdfBlob,
+        filename: `Invoice-${invoiceData.invoiceId || "Unknown"}.pdf`,
+        pageCount: pdf.internal.getNumberOfPages(),
+        size: {
+          width: imgWidth + margin * 2,
+          height: imgHeight + margin * 2,
+        },
+      };
+    } catch (error) {
+      console.error("Invoice PDF blob generation error:", error);
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
    * Generate order PDF with QR code pointing to invoice
    */
   async generateOrderPDF(orderElement, orderData, options = {}) {
