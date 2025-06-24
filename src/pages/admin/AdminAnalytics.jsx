@@ -28,7 +28,7 @@ import {
 } from "chart.js";
 import { Line, Bar, Doughnut, Pie } from "react-chartjs-2";
 import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
+import pdfService from "../../services/PDFService";
 import { api, safeApiCall } from "../../utils/apiClient";
 import {
   PageHeroSection,
@@ -219,15 +219,30 @@ const AdminAnalytics = () => {
     XLSX.writeFile(wb, `analytics-${dateRange}.xlsx`);
   };
 
-  const exportToPDF = () => {
-    const pdf = new jsPDF();
-    pdf.text("Analytics Report", 20, 20);
-    pdf.text(`Date Range: ${dateRange}`, 20, 40);
-    pdf.text(`Total Revenue: ₹${analyticsData.stats.totalRevenue}`, 20, 60);
-    pdf.text(`Total Orders: ${analyticsData.stats.totalOrders}`, 20, 80);
-    pdf.text(`Total Users: ${analyticsData.stats.totalUsers}`, 20, 100);
-    pdf.text(`Total Products: ${analyticsData.stats.totalProducts}`, 20, 120);
-    pdf.save(`analytics-${dateRange}.pdf`);
+  const exportToPDF = async () => {
+    try {
+      // Create analytics element or use existing one
+      const analyticsElement =
+        document.getElementById("analytics-content") || document.body;
+
+      const result = await pdfService.generateAnalyticsPDF(
+        analyticsElement,
+        analyticsData,
+        {
+          filename: `analytics-${dateRange}.pdf`,
+          onProgress: (message, progress) => {
+            console.log(`PDF Generation: ${message} (${progress}%)`);
+          },
+        },
+      );
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      console.error("PDF export failed:", error);
+      alert("PDF export failed. Please try again.");
+    }
   };
 
   if (loading) {
