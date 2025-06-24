@@ -743,15 +743,25 @@ npm run dev
                   </li>
                 </ul>
               </Col>
-                      v3.0
-                    </Badge>
-                    Real-time system integration
-                  </li>
-                </ul>
-              </Col>
             </Row>
           </Card.Body>
         </Card>
+
+        {/* Login Credentials */}
+        <Card className="mb-4" style={{ border: "2px solid #f8f9fa" }}>
+          <Card.Header
+            style={{
+              background: "linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%)",
+              color: "white",
+            }}
+          >
+            <h4 className="mb-0">
+              <i className="bi bi-person-check me-2"></i>
+              Step 7: Default Login Credentials & Testing
+            </h4>
+          </Card.Header>
+          <Card.Body>
+            <Row>
               <Col md={6}>
                 <Card className="border-primary">
                   <Card.Header className="bg-primary text-white">
