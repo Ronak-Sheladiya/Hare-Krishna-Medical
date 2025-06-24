@@ -12,10 +12,10 @@ class PDFService {
       format: "a4",
       orientation: "portrait",
       unit: "mm",
-      quality: 0.98,
+      quality: 0.9, // Reduced for faster generation
       useCORS: true,
       allowTaint: false,
-      scale: 2,
+      scale: 1.8, // Reduced for faster processing
       backgroundColor: "#ffffff",
     };
   }
@@ -190,15 +190,15 @@ class PDFService {
   }
 
   /**
-   * Generate invoice PDF as blob for preview (without downloading)
+   * Generate invoice PDF as blob for preview (without downloading) - optimized for speed
    */
   async generateInvoicePDFBlob(invoiceElement, invoiceData, options = {}) {
     try {
       const {
         addQR = false, // Disabled: Invoice design already includes QR code
         onProgress = null,
-        quality = this.defaultOptions.quality,
-        scale = this.defaultOptions.scale,
+        quality = 0.8, // Lower quality for faster preview generation
+        scale = 1.5, // Lower scale for faster processing
         backgroundColor = this.defaultOptions.backgroundColor,
       } = options;
 
