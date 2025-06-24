@@ -17,6 +17,7 @@ import { getDemoInvoice, isDemoInvoice } from "../utils/demoInvoiceData";
 import { PageHeroSection } from "../components/common/ConsistentTheme";
 import QRCameraScanner from "../components/common/QRCameraScanner";
 import pdfService from "../services/PDFService";
+import invoiceService from "../services/InvoiceService";
 import "../styles/InvoiceA4.css";
 
 const InvoiceVerify = () => {
@@ -32,6 +33,8 @@ const InvoiceVerify = () => {
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [showQRScanner, setShowQRScanner] = useState(false);
+  const [qrCode, setQrCode] = useState(null);
+  const [qrData, setQrData] = useState(null);
 
   // Auto-verify if invoice ID is in URL
   useEffect(() => {
@@ -70,6 +73,7 @@ const InvoiceVerify = () => {
           setInvoice(demoInvoice);
           setVerifySuccess(true);
           generateInvoicePDF(demoInvoice);
+          generateVerificationQR(demoInvoice.invoiceNumber || targetId);
           setLoading(false);
           return;
         }
@@ -112,6 +116,9 @@ const InvoiceVerify = () => {
         setInvoice(data.data);
         setVerifySuccess(true);
         generateInvoicePDF(data.data);
+        generateVerificationQR(
+          data.data.invoiceId || data.data._id || targetId,
+        );
       } else {
         // Determine if this was a QR scan or manual input
         const wasQRScan = searchParams.get("invoice") || searchParams.get("id");
@@ -132,6 +139,22 @@ const InvoiceVerify = () => {
       setError("Verification failed. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const generateVerificationQR = async (invoiceId) => {
+    try {
+      const result = await invoiceService.generateInvoiceQR(invoiceId);
+      if (result) {
+        setQrCode(result.qrCode);
+        setQrData(result.qrData);
+        console.log(
+          "QR Code generated for verification:",
+          result.verificationUrl,
+        );
+      }
+    } catch (error) {
+      console.error("QR Code generation failed:", error);
     }
   };
 
