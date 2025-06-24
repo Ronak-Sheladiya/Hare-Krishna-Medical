@@ -749,9 +749,9 @@ npm run dev
                   </li>
                 </ul>
               </Col>
-                  </Card.Body>
-                </Card>
-              </Col>
+            </Row>
+          </Card.Body>
+        </Card>
               <Col md={6}>
                 <Card className="border-primary">
                   <Card.Header className="bg-primary text-white">
