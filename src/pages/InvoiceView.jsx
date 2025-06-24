@@ -16,6 +16,7 @@ import { api, safeApiCall } from "../utils/apiClient";
 import { getDemoInvoice, isDemoInvoice } from "../utils/demoInvoiceData";
 import invoiceService from "../services/InvoiceService";
 import pdfService from "../services/PDFService";
+import { PageHeroSection } from "../components/common/ConsistentTheme";
 import "../styles/InvoiceA4.css";
 
 const InvoiceView = () => {
@@ -321,43 +322,49 @@ const InvoiceView = () => {
 
   return (
     <div className="fade-in">
-      {/* Navigation and Header */}
-      <div className="hero-section">
+      {/* Professional Hero Section */}
+      <PageHeroSection
+        title={`Invoice #${invoiceId}`}
+        subtitle="Official invoice with secure QR verification and professional formatting"
+        iconContext="invoice"
+      />
+
+      {/* Action Buttons Section */}
+      <section
+        style={{
+          background: "#ffffff",
+          paddingTop: "40px",
+          paddingBottom: "20px",
+          borderBottom: "1px solid #f8f9fa",
+        }}
+      >
         <Container>
-          <Row className="align-items-center">
-            <Col lg={8}>
-              <div>
-                <nav className="breadcrumb-nav">
-                  <Button
-                    variant="link"
-                    onClick={() => navigate("/")}
-                    className="text-white p-0 me-2"
-                  >
-                    <i className="bi bi-house"></i> Home
-                  </Button>
-                  <span className="text-white mx-2">/</span>
-                  <span className="text-white-50">Invoice {invoiceId}</span>
-                </nav>
-                <h1 className="mb-3" style={{ fontSize: "2.5rem" }}>
-                  <i className="bi bi-receipt me-3"></i>
-                  Invoice Verification
-                </h1>
-                <p className="lead mb-0" style={{ opacity: 0.9 }}>
-                  Official invoice with QR verification for secure
-                  authentication
-                </p>
-              </div>
-            </Col>
-            <Col lg={4} className="text-end">
-              <div className="d-flex gap-2 justify-content-end">
+          <Row className="justify-content-center">
+            <Col lg={8} className="text-center">
+              <div className="d-flex gap-3 justify-content-center flex-wrap">
                 <Button
-                  variant="outline-light"
+                  variant="outline-dark"
                   onClick={handlePrint}
                   disabled={pdfGenerating}
                   style={{
                     fontWeight: "600",
-                    borderRadius: "8px",
-                    minWidth: "120px",
+                    borderRadius: "12px",
+                    padding: "12px 24px",
+                    border: "2px solid #343a40",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = "#343a40";
+                    e.target.style.color = "white";
+                    e.target.style.transform = "translateY(-2px)";
+                    e.target.style.boxShadow =
+                      "0 4px 15px rgba(52, 58, 64, 0.3)";
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = "transparent";
+                    e.target.style.color = "#343a40";
+                    e.target.style.transform = "translateY(0)";
+                    e.target.style.boxShadow = "none";
                   }}
                 >
                   {pdfGenerating ? (
@@ -372,18 +379,30 @@ const InvoiceView = () => {
                     </>
                   ) : (
                     <>
-                      <i className="bi bi-printer me-2"></i>Print
+                      <i className="bi bi-printer me-2"></i>Print Invoice
                     </>
                   )}
                 </Button>
                 <Button
-                  variant="warning"
+                  variant="dark"
                   onClick={handleDownloadPDF}
                   disabled={downloading}
                   style={{
                     fontWeight: "600",
-                    borderRadius: "8px",
-                    minWidth: "140px",
+                    borderRadius: "12px",
+                    padding: "12px 24px",
+                    background: "linear-gradient(135deg, #343a40, #495057)",
+                    border: "none",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.transform = "translateY(-2px)";
+                    e.target.style.boxShadow =
+                      "0 6px 20px rgba(52, 58, 64, 0.4)";
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.transform = "translateY(0)";
+                    e.target.style.boxShadow = "none";
                   }}
                 >
                   {downloading ? (
@@ -401,7 +420,7 @@ const InvoiceView = () => {
             </Col>
           </Row>
         </Container>
-      </div>
+      </section>
 
       {/* Invoice Content - A4 Size with 15px margins */}
       <Container className="py-4">
