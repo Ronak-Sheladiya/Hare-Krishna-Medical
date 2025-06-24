@@ -17,9 +17,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearCart } from "../store/slices/cartSlice.js";
 import PaymentOptions from "../components/common/PaymentOptions.jsx";
 import OfficialInvoiceDesign from "../components/common/OfficialInvoiceDesign.jsx";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import QRCode from "qrcode";
+import pdfService from "../services/PDFService";
 
 const Order = () => {
   const navigate = useNavigate();
