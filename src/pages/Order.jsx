@@ -300,35 +300,21 @@ const Order = () => {
       // Wait for rendering
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Generate PDF with high quality, optimized for A4 single page
-      const canvas = await html2canvas(invoiceElement, {
-        scale: 2.5,
-        logging: false,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        width: invoiceElement.scrollWidth,
-        height: invoiceElement.scrollHeight,
-      });
+      // Use centralized PDF service
+      const result = await pdfService.generateInvoicePDF(
+        invoiceElement,
+        invoiceData,
+        {
+          filename: `Invoice-${orderDetails.invoiceId}.pdf`,
+          onProgress: (message, progress) => {
+            console.log(`PDF Generation: ${message} (${progress}%)`);
+          },
+        },
+      );
 
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      // Always ensure single page - scale down if necessary
-      if (imgHeight > pageHeight) {
-        const scaleFactor = (pageHeight - 5) / imgHeight; // 5mm margin for safety
-        const scaledWidth = imgWidth * scaleFactor;
-        const scaledHeight = pageHeight - 5;
-        const xOffset = (imgWidth - scaledWidth) / 2;
-        pdf.addImage(imgData, "PNG", xOffset, 2.5, scaledWidth, scaledHeight);
-      } else {
-        const yOffset = (pageHeight - imgHeight) / 2;
-        pdf.addImage(imgData, "PNG", 0, yOffset, imgWidth, imgHeight);
+      if (!result.success) {
+        throw new Error(result.error);
       }
-
-      pdf.save(`Invoice-${orderDetails.invoiceId}.pdf`);
 
       // Clean up
       root.unmount();
