@@ -24,6 +24,18 @@ const InvoiceView = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
+
+  // Check if user has access (admin or authenticated user)
+  useEffect(() => {
+    if (!isAuthenticated) {
+      // Redirect to login with return path
+      navigate("/login", {
+        state: { from: `/invoice/${invoiceId}` },
+        replace: true,
+      });
+      return;
+    }
+  }, [isAuthenticated, navigate, invoiceId]);
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -167,24 +179,66 @@ const InvoiceView = () => {
         // Set title for the print window
         printWindow.document.title = `Invoice ${invoiceId} - Print`;
 
+        // Function to close window after print
+        const setupPrintHandlers = () => {
+          // Close window after print dialog is dismissed
+          const afterPrint = () => {
+            setTimeout(() => {
+              printWindow.close();
+            }, 1000);
+          };
+
+          // Listen for print events
+          printWindow.addEventListener("afterprint", afterPrint);
+
+          // Also listen for window focus change (when print dialog closes)
+          let printDialogOpen = false;
+          printWindow.addEventListener("beforeprint", () => {
+            printDialogOpen = true;
+          });
+
+          printWindow.addEventListener("focus", () => {
+            if (printDialogOpen) {
+              // Print dialog was closed, close the window
+              setTimeout(() => {
+                printWindow.close();
+              }, 500);
+            }
+          });
+
+          // Close window if user navigates away or closes manually
+          printWindow.addEventListener("beforeunload", () => {
+            printWindow.close();
+          });
+        };
+
         // Wait for PDF to load, then trigger print
         printWindow.onload = () => {
           setTimeout(() => {
+            setupPrintHandlers();
             // Focus the window and trigger print
             printWindow.focus();
             printWindow.print();
-          }, 1000); // Increased delay to ensure PDF fully loads
+          }, 1000);
         };
 
         // Fallback for browsers that don't support onload for PDF
         setTimeout(() => {
           try {
+            setupPrintHandlers();
             printWindow.focus();
             printWindow.print();
           } catch (error) {
             console.log("Fallback print trigger:", error);
           }
         }, 2000);
+
+        // Auto-close window after 30 seconds as safety measure
+        setTimeout(() => {
+          if (printWindow && !printWindow.closed) {
+            printWindow.close();
+          }
+        }, 30000);
       } else {
         alert(
           "Please allow pop-ups to print the invoice. Check your browser's pop-up blocker settings.",
@@ -347,12 +401,50 @@ const InvoiceView = () => {
 
   return (
     <div className="fade-in">
-      {/* Professional Hero Section */}
+      {/* Professional Hero Section with Back Button */}
       <PageHeroSection
         title={`Invoice #${invoiceId}`}
         subtitle="Official invoice with secure QR verification and professional formatting"
         iconContext="invoice"
       />
+
+      {/* Back Button */}
+      <section
+        style={{
+          background: "linear-gradient(135deg, #e63946, #dc3545)",
+          paddingTop: "20px",
+          paddingBottom: "20px",
+        }}
+      >
+        <Container>
+          <Row>
+            <Col>
+              <Button
+                variant="outline-light"
+                onClick={() => navigate(-1)}
+                style={{
+                  fontWeight: "600",
+                  borderRadius: "8px",
+                  border: "2px solid rgba(255,255,255,0.3)",
+                  padding: "8px 16px",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.background = "rgba(255,255,255,0.1)";
+                  e.target.style.borderColor = "rgba(255,255,255,0.5)";
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.background = "transparent";
+                  e.target.style.borderColor = "rgba(255,255,255,0.3)";
+                }}
+              >
+                <i className="bi bi-arrow-left me-2"></i>
+                Back to Previous Page
+              </Button>
+            </Col>
+          </Row>
+        </Container>
+      </section>
 
       {/* Action Buttons Section */}
       <section
