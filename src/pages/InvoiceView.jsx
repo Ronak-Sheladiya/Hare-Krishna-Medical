@@ -28,14 +28,19 @@ const InvoiceView = () => {
   // Check if user has access (admin or authenticated user)
   useEffect(() => {
     if (!isAuthenticated) {
-      // Redirect to login with return path
+      // Store return URL and redirect to login
+      const returnUrl = `/invoice/${invoiceId}`;
+      sessionStorage.setItem("redirectAfterLogin", returnUrl);
+      localStorage.setItem("lastAttemptedUrl", returnUrl);
+
       navigate("/login", {
-        state: { from: `/invoice/${invoiceId}` },
-        replace: true
+        state: { from: returnUrl, returnTo: returnUrl },
+        replace: true,
       });
       return;
     }
   }, [isAuthenticated, navigate, invoiceId]);
+
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -45,10 +50,10 @@ const InvoiceView = () => {
   const [pdfGenerating, setPdfGenerating] = useState(false);
 
   useEffect(() => {
-    if (invoiceId) {
+    if (invoiceId && isAuthenticated) {
       fetchInvoice();
     }
-  }, [invoiceId]);
+  }, [invoiceId, isAuthenticated]);
 
   const fetchInvoice = async () => {
     if (!invoiceId) {
@@ -67,10 +72,10 @@ const InvoiceView = () => {
         setInvoice(demoInvoice);
         generateQRCode(invoiceId);
 
-        // Generate PDF for demo invoice
+        // Generate PDF for demo invoice - optimized for speed
         setTimeout(() => {
           generateInvoicePDF(demoInvoice);
-        }, 1000);
+        }, 500); // Reduced from 1000ms
 
         setLoading(false);
         return;
@@ -104,10 +109,10 @@ const InvoiceView = () => {
         generateQRCode(invoiceId);
       }
 
-      // Generate PDF after invoice is loaded
+      // Generate PDF after invoice is loaded - optimized for speed
       setTimeout(() => {
         generateInvoicePDF(data.data);
-      }, 1000);
+      }, 500); // Reduced from 1000ms
 
       setLoading(false);
     } else {
@@ -132,22 +137,28 @@ const InvoiceView = () => {
     }
   };
 
+  // Optimized PDF generation with faster processing
   const generateInvoicePDF = async (invoiceData = null) => {
     const dataToUse = invoiceData || invoice;
     if (!dataToUse) return;
 
     setPdfGenerating(true);
     try {
+      // Wait shorter time for DOM to render
+      await new Promise((resolve) => setTimeout(resolve, 300)); // Reduced from 1000ms
+
       const invoiceElement = document.getElementById("invoice-content");
       if (!invoiceElement) {
         throw new Error("Invoice content not found");
       }
 
-      // Create PDF blob instead of downloading
+      // Use optimized PDF generation
       const result = await pdfService.generateInvoicePDFBlob(
         invoiceElement,
         dataToUse,
         {
+          quality: 0.8, // Reduced quality for faster generation
+          scale: 1.5, // Reduced scale for faster processing
           onProgress: (message, progress) => {
             console.log(`PDF Generation: ${message} (${progress}%)`);
           },
@@ -166,13 +177,14 @@ const InvoiceView = () => {
     }
   };
 
+  // Optimized print function without permission requests
   const handlePrint = () => {
     if (pdfUrl) {
-      // Create a new window with specific parameters for PDF viewing
+      // Create print window immediately without asking permission
       const printWindow = window.open(
         pdfUrl,
-        '_blank',
-        'width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes,location=no,status=no'
+        "_blank",
+        "width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes",
       );
 
       if (printWindow) {
@@ -180,7 +192,7 @@ const InvoiceView = () => {
 
         const setupPrintHandlers = () => {
           const afterPrint = () => {
-            setTimeout(() => printWindow.close(), 1000);
+            setTimeout(() => printWindow.close(), 500); // Faster close
           };
 
           printWindow.addEventListener("afterprint", afterPrint);
@@ -189,39 +201,16 @@ const InvoiceView = () => {
           );
         };
 
+        // Faster PDF loading and printing
         printWindow.onload = () => {
           setTimeout(() => {
             setupPrintHandlers();
             printWindow.focus();
             printWindow.print();
-          }, 1000);
+          }, 500); // Reduced from 1000ms
         };
 
-        // Reduce auto-close timeout to 15 seconds
-        setTimeout(() => {
-          if (printWindow && !printWindow.closed) {
-            printWindow.close();
-          }
-        }, 15000);
-      }
-
-          // Close window if user navigates away or closes manually
-          printWindow.addEventListener('beforeunload', () => {
-            printWindow.close();
-          });
-        };
-
-        // Wait for PDF to load, then trigger print
-        printWindow.onload = () => {
-          setTimeout(() => {
-            setupPrintHandlers();
-            // Focus the window and trigger print
-            printWindow.focus();
-            printWindow.print();
-          }, 1000);
-        };
-
-        // Fallback for browsers that don't support onload for PDF
+        // Faster fallback
         setTimeout(() => {
           try {
             setupPrintHandlers();
@@ -230,19 +219,18 @@ const InvoiceView = () => {
           } catch (error) {
             console.log("Fallback print trigger:", error);
           }
-        }, 2000);
+        }, 1000); // Reduced from 2000ms
 
-        // Auto-close window after 30 seconds as safety measure
+        // Faster auto-close
         setTimeout(() => {
           if (printWindow && !printWindow.closed) {
             printWindow.close();
           }
-        }, 15000);
+        }, 10000); // Reduced from 15000ms
       }
     } else if (pdfGenerating) {
       alert("PDF is still being generated. Please wait and try again.");
     } else {
-      // Fallback: regenerate PDF if not available
       alert("PDF not available. Regenerating...");
       generateInvoicePDF();
     }
@@ -256,30 +244,28 @@ const InvoiceView = () => {
         throw new Error("Invoice content not found");
       }
 
-      // Save current styles
+      // Set optimal styles for capturing
       const originalDisplay = invoiceElement.style.display;
       const originalTransform = invoiceElement.style.transform;
       const originalWidth = invoiceElement.style.width;
       const originalHeight = invoiceElement.style.height;
 
-      // Set optimal styles for capturing
       invoiceElement.style.display = "block";
       invoiceElement.style.transform = "none";
       invoiceElement.style.width = "210mm";
       invoiceElement.style.height = "auto";
 
-      // Wait for styles to apply
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Shorter wait time for style application
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
-      // Use centralized PDF service
+      // Use optimized PDF generation for download
       const result = await pdfService.generateInvoicePDF(
         invoiceElement,
         invoice,
         {
           filename: `Invoice_${invoiceId}_${new Date().toISOString().split("T")[0]}.pdf`,
-          onProgress: (message, progress) => {
-            console.log(`PDF Generation: ${message} (${progress}%)`);
-          },
+          quality: 0.9, // Better quality for downloads
+          scale: 2, // Higher scale for downloads
         },
       );
 
@@ -308,6 +294,18 @@ const InvoiceView = () => {
       }
     };
   }, [pdfUrl]);
+
+  // Show loading while checking authentication
+  if (!isAuthenticated) {
+    return (
+      <div className="fade-in">
+        <Container className="text-center py-5">
+          <Spinner animation="border" variant="danger" size="lg" />
+          <h4 className="mt-3">Redirecting to login...</h4>
+        </Container>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -349,7 +347,13 @@ const InvoiceView = () => {
                   </h2>
                   <p className="text-muted mb-4 text-center">{error}</p>
                   <div className="d-flex gap-3 justify-content-center flex-wrap">
-                    <Button variant="danger" onClick={() => navigate("/")}>
+                    <Button variant="danger" onClick={() => navigate(-1)}>
+                      <i className="bi bi-arrow-left me-2"></i>Go Back
+                    </Button>
+                    <Button
+                      variant="outline-danger"
+                      onClick={() => navigate("/")}
+                    >
                       <i className="bi bi-house me-2"></i>Go Home
                     </Button>
                   </div>
@@ -362,7 +366,7 @@ const InvoiceView = () => {
     );
   }
 
-  // Create invoiceData only when invoice is loaded
+  // Create invoice data only when invoice is loaded
   const invoiceData = invoice
     ? {
         invoiceId: invoice.invoiceId || invoiceId,
@@ -466,16 +470,21 @@ const InvoiceView = () => {
                     transition: "all 0.3s ease",
                   }}
                   onMouseOver={(e) => {
-                    e.target.style.background = "#343a40";
-                    e.target.style.color = "white";
-                    e.target.style.transform = "translateY(-2px)";
-                    e.target.style.boxShadow = "0 4px 15px rgba(52, 58, 64, 0.3)";
+                    if (!pdfGenerating) {
+                      e.target.style.background = "#343a40";
+                      e.target.style.color = "white";
+                      e.target.style.transform = "translateY(-2px)";
+                      e.target.style.boxShadow =
+                        "0 4px 15px rgba(52, 58, 64, 0.3)";
+                    }
                   }}
                   onMouseOut={(e) => {
-                    e.target.style.background = "transparent";
-                    e.target.style.color = "#343a40";
-                    e.target.style.transform = "translateY(0)";
-                    e.target.style.boxShadow = "none";
+                    if (!pdfGenerating) {
+                      e.target.style.background = "transparent";
+                      e.target.style.color = "#343a40";
+                      e.target.style.transform = "translateY(0)";
+                      e.target.style.boxShadow = "none";
+                    }
                   }}
                 >
                   {pdfGenerating ? (
@@ -507,12 +516,17 @@ const InvoiceView = () => {
                     transition: "all 0.3s ease",
                   }}
                   onMouseOver={(e) => {
-                    e.target.style.transform = "translateY(-2px)";
-                    e.target.style.boxShadow = "0 6px 20px rgba(52, 58, 64, 0.4)";
+                    if (!downloading) {
+                      e.target.style.transform = "translateY(-2px)";
+                      e.target.style.boxShadow =
+                        "0 6px 20px rgba(52, 58, 64, 0.4)";
+                    }
                   }}
                   onMouseOut={(e) => {
-                    e.target.style.transform = "translateY(0)";
-                    e.target.style.boxShadow = "none";
+                    if (!downloading) {
+                      e.target.style.transform = "translateY(0)";
+                      e.target.style.boxShadow = "none";
+                    }
                   }}
                 >
                   {downloading ? (
@@ -548,364 +562,412 @@ const InvoiceView = () => {
                 className="invoice-a4"
                 style={{
                   width: "210mm",
-                  maxHeight: "257mm", // A4 height minus margins
+                  maxHeight: "257mm",
                   minHeight: "257mm",
                   margin: "0 auto",
                   background: "white",
                   boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
                   borderRadius: "12px",
                   overflow: "hidden",
-                  padding: "15px", // 15px safe margin inside the container
+                  padding: "15px",
                   boxSizing: "border-box",
                   border: "1px solid #e9ecef",
                   position: "relative",
                 }}
               >
-          {/* Company Header */}
-          <div
-            style={{
-              background: "linear-gradient(135deg, #e63946, #dc3545)",
-              color: "white",
-              padding: "20px",
-              position: "relative",
-              margin: "-15px -15px 15px -15px", // Extend to container edges, add bottom margin
-            }}
-          >
-            <Row className="align-items-center">
-              <Col lg={8}>
-                <div className="d-flex align-items-center">
-                  <div
-                    style={{
-                      width: "80px",
-                      height: "80px",
-                      background: "white",
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginRight: "20px",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                    }}
-                  >
-                    <img
-                      src="https://cdn.builder.io/api/v1/assets/30eb44a11c7b4dd995ed4b1b6b9528c2/hk_bg-dae727?format=webp&width=800"
-                      alt="Hare Krishna Medical Logo"
+                {/* Invoice content will be rendered here based on invoiceData */}
+                {invoiceData && (
+                  <>
+                    {/* Company Header */}
+                    <div
                       style={{
-                        width: "60px",
-                        height: "60px",
-                        objectFit: "contain",
+                        background: "linear-gradient(135deg, #e63946, #dc3545)",
+                        color: "white",
+                        padding: "20px",
+                        position: "relative",
+                        margin: "-15px -15px 15px -15px",
                       }}
-                      onError={(e) => {
-                        e.target.style.display = "none";
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <h2
-                      className="mb-1"
-                      style={{ fontSize: "1.8rem", fontWeight: "700" }}
                     >
-                      Hare Krishna Medical
-                    </h2>
-                    <p
-                      className="mb-1"
-                      style={{ fontSize: "0.9rem", opacity: 0.9 }}
-                    >
-                      📍 Shop 12, Amroli Char Rasta, Nr. ONGC Circle, Surat
-                    </p>
-                    <p
-                      className="mb-0"
-                      style={{ fontSize: "0.9rem", opacity: 0.9 }}
-                    >
-                      📞 +91 76989 13354 | ✉️ hkmedicalamroli@gmail.com
-                    </p>
-                  </div>
-                </div>
-              </Col>
-              <Col lg={4} className="text-end">
-                <div
-                  style={{
-                    background: "rgba(255,255,255,0.2)",
-                    padding: "15px",
-                    borderRadius: "10px",
-                    backdropFilter: "blur(10px)",
-                  }}
-                >
-                  <h3
-                    className="mb-2"
-                    style={{ fontSize: "1.5rem", fontWeight: "700" }}
-                  >
-                    INVOICE
-                  </h3>
-                  <p className="mb-1" style={{ fontSize: "0.9rem" }}>
-                    <strong>#{invoiceData?.invoiceId}</strong>
-                  </p>
-                  <p
-                    className="mb-0"
-                    style={{ fontSize: "0.8rem", opacity: 0.9 }}
-                  >
-                    {invoiceData?.orderDate} | {invoiceData?.orderTime}
-                  </p>
-                </div>
-              </Col>
-            </Row>
-          </div>
+                      <Row className="align-items-center">
+                        <Col lg={8}>
+                          <div className="d-flex align-items-center">
+                            <div
+                              style={{
+                                width: "80px",
+                                height: "80px",
+                                background: "white",
+                                borderRadius: "50%",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                marginRight: "20px",
+                                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                              }}
+                            >
+                              <img
+                                src="https://cdn.builder.io/api/v1/assets/30eb44a11c7b4dd995ed4b1b6b9528c2/hk_bg-dae727?format=webp&width=800"
+                                alt="Hare Krishna Medical Logo"
+                                style={{
+                                  width: "60px",
+                                  height: "60px",
+                                  objectFit: "contain",
+                                }}
+                                onError={(e) => {
+                                  e.target.style.display = "none";
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <h2
+                                className="mb-1"
+                                style={{
+                                  fontSize: "1.8rem",
+                                  fontWeight: "700",
+                                }}
+                              >
+                                Hare Krishna Medical
+                              </h2>
+                              <p
+                                className="mb-1"
+                                style={{ fontSize: "0.9rem", opacity: 0.9 }}
+                              >
+                                📍 Shop 12, Amroli Char Rasta, Nr. ONGC Circle,
+                                Surat
+                              </p>
+                              <p
+                                className="mb-0"
+                                style={{ fontSize: "0.9rem", opacity: 0.9 }}
+                              >
+                                📞 +91 76989 13354 | ✉️
+                                hkmedicalamroli@gmail.com
+                              </p>
+                            </div>
+                          </div>
+                        </Col>
+                        <Col lg={4} className="text-end">
+                          <div
+                            style={{
+                              background: "rgba(255,255,255,0.2)",
+                              padding: "15px",
+                              borderRadius: "10px",
+                              backdropFilter: "blur(10px)",
+                            }}
+                          >
+                            <h3
+                              className="mb-2"
+                              style={{ fontSize: "1.5rem", fontWeight: "700" }}
+                            >
+                              INVOICE
+                            </h3>
+                            <p className="mb-1" style={{ fontSize: "0.9rem" }}>
+                              <strong>#{invoiceData?.invoiceId}</strong>
+                            </p>
+                            <p
+                              className="mb-0"
+                              style={{ fontSize: "0.8rem", opacity: 0.9 }}
+                            >
+                              {invoiceData?.orderDate} |{" "}
+                              {invoiceData?.orderTime}
+                            </p>
+                          </div>
+                        </Col>
+                      </Row>
+                    </div>
 
-          {/* Customer and QR Information */}
-          <Row className="mb-4">
-            <Col lg={8}>
-              <div
-                style={{
-                  background: "#f8f9fa",
-                  padding: "20px",
-                  borderRadius: "10px",
-                  border: "1px solid #e0e0e0",
-                }}
-              >
-                <h5
-                  className="mb-3"
-                  style={{ color: "#e63946", fontWeight: "600" }}
-                >
-                  <i className="bi bi-person-check me-2"></i>Customer Details
-                </h5>
-                <Row>
-                  <Col md={6}>
-                    <p className="mb-2">
-                      <strong>Name:</strong>{" "}
-                      {invoiceData?.customerDetails?.fullName}
-                    </p>
-                    <p className="mb-2">
-                      <strong>Email:</strong>{" "}
-                      {invoiceData?.customerDetails?.email}
-                    </p>
-                    <p className="mb-0">
-                      <strong>Mobile:</strong>{" "}
-                      {invoiceData?.customerDetails?.mobile}
-                    </p>
-                  </Col>
-                  <Col md={6}>
-                    <p className="mb-2">
-                      <strong>Address:</strong>
-                    </p>
-                    <p className="mb-0" style={{ fontSize: "0.9rem" }}>
-                      {invoiceData?.customerDetails?.address}
-                      <br />
-                      {invoiceData?.customerDetails?.city},{" "}
-                      {invoiceData?.customerDetails?.state}{" "}
-                      {invoiceData?.customerDetails?.pincode}
-                    </p>
-                  </Col>
-                </Row>
-              </div>
-            </Col>
-            <Col lg={4}>
-              <div
-                style={{
-                  background: "white",
-                  padding: "20px",
-                  borderRadius: "10px",
-                  border: "2px solid #e63946",
-                  textAlign: "center",
-                }}
-              >
-                <h6
-                  style={{
-                    color: "#e63946",
-                    fontWeight: "600",
-                    marginBottom: "15px",
-                  }}
-                >
-                  <i className="bi bi-qr-code me-2"></i>Verification QR
-                </h6>
-                {qrCode ? (
-                  <img
-                    src={qrCode}
-                    alt="Invoice QR Code"
-                    style={{
-                      width: "120px",
-                      height: "120px",
-                      border: "2px solid #e63946",
-                      borderRadius: "8px",
-                    }}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      width: "120px",
-                      height: "120px",
-                      border: "2px dashed #e63946",
-                      borderRadius: "8px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      margin: "0 auto",
-                      background: "#f8f9fa",
-                    }}
-                  >
-                    <span style={{ color: "#e63946", fontSize: "0.8rem" }}>
-                      QR Code
-                    </span>
-                  </div>
+                    {/* Customer and QR Information */}
+                    <Row className="mb-4">
+                      <Col lg={8}>
+                        <div
+                          style={{
+                            background: "#f8f9fa",
+                            padding: "20px",
+                            borderRadius: "10px",
+                            border: "1px solid #e0e0e0",
+                          }}
+                        >
+                          <h5
+                            className="mb-3"
+                            style={{ color: "#e63946", fontWeight: "600" }}
+                          >
+                            <i className="bi bi-person-check me-2"></i>Customer
+                            Details
+                          </h5>
+                          <Row>
+                            <Col md={6}>
+                              <p className="mb-2">
+                                <strong>Name:</strong>{" "}
+                                {invoiceData?.customerDetails?.fullName}
+                              </p>
+                              <p className="mb-2">
+                                <strong>Email:</strong>{" "}
+                                {invoiceData?.customerDetails?.email}
+                              </p>
+                              <p className="mb-0">
+                                <strong>Mobile:</strong>{" "}
+                                {invoiceData?.customerDetails?.mobile}
+                              </p>
+                            </Col>
+                            <Col md={6}>
+                              <p className="mb-2">
+                                <strong>Address:</strong>
+                              </p>
+                              <p
+                                className="mb-0"
+                                style={{ fontSize: "0.9rem" }}
+                              >
+                                {invoiceData?.customerDetails?.address}
+                                <br />
+                                {invoiceData?.customerDetails?.city},{" "}
+                                {invoiceData?.customerDetails?.state}{" "}
+                                {invoiceData?.customerDetails?.pincode}
+                              </p>
+                            </Col>
+                          </Row>
+                        </div>
+                      </Col>
+                      <Col lg={4}>
+                        <div
+                          style={{
+                            background: "white",
+                            padding: "20px",
+                            borderRadius: "10px",
+                            border: "2px solid #e63946",
+                            textAlign: "center",
+                          }}
+                        >
+                          <h6
+                            style={{
+                              color: "#e63946",
+                              fontWeight: "600",
+                              marginBottom: "15px",
+                            }}
+                          >
+                            <i className="bi bi-qr-code me-2"></i>Verification
+                            QR
+                          </h6>
+                          {qrCode ? (
+                            <img
+                              src={qrCode}
+                              alt="Invoice QR Code"
+                              style={{
+                                width: "120px",
+                                height: "120px",
+                                border: "2px solid #e63946",
+                                borderRadius: "8px",
+                              }}
+                            />
+                          ) : (
+                            <div
+                              style={{
+                                width: "120px",
+                                height: "120px",
+                                border: "2px dashed #e63946",
+                                borderRadius: "8px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                margin: "0 auto",
+                                background: "#f8f9fa",
+                              }}
+                            >
+                              <span
+                                style={{ color: "#e63946", fontSize: "0.8rem" }}
+                              >
+                                QR Code
+                              </span>
+                            </div>
+                          )}
+                          <p
+                            style={{
+                              fontSize: "0.8rem",
+                              color: "#666",
+                              marginTop: "10px",
+                              marginBottom: "0",
+                            }}
+                          >
+                            Scan to verify invoice
+                          </p>
+                        </div>
+                      </Col>
+                    </Row>
+
+                    {/* Items Table */}
+                    <div className="mb-4">
+                      <h5
+                        className="mb-3"
+                        style={{ color: "#e63946", fontWeight: "600" }}
+                      >
+                        <i className="bi bi-bag-check me-2"></i>Order Items
+                      </h5>
+                      <div
+                        style={{
+                          border: "1px solid #e0e0e0",
+                          borderRadius: "8px",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <table className="table table-striped mb-0">
+                          <thead
+                            style={{ background: "#e63946", color: "white" }}
+                          >
+                            <tr>
+                              <th
+                                style={{ padding: "12px", fontWeight: "600" }}
+                              >
+                                Item
+                              </th>
+                              <th
+                                style={{ padding: "12px", fontWeight: "600" }}
+                              >
+                                Qty
+                              </th>
+                              <th
+                                style={{ padding: "12px", fontWeight: "600" }}
+                              >
+                                Price
+                              </th>
+                              <th
+                                style={{ padding: "12px", fontWeight: "600" }}
+                              >
+                                Total
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {invoiceData?.items?.map((item, index) => (
+                              <tr key={index}>
+                                <td style={{ padding: "12px" }}>{item.name}</td>
+                                <td style={{ padding: "12px" }}>
+                                  {item.quantity}
+                                </td>
+                                <td style={{ padding: "12px" }}>
+                                  ₹{item.price}
+                                </td>
+                                <td style={{ padding: "12px" }}>
+                                  ₹{(item.quantity * item.price).toFixed(2)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Totals and Footer */}
+                    <Row>
+                      <Col lg={8}>
+                        <div
+                          style={{
+                            background: "#f8f9fa",
+                            padding: "15px",
+                            borderRadius: "8px",
+                            border: "1px solid #e0e0e0",
+                          }}
+                        >
+                          <h6
+                            style={{
+                              color: "#e63946",
+                              fontWeight: "600",
+                              marginBottom: "10px",
+                            }}
+                          >
+                            <i className="bi bi-credit-card me-2"></i>Payment
+                            Information
+                          </h6>
+                          <p className="mb-1">
+                            <strong>Method:</strong>{" "}
+                            {invoiceData?.paymentMethod}
+                          </p>
+                          <p className="mb-1">
+                            <strong>Status:</strong>{" "}
+                            <Badge
+                              bg={
+                                invoiceData?.paymentStatus === "Paid"
+                                  ? "success"
+                                  : "warning"
+                              }
+                            >
+                              {invoiceData?.paymentStatus}
+                            </Badge>
+                          </p>
+                          <p className="mb-0">
+                            <strong>Order Status:</strong>{" "}
+                            <Badge bg="info">{invoiceData?.status}</Badge>
+                          </p>
+                        </div>
+                      </Col>
+                      <Col lg={4}>
+                        <div
+                          style={{
+                            background: "white",
+                            padding: "20px",
+                            border: "2px solid #e63946",
+                            borderRadius: "8px",
+                          }}
+                        >
+                          <div className="d-flex justify-content-between mb-2">
+                            <span>Subtotal:</span>
+                            <span>₹{invoiceData?.subtotal?.toFixed(2)}</span>
+                          </div>
+                          <div className="d-flex justify-content-between mb-2">
+                            <span>Shipping:</span>
+                            <span>₹{invoiceData?.shipping?.toFixed(2)}</span>
+                          </div>
+                          <div className="d-flex justify-content-between mb-2">
+                            <span>Tax:</span>
+                            <span>₹{invoiceData?.tax?.toFixed(2)}</span>
+                          </div>
+                          <hr style={{ margin: "10px 0" }} />
+                          <div
+                            className="d-flex justify-content-between"
+                            style={{ fontSize: "1.2rem", fontWeight: "bold" }}
+                          >
+                            <span>Total:</span>
+                            <span style={{ color: "#e63946" }}>
+                              ₹{invoiceData?.total?.toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      </Col>
+                    </Row>
+
+                    {/* Footer */}
+                    <div
+                      style={{
+                        borderTop: "2px solid #e63946",
+                        marginTop: "20px",
+                        paddingTop: "15px",
+                        textAlign: "center",
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontSize: "0.9rem",
+                          color: "#666",
+                          marginBottom: "5px",
+                        }}
+                      >
+                        Thank you for choosing Hare Krishna Medical
+                      </p>
+                      <p
+                        style={{
+                          fontSize: "0.8rem",
+                          color: "#999",
+                          marginBottom: "0",
+                        }}
+                      >
+                        For any queries, contact us at +91 76989 13354 |
+                        hkmedicalamroli@gmail.com
+                      </p>
+                    </div>
+                  </>
                 )}
-                <p
-                  style={{
-                    fontSize: "0.8rem",
-                    color: "#666",
-                    marginTop: "10px",
-                    marginBottom: "0",
-                  }}
-                >
-                  Scan to verify invoice
-                </p>
               </div>
             </Col>
           </Row>
-
-          {/* Items Table */}
-          <div className="mb-4">
-            <h5
-              className="mb-3"
-              style={{ color: "#e63946", fontWeight: "600" }}
-            >
-              <i className="bi bi-bag-check me-2"></i>Order Items
-            </h5>
-            <div
-              style={{
-                border: "1px solid #e0e0e0",
-                borderRadius: "8px",
-                overflow: "hidden",
-              }}
-            >
-              <table className="table table-striped mb-0">
-                <thead style={{ background: "#e63946", color: "white" }}>
-                  <tr>
-                    <th style={{ padding: "12px", fontWeight: "600" }}>Item</th>
-                    <th style={{ padding: "12px", fontWeight: "600" }}>Qty</th>
-                    <th style={{ padding: "12px", fontWeight: "600" }}>
-                      Price
-                    </th>
-                    <th style={{ padding: "12px", fontWeight: "600" }}>
-                      Total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invoiceData?.items?.map((item, index) => (
-                    <tr key={index}>
-                      <td style={{ padding: "12px" }}>{item.name}</td>
-                      <td style={{ padding: "12px" }}>{item.quantity}</td>
-                      <td style={{ padding: "12px" }}>₹{item.price}</td>
-                      <td style={{ padding: "12px" }}>
-                        ₹{(item.quantity * item.price).toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Totals and Footer */}
-          <Row>
-            <Col lg={8}>
-              <div
-                style={{
-                  background: "#f8f9fa",
-                  padding: "15px",
-                  borderRadius: "8px",
-                  border: "1px solid #e0e0e0",
-                }}
-              >
-                <h6
-                  style={{
-                    color: "#e63946",
-                    fontWeight: "600",
-                    marginBottom: "10px",
-                  }}
-                >
-                  <i className="bi bi-credit-card me-2"></i>Payment Information
-                </h6>
-                <p className="mb-1">
-                  <strong>Method:</strong> {invoiceData?.paymentMethod}
-                </p>
-                <p className="mb-1">
-                  <strong>Status:</strong>{" "}
-                  <Badge
-                    bg={
-                      invoiceData?.paymentStatus === "Paid"
-                        ? "success"
-                        : "warning"
-                    }
-                  >
-                    {invoiceData?.paymentStatus}
-                  </Badge>
-                </p>
-                <p className="mb-0">
-                  <strong>Order Status:</strong>{" "}
-                  <Badge bg="info">{invoiceData?.status}</Badge>
-                </p>
-              </div>
-            </Col>
-            <Col lg={4}>
-              <div
-                style={{
-                  background: "white",
-                  padding: "20px",
-                  border: "2px solid #e63946",
-                  borderRadius: "8px",
-                }}
-              >
-                <div className="d-flex justify-content-between mb-2">
-                  <span>Subtotal:</span>
-                  <span>₹{invoiceData?.subtotal?.toFixed(2)}</span>
-                </div>
-                <div className="d-flex justify-content-between mb-2">
-                  <span>Shipping:</span>
-                  <span>₹{invoiceData?.shipping?.toFixed(2)}</span>
-                </div>
-                <div className="d-flex justify-content-between mb-2">
-                  <span>Tax:</span>
-                  <span>₹{invoiceData?.tax?.toFixed(2)}</span>
-                </div>
-                <hr style={{ margin: "10px 0" }} />
-                <div
-                  className="d-flex justify-content-between"
-                  style={{ fontSize: "1.2rem", fontWeight: "bold" }}
-                >
-                  <span>Total:</span>
-                  <span style={{ color: "#e63946" }}>
-                    ₹{invoiceData?.total?.toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            </Col>
-          </Row>
-
-          {/* Footer */}
-          <div
-            style={{
-              borderTop: "2px solid #e63946",
-              marginTop: "20px",
-              paddingTop: "15px",
-              textAlign: "center",
-            }}
-          >
-            <p
-              style={{ fontSize: "0.9rem", color: "#666", marginBottom: "5px" }}
-            >
-              Thank you for choosing Hare Krishna Medical
-            </p>
-            <p style={{ fontSize: "0.8rem", color: "#999", marginBottom: "0" }}>
-              For any queries, contact us at +91 76989 13354 |
-              hkmedicalamroli@gmail.com
-            </p>
-            </div>
-          </div>
-        </Col>
-      </Row>
-    </Container>
-  </section>
-</div>
+        </Container>
+      </section>
+    </div>
   );
 };
 
