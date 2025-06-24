@@ -63,7 +63,7 @@ export const PageHeroSection = ({
                 style={{
                   marginRight: "25px",
                   marginBottom: "10px",
-                  color: "#e63946",
+                  color: isHomePage ? "#e63946" : "#8B0000",
                   boxShadow: "0 12px 40px rgba(0,0,0,0.25)",
                   border: "4px solid rgba(255,255,255,0.95)",
                   animation: "heroIconFloat 3s ease-in-out infinite",
