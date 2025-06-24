@@ -113,10 +113,19 @@ const InvoiceVerify = () => {
         setVerifySuccess(true);
         generateInvoicePDF(data.data);
       } else {
-        setError(
-          apiError ||
-            "Invoice not found. Please check the Invoice ID or Order ID and try again.",
-        );
+        // Determine if this was a QR scan or manual input
+        const wasQRScan = searchParams.get("invoice") || searchParams.get("id");
+        let errorMessage;
+
+        if (wasQRScan) {
+          errorMessage =
+            "❌ Invalid Invoice - The QR code you scanned is not valid or has expired. Please scan a verified QR code from an authentic Hare Krishna Medical invoice.";
+        } else {
+          errorMessage =
+            "❌ Invalid Invoice - Please check that your Invoice ID or Order ID is entered correctly. Make sure there are no extra spaces and all characters are accurate.";
+        }
+
+        setError(errorMessage);
       }
     } catch (error) {
       console.error("Verification error:", error);
@@ -172,30 +181,23 @@ const InvoiceVerify = () => {
       if (printWindow) {
         printWindow.document.title = `Invoice Verification - ${invoice?.invoiceId}`;
 
-        const setupPrintHandlers = () => {
-          const afterPrint = () => {
-            setTimeout(() => printWindow.close(), 1000);
-          };
-
-          printWindow.addEventListener("afterprint", afterPrint);
-          printWindow.addEventListener("beforeunload", () =>
-            printWindow.close(),
-          );
-        };
-
+        // No auto-close handlers - let user manage the window
         printWindow.onload = () => {
           setTimeout(() => {
-            setupPrintHandlers();
             printWindow.focus();
             printWindow.print();
           }, 1000);
         };
 
+        // Fallback to trigger print
         setTimeout(() => {
-          if (printWindow && !printWindow.closed) {
-            printWindow.close();
+          try {
+            printWindow.focus();
+            printWindow.print();
+          } catch (error) {
+            console.log("Fallback print trigger:", error);
           }
-        }, 30000);
+        }, 2000);
       }
     }
   };
