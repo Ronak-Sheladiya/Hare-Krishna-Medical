@@ -18,6 +18,7 @@ const loadCartFromStorage = () => {
     items: [],
     totalItems: 0,
     totalAmount: 0,
+    lastUpdated: Date.now(),
   };
 };
 
@@ -30,10 +31,15 @@ const saveCartToStorage = (state) => {
   }
 };
 
-// Helper function to broadcast cart events across tabs
+// Helper function to broadcast cart events across tabs with debouncing
+let broadcastTimeout;
 const broadcastCartEvent = (type, payload = null) => {
   if (typeof window !== "undefined" && window.broadcastCartEvent) {
-    window.broadcastCartEvent(type, payload);
+    // Clear previous timeout to debounce rapid changes
+    clearTimeout(broadcastTimeout);
+    broadcastTimeout = setTimeout(() => {
+      window.broadcastCartEvent(type, payload);
+    }, 50); // 50ms debounce
   }
 };
 
@@ -62,6 +68,7 @@ const cartSlice = createSlice({
         (total, item) => total + item.price * item.quantity,
         0,
       );
+      state.lastUpdated = Date.now();
 
       saveCartToStorage(state);
       broadcastCartEvent("CART_ADD_ITEM", action.payload);
