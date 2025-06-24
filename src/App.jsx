@@ -62,8 +62,9 @@ import VerifyEmail from "./pages/VerifyEmail.jsx";
 import VerificationStatus from "./pages/VerificationStatus.jsx";
 import AccessDenied from "./pages/AccessDenied.jsx";
 import NotFound from "./pages/NotFound.jsx";
-// Use simple socket client until socket.io-client is installed
-import socketClient from "./utils/socketClient.simple";
+
+// Use proper socket client
+import socketClient from "./utils/socketClient.js";
 
 // Invoice Service
 import invoiceService from "./services/InvoiceService";
@@ -188,13 +189,10 @@ function App() {
     try {
       if (token && user) {
         // Connect socket when user is authenticated
-        // Note: Socket.io-client needs to be installed first: npm install socket.io-client
         if (socketClient && typeof socketClient.connect === "function") {
           socketClient.connect(token, user.role);
         } else {
-          console.log(
-            "Socket.io-client not available. Install with: npm install socket.io-client",
-          );
+          console.log("Socket client not available");
         }
 
         // Request notification permission safely
