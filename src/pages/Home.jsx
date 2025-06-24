@@ -9,7 +9,7 @@ import {
   InputGroup,
   Form,
 } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../store/slices/cartSlice";
 import { setFeaturedProducts } from "../store/slices/productsSlice";
