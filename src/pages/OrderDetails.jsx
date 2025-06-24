@@ -178,8 +178,8 @@ const OrderDetails = () => {
       const html2canvas = (await import("html2canvas")).default;
       const QRCode = (await import("qrcode")).default;
 
-      // Generate QR code for verification
-      const verifyUrl = `${window.location.origin}/invoice/${orderId}`;
+      // Generate QR code for verification - Fixed: use invoiceId instead of orderId
+      const verifyUrl = `${window.location.origin}/invoice/${order.invoiceId || orderId}`;
       const qrDataURL = await QRCode.toDataURL(verifyUrl, {
         width: 120,
         margin: 2,
