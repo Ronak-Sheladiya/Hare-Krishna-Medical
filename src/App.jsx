@@ -103,16 +103,17 @@ const ProtectedRoute = ({ children, adminOnly = false, userOnly = false }) => {
   const location = useLocation();
 
   if (!isAuthenticated) {
-    // Store the current location for redirect after login
-    sessionStorage.setItem(
-      "redirectAfterLogin",
-      location.pathname + location.search,
-    );
+    // Store the current location for redirect after login (both session and localStorage)
+    const returnUrl = location.pathname + location.search + location.hash;
+    sessionStorage.setItem("redirectAfterLogin", returnUrl);
+    localStorage.setItem("lastAttemptedUrl", returnUrl);
+
     return (
       <Navigate
         to="/login"
         state={{
-          from: location.pathname + location.search,
+          from: returnUrl,
+          returnTo: returnUrl,
         }}
         replace
       />
