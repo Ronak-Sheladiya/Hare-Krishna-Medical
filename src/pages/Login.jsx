@@ -120,9 +120,16 @@ const Login = () => {
           }),
         );
 
-        // Handle redirect after login
+        // Handle redirect after login - Clear stored URLs and redirect
         const redirectUrl =
-          sessionStorage.getItem("redirectAfterLogin") || from;
+          from ||
+          sessionStorage.getItem("redirectAfterLogin") ||
+          localStorage.getItem("lastAttemptedUrl");
+
+        // Clear stored redirect URLs
+        sessionStorage.removeItem("redirectAfterLogin");
+        localStorage.removeItem("lastAttemptedUrl");
+
         if (
           redirectUrl &&
           redirectUrl !== "/login" &&
@@ -158,9 +165,16 @@ const Login = () => {
           }),
         );
 
-        // Handle redirect after login
+        // Handle redirect after login - Clear stored URLs and redirect
         const redirectUrl =
-          sessionStorage.getItem("redirectAfterLogin") || from;
+          from ||
+          sessionStorage.getItem("redirectAfterLogin") ||
+          localStorage.getItem("lastAttemptedUrl");
+
+        // Clear stored redirect URLs
+        sessionStorage.removeItem("redirectAfterLogin");
+        localStorage.removeItem("lastAttemptedUrl");
+
         if (
           redirectUrl &&
           redirectUrl !== "/login" &&
