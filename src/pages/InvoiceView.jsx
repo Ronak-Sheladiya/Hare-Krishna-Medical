@@ -207,7 +207,7 @@ const InvoiceView = () => {
             setupPrintHandlers();
             printWindow.focus();
             printWindow.print();
-          }, 500); // Reduced from 1000ms
+          }, 200); // Further reduced for faster printing
         };
 
         // Faster fallback
@@ -219,14 +219,14 @@ const InvoiceView = () => {
           } catch (error) {
             console.log("Fallback print trigger:", error);
           }
-        }, 1000); // Reduced from 2000ms
+        }, 500); // Further reduced fallback time
 
         // Faster auto-close
         setTimeout(() => {
           if (printWindow && !printWindow.closed) {
             printWindow.close();
           }
-        }, 10000); // Reduced from 15000ms
+        }, 3000); // Reduced to 3 seconds for faster close
       }
     } else if (pdfGenerating) {
       alert("PDF is still being generated. Please wait and try again.");

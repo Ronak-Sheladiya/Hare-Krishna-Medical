@@ -15,6 +15,7 @@ import {
 import { api, safeApiCall } from "../utils/apiClient";
 import { getDemoInvoice, isDemoInvoice } from "../utils/demoInvoiceData";
 import { PageHeroSection } from "../components/common/ConsistentTheme";
+import QRCameraScanner from "../components/common/QRCameraScanner";
 import pdfService from "../services/PDFService";
 import "../styles/InvoiceA4.css";
 
@@ -30,6 +31,7 @@ const InvoiceVerify = () => {
   const [verifySuccess, setVerifySuccess] = useState(false);
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
+  const [showQRScanner, setShowQRScanner] = useState(false);
 
   // Auto-verify if invoice ID is in URL
   useEffect(() => {
@@ -223,10 +225,19 @@ const InvoiceVerify = () => {
   };
 
   const handleQRScan = () => {
-    // In a real implementation, this would open camera for QR scanning
-    alert(
-      "QR Scanner feature will be implemented with camera access. For now, please enter the Invoice ID manually.",
-    );
+    setShowQRScanner(true);
+  };
+
+  const handleQRScanSuccess = (scannedInvoiceId) => {
+    setInvoiceId(scannedInvoiceId);
+    setShowQRScanner(false);
+    // Auto-verify the scanned invoice ID
+    handleVerify(scannedInvoiceId);
+  };
+
+  const handleQRScanError = (error) => {
+    console.error('QR Scan Error:', error);
+    setError('Failed to scan QR code. Please try again or enter the invoice ID manually.');
   };
 
   // Create invoice data for display
@@ -863,14 +874,22 @@ const InvoiceVerify = () => {
                         queries: +91 76989 13354 | hkmedicalamroli@gmail.com
                       </p>
                     </div>
-                  </div>
-                </Col>
-              </Row>
-            </Container>
-          </section>
+          )}
         </>
       )}
+
+      {/* QR Camera Scanner Modal */}
+      <QRCameraScanner
+        show={showQRScanner}
+        onHide={() => setShowQRScanner(false)}
+        onScanSuccess={handleQRScanSuccess}
+        onScanError={handleQRScanError}
+      />
     </div>
+  );
+};
+
+export default InvoiceVerify;
   );
 };
 

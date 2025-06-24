@@ -629,8 +629,8 @@ const Home = () => {
       <section
         style={{
           background: "linear-gradient(135deg, #f8f9fa, #e9ecef)",
-          paddingTop: "80px",
-          paddingBottom: "80px",
+          paddingTop: "40px",
+          paddingBottom: "40px",
         }}
       >
         <Container>
@@ -639,123 +639,112 @@ const Home = () => {
               <div
                 style={{
                   background: "white",
-                  padding: "60px 40px",
+                  padding: "30px 40px",
                   borderRadius: "20px",
                   boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
                   border: "1px solid #e9ecef",
+                  maxHeight: "100px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                <div className="mb-4">
+                <div className="d-flex align-items-center gap-4 w-100">
                   <div
                     style={{
-                      width: "100px",
-                      height: "100px",
+                      width: "60px",
+                      height: "60px",
                       background: "linear-gradient(135deg, #e63946, #dc3545)",
                       borderRadius: "50%",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      margin: "0 auto 30px",
                       color: "white",
-                      fontSize: "3rem",
+                      fontSize: "1.5rem",
+                      flexShrink: 0,
                     }}
                   >
                     <i className="bi bi-shield-check"></i>
                   </div>
-                  <h2
-                    style={{
-                      color: "#343a40",
-                      fontSize: "2.5rem",
-                      fontWeight: "700",
-                      marginBottom: "20px",
-                    }}
-                  >
-                    Verify Your Invoice
-                  </h2>
-                  <p
-                    style={{
-                      color: "#6c757d",
-                      fontSize: "1.2rem",
-                      marginBottom: "40px",
-                      lineHeight: "1.6",
-                    }}
-                  >
-                    Ensure authenticity and security by verifying your invoice.
-                    Enter your Invoice ID, Order ID, or scan the QR code to
-                    verify instantly.
-                  </p>
-                </div>
-
-                <div className="d-flex gap-3 justify-content-center flex-wrap">
-                  <Button
-                    as={Link}
-                    to="/verify"
-                    style={{
-                      background: "linear-gradient(135deg, #e63946, #dc3545)",
-                      border: "none",
-                      borderRadius: "12px",
-                      padding: "15px 30px",
-                      fontSize: "1.1rem",
-                      fontWeight: "600",
-                      transition: "all 0.3s ease",
-                      minWidth: "200px",
-                    }}
-                    onMouseOver={(e) => {
-                      e.target.style.transform = "translateY(-3px)";
-                      e.target.style.boxShadow =
-                        "0 8px 25px rgba(230, 57, 70, 0.4)";
-                    }}
-                    onMouseOut={(e) => {
-                      e.target.style.transform = "translateY(0)";
-                      e.target.style.boxShadow = "none";
-                    }}
-                  >
-                    <i className="bi bi-search me-2"></i>
-                    Verify Invoice
-                  </Button>
-                  <Button
-                    variant="outline-dark"
-                    style={{
-                      borderRadius: "12px",
-                      padding: "15px 30px",
-                      fontSize: "1.1rem",
-                      fontWeight: "600",
-                      border: "2px solid #343a40",
-                      transition: "all 0.3s ease",
-                      minWidth: "200px",
-                    }}
-                    onMouseOver={(e) => {
-                      e.target.style.background = "#343a40";
-                      e.target.style.color = "white";
-                      e.target.style.transform = "translateY(-3px)";
-                      e.target.style.boxShadow =
-                        "0 8px 25px rgba(52, 58, 64, 0.3)";
-                    }}
-                    onMouseOut={(e) => {
-                      e.target.style.background = "transparent";
-                      e.target.style.color = "#343a40";
-                      e.target.style.transform = "translateY(0)";
-                      e.target.style.boxShadow = "none";
-                    }}
-                    onClick={() =>
-                      alert("QR Scanner will open camera for scanning QR codes")
-                    }
-                  >
-                    <i className="bi bi-qr-code-scan me-2"></i>
-                    Scan QR Code
-                  </Button>
-                </div>
-
-                <div className="mt-4">
-                  <small
-                    style={{
-                      color: "#6c757d",
-                      fontSize: "0.9rem",
-                    }}
-                  >
-                    🔒 Secure verification system | ✓ Instant results | 🎯 100%
-                    authentic
-                  </small>
+                  <div className="flex-grow-1">
+                    <h3
+                      style={{
+                        color: "#343a40",
+                        fontSize: "1.5rem",
+                        fontWeight: "700",
+                        marginBottom: "5px",
+                      }}
+                    >
+                      Verify Your Invoice
+                    </h3>
+                    <p
+                      style={{
+                        color: "#6c757d",
+                        fontSize: "0.9rem",
+                        marginBottom: "0",
+                        lineHeight: "1.4",
+                      }}
+                    >
+                      Ensure authenticity and security by verifying your invoice
+                      instantly.
+                    </p>
+                  </div>
+                  <div className="d-flex gap-2">
+                    <Button
+                      as={Link}
+                      to="/verify"
+                      style={{
+                        background: "linear-gradient(135deg, #e63946, #dc3545)",
+                        border: "none",
+                        borderRadius: "8px",
+                        padding: "8px 16px",
+                        fontSize: "0.9rem",
+                        fontWeight: "600",
+                        transition: "all 0.3s ease",
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.transform = "translateY(-2px)";
+                        e.target.style.boxShadow =
+                          "0 4px 15px rgba(230, 57, 70, 0.4)";
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.transform = "translateY(0)";
+                        e.target.style.boxShadow = "none";
+                      }}
+                    >
+                      <i className="bi bi-search me-1"></i>
+                      Verify
+                    </Button>
+                    <Button
+                      variant="outline-dark"
+                      style={{
+                        borderRadius: "8px",
+                        padding: "8px 16px",
+                        fontSize: "0.9rem",
+                        fontWeight: "600",
+                        border: "2px solid #343a40",
+                        transition: "all 0.3s ease",
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.background = "#343a40";
+                        e.target.style.color = "white";
+                        e.target.style.transform = "translateY(-2px)";
+                        e.target.style.boxShadow =
+                          "0 4px 15px rgba(52, 58, 64, 0.3)";
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.background = "transparent";
+                        e.target.style.color = "#343a40";
+                        e.target.style.transform = "translateY(0)";
+                        e.target.style.boxShadow = "none";
+                      }}
+                      as={Link}
+                      to="/verify"
+                    >
+                      <i className="bi bi-qr-code-scan me-1"></i>
+                      Scan QR
+                    </Button>
+                  </div>
                 </div>
               </div>
             </Col>
