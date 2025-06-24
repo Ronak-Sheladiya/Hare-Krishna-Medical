@@ -52,15 +52,15 @@ const InvoiceVerify = () => {
     }
   }, [searchParams, urlInvoiceId]);
 
-  // Generate QR code for invoice verification
+  // Generate QR code for invoice verification - BLACK COLOR
   const generateInvoiceQR = async (invoiceId) => {
     try {
       const verificationUrl = `${window.location.origin}/invoice/${invoiceId}`;
       const qrCodeUrl = await QRCode.toDataURL(verificationUrl, {
         width: 150,
-        margin: 2,
+        margin: 1,
         color: {
-          dark: "#e63946",
+          dark: "#000000",
           light: "#ffffff",
         },
         errorCorrectionLevel: "M",
@@ -195,6 +195,7 @@ const InvoiceVerify = () => {
     }
   };
 
+  // RE-ENABLE AUTO-CLOSE PRINT FUNCTIONALITY
   const handlePrint = () => {
     if (pdfUrl) {
       const printWindow = window.open(
@@ -206,23 +207,32 @@ const InvoiceVerify = () => {
       if (printWindow) {
         printWindow.document.title = `Invoice Verification - ${invoice?.invoiceId}`;
 
-        // No auto-close handlers - let user manage the window
-        printWindow.onload = () => {
-          setTimeout(() => {
-            printWindow.focus();
-            printWindow.print();
-          }, 1000);
+        // Re-enable auto-close functionality
+        const setupPrintHandlers = () => {
+          const afterPrint = () => {
+            setTimeout(() => printWindow.close(), 800);
+          };
+
+          printWindow.addEventListener("afterprint", afterPrint);
+          printWindow.addEventListener("beforeunload", () =>
+            printWindow.close(),
+          );
         };
 
-        // Fallback to trigger print
-        setTimeout(() => {
-          try {
+        printWindow.onload = () => {
+          setTimeout(() => {
+            setupPrintHandlers();
             printWindow.focus();
             printWindow.print();
-          } catch (error) {
-            console.log("Fallback print trigger:", error);
+          }, 800);
+        };
+
+        // Auto-close after 25 seconds
+        setTimeout(() => {
+          if (printWindow && !printWindow.closed) {
+            printWindow.close();
           }
-        }, 2000);
+        }, 25000);
       }
     }
   };
@@ -538,12 +548,12 @@ const InvoiceVerify = () => {
             </Container>
           </section>
 
-          {/* Invoice Details Display */}
+          {/* Invoice Details Display - REDUCED PADDING AND NO BORDERS */}
           <section
             style={{
               background: "#f8f9fa",
-              paddingTop: "60px",
-              paddingBottom: "80px",
+              paddingTop: "40px",
+              paddingBottom: "60px",
             }}
           >
             <Container>
@@ -553,20 +563,19 @@ const InvoiceVerify = () => {
                     id="verify-invoice-content"
                     style={{
                       background: "white",
-                      borderRadius: "12px",
-                      padding: "40px",
-                      boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
-                      border: "1px solid #e9ecef",
+                      borderRadius: "8px",
+                      padding: "30px",
+                      boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
                     }}
                   >
-                    {/* Invoice Header */}
+                    {/* Invoice Header - REDUCED HEIGHT */}
                     <div
                       style={{
                         background: "linear-gradient(135deg, #e63946, #dc3545)",
                         color: "white",
-                        padding: "30px",
-                        margin: "-40px -40px 30px -40px",
-                        borderRadius: "12px 12px 0 0",
+                        padding: "20px",
+                        margin: "-30px -30px 20px -30px",
+                        borderRadius: "8px 8px 0 0",
                       }}
                     >
                       <Row className="align-items-center">
@@ -574,8 +583,8 @@ const InvoiceVerify = () => {
                           <div className="d-flex align-items-center">
                             <div
                               style={{
-                                width: "80px",
-                                height: "80px",
+                                width: "70px",
+                                height: "70px",
                                 background: "white",
                                 borderRadius: "50%",
                                 display: "flex",
@@ -588,8 +597,8 @@ const InvoiceVerify = () => {
                                 src="https://cdn.builder.io/api/v1/assets/30eb44a11c7b4dd995ed4b1b6b9528c2/hk_bg-dae727?format=webp&width=80"
                                 alt="Logo"
                                 style={{
-                                  width: "60px",
-                                  height: "60px",
+                                  width: "50px",
+                                  height: "50px",
                                   objectFit: "contain",
                                 }}
                               />
@@ -597,7 +606,7 @@ const InvoiceVerify = () => {
                             <div>
                               <h2
                                 style={{
-                                  fontSize: "1.8rem",
+                                  fontSize: "1.6rem",
                                   fontWeight: "700",
                                   marginBottom: "5px",
                                 }}
@@ -606,7 +615,7 @@ const InvoiceVerify = () => {
                               </h2>
                               <p
                                 style={{
-                                  fontSize: "0.9rem",
+                                  fontSize: "0.8rem",
                                   marginBottom: "0",
                                   opacity: 0.9,
                                 }}
@@ -621,15 +630,15 @@ const InvoiceVerify = () => {
                           <div
                             style={{
                               background: "rgba(255,255,255,0.2)",
-                              padding: "20px",
-                              borderRadius: "10px",
+                              padding: "15px",
+                              borderRadius: "8px",
                             }}
                           >
                             <h3
                               style={{
-                                fontSize: "1.5rem",
+                                fontSize: "1.3rem",
                                 fontWeight: "700",
-                                marginBottom: "15px",
+                                marginBottom: "10px",
                               }}
                             >
                               VERIFIED INVOICE
@@ -638,8 +647,8 @@ const InvoiceVerify = () => {
                             {/* Simple text for Invoice ID and Order ID */}
                             <p
                               style={{
-                                fontSize: "0.9rem",
-                                marginBottom: "5px",
+                                fontSize: "0.85rem",
+                                marginBottom: "4px",
                                 opacity: 0.9,
                               }}
                             >
@@ -650,8 +659,8 @@ const InvoiceVerify = () => {
                             </p>
                             <p
                               style={{
-                                fontSize: "0.9rem",
-                                marginBottom: "5px",
+                                fontSize: "0.85rem",
+                                marginBottom: "4px",
                                 opacity: 0.9,
                               }}
                             >
@@ -662,7 +671,7 @@ const InvoiceVerify = () => {
                             </p>
                             <p
                               style={{
-                                fontSize: "0.8rem",
+                                fontSize: "0.75rem",
                                 marginBottom: "0",
                                 opacity: 0.9,
                               }}
@@ -818,7 +827,7 @@ const InvoiceVerify = () => {
                       </div>
                     </div>
 
-                    {/* Total and Payment Info with QR Code */}
+                    {/* Total and Payment Info with QR Code - NO BORDERS */}
                     <Row>
                       <Col lg={5}>
                         <div
@@ -862,13 +871,12 @@ const InvoiceVerify = () => {
                         </div>
                       </Col>
 
-                      {/* QR Code Column */}
+                      {/* QR Code Column - NO BORDERS */}
                       <Col lg={3}>
                         <div
                           style={{
                             background: "white",
-                            padding: "20px",
-                            border: "2px solid #e63946",
+                            padding: "15px",
                             borderRadius: "8px",
                             textAlign: "center",
                           }}
@@ -889,8 +897,7 @@ const InvoiceVerify = () => {
                               style={{
                                 width: "120px",
                                 height: "120px",
-                                border: "2px solid #e63946",
-                                borderRadius: "8px",
+                                borderRadius: "4px",
                               }}
                             />
                           ) : (
@@ -898,14 +905,13 @@ const InvoiceVerify = () => {
                               style={{
                                 width: "120px",
                                 height: "120px",
-                                border: "2px dashed #e63946",
-                                borderRadius: "8px",
+                                borderRadius: "4px",
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
                                 margin: "0 auto",
                                 background: "#f8f9fa",
-                                color: "#e63946",
+                                color: "#666",
                                 fontSize: "0.8rem",
                               }}
                             >
@@ -960,8 +966,8 @@ const InvoiceVerify = () => {
                     <div
                       style={{
                         borderTop: "2px solid #28a745",
-                        marginTop: "30px",
-                        paddingTop: "20px",
+                        marginTop: "20px",
+                        paddingTop: "15px",
                         textAlign: "center",
                       }}
                     >
