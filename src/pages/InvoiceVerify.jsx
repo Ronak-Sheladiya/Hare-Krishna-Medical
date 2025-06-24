@@ -195,9 +195,10 @@ const InvoiceVerify = () => {
     }
   };
 
-  // RE-ENABLE AUTO-CLOSE PRINT FUNCTIONALITY
+  // COMPREHENSIVE PRINT FUNCTIONALITY - MOVED FROM /INVOICE PAGE
   const handlePrint = () => {
     if (pdfUrl) {
+      // Create print window immediately without asking permission
       const printWindow = window.open(
         pdfUrl,
         "_blank",
@@ -205,12 +206,11 @@ const InvoiceVerify = () => {
       );
 
       if (printWindow) {
-        printWindow.document.title = `Invoice Verification - ${invoice?.invoiceId}`;
+        printWindow.document.title = `Invoice ${invoice?.invoiceId} - Print`;
 
-        // Re-enable auto-close functionality
         const setupPrintHandlers = () => {
           const afterPrint = () => {
-            setTimeout(() => printWindow.close(), 800);
+            setTimeout(() => printWindow.close(), 500); // Faster close
           };
 
           printWindow.addEventListener("afterprint", afterPrint);
@@ -219,21 +219,38 @@ const InvoiceVerify = () => {
           );
         };
 
+        // Faster PDF loading and printing
         printWindow.onload = () => {
           setTimeout(() => {
             setupPrintHandlers();
             printWindow.focus();
             printWindow.print();
-          }, 800);
+          }, 200); // Further reduced for faster printing
         };
 
-        // Auto-close after 25 seconds
+        // Faster fallback
+        setTimeout(() => {
+          try {
+            setupPrintHandlers();
+            printWindow.focus();
+            printWindow.print();
+          } catch (error) {
+            console.log("Fallback print trigger:", error);
+          }
+        }, 500); // Further reduced fallback time
+
+        // Faster auto-close
         setTimeout(() => {
           if (printWindow && !printWindow.closed) {
             printWindow.close();
           }
-        }, 25000);
+        }, 3000); // Reduced to 3 seconds for faster close
       }
+    } else if (pdfGenerating) {
+      alert("PDF is still being generated. Please wait and try again.");
+    } else {
+      alert("PDF not available. Regenerating...");
+      generateInvoicePDF();
     }
   };
 
