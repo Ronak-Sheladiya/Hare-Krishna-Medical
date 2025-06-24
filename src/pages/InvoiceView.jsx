@@ -490,14 +490,29 @@ const InvoiceView = () => {
                     <Button variant="danger" onClick={() => navigate("/")}>
                       <i className="bi bi-house me-2"></i>Go Home
                     </Button>
-                    <Button
-                      variant="outline-secondary"
-                      onClick={fetchInvoiceData}
-                    >
-                      <i className="bi bi-arrow-clockwise me-2"></i>Try Again
-                    </Button>
-                  </div>
-                </Card.Body>
+                <Button
+                  variant="outline-secondary"
+                  onClick={handlePrint}
+                  className="me-2"
+                  disabled={pdfGenerating}
+                >
+                  {pdfGenerating ? (
+                    <>
+                      <Spinner
+                        as="span"
+                        animation="border"
+                        size="sm"
+                        className="me-2"
+                      />
+                      Generating PDF...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-printer me-2"></i>
+                      Print Invoice
+                    </>
+                  )}
+                </Button>
               </Card>
             </Col>
           </Row>
