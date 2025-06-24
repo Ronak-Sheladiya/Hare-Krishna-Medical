@@ -604,19 +604,82 @@ const InvoiceVerify = () => {
                               style={{
                                 fontSize: "1.5rem",
                                 fontWeight: "700",
-                                marginBottom: "10px",
+                                marginBottom: "15px",
                               }}
                             >
                               VERIFIED INVOICE
                             </h3>
-                            <p
+
+                            {/* Invoice ID and Order ID Display */}
+                            <div
                               style={{
-                                fontSize: "0.9rem",
-                                marginBottom: "5px",
+                                background: "rgba(255,255,255,0.15)",
+                                padding: "15px",
+                                borderRadius: "8px",
+                                marginBottom: "15px",
+                                textAlign: "center",
                               }}
                             >
-                              <strong>#{invoiceData?.invoiceId}</strong>
-                            </p>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-around",
+                                  alignItems: "center",
+                                  flexWrap: "wrap",
+                                  gap: "15px",
+                                }}
+                              >
+                                <div>
+                                  <strong
+                                    style={{
+                                      fontSize: "0.9rem",
+                                      opacity: 0.9,
+                                      display: "block",
+                                    }}
+                                  >
+                                    Invoice ID
+                                  </strong>
+                                  <span
+                                    style={{
+                                      fontSize: "1.1rem",
+                                      fontWeight: "700",
+                                      background: "rgba(255,255,255,0.2)",
+                                      padding: "6px 12px",
+                                      borderRadius: "6px",
+                                      display: "inline-block",
+                                      marginTop: "4px",
+                                    }}
+                                  >
+                                    #{invoiceData?.invoiceId || "INV-2024-001"}
+                                  </span>
+                                </div>
+                                <div>
+                                  <strong
+                                    style={{
+                                      fontSize: "0.9rem",
+                                      opacity: 0.9,
+                                      display: "block",
+                                    }}
+                                  >
+                                    Order ID
+                                  </strong>
+                                  <span
+                                    style={{
+                                      fontSize: "1.1rem",
+                                      fontWeight: "700",
+                                      background: "rgba(255,255,255,0.2)",
+                                      padding: "6px 12px",
+                                      borderRadius: "6px",
+                                      display: "inline-block",
+                                      marginTop: "4px",
+                                    }}
+                                  >
+                                    #{invoiceData?.orderId || "ORD-2024-001"}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
                             <p
                               style={{
                                 fontSize: "0.8rem",
@@ -777,7 +840,7 @@ const InvoiceVerify = () => {
 
                     {/* Total and Payment Info */}
                     <Row>
-                      <Col lg={8}>
+                      <Col lg={5}>
                         <div
                           style={{
                             background: "#f8f9fa",
@@ -818,6 +881,56 @@ const InvoiceVerify = () => {
                           </p>
                         </div>
                       </Col>
+
+                      {/* QR Code Column */}
+                      <Col lg={3}>
+                        <div
+                          style={{
+                            background: "white",
+                            padding: "20px",
+                            border: "2px solid #e63946",
+                            borderRadius: "8px",
+                            textAlign: "center",
+                          }}
+                        >
+                          <h6
+                            style={{
+                              color: "#e63946",
+                              fontWeight: "600",
+                              marginBottom: "15px",
+                            }}
+                          >
+                            <i className="bi bi-qr-code me-2"></i>QR Code
+                          </h6>
+                          <div
+                            style={{
+                              width: "100px",
+                              height: "100px",
+                              border: "2px solid #e63946",
+                              borderRadius: "8px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              margin: "0 auto 10px",
+                              background: "#f8f9fa",
+                              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 100 100'%3E%3Cg fill='%23e63946'%3E%3Crect x='0' y='0' width='20' height='20'/%3E%3Crect x='20' y='20' width='20' height='20'/%3E%3Crect x='40' y='0' width='20' height='20'/%3E%3Crect x='60' y='20' width='20' height='20'/%3E%3Crect x='80' y='0' width='20' height='20'/%3E%3Crect x='0' y='40' width='20' height='20'/%3E%3Crect x='40' y='40' width='20' height='20'/%3E%3Crect x='80' y='40' width='20' height='20'/%3E%3Crect x='20' y='60' width='20' height='20'/%3E%3Crect x='60' y='60' width='20' height='20'/%3E%3Crect x='0' y='80' width='20' height='20'/%3E%3Crect x='40' y='80' width='20' height='20'/%3E%3Crect x='80' y='80' width='20' height='20'/%3E%3C/g%3E%3C/svg%3E")`,
+                              backgroundSize: "70px 70px",
+                              backgroundRepeat: "no-repeat",
+                              backgroundPosition: "center",
+                            }}
+                          ></div>
+                          <p
+                            style={{
+                              fontSize: "0.8rem",
+                              color: "#666",
+                              marginBottom: "0",
+                            }}
+                          >
+                            Scan to verify
+                          </p>
+                        </div>
+                      </Col>
+
                       <Col lg={4}>
                         <div
                           style={{
