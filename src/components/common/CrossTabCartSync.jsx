@@ -81,21 +81,59 @@ const CrossTabCartSync = () => {
 
           console.log(`[Cart Sync] Storage event: ${cartEvent.type}`);
 
+          // Prevent action loops by checking if state would actually change
+          const currentState = cartState;
+          let shouldDispatch = true;
+
           switch (cartEvent.type) {
             case "CART_ADD_ITEM":
-              dispatch(addToCart(cartEvent.payload));
+              // Check if item already exists with same quantity
+              const existingItem = currentState.items.find(
+                (item) => item.id === cartEvent.payload.id,
+              );
+              if (existingItem) {
+                shouldDispatch = false; // Item already exists, prevent duplicate
+              }
+              if (shouldDispatch) dispatch(addToCart(cartEvent.payload));
               break;
             case "CART_REMOVE_ITEM":
-              dispatch(removeFromCart(cartEvent.payload));
+              // Check if item exists to remove
+              const itemExists = currentState.items.find(
+                (item) => item.id === cartEvent.payload,
+              );
+              if (!itemExists) {
+                shouldDispatch = false;
+              }
+              if (shouldDispatch) dispatch(removeFromCart(cartEvent.payload));
               break;
             case "CART_UPDATE_QUANTITY":
-              dispatch(updateQuantity(cartEvent.payload));
+              // Check if quantity is actually different
+              const itemToUpdate = currentState.items.find(
+                (item) => item.id === cartEvent.payload.id,
+              );
+              if (
+                itemToUpdate &&
+                itemToUpdate.quantity === cartEvent.payload.quantity
+              ) {
+                shouldDispatch = false;
+              }
+              if (shouldDispatch) dispatch(updateQuantity(cartEvent.payload));
               break;
             case "CART_CLEAR":
-              dispatch(clearCart());
+              // Only clear if cart has items
+              if (currentState.items.length === 0) {
+                shouldDispatch = false;
+              }
+              if (shouldDispatch) dispatch(clearCart());
               break;
             case "CART_SYNC":
-              dispatch(syncCartFromServer(cartEvent.payload));
+              // Compare full state before syncing
+              const newState = cartEvent.payload;
+              if (JSON.stringify(currentState) === JSON.stringify(newState)) {
+                shouldDispatch = false;
+              }
+              if (shouldDispatch)
+                dispatch(syncCartFromServer(cartEvent.payload));
               break;
             default:
               console.warn(
