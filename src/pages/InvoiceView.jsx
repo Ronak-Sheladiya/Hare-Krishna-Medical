@@ -490,6 +490,74 @@ const InvoiceView = () => {
                     <Button variant="danger" onClick={() => navigate("/")}>
                       <i className="bi bi-house me-2"></i>Go Home
                     </Button>
+                  </div>
+                </Col>
+              </Row>
+            </Container>
+          </div>
+        )}
+      </>
+    );
+  }
+
+  return (
+    <div className="fade-in">
+      {/* Navigation and Header */}
+      <div className="hero-section">
+        <Container>
+          <Row className="align-items-center">
+            <Col lg={8}>
+              <div>
+                <nav className="breadcrumb-nav">
+                  <Button
+                    variant="link"
+                    onClick={() => navigate("/")}
+                    className="text-white p-0 me-2"
+                  >
+                    <i className="bi bi-house"></i> Home
+                  </Button>
+                  <span className="text-white mx-2">/</span>
+                  <span className="text-white-50">Invoice {invoiceId}</span>
+                </nav>
+                <h1 className="mb-3" style={{ fontSize: "2.5rem" }}>
+                  <i className="bi bi-receipt me-3"></i>
+                  Invoice Verification
+                </h1>
+                <p className="lead mb-0" style={{ opacity: 0.9 }}>
+                  Official invoice with QR verification for secure
+                  authentication
+                </p>
+              </div>
+            </Col>
+            <Col lg={4} className="text-end">
+              <div className="d-flex gap-2 justify-content-end">
+                <Button
+                  variant="outline-secondary"
+                  onClick={handlePrint}
+                  className="me-2"
+                  disabled={pdfGenerating}
+                  style={{
+                    fontWeight: "600",
+                    borderRadius: "8px",
+                    minWidth: "120px",
+                  }}
+                >
+                  {pdfGenerating ? (
+                    <>
+                      <Spinner
+                        as="span"
+                        animation="border"
+                        size="sm"
+                        className="me-2"
+                      />
+                      Generating PDF...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-printer me-2"></i>Print
+                    </>
+                  )}
+                </Button>
                 <Button
                   variant="outline-secondary"
                   onClick={handlePrint}
