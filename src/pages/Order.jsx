@@ -182,9 +182,10 @@ const Order = () => {
     return "HKM" + Date.now().toString().slice(-8);
   };
 
-  const generateQRCode = async (orderId) => {
+  const generateQRCode = async (invoiceId) => {
     try {
-      const invoiceUrl = `${window.location.origin}/invoice/${orderId}`;
+      // Fixed: Generate QR for invoice verification using invoiceId
+      const invoiceUrl = `${window.location.origin}/invoice/${invoiceId}`;
       const qrCodeDataURL = await QRCode.toDataURL(invoiceUrl, {
         width: 200,
         margin: 2,
@@ -208,11 +209,12 @@ const Order = () => {
     }
 
     const orderId = generateOrderId();
-    const qrCodeData = await generateQRCode(orderId);
+    const invoiceId = `INV${orderId.slice(-6)}`;
+    const qrCodeData = await generateQRCode(invoiceId);
 
     const orderData = {
       orderId,
-      invoiceId: `INV${orderId.slice(-6)}`,
+      invoiceId,
       items: [...items],
       customerDetails: { ...formData },
       orderSummary: {
