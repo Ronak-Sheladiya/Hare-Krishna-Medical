@@ -12,12 +12,12 @@ import {
   Spinner,
   InputGroup,
 } from "react-bootstrap";
+import QRCode from "qrcode";
 import { api, safeApiCall } from "../utils/apiClient";
 import { getDemoInvoice, isDemoInvoice } from "../utils/demoInvoiceData";
 import { PageHeroSection } from "../components/common/ConsistentTheme";
 import QRCameraScanner from "../components/common/QRCameraScanner";
 import pdfService from "../services/PDFService";
-import invoiceService from "../services/InvoiceService";
 import "../styles/InvoiceA4.css";
 
 const InvoiceVerify = () => {
@@ -33,8 +33,7 @@ const InvoiceVerify = () => {
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [showQRScanner, setShowQRScanner] = useState(false);
-  const [qrCode, setQrCode] = useState(null);
-  const [qrData, setQrData] = useState(null);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState(null);
 
   // Auto-verify if invoice ID is in URL
   useEffect(() => {
@@ -53,6 +52,26 @@ const InvoiceVerify = () => {
     }
   }, [searchParams, urlInvoiceId]);
 
+  // Generate QR code for invoice verification
+  const generateInvoiceQR = async (invoiceId) => {
+    try {
+      const verificationUrl = `${window.location.origin}/invoice/${invoiceId}`;
+      const qrCodeUrl = await QRCode.toDataURL(verificationUrl, {
+        width: 150,
+        margin: 2,
+        color: {
+          dark: "#e63946",
+          light: "#ffffff",
+        },
+        errorCorrectionLevel: "M",
+      });
+      setQrCodeDataUrl(qrCodeUrl);
+      console.log("QR Code generated for:", verificationUrl);
+    } catch (error) {
+      console.error("QR Code generation failed:", error);
+    }
+  };
+
   const handleVerify = async (idToVerify = null) => {
     const targetId = idToVerify || invoiceId.trim();
     if (!targetId) {
@@ -64,6 +83,7 @@ const InvoiceVerify = () => {
     setError("");
     setVerifySuccess(false);
     setInvoice(null);
+    setQrCodeDataUrl(null);
 
     try {
       // Check if this is a demo invoice first
@@ -73,7 +93,7 @@ const InvoiceVerify = () => {
           setInvoice(demoInvoice);
           setVerifySuccess(true);
           generateInvoicePDF(demoInvoice);
-          generateVerificationQR(demoInvoice.invoiceNumber || targetId);
+          generateInvoiceQR(demoInvoice.invoiceNumber || targetId);
           setLoading(false);
           return;
         }
@@ -116,9 +136,7 @@ const InvoiceVerify = () => {
         setInvoice(data.data);
         setVerifySuccess(true);
         generateInvoicePDF(data.data);
-        generateVerificationQR(
-          data.data.invoiceId || data.data._id || targetId,
-        );
+        generateInvoiceQR(data.data.invoiceId || data.data._id || targetId);
       } else {
         // Determine if this was a QR scan or manual input
         const wasQRScan = searchParams.get("invoice") || searchParams.get("id");
@@ -139,22 +157,6 @@ const InvoiceVerify = () => {
       setError("Verification failed. Please try again.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const generateVerificationQR = async (invoiceId) => {
-    try {
-      const result = await invoiceService.generateInvoiceQR(invoiceId);
-      if (result) {
-        setQrCode(result.qrCode);
-        setQrData(result.qrData);
-        console.log(
-          "QR Code generated for verification:",
-          result.verificationUrl,
-        );
-      }
-    } catch (error) {
-      console.error("QR Code generation failed:", error);
     }
   };
 
@@ -633,76 +635,31 @@ const InvoiceVerify = () => {
                               VERIFIED INVOICE
                             </h3>
 
-                            {/* Invoice ID and Order ID Display */}
-                            <div
+                            {/* Simple text for Invoice ID and Order ID */}
+                            <p
                               style={{
-                                background: "rgba(255,255,255,0.15)",
-                                padding: "15px",
-                                borderRadius: "8px",
-                                marginBottom: "15px",
-                                textAlign: "center",
+                                fontSize: "0.9rem",
+                                marginBottom: "5px",
+                                opacity: 0.9,
                               }}
                             >
-                              <div
-                                style={{
-                                  display: "flex",
-                                  justifyContent: "space-around",
-                                  alignItems: "center",
-                                  flexWrap: "wrap",
-                                  gap: "15px",
-                                }}
-                              >
-                                <div>
-                                  <strong
-                                    style={{
-                                      fontSize: "0.9rem",
-                                      opacity: 0.9,
-                                      display: "block",
-                                    }}
-                                  >
-                                    Invoice ID
-                                  </strong>
-                                  <span
-                                    style={{
-                                      fontSize: "1.1rem",
-                                      fontWeight: "700",
-                                      background: "rgba(255,255,255,0.2)",
-                                      padding: "6px 12px",
-                                      borderRadius: "6px",
-                                      display: "inline-block",
-                                      marginTop: "4px",
-                                    }}
-                                  >
-                                    #{invoiceData?.invoiceId || "INV-2024-001"}
-                                  </span>
-                                </div>
-                                <div>
-                                  <strong
-                                    style={{
-                                      fontSize: "0.9rem",
-                                      opacity: 0.9,
-                                      display: "block",
-                                    }}
-                                  >
-                                    Order ID
-                                  </strong>
-                                  <span
-                                    style={{
-                                      fontSize: "1.1rem",
-                                      fontWeight: "700",
-                                      background: "rgba(255,255,255,0.2)",
-                                      padding: "6px 12px",
-                                      borderRadius: "6px",
-                                      display: "inline-block",
-                                      marginTop: "4px",
-                                    }}
-                                  >
-                                    #{invoiceData?.orderId || "ORD-2024-001"}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
+                              Invoice ID:{" "}
+                              <strong>
+                                #{invoiceData?.invoiceId || "INV-2024-001"}
+                              </strong>
+                            </p>
+                            <p
+                              style={{
+                                fontSize: "0.9rem",
+                                marginBottom: "5px",
+                                opacity: 0.9,
+                              }}
+                            >
+                              Order ID:{" "}
+                              <strong>
+                                #{invoiceData?.orderId || "ORD-2024-001"}
+                              </strong>
+                            </p>
                             <p
                               style={{
                                 fontSize: "0.8rem",
@@ -861,7 +818,7 @@ const InvoiceVerify = () => {
                       </div>
                     </div>
 
-                    {/* Total and Payment Info */}
+                    {/* Total and Payment Info with QR Code */}
                     <Row>
                       <Col lg={5}>
                         <div
@@ -925,31 +882,45 @@ const InvoiceVerify = () => {
                           >
                             <i className="bi bi-qr-code me-2"></i>QR Code
                           </h6>
-                          <div
-                            style={{
-                              width: "100px",
-                              height: "100px",
-                              border: "2px solid #e63946",
-                              borderRadius: "8px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              margin: "0 auto 10px",
-                              background: "#f8f9fa",
-                              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 100 100'%3E%3Cg fill='%23e63946'%3E%3Crect x='0' y='0' width='20' height='20'/%3E%3Crect x='20' y='20' width='20' height='20'/%3E%3Crect x='40' y='0' width='20' height='20'/%3E%3Crect x='60' y='20' width='20' height='20'/%3E%3Crect x='80' y='0' width='20' height='20'/%3E%3Crect x='0' y='40' width='20' height='20'/%3E%3Crect x='40' y='40' width='20' height='20'/%3E%3Crect x='80' y='40' width='20' height='20'/%3E%3Crect x='20' y='60' width='20' height='20'/%3E%3Crect x='60' y='60' width='20' height='20'/%3E%3Crect x='0' y='80' width='20' height='20'/%3E%3Crect x='40' y='80' width='20' height='20'/%3E%3Crect x='80' y='80' width='20' height='20'/%3E%3C/g%3E%3C/svg%3E")`,
-                              backgroundSize: "70px 70px",
-                              backgroundRepeat: "no-repeat",
-                              backgroundPosition: "center",
-                            }}
-                          ></div>
+                          {qrCodeDataUrl ? (
+                            <img
+                              src={qrCodeDataUrl}
+                              alt="Invoice Verification QR Code"
+                              style={{
+                                width: "120px",
+                                height: "120px",
+                                border: "2px solid #e63946",
+                                borderRadius: "8px",
+                              }}
+                            />
+                          ) : (
+                            <div
+                              style={{
+                                width: "120px",
+                                height: "120px",
+                                border: "2px dashed #e63946",
+                                borderRadius: "8px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                margin: "0 auto",
+                                background: "#f8f9fa",
+                                color: "#e63946",
+                                fontSize: "0.8rem",
+                              }}
+                            >
+                              Generating QR...
+                            </div>
+                          )}
                           <p
                             style={{
                               fontSize: "0.8rem",
                               color: "#666",
+                              marginTop: "10px",
                               marginBottom: "0",
                             }}
                           >
-                            Scan to verify
+                            Scan to view invoice
                           </p>
                         </div>
                       </Col>
