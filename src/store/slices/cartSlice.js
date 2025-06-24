@@ -21,12 +21,19 @@ const loadCartFromStorage = () => {
   };
 };
 
-// Helper function to save cart to localStorage
+// Helper function to save cart to localStorage and broadcast changes
 const saveCartToStorage = (state) => {
   try {
     localStorage.setItem("cart", JSON.stringify(state));
   } catch (error) {
     console.warn("Failed to save cart to localStorage:", error);
+  }
+};
+
+// Helper function to broadcast cart events across tabs
+const broadcastCartEvent = (type, payload = null) => {
+  if (typeof window !== "undefined" && window.broadcastCartEvent) {
+    window.broadcastCartEvent(type, payload);
   }
 };
 
@@ -57,6 +64,7 @@ const cartSlice = createSlice({
       );
 
       saveCartToStorage(state);
+      broadcastCartEvent("CART_ADD_ITEM", action.payload);
     },
     removeFromCart: (state, action) => {
       state.items = state.items.filter((item) => item.id !== action.payload);
@@ -70,6 +78,7 @@ const cartSlice = createSlice({
       );
 
       saveCartToStorage(state);
+      broadcastCartEvent("CART_REMOVE_ITEM", action.payload);
     },
     updateQuantity: (state, action) => {
       const { id, quantity } = action.payload;
@@ -92,6 +101,7 @@ const cartSlice = createSlice({
       );
 
       saveCartToStorage(state);
+      broadcastCartEvent("CART_UPDATE_QUANTITY", action.payload);
     },
     clearCart: (state) => {
       state.items = [];
@@ -99,15 +109,20 @@ const cartSlice = createSlice({
       state.totalAmount = 0;
 
       saveCartToStorage(state);
+      broadcastCartEvent("CART_CLEAR");
     },
-    // Add action to sync cart from server
+    // Add action to sync cart from server or other tabs
     syncCartFromServer: (state, action) => {
-      if (action.payload && action.payload.items) {
-        state.items = action.payload.items;
+      if (action.payload) {
+        state.items = action.payload.items || [];
         state.totalItems = action.payload.totalItems || 0;
         state.totalAmount = action.payload.totalAmount || 0;
 
         saveCartToStorage(state);
+        // Only broadcast if this is a server sync, not a cross-tab sync
+        if (action.payload.fromServer) {
+          broadcastCartEvent("CART_SYNC", action.payload);
+        }
       }
     },
   },
