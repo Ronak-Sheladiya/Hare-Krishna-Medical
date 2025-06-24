@@ -890,7 +890,3 @@ const InvoiceVerify = () => {
 };
 
 export default InvoiceVerify;
-  );
-};
-
-export default InvoiceVerify;
