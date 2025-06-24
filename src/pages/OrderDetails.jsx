@@ -174,12 +174,10 @@ const OrderDetails = () => {
 
     try {
       // Import required libraries dynamically
-      const jsPDF = (await import("jspdf")).default;
-      const html2canvas = (await import("html2canvas")).default;
       const QRCode = (await import("qrcode")).default;
 
-      // Generate QR code for verification
-      const verifyUrl = `${window.location.origin}/invoice/${orderId}`;
+      // Generate QR code for verification - Fixed: use invoiceId instead of orderId
+      const verifyUrl = `${window.location.origin}/invoice/${order.invoiceId || orderId}`;
       const qrDataURL = await QRCode.toDataURL(verifyUrl, {
         width: 120,
         margin: 2,
@@ -235,40 +233,23 @@ const OrderDetails = () => {
       // Wait for rendering
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      // Generate PDF
-      const canvas = await html2canvas(tempDiv, {
-        scale: 2.5,
-        logging: false,
-        useCORS: true,
-        backgroundColor: "#ffffff",
+      // Use centralized PDF service
+      const result = await pdfService.generateOrderPDF(tempDiv, order, {
+        filename: `${order.invoiceId}.pdf`,
+        onProgress: (message, progress) => {
+          console.log(`PDF Generation: ${message} (${progress}%)`);
+        },
       });
-
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      if (imgHeight > pageHeight) {
-        const scaleFactor = (pageHeight - 5) / imgHeight;
-        const scaledWidth = imgWidth * scaleFactor;
-        const scaledHeight = pageHeight - 5;
-        const xOffset = (imgWidth - scaledWidth) / 2;
-        pdf.addImage(imgData, "PNG", xOffset, 2.5, scaledWidth, scaledHeight);
-      } else {
-        const yOffset = (pageHeight - imgHeight) / 2;
-        pdf.addImage(imgData, "PNG", 0, yOffset, imgWidth, imgHeight);
-      }
-
-      // Download with invoice ID as filename
-      pdf.save(`${order.invoiceId}.pdf`);
 
       // Clean up
       root.unmount();
       document.body.removeChild(tempDiv);
 
-      // Show success message
-      alert("Official Invoice downloaded successfully!");
+      if (result.success) {
+        alert("Official Invoice downloaded successfully!");
+      } else {
+        throw new Error(result.error);
+      }
     } catch (error) {
       console.error("Error generating PDF:", error);
       alert("Error generating PDF. Please try again.");

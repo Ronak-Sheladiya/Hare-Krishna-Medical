@@ -51,6 +51,23 @@ const Footer = () => {
               <li className="mb-2">
                 <Link to="/contact">Contact</Link>
               </li>
+              <li className="mb-2">
+                <Link
+                  to="/verify"
+                  style={{
+                    color: "#e63946",
+                    fontWeight: "600",
+                    textDecoration: "none",
+                  }}
+                  onMouseOver={(e) =>
+                    (e.target.style.textDecoration = "underline")
+                  }
+                  onMouseOut={(e) => (e.target.style.textDecoration = "none")}
+                >
+                  <i className="bi bi-shield-check me-1"></i>
+                  Verify Invoice
+                </Link>
+              </li>
             </ul>
           </Col>
 

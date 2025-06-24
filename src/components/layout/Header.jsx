@@ -337,6 +337,7 @@ const Header = () => {
           transition: all 0.3s ease;
           object-fit: contain;
           margin: 0 !important;
+          background: transparent;
         }
 
         .medical-logo:hover {
@@ -464,6 +465,24 @@ const Header = () => {
 
           .brand-text-container h4 {
             font-size: 1.1rem !important;
+          }
+
+          .navbar-brand > div {
+            width: 60px !important;
+            height: 60px !important;
+            padding: 8px !important;
+          }
+        }
+
+        @media (max-width: 576px) {
+          .navbar-brand > div {
+            width: 50px !important;
+            height: 50px !important;
+            padding: 6px !important;
+          }
+
+          .brand-text-container {
+            display: none;
           }
         }
       `}</style>

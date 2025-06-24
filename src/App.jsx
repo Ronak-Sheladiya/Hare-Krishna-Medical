@@ -22,6 +22,7 @@ import RealTimeStatus from "./components/common/RealTimeStatus.jsx";
 import SocketDiagnostic from "./components/common/SocketDiagnostic.jsx";
 import SessionStatus from "./components/common/SessionStatus.jsx";
 import SecurityLayer from "./components/common/SecurityLayer.jsx";
+import CrossTabCartSync from "./components/common/CrossTabCartSync.jsx";
 
 // Pages
 import Home from "./pages/Home.jsx";
@@ -49,6 +50,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
 import TermsConditions from "./pages/TermsConditions.jsx";
 import BackendDocs from "./pages/BackendDocs.jsx";
 import InvoiceView from "./pages/InvoiceView.jsx";
+import InvoiceVerify from "./pages/InvoiceVerify.jsx";
 import OrderDetails from "./pages/OrderDetails.jsx";
 import UserGuide from "./pages/UserGuide.jsx";
 import LocalSetupGuide from "./pages/LocalSetupGuide.jsx";
@@ -101,16 +103,17 @@ const ProtectedRoute = ({ children, adminOnly = false, userOnly = false }) => {
   const location = useLocation();
 
   if (!isAuthenticated) {
-    // Store the current location for redirect after login
-    sessionStorage.setItem(
-      "redirectAfterLogin",
-      location.pathname + location.search,
-    );
+    // Store the current location for redirect after login (both session and localStorage)
+    const returnUrl = location.pathname + location.search + location.hash;
+    sessionStorage.setItem("redirectAfterLogin", returnUrl);
+    localStorage.setItem("lastAttemptedUrl", returnUrl);
+
     return (
       <Navigate
         to="/login"
         state={{
-          from: location.pathname + location.search,
+          from: returnUrl,
+          returnTo: returnUrl,
         }}
         replace
       />
@@ -236,6 +239,7 @@ function App() {
         <div className="App">
           <SecurityLayer />
           <RealTimeSync />
+          <CrossTabCartSync />
           <ScrollToTop />
           <Header />
           <main>
@@ -245,6 +249,8 @@ function App() {
               <Route path="/products" element={<Products />} />
               <Route path="/product/:id" element={<ProductDetails />} />
               <Route path="/invoice/:invoiceId" element={<InvoiceView />} />
+              <Route path="/verify" element={<InvoiceVerify />} />
+              <Route path="/verify/:invoiceId" element={<InvoiceVerify />} />
 
               <Route path="/verify-email/:token" element={<VerifyEmail />} />
               <Route

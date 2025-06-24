@@ -17,9 +17,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearCart } from "../store/slices/cartSlice.js";
 import PaymentOptions from "../components/common/PaymentOptions.jsx";
 import OfficialInvoiceDesign from "../components/common/OfficialInvoiceDesign.jsx";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import QRCode from "qrcode";
+import pdfService from "../services/PDFService";
 
 const Order = () => {
   const navigate = useNavigate();
@@ -182,9 +181,10 @@ const Order = () => {
     return "HKM" + Date.now().toString().slice(-8);
   };
 
-  const generateQRCode = async (orderId) => {
+  const generateQRCode = async (invoiceId) => {
     try {
-      const invoiceUrl = `${window.location.origin}/invoice/${orderId}`;
+      // Fixed: Generate QR for invoice verification using invoiceId
+      const invoiceUrl = `${window.location.origin}/invoice/${invoiceId}`;
       const qrCodeDataURL = await QRCode.toDataURL(invoiceUrl, {
         width: 200,
         margin: 2,
@@ -208,11 +208,12 @@ const Order = () => {
     }
 
     const orderId = generateOrderId();
-    const qrCodeData = await generateQRCode(orderId);
+    const invoiceId = `INV${orderId.slice(-6)}`;
+    const qrCodeData = await generateQRCode(invoiceId);
 
     const orderData = {
       orderId,
-      invoiceId: `INV${orderId.slice(-6)}`,
+      invoiceId,
       items: [...items],
       customerDetails: { ...formData },
       orderSummary: {
@@ -299,35 +300,21 @@ const Order = () => {
       // Wait for rendering
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Generate PDF with high quality, optimized for A4 single page
-      const canvas = await html2canvas(invoiceElement, {
-        scale: 2.5,
-        logging: false,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        width: invoiceElement.scrollWidth,
-        height: invoiceElement.scrollHeight,
-      });
+      // Use centralized PDF service
+      const result = await pdfService.generateInvoicePDF(
+        invoiceElement,
+        invoiceData,
+        {
+          filename: `Invoice-${orderDetails.invoiceId}.pdf`,
+          onProgress: (message, progress) => {
+            console.log(`PDF Generation: ${message} (${progress}%)`);
+          },
+        },
+      );
 
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      // Always ensure single page - scale down if necessary
-      if (imgHeight > pageHeight) {
-        const scaleFactor = (pageHeight - 5) / imgHeight; // 5mm margin for safety
-        const scaledWidth = imgWidth * scaleFactor;
-        const scaledHeight = pageHeight - 5;
-        const xOffset = (imgWidth - scaledWidth) / 2;
-        pdf.addImage(imgData, "PNG", xOffset, 2.5, scaledWidth, scaledHeight);
-      } else {
-        const yOffset = (pageHeight - imgHeight) / 2;
-        pdf.addImage(imgData, "PNG", 0, yOffset, imgWidth, imgHeight);
+      if (!result.success) {
+        throw new Error(result.error);
       }
-
-      pdf.save(`Invoice-${orderDetails.invoiceId}.pdf`);
 
       // Clean up
       root.unmount();

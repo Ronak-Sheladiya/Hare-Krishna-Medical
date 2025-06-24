@@ -16,8 +16,23 @@ const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ["auth/loginSuccess", "auth/updateUser"],
-        ignoredPaths: ["auth.user.profileImage"],
+        ignoredActions: [
+          "auth/loginSuccess",
+          "auth/updateUser",
+          "cart/addToCart",
+          "cart/removeFromCart",
+          "cart/updateQuantity",
+          "cart/clearCart",
+          "cart/syncCartFromServer",
+        ],
+        ignoredPaths: [
+          "auth.user.profileImage",
+          "cart.items",
+          "cart.lastUpdated",
+        ],
+      },
+      immutableCheck: {
+        ignoredPaths: ["cart.items"],
       },
     }),
   devTools: process.env.NODE_ENV !== "production",

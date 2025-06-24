@@ -47,8 +47,8 @@ const ProfessionalInvoice = ({
           return;
         }
 
-        // Generate new QR code if none provided
-        const verifyUrl = `${window.location.origin}/invoice/${orderId}`;
+        // Generate new QR code if none provided - Fixed: use invoiceId instead of orderId
+        const verifyUrl = `${window.location.origin}/invoice/${invoiceId}`;
         const qrData = {
           type: "invoice_verification",
           invoice_id: invoiceId,
