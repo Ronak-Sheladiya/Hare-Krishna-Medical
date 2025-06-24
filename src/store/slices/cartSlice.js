@@ -83,6 +83,7 @@ const cartSlice = createSlice({
         (total, item) => total + item.price * item.quantity,
         0,
       );
+      state.lastUpdated = Date.now();
 
       saveCartToStorage(state);
       broadcastCartEvent("CART_REMOVE_ITEM", action.payload);
@@ -106,6 +107,7 @@ const cartSlice = createSlice({
         (total, item) => total + item.price * item.quantity,
         0,
       );
+      state.lastUpdated = Date.now();
 
       saveCartToStorage(state);
       broadcastCartEvent("CART_UPDATE_QUANTITY", action.payload);
@@ -114,6 +116,7 @@ const cartSlice = createSlice({
       state.items = [];
       state.totalItems = 0;
       state.totalAmount = 0;
+      state.lastUpdated = Date.now();
 
       saveCartToStorage(state);
       broadcastCartEvent("CART_CLEAR");
