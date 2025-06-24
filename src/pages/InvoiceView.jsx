@@ -15,8 +15,7 @@ import { refreshSession } from "../store/slices/authSlice";
 import { api, safeApiCall } from "../utils/apiClient";
 import { getDemoInvoice, isDemoInvoice } from "../utils/demoInvoiceData";
 import invoiceService from "../services/InvoiceService";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import pdfService from "../services/PDFService";
 import "../styles/InvoiceA4.css";
 
 const InvoiceView = () => {
@@ -375,32 +374,17 @@ const InvoiceView = () => {
       // Wait for styles to apply
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Create canvas with high quality settings
-      const canvas = await html2canvas(invoiceElement, {
-        scale: 3, // Higher scale for better quality
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-        width: 794, // A4 width in pixels at 96 DPI
-        height: Math.max(1123, invoiceElement.scrollHeight * 3.78), // Dynamic height
-        logging: false,
-        removeContainer: true,
-        imageTimeout: 0,
-        onclone: (clonedDoc) => {
-          // Apply print styles to cloned document
-          const style = clonedDoc.createElement("style");
-          style.textContent = `
-            * { box-sizing: border-box; }
-            .no-print { display: none !important; }
-            #invoice-content {
-              width: 210mm !important;
-              font-family: 'Segoe UI', Arial, sans-serif !important;
-              background: white !important;
-            }
-          `;
-          clonedDoc.head.appendChild(style);
+      // Use centralized PDF service
+      const result = await pdfService.generateInvoicePDF(
+        invoiceElement,
+        invoice,
+        {
+          filename: `Invoice_${invoiceId}_${new Date().toISOString().split("T")[0]}.pdf`,
+          onProgress: (message, progress) => {
+            console.log(`PDF Generation: ${message} (${progress}%)`);
+          },
         },
-      });
+      );
 
       // Restore original styles
       invoiceElement.style.display = originalDisplay;
@@ -408,38 +392,9 @@ const InvoiceView = () => {
       invoiceElement.style.width = originalWidth;
       invoiceElement.style.height = originalHeight;
 
-      // Create PDF with proper A4 dimensions
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-        compress: true,
-      });
-
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      const imgData = canvas.toDataURL("image/jpeg", 0.95);
-
-      // Add first page
-      pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      // Add additional pages if needed
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      if (!result.success) {
+        throw new Error(result.error);
       }
-
-      // Download the PDF
-      const fileName = `Invoice_${invoiceId}_${new Date().toISOString().split("T")[0]}.pdf`;
-      pdf.save(fileName);
     } catch (error) {
       console.error("PDF download failed:", error);
       alert("PDF download failed. Please try printing instead.");
