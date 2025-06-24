@@ -156,21 +156,46 @@ const InvoiceView = () => {
 
   const handlePrint = () => {
     if (pdfUrl) {
-      // Open PDF in new window for printing
-      const printWindow = window.open(pdfUrl, "_blank");
+      // Create a new window with specific parameters for PDF viewing
+      const printWindow = window.open(
+        pdfUrl,
+        "_blank",
+        "width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes,location=no,status=no",
+      );
+
       if (printWindow) {
+        // Set title for the print window
+        printWindow.document.title = `Invoice ${invoiceId} - Print`;
+
+        // Wait for PDF to load, then trigger print
         printWindow.onload = () => {
           setTimeout(() => {
+            // Focus the window and trigger print
+            printWindow.focus();
             printWindow.print();
-          }, 500);
+          }, 1000); // Increased delay to ensure PDF fully loads
         };
+
+        // Fallback for browsers that don't support onload for PDF
+        setTimeout(() => {
+          try {
+            printWindow.focus();
+            printWindow.print();
+          } catch (error) {
+            console.log("Fallback print trigger:", error);
+          }
+        }, 2000);
       } else {
-        alert("Please allow pop-ups to print the invoice.");
+        alert(
+          "Please allow pop-ups to print the invoice. Check your browser's pop-up blocker settings.",
+        );
       }
     } else if (pdfGenerating) {
       alert("PDF is still being generated. Please wait and try again.");
     } else {
-      alert("PDF not available. Please refresh the page and try again.");
+      // Fallback: regenerate PDF if not available
+      alert("PDF not available. Regenerating...");
+      generateInvoicePDF();
     }
   };
 
