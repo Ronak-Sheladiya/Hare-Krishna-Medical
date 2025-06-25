@@ -1,5 +1,4 @@
 const express = require("express");
-const Product = require("../models/Product");
 const { auth, adminAuth } = require("../middleware/auth");
 const {
   validateProduct,
@@ -7,6 +6,7 @@ const {
   validatePagination,
   validateSearch,
 } = require("../middleware/validate");
+const productsController = require("../controllers/productsController");
 
 const router = express.Router();
 
