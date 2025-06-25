@@ -21,7 +21,7 @@ import {
   setError,
 } from "../store/slices/productsSlice.js";
 import ProductCard from "../components/products/ProductCard.jsx";
-import { api, safeApiCall } from "../utils/apiClient";
+import { api, safeApiCall } from "../utils/apiClient.js";
 
 const Products = () => {
   const dispatch = useDispatch();

@@ -15,20 +15,20 @@ import {
   Dropdown,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import OfficialInvoiceDesign from "../../components/common/OfficialInvoiceDesign";
+import OfficialInvoiceDesign from "../../components/common/OfficialInvoiceDesign.jsx";
 import {
   viewInvoice,
   printInvoice,
   downloadInvoice,
   createInvoiceData,
 } from "../../utils/invoiceUtils.js";
-import { formatDateTime, getRelativeTime } from "../../utils/dateUtils";
-import { api, safeApiCall } from "../../utils/apiClient";
+import { formatDateTime, getRelativeTime } from "../../utils/dateUtils.js";
+import { api, safeApiCall } from "../../utils/apiClient.js";
 import {
   PageHeroSection,
   ThemeCard,
   ThemeButton,
-} from "../../components/common/ConsistentTheme";
+} from "../../components/common/ConsistentTheme.jsx";
 import * as XLSX from "xlsx";
 
 const AdminOrders = () => {

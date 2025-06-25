@@ -17,7 +17,7 @@ import {
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../store/slices/cartSlice.js";
-import { api, safeApiCall } from "../utils/apiClient";
+import { api, safeApiCall } from "../utils/apiClient.js";
 
 const ProductDetails = () => {
   const { id } = useParams();

@@ -18,7 +18,7 @@ import { clearCart } from "../store/slices/cartSlice.js";
 import PaymentOptions from "../components/common/PaymentOptions.jsx";
 import OfficialInvoiceDesign from "../components/common/OfficialInvoiceDesign.jsx";
 import QRCode from "qrcode";
-import pdfService from "../services/PDFService";
+import pdfService from "../services/PDFService.js";
 
 const Order = () => {
   const navigate = useNavigate();

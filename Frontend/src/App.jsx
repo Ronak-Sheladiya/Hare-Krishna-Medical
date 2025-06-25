@@ -68,7 +68,7 @@ import NotFound from "./pages/NotFound.jsx";
 import socketClient from "./utils/socketClient.js";
 
 // Invoice Service
-import invoiceService from "./services/InvoiceService";
+import invoiceService from "./services/InvoiceService.js";
 
 // Styles
 import "./App.css";
