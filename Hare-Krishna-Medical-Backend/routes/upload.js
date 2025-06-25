@@ -1,15 +1,16 @@
 const express = require("express");
 const multer = require("multer");
-const cloudinary = require("cloudinary").v2;
 const { adminAuth } = require("../middleware/auth");
+const mongoose = require("mongoose");
 
 const router = express.Router();
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+// GridFS setup for storing images in MongoDB
+let gridfsBucket;
+mongoose.connection.once("open", () => {
+  gridfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+    bucketName: "images",
+  });
 });
 
 // Configure multer for memory storage
@@ -29,65 +30,122 @@ const upload = multer({
   },
 });
 
-// @route   POST /api/upload/product-image
-// @desc    Upload product image
-// @access  Admin
-router.post(
-  "/product-image",
-  adminAuth,
-  upload.single("image"),
-  async (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          message: "No image file provided",
-        });
-      }
+// Helper function to store image in MongoDB GridFS
+const storeImageInMongoDB = (buffer, filename, mimetype) => {
+  return new Promise((resolve, reject) => {
+    if (!gridfsBucket) {
+      return reject(new Error("GridFS bucket not initialized"));
+    }
 
-      // Upload to Cloudinary
-      const result = await new Promise((resolve, reject) => {
-        cloudinary.uploader
-          .upload_stream(
-            {
-              resource_type: "image",
-              folder: "hare-krishna-medical/products",
-              transformation: [
-                { width: 800, height: 800, crop: "fill", quality: "auto" },
-                { fetch_format: "auto" },
-              ],
-            },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            },
-          )
-          .end(req.file.buffer);
-      });
+    const uploadStream = gridfsBucket.openUploadStream(filename, {
+      metadata: {
+        contentType: mimetype,
+        uploadDate: new Date(),
+      },
+    });
 
-      res.json({
-        success: true,
-        message: "Image uploaded successfully",
-        data: {
-          url: result.secure_url,
-          public_id: result.public_id,
-          width: result.width,
-          height: result.height,
-        },
+    uploadStream.on("error", reject);
+    uploadStream.on("finish", (file) => {
+      resolve({
+        _id: file._id,
+        filename: file.filename,
+        url: `/api/upload/image/${file._id}`,
+        contentType: mimetype,
+        length: file.length,
       });
-    } catch (error) {
-      console.error("Upload error:", error);
-      res.status(500).json({
+    });
+
+    uploadStream.end(buffer);
+  });
+};
+
+// @route   GET /api/upload/image/:id
+// @desc    Get image from MongoDB GridFS
+// @access  Public
+router.get("/image/:id", async (req, res) => {
+  try {
+    if (!gridfsBucket) {
+      return res.status(500).json({
         success: false,
-        message: "Failed to upload image",
-        error: error.message,
+        message: "GridFS bucket not initialized",
       });
     }
-  },
-);
+
+    const objectId = new mongoose.Types.ObjectId(req.params.id);
+
+    // Find the file
+    const files = await gridfsBucket.find({ _id: objectId }).toArray();
+
+    if (!files || files.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Image not found",
+      });
+    }
+
+    const file = files[0];
+
+    // Set appropriate headers
+    res.set({
+      "Content-Type": file.metadata.contentType || "image/jpeg",
+      "Content-Length": file.length,
+    });
+
+    // Stream the file
+    const downloadStream = gridfsBucket.openDownloadStream(objectId);
+    downloadStream.pipe(res);
+  } catch (error) {
+    console.error("Error retrieving image:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve image",
+      error: error.message,
+    });
+  }
+});
+
+// @route   POST /api/upload/image
+// @desc    Upload single product image to MongoDB
+// @access  Admin
+router.post("/image", adminAuth, upload.single("image"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No image file provided",
+      });
+    }
+
+    const filename = `product_${Date.now()}_${req.file.originalname}`;
+    const result = await storeImageInMongoDB(
+      req.file.buffer,
+      filename,
+      req.file.mimetype,
+    );
+
+    res.json({
+      success: true,
+      message: "Image uploaded successfully",
+      data: {
+        url: result.url,
+        id: result._id,
+        filename: result.filename,
+        contentType: result.contentType,
+        size: result.length,
+      },
+    });
+  } catch (error) {
+    console.error("Upload error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to upload image",
+      error: error.message,
+    });
+  }
+});
 
 // @route   POST /api/upload/product-images
-// @desc    Upload multiple product images
+// @desc    Upload multiple product images to MongoDB
 // @access  Admin
 router.post(
   "/product-images",
@@ -102,35 +160,20 @@ router.post(
         });
       }
 
-      // Upload all images to Cloudinary
-      const uploadPromises = req.files.map((file) => {
-        return new Promise((resolve, reject) => {
-          cloudinary.uploader
-            .upload_stream(
-              {
-                resource_type: "image",
-                folder: "hare-krishna-medical/products",
-                transformation: [
-                  { width: 800, height: 800, crop: "fill", quality: "auto" },
-                  { fetch_format: "auto" },
-                ],
-              },
-              (error, result) => {
-                if (error) reject(error);
-                else resolve(result);
-              },
-            )
-            .end(file.buffer);
-        });
+      // Upload all images to MongoDB GridFS
+      const uploadPromises = req.files.map(async (file, index) => {
+        const filename = `product_${Date.now()}_${index}_${file.originalname}`;
+        return await storeImageInMongoDB(file.buffer, filename, file.mimetype);
       });
 
       const results = await Promise.all(uploadPromises);
 
       const uploadedImages = results.map((result) => ({
-        url: result.secure_url,
-        public_id: result.public_id,
-        width: result.width,
-        height: result.height,
+        url: result.url,
+        id: result._id,
+        filename: result.filename,
+        contentType: result.contentType,
+        size: result.length,
       }));
 
       res.json({
@@ -150,34 +193,35 @@ router.post(
 );
 
 // @route   DELETE /api/upload/delete-image
-// @desc    Delete image from Cloudinary
+// @desc    Delete image from MongoDB GridFS
 // @access  Admin
 router.delete("/delete-image", adminAuth, async (req, res) => {
   try {
-    const { public_id } = req.body;
+    const { image_id } = req.body;
 
-    if (!public_id) {
+    if (!image_id) {
       return res.status(400).json({
         success: false,
-        message: "Public ID is required",
+        message: "Image ID is required",
       });
     }
 
-    // Delete from Cloudinary
-    const result = await cloudinary.uploader.destroy(public_id);
-
-    if (result.result === "ok") {
-      res.json({
-        success: true,
-        message: "Image deleted successfully",
-      });
-    } else {
-      res.status(400).json({
+    if (!gridfsBucket) {
+      return res.status(500).json({
         success: false,
-        message: "Failed to delete image",
-        error: result.result,
+        message: "GridFS bucket not initialized",
       });
     }
+
+    const objectId = new mongoose.Types.ObjectId(image_id);
+
+    // Delete from MongoDB GridFS
+    await gridfsBucket.delete(objectId);
+
+    res.json({
+      success: true,
+      message: "Image deleted successfully",
+    });
   } catch (error) {
     console.error("Delete image error:", error);
     res.status(500).json({
@@ -189,7 +233,7 @@ router.delete("/delete-image", adminAuth, async (req, res) => {
 });
 
 // @route   POST /api/upload/user-avatar
-// @desc    Upload user avatar
+// @desc    Upload user avatar to MongoDB
 // @access  Private
 router.post("/user-avatar", upload.single("avatar"), async (req, res) => {
   try {
@@ -200,33 +244,20 @@ router.post("/user-avatar", upload.single("avatar"), async (req, res) => {
       });
     }
 
-    // Upload to Cloudinary
-    const result = await new Promise((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream(
-          {
-            resource_type: "image",
-            folder: "hare-krishna-medical/avatars",
-            transformation: [
-              { width: 200, height: 200, crop: "fill", gravity: "face" },
-              { quality: "auto" },
-              { fetch_format: "auto" },
-            ],
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          },
-        )
-        .end(req.file.buffer);
-    });
+    const filename = `avatar_${Date.now()}_${req.file.originalname}`;
+    const result = await storeImageInMongoDB(
+      req.file.buffer,
+      filename,
+      req.file.mimetype,
+    );
 
     res.json({
       success: true,
       message: "Avatar uploaded successfully",
       data: {
-        url: result.secure_url,
-        public_id: result.public_id,
+        url: result.url,
+        id: result._id,
+        filename: result.filename,
       },
     });
   } catch (error) {
