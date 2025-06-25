@@ -3,7 +3,6 @@ const Product = require("../models/Product");
 const User = require("../models/User");
 const Invoice = require("../models/Invoice");
 const emailService = require("../utils/emailService");
-const smsService = require("../utils/smsService");
 
 class OrdersController {
   // Create new order
