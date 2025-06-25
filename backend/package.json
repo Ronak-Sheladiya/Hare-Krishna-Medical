@@ -1,7 +1,7 @@
 {
   "name": "hare-krishna-medical-backend",
   "version": "1.0.0",
-  "description": "Backend API for Hare Krishna Medical Store",
+  "description": "Backend API for Hare Krishna Medical Store (Email-only)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
