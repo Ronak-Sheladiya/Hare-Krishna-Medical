@@ -242,11 +242,6 @@ const InvoiceVerify = () => {
       generateInvoicePDF();
     }
   };
-    } else {
-      alert("PDF not available. Regenerating...");
-      generateInvoicePDF();
-    }
-  };
 
   const handleDownloadPDF = async () => {
     if (!invoice) return;
