@@ -195,10 +195,10 @@ const InvoiceVerify = () => {
     }
   };
 
-  // COMPREHENSIVE PRINT FUNCTIONALITY - MOVED FROM /INVOICE PAGE
+  // IMMEDIATE PRINT FUNCTIONALITY - KEEP WINDOW OPEN
   const handlePrint = () => {
     if (pdfUrl) {
-      // Create print window immediately without asking permission
+      // Create print window immediately
       const printWindow = window.open(
         pdfUrl,
         "_blank",
@@ -210,44 +210,38 @@ const InvoiceVerify = () => {
 
         const setupPrintHandlers = () => {
           const afterPrint = () => {
-            setTimeout(() => printWindow.close(), 500); // Faster close
+            // Keep window open after printing for user convenience
+            console.log("Print completed - PDF viewer remains open");
           };
 
           printWindow.addEventListener("afterprint", afterPrint);
-          printWindow.addEventListener("beforeunload", () =>
-            printWindow.close(),
-          );
+          // Remove auto-close handlers to keep window open
         };
 
-        // Faster PDF loading and printing
+        // Immediate PDF loading and printing
         printWindow.onload = () => {
-          setTimeout(() => {
-            setupPrintHandlers();
-            printWindow.focus();
-            printWindow.print();
-          }, 200); // Further reduced for faster printing
+          setupPrintHandlers();
+          printWindow.focus();
+          printWindow.print();
         };
 
-        // Faster fallback
-        setTimeout(() => {
-          try {
-            setupPrintHandlers();
-            printWindow.focus();
-            printWindow.print();
-          } catch (error) {
-            console.log("Fallback print trigger:", error);
-          }
-        }, 500); // Further reduced fallback time
-
-        // Faster auto-close
-        setTimeout(() => {
-          if (printWindow && !printWindow.closed) {
-            printWindow.close();
-          }
-        }, 3000); // Reduced to 3 seconds for faster close
+        // Immediate fallback - no timeout
+        try {
+          setupPrintHandlers();
+          printWindow.focus();
+          printWindow.print();
+        } catch (error) {
+          console.log("Fallback print trigger:", error);
+        }
       }
     } else if (pdfGenerating) {
-      alert("PDF is still being generated. Please wait and try again.");
+      // Don't show alert, just wait for PDF to generate
+      console.log("PDF is generating, please wait...");
+    } else {
+      alert("PDF not available. Regenerating...");
+      generateInvoicePDF();
+    }
+  };
     } else {
       alert("PDF not available. Regenerating...");
       generateInvoicePDF();
