@@ -192,7 +192,7 @@ const InvoiceView = () => {
 
         const setupPrintHandlers = () => {
           const afterPrint = () => {
-            setTimeout(() => printWindow.close(), 500); // Faster close
+            setTimeout(() => printWindow.close(), 3000); // Updated close time
           };
 
           printWindow.addEventListener("afterprint", afterPrint);
