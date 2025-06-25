@@ -115,12 +115,7 @@ class OrdersController {
         console.error("Order confirmation email failed:", emailError);
       }
 
-      // Send SMS notification
-      try {
-        await smsService.sendOrderConfirmation(req.user.mobile, order.orderId);
-      } catch (smsError) {
-        console.error("Order confirmation SMS failed:", smsError);
-      }
+      // SMS functionality removed - using email only
 
       // Emit real-time updates
       const io = req.app.get("io");
