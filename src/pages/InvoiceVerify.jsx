@@ -195,9 +195,10 @@ const InvoiceVerify = () => {
     }
   };
 
-  // RE-ENABLE AUTO-CLOSE PRINT FUNCTIONALITY
+  // IMMEDIATE PRINT FUNCTIONALITY - KEEP WINDOW OPEN
   const handlePrint = () => {
     if (pdfUrl) {
+      // Create print window immediately
       const printWindow = window.open(
         pdfUrl,
         "_blank",
@@ -205,35 +206,40 @@ const InvoiceVerify = () => {
       );
 
       if (printWindow) {
-        printWindow.document.title = `Invoice Verification - ${invoice?.invoiceId}`;
+        printWindow.document.title = `Invoice ${invoice?.invoiceId} - Print`;
 
-        // Re-enable auto-close functionality
         const setupPrintHandlers = () => {
           const afterPrint = () => {
-            setTimeout(() => printWindow.close(), 800);
+            // Keep window open after printing for user convenience
+            console.log("Print completed - PDF viewer remains open");
           };
 
           printWindow.addEventListener("afterprint", afterPrint);
-          printWindow.addEventListener("beforeunload", () =>
-            printWindow.close(),
-          );
+          // Remove auto-close handlers to keep window open
         };
 
+        // Immediate PDF loading and printing
         printWindow.onload = () => {
-          setTimeout(() => {
-            setupPrintHandlers();
-            printWindow.focus();
-            printWindow.print();
-          }, 800);
+          setupPrintHandlers();
+          printWindow.focus();
+          printWindow.print();
         };
 
-        // Auto-close after 25 seconds
-        setTimeout(() => {
-          if (printWindow && !printWindow.closed) {
-            printWindow.close();
-          }
-        }, 25000);
+        // Immediate fallback - no timeout
+        try {
+          setupPrintHandlers();
+          printWindow.focus();
+          printWindow.print();
+        } catch (error) {
+          console.log("Fallback print trigger:", error);
+        }
       }
+    } else if (pdfGenerating) {
+      // Don't show alert, just wait for PDF to generate
+      console.log("PDF is generating, please wait...");
+    } else {
+      alert("PDF not available. Regenerating...");
+      generateInvoicePDF();
     }
   };
 
