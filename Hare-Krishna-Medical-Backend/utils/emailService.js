@@ -58,7 +58,7 @@ class EmailService {
           <p>Dear ${fullName},</p>
           <p>Please verify your email address by clicking the link below:</p>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${verificationUrl}" 
+            <a href="${verificationUrl}"
                style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
               Verify Email Address
             </a>
@@ -81,6 +81,57 @@ class EmailService {
     }
   }
 
+  async sendVerificationEmail(email, fullName, otp) {
+    const mailOptions = {
+      from: `"Hare Krishna Medical" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Email Verification OTP - Hare Krishna Medical Store",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #007bff, #0056b3); color: white; padding: 30px; border-radius: 10px; text-align: center;">
+            <h1 style="margin: 0; font-size: 28px;">Email Verification 📧</h1>
+            <p style="margin: 10px 0 0 0; font-size: 16px;">Hare Krishna Medical Store</p>
+          </div>
+
+          <div style="padding: 30px; background: #f8f9fa; border-radius: 10px; margin-top: 20px;">
+            <h2 style="color: #333; margin-top: 0;">Hello ${fullName}!</h2>
+
+            <p style="color: #666; line-height: 1.6;">
+              Thank you for registering with Hare Krishna Medical Store. To complete your registration, please verify your email address using the OTP below:
+            </p>
+
+            <div style="background: white; padding: 30px; border-radius: 8px; margin: 30px 0; text-align: center; border: 2px dashed #007bff;">
+              <h2 style="color: #007bff; margin: 0; font-size: 36px; letter-spacing: 8px; font-family: monospace;">${otp}</h2>
+              <p style="color: #666; margin: 10px 0 0 0;">Enter this 6-digit code to verify your email</p>
+            </div>
+
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0; color: #856404;">
+                <strong>⏰ This OTP will expire in 10 minutes</strong><br>
+                If you didn't create an account, please ignore this email.
+              </p>
+            </div>
+
+            <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px; text-align: center;">
+              <p style="color: #888; font-size: 14px; margin: 0;">
+                📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat<br>
+                📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
+              </p>
+            </div>
+          </div>
+        </div>
+      `,
+    };
+
+    try {
+      await this.transporter.sendMail(mailOptions);
+      console.log(`Verification OTP sent to ${email}`);
+    } catch (error) {
+      console.error("Error sending verification OTP:", error);
+      throw error;
+    }
+  }
+
   async sendPasswordResetEmail(email, fullName, resetToken) {
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
@@ -94,7 +145,7 @@ class EmailService {
           <p>Dear ${fullName},</p>
           <p>You requested a password reset for your account. Click the link below to reset your password:</p>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${resetUrl}" 
+            <a href="${resetUrl}"
                style="background-color: #dc3545; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
               Reset Password
             </a>
@@ -127,7 +178,7 @@ class EmailService {
           <h2 style="color: #28a745;">Order Confirmed!</h2>
           <p>Dear ${fullName},</p>
           <p>Thank you for your order. Your order has been confirmed and is being processed.</p>
-          
+
           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
             <h3>Order Details</h3>
             <p><strong>Order ID:</strong> ${order.orderId}</p>
@@ -152,7 +203,7 @@ class EmailService {
 
           <p style="margin-top: 20px;">We'll notify you when your order is shipped.</p>
           <p>Track your order status in your dashboard.</p>
-          
+
           <p>Best regards,<br>Hare Krishna Medical Store Team</p>
         </div>
       `,
@@ -184,7 +235,7 @@ class EmailService {
           <h2 style="color: #007bff;">Order Status Update</h2>
           <p>Dear ${fullName},</p>
           <p>Your order status has been updated:</p>
-          
+
           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
             <h3>Order #${order.orderId}</h3>
             <p><strong>Status:</strong> <span style="color: #28a745; text-transform: uppercase;">${newStatus}</span></p>
@@ -209,7 +260,7 @@ class EmailService {
           }
 
           <p>You can view full order details in your dashboard.</p>
-          
+
           <p>Best regards,<br>Hare Krishna Medical Store Team</p>
         </div>
       `,
@@ -234,7 +285,7 @@ class EmailService {
           <h2 style="color: #28a745;">Invoice Generated</h2>
           <p>Dear ${fullName},</p>
           <p>Please find your invoice attached for order #${invoice.orderId}.</p>
-          
+
           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
             <h3>Invoice Details</h3>
             <p><strong>Invoice Number:</strong> ${invoice.invoiceNumber}</p>
@@ -243,7 +294,7 @@ class EmailService {
           </div>
 
           <p>You can also view and download your invoice from your dashboard.</p>
-          
+
           <p>Thank you for your business!</p>
           <p>Best regards,<br>Hare Krishna Medical Store Team</p>
         </div>
@@ -276,7 +327,7 @@ class EmailService {
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #007bff;">New Contact Form Submission</h2>
-          
+
           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
             <p><strong>Name:</strong> ${formData.name}</p>
             <p><strong>Email:</strong> ${formData.email}</p>
