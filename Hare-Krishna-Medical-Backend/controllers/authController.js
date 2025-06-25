@@ -39,26 +39,40 @@ class AuthController {
       // Generate JWT token
       const token = user.generateAuthToken();
 
-      // Send welcome email
+      // Generate and send OTP for email verification
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      user.emailOTP = otp;
+      user.emailOTPExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+      await user.save();
+
+      // Send welcome email with OTP
       try {
         await emailService.sendWelcomeEmail(user.email, user.fullName);
+        await emailService.sendVerificationEmail(
+          user.email,
+          user.fullName,
+          otp,
+        );
       } catch (emailError) {
-        console.error("Welcome email failed:", emailError);
+        console.error("Welcome/OTP email failed:", emailError);
       }
 
       // Emit real-time update
       const io = req.app.get("io");
-      io.to("admin-room").emit("new-user-registered", {
-        user: {
-          id: user._id,
-          fullName: user.fullName,
-          email: user.email,
-          registeredAt: user.createdAt,
-        },
-      });
+      if (io) {
+        io.to("admin-room").emit("new-user-registered", {
+          user: {
+            id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            registeredAt: user.createdAt,
+          },
+        });
+      }
 
       res.status(201).json({
-        message: "User registered successfully",
+        message:
+          "User registered successfully. Please check your email for verification OTP.",
         token,
         user: {
           id: user._id,
@@ -67,6 +81,7 @@ class AuthController {
           mobile: user.mobile,
           role: user.role,
           address: user.address,
+          emailVerified: user.emailVerified,
         },
       });
     } catch (error) {
