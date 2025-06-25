@@ -22,6 +22,7 @@ const Header = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { unreadCount } = useSelector((state) => state.messages);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isActiveRoute = (path) => {
     return location.pathname === path;
