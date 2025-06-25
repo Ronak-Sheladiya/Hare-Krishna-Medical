@@ -65,6 +65,8 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
     emailVerificationToken: String,
+    emailOTP: String,
+    emailOTPExpires: Date,
     preferences: {
       notifications: {
         email: { type: Boolean, default: true },
