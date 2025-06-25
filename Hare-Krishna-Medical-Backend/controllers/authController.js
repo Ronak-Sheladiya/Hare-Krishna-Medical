@@ -456,7 +456,16 @@ class AuthController {
         });
       }
 
-      // Generate new OTP token
+      if (user.emailVerified) {
+        return res.status(400).json({
+          message: "Email is already verified",
+        });
+      }
+
+      // Generate new OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      user.emailOTP = otp;
+      user.emailOTPExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
       user.emailVerificationToken = crypto.randomBytes(32).toString("hex");
       await user.save();
 
@@ -465,14 +474,17 @@ class AuthController {
         await emailService.sendVerificationEmail(
           user.email,
           user.fullName,
-          "123456",
+          otp,
         );
       } catch (emailError) {
         console.error("Resend OTP email failed:", emailError);
+        return res.status(500).json({
+          message: "Failed to send OTP email",
+        });
       }
 
       res.json({
-        message: "New OTP sent successfully",
+        message: "New OTP sent successfully to your email",
       });
     } catch (error) {
       console.error("Resend OTP error:", error);
