@@ -45,6 +45,7 @@ const InvoiceView = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [downloading, setDownloading] = useState(false);
+  const [printing, setPrinting] = useState(false);
   const [qrCode, setQrCode] = useState(null);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [pdfGenerating, setPdfGenerating] = useState(false);
