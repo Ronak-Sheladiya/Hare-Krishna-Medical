@@ -11,77 +11,7 @@ const router = express.Router();
 // @route   POST /api/auth/register
 // @desc    Register a new user
 // @access  Public
-router.post("/register", validateUserRegistration, async (req, res) => {
-  try {
-    const { fullName, email, mobile, password, address } = req.body;
-
-    // Check if user already exists
-    const existingUser = await User.findOne({
-      $or: [{ email }, { mobile }],
-    });
-
-    if (existingUser) {
-      return res.status(400).json({
-        message:
-          existingUser.email === email
-            ? "User with this email already exists"
-            : "User with this mobile number already exists",
-      });
-    }
-
-    // Create new user
-    const user = new User({
-      fullName,
-      email,
-      mobile,
-      password,
-      address,
-      emailVerificationToken: crypto.randomBytes(32).toString("hex"),
-    });
-
-    await user.save();
-
-    // Generate JWT token
-    const token = user.generateAuthToken();
-
-    // Send welcome email
-    try {
-      await emailService.sendWelcomeEmail(user.email, user.fullName);
-    } catch (emailError) {
-      console.error("Welcome email failed:", emailError);
-    }
-
-    // Emit real-time update
-    const io = req.app.get("io");
-    io.to("admin-room").emit("new-user-registered", {
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        registeredAt: user.createdAt,
-      },
-    });
-
-    res.status(201).json({
-      message: "User registered successfully",
-      token,
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        mobile: user.mobile,
-        role: user.role,
-        address: user.address,
-      },
-    });
-  } catch (error) {
-    console.error("Registration error:", error);
-    res.status(500).json({
-      message: "Registration failed",
-      error: error.message,
-    });
-  }
-});
+router.post("/register", validateUserRegistration, authController.register);
 
 // @route   POST /api/auth/login
 // @desc    Login user
