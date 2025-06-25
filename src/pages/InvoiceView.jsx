@@ -178,10 +178,10 @@ const InvoiceView = () => {
     }
   };
 
-  // COMPREHENSIVE PRINT FUNCTIONALITY - COPIED FROM VERIFY PAGE
+  // IMMEDIATE PRINT FUNCTIONALITY - NO TIMEOUTS
   const handlePrint = () => {
     if (pdfUrl) {
-      // Create print window immediately without asking permission
+      // Create print window immediately
       const printWindow = window.open(
         pdfUrl,
         "_blank",
@@ -193,7 +193,7 @@ const InvoiceView = () => {
 
         const setupPrintHandlers = () => {
           const afterPrint = () => {
-            setTimeout(() => printWindow.close(), 3000); // Updated close time
+            printWindow.close(); // Immediate close after print
           };
 
           printWindow.addEventListener("afterprint", afterPrint);
@@ -202,32 +202,21 @@ const InvoiceView = () => {
           );
         };
 
-        // Faster PDF loading and printing
+        // Immediate PDF loading and printing
         printWindow.onload = () => {
-          setTimeout(() => {
-            setupPrintHandlers();
-            printWindow.focus();
-            printWindow.print();
-          }, 200); // Further reduced for faster printing
+          setupPrintHandlers();
+          printWindow.focus();
+          printWindow.print();
         };
 
-        // Faster fallback
-        setTimeout(() => {
-          try {
-            setupPrintHandlers();
-            printWindow.focus();
-            printWindow.print();
-          } catch (error) {
-            console.log("Fallback print trigger:", error);
-          }
-        }, 500); // Further reduced fallback time
-
-        // Faster auto-close
-        setTimeout(() => {
-          if (printWindow && !printWindow.closed) {
-            printWindow.close();
-          }
-        }, 3000); // Reduced to 3 seconds for faster close
+        // Immediate fallback
+        try {
+          setupPrintHandlers();
+          printWindow.focus();
+          printWindow.print();
+        } catch (error) {
+          console.log("Fallback print trigger:", error);
+        }
       }
     } else if (pdfGenerating) {
       alert("PDF is still being generated. Please wait and try again.");
