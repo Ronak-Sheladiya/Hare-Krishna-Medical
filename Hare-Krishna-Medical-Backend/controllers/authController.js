@@ -391,10 +391,24 @@ class AuthController {
         });
       }
 
-      // For demo purposes, accept any 6-digit OTP
-      // In production, implement proper OTP verification
-      if (otp.length === 6 && /^\d{6}$/.test(otp)) {
+      // Check if OTP exists and is not expired
+      if (!user.emailOTP || !user.emailOTPExpires) {
+        return res.status(400).json({
+          message: "No OTP found. Please request a new OTP.",
+        });
+      }
+
+      if (Date.now() > user.emailOTPExpires) {
+        return res.status(400).json({
+          message: "OTP has expired. Please request a new OTP.",
+        });
+      }
+
+      // Verify OTP
+      if (user.emailOTP === otp) {
         user.emailVerified = true;
+        user.emailOTP = undefined;
+        user.emailOTPExpires = undefined;
         user.emailVerificationToken = undefined;
         await user.save();
 
@@ -411,7 +425,7 @@ class AuthController {
         });
       } else {
         return res.status(400).json({
-          message: "Invalid OTP format. Please enter a 6-digit number.",
+          message: "Invalid OTP. Please check and try again.",
         });
       }
     } catch (error) {
