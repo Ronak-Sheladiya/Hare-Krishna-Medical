@@ -319,15 +319,7 @@ class OrdersController {
         console.error("Status update email failed:", emailError);
       }
 
-      try {
-        await smsService.sendOrderStatusUpdate(
-          order.user.mobile,
-          order.orderId,
-          status,
-        );
-      } catch (smsError) {
-        console.error("Status update SMS failed:", smsError);
-      }
+      // SMS functionality removed - using email only
 
       // Emit real-time updates
       const io = req.app.get("io");
