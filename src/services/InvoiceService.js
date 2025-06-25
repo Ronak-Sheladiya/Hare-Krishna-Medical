@@ -219,10 +219,8 @@ class InvoiceService {
             </div>
             <script>
               window.onload = function() {
-                setTimeout(function() {
-                  window.print();
-                  window.close();
-                }, 500);
+                window.print();
+                // Keep window open for user convenience
               };
             </script>
           </body>
