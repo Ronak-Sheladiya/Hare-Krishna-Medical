@@ -301,6 +301,30 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/admin/letterheads"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminLetterheads />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/letterheads/add"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AddLetterhead />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/letterheads/edit/:id"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AddLetterhead />
+                </ProtectedRoute>
+              }
+            />
 
             {/* User Routes */}
             <Route
