@@ -137,19 +137,60 @@ const SocketDiagnostics = () => {
       try {
         // Disconnect existing connection first
         socketClient.disconnect();
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1s for clean disconnect
 
-        // Try to connect
-        const socket = socketClient.connect(user?.id || user?._id, user?.role);
+        // Try to connect with timeout
+        const connectionPromise = new Promise((resolve, reject) => {
+          try {
+            const socket = socketClient.connect(
+              user?.id || user?._id,
+              user?.role,
+            );
 
-        if (socket) {
-          results.push({
-            test: "Socket Connection",
-            status: "pass",
-            message: "Socket connection established successfully",
+            if (socket) {
+              // Wait for actual connection
+              const checkConnection = () => {
+                const status = socketClient.getConnectionStatus();
+                if (status.connected) {
+                  resolve(socket);
+                } else if (status.fallbackMode) {
+                  reject(new Error("Socket entered fallback mode"));
+                } else {
+                  // Keep checking for 5 seconds
+                  setTimeout(checkConnection, 500);
+                }
+              };
+
+              setTimeout(checkConnection, 100);
+
+              // Timeout after 5 seconds
+              setTimeout(() => {
+                if (!socketClient.getConnectionStatus().connected) {
+                  reject(new Error("Connection timeout"));
+                }
+              }, 5000);
+            } else {
+              reject(new Error("Socket client returned null"));
+            }
+          } catch (err) {
+            reject(err);
+          }
+        });
+
+        const socket = await connectionPromise;
+
+        results.push({
+          test: "Socket Connection",
+          status: "pass",
+          message: `Socket connected successfully. ID: ${socket.id || "N/A"}`,
+        });
+
+        // Test 4: Test event emission
+        try {
+          const testEventSent = socketClient.emit("test-event", {
+            test: true,
+            timestamp: Date.now(),
           });
-
-          // Test 4: Test event emission
-          const testEventSent = socketClient.emit("test-event", { test: true });
 
           if (testEventSent) {
             results.push({
@@ -161,18 +202,18 @@ const SocketDiagnostics = () => {
             results.push({
               test: "Event Emission",
               status: "fail",
-              message: "Failed to emit test event",
+              message: "Socket is connected but failed to emit test event",
             });
           }
-
-          addToHistory("Test", "Socket connection test completed");
-        } else {
+        } catch (emitError) {
           results.push({
-            test: "Socket Connection",
+            test: "Event Emission",
             status: "fail",
-            message: "Failed to establish socket connection",
+            message: `Event emission failed: ${emitError.message}`,
           });
         }
+
+        addToHistory("Test", "Socket connection test completed successfully");
       } catch (error) {
         results.push({
           test: "Socket Connection",
@@ -180,6 +221,14 @@ const SocketDiagnostics = () => {
           message: `Connection error: ${error.message}`,
         });
         addToHistory("Error", `Connection failed: ${error.message}`);
+
+        // Add fallback test info
+        const status = socketClient.getConnectionStatus();
+        results.push({
+          test: "Socket Status Debug",
+          status: "info",
+          message: `Fallback mode: ${status.fallbackMode}, Attempts: ${status.connectionAttempts}`,
+        });
       }
 
       // Test 5: Network configuration
