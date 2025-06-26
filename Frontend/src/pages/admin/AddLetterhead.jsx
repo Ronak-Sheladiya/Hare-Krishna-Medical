@@ -267,36 +267,63 @@ const AddLetterhead = () => {
         )}
 
         <Form onSubmit={handleSubmit}>
-          <Row>
-            <Col lg={8}>
+          {/* Form Progress Indicator */}
+          <div className="mb-4">
+            <div className="d-flex justify-content-between align-items-center text-muted">
+              <small>
+                <i className="bi bi-info-circle me-1"></i>Complete all required
+                fields (*) to create the letterhead
+              </small>
+              <small className="text-end">
+                <i className="bi bi-save me-1"></i>
+                Auto-saved as draft
+              </small>
+            </div>
+          </div>
+
+          <Row className="g-4">
+            {/* Main Content - Left Column */}
+            <Col xl={8} lg={7}>
               {/* Basic Information */}
-              <ThemeCard className="mb-4">
-                <Card.Header>
-                  <h5 className="mb-0">Basic Information</h5>
+              <ThemeCard
+                className="mb-4"
+                style={{ borderLeft: "4px solid #e63946" }}
+              >
+                <Card.Header className="bg-light border-0 rounded-top">
+                  <div className="d-flex align-items-center">
+                    <i className="bi bi-file-earmark-text text-primary me-2 fs-5"></i>
+                    <h5 className="mb-0 fw-bold">Basic Information</h5>
+                  </div>
                 </Card.Header>
-                <Card.Body>
-                  <Row>
-                    <Col md={8}>
-                      <Form.Group className="mb-3">
-                        <Form.Label>Title *</Form.Label>
+                <Card.Body className="p-4">
+                  <Row className="g-3">
+                    <Col lg={8} md={7}>
+                      <Form.Group className="position-relative">
+                        <Form.Label className="fw-semibold">
+                          Title <span className="text-danger">*</span>
+                        </Form.Label>
                         <Form.Control
                           type="text"
                           name="title"
                           value={formData.title}
                           onChange={handleChange}
-                          placeholder="Enter letterhead title"
+                          placeholder="e.g., Certificate of Appreciation"
                           required
+                          className="form-control-lg"
                         />
                       </Form.Group>
                     </Col>
-                    <Col md={4}>
-                      <Form.Group className="mb-3">
-                        <Form.Label>Letter Type *</Form.Label>
+                    <Col lg={4} md={5}>
+                      <Form.Group>
+                        <Form.Label className="fw-semibold">
+                          Letter Type <span className="text-danger">*</span>
+                        </Form.Label>
                         <Form.Select
                           name="letterType"
                           value={formData.letterType}
                           onChange={handleChange}
                           required
+                          className="form-select-lg"
                         >
                           {letterTypes.map((type) => (
                             <option key={type.value} value={type.value}>
@@ -306,309 +333,408 @@ const AddLetterhead = () => {
                         </Form.Select>
                       </Form.Group>
                     </Col>
+                    <Col xs={12}>
+                      <Form.Group>
+                        <Form.Label className="fw-semibold">
+                          Subject <span className="text-danger">*</span>
+                        </Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="subject"
+                          value={formData.subject}
+                          onChange={handleChange}
+                          placeholder="e.g., Outstanding Performance Recognition"
+                          required
+                          className="form-control-lg"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col xs={12}>
+                      <Form.Group>
+                        <Form.Label className="fw-semibold">
+                          Content <span className="text-danger">*</span>
+                        </Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={6}
+                          name="content"
+                          value={formData.content}
+                          onChange={handleChange}
+                          placeholder="Enter the main content of the letterhead..."
+                          required
+                          style={{ resize: "vertical", minHeight: "150px" }}
+                        />
+                        <Form.Text className="text-muted">
+                          <i className="bi bi-lightbulb me-1"></i>
+                          Use professional language and include all relevant
+                          details
+                        </Form.Text>
+                      </Form.Group>
+                    </Col>
                   </Row>
-
-                  <Form.Group className="mb-3">
-                    <Form.Label>Subject *</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleChange}
-                      placeholder="Enter letter subject"
-                      required
-                    />
-                  </Form.Group>
-
-                  <Form.Group className="mb-3">
-                    <Form.Label>Content *</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      rows={8}
-                      name="content"
-                      value={formData.content}
-                      onChange={handleChange}
-                      placeholder="Enter the main content of the letterhead"
-                      required
-                    />
-                  </Form.Group>
                 </Card.Body>
               </ThemeCard>
 
-              {/* Recipient Information */}
-              <ThemeCard className="mb-4">
-                <Card.Header>
-                  <h5 className="mb-0">Recipient Information</h5>
-                </Card.Header>
-                <Card.Body>
-                  <Row>
-                    <Col md={6}>
+              {/* Recipient & Issuer Information - Responsive Layout */}
+              <Row className="g-4 mb-4">
+                <Col lg={6}>
+                  {/* Recipient Information */}
+                  <ThemeCard
+                    className="h-100"
+                    style={{ borderLeft: "4px solid #28a745" }}
+                  >
+                    <Card.Header className="bg-light border-0 rounded-top">
+                      <div className="d-flex align-items-center">
+                        <i className="bi bi-person-badge text-success me-2 fs-5"></i>
+                        <h5 className="mb-0 fw-bold">Recipient Information</h5>
+                      </div>
+                    </Card.Header>
+                    <Card.Body className="p-4">
                       <Form.Group className="mb-3">
-                        <Form.Label>Recipient Name *</Form.Label>
+                        <Form.Label className="fw-semibold">
+                          Name <span className="text-danger">*</span>
+                        </Form.Label>
                         <Form.Control
                           type="text"
                           name="recipient.name"
                           value={formData.recipient.name}
                           onChange={handleChange}
-                          placeholder="Enter recipient name"
+                          placeholder="Full name of recipient"
                           required
                         />
                       </Form.Group>
-                    </Col>
-                    <Col md={6}>
+
                       <Form.Group className="mb-3">
-                        <Form.Label>Designation</Form.Label>
+                        <Form.Label className="fw-semibold">
+                          Designation
+                        </Form.Label>
                         <Form.Control
                           type="text"
                           name="recipient.designation"
                           value={formData.recipient.designation}
                           onChange={handleChange}
-                          placeholder="Enter recipient designation"
+                          placeholder="Job title or position"
                         />
                       </Form.Group>
-                    </Col>
-                  </Row>
 
-                  <Form.Group className="mb-3">
-                    <Form.Label>Organization</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="recipient.organization"
-                      value={formData.recipient.organization}
-                      onChange={handleChange}
-                      placeholder="Enter recipient organization"
-                    />
-                  </Form.Group>
-
-                  <Form.Group className="mb-3">
-                    <Form.Label>Address</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      rows={3}
-                      name="recipient.address"
-                      value={formData.recipient.address}
-                      onChange={handleChange}
-                      placeholder="Enter recipient address"
-                    />
-                  </Form.Group>
-                </Card.Body>
-              </ThemeCard>
-
-              {/* Issuer Information */}
-              <ThemeCard className="mb-4">
-                <Card.Header>
-                  <h5 className="mb-0">Issuer Information</h5>
-                </Card.Header>
-                <Card.Body>
-                  <Row>
-                    <Col md={6}>
                       <Form.Group className="mb-3">
-                        <Form.Label>Issuer Name *</Form.Label>
+                        <Form.Label className="fw-semibold">
+                          Organization
+                        </Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="recipient.organization"
+                          value={formData.recipient.organization}
+                          onChange={handleChange}
+                          placeholder="Company or institution name"
+                        />
+                      </Form.Group>
+
+                      <Form.Group className="mb-0">
+                        <Form.Label className="fw-semibold">Address</Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={3}
+                          name="recipient.address"
+                          value={formData.recipient.address}
+                          onChange={handleChange}
+                          placeholder="Complete address"
+                          style={{ resize: "vertical" }}
+                        />
+                      </Form.Group>
+                    </Card.Body>
+                  </ThemeCard>
+                </Col>
+
+                <Col lg={6}>
+                  {/* Issuer Information */}
+                  <ThemeCard
+                    className="h-100"
+                    style={{ borderLeft: "4px solid #fd7e14" }}
+                  >
+                    <Card.Header className="bg-light border-0 rounded-top">
+                      <div className="d-flex align-items-center">
+                        <i className="bi bi-person-check text-warning me-2 fs-5"></i>
+                        <h5 className="mb-0 fw-bold">Issuer Information</h5>
+                      </div>
+                    </Card.Header>
+                    <Card.Body className="p-4">
+                      <Form.Group className="mb-3">
+                        <Form.Label className="fw-semibold">
+                          Name <span className="text-danger">*</span>
+                        </Form.Label>
                         <Form.Control
                           type="text"
                           name="issuer.name"
                           value={formData.issuer.name}
                           onChange={handleChange}
-                          placeholder="Enter issuer name"
+                          placeholder="Full name of issuer"
                           required
                         />
                       </Form.Group>
-                    </Col>
-                    <Col md={6}>
+
                       <Form.Group className="mb-3">
-                        <Form.Label>Issuer Designation *</Form.Label>
+                        <Form.Label className="fw-semibold">
+                          Designation <span className="text-danger">*</span>
+                        </Form.Label>
                         <Form.Control
                           type="text"
                           name="issuer.designation"
                           value={formData.issuer.designation}
                           onChange={handleChange}
-                          placeholder="Enter issuer designation"
+                          placeholder="Official title or position"
                           required
                         />
                       </Form.Group>
-                    </Col>
-                  </Row>
 
-                  <Form.Group className="mb-3">
-                    <Form.Label>Signature (Base64 or URL)</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="issuer.signature"
-                      value={formData.issuer.signature}
-                      onChange={handleChange}
-                      placeholder="Enter signature image URL or base64"
-                    />
-                  </Form.Group>
-                </Card.Body>
-              </ThemeCard>
+                      <Form.Group className="mb-0">
+                        <Form.Label className="fw-semibold">
+                          Digital Signature
+                          <small className="text-muted ms-1">(Optional)</small>
+                        </Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="issuer.signature"
+                          value={formData.issuer.signature}
+                          onChange={handleChange}
+                          placeholder="Signature image URL or base64"
+                        />
+                        <Form.Text className="text-muted">
+                          <i className="bi bi-image me-1"></i>
+                          Upload signature image for professional appearance
+                        </Form.Text>
+                      </Form.Group>
+                    </Card.Body>
+                  </ThemeCard>
+                </Col>
+              </Row>
             </Col>
 
-            <Col lg={4}>
-              {/* Header Configuration */}
-              <ThemeCard className="mb-4">
-                <Card.Header>
-                  <h5 className="mb-0">Header Configuration</h5>
-                </Card.Header>
-                <Card.Body>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Company Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="header.companyName"
-                      value={formData.header.companyName}
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
+            {/* Configuration Sidebar - Right Column */}
+            <Col xl={4} lg={5}>
+              {/* Quick Actions - Sticky on Desktop */}
+              <div className="sticky-top" style={{ top: "100px" }}>
+                {/* Primary Actions */}
+                <ThemeCard
+                  className="mb-4"
+                  style={{ borderLeft: "4px solid #6f42c1" }}
+                >
+                  <Card.Header className="bg-light border-0 rounded-top">
+                    <div className="d-flex align-items-center">
+                      <i className="bi bi-lightning text-primary me-2 fs-5"></i>
+                      <h5 className="mb-0 fw-bold">Quick Actions</h5>
+                    </div>
+                  </Card.Header>
+                  <Card.Body className="p-4">
+                    <div className="d-grid gap-3">
+                      <ThemeButton
+                        type="submit"
+                        disabled={submitLoading}
+                        size="lg"
+                      >
+                        {submitLoading ? (
+                          <>
+                            <Spinner size="sm" className="me-2" />
+                            {isEditing ? "Updating..." : "Creating..."}
+                          </>
+                        ) : (
+                          <>
+                            <i className="bi bi-check-circle me-2"></i>
+                            {isEditing
+                              ? "Update Letterhead"
+                              : "Create Letterhead"}
+                          </>
+                        )}
+                      </ThemeButton>
 
-                  <Form.Group className="mb-3">
-                    <Form.Label>Company Address</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="header.companyAddress"
-                      value={formData.header.companyAddress}
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
+                      <Button
+                        type="button"
+                        variant="outline-secondary"
+                        size="lg"
+                        onClick={() => navigate("/admin/letterheads")}
+                        disabled={submitLoading}
+                      >
+                        <i className="bi bi-arrow-left me-2"></i>
+                        Back to Letterheads
+                      </Button>
+                    </div>
+                  </Card.Body>
+                </ThemeCard>
 
-                  <Form.Group className="mb-3">
-                    <Form.Label>City & State</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="header.companyCity"
-                      value={formData.header.companyCity}
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
+                {/* Company Header Configuration */}
+                <ThemeCard
+                  className="mb-4"
+                  style={{ borderLeft: "4px solid #20c997" }}
+                >
+                  <Card.Header className="bg-light border-0 rounded-top">
+                    <div className="d-flex align-items-center">
+                      <i className="bi bi-building text-info me-2 fs-5"></i>
+                      <h5 className="mb-0 fw-bold">Header Configuration</h5>
+                    </div>
+                  </Card.Header>
+                  <Card.Body className="p-4">
+                    <Row className="g-3">
+                      <Col xs={12}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            Company Name
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="header.companyName"
+                            value={formData.header.companyName}
+                            onChange={handleChange}
+                            placeholder="Your company name"
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col xs={12}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            Address
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="header.companyAddress"
+                            value={formData.header.companyAddress}
+                            onChange={handleChange}
+                            placeholder="Street address"
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col xs={12}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            City & State
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="header.companyCity"
+                            value={formData.header.companyCity}
+                            onChange={handleChange}
+                            placeholder="City, State ZIP"
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">Phone</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="header.companyPhone"
+                            value={formData.header.companyPhone}
+                            onChange={handleChange}
+                            placeholder="Contact number"
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">Email</Form.Label>
+                          <Form.Control
+                            type="email"
+                            name="header.companyEmail"
+                            value={formData.header.companyEmail}
+                            onChange={handleChange}
+                            placeholder="company@email.com"
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col xs={12}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            Logo URL
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="header.logo"
+                            value={formData.header.logo}
+                            onChange={handleChange}
+                            placeholder="https://example.com/logo.png"
+                          />
+                          <Form.Text className="text-muted">
+                            <i className="bi bi-image me-1"></i>
+                            Company logo for letterhead header
+                          </Form.Text>
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                  </Card.Body>
+                </ThemeCard>
 
-                  <Form.Group className="mb-3">
-                    <Form.Label>Phone</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="header.companyPhone"
-                      value={formData.header.companyPhone}
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
+                {/* Footer & Metadata Configuration */}
+                <ThemeCard
+                  className="mb-4"
+                  style={{ borderLeft: "4px solid #dc3545" }}
+                >
+                  <Card.Header className="bg-light border-0 rounded-top">
+                    <div className="d-flex align-items-center">
+                      <i className="bi bi-card-text text-danger me-2 fs-5"></i>
+                      <h5 className="mb-0 fw-bold">Footer & Metadata</h5>
+                    </div>
+                  </Card.Header>
+                  <Card.Body className="p-4">
+                    <Form.Group className="mb-3">
+                      <Form.Label className="fw-semibold">
+                        Terms & Conditions
+                      </Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={3}
+                        name="footer.terms"
+                        value={formData.footer.terms}
+                        onChange={handleChange}
+                        placeholder="Legal terms and verification info"
+                        style={{ resize: "vertical" }}
+                      />
+                    </Form.Group>
 
-                  <Form.Group className="mb-3">
-                    <Form.Label>Email</Form.Label>
-                    <Form.Control
-                      type="email"
-                      name="header.companyEmail"
-                      value={formData.header.companyEmail}
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="fw-semibold">
+                        Additional Information
+                      </Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        name="footer.additionalInfo"
+                        value={formData.footer.additionalInfo}
+                        onChange={handleChange}
+                        placeholder="Extra footer details"
+                        style={{ resize: "vertical" }}
+                      />
+                    </Form.Group>
 
-                  <Form.Group className="mb-3">
-                    <Form.Label>Logo (URL)</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="header.logo"
-                      value={formData.header.logo}
-                      onChange={handleChange}
-                      placeholder="Enter logo image URL"
-                    />
-                  </Form.Group>
-                </Card.Body>
-              </ThemeCard>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="fw-semibold">Tags</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={formData.tags.join(", ")}
+                        onChange={handleTagsChange}
+                        placeholder="certificate, official, 2024"
+                      />
+                      <Form.Text className="text-muted">
+                        <i className="bi bi-tags me-1"></i>
+                        Comma-separated keywords for organization
+                      </Form.Text>
+                    </Form.Group>
 
-              {/* Footer Configuration */}
-              <ThemeCard className="mb-4">
-                <Card.Header>
-                  <h5 className="mb-0">Footer Configuration</h5>
-                </Card.Header>
-                <Card.Body>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Terms</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      rows={4}
-                      name="footer.terms"
-                      value={formData.footer.terms}
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
-
-                  <Form.Group className="mb-3">
-                    <Form.Label>Additional Info</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      rows={3}
-                      name="footer.additionalInfo"
-                      value={formData.footer.additionalInfo}
-                      onChange={handleChange}
-                      placeholder="Additional footer information"
-                    />
-                  </Form.Group>
-                </Card.Body>
-              </ThemeCard>
-
-              {/* Metadata */}
-              <ThemeCard className="mb-4">
-                <Card.Header>
-                  <h5 className="mb-0">Metadata</h5>
-                </Card.Header>
-                <Card.Body>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Tags</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={formData.tags.join(", ")}
-                      onChange={handleTagsChange}
-                      placeholder="Enter tags separated by commas"
-                    />
-                    <Form.Text className="text-muted">
-                      Separate tags with commas
-                    </Form.Text>
-                  </Form.Group>
-
-                  <Form.Group className="mb-3">
-                    <Form.Label>Notes</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      rows={3}
-                      name="notes"
-                      value={formData.notes}
-                      onChange={handleChange}
-                      placeholder="Internal notes about this letterhead"
-                    />
-                  </Form.Group>
-                </Card.Body>
-              </ThemeCard>
-
-              {/* Actions */}
-              <ThemeCard>
-                <Card.Body>
-                  <div className="d-grid gap-2">
-                    <ThemeButton type="submit" disabled={submitLoading}>
-                      {submitLoading ? (
-                        <>
-                          <Spinner size="sm" className="me-2" />
-                          {isEditing ? "Updating..." : "Creating..."}
-                        </>
-                      ) : (
-                        <>
-                          <i className="bi bi-check-lg me-2"></i>
-                          {isEditing
-                            ? "Update Letterhead"
-                            : "Create Letterhead"}
-                        </>
-                      )}
-                    </ThemeButton>
-
-                    <Button
-                      type="button"
-                      variant="outline-secondary"
-                      onClick={() => navigate("/admin/letterheads")}
-                      disabled={submitLoading}
-                    >
-                      <i className="bi bi-arrow-left me-2"></i>
-                      Back to Letterheads
-                    </Button>
-                  </div>
-                </Card.Body>
-              </ThemeCard>
+                    <Form.Group className="mb-0">
+                      <Form.Label className="fw-semibold">
+                        Internal Notes
+                      </Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        name="notes"
+                        value={formData.notes}
+                        onChange={handleChange}
+                        placeholder="Private notes for internal reference"
+                        style={{ resize: "vertical" }}
+                      />
+                    </Form.Group>
+                  </Card.Body>
+                </ThemeCard>
+              </div>
             </Col>
           </Row>
         </Form>
