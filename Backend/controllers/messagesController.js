@@ -361,12 +361,12 @@ class MessagesController {
   // Respond to message (Admin)
   async respondToMessage(req, res) {
     try {
-      const messageId = parseInt(req.params.id);
+      const messageId = req.params.id;
       const { response } = req.body;
 
-      const message = this.messages.find((msg) => msg.id === messageId);
+      const message = await Message.findById(messageId);
 
-      if (!message) {
+      if (!message || message.isDeleted) {
         return res.status(404).json({
           success: false,
           message: "Message not found",
@@ -377,6 +377,10 @@ class MessagesController {
       message.response = response;
       message.status = "responded";
       message.respondedAt = new Date();
+      if (req.user) {
+        message.respondedBy = req.user._id;
+      }
+      await message.save();
 
       // Send response email
       try {
