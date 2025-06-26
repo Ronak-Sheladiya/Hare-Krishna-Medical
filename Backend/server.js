@@ -6,7 +6,7 @@ const rateLimit = require("express-rate-limit");
 const http = require("http");
 const socketIo = require("socket.io");
 require("dotenv").config();
-
+const testUserRoute = require("./routes/testUser");
 const app = express();
 const server = http.createServer(app);
 
@@ -53,6 +53,9 @@ mongoose
   )
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
+
+  app.use(express.json());
+app.use("/api/test", testUserRoute); 
 
 // Socket.io connection handling
 io.on("connection", (socket) => {

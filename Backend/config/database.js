@@ -4,7 +4,7 @@ const connectDB = async () => {
   try {
     const conn = await mongoose.connect(
       process.env.MONGODB_URI ||
-        "mongodb://localhost:27017/Hare_Krishna_Medical",
+        "mongodb://localhost:27017/Hare_Krishna_Medical_db",
       {
         useNewUrlParser: true,
         useUnifiedTopology: true,
