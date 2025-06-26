@@ -136,7 +136,7 @@ router.get(
   "/:id",
   adminAuth,
   validateLetterheadId,
-  validate,
+  handleValidationErrors,
   letterheadController.getLetterheadById,
 );
 
