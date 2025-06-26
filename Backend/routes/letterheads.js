@@ -182,7 +182,7 @@ router.put(
   "/:id/mark-sent",
   adminAuth,
   validateLetterheadId,
-  validate,
+  handleValidationErrors,
   letterheadController.markAsSent,
 );
 
