@@ -3,8 +3,17 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const User = require("../models/User");
 const emailService = require("../utils/emailService");
+const mongoose = require("mongoose");
 
 class AuthController {
+  // Check database connectivity
+  checkDBConnection() {
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error(
+        "Database connection not available. Please ensure MongoDB is running.",
+      );
+    }
+  }
   // Register a new user
   async register(req, res) {
     try {
