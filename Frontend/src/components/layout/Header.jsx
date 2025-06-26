@@ -364,6 +364,10 @@ const Header = () => {
                         >
                           Messages
                         </AdminDropdownItem>
+                        <Dropdown.Item as={Link} to="/admin/letterheads">
+                          <i className="bi bi-file-text me-2"></i>
+                          Letterheads
+                        </Dropdown.Item>
                         <Dropdown.Divider />
                         <Dropdown.Header>
                           <small className="text-muted">Admin Tools</small>
