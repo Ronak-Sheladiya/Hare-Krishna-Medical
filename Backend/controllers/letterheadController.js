@@ -1,7 +1,165 @@
 const Letterhead = require("../models/Letterhead");
 const User = require("../models/User");
+const mongoose = require("mongoose");
+const { shouldUseFallback, devLetterheads } = require("../utils/devFallback");
 
 class LetterheadController {
+  // Check database connectivity
+  checkDBConnection() {
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error(
+        "Database connection not available. Using development fallback.",
+      );
+    }
+  }
+
+  // Development fallback for getting letterheads
+  async getLetterheadsFallback(filters, page, limit) {
+    // Initialize with some sample data if empty
+    if (devLetterheads.length === 0) {
+      devLetterheads.push({
+        _id: "dev_letterhead_1",
+        letterheadId: "HKMS/LH/2024/01/01/001",
+        title: "Certificate of Excellence",
+        letterType: "certificate",
+        subject: "Outstanding Performance Recognition",
+        content:
+          "We hereby certify that the recipient has demonstrated exceptional performance and dedication in their field of work.",
+        recipient: {
+          name: "John Doe",
+          designation: "Senior Manager",
+          organization: "ABC Corporation",
+          address: "123 Business Street, City, State 12345",
+        },
+        issuer: {
+          name: "Dr. Rajesh Kumar",
+          designation: "Chief Medical Officer",
+          signature: "",
+        },
+        header: {
+          companyName: "Hare Krishna Medical Store",
+          companyAddress: "123 Main Street, Healthcare District",
+          companyCity: "Medical City, State 12345",
+          companyPhone: "+91 98765 43210",
+          companyEmail: "info@harekrishnamedical.com",
+          logo: "",
+        },
+        footer: {
+          terms:
+            "This is an official document issued by Hare Krishna Medical Store. For verification, please contact us at the above details.",
+          additionalInfo: "",
+        },
+        status: "issued",
+        tags: ["certificate", "performance", "official"],
+        notes: "Sample letterhead for development",
+        qrCode: "sample-qr-code-data",
+        createdBy: "dev_admin_user",
+        createdAt: new Date("2024-01-01"),
+        updatedAt: new Date("2024-01-01"),
+      });
+
+      devLetterheads.push({
+        _id: "dev_letterhead_2",
+        letterheadId: "HKMS/LH/2024/01/02/002",
+        title: "Medical Recommendation",
+        letterType: "recommendation",
+        subject: "Professional Medical Recommendation",
+        content:
+          "Based on our professional assessment, we recommend the following course of action for the patient's well-being.",
+        recipient: {
+          name: "Jane Smith",
+          designation: "Patient",
+          organization: "Personal",
+          address: "456 Health Avenue, Wellness City, State 67890",
+        },
+        issuer: {
+          name: "Dr. Priya Sharma",
+          designation: "Chief Pharmacist",
+          signature: "",
+        },
+        header: {
+          companyName: "Hare Krishna Medical Store",
+          companyAddress: "123 Main Street, Healthcare District",
+          companyCity: "Medical City, State 12345",
+          companyPhone: "+91 98765 43210",
+          companyEmail: "info@harekrishnamedical.com",
+          logo: "",
+        },
+        footer: {
+          terms:
+            "This is an official document issued by Hare Krishna Medical Store. For verification, please contact us at the above details.",
+          additionalInfo: "Valid for 30 days from issue date",
+        },
+        status: "sent",
+        tags: ["recommendation", "medical", "official"],
+        notes: "Sample medical recommendation",
+        qrCode: "sample-qr-code-data-2",
+        createdBy: "dev_admin_user",
+        createdAt: new Date("2024-01-02"),
+        updatedAt: new Date("2024-01-02"),
+      });
+    }
+
+    // Apply filters
+    let filteredLetterheads = [...devLetterheads];
+
+    if (filters.status) {
+      filteredLetterheads = filteredLetterheads.filter(
+        (l) => l.status === filters.status,
+      );
+    }
+
+    if (filters.letterType) {
+      filteredLetterheads = filteredLetterheads.filter(
+        (l) => l.letterType === filters.letterType,
+      );
+    }
+
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filteredLetterheads = filteredLetterheads.filter(
+        (l) =>
+          l.letterheadId.toLowerCase().includes(searchLower) ||
+          l.title.toLowerCase().includes(searchLower) ||
+          l.subject.toLowerCase().includes(searchLower) ||
+          l.recipient.name.toLowerCase().includes(searchLower) ||
+          l.recipient.organization.toLowerCase().includes(searchLower) ||
+          l.issuer.name.toLowerCase().includes(searchLower),
+      );
+    }
+
+    if (filters.startDate) {
+      filteredLetterheads = filteredLetterheads.filter(
+        (l) => new Date(l.createdAt) >= new Date(filters.startDate),
+      );
+    }
+
+    if (filters.endDate) {
+      filteredLetterheads = filteredLetterheads.filter(
+        (l) => new Date(l.createdAt) <= new Date(filters.endDate),
+      );
+    }
+
+    // Sort by creation date (newest first)
+    filteredLetterheads.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+    );
+
+    // Apply pagination
+    const total = filteredLetterheads.length;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const paginatedLetterheads = filteredLetterheads.slice(
+      skip,
+      skip + parseInt(limit),
+    );
+
+    return {
+      letterheads: paginatedLetterheads,
+      total,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
   // Get all letterheads with pagination and filtering
   async getAllLetterheads(req, res) {
     try {
@@ -14,6 +172,29 @@ class LetterheadController {
         startDate,
         endDate,
       } = req.query;
+
+      // Use development fallback if database is not available
+      if (shouldUseFallback()) {
+        console.log("🔄 Using development fallback for fetching letterheads");
+
+        const filters = { status, letterType, search, startDate, endDate };
+        const result = await this.getLetterheadsFallback(filters, page, limit);
+
+        return res.json({
+          success: true,
+          letterheads: result.letterheads,
+          pagination: {
+            currentPage: parseInt(page),
+            totalPages: result.totalPages,
+            total: result.total,
+            hasNextPage: page < result.totalPages,
+            hasPrevPage: page > 1,
+          },
+        });
+      }
+
+      // Check database connectivity
+      this.checkDBConnection();
 
       // Build filter
       const filter = {};
