@@ -59,7 +59,6 @@ console.log("🔄 Attempting MongoDB connection to:", mongoURI);
 
 // Set mongoose buffer commands to false to fail fast
 mongoose.set("bufferCommands", false);
-mongoose.set("bufferMaxEntries", 0);
 
 const connectDB = async () => {
   try {
