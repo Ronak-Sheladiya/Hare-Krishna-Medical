@@ -16,127 +16,236 @@ class EmailService {
   async sendWelcomeEmail(email, fullName) {
     const websiteUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
+    console.log("📧 Sending welcome email to:", email);
+
     const mailOptions = {
-      from: `"Hare Krishna Medical" <${process.env.EMAIL_USER}>`,
+      from: `"Hare Krishna Medical Store" <${process.env.EMAIL_USER}>`,
       to: email,
       subject:
-        "Welcome to Hare Krishna Medical Store - Your Trusted Health Partner",
+        "🌟 Welcome to Hare Krishna Medical Store - Your Trusted Health Partner",
       html: `
         <!DOCTYPE html>
-        <html lang="en">
+        <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Welcome to Hare Krishna Medical</title>
+          <meta http-equiv="X-UA-Compatible" content="IE=edge">
+          <title>Welcome to Hare Krishna Medical Store</title>
+          <!--[if mso]>
+          <noscript>
+            <xml>
+              <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+              </o:OfficeDocumentSettings>
+            </xml>
+          </noscript>
+          <![endif]-->
+          <style>
+            @media only screen and (max-width: 600px) {
+              .container { width: 100% !important; }
+              .features-grid { flex-direction: column !important; }
+              .feature-item { min-width: 100% !important; margin-bottom: 15px !important; }
+              .contact-info { flex-direction: column !important; gap: 15px !important; }
+            }
+          </style>
         </head>
-        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa;">
-          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+        <body style="margin: 0; padding: 0; font-family: 'Times New Roman', Times, serif; background: linear-gradient(135deg, #f8f9fa, #e9ecef); min-height: 100vh;">
 
-            <!-- Header Section -->
-            <div style="background: linear-gradient(135deg, #e63946, #dc3545); color: #ffffff; padding: 40px 30px; text-align: center; border-radius: 10px 10px 0 0;">
-              <div style="background: white; border-radius: 50%; padding: 15px; width: 100px; height: 100px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=200"
-                     alt="Hare Krishna Medical"
-                     style="width: 70px; height: 70px; object-fit: contain;" />
-              </div>
-              <h1 style="margin: 0; font-size: 28px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">HARE KRISHNA MEDICAL</h1>
-              <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.95;">Your Trusted Health Partner</p>
-            </div>
+          <!-- Outer Container -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: linear-gradient(135deg, #f8f9fa, #e9ecef);">
+            <tr>
+              <td style="padding: 20px 0;">
 
-            <!-- Welcome Content -->
-            <div style="padding: 40px 30px;">
-              <div style="text-align: center; margin-bottom: 30px;">
-                <h2 style="color: #e63946; margin: 0 0 15px 0; font-size: 24px; font-weight: 600;">
-                  Welcome to Our Family! 🎉
-                </h2>
-                <p style="color: #6c757d; font-size: 16px; line-height: 1.6; margin: 0;">
-                  Dear <strong style="color: #e63946;">${fullName}</strong>,
-                </p>
-              </div>
+                <!-- Main Email Container -->
+                <div class="container" style="max-width: 650px; margin: 0 auto; background: #ffffff; border-radius: 15px; box-shadow: 0 10px 40px rgba(230, 57, 70, 0.15), 0 1px 3px rgba(0,0,0,0.1); overflow: hidden;">
 
-              <div style="background: linear-gradient(135deg, #fff5f5, #ffeaea); border-left: 4px solid #e63946; padding: 25px; border-radius: 8px; margin: 25px 0;">
-                <p style="color: #495057; font-size: 16px; line-height: 1.7; margin: 0;">
-                  Thank you for choosing <strong style="color: #e63946;">Hare Krishna Medical Store</strong>!
-                  We're thrilled to welcome you to our community of health-conscious individuals who trust us for their medical needs.
-                </p>
-              </div>
+                  <!-- Professional Header with Logo -->
+                  <div style="background: linear-gradient(135deg, #e63946 0%, #dc3545 50%, #c82333 100%); position: relative; overflow: hidden;">
+                    <!-- Decorative Pattern -->
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><defs><pattern id=\"grain\" width=\"100\" height=\"100\" patternUnits=\"userSpaceOnUse\"><circle cx=\"50\" cy=\"50\" r=\"1\" fill=\"white\" opacity=\"0.03\"/></pattern></defs><rect width=\"100\" height=\"100\" fill=\"url(%23grain)\"/></svg>'); opacity: 0.1;"></div>
 
-              <!-- Features Grid -->
-              <div style="margin: 30px 0;">
-                <h3 style="color: #e63946; margin-bottom: 20px; font-size: 18px; text-align: center;">What You Can Do Now:</h3>
-                <div style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: space-between;">
-                  <div style="flex: 1; min-width: 250px; background: #ffffff; border: 2px solid #f8f9fa; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(230,57,70,0.1); text-align: center;">
-                    <div style="color: #e63946; font-size: 24px; margin-bottom: 10px;">🏥</div>
-                    <h4 style="color: #495057; margin: 0 0 8px 0; font-size: 16px;">Browse Products</h4>
-                    <p style="color: #6c757d; margin: 0; font-size: 14px;">Explore our extensive medical product catalog</p>
+                    <div style="position: relative; padding: 45px 40px; text-align: center; color: #ffffff;">
+                      <!-- Logo Section -->
+                      <div style="background: rgba(255, 255, 255, 0.95); border-radius: 50%; padding: 20px; width: 120px; height: 120px; margin: 0 auto 25px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 4px rgba(255,255,255,0.1);">
+                        <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=200"
+                             alt="Hare Krishna Medical Store Logo"
+                             style="width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(230,57,70,0.3));" />
+                      </div>
+
+                      <!-- Company Name -->
+                      <h1 style="margin: 0 0 8px 0; font-family: 'Times New Roman', Times, serif; font-size: 32px; font-weight: 700; text-shadow: 0 3px 6px rgba(0,0,0,0.3); letter-spacing: 1px;">
+                        HARE KRISHNA MEDICAL STORE
+                      </h1>
+                      <div style="width: 80px; height: 3px; background: rgba(255,255,255,0.8); margin: 0 auto 15px; border-radius: 2px;"></div>
+                      <p style="margin: 0; font-size: 18px; opacity: 0.95; font-style: italic;">Your Trusted Health & Wellness Partner</p>
+
+                      <!-- Professional Badge -->
+                      <div style="margin-top: 20px; display: inline-block; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 8px 20px;">
+                        <span style="font-size: 14px; font-weight: 500;">🏥 Professional Medical Services Since 2020</span>
+                      </div>
+                    </div>
                   </div>
-                  <div style="flex: 1; min-width: 250px; background: #ffffff; border: 2px solid #f8f9fa; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(230,57,70,0.1); text-align: center;">
-                    <div style="color: #e63946; font-size: 24px; margin-bottom: 10px;">🛒</div>
-                    <h4 style="color: #495057; margin: 0 0 8px 0; font-size: 16px;">Easy Orders</h4>
-                    <p style="color: #6c757d; margin: 0; font-size: 14px;">Place orders online with just a few clicks</p>
+
+                  <!-- Welcome Message -->
+                  <div style="padding: 50px 40px;">
+
+                    <!-- Personalized Greeting -->
+                    <div style="text-align: center; margin-bottom: 40px;">
+                      <div style="background: linear-gradient(135deg, #fff5f5, #ffeaea); border: 2px solid #ffd6d9; border-radius: 15px; padding: 30px; position: relative; overflow: hidden;">
+                        <div style="position: absolute; top: -10px; right: -10px; width: 40px; height: 40px; background: #e63946; border-radius: 50%; opacity: 0.1;"></div>
+                        <h2 style="color: #e63946; margin: 0 0 20px 0; font-family: 'Times New Roman', Times, serif; font-size: 28px; font-weight: 600;">
+                          Welcome to Our Medical Family! 🎉
+                        </h2>
+                        <p style="color: #495057; font-size: 18px; line-height: 1.7; margin: 0;">
+                          Dear <strong style="color: #e63946; font-size: 20px;">${fullName}</strong>,
+                        </p>
+                        <p style="color: #495057; font-size: 16px; line-height: 1.7; margin: 15px 0 0 0;">
+                          We are delighted to welcome you to <strong style="color: #e63946;">Hare Krishna Medical Store</strong> –
+                          where healthcare meets excellence. Thank you for choosing us as your trusted medical partner.
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- Professional Services Overview -->
+                    <div style="margin: 40px 0;">
+                      <h3 style="color: #e63946; margin-bottom: 25px; font-family: 'Times New Roman', Times, serif; font-size: 22px; text-align: center; font-weight: 600;">
+                        🏥 Our Professional Services
+                      </h3>
+
+                      <div class="features-grid" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between;">
+                        <div class="feature-item" style="flex: 1; min-width: 280px; background: #ffffff; border: 2px solid #e63946; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(230,57,70,0.1); text-align: center; transition: transform 0.3s ease;">
+                          <div style="background: linear-gradient(135deg, #e63946, #dc3545); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 24px;">🏥</div>
+                          <h4 style="color: #2c3e50; margin: 0 0 10px 0; font-family: 'Times New Roman', Times, serif; font-size: 18px; font-weight: 600;">Premium Products</h4>
+                          <p style="color: #6c757d; margin: 0; font-size: 14px; line-height: 1.5;">Access our extensive catalog of authenticated medical products and medicines</p>
+                        </div>
+
+                        <div class="feature-item" style="flex: 1; min-width: 280px; background: #ffffff; border: 2px solid #e63946; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(230,57,70,0.1); text-align: center; transition: transform 0.3s ease;">
+                          <div style="background: linear-gradient(135deg, #e63946, #dc3545); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 24px;">🛒</div>
+                          <h4 style="color: #2c3e50; margin: 0 0 10px 0; font-family: 'Times New Roman', Times, serif; font-size: 18px; font-weight: 600;">Easy Ordering</h4>
+                          <p style="color: #6c757d; margin: 0; font-size: 14px; line-height: 1.5;">Place orders seamlessly through our professional online platform</p>
+                        </div>
+                      </div>
+
+                      <div class="features-grid" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; margin-top: 20px;">
+                        <div class="feature-item" style="flex: 1; min-width: 280px; background: #ffffff; border: 2px solid #e63946; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(230,57,70,0.1); text-align: center; transition: transform 0.3s ease;">
+                          <div style="background: linear-gradient(135deg, #e63946, #dc3545); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 24px;">📦</div>
+                          <h4 style="color: #2c3e50; margin: 0 0 10px 0; font-family: 'Times New Roman', Times, serif; font-size: 18px; font-weight: 600;">Order Tracking</h4>
+                          <p style="color: #6c757d; margin: 0; font-size: 14px; line-height: 1.5;">Real-time order tracking with instant notifications and updates</p>
+                        </div>
+
+                        <div class="feature-item" style="flex: 1; min-width: 280px; background: #ffffff; border: 2px solid #e63946; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(230,57,70,0.1); text-align: center; transition: transform 0.3s ease;">
+                          <div style="background: linear-gradient(135deg, #e63946, #dc3545); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 24px;">📄</div>
+                          <h4 style="color: #2c3e50; margin: 0 0 10px 0; font-family: 'Times New Roman', Times, serif; font-size: 18px; font-weight: 600;">Digital Records</h4>
+                          <p style="color: #6c757d; margin: 0; font-size: 14px; line-height: 1.5;">Professional invoices and complete order history management</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Call to Action -->
+                    <div style="text-align: center; margin: 45px 0;">
+                      <div style="background: linear-gradient(135deg, #fff5f5, #ffeaea); border-radius: 15px; padding: 30px; margin-bottom: 25px;">
+                        <h3 style="color: #e63946; margin: 0 0 15px 0; font-family: 'Times New Roman', Times, serif; font-size: 20px;">Ready to Experience Excellence?</h3>
+                        <p style="color: #6c757d; margin: 0 0 25px 0; font-size: 16px; line-height: 1.6;">
+                          Explore our comprehensive medical store and discover why thousands trust us for their healthcare needs.
+                        </p>
+
+                        <a href="${websiteUrl}"
+                           style="display: inline-block; background: linear-gradient(135deg, #e63946, #dc3545); color: #ffffff; text-decoration: none; padding: 18px 40px; border-radius: 30px; font-family: 'Times New Roman', Times, serif; font-weight: 600; font-size: 18px; box-shadow: 0 8px 25px rgba(230,57,70,0.3); transition: all 0.3s ease; border: 2px solid transparent;">
+                          🌐 Visit Our Medical Store
+                        </a>
+                      </div>
+                    </div>
+
+                    <!-- Professional Support Information -->
+                    <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); border: 2px solid #e63946; border-radius: 15px; padding: 30px; margin: 40px 0; text-align: center;">
+                      <h4 style="color: #e63946; margin: 0 0 20px 0; font-family: 'Times New Roman', Times, serif; font-size: 20px; font-weight: 600;">📞 Professional Support Team</h4>
+                      <p style="color: #495057; margin: 0 0 20px 0; line-height: 1.6; font-size: 16px;">
+                        Our certified medical professionals are available to assist you with expert guidance and support.
+                      </p>
+
+                      <div class="contact-info" style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; margin-top: 25px;">
+                        <div style="text-align: center; background: #ffffff; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); min-width: 200px;">
+                          <div style="color: #e63946; font-size: 24px; margin-bottom: 8px;">📞</div>
+                          <strong style="color: #2c3e50; font-size: 16px; display: block;">Professional Helpline</strong>
+                          <span style="color: #e63946; font-weight: 600; font-size: 16px;">+91 76989 13354</span>
+                        </div>
+
+                        <div style="text-align: center; background: #ffffff; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); min-width: 200px;">
+                          <div style="color: #e63946; font-size: 24px; margin-bottom: 8px;">📧</div>
+                          <strong style="color: #2c3e50; font-size: 16px; display: block;">Email Support</strong>
+                          <span style="color: #e63946; font-weight: 600; font-size: 16px;">hkmedicalamroli@gmail.com</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Professional Credentials -->
+                    <div style="background: linear-gradient(135deg, #d4edda, #c3e6cb); border-left: 5px solid #28a745; border-radius: 10px; padding: 25px; margin: 30px 0; text-align: center;">
+                      <h4 style="color: #155724; margin: 0 0 15px 0; font-family: 'Times New Roman', Times, serif; font-size: 18px;">🏆 Why Choose Hare Krishna Medical?</h4>
+                      <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; font-size: 14px; color: #155724;">
+                        <span>✓ Licensed Medical Store</span>
+                        <span>✓ Authentic Products</span>
+                        <span>✓ Expert Consultation</span>
+                        <span>✓ Fast Delivery</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Professional Footer -->
+                  <div style="background: linear-gradient(135deg, #2c3e50, #34495e); color: #ffffff; padding: 35px 40px; text-align: center;">
+                    <div style="border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 20px; margin-bottom: 20px;">
+                      <h4 style="margin: 0 0 10px 0; font-family: 'Times New Roman', Times, serif; font-size: 18px; color: #ffffff;">Hare Krishna Medical Store</h4>
+                      <p style="margin: 0; font-size: 14px; opacity: 0.9; font-style: italic;">Serving Gujarat with Excellence in Healthcare</p>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                      <p style="margin: 0 0 8px 0; font-size: 14px; opacity: 0.9;">
+                        📍 <strong>Professional Address:</strong> 3 Sahyog Complex, Man Sarovar Circle, Amroli, 394107, Gujarat
+                      </p>
+                      <p style="margin: 0; font-size: 14px; opacity: 0.9;">
+                        ⏰ <strong>Business Hours:</strong> Mon-Sat 9:00 AM - 9:00 PM | Sunday 10:00 AM - 6:00 PM
+                      </p>
+                    </div>
+
+                    <div style="border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px;">
+                      <p style="margin: 0; font-size: 12px; opacity: 0.7;">
+                        © 2024 Hare Krishna Medical Store. All rights reserved. Licensed Medical Establishment.
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: space-between; margin-top: 15px;">
-                  <div style="flex: 1; min-width: 250px; background: #ffffff; border: 2px solid #f8f9fa; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(230,57,70,0.1); text-align: center;">
-                    <div style="color: #e63946; font-size: 24px; margin-bottom: 10px;">📦</div>
-                    <h4 style="color: #495057; margin: 0 0 8px 0; font-size: 16px;">Track Orders</h4>
-                    <p style="color: #6c757d; margin: 0; font-size: 14px;">Monitor your order status in real-time</p>
-                  </div>
-                  <div style="flex: 1; min-width: 250px; background: #ffffff; border: 2px solid #f8f9fa; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(230,57,70,0.1); text-align: center;">
-                    <div style="color: #e63946; font-size: 24px; margin-bottom: 10px;">📄</div>
-                    <h4 style="color: #495057; margin: 0 0 8px 0; font-size: 16px;">Digital Invoices</h4>
-                    <p style="color: #6c757d; margin: 0; font-size: 14px;">Access your order history and invoices</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- CTA Button -->
-              <div style="text-align: center; margin: 35px 0;">
-                <a href="${websiteUrl}"
-                   style="display: inline-block; background: linear-gradient(135deg, #e63946, #dc3545); color: #ffffff; text-decoration: none; padding: 15px 35px; border-radius: 25px; font-weight: 600; font-size: 16px; box-shadow: 0 6px 20px rgba(230,57,70,0.3); transition: all 0.3s ease;">
-                  🌐 Visit Our Website
-                </a>
-              </div>
-
-              <!-- Support Info -->
-              <div style="background: #f8f9fa; border-radius: 10px; padding: 25px; margin: 30px 0; text-align: center;">
-                <h4 style="color: #e63946; margin: 0 0 15px 0;">Need Help? We're Here for You!</h4>
-                <p style="color: #6c757d; margin: 0 0 15px 0; line-height: 1.6;">
-                  Our dedicated support team is ready to assist you with any questions or concerns.
-                </p>
-                <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-top: 20px;">
-                  <div style="text-align: center;">
-                    <div style="color: #e63946; font-size: 18px; margin-bottom: 5px;">📞</div>
-                    <strong style="color: #495057;">+91 76989 13354</strong>
-                  </div>
-                  <div style="text-align: center;">
-                    <div style="color: #e63946; font-size: 18px; margin-bottom: 5px;">📧</div>
-                    <strong style="color: #495057;">hkmedicalamroli@gmail.com</strong>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Footer -->
-            <div style="background: linear-gradient(135deg, #495057, #343a40); color: #ffffff; padding: 25px 30px; text-align: center; border-radius: 0 0 10px 10px;">
-              <p style="margin: 0 0 10px 0; font-size: 14px; opacity: 0.9;">
-                📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat
-              </p>
-              <p style="margin: 0; font-size: 12px; opacity: 0.7;">
-                © 2024 Hare Krishna Medical Store. All rights reserved.
-              </p>
-            </div>
-          </div>
+              </td>
+            </tr>
+          </table>
         </body>
         </html>
       `,
     };
 
     try {
-      await this.transporter.sendMail(mailOptions);
-      console.log(`Welcome email sent to ${email}`);
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log(
+        `✅ Welcome email sent successfully to ${email}:`,
+        result.messageId,
+      );
+      return result;
     } catch (error) {
-      console.error("Error sending welcome email:", error);
+      console.error(
+        "❌ Error sending welcome email to",
+        email,
+        ":",
+        error.message,
+      );
+      console.error("Email configuration check:");
+      console.error("- EMAIL_HOST:", process.env.EMAIL_HOST);
+      console.error("- EMAIL_PORT:", process.env.EMAIL_PORT);
+      console.error(
+        "- EMAIL_USER:",
+        process.env.EMAIL_USER ? "Set" : "Not Set",
+      );
+      console.error(
+        "- EMAIL_PASS:",
+        process.env.EMAIL_PASS ? "Set" : "Not Set",
+      );
       throw error;
     }
   }

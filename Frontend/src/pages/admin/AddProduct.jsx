@@ -30,8 +30,8 @@ const AddProduct = () => {
     stock: "",
     category: "",
     weight: "",
+    shortDescription: "",
     description: "",
-    benefits: "",
     usage: "",
     composition: "",
     sideEffects: "",
@@ -131,6 +131,8 @@ const AddProduct = () => {
     if (!formData.price) newErrors.price = "Price is required";
     if (!formData.stock) newErrors.stock = "Stock quantity is required";
     if (!formData.category) newErrors.category = "Category is required";
+    if (!formData.shortDescription.trim())
+      newErrors.shortDescription = "Short description is required";
     if (!formData.description.trim())
       newErrors.description = "Description is required";
 
@@ -260,8 +262,8 @@ const AddProduct = () => {
       stock: "",
       category: "",
       weight: "",
+      shortDescription: "",
       description: "",
-      benefits: "",
       usage: "",
       composition: "",
       sideEffects: "",
@@ -436,16 +438,38 @@ const AddProduct = () => {
                       </Col>
                       <Col md={12} className="mb-3">
                         <Form.Label>
-                          Description <span className="text-danger">*</span>
+                          Short Description{" "}
+                          <span className="text-danger">*</span>
+                        </Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="shortDescription"
+                          value={formData.shortDescription}
+                          onChange={handleInputChange}
+                          isInvalid={!!errors.shortDescription}
+                          placeholder="Enter brief product summary (max 100 characters)"
+                          maxLength={100}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {errors.shortDescription}
+                        </Form.Control.Feedback>
+                        <Form.Text className="text-muted">
+                          Brief summary for product cards and listings
+                        </Form.Text>
+                      </Col>
+                      <Col md={12} className="mb-3">
+                        <Form.Label>
+                          Detailed Description{" "}
+                          <span className="text-danger">*</span>
                         </Form.Label>
                         <Form.Control
                           as="textarea"
-                          rows={3}
+                          rows={4}
                           name="description"
                           value={formData.description}
                           onChange={handleInputChange}
                           isInvalid={!!errors.description}
-                          placeholder="Enter detailed product description"
+                          placeholder="Enter comprehensive product description with all details"
                         />
                         <Form.Control.Feedback type="invalid">
                           {errors.description}
@@ -474,17 +498,6 @@ const AddProduct = () => {
                           value={formData.composition}
                           onChange={handleInputChange}
                           placeholder="Enter product composition/ingredients"
-                        />
-                      </Col>
-                      <Col md={12} className="mb-3">
-                        <Form.Label>Benefits</Form.Label>
-                        <Form.Control
-                          as="textarea"
-                          rows={3}
-                          name="benefits"
-                          value={formData.benefits}
-                          onChange={handleInputChange}
-                          placeholder="Enter product benefits (one per line or comma separated)"
                         />
                       </Col>
                       <Col md={12} className="mb-3">

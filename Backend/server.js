@@ -93,6 +93,50 @@ app.get("/api/health", (req, res) => {
 });
 
 // ==========================
+// ✅ Email Test Route (Development Only)
+// ==========================
+if (process.env.NODE_ENV === "development") {
+  app.post("/api/test-email", async (req, res) => {
+    try {
+      const emailService = require("./utils/emailService");
+      const { email, fullName } = req.body;
+
+      if (!email || !fullName) {
+        return res.status(400).json({
+          success: false,
+          message: "Email and fullName are required",
+        });
+      }
+
+      // Test email connection first
+      const connectionTest = await emailService.testConnection();
+      if (!connectionTest) {
+        return res.status(500).json({
+          success: false,
+          message: "Email service connection failed",
+        });
+      }
+
+      // Send test welcome email
+      await emailService.sendWelcomeEmail(email, fullName);
+
+      res.json({
+        success: true,
+        message: "Test email sent successfully",
+        email: email,
+      });
+    } catch (error) {
+      console.error("Test email error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to send test email",
+        error: error.message,
+      });
+    }
+  });
+}
+
+// ==========================
 // ✅ Socket.io Events
 // ==========================
 io.on("connection", (socket) => {
