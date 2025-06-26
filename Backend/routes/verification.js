@@ -2,8 +2,10 @@ const express = require("express");
 const crypto = require("crypto");
 const User = require("../models/User");
 const Verification = require("../models/Verification");
+const Invoice = require("../models/Invoice");
+const Letterhead = require("../models/Letterhead");
 const { auth } = require("../middleware/auth");
-const { body, validationResult } = require("express-validator");
+const { body, validationResult, query } = require("express-validator");
 const emailService = require("../utils/emailService");
 
 const router = express.Router();
