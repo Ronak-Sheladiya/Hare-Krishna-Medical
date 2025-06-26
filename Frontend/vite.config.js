@@ -9,4 +9,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      "/socket.io": {
+        target: "http://localhost:5000", // Backend URL
+        ws: true,                         // Enable WebSocket proxying
+        changeOrigin: true,
+      },
+    },
+  },
 });
