@@ -501,17 +501,6 @@ const AddProduct = () => {
                         />
                       </Col>
                       <Col md={12} className="mb-3">
-                        <Form.Label>Benefits</Form.Label>
-                        <Form.Control
-                          as="textarea"
-                          rows={3}
-                          name="benefits"
-                          value={formData.benefits}
-                          onChange={handleInputChange}
-                          placeholder="Enter product benefits (one per line or comma separated)"
-                        />
-                      </Col>
-                      <Col md={12} className="mb-3">
                         <Form.Label>Usage Instructions</Form.Label>
                         <Form.Control
                           as="textarea"
