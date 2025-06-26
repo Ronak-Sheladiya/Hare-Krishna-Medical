@@ -655,7 +655,7 @@ const SocketDiagnostics = () => {
                   Ensure your backend allows CORS from your frontend domain
                 </li>
               </ol>
-            </p>
+            </div>
           </Alert>
         )}
 
