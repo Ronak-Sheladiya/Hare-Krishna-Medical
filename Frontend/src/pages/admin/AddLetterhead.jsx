@@ -64,11 +64,13 @@ const AddLetterhead = () => {
   const fetchLetterhead = async () => {
     setLoading(true);
     try {
-      const response = await safeApiCall(() => api.get(`/letterheads/${id}`));
+      const response = await safeApiCall(() =>
+        api.get(`/api/letterheads/${id}`),
+      );
       if (response.success) {
-        setFormData(response.letterhead);
+        setFormData(response.data);
       } else {
-        setError(response.message || "Failed to fetch letterhead");
+        setError(response.error || "Failed to fetch letterhead");
       }
     } catch (err) {
       console.error("Fetch letterhead error:", err);
@@ -115,10 +117,12 @@ const AddLetterhead = () => {
       let response;
       if (isEditing) {
         response = await safeApiCall(() =>
-          api.put(`/letterheads/${id}`, formData),
+          api.put(`/api/letterheads/${id}`, formData),
         );
       } else {
-        response = await safeApiCall(() => api.post("/letterheads", formData));
+        response = await safeApiCall(() =>
+          api.post("/api/letterheads", formData),
+        );
       }
 
       if (response.success) {
@@ -131,7 +135,7 @@ const AddLetterhead = () => {
         // Trigger real-time refresh
         window.dispatchEvent(
           new CustomEvent("refreshLetterheads", {
-            detail: response.letterhead,
+            detail: response.data,
           }),
         );
 
@@ -139,7 +143,7 @@ const AddLetterhead = () => {
           navigate("/admin/letterheads");
         }, 2000);
       } else {
-        setError(response.message || "Failed to save letterhead");
+        setError(response.error || "Failed to save letterhead");
       }
     } catch (err) {
       console.error("Save letterhead error:", err);
@@ -198,88 +202,121 @@ const AddLetterhead = () => {
 
   if (loading && isEditing) {
     return (
-      <Container className="py-4">
+      <Container className="py-5">
         <div className="text-center">
-          <Spinner animation="border" variant="danger">
-            <span className="visually-hidden">Loading...</span>
-          </Spinner>
-          <p className="mt-2 text-muted">Loading letterhead...</p>
+          <Spinner animation="border" variant="danger" />
+          <p className="mt-3">Loading letterhead data...</p>
         </div>
       </Container>
     );
   }
 
   return (
-    <div className="admin-letterhead-form">
-      <style jsx>{`
-        .admin-letterhead-form {
-          background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    <div className="letterhead-container">
+      <style>{`
+        .letterhead-container {
+          background: #f8f9fa;
           min-height: 100vh;
-          padding: 2rem 0;
+          padding-bottom: 2rem;
         }
 
         .letterhead-hero {
           background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%);
           color: white;
-          padding: 3rem 0;
+          padding: 4rem 0 3rem 0;
           margin-bottom: 2rem;
-          border-radius: 0 0 20px 20px;
-          box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .letterhead-hero::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        }
+
+        .letterhead-hero .container {
+          position: relative;
+          z-index: 2;
         }
 
         .letterhead-card {
           border: none;
           border-radius: 15px;
-          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-          transition: all 0.3s ease;
+          box-shadow: 0 10px 30px rgba(220, 53, 69, 0.1);
           margin-bottom: 2rem;
+          overflow: hidden;
+          transition: all 0.3s ease;
+          background: white;
         }
 
         .letterhead-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+          transform: translateY(-5px);
+          box-shadow: 0 15px 40px rgba(220, 53, 69, 0.15);
         }
 
         .letterhead-card .card-header {
           background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%);
           color: white;
-          border-radius: 15px 15px 0 0 !important;
-          padding: 1.25rem 2rem;
           border: none;
+          padding: 1.5rem;
         }
 
         .letterhead-tabs {
           background: white;
-          border-radius: 10px;
-          padding: 0.5rem;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+          border-radius: 15px;
+          padding: 1rem;
           margin-bottom: 2rem;
+          box-shadow: 0 5px 20px rgba(220, 53, 69, 0.1);
+          display: flex;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+          justify-content: center;
         }
 
         .letterhead-tab {
           background: transparent;
-          border: none;
-          padding: 1rem 2rem;
-          border-radius: 8px;
+          border: 2px solid #e9ecef;
           color: #6c757d;
+          padding: 1rem 1.5rem;
+          border-radius: 10px;
           font-weight: 500;
           transition: all 0.3s ease;
-          margin: 0 0.25rem;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          text-decoration: none;
+          min-width: 120px;
+          justify-content: center;
+          flex: 1;
+          max-width: 200px;
+        }
+
+        .letterhead-tab:hover {
+          border-color: #dc3545;
+          color: #dc3545;
+          transform: translateY(-2px);
         }
 
         .letterhead-tab.active {
           background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%);
+          border-color: #dc3545;
           color: white;
           transform: translateY(-2px);
-          box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+          box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
         }
 
         .letterhead-form-control {
           border: 2px solid #e9ecef;
           border-radius: 10px;
           padding: 0.75rem 1rem;
-          font-size: 0.95rem;
           transition: all 0.3s ease;
+          font-size: 0.95rem;
+          width: 100%;
         }
 
         .letterhead-form-control:focus {
@@ -288,102 +325,40 @@ const AddLetterhead = () => {
           transform: translateY(-1px);
         }
 
-        .content-editor {
-          border: 2px solid #e9ecef;
-          border-radius: 10px;
-          background: white;
-          min-height: 300px;
-        }
-
-        .content-toolbar {
-          background: #f8f9fa;
-          border-bottom: 1px solid #dee2e6;
-          padding: 0.75rem;
-          border-radius: 10px 10px 0 0;
-        }
-
-        .content-editor-area {
-          padding: 1.5rem;
-          min-height: 250px;
-          font-family: "Times New Roman", serif;
-          font-size: 12px;
-          line-height: 1.6;
-          border-radius: 0 0 10px 10px;
-        }
-
-        .content-editor-area:focus {
-          outline: none;
-          background: #fafbfc;
-        }
-
-        .toolbar-btn {
-          background: white;
-          border: 1px solid #dee2e6;
-          border-radius: 6px;
-          padding: 0.5rem 0.75rem;
-          margin: 0 0.25rem;
-          color: #495057;
-          transition: all 0.2s ease;
-        }
-
-        .toolbar-btn:hover {
-          background: #dc3545;
-          color: white;
-          border-color: #dc3545;
-        }
-
-        .preview-panel {
-          background: white;
-          border-radius: 15px;
-          padding: 2rem;
-          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-          position: sticky;
-          top: 2rem;
-          max-height: calc(100vh - 4rem);
-          overflow-y: auto;
-        }
-
-        .preview-content {
-          font-family: "Times New Roman", serif;
-          font-size: 12px;
-          line-height: 1.6;
-          border: 1px dashed #dee2e6;
-          padding: 1.5rem;
-          border-radius: 8px;
-          background: #fafbfc;
-        }
-
         .letterhead-btn {
           background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%);
           border: none;
-          border-radius: 10px;
-          padding: 0.75rem 2rem;
-          font-weight: 600;
           color: white;
+          padding: 0.75rem 2rem;
+          border-radius: 10px;
+          font-weight: 600;
           transition: all 0.3s ease;
-          box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+          display: inline-flex;
+          align-items: center;
         }
 
-        .letterhead-btn:hover {
+        .letterhead-btn:hover:not(:disabled) {
           transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+          box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
           color: white;
         }
 
         .letterhead-btn:disabled {
-          opacity: 0.6;
+          opacity: 0.7;
           transform: none;
-          box-shadow: none;
         }
 
         .letterhead-btn-outline {
           background: transparent;
           border: 2px solid #dc3545;
           color: #dc3545;
-          border-radius: 10px;
           padding: 0.75rem 2rem;
+          border-radius: 10px;
           font-weight: 600;
           transition: all 0.3s ease;
+          display: inline-flex;
+          align-items: center;
+          text-decoration: none;
         }
 
         .letterhead-btn-outline:hover {
@@ -392,8 +367,43 @@ const AddLetterhead = () => {
           transform: translateY(-2px);
         }
 
+        .preview-panel {
+          position: sticky;
+          top: 20px;
+          background: white;
+          border-radius: 15px;
+          padding: 1.5rem;
+          box-shadow: 0 10px 30px rgba(220, 53, 69, 0.1);
+          border: 2px solid #f8f9fa;
+          max-height: 80vh;
+          overflow-y: auto;
+        }
+
+        .toolbar-btn {
+          background: #f8f9fa;
+          border: 1px solid #dee2e6;
+          color: #495057;
+          padding: 0.5rem 0.75rem;
+          border-radius: 6px;
+          transition: all 0.2s ease;
+          cursor: pointer;
+        }
+
+        .toolbar-btn:hover {
+          background: #dc3545;
+          border-color: #dc3545;
+          color: white;
+        }
+
         .form-section {
-          margin-bottom: 2rem;
+          margin-bottom: 3rem;
+          padding-bottom: 2rem;
+          border-bottom: 1px solid #f0f0f0;
+        }
+
+        .form-section:last-child {
+          border-bottom: none;
+          margin-bottom: 0;
         }
 
         .section-title {
@@ -404,6 +414,88 @@ const AddLetterhead = () => {
           padding-bottom: 0.5rem;
           border-bottom: 2px solid #dc3545;
           display: inline-block;
+        }
+
+        .content-editor {
+          border: 2px solid #e9ecef;
+          border-radius: 10px;
+          overflow: hidden;
+          transition: all 0.3s ease;
+          background: white;
+        }
+
+        .content-editor:focus-within {
+          border-color: #dc3545;
+          box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+
+        .content-toolbar {
+          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+          padding: 1rem;
+          border-bottom: 1px solid #dee2e6;
+        }
+
+        .content-editor-area {
+          padding: 1.5rem;
+          background: white;
+          font-family: 'Times New Roman', serif;
+          font-size: 14px;
+          line-height: 1.6;
+          border: none;
+          min-height: 300px;
+          width: 100%;
+          outline: none;
+          color: #333;
+        }
+
+        .content-editor-area:focus {
+          background: #fefefe;
+        }
+
+        .preview-content {
+          font-family: "Times New Roman", serif;
+          font-size: 12px;
+          line-height: 1.5;
+          background: white;
+          padding: 2rem;
+          border: 1px solid #dee2e6;
+          border-radius: 8px;
+          margin-bottom: 1rem;
+          color: #333;
+        }
+
+        .email-template {
+          background: white;
+          width: 100%;
+          max-width: 800px;
+          margin: 0 auto;
+          font-family: 'Times New Roman', serif;
+          font-size: 14px;
+          line-height: 1.6;
+          color: #333;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          overflow: hidden;
+        }
+
+        .email-header {
+          background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%);
+          color: white;
+          padding: 2rem;
+          text-align: center;
+        }
+
+        .email-body {
+          padding: 2rem;
+        }
+
+        .email-footer {
+          background: #f8f9fa;
+          padding: 1.5rem 2rem;
+          border-top: 1px solid #dee2e6;
+          font-size: 12px;
+          color: #6c757d;
+          text-align: center;
         }
 
         .alert-custom {
@@ -434,29 +526,162 @@ const AddLetterhead = () => {
           font-weight: 500;
         }
 
+        .action-buttons {
+          display: flex;
+          gap: 1rem;
+          flex-wrap: wrap;
+          margin-top: 2rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+          .preview-panel {
+            position: static;
+            margin-top: 2rem;
+            max-height: none;
+          }
+        }
+
         @media (max-width: 768px) {
           .letterhead-hero {
             padding: 2rem 0;
             margin-bottom: 1rem;
           }
 
+          .letterhead-hero h1 {
+            font-size: 1.75rem;
+          }
+
           .letterhead-card {
             margin-bottom: 1rem;
           }
 
-          .preview-panel {
-            position: static;
-            margin-top: 2rem;
-            max-height: none;
-          }
-
           .letterhead-tabs {
             flex-direction: column;
+            gap: 0.5rem;
           }
 
           .letterhead-tab {
-            margin: 0.25rem 0;
+            margin: 0;
             text-align: center;
+            min-width: auto;
+            width: 100%;
+            max-width: none;
+            flex: none;
+          }
+
+          .content-toolbar {
+            padding: 0.75rem;
+          }
+
+          .content-toolbar .d-flex {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+          }
+
+          .toolbar-btn {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.85rem;
+          }
+
+          .content-editor-area {
+            padding: 1rem;
+            font-size: 13px;
+            min-height: 250px;
+          }
+
+          .preview-content {
+            padding: 1rem;
+            font-size: 11px;
+          }
+
+          .email-template {
+            margin: 0;
+            border-radius: 0;
+          }
+
+          .email-header, .email-body {
+            padding: 1.5rem 1rem;
+          }
+
+          .email-footer {
+            padding: 1rem;
+          }
+
+          .action-buttons {
+            flex-direction: column;
+          }
+
+          .letterhead-btn, .letterhead-btn-outline {
+            padding: 0.6rem 1.5rem;
+            font-size: 0.9rem;
+            width: 100%;
+            justify-content: center;
+          }
+        }
+
+        @media (max-width: 576px) {
+          .letterhead-hero {
+            padding: 1.5rem 0;
+          }
+
+          .letterhead-hero h1 {
+            font-size: 1.5rem;
+          }
+
+          .letterhead-card .card-header {
+            padding: 1rem;
+          }
+
+          .letterhead-card .card-body {
+            padding: 1rem !important;
+          }
+
+          .content-editor-area {
+            min-height: 200px;
+            font-size: 12px;
+          }
+
+          .preview-content {
+            font-size: 10px;
+            padding: 0.75rem;
+          }
+
+          .email-header, .email-body {
+            padding: 1rem 0.75rem;
+          }
+
+          .form-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+          }
+        }
+
+        /* Print Styles for Email Templates */
+        @media print {
+          .letterhead-container {
+            background: white;
+          }
+
+          .email-template {
+            border: none;
+            box-shadow: none;
+            max-width: none;
+            width: 100%;
+          }
+
+          .letterhead-hero,
+          .letterhead-tabs,
+          .alert-custom,
+          .preview-panel,
+          button,
+          .action-buttons {
+            display: none !important;
+          }
+
+          .content-editor-area {
+            border: none;
+            padding: 0;
           }
         }
       `}</style>
@@ -469,13 +694,13 @@ const AddLetterhead = () => {
               <h1 className="display-5 fw-bold mb-3">
                 <i className="bi bi-file-text-fill me-3"></i>
                 {isEditing
-                  ? "Edit Letterhead"
+                  ? "Edit Professional Letterhead"
                   : "Create Professional Letterhead"}
               </h1>
               <p className="lead opacity-90">
                 {isEditing
-                  ? "Update your letterhead with professional formatting and design"
-                  : "Design professional letterheads with our advanced editor"}
+                  ? "Update your letterhead with professional formatting and responsive email design"
+                  : "Design professional letterheads with our advanced email-ready editor"}
               </p>
             </div>
           </Container>
@@ -508,7 +733,7 @@ const AddLetterhead = () => {
           )}
 
           {/* Navigation Tabs */}
-          <div className="letterhead-tabs d-flex justify-content-center">
+          <div className="letterhead-tabs">
             {[
               { key: "basic", label: "Basic Info", icon: "bi-info-circle" },
               { key: "recipient", label: "Recipient", icon: "bi-person" },
@@ -597,56 +822,35 @@ const AddLetterhead = () => {
                             name="title"
                             value={formData.title}
                             onChange={handleInputChange}
-                            placeholder="Enter letterhead title (e.g., Certificate of Excellence)"
+                            placeholder="Enter the title of your letterhead"
                             className="letterhead-form-control"
                             required
                           />
                         </Form.Group>
 
-                        <Row>
-                          <Col md={6}>
-                            <Form.Group className="mb-4">
-                              <Form.Label className="fw-semibold">
-                                Context *
-                              </Form.Label>
-                              <Form.Select
-                                name="context"
-                                value={formData.context}
-                                onChange={handleInputChange}
-                                className="letterhead-form-control"
-                                required
-                              >
-                                <option value="respected">Respected</option>
-                                <option value="dear">Dear</option>
-                                <option value="to_whom_it_may_concern">
-                                  To Whom It May Concern
-                                </option>
-                              </Form.Select>
-                            </Form.Group>
-                          </Col>
-                          <Col md={6}>
-                            <Form.Group className="mb-4">
-                              <Form.Label className="fw-semibold">
-                                Subject *
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="subject"
-                                value={formData.subject}
-                                onChange={handleInputChange}
-                                placeholder="Enter subject line"
-                                className="letterhead-form-control"
-                                required
-                              />
-                            </Form.Group>
-                          </Col>
-                        </Row>
+                        <Form.Group className="mb-4">
+                          <Form.Label className="fw-semibold">
+                            Context Type
+                          </Form.Label>
+                          <Form.Select
+                            name="context"
+                            value={formData.context}
+                            onChange={handleInputChange}
+                            className="letterhead-form-control"
+                          >
+                            <option value="respected">Respected</option>
+                            <option value="dear">Dear</option>
+                            <option value="to_whom_it_may_concern">
+                              To Whom It May Concern
+                            </option>
+                          </Form.Select>
+                        </Form.Group>
                       </div>
                     </Card.Body>
                   </Card>
                 )}
 
-                {/* Recipient Information Tab */}
+                {/* Recipient Tab */}
                 {activeTab === "recipient" && (
                   <Card className="letterhead-card">
                     <Card.Header>
@@ -662,22 +866,19 @@ const AddLetterhead = () => {
                           <Col md={3}>
                             <Form.Group className="mb-4">
                               <Form.Label className="fw-semibold">
-                                Prefix *
+                                Prefix
                               </Form.Label>
                               <Form.Select
                                 name="recipient.prefix"
                                 value={formData.recipient.prefix}
                                 onChange={handleInputChange}
                                 className="letterhead-form-control"
-                                required
                               >
                                 <option value="Mr.">Mr.</option>
                                 <option value="Mrs.">Mrs.</option>
-                                <option value="Ms.">Ms.</option>
+                                <option value="Miss">Miss</option>
                                 <option value="Dr.">Dr.</option>
                                 <option value="Prof.">Prof.</option>
-                                <option value="Hon.">Hon.</option>
-                                <option value="Company">Company</option>
                               </Form.Select>
                             </Form.Group>
                           </Col>
@@ -744,7 +945,7 @@ const AddLetterhead = () => {
                                 name="recipient.designation"
                                 value={formData.recipient.designation}
                                 onChange={handleInputChange}
-                                placeholder="Recipient's designation"
+                                placeholder="Job title or position"
                                 className="letterhead-form-control"
                               />
                             </Form.Group>
@@ -766,6 +967,24 @@ const AddLetterhead = () => {
                           </Col>
                         </Row>
                       </div>
+
+                      <div className="form-section">
+                        <h6 className="section-title">Subject</h6>
+                        <Form.Group className="mb-4">
+                          <Form.Label className="fw-semibold">
+                            Subject Line *
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="subject"
+                            value={formData.subject}
+                            onChange={handleInputChange}
+                            placeholder="Enter the subject of your letterhead"
+                            className="letterhead-form-control"
+                            required
+                          />
+                        </Form.Group>
+                      </div>
                     </Card.Body>
                   </Card>
                 )}
@@ -776,7 +995,7 @@ const AddLetterhead = () => {
                     <Card.Header>
                       <h5 className="mb-0">
                         <i className="bi bi-file-text me-2"></i>
-                        Document Content
+                        Professional Email Content
                       </h5>
                     </Card.Header>
                     <Card.Body className="p-4">
@@ -798,17 +1017,17 @@ const AddLetterhead = () => {
                       </div>
 
                       <div className="form-section">
-                        <h6 className="section-title">Main Content *</h6>
+                        <h6 className="section-title">Main Email Content *</h6>
                         <div className="content-editor">
                           <div className="content-toolbar">
                             <div className="d-flex align-items-center gap-2 flex-wrap">
-                              <small className="text-muted me-3">
-                                Formatting:
+                              <small className="text-muted me-3 fw-semibold">
+                                Email Formatting Tools:
                               </small>
 
                               <OverlayTrigger
                                 placement="top"
-                                overlay={<Tooltip>Bold</Tooltip>}
+                                overlay={<Tooltip>Bold Text</Tooltip>}
                               >
                                 <button
                                   type="button"
@@ -821,7 +1040,7 @@ const AddLetterhead = () => {
 
                               <OverlayTrigger
                                 placement="top"
-                                overlay={<Tooltip>Italic</Tooltip>}
+                                overlay={<Tooltip>Italic Text</Tooltip>}
                               >
                                 <button
                                   type="button"
@@ -834,7 +1053,7 @@ const AddLetterhead = () => {
 
                               <OverlayTrigger
                                 placement="top"
-                                overlay={<Tooltip>Underline</Tooltip>}
+                                overlay={<Tooltip>Underline Text</Tooltip>}
                               >
                                 <button
                                   type="button"
@@ -852,14 +1071,14 @@ const AddLetterhead = () => {
 
                               <OverlayTrigger
                                 placement="top"
-                                overlay={<Tooltip>Insert Date</Tooltip>}
+                                overlay={<Tooltip>Insert Current Date</Tooltip>}
                               >
                                 <button
                                   type="button"
                                   className="toolbar-btn"
                                   onClick={() =>
                                     insertTextAtCursor(
-                                      new Date().toLocaleDateString(),
+                                      new Date().toLocaleDateString("en-GB"),
                                     )
                                   }
                                 >
@@ -869,7 +1088,9 @@ const AddLetterhead = () => {
 
                               <OverlayTrigger
                                 placement="top"
-                                overlay={<Tooltip>Insert Line Break</Tooltip>}
+                                overlay={
+                                  <Tooltip>Insert Paragraph Break</Tooltip>
+                                }
                               >
                                 <button
                                   type="button"
@@ -877,6 +1098,23 @@ const AddLetterhead = () => {
                                   onClick={() => insertTextAtCursor("\n\n")}
                                 >
                                   <i className="bi bi-text-paragraph"></i>
+                                </button>
+                              </OverlayTrigger>
+
+                              <OverlayTrigger
+                                placement="top"
+                                overlay={
+                                  <Tooltip>Create Professional List</Tooltip>
+                                }
+                              >
+                                <button
+                                  type="button"
+                                  className="toolbar-btn"
+                                  onClick={() =>
+                                    formatText("insertUnorderedList")
+                                  }
+                                >
+                                  <i className="bi bi-list-ul"></i>
                                 </button>
                               </OverlayTrigger>
                             </div>
@@ -892,16 +1130,15 @@ const AddLetterhead = () => {
                             dangerouslySetInnerHTML={{
                               __html: formData.content,
                             }}
-                            style={{
-                              outline: "none",
-                              minHeight: "250px",
-                            }}
+                            placeholder="Write your professional email content here. Use the toolbar for formatting..."
                           />
                         </div>
                         <Form.Text className="text-muted">
                           <i className="bi bi-info-circle me-1"></i>
-                          Write the main content of your letterhead. Use the
-                          toolbar for basic formatting.
+                          Write the main content of your professional letterhead
+                          email. Use the formatting toolbar for professional
+                          styling. This content will be displayed in a
+                          responsive email format.
                         </Form.Text>
                       </div>
 
@@ -916,9 +1153,13 @@ const AddLetterhead = () => {
                             name="footer"
                             value={formData.footer}
                             onChange={handleInputChange}
-                            placeholder="Footer content (appears at the bottom of the letterhead)"
+                            placeholder="Footer content (appears at the bottom of the letterhead email)"
                             className="letterhead-form-control"
                           />
+                          <Form.Text className="text-muted">
+                            Professional footer content such as disclaimers,
+                            contact information, or company policies.
+                          </Form.Text>
                         </Form.Group>
                       </div>
                     </Card.Body>
@@ -985,12 +1226,12 @@ const AddLetterhead = () => {
                             name="notes"
                             value={formData.notes}
                             onChange={handleInputChange}
-                            placeholder="Internal notes and comments (not visible in the letterhead)"
+                            placeholder="Internal notes and comments (not visible in the letterhead email)"
                             className="letterhead-form-control"
                           />
                           <Form.Text className="text-muted">
                             These notes are for internal use only and will not
-                            appear in the final letterhead.
+                            appear in the final letterhead email.
                           </Form.Text>
                         </Form.Group>
                       </div>
@@ -999,7 +1240,7 @@ const AddLetterhead = () => {
                 )}
 
                 {/* Action Buttons */}
-                <div className="d-flex gap-3 mt-4 flex-wrap">
+                <div className="action-buttons">
                   <button
                     type="submit"
                     disabled={loading}
@@ -1017,7 +1258,9 @@ const AddLetterhead = () => {
                     ) : (
                       <>
                         <i className="bi bi-check-circle me-2"></i>
-                        {isEditing ? "Update Letterhead" : "Create Letterhead"}
+                        {isEditing
+                          ? "Update Professional Letterhead"
+                          : "Create Professional Letterhead"}
                       </>
                     )}
                   </button>
@@ -1037,7 +1280,7 @@ const AddLetterhead = () => {
                     onClick={() => setShowPreview(true)}
                   >
                     <i className="bi bi-eye me-2"></i>
-                    Full Preview
+                    Full Email Preview
                   </button>
                 </div>
               </Col>
@@ -1045,18 +1288,18 @@ const AddLetterhead = () => {
               {/* Live Preview Panel */}
               <Col lg={4}>
                 <div className="preview-panel">
-                  <h6 className="fw-bold mb-3 text-center">
+                  <h6 className="fw-bold mb-3 text-center text-danger">
                     <i className="bi bi-eye me-2"></i>
-                    Live Preview
+                    Live Email Preview
                   </h6>
 
-                  <div className="preview-content">
-                    <div className="text-center mb-3">
+                  <div className="email-template">
+                    <div className="email-header">
                       <h6
                         style={{
-                          fontSize: "14px",
+                          margin: 0,
+                          fontSize: "16px",
                           fontWeight: "bold",
-                          color: "#dc3545",
                         }}
                       >
                         HARE KRISHNA MEDICAL
@@ -1064,9 +1307,9 @@ const AddLetterhead = () => {
                       {formData.title && (
                         <div
                           style={{
-                            fontSize: "12px",
-                            fontWeight: "bold",
-                            marginTop: "1rem",
+                            fontSize: "14px",
+                            fontWeight: "600",
+                            marginTop: "0.5rem",
                           }}
                         >
                           {formData.title}
@@ -1074,78 +1317,116 @@ const AddLetterhead = () => {
                       )}
                     </div>
 
-                    <div
-                      className="d-flex justify-content-between mb-3"
-                      style={{ fontSize: "10px" }}
-                    >
-                      <span>Ref: [Auto-generated]</span>
-                      <span>
-                        Date: {new Date().toLocaleDateString("en-GB")}
-                      </span>
-                    </div>
-
-                    {formData.recipient.firstName && (
-                      <div className="mb-3" style={{ fontSize: "11px" }}>
-                        <div>
-                          {getPreviewText().context}{" "}
-                          {getPreviewText().recipientName},
-                        </div>
-                        {formData.recipient.designation && (
-                          <div>{formData.recipient.designation}</div>
-                        )}
-                        {formData.recipient.company && (
-                          <div>{formData.recipient.company}</div>
-                        )}
-                      </div>
-                    )}
-
-                    {formData.subject && (
-                      <div className="mb-3" style={{ fontSize: "11px" }}>
-                        <strong>Subject: </strong>
-                        {formData.subject}
-                      </div>
-                    )}
-
-                    <div
-                      className="mb-3"
-                      style={{
-                        fontSize: "11px",
-                        minHeight: "100px",
-                        textAlign: "justify",
-                      }}
-                    >
+                    <div className="email-body">
                       <div
-                        dangerouslySetInnerHTML={{
-                          __html: getPreviewText().content,
-                        }}
-                      />
-                    </div>
+                        className="d-flex justify-content-between mb-3"
+                        style={{ fontSize: "11px", color: "#666" }}
+                      >
+                        <span>
+                          <strong>Ref:</strong> [Auto-generated]
+                        </span>
+                        <span>
+                          <strong>Date:</strong>{" "}
+                          {new Date().toLocaleDateString("en-GB")}
+                        </span>
+                      </div>
 
-                    <div className="mb-3" style={{ fontSize: "11px" }}>
-                      <div>With regards,</div>
-                      <div style={{ marginTop: "2rem" }}>
-                        <div>_____________________</div>
-                        <div>{formData.host.name || "[Host Name]"}</div>
-                        <div>
+                      {formData.recipient.firstName && (
+                        <div className="mb-3" style={{ fontSize: "12px" }}>
+                          <div style={{ marginBottom: "0.5rem" }}>
+                            <strong>
+                              {getPreviewText().context}{" "}
+                              {getPreviewText().recipientName},
+                            </strong>
+                          </div>
+                          {formData.recipient.designation && (
+                            <div style={{ color: "#666" }}>
+                              {formData.recipient.designation}
+                            </div>
+                          )}
+                          {formData.recipient.company && (
+                            <div style={{ color: "#666" }}>
+                              {formData.recipient.company}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {formData.subject && (
+                        <div className="mb-3" style={{ fontSize: "12px" }}>
+                          <strong style={{ color: "#dc3545" }}>
+                            Subject:{" "}
+                          </strong>
+                          {formData.subject}
+                        </div>
+                      )}
+
+                      <div
+                        className="mb-4"
+                        style={{
+                          fontSize: "12px",
+                          minHeight: "100px",
+                          textAlign: "justify",
+                          lineHeight: "1.6",
+                          color: "#333",
+                        }}
+                      >
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: getPreviewText().content,
+                          }}
+                        />
+                      </div>
+
+                      <div className="mb-3" style={{ fontSize: "12px" }}>
+                        <div>With warm regards,</div>
+                        <div
+                          style={{ marginTop: "2rem", marginBottom: "1rem" }}
+                        >
+                          <div
+                            style={{
+                              borderBottom: "1px solid #333",
+                              width: "200px",
+                            }}
+                          ></div>
+                        </div>
+                        <div style={{ fontWeight: "600" }}>
+                          {formData.host.name || "[Host Name]"}
+                        </div>
+                        <div style={{ color: "#666" }}>
                           {formData.host.designation || "[Host Designation]"}
                         </div>
-                        <div>Hare Krishna Medical</div>
+                        <div style={{ color: "#dc3545", fontWeight: "600" }}>
+                          Hare Krishna Medical
+                        </div>
                       </div>
                     </div>
 
-                    <div className="text-center" style={{ fontSize: "10px" }}>
-                      <div
-                        style={{ border: "1px dashed #ccc", padding: "0.5rem" }}
-                      >
-                        Place for Official Stamp
+                    <div className="email-footer">
+                      <div style={{ marginBottom: "1rem" }}>
+                        <div
+                          style={{
+                            border: "2px dashed #ccc",
+                            padding: "1rem",
+                            textAlign: "center",
+                            backgroundColor: "#fafafa",
+                          }}
+                        >
+                          <i className="bi bi-shield-check me-1"></i>
+                          Official Stamp & Verification
+                        </div>
+                      </div>
+                      <div style={{ fontSize: "10px", color: "#999" }}>
+                        This is a computer-generated professional letterhead. QR
+                        code verification available.
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-3">
+                  <div className="mt-3 text-center">
                     <span className="badge-professional">
-                      <i className="bi bi-shield-check me-1"></i>
-                      Official Document
+                      <i className="bi bi-envelope-check me-1"></i>
+                      Email-Ready Template
                     </span>
                   </div>
                 </div>
@@ -1158,38 +1439,30 @@ const AddLetterhead = () => {
         <Modal
           show={showPreview}
           onHide={() => setShowPreview(false)}
-          size="lg"
+          size="xl"
           centered
         >
           <Modal.Header closeButton className="bg-danger text-white">
             <Modal.Title>
-              <i className="bi bi-eye me-2"></i>
-              Full Letterhead Preview
+              <i className="bi bi-envelope me-2"></i>
+              Full Professional Email Preview
             </Modal.Title>
           </Modal.Header>
-          <Modal.Body
-            style={{ fontFamily: "Times New Roman, serif", fontSize: "12px" }}
-          >
+          <Modal.Body style={{ padding: 0 }}>
             <div
-              className="letterhead-preview p-4"
-              style={{ backgroundColor: "white" }}
+              className="email-template"
+              style={{ margin: 0, borderRadius: 0 }}
             >
-              <div className="text-center mb-4">
-                <h4
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: "bold",
-                    color: "#dc3545",
-                  }}
-                >
+              <div className="email-header">
+                <h4 style={{ margin: 0, fontSize: "18px", fontWeight: "bold" }}>
                   HARE KRISHNA MEDICAL
                 </h4>
                 {formData.title && (
                   <div
                     style={{
-                      fontSize: "14px",
-                      fontWeight: "bold",
-                      margin: "1rem 0",
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      marginTop: "1rem",
                     }}
                   >
                     {formData.title}
@@ -1197,72 +1470,140 @@ const AddLetterhead = () => {
                 )}
               </div>
 
-              <div className="d-flex justify-content-between mb-4">
-                <div>Ref: [Auto-generated]</div>
-                <div>Date: {new Date().toLocaleDateString("en-GB")}</div>
-              </div>
-
-              <div className="mb-4">
-                <div>
-                  {getPreviewText().context} {getPreviewText().recipientName},
-                </div>
-                {formData.recipient.designation && (
-                  <div>{formData.recipient.designation}</div>
-                )}
-                {formData.recipient.company && (
-                  <div>{formData.recipient.company}</div>
-                )}
-              </div>
-
-              {formData.subject && (
-                <div className="mb-4">
-                  <strong>Subject: </strong>
-                  {formData.subject}
-                </div>
-              )}
-
-              <div
-                className="mb-4"
-                style={{ textAlign: "justify", lineHeight: "1.6" }}
-              >
+              <div className="email-body" style={{ padding: "3rem" }}>
                 <div
-                  dangerouslySetInnerHTML={{
-                    __html:
-                      formData.content || "Your content will appear here...",
-                  }}
-                />
-              </div>
-
-              <div className="mb-4">
-                <div>With regards,</div>
-                <div style={{ marginTop: "3rem" }}>
-                  <div>_____________________</div>
-                  <div>{formData.host.name || "[Host Name]"}</div>
-                  <div>{formData.host.designation || "[Host Designation]"}</div>
-                  <div>Hare Krishna Medical</div>
+                  className="d-flex justify-content-between mb-4"
+                  style={{ fontSize: "12px", color: "#666" }}
+                >
+                  <span>
+                    <strong>Reference:</strong> [Auto-generated ID]
+                  </span>
+                  <span>
+                    <strong>Date:</strong>{" "}
+                    {new Date().toLocaleDateString("en-GB")}
+                  </span>
                 </div>
-              </div>
 
-              <div className="text-end">
+                {formData.recipient.firstName && (
+                  <div className="mb-4" style={{ fontSize: "14px" }}>
+                    <div style={{ marginBottom: "1rem" }}>
+                      <strong>
+                        {getPreviewText().context}{" "}
+                        {getPreviewText().recipientName},
+                      </strong>
+                    </div>
+                    {formData.recipient.designation && (
+                      <div style={{ color: "#666", marginBottom: "0.25rem" }}>
+                        {formData.recipient.designation}
+                      </div>
+                    )}
+                    {formData.recipient.company && (
+                      <div style={{ color: "#666" }}>
+                        {formData.recipient.company}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {formData.subject && (
+                  <div className="mb-4" style={{ fontSize: "14px" }}>
+                    <strong style={{ color: "#dc3545" }}>Subject: </strong>
+                    {formData.subject}
+                  </div>
+                )}
+
                 <div
+                  className="mb-4"
                   style={{
-                    border: "2px dashed #dc3545",
-                    padding: "1rem",
-                    width: "150px",
-                    marginLeft: "auto",
+                    fontSize: "14px",
+                    lineHeight: "1.8",
+                    textAlign: "justify",
+                    color: "#333",
+                    minHeight: "150px",
                   }}
                 >
-                  <small>Place for Official Stamp</small>
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        formData.content ||
+                        "Your professional email content will appear here...",
+                    }}
+                  />
+                </div>
+
+                <div style={{ fontSize: "14px", marginTop: "3rem" }}>
+                  <div>With warm regards,</div>
+                  <div style={{ marginTop: "3rem", marginBottom: "1rem" }}>
+                    <div
+                      style={{ borderBottom: "2px solid #333", width: "250px" }}
+                    ></div>
+                  </div>
+                  <div style={{ fontWeight: "600", fontSize: "15px" }}>
+                    {formData.host.name || "[Host Name]"}
+                  </div>
+                  <div style={{ color: "#666", marginBottom: "0.5rem" }}>
+                    {formData.host.designation || "[Host Designation]"}
+                  </div>
+                  <div style={{ color: "#dc3545", fontWeight: "600" }}>
+                    Hare Krishna Medical
+                  </div>
+                </div>
+              </div>
+
+              <div className="email-footer">
+                <div style={{ marginBottom: "1.5rem" }}>
+                  <div
+                    style={{
+                      border: "2px dashed #ccc",
+                      padding: "1.5rem",
+                      textAlign: "center",
+                      backgroundColor: "#fafafa",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    <i
+                      className="bi bi-shield-check me-2"
+                      style={{ fontSize: "1.2rem" }}
+                    ></i>
+                    <strong>Official Stamp & Digital Verification</strong>
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        marginTop: "0.5rem",
+                        color: "#666",
+                      }}
+                    >
+                      QR Code verification and digital signature space
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style={{
+                    fontSize: "11px",
+                    color: "#999",
+                    textAlign: "center",
+                  }}
+                >
+                  This is a computer-generated professional letterhead with
+                  email-ready formatting.
+                  <br />
+                  For verification, scan the QR code or visit our verification
+                  portal.
                 </div>
               </div>
             </div>
           </Modal.Body>
-          <Modal.Footer>
+          <Modal.Footer className="bg-light">
             <Button
-              variant="outline-secondary"
+              variant="outline-danger"
               onClick={() => setShowPreview(false)}
             >
+              <i className="bi bi-x-circle me-2"></i>
               Close Preview
+            </Button>
+            <Button variant="danger" onClick={() => window.print()}>
+              <i className="bi bi-printer me-2"></i>
+              Print Email
             </Button>
           </Modal.Footer>
         </Modal>
