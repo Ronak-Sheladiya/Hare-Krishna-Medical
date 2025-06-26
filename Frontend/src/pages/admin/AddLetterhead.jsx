@@ -660,16 +660,16 @@ const AddLetterhead = () => {
           }
         }
 
-        /* Print Styles for Email Templates */
+        /* Print Styles for Letterhead Templates */
         @media print {
           .letterhead-container {
             background: white;
           }
 
-          .email-template {
+          .letterhead-template {
             border: none;
             box-shadow: none;
-            max-width: none;
+          }
             width: 100%;
           }
 
