@@ -1579,8 +1579,8 @@ const AddLetterhead = () => {
                     textAlign: "center",
                   }}
                 >
-                  This is a computer-generated professional letterhead with
-                  email-ready formatting.
+                  This is a computer-generated letterhead with proper
+                  formatting.
                   <br />
                   For verification, scan the QR code or visit our verification
                   portal.
