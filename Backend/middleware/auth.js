@@ -13,8 +13,22 @@ const auth = async (req, res, next) => {
       });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select("-password");
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "dev-secret-key",
+    );
+
+    let user;
+    if (shouldUseFallback()) {
+      user = await devAuth.findUserById(decoded.id);
+      if (user) {
+        // Remove password from user object for security
+        const { password, ...userWithoutPassword } = user;
+        user = userWithoutPassword;
+      }
+    } else {
+      user = await User.findById(decoded.id).select("-password");
+    }
 
     if (!user) {
       return res.status(401).json({
