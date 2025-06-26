@@ -52,13 +52,13 @@ const AdminLetterheads = () => {
 
   const letterTypes = [
     "certificate",
-    "recommendation", 
+    "recommendation",
     "authorization",
     "notice",
     "announcement",
     "invitation",
     "acknowledgment",
-    "verification"
+    "verification",
   ];
 
   const statusOptions = [
@@ -85,12 +85,12 @@ const AdminLetterheads = () => {
   };
 
   const handleLetterheadStatusUpdated = (data) => {
-    setLetterheads(prev => 
-      prev.map(letterhead => 
-        letterhead.letterheadId === data.letterheadId 
+    setLetterheads((prev) =>
+      prev.map((letterhead) =>
+        letterhead.letterheadId === data.letterheadId
           ? { ...letterhead, status: data.status }
-          : letterhead
-      )
+          : letterhead,
+      ),
     );
     showNotification(`Letterhead status updated to ${data.status}`, "info");
   };
@@ -99,7 +99,10 @@ const AdminLetterheads = () => {
     { event: "letterhead-created", handler: handleLetterheadCreated },
     { event: "letterhead-updated", handler: handleLetterheadUpdated },
     { event: "letterhead-deleted", handler: handleLetterheadDeleted },
-    { event: "letterhead-status-updated", handler: handleLetterheadStatusUpdated },
+    {
+      event: "letterhead-status-updated",
+      handler: handleLetterheadStatusUpdated,
+    },
   ]);
 
   // Fetch letterheads
@@ -118,7 +121,7 @@ const AdminLetterheads = () => {
       if (typeFilter) params.append("letterType", typeFilter);
 
       const response = await safeApiCall(
-        api.get(`/api/letterheads?${params.toString()}`)
+        api.get(`/api/letterheads?${params.toString()}`),
       );
 
       if (response?.success) {
@@ -156,7 +159,7 @@ const AdminLetterheads = () => {
     try {
       setActionLoading(true);
       const response = await safeApiCall(
-        api.delete(`/api/letterheads/${letterheadToDelete._id}`)
+        api.delete(`/api/letterheads/${letterheadToDelete._id}`),
       );
 
       if (response?.success) {
@@ -180,7 +183,7 @@ const AdminLetterheads = () => {
     try {
       setActionLoading(true);
       const response = await safeApiCall(
-        api.put(`/api/letterheads/${letterhead._id}/mark-issued`)
+        api.put(`/api/letterheads/${letterhead._id}/mark-issued`),
       );
 
       if (response?.success) {
@@ -202,7 +205,7 @@ const AdminLetterheads = () => {
     try {
       setActionLoading(true);
       const response = await safeApiCall(
-        api.put(`/api/letterheads/${letterhead._id}/mark-sent`)
+        api.put(`/api/letterheads/${letterhead._id}/mark-sent`),
       );
 
       if (response?.success) {
@@ -234,7 +237,7 @@ const AdminLetterheads = () => {
   };
 
   const getStatusBadge = (status) => {
-    const statusConfig = statusOptions.find(s => s.value === status);
+    const statusConfig = statusOptions.find((s) => s.value === status);
     return (
       <Badge bg={statusConfig?.variant || "secondary"}>
         {statusConfig?.label || status}
@@ -335,7 +338,7 @@ const AdminLetterheads = () => {
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
                 <option value="">All Statuses</option>
-                {statusOptions.map(status => (
+                {statusOptions.map((status) => (
                   <option key={status.value} value={status.value}>
                     {status.label}
                   </option>
@@ -351,7 +354,7 @@ const AdminLetterheads = () => {
                 onChange={(e) => setTypeFilter(e.target.value)}
               >
                 <option value="">All Types</option>
-                {letterTypes.map(type => (
+                {letterTypes.map((type) => (
                   <option key={type} value={type}>
                     {type.charAt(0).toUpperCase() + type.slice(1)}
                   </option>
@@ -388,9 +391,9 @@ const AdminLetterheads = () => {
         <Alert variant="danger">
           <i className="bi bi-exclamation-triangle me-2"></i>
           {error}
-          <Button 
-            variant="outline-danger" 
-            size="sm" 
+          <Button
+            variant="outline-danger"
+            size="sm"
             className="ms-2"
             onClick={fetchLetterheads}
           >
@@ -404,7 +407,7 @@ const AdminLetterheads = () => {
       return (
         <Alert variant="info">
           <i className="bi bi-info-circle me-2"></i>
-          No letterheads found. 
+          No letterheads found.
           <Link to="/admin/letterheads/add" className="ms-2">
             Create your first letterhead
           </Link>
@@ -434,22 +437,27 @@ const AdminLetterheads = () => {
               <td className="fw-bold">{letterhead.title}</td>
               <td>
                 <Badge bg="info">
-                  {letterhead.letterType?.charAt(0).toUpperCase() + letterhead.letterType?.slice(1)}
+                  {letterhead.letterType?.charAt(0).toUpperCase() +
+                    letterhead.letterType?.slice(1)}
                 </Badge>
               </td>
               <td>
                 <div>
                   <strong>{letterhead.recipient?.name}</strong>
                   {letterhead.recipient?.organization && (
-                    <br />
-                    <small className="text-muted">
-                      {letterhead.recipient.organization}
-                    </small>
+                    <>
+                      <br />
+                      <small className="text-muted">
+                        {letterhead.recipient.organization}
+                      </small>
+                    </>
                   )}
                 </div>
               </td>
               <td>{getStatusBadge(letterhead.status)}</td>
-              <td>{formatDate(letterhead.issueDate || letterhead.createdAt)}</td>
+              <td>
+                {formatDate(letterhead.issueDate || letterhead.createdAt)}
+              </td>
               <td>
                 <div className="btn-group" role="group">
                   <Button
@@ -461,7 +469,7 @@ const AdminLetterheads = () => {
                   >
                     <i className="bi bi-pencil"></i>
                   </Button>
-                  
+
                   {letterhead.status === "draft" && (
                     <Button
                       variant="outline-success"
@@ -473,7 +481,7 @@ const AdminLetterheads = () => {
                       <i className="bi bi-check-circle"></i>
                     </Button>
                   )}
-                  
+
                   {letterhead.status === "issued" && (
                     <Button
                       variant="outline-info"
@@ -527,7 +535,7 @@ const AdminLetterheads = () => {
           onClick={() => setCurrentPage(number)}
         >
           {number}
-        </Pagination.Item>
+        </Pagination.Item>,
       );
     }
 
@@ -584,13 +592,9 @@ const AdminLetterheads = () => {
               Create Letterhead
             </ThemeButton>
           </Card.Header>
-          <Card.Body className="p-0">
-            {renderLetterheadsTable()}
-          </Card.Body>
+          <Card.Body className="p-0">{renderLetterheadsTable()}</Card.Body>
           {letterheads.length > 0 && (
-            <Card.Footer>
-              {renderPagination()}
-            </Card.Footer>
+            <Card.Footer>{renderPagination()}</Card.Footer>
           )}
         </ThemeCard>
       </ThemeSection>
