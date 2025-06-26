@@ -956,21 +956,13 @@ const AdminLetterheads = () => {
           </Modal.Body>
           <Modal.Footer>
             {selectedLetterhead && (
-              <div className="d-flex gap-2">
-                <Button
-                  className="letterhead-btn"
-                  onClick={() => handleDownloadPDF(selectedLetterhead._id)}
-                >
-                  <i className="bi bi-download me-1"></i>Download PDF
-                </Button>
-                <Button
-                  className="letterhead-btn-outline"
-                  as={Link}
-                  to={`/admin/letterheads/edit/${selectedLetterhead._id}`}
-                >
-                  <i className="bi bi-pencil me-1"></i>Edit
-                </Button>
-              </div>
+              <Button
+                className="letterhead-btn-outline"
+                as={Link}
+                to={`/admin/letterheads/edit/${selectedLetterhead._id}`}
+              >
+                <i className="bi bi-pencil me-1"></i>Edit Letterhead
+              </Button>
             )}
             <Button
               variant="outline-secondary"
