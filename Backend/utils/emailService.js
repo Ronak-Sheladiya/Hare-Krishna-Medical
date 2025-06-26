@@ -463,12 +463,12 @@ class EmailService {
             </div>
 
             <!-- Footer -->
-            <div style="background: linear-gradient(135deg, #495057, #343a40); color: #ffffff; padding: 20px 30px; text-align: center; border-radius: 0 0 10px 10px;">
+            <div style="background: linear-gradient(135deg, #2c3e50, #34495e); color: #ffffff; padding: 20px 30px; text-align: center; border-radius: 0 0 10px 10px;">
               <p style="margin: 0 0 8px 0; font-size: 13px;">
                 📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat
               </p>
               <p style="margin: 0; font-size: 11px; opacity: 0.7;">
-                📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
+                📞 +91 76989 13354 | +91 91060 18508 | 📧 hkmedicalamroli@gmail.com | 🌐 @harekrishna_medical
               </p>
             </div>
           </div>
