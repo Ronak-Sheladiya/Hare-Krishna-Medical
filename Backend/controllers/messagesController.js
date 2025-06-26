@@ -1,86 +1,87 @@
 const emailService = require("../utils/emailService");
+const Message = require("../models/Message");
 
 class MessagesController {
-  constructor() {
-    // Message model (simple in-memory storage for demo)
-    // In production, you'd want a proper MongoDB model
-    this.messages = [
-      {
-        id: 1,
-        name: "John Doe",
-        email: "john@example.com",
-        mobile: "+91 9876543210",
-        subject: "Product Inquiry",
-        message: "I need information about diabetes medicines.",
-        status: "unread",
-        createdAt: new Date("2024-01-15"),
-        respondedAt: null,
-        response: null,
-      },
-      {
-        id: 2,
-        name: "Jane Smith",
-        email: "jane@example.com",
-        mobile: "+91 9123456789",
-        subject: "Order Issue",
-        message: "My order was delayed, please help.",
-        status: "read",
-        createdAt: new Date("2024-01-14"),
-        respondedAt: new Date("2024-01-14"),
-        response: "We apologize for the delay. Your order is now shipped.",
-      },
-    ];
-
-    this.messageIdCounter = 3;
-  }
-
   // Submit contact form
   async submitContact(req, res) {
     try {
-      const { name, email, mobile, subject, message } = req.body;
+      const { name, email, mobile, subject, message, category, priority } =
+        req.body;
 
-      // Create new message
-      const newMessage = {
-        id: this.messageIdCounter++,
+      // Get client info for tracking
+      const ipAddress =
+        req.ip ||
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        (req.connection.socket ? req.connection.socket.remoteAddress : null);
+      const userAgent = req.headers["user-agent"];
+
+      // Create new message in database
+      const newMessage = await Message.create({
         name,
         email,
         mobile: mobile || "",
         subject,
         message,
+        category: category || "general",
+        priority: priority || "normal",
+        ipAddress,
+        userAgent,
         status: "unread",
-        createdAt: new Date(),
-        respondedAt: null,
-        response: null,
-      };
-
-      this.messages.push(newMessage);
+      });
 
       // Send confirmation email to user
       try {
         const confirmationHtml = `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 30px; border-radius: 10px; text-align: center;">
-              <h1 style="margin: 0; font-size: 28px;">Message Received! ✅</h1>
-              <p style="margin: 10px 0 0 0; font-size: 16px;">Thank you for contacting us</p>
+          <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; backgroundColor: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(220, 53, 69, 0.15);">
+            <div style="background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%); color: #ffffff; padding: 2rem; text-align: center;">
+              <h2 style="margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">🏥 HARE KRISHNA MEDICAL</h2>
+              <p style="margin: 0.5rem 0 0 0; font-size: 14px; opacity: 0.9; font-style: italic;">Your Health, Our Priority</p>
+              <div style="background-color: rgba(255, 255, 255, 0.2); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                <h3 style="margin: 0; font-size: 20px; font-weight: 600;">Message Received ✅</h3>
+              </div>
             </div>
 
-            <div style="padding: 30px; background: #f8f9fa; border-radius: 10px; margin-top: 20px;">
-              <h2 style="color: #333; margin-top: 0;">Hello ${name}!</h2>
-
-              <p style="color: #666; line-height: 1.6;">
-                We have received your message and our team will get back to you within 24 hours.
-              </p>
-
-              <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <h3 style="color: #28a745; margin-top: 0;">Your Message:</h3>
-                <p style="margin: 0;"><strong>Subject:</strong> ${subject}</p>
-                <p style="margin: 10px 0 0 0; color: #666;">${message}</p>
+            <div style="padding: 2rem;">
+              <div style="text-align: center; margin-bottom: 2rem;">
+                <h3 style="color: #dc3545; font-size: 24px; margin: 0 0 1rem 0; font-weight: 600;">Thank You for Contacting Us! 🎉</h3>
               </div>
 
-              <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px; text-align: center;">
-                <p style="color: #888; font-size: 14px; margin: 0;">
-                  📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat<br>
-                  📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
+              <div style="font-size: 16px; line-height: 1.7;">
+                <p style="margin: 1rem 0; color: #444444;">
+                  Dear <strong>${name}</strong>,
+                </p>
+
+                <p style="margin: 1rem 0; color: #444444;">
+                  We have received your message and our team will get back to you within 24 hours.
+                </p>
+
+                <div style="background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%); border: 2px solid #dc3545; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
+                  <h4 style="color: #dc3545; font-size: 18px; margin: 0 0 1rem 0; font-weight: 600;">📝 Your Message Details:</h4>
+                  <div style="background: #ffffff; padding: 1rem; border-left: 4px solid #dc3545; border-radius: 4px;">
+                    <p style="margin: 0;"><strong>Subject:</strong> ${subject}</p>
+                    <p style="margin: 10px 0 0 0; color: #666;">${message}</p>
+                  </div>
+                </div>
+
+                <p style="margin: 1rem 0; color: #444444;">
+                  If you have any urgent questions, feel free to contact our customer support team at
+                  <strong style="color: #dc3545;"> +91 76989 13354</strong> or reply to this email.
+                </p>
+              </div>
+            </div>
+
+            <div style="background: #f8f9fa; border-top: 3px solid #dc3545; padding: 2rem;">
+              <div style="text-align: center;">
+                <p style="margin: 0 0 1rem 0; font-size: 14px; color: #666666; line-height: 1.5;">
+                  <strong>Hare Krishna Medical Store</strong><br/>
+                  📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat<br/>
+                  📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com<br/>
+                  🌐 Visit our store for the best medical care
+                </p>
+
+                <p style="margin: 1rem 0 0 0; font-size: 12px; color: #999999; font-style: italic;">
+                  This is an automated email. Please do not reply to this email address.
                 </p>
               </div>
             </div>
@@ -100,45 +101,63 @@ class MessagesController {
       // Send notification email to admin
       try {
         const adminNotificationHtml = `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #e63946, #dc3545); color: white; padding: 30px; border-radius: 10px; text-align: center;">
-              <h1 style="margin: 0; font-size: 28px;">New Message Received! 📧</h1>
-              <p style="margin: 10px 0 0 0; font-size: 16px;">Contact Form Submission</p>
+          <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; backgroundColor: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(220, 53, 69, 0.15);">
+            <div style="background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%); color: #ffffff; padding: 2rem; text-align: center;">
+              <h2 style="margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">🏥 HARE KRISHNA MEDICAL</h2>
+              <div style="background-color: rgba(255, 255, 255, 0.2); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                <h3 style="margin: 0; font-size: 20px; font-weight: 600;">New Contact Message 📧</h3>
+                <p style="margin: 0.5rem 0 0 0; font-size: 16px; opacity: 0.9;">Admin Notification</p>
+              </div>
             </div>
 
-            <div style="padding: 30px; background: #f8f9fa; border-radius: 10px; margin-top: 20px;">
-              <h2 style="color: #333; margin-top: 0;">Message Details:</h2>
+            <div style="padding: 2rem;">
+              <div style="font-size: 16px; line-height: 1.7;">
+                <p style="margin: 1rem 0; color: #444444;">
+                  A new message has been received through the contact form.
+                </p>
 
-              <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <table style="width: 100%; border-collapse: collapse;">
-                  <tr>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Name:</strong></td>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${name}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Email:</strong></td>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${email}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Mobile:</strong></td>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${mobile || "Not provided"}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Subject:</strong></td>
-                    <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${subject}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; vertical-align: top;"><strong>Message:</strong></td>
-                    <td style="padding: 8px 0;">${message}</td>
-                  </tr>
-                </table>
+                <div style="background: #f8f9fa; border: 2px solid #dc3545; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
+                  <h4 style="color: #dc3545; font-size: 18px; margin: 0 0 1rem 0; font-weight: 600;">📋 Message Details:</h4>
+                  <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                      <td style="padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: bold; color: #dc3545;">Name:</td>
+                      <td style="padding: 8px 0; border-bottom: 1px solid #ddd;">${name}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: bold; color: #dc3545;">Email:</td>
+                      <td style="padding: 8px 0; border-bottom: 1px solid #ddd;">${email}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: bold; color: #dc3545;">Mobile:</td>
+                      <td style="padding: 8px 0; border-bottom: 1px solid #ddd;">${mobile || "Not provided"}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: bold; color: #dc3545;">Subject:</td>
+                      <td style="padding: 8px 0; border-bottom: 1px solid #ddd;">${subject}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; vertical-align: top; font-weight: bold; color: #dc3545;">Message:</td>
+                      <td style="padding: 8px 0;">${message}</td>
+                    </tr>
+                  </table>
+                </div>
+
+                <div style="text-align: center; margin: 2rem 0;">
+                  <a href="${process.env.FRONTEND_URL}/admin/messages"
+                     style="display: inline-block; background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%); color: #ffffff; padding: 1rem 2rem; text-decoration: none; border-radius: 25px; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);">
+                    View in Admin Panel
+                  </a>
+                </div>
               </div>
+            </div>
 
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.FRONTEND_URL}/admin/messages"
-                   style="background: #e63946; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
-                  View in Admin Panel
-                </a>
+            <div style="background: #f8f9fa; border-top: 3px solid #dc3545; padding: 2rem;">
+              <div style="text-align: center;">
+                <p style="margin: 0 0 1rem 0; font-size: 14px; color: #666666; line-height: 1.5;">
+                  <strong>Hare Krishna Medical Store - Admin Panel</strong><br/>
+                  📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat<br/>
+                  📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
+                </p>
               </div>
             </div>
           </div>
@@ -159,10 +178,12 @@ class MessagesController {
       if (io) {
         io.to("admin-room").emit("new-message", {
           message: {
-            id: newMessage.id,
+            id: newMessage._id,
             name: newMessage.name,
             email: newMessage.email,
             subject: newMessage.subject,
+            category: newMessage.category,
+            priority: newMessage.priority,
             createdAt: newMessage.createdAt,
             status: newMessage.status,
           },
@@ -173,7 +194,7 @@ class MessagesController {
         success: true,
         message: "Message sent successfully! We'll get back to you soon.",
         data: {
-          id: newMessage.id,
+          id: newMessage._id,
           status: "sent",
         },
       });
@@ -197,55 +218,78 @@ class MessagesController {
         search,
         startDate,
         endDate,
+        category,
+        priority,
+        sortBy = "createdAt",
+        sortOrder = "desc",
       } = req.query;
 
-      let filteredMessages = [...this.messages];
+      // Build query
+      const query = { isDeleted: false };
 
       // Filter by status
       if (status) {
-        filteredMessages = filteredMessages.filter(
-          (msg) => msg.status === status,
-        );
+        query.status = status;
       }
 
-      // Search filter
-      if (search) {
-        const searchLower = search.toLowerCase();
-        filteredMessages = filteredMessages.filter(
-          (msg) =>
-            msg.name.toLowerCase().includes(searchLower) ||
-            msg.email.toLowerCase().includes(searchLower) ||
-            msg.subject.toLowerCase().includes(searchLower) ||
-            msg.message.toLowerCase().includes(searchLower),
-        );
+      // Filter by category
+      if (category) {
+        query.category = category;
+      }
+
+      // Filter by priority
+      if (priority) {
+        query.priority = priority;
       }
 
       // Date range filter
       if (startDate || endDate) {
-        filteredMessages = filteredMessages.filter((msg) => {
-          const msgDate = new Date(msg.createdAt);
-          if (startDate && msgDate < new Date(startDate)) return false;
-          if (endDate && msgDate > new Date(endDate)) return false;
-          return true;
-        });
+        query.createdAt = {};
+        if (startDate) {
+          query.createdAt.$gte = new Date(startDate);
+        }
+        if (endDate) {
+          query.createdAt.$lte = new Date(endDate);
+        }
       }
 
-      // Sort by date (newest first)
-      filteredMessages.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-      );
+      // Build sort object
+      const sortObj = {};
+      sortObj[sortBy] = sortOrder === "desc" ? -1 : 1;
 
-      // Pagination
-      const startIndex = (parseInt(page) - 1) * parseInt(limit);
-      const endIndex = startIndex + parseInt(limit);
-      const paginatedMessages = filteredMessages.slice(startIndex, endIndex);
+      // Count total messages for pagination
+      let totalMessages;
+      let messages;
 
-      const totalMessages = filteredMessages.length;
+      if (search) {
+        // Use text search if search term provided
+        const searchResults = await Message.searchMessages(search, {
+          skip: (parseInt(page) - 1) * parseInt(limit),
+          limit: parseInt(limit),
+        }).populate("respondedBy", "fullName email");
+
+        messages = searchResults;
+        totalMessages = await Message.countDocuments({
+          $text: { $search: search },
+          isDeleted: false,
+          ...query,
+        });
+      } else {
+        // Regular query
+        messages = await Message.find(query)
+          .populate("respondedBy", "fullName email")
+          .sort(sortObj)
+          .skip((parseInt(page) - 1) * parseInt(limit))
+          .limit(parseInt(limit));
+
+        totalMessages = await Message.countDocuments(query);
+      }
+
       const totalPages = Math.ceil(totalMessages / limit);
 
       res.json({
         success: true,
-        data: paginatedMessages,
+        data: messages,
         pagination: {
           currentPage: parseInt(page),
           totalPages,
@@ -268,18 +312,21 @@ class MessagesController {
   // Get single message (Admin)
   async getMessage(req, res) {
     try {
-      const messageId = parseInt(req.params.id);
-      const message = this.messages.find((msg) => msg.id === messageId);
+      const messageId = req.params.id;
+      const message = await Message.findById(messageId)
+        .populate("respondedBy", "fullName email")
+        .lean();
 
-      if (!message) {
+      if (!message || message.isDeleted) {
         return res.status(404).json({
           success: false,
           message: "Message not found",
         });
       }
 
-      // Mark as read
+      // Mark as read if it's unread
       if (message.status === "unread") {
+        await Message.findByIdAndUpdate(messageId, { status: "read" });
         message.status = "read";
       }
 
@@ -300,7 +347,7 @@ class MessagesController {
   // Update message status (Admin)
   async updateMessageStatus(req, res) {
     try {
-      const messageId = parseInt(req.params.id);
+      const messageId = req.params.id;
       const { status } = req.body;
 
       const validStatuses = ["unread", "read", "responded", "archived"];
@@ -312,9 +359,9 @@ class MessagesController {
         });
       }
 
-      const message = this.messages.find((msg) => msg.id === messageId);
+      const message = await Message.findById(messageId);
 
-      if (!message) {
+      if (!message || message.isDeleted) {
         return res.status(404).json({
           success: false,
           message: "Message not found",
@@ -322,14 +369,18 @@ class MessagesController {
       }
 
       message.status = status;
+      if (status === "responded" && !message.respondedAt) {
+        message.respondedAt = new Date();
+      }
+      await message.save();
 
       // Emit real-time update
       const io = req.app.get("io");
       if (io) {
         io.to("admin-room").emit("message-status-updated", {
-          messageId: message.id,
+          messageId: message._id,
           newStatus: status,
-          updatedBy: req.user.fullName,
+          updatedBy: req.user ? req.user.fullName : "Admin",
         });
       }
 
@@ -337,7 +388,7 @@ class MessagesController {
         success: true,
         message: "Message status updated successfully",
         data: {
-          id: message.id,
+          id: message._id,
           status: message.status,
         },
       });
@@ -354,12 +405,12 @@ class MessagesController {
   // Respond to message (Admin)
   async respondToMessage(req, res) {
     try {
-      const messageId = parseInt(req.params.id);
+      const messageId = req.params.id;
       const { response } = req.body;
 
-      const message = this.messages.find((msg) => msg.id === messageId);
+      const message = await Message.findById(messageId);
 
-      if (!message) {
+      if (!message || message.isDeleted) {
         return res.status(404).json({
           success: false,
           message: "Message not found",
@@ -370,6 +421,10 @@ class MessagesController {
       message.response = response;
       message.status = "responded";
       message.respondedAt = new Date();
+      if (req.user) {
+        message.respondedBy = req.user._id;
+      }
+      await message.save();
 
       // Send response email
       try {
@@ -424,8 +479,8 @@ class MessagesController {
       const io = req.app.get("io");
       if (io) {
         io.to("admin-room").emit("message-responded", {
-          messageId: message.id,
-          respondedBy: req.user.fullName,
+          messageId: message._id,
+          respondedBy: req.user ? req.user.fullName : "Admin",
           respondedAt: message.respondedAt,
         });
       }
@@ -434,7 +489,7 @@ class MessagesController {
         success: true,
         message: "Response sent successfully",
         data: {
-          id: message.id,
+          id: message._id,
           status: message.status,
           response: message.response,
           respondedAt: message.respondedAt,
@@ -453,52 +508,88 @@ class MessagesController {
   // Get message statistics (Admin)
   async getMessageStats(req, res) {
     try {
-      const totalMessages = this.messages.length;
-      const unreadMessages = this.messages.filter(
-        (msg) => msg.status === "unread",
-      ).length;
-      const readMessages = this.messages.filter(
-        (msg) => msg.status === "read",
-      ).length;
-      const respondedMessages = this.messages.filter(
-        (msg) => msg.status === "responded",
-      ).length;
+      const totalMessages = await Message.countDocuments({ isDeleted: false });
+      const unreadMessages = await Message.countDocuments({
+        status: "unread",
+        isDeleted: false,
+      });
+      const readMessages = await Message.countDocuments({
+        status: "read",
+        isDeleted: false,
+      });
+      const respondedMessages = await Message.countDocuments({
+        status: "responded",
+        isDeleted: false,
+      });
+
+      // Messages by category
+      const categoryStats = await Message.aggregate([
+        { $match: { isDeleted: false } },
+        { $group: { _id: "$category", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]);
+
+      // Messages by priority
+      const priorityStats = await Message.aggregate([
+        { $match: { isDeleted: false } },
+        { $group: { _id: "$priority", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]);
 
       // Daily message trend (last 30 days)
-      const dailyMessages = {};
       const last30Days = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const dailyMessages = await Message.aggregate([
+        {
+          $match: {
+            createdAt: { $gte: last30Days },
+            isDeleted: false,
+          },
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+            },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]);
 
-      this.messages
-        .filter((msg) => new Date(msg.createdAt) >= last30Days)
-        .forEach((msg) => {
-          const date = new Date(msg.createdAt).toISOString().split("T")[0];
-          dailyMessages[date] = (dailyMessages[date] || 0) + 1;
-        });
-
-      const messageTrend = Object.entries(dailyMessages).map(
-        ([date, count]) => ({
-          date,
-          count,
-        }),
-      );
+      const messageTrend = dailyMessages.map((item) => ({
+        date: item._id,
+        count: item.count,
+      }));
 
       // Response time analysis
-      const respondedMessagesWithTime = this.messages.filter(
-        (msg) => msg.status === "responded" && msg.respondedAt,
-      );
-
-      let avgResponseTime = 0;
-      if (respondedMessagesWithTime.length > 0) {
-        const totalResponseTime = respondedMessagesWithTime.reduce(
-          (sum, msg) => {
-            const responseTime =
-              new Date(msg.respondedAt) - new Date(msg.createdAt);
-            return sum + responseTime;
+      const responseTimeStats = await Message.aggregate([
+        {
+          $match: {
+            status: "responded",
+            respondedAt: { $exists: true },
+            isDeleted: false,
           },
-          0,
-        );
-        avgResponseTime = totalResponseTime / respondedMessagesWithTime.length;
-      }
+        },
+        {
+          $project: {
+            responseTime: {
+              $subtract: ["$respondedAt", "$createdAt"],
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            avgResponseTime: { $avg: "$responseTime" },
+            minResponseTime: { $min: "$responseTime" },
+            maxResponseTime: { $max: "$responseTime" },
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+
+      const avgResponseTime =
+        responseTimeStats.length > 0 ? responseTimeStats[0].avgResponseTime : 0;
 
       res.json({
         success: true,
@@ -507,6 +598,8 @@ class MessagesController {
           unreadMessages,
           readMessages,
           respondedMessages,
+          categoryStats,
+          priorityStats,
           messageTrend,
           avgResponseTimeHours:
             Math.round((avgResponseTime / (1000 * 60 * 60)) * 100) / 100,

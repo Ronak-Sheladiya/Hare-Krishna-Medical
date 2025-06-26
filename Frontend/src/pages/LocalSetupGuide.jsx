@@ -23,11 +23,9 @@ const LocalSetupGuide = () => {
       <Container className="py-5">
         {/* Breadcrumb */}
         <Breadcrumb className="mb-4">
-          <Breadcrumb.Item>
-            <Link to="/" className="text-decoration-none">
-              <i className="bi bi-house me-1"></i>
-              Home
-            </Link>
+          <Breadcrumb.Item linkAs={Link} linkProps={{ to: "/" }}>
+            <i className="bi bi-house me-1"></i>
+            Home
           </Breadcrumb.Item>
           <Breadcrumb.Item active>Local Setup Guide</Breadcrumb.Item>
         </Breadcrumb>

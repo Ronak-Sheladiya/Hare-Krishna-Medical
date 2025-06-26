@@ -464,7 +464,7 @@ const AddLetterhead = () => {
           color: #333;
         }
 
-        .email-template {
+        .letterhead-template {
           background: white;
           width: 100%;
           max-width: 800px;
@@ -473,26 +473,29 @@ const AddLetterhead = () => {
           font-size: 14px;
           line-height: 1.6;
           color: #333;
-          border: 1px solid #ddd;
-          border-radius: 8px;
+          border: 2px solid #dc3545;
+          border-radius: 0;
           overflow: hidden;
+          page-break-inside: avoid;
         }
 
-        .email-header {
+        .letterhead-header {
           background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%);
           color: white;
           padding: 2rem;
           text-align: center;
+          border-bottom: 3px solid #dc3545;
         }
 
-        .email-body {
-          padding: 2rem;
+        .letterhead-content {
+          padding: 2.5rem;
+          min-height: 400px;
         }
 
-        .email-footer {
+        .letterhead-footer {
           background: #f8f9fa;
           padding: 1.5rem 2rem;
-          border-top: 1px solid #dee2e6;
+          border-top: 2px solid #dc3545;
           font-size: 12px;
           color: #6c757d;
           text-align: center;
@@ -693,14 +696,12 @@ const AddLetterhead = () => {
             <div className="text-center">
               <h1 className="display-5 fw-bold mb-3">
                 <i className="bi bi-file-text-fill me-3"></i>
-                {isEditing
-                  ? "Edit Professional Letterhead"
-                  : "Create Professional Letterhead"}
+                {isEditing ? "Edit Letterhead" : "Create Letterhead"}
               </h1>
               <p className="lead opacity-90">
                 {isEditing
-                  ? "Update your letterhead with professional formatting and responsive email design"
-                  : "Design professional letterheads with our advanced email-ready editor"}
+                  ? "Update your letterhead with proper formatting and design"
+                  : "Design letterheads with our advanced editor"}
               </p>
             </div>
           </Container>
@@ -860,78 +861,6 @@ const AddLetterhead = () => {
                       </h5>
                     </Card.Header>
                     <Card.Body className="p-4">
-                      <div className="form-section">
-                        <h6 className="section-title">Personal Details</h6>
-                        <Row>
-                          <Col md={3}>
-                            <Form.Group className="mb-4">
-                              <Form.Label className="fw-semibold">
-                                Prefix
-                              </Form.Label>
-                              <Form.Select
-                                name="recipient.prefix"
-                                value={formData.recipient.prefix}
-                                onChange={handleInputChange}
-                                className="letterhead-form-control"
-                              >
-                                <option value="Mr.">Mr.</option>
-                                <option value="Mrs.">Mrs.</option>
-                                <option value="Miss">Miss</option>
-                                <option value="Dr.">Dr.</option>
-                                <option value="Prof.">Prof.</option>
-                              </Form.Select>
-                            </Form.Group>
-                          </Col>
-                          <Col md={3}>
-                            <Form.Group className="mb-4">
-                              <Form.Label className="fw-semibold">
-                                First Name *
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="recipient.firstName"
-                                value={formData.recipient.firstName}
-                                onChange={handleInputChange}
-                                placeholder="First name"
-                                className="letterhead-form-control"
-                                required
-                              />
-                            </Form.Group>
-                          </Col>
-                          <Col md={3}>
-                            <Form.Group className="mb-4">
-                              <Form.Label className="fw-semibold">
-                                Middle Name
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="recipient.middleName"
-                                value={formData.recipient.middleName}
-                                onChange={handleInputChange}
-                                placeholder="Middle name"
-                                className="letterhead-form-control"
-                              />
-                            </Form.Group>
-                          </Col>
-                          <Col md={3}>
-                            <Form.Group className="mb-4">
-                              <Form.Label className="fw-semibold">
-                                Last Name *
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="recipient.lastName"
-                                value={formData.recipient.lastName}
-                                onChange={handleInputChange}
-                                placeholder="Last name"
-                                className="letterhead-form-control"
-                                required
-                              />
-                            </Form.Group>
-                          </Col>
-                        </Row>
-                      </div>
-
                       <div className="form-section">
                         <h6 className="section-title">Professional Details</h6>
                         <Row>
@@ -1134,11 +1063,10 @@ const AddLetterhead = () => {
                           />
                         </div>
                         <Form.Text className="text-muted">
-                          <i className="bi bi-info-circle me-1"></i>
-                          Write the main content of your professional letterhead
-                          email. Use the formatting toolbar for professional
-                          styling. This content will be displayed in a
-                          responsive email format.
+                          <div className="letterhead-footer">
+                            This is a computer-generated letterhead document
+                            with proper formatting and official verification.
+                          </div>
                         </Form.Text>
                       </div>
 
@@ -1258,9 +1186,7 @@ const AddLetterhead = () => {
                     ) : (
                       <>
                         <i className="bi bi-check-circle me-2"></i>
-                        {isEditing
-                          ? "Update Professional Letterhead"
-                          : "Create Professional Letterhead"}
+                        {isEditing ? "Update Letterhead" : "Create Letterhead"}
                       </>
                     )}
                   </button>
@@ -1402,11 +1328,11 @@ const AddLetterhead = () => {
                       </div>
                     </div>
 
-                    <div className="email-footer">
+                    <div className="letterhead-footer">
                       <div style={{ marginBottom: "1rem" }}>
                         <div
                           style={{
-                            border: "2px dashed #ccc",
+                            border: "2px dashed #dc3545",
                             padding: "1rem",
                             textAlign: "center",
                             backgroundColor: "#fafafa",
@@ -1417,7 +1343,7 @@ const AddLetterhead = () => {
                         </div>
                       </div>
                       <div style={{ fontSize: "10px", color: "#999" }}>
-                        This is a computer-generated professional letterhead. QR
+                        This is a computer-generated letterhead document. QR
                         code verification available.
                       </div>
                     </div>
@@ -1425,8 +1351,8 @@ const AddLetterhead = () => {
 
                   <div className="mt-3 text-center">
                     <span className="badge-professional">
-                      <i className="bi bi-envelope-check me-1"></i>
-                      Email-Ready Template
+                      <i className="bi bi-file-text-check me-1"></i>
+                      Official Document Template
                     </span>
                   </div>
                 </div>
@@ -1444,16 +1370,16 @@ const AddLetterhead = () => {
         >
           <Modal.Header closeButton className="bg-danger text-white">
             <Modal.Title>
-              <i className="bi bi-envelope me-2"></i>
-              Full Professional Email Preview
+              <i className="bi bi-file-text me-2"></i>
+              Full Letterhead Document Preview
             </Modal.Title>
           </Modal.Header>
           <Modal.Body style={{ padding: 0 }}>
             <div
-              className="email-template"
+              className="letterhead-template"
               style={{ margin: 0, borderRadius: 0 }}
             >
-              <div className="email-header">
+              <div className="letterhead-header">
                 <h4 style={{ margin: 0, fontSize: "18px", fontWeight: "bold" }}>
                   HARE KRISHNA MEDICAL
                 </h4>
@@ -1470,7 +1396,7 @@ const AddLetterhead = () => {
                 )}
               </div>
 
-              <div className="email-body" style={{ padding: "3rem" }}>
+              <div className="letterhead-content" style={{ padding: "3rem" }}>
                 <div
                   className="d-flex justify-content-between mb-4"
                   style={{ fontSize: "12px", color: "#666" }}
@@ -1584,8 +1510,8 @@ const AddLetterhead = () => {
                     textAlign: "center",
                   }}
                 >
-                  This is a computer-generated professional letterhead with
-                  email-ready formatting.
+                  This is a computer-generated letterhead with proper
+                  formatting.
                   <br />
                   For verification, scan the QR code or visit our verification
                   portal.
