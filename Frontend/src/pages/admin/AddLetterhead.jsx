@@ -598,20 +598,20 @@ const AddLetterhead = () => {
             font-size: 11px;
           }
 
-          .email-template {
+          .letterhead-template {
             margin: 0;
-            border-radius: 0;
+            border-radius: 8px;
           }
 
-          .email-header, .email-body {
+          .letterhead-header, .letterhead-body {
             padding: 1.5rem 1rem;
+            border-radius: 8px;
           }
 
-          .email-footer {
+          .letterhead-footer {
             padding: 1rem;
+            background: #f8f9fa;
           }
-
-          .action-buttons {
             flex-direction: column;
           }
 
