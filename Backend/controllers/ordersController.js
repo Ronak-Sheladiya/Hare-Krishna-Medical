@@ -120,28 +120,60 @@ class OrdersController {
       // Emit real-time updates
       const io = req.app.get("io");
 
-      // Notify admin
-      io.to("admin-room").emit("new-order", {
-        order: {
-          id: order._id,
+      try {
+        const { addNotification } = require("../routes/notifications");
+
+        // Create admin notification
+        const notification = addNotification(
+          "order",
+          "New Order Received",
+          `Order ${order.orderId} from ${req.user.fullName} - ₹${order.total}`,
+          "/admin/orders",
+          {
+            orderId: order.orderId,
+            customerName: req.user.fullName,
+            totalAmount: order.total,
+            itemCount: order.items.length,
+          },
+        );
+
+        // Notify admin with enhanced data
+        io.to("admin-room").emit("admin_notification", {
+          type: "order",
+          title: "New Order Received",
+          message: `Order ${order.orderId} from ${req.user.fullName} - ₹${order.total}`,
           orderId: order.orderId,
           customerName: req.user.fullName,
-          total: order.total,
+          totalAmount: order.total,
           itemCount: order.items.length,
           paymentMethod: order.paymentMethod,
-          createdAt: order.createdAt,
-        },
-      });
+          notification: notification,
+        });
 
-      // Notify user
-      io.to(`user-${req.user.id}`).emit("order-created", {
-        order: {
-          id: order._id,
-          orderId: order.orderId,
-          status: order.orderStatus,
-          total: order.total,
-        },
-      });
+        // Emit data update event for real-time dashboard refresh
+        io.to("admin-room").emit("data_update", {
+          type: "orders",
+          action: "new_order",
+          data: {
+            orderId: order.orderId,
+            total: order.total,
+            status: order.orderStatus,
+          },
+        });
+
+        // Notify user
+        io.to(`user-${req.user.id}`).emit("order-created", {
+          order: {
+            id: order._id,
+            orderId: order.orderId,
+            status: order.orderStatus,
+            total: order.total,
+          },
+        });
+      } catch (notificationError) {
+        console.error("Notification error:", notificationError);
+        // Continue without failing the order creation
+      }
 
       res.status(201).json({
         success: true,
