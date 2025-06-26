@@ -3,12 +3,43 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const User = require("../models/User");
 const emailService = require("../utils/emailService");
+const mongoose = require("mongoose");
+const { devAuth, shouldUseFallback } = require("../utils/devFallback");
 
 class AuthController {
+  // Check database connectivity
+  checkDBConnection() {
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error(
+        "Database connection not available. Please ensure MongoDB is running.",
+      );
+    }
+  }
   // Register a new user
   async register(req, res) {
     try {
       const { fullName, email, mobile, password, address } = req.body;
+
+      // Use development fallback if database is not available
+      if (shouldUseFallback()) {
+        console.log("🔄 Using development fallback for registration");
+        const result = await devAuth.register({
+          fullName,
+          email,
+          mobile,
+          password,
+          address,
+        });
+
+        return res.status(201).json({
+          message: "Registration successful (Development Mode)",
+          token: result.token,
+          user: result.user,
+        });
+      }
+
+      // Check database connectivity
+      this.checkDBConnection();
 
       // Check if user already exists
       const existingUser = await User.findOne({
@@ -96,6 +127,21 @@ class AuthController {
   async login(req, res) {
     try {
       const { email, password } = req.body;
+
+      // Use development fallback if database is not available
+      if (shouldUseFallback()) {
+        console.log("🔄 Using development fallback for login");
+        const result = await devAuth.login(email, password);
+
+        return res.json({
+          message: "Login successful (Development Mode)",
+          token: result.token,
+          user: result.user,
+        });
+      }
+
+      // Check database connectivity
+      this.checkDBConnection();
 
       // Find user and include password for comparison
       const user = await User.findOne({ email }).select("+password");

@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const letterheadController = require("../controllers/letterheadController");
 const { auth, adminAuth } = require("../middleware/auth");
-const { mockLetterhead } = require("../scripts/create-mock-letterhead");
 const { body, param, query } = require("express-validator");
 const { handleValidationErrors } = require("../middleware/validate");
 
@@ -12,65 +11,56 @@ const validateLetterheadId = [
 ];
 
 const validateCreateLetterhead = [
-  body("letterType")
-    .isIn(["certificate", "request", "application", "notice", "recommendation"])
-    .withMessage("Invalid letter type"),
   body("title").trim().notEmpty().withMessage("Title is required"),
-  body("context")
-    .isIn(["respected", "dear", "to_whom_it_may_concern"])
-    .withMessage("Invalid context"),
-  body("recipient.prefix")
-    .isIn(["Mr.", "Mrs.", "Ms.", "Dr.", "Prof.", "Hon.", "Company"])
-    .withMessage("Invalid prefix"),
-  body("recipient.firstName")
+  body("letterType")
+    .isIn([
+      "certificate",
+      "recommendation",
+      "authorization",
+      "notice",
+      "announcement",
+      "invitation",
+      "acknowledgment",
+      "verification",
+    ])
+    .withMessage("Invalid letter type"),
+  body("recipient.name")
     .trim()
     .notEmpty()
-    .withMessage("First name is required"),
-  body("recipient.lastName")
-    .trim()
-    .notEmpty()
-    .withMessage("Last name is required"),
+    .withMessage("Recipient name is required"),
   body("subject").trim().notEmpty().withMessage("Subject is required"),
   body("content").trim().notEmpty().withMessage("Content is required"),
-  body("host.name").trim().notEmpty().withMessage("Host name is required"),
-  body("host.designation")
+  body("issuer.name").trim().notEmpty().withMessage("Issuer name is required"),
+  body("issuer.designation")
     .trim()
     .notEmpty()
-    .withMessage("Host designation is required"),
-  body("language")
-    .optional()
-    .isIn(["english", "hindi", "gujarati"])
-    .withMessage("Invalid language"),
+    .withMessage("Issuer designation is required"),
 ];
 
 const validateUpdateLetterhead = [
-  body("letterType")
-    .optional()
-    .isIn(["certificate", "request", "application", "notice", "recommendation"])
-    .withMessage("Invalid letter type"),
   body("title")
     .optional()
     .trim()
     .notEmpty()
     .withMessage("Title cannot be empty"),
-  body("context")
+  body("letterType")
     .optional()
-    .isIn(["respected", "dear", "to_whom_it_may_concern"])
-    .withMessage("Invalid context"),
-  body("recipient.prefix")
-    .optional()
-    .isIn(["Mr.", "Mrs.", "Ms.", "Dr.", "Prof.", "Hon.", "Company"])
-    .withMessage("Invalid prefix"),
-  body("recipient.firstName")
+    .isIn([
+      "certificate",
+      "recommendation",
+      "authorization",
+      "notice",
+      "announcement",
+      "invitation",
+      "acknowledgment",
+      "verification",
+    ])
+    .withMessage("Invalid letter type"),
+  body("recipient.name")
     .optional()
     .trim()
     .notEmpty()
-    .withMessage("First name cannot be empty"),
-  body("recipient.lastName")
-    .optional()
-    .trim()
-    .notEmpty()
-    .withMessage("Last name cannot be empty"),
+    .withMessage("Recipient name cannot be empty"),
   body("subject")
     .optional()
     .trim()
@@ -81,20 +71,16 @@ const validateUpdateLetterhead = [
     .trim()
     .notEmpty()
     .withMessage("Content cannot be empty"),
-  body("host.name")
+  body("issuer.name")
     .optional()
     .trim()
     .notEmpty()
-    .withMessage("Host name cannot be empty"),
-  body("host.designation")
+    .withMessage("Issuer name cannot be empty"),
+  body("issuer.designation")
     .optional()
     .trim()
     .notEmpty()
-    .withMessage("Host designation cannot be empty"),
-  body("language")
-    .optional()
-    .isIn(["english", "hindi", "gujarati"])
-    .withMessage("Invalid language"),
+    .withMessage("Issuer designation cannot be empty"),
 ];
 
 const validateQueryParams = [
@@ -108,60 +94,26 @@ const validateQueryParams = [
     .withMessage("Limit must be between 1 and 100"),
   query("status")
     .optional()
-    .isIn(["draft", "finalized", "sent", "archived"])
+    .isIn(["draft", "issued", "sent", "archived"])
     .withMessage("Invalid status"),
   query("letterType")
     .optional()
-    .isIn(["certificate", "request", "application", "notice", "recommendation"])
+    .isIn([
+      "certificate",
+      "recommendation",
+      "authorization",
+      "notice",
+      "announcement",
+      "invitation",
+      "acknowledgment",
+      "verification",
+    ])
     .withMessage("Invalid letter type"),
   query("startDate").optional().isISO8601().withMessage("Invalid start date"),
   query("endDate").optional().isISO8601().withMessage("Invalid end date"),
 ];
 
 // Routes
-
-// Development route to add mock letterhead (only in development)
-if (process.env.NODE_ENV === "development") {
-  router.post("/create-mock", adminAuth, async (req, res) => {
-    try {
-      const Letterhead = require("../models/Letterhead");
-
-      // Check if mock letterhead already exists
-      const existing = await Letterhead.findOne({
-        letterId: mockLetterhead.letterId,
-      });
-      if (existing) {
-        return res.json({
-          success: true,
-          message: "Mock letterhead already exists",
-          data: existing,
-        });
-      }
-
-      // Set the admin user as creator
-      const letterheadData = {
-        ...mockLetterhead,
-        createdBy: req.user._id,
-      };
-
-      const letterhead = new Letterhead(letterheadData);
-      await letterhead.save();
-
-      res.status(201).json({
-        success: true,
-        message: "Mock letterhead created successfully",
-        data: letterhead,
-      });
-    } catch (error) {
-      console.error("Mock letterhead creation error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to create mock letterhead",
-        error: error.message,
-      });
-    }
-  });
-}
 
 // GET /api/letterheads - Get all letterheads (Admin only)
 router.get(
@@ -173,9 +125,9 @@ router.get(
 );
 
 // GET /api/letterheads/stats - Get letterhead statistics (Admin only)
-router.get("/stats", adminAuth, letterheadController.getLetterheadStats);
+router.get("/stats", adminAuth, letterheadController.getStats);
 
-// GET /api/letterheads/:id - Get single letterhead by ID
+// GET /api/letterheads/:id - Get single letterhead by ID (Admin only)
 router.get(
   "/:id",
   adminAuth,
@@ -212,13 +164,13 @@ router.delete(
   letterheadController.deleteLetterhead,
 );
 
-// GET /api/letterheads/:id/pdf - Generate PDF for letterhead
-router.get(
-  "/:id/pdf",
+// PUT /api/letterheads/:id/mark-issued - Mark letterhead as issued (Admin only)
+router.put(
+  "/:id/mark-issued",
   adminAuth,
   validateLetterheadId,
   handleValidationErrors,
-  letterheadController.generateLetterheadPDF,
+  letterheadController.markAsIssued,
 );
 
 // PUT /api/letterheads/:id/mark-sent - Mark letterhead as sent (Admin only)
@@ -231,10 +183,10 @@ router.put(
 );
 
 // Public verification route
-// GET /api/letterheads/verify/:letterId - Verify letterhead by letter ID (Public)
+// GET /api/letterheads/verify/:letterheadId - Verify letterhead by letterhead ID (Public)
 router.get(
-  "/verify/:letterId",
-  param("letterId").notEmpty().withMessage("Letter ID is required"),
+  "/verify/:letterheadId",
+  param("letterheadId").notEmpty().withMessage("Letterhead ID is required"),
   handleValidationErrors,
   letterheadController.verifyLetterhead,
 );

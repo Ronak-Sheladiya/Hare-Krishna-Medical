@@ -1,12 +1,166 @@
 const Letterhead = require("../models/Letterhead");
 const User = require("../models/User");
-const QRCode = require("qrcode");
-const PDFDocument = require("pdfkit");
-const fs = require("fs");
-const path = require("path");
+const mongoose = require("mongoose");
+const { shouldUseFallback, devLetterheads } = require("../utils/devFallback");
 
 class LetterheadController {
-  // Get all letterheads (Admin only)
+  // Check database connectivity
+  checkDBConnection() {
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error(
+        "Database connection not available. Using development fallback.",
+      );
+    }
+  }
+
+  // Development fallback for getting letterheads
+  async getLetterheadsFallback(filters, page, limit) {
+    // Initialize with some sample data if empty
+    if (devLetterheads.length === 0) {
+      devLetterheads.push({
+        _id: "dev_letterhead_1",
+        letterheadId: "HKMS/LH/2024/01/01/001",
+        title: "Certificate of Excellence",
+        letterType: "certificate",
+        subject: "Outstanding Performance Recognition",
+        content:
+          "We hereby certify that the recipient has demonstrated exceptional performance and dedication in their field of work.",
+        recipient: {
+          name: "John Doe",
+          designation: "Senior Manager",
+          organization: "ABC Corporation",
+          address: "123 Business Street, City, State 12345",
+        },
+        issuer: {
+          name: "Dr. Rajesh Kumar",
+          designation: "Chief Medical Officer",
+          signature: "",
+        },
+        header: {
+          companyName: "Hare Krishna Medical Store",
+          companyAddress: "123 Main Street, Healthcare District",
+          companyCity: "Medical City, State 12345",
+          companyPhone: "+91 98765 43210",
+          companyEmail: "info@harekrishnamedical.com",
+          logo: "",
+        },
+        footer: {
+          terms:
+            "This is an official document issued by Hare Krishna Medical Store. For verification, please contact us at the above details.",
+          additionalInfo: "",
+        },
+        status: "issued",
+        tags: ["certificate", "performance", "official"],
+        notes: "Sample letterhead for development",
+        qrCode: "sample-qr-code-data",
+        createdBy: "dev_admin_user",
+        createdAt: new Date("2024-01-01"),
+        updatedAt: new Date("2024-01-01"),
+      });
+
+      devLetterheads.push({
+        _id: "dev_letterhead_2",
+        letterheadId: "HKMS/LH/2024/01/02/002",
+        title: "Medical Recommendation",
+        letterType: "recommendation",
+        subject: "Professional Medical Recommendation",
+        content:
+          "Based on our professional assessment, we recommend the following course of action for the patient's well-being.",
+        recipient: {
+          name: "Jane Smith",
+          designation: "Patient",
+          organization: "Personal",
+          address: "456 Health Avenue, Wellness City, State 67890",
+        },
+        issuer: {
+          name: "Dr. Priya Sharma",
+          designation: "Chief Pharmacist",
+          signature: "",
+        },
+        header: {
+          companyName: "Hare Krishna Medical Store",
+          companyAddress: "123 Main Street, Healthcare District",
+          companyCity: "Medical City, State 12345",
+          companyPhone: "+91 98765 43210",
+          companyEmail: "info@harekrishnamedical.com",
+          logo: "",
+        },
+        footer: {
+          terms:
+            "This is an official document issued by Hare Krishna Medical Store. For verification, please contact us at the above details.",
+          additionalInfo: "Valid for 30 days from issue date",
+        },
+        status: "sent",
+        tags: ["recommendation", "medical", "official"],
+        notes: "Sample medical recommendation",
+        qrCode: "sample-qr-code-data-2",
+        createdBy: "dev_admin_user",
+        createdAt: new Date("2024-01-02"),
+        updatedAt: new Date("2024-01-02"),
+      });
+    }
+
+    // Apply filters
+    let filteredLetterheads = [...devLetterheads];
+
+    if (filters.status) {
+      filteredLetterheads = filteredLetterheads.filter(
+        (l) => l.status === filters.status,
+      );
+    }
+
+    if (filters.letterType) {
+      filteredLetterheads = filteredLetterheads.filter(
+        (l) => l.letterType === filters.letterType,
+      );
+    }
+
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filteredLetterheads = filteredLetterheads.filter(
+        (l) =>
+          l.letterheadId.toLowerCase().includes(searchLower) ||
+          l.title.toLowerCase().includes(searchLower) ||
+          l.subject.toLowerCase().includes(searchLower) ||
+          l.recipient.name.toLowerCase().includes(searchLower) ||
+          l.recipient.organization.toLowerCase().includes(searchLower) ||
+          l.issuer.name.toLowerCase().includes(searchLower),
+      );
+    }
+
+    if (filters.startDate) {
+      filteredLetterheads = filteredLetterheads.filter(
+        (l) => new Date(l.createdAt) >= new Date(filters.startDate),
+      );
+    }
+
+    if (filters.endDate) {
+      filteredLetterheads = filteredLetterheads.filter(
+        (l) => new Date(l.createdAt) <= new Date(filters.endDate),
+      );
+    }
+
+    // Sort by creation date (newest first)
+    filteredLetterheads.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+    );
+
+    // Apply pagination
+    const total = filteredLetterheads.length;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const paginatedLetterheads = filteredLetterheads.slice(
+      skip,
+      skip + parseInt(limit),
+    );
+
+    return {
+      letterheads: paginatedLetterheads,
+      total,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  // Get all letterheads with pagination and filtering
   async getAllLetterheads(req, res) {
     try {
       const {
@@ -14,10 +168,33 @@ class LetterheadController {
         limit = 10,
         status,
         letterType,
+        search,
         startDate,
         endDate,
-        search,
       } = req.query;
+
+      // Use development fallback if database is not available
+      if (shouldUseFallback()) {
+        console.log("🔄 Using development fallback for fetching letterheads");
+
+        const filters = { status, letterType, search, startDate, endDate };
+        const result = await this.getLetterheadsFallback(filters, page, limit);
+
+        return res.json({
+          success: true,
+          letterheads: result.letterheads,
+          pagination: {
+            currentPage: parseInt(page),
+            totalPages: result.totalPages,
+            total: result.total,
+            hasNextPage: page < result.totalPages,
+            hasPrevPage: page > 1,
+          },
+        });
+      }
+
+      // Check database connectivity
+      this.checkDBConnection();
 
       // Build filter
       const filter = {};
@@ -35,12 +212,12 @@ class LetterheadController {
       // Search filter
       if (search) {
         filter.$or = [
-          { letterId: { $regex: search, $options: "i" } },
+          { letterheadId: { $regex: search, $options: "i" } },
           { title: { $regex: search, $options: "i" } },
           { subject: { $regex: search, $options: "i" } },
-          { "recipient.firstName": { $regex: search, $options: "i" } },
-          { "recipient.lastName": { $regex: search, $options: "i" } },
-          { "host.name": { $regex: search, $options: "i" } },
+          { "recipient.name": { $regex: search, $options: "i" } },
+          { "recipient.organization": { $regex: search, $options: "i" } },
+          { "issuer.name": { $regex: search, $options: "i" } },
         ];
       }
 
@@ -48,7 +225,7 @@ class LetterheadController {
       const skip = (parseInt(page) - 1) * parseInt(limit);
 
       // Execute query
-      const [letterheads, totalLetterheads] = await Promise.all([
+      const [letterheads, total] = await Promise.all([
         Letterhead.find(filter)
           .sort({ createdAt: -1 })
           .skip(skip)
@@ -58,7 +235,16 @@ class LetterheadController {
       ]);
 
       // Calculate pagination info
-      const totalPages = Math.ceil(totalLetterheads / limit);
+      const totalPages = Math.ceil(total / limit);
+
+      // Emit real-time update to admin
+      const io = req.app.get("io");
+      if (io) {
+        io.to("admin-room").emit("letterheads-viewed", {
+          count: total,
+          timestamp: new Date().toISOString(),
+        });
+      }
 
       res.json({
         success: true,
@@ -66,7 +252,7 @@ class LetterheadController {
         pagination: {
           currentPage: parseInt(page),
           totalPages,
-          totalLetterheads,
+          total,
           hasNextPage: page < totalPages,
           hasPrevPage: page > 1,
         },
@@ -86,6 +272,35 @@ class LetterheadController {
     try {
       const { id } = req.params;
 
+      // Use development fallback if database is not available
+      if (shouldUseFallback()) {
+        console.log(
+          "🔄 Using development fallback for getting letterhead by ID",
+        );
+
+        // Initialize sample data if empty
+        if (devLetterheads.length === 0) {
+          this.getLetterheadsFallback({}, 1, 10);
+        }
+
+        const letterhead = devLetterheads.find((l) => l._id === id);
+
+        if (!letterhead) {
+          return res.status(404).json({
+            success: false,
+            message: "Letterhead not found",
+          });
+        }
+
+        return res.json({
+          success: true,
+          letterhead,
+        });
+      }
+
+      // Check database connectivity
+      this.checkDBConnection();
+
       const letterhead = await Letterhead.findById(id).populate(
         "createdBy",
         "fullName email",
@@ -103,7 +318,7 @@ class LetterheadController {
         letterhead,
       });
     } catch (error) {
-      console.error("Get letterhead by ID error:", error);
+      console.error("Get letterhead error:", error);
       res.status(500).json({
         success: false,
         message: "Failed to fetch letterhead",
@@ -115,48 +330,32 @@ class LetterheadController {
   // Create new letterhead
   async createLetterhead(req, res) {
     try {
-      const {
-        letterType,
-        title,
-        context,
-        recipient,
-        subject,
-        content,
-        header,
-        footer,
-        host,
-        language,
-        notes,
-      } = req.body;
-
-      // Validate required fields
-      if (!letterType || !title || !subject || !content || !host) {
-        return res.status(400).json({
-          success: false,
-          message: "Missing required fields",
-        });
-      }
-
-      // Create new letterhead
-      const letterhead = new Letterhead({
-        letterType,
-        title,
-        context,
-        recipient,
-        subject,
-        content,
-        header,
-        footer,
-        host,
-        language,
-        notes,
+      const letterheadData = {
+        ...req.body,
         createdBy: req.user.id,
-      });
+      };
 
+      const letterhead = new Letterhead(letterheadData);
       await letterhead.save();
 
-      // Populate the created letterhead
+      // Populate the created letterhead for response
       await letterhead.populate("createdBy", "fullName email");
+
+      // Emit real-time update to admin
+      const io = req.app.get("io");
+      if (io) {
+        io.to("admin-room").emit("letterhead-created", {
+          letterhead: {
+            id: letterhead._id,
+            letterheadId: letterhead.letterheadId,
+            title: letterhead.title,
+            letterType: letterhead.letterType,
+            recipientName: letterhead.recipient.name,
+            status: letterhead.status,
+            createdAt: letterhead.createdAt,
+          },
+        });
+      }
 
       res.status(201).json({
         success: true,
@@ -177,23 +376,36 @@ class LetterheadController {
   async updateLetterhead(req, res) {
     try {
       const { id } = req.params;
-      const updateData = req.body;
 
-      // Remove fields that shouldn't be updated directly
-      delete updateData.letterId;
-      delete updateData.createdBy;
-      delete updateData.qrCode;
-      delete updateData.qrCodeData;
-
-      const letterhead = await Letterhead.findByIdAndUpdate(id, updateData, {
-        new: true,
-        runValidators: true,
-      }).populate("createdBy", "fullName email");
+      const letterhead = await Letterhead.findById(id);
 
       if (!letterhead) {
         return res.status(404).json({
           success: false,
           message: "Letterhead not found",
+        });
+      }
+
+      // Update letterhead
+      Object.assign(letterhead, req.body);
+      await letterhead.save();
+
+      // Populate the updated letterhead
+      await letterhead.populate("createdBy", "fullName email");
+
+      // Emit real-time update to admin
+      const io = req.app.get("io");
+      if (io) {
+        io.to("admin-room").emit("letterhead-updated", {
+          letterhead: {
+            id: letterhead._id,
+            letterheadId: letterhead.letterheadId,
+            title: letterhead.title,
+            letterType: letterhead.letterType,
+            recipientName: letterhead.recipient.name,
+            status: letterhead.status,
+            updatedAt: letterhead.updatedAt,
+          },
         });
       }
 
@@ -217,12 +429,23 @@ class LetterheadController {
     try {
       const { id } = req.params;
 
-      const letterhead = await Letterhead.findByIdAndDelete(id);
+      const letterhead = await Letterhead.findById(id);
 
       if (!letterhead) {
         return res.status(404).json({
           success: false,
           message: "Letterhead not found",
+        });
+      }
+
+      await Letterhead.findByIdAndDelete(id);
+
+      // Emit real-time update to admin
+      const io = req.app.get("io");
+      if (io) {
+        io.to("admin-room").emit("letterhead-deleted", {
+          letterheadId: letterhead.letterheadId,
+          id: letterhead._id,
         });
       }
 
@@ -240,15 +463,12 @@ class LetterheadController {
     }
   }
 
-  // Generate PDF for letterhead
-  async generateLetterheadPDF(req, res) {
+  // Mark letterhead as issued
+  async markAsIssued(req, res) {
     try {
       const { id } = req.params;
 
-      const letterhead = await Letterhead.findById(id).populate(
-        "createdBy",
-        "fullName email",
-      );
+      const letterhead = await Letterhead.findById(id);
 
       if (!letterhead) {
         return res.status(404).json({
@@ -257,292 +477,31 @@ class LetterheadController {
         });
       }
 
-      // Create PDF
-      const doc = new PDFDocument({
-        size: "A4",
-        margin: 50,
+      await letterhead.markAsIssued();
+
+      // Emit real-time update
+      const io = req.app.get("io");
+      if (io) {
+        io.to("admin-room").emit("letterhead-status-updated", {
+          letterheadId: letterhead.letterheadId,
+          status: "issued",
+          issueDate: letterhead.issueDate,
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Letterhead marked as issued",
+        letterhead,
       });
-
-      // Set response headers
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename="letterhead-${letterhead.letterId}.pdf"`,
-      );
-
-      doc.pipe(res);
-
-      // Add letterhead content to PDF
-      await this.addLetterheadToPDF(doc, letterhead);
-
-      doc.end();
     } catch (error) {
-      console.error("Generate PDF error:", error);
+      console.error("Mark as issued error:", error);
       res.status(500).json({
         success: false,
-        message: "Failed to generate PDF",
+        message: "Failed to mark letterhead as issued",
         error: error.message,
       });
     }
-  }
-
-  // Helper method to add letterhead content to PDF
-  async addLetterheadToPDF(doc, letterhead) {
-    const pageWidth = doc.page.width;
-    const pageHeight = doc.page.height;
-    const margin = 50;
-
-    // Red theme colors
-    const redColor = "#e63946";
-    const lightRed = "#fff5f5";
-
-    // Header with red background
-    doc.rect(0, 0, pageWidth, 120).fill(redColor);
-
-    // Company Header in white text
-    doc
-      .fontSize(20)
-      .font("Times-Bold")
-      .fillColor("white")
-      .text("HARE KRISHNA MEDICAL STORE", margin, 30, {
-        width: pageWidth - 2 * margin - 100, // Leave space for QR code
-        align: "center",
-      });
-
-    doc
-      .fontSize(10)
-      .font("Times-Roman")
-      .text(
-        "3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat",
-        margin,
-        55,
-        {
-          width: pageWidth - 2 * margin - 100,
-          align: "center",
-        },
-      );
-
-    doc.text(
-      "Phone: +91 76989 13354 | Email: hkmedicalamroli@gmail.com",
-      margin,
-      70,
-      {
-        width: pageWidth - 2 * margin - 100,
-        align: "center",
-      },
-    );
-
-    doc.text("GST No: 24XXXXX1234Z1Z5 | Drug License: GJ-XXX-XXX", margin, 85, {
-      width: pageWidth - 2 * margin - 100,
-      align: "center",
-    });
-
-    // QR Code (top-right)
-    if (letterhead.qrCode) {
-      try {
-        const qrBuffer = Buffer.from(letterhead.qrCode.split(",")[1], "base64");
-        doc.image(qrBuffer, pageWidth - 130, 20, { width: 80, height: 80 });
-      } catch (error) {
-        console.error("QR Code insertion error:", error);
-      }
-    }
-
-    // Header content
-    if (letterhead.header) {
-      doc
-        .fontSize(12)
-        .font("Times-Bold")
-        .fillColor("white")
-        .text(letterhead.header, margin, 100, {
-          width: pageWidth - 2 * margin,
-          align: "center",
-        });
-    }
-
-    // Reset text color to black
-    doc.fillColor("black");
-
-    // Reference and Date section (right-aligned)
-    const startY = 140;
-    doc
-      .fontSize(12)
-      .font("Times-Bold")
-      .fillColor(redColor)
-      .text(`Ref: ${letterhead.letterId}`, pageWidth - 200, startY, {
-        width: 150,
-        align: "right",
-      });
-
-    doc.text(
-      `Date: ${new Date(letterhead.createdAt).toLocaleDateString("en-GB")}`,
-      pageWidth - 200,
-      startY + 15,
-      {
-        width: 150,
-        align: "right",
-      },
-    );
-
-    // Letter meta information box
-    doc.fillColor("black");
-    doc.rect(margin, startY + 40, pageWidth - 2 * margin, 60).fill(lightRed);
-    doc.rect(margin, startY + 40, pageWidth - 2 * margin, 60).stroke(redColor);
-
-    doc
-      .fontSize(11)
-      .font("Times-Bold")
-      .fillColor(redColor)
-      .text("Letter Type:", margin + 10, startY + 50)
-      .font("Times-Roman")
-      .fillColor("black")
-      .text(
-        letterhead.letterType.charAt(0).toUpperCase() +
-          letterhead.letterType.slice(1),
-        margin + 80,
-        startY + 50,
-      );
-
-    doc
-      .font("Times-Bold")
-      .fillColor(redColor)
-      .text("Subject:", margin + 10, startY + 65)
-      .font("Times-Roman")
-      .fillColor("black")
-      .text(letterhead.subject, margin + 60, startY + 65, {
-        width: pageWidth - 2 * margin - 70,
-      });
-
-    doc
-      .font("Times-Bold")
-      .fillColor(redColor)
-      .text("To:", pageWidth - 200, startY + 50)
-      .font("Times-Roman")
-      .fillColor("black")
-      .text(letterhead.recipientFullName, pageWidth - 180, startY + 50, {
-        width: 160,
-      });
-
-    if (letterhead.recipient.designation) {
-      doc
-        .font("Times-Bold")
-        .fillColor(redColor)
-        .text("Designation:", pageWidth - 200, startY + 65)
-        .font("Times-Roman")
-        .fillColor("black")
-        .text(letterhead.recipient.designation, pageWidth - 130, startY + 65, {
-          width: 110,
-        });
-    }
-
-    doc.y = startY + 120;
-
-    // Context and greeting
-    const contextText = {
-      respected: "Respected",
-      dear: "Dear",
-      to_whom_it_may_concern: "To Whom It May Concern",
-    };
-
-    doc
-      .fontSize(12)
-      .font("Times-Bold")
-      .fillColor("black")
-      .text(
-        `${contextText[letterhead.context]} ${letterhead.recipientFullName},`,
-        margin,
-      );
-
-    doc.moveDown(1);
-
-    // Main content
-    const cleanContent = letterhead.content
-      .replace(/<br\s*\/?>/gi, "\n")
-      .replace(/<\/p>/gi, "\n\n")
-      .replace(/<[^>]*>/g, "")
-      .replace(/&nbsp;/g, " ");
-
-    doc
-      .fontSize(12)
-      .font("Times-Roman")
-      .text(cleanContent, margin, doc.y, {
-        width: pageWidth - 2 * margin,
-        align: "justify",
-        lineGap: 3,
-      });
-
-    doc.moveDown(2);
-
-    // Closing
-    doc.text("Thank you for your time and consideration.", margin);
-    doc.moveDown(1);
-    doc.text("Sincerely,", margin);
-    doc.moveDown(3);
-
-    // Footer with red border
-    const footerY = doc.y + 50;
-    doc.rect(0, footerY, pageWidth, 2).fill(redColor);
-
-    // Signature section (right side)
-    doc
-      .fontSize(12)
-      .font("Times-Roman")
-      .text("_____________________", pageWidth - 200, footerY + 20, {
-        width: 150,
-        align: "center",
-      });
-
-    doc
-      .font("Times-Bold")
-      .fillColor(redColor)
-      .text(`${letterhead.host.name}`, pageWidth - 200, footerY + 35, {
-        width: 150,
-        align: "center",
-      });
-
-    doc
-      .font("Times-Roman")
-      .fillColor("black")
-      .text(`${letterhead.host.designation}`, pageWidth - 200, footerY + 50, {
-        width: 150,
-        align: "center",
-      });
-
-    doc.text("Hare Krishna Medical Store", pageWidth - 200, footerY + 65, {
-      width: 150,
-      align: "center",
-    });
-
-    // Footer content (left side)
-    if (letterhead.footer) {
-      doc
-        .fontSize(10)
-        .font("Times-Roman")
-        .fillColor("#666")
-        .text(letterhead.footer, margin, footerY + 20, {
-          width: 300,
-        });
-    }
-
-    // Verification note
-    doc
-      .fontSize(9)
-      .font("Times-Roman")
-      .fillColor("#666")
-      .text(
-        "This is a computer generated official letterhead document",
-        margin,
-        footerY + 80,
-      );
-
-    doc.text("Scan QR code for digital verification", margin, footerY + 95);
-
-    // Verification URL
-    const verificationUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/verify-docs?id=${letterhead.letterId}&type=letterhead`;
-    doc
-      .fontSize(8)
-      .text(`Verification: ${verificationUrl}`, margin, footerY + 110, {
-        width: pageWidth - 2 * margin,
-      });
   }
 
   // Mark letterhead as sent
@@ -561,6 +520,15 @@ class LetterheadController {
 
       await letterhead.markAsSent();
 
+      // Emit real-time update
+      const io = req.app.get("io");
+      if (io) {
+        io.to("admin-room").emit("letterhead-status-updated", {
+          letterheadId: letterhead.letterheadId,
+          status: "sent",
+        });
+      }
+
       res.json({
         success: true,
         message: "Letterhead marked as sent",
@@ -576,37 +544,88 @@ class LetterheadController {
     }
   }
 
+  // Development fallback for getting stats
+  getStatsFallback() {
+    // Initialize sample data if empty
+    if (devLetterheads.length === 0) {
+      this.getLetterheadsFallback({}, 1, 10); // This will initialize sample data
+    }
+
+    const total = devLetterheads.length;
+    const statusCounts = devLetterheads.reduce((acc, letterhead) => {
+      acc[letterhead.status] = (acc[letterhead.status] || 0) + 1;
+      return acc;
+    }, {});
+
+    const typeCounts = devLetterheads.reduce((acc, letterhead) => {
+      acc[letterhead.letterType] = (acc[letterhead.letterType] || 0) + 1;
+      return acc;
+    }, {});
+
+    const generalStats = {
+      total,
+      issued: statusCounts.issued || 0,
+      sent: statusCounts.sent || 0,
+      draft: statusCounts.draft || 0,
+      archived: statusCounts.archived || 0,
+    };
+
+    const typeStats = Object.entries(typeCounts).map(([type, count]) => ({
+      _id: type,
+      count,
+    }));
+
+    return { generalStats, typeStats };
+  }
+
   // Get letterhead statistics
-  async getLetterheadStats(req, res) {
+  async getStats(req, res) {
     try {
+      // Use development fallback if database is not available
+      if (shouldUseFallback()) {
+        console.log("🔄 Using development fallback for letterhead stats");
+        const { generalStats, typeStats } = this.getStatsFallback();
+
+        return res.json({
+          success: true,
+          stats: {
+            general: generalStats,
+            types: typeStats,
+          },
+        });
+      }
+
+      // Check database connectivity
+      this.checkDBConnection();
+
       const [generalStats, typeStats] = await Promise.all([
-        Letterhead.getLetterheadStats(),
-        Letterhead.getLetterTypeStats(),
+        Letterhead.getStats(),
+        Letterhead.getTypeStats(),
       ]);
 
       res.json({
         success: true,
         stats: {
           general: generalStats,
-          byType: typeStats,
+          types: typeStats,
         },
       });
     } catch (error) {
       console.error("Get letterhead stats error:", error);
       res.status(500).json({
         success: false,
-        message: "Failed to fetch letterhead statistics",
+        message: "Failed to get letterhead statistics",
         error: error.message,
       });
     }
   }
 
-  // Verify letterhead by letter ID
+  // Verify letterhead by letterheadId (public endpoint)
   async verifyLetterhead(req, res) {
     try {
-      const { letterId } = req.params;
+      const { letterheadId } = req.params;
 
-      const letterhead = await Letterhead.findOne({ letterId }).populate(
+      const letterhead = await Letterhead.findOne({ letterheadId }).populate(
         "createdBy",
         "fullName email",
       );
@@ -615,32 +634,38 @@ class LetterheadController {
         return res.status(404).json({
           success: false,
           message: "Letterhead not found",
+          verified: false,
         });
       }
 
-      // Return verification data
+      const verificationData = {
+        letterheadId: letterhead.letterheadId,
+        title: letterhead.title,
+        letterType: letterhead.letterType,
+        recipientName: letterhead.recipient.name,
+        recipientOrganization: letterhead.recipient.organization,
+        subject: letterhead.subject,
+        issuerName: letterhead.issuer.name,
+        issuerDesignation: letterhead.issuer.designation,
+        issueDate: letterhead.issueDate,
+        validUntil: letterhead.validUntil,
+        status: letterhead.status,
+        verified: true,
+      };
+
       res.json({
         success: true,
         verified: true,
-        letterhead: {
-          letterId: letterhead.letterId,
-          letterType: letterhead.letterType,
-          title: letterhead.title,
-          recipientName: letterhead.recipientFullName,
-          subject: letterhead.subject,
-          createdAt: letterhead.createdAt,
-          status: letterhead.status,
-          hostName: letterhead.host.name,
-          hostDesignation: letterhead.host.designation,
-          qrCodeData: letterhead.qrCodeData,
-        },
+        letterhead: verificationData,
+        message: "Letterhead verified successfully",
       });
     } catch (error) {
       console.error("Verify letterhead error:", error);
       res.status(500).json({
         success: false,
-        message: "Failed to verify letterhead",
+        message: "Letterhead verification failed",
         error: error.message,
+        verified: false,
       });
     }
   }

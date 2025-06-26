@@ -60,7 +60,6 @@ import AdminPaymentMethods from "./pages/admin/AdminPaymentMethods";
 import AdminLetterheads from "./pages/admin/AdminLetterheads";
 import AddLetterhead from "./pages/admin/AddLetterhead";
 import VerifyDocs from "./pages/VerifyDocs";
-
 // User
 import UserDashboard from "./pages/UserDashboard";
 import UserOrders from "./pages/user/UserOrders";
@@ -293,6 +292,15 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            <Route
+              path="/admin/profile"
+              element={
+                <ProtectedRoute adminOnly>
+                  <UserProfile />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/admin/letterheads"
               element={
@@ -314,14 +322,6 @@ function App() {
               element={
                 <ProtectedRoute adminOnly>
                   <AddLetterhead />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/profile"
-              element={
-                <ProtectedRoute adminOnly>
-                  <UserProfile />
                 </ProtectedRoute>
               }
             />

@@ -27,6 +27,9 @@ app.set("io", io);
 // ==========================
 // ✅ Middleware
 // ==========================
+// Trust proxy for rate limiting in cloud environments
+app.set("trust proxy", 1);
+
 app.use(helmet());
 app.use(
   cors({
@@ -41,23 +44,78 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   message: "Too many requests from this IP, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 app.use("/api/", limiter);
 
 // ==========================
 // ✅ Database Connection
 // ==========================
-mongoose
-  .connect(
-    process.env.MONGODB_URI ||
-      "mongodb://localhost:27017/Hare_Krishna_Medical_db",
-    {
+const mongoURI =
+  process.env.MONGODB_URI ||
+  "mongodb://localhost:27017/Hare_Krishna_Medical_db";
+console.log("🔄 Attempting MongoDB connection to:", mongoURI);
+
+// Set mongoose buffer commands to false to fail fast
+mongoose.set("bufferCommands", false);
+
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-    },
-  )
-  .then(() => console.log("✅ Connected to MongoDB"))
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
+      serverSelectionTimeoutMS: 5000, // Fail fast on server selection
+      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+      family: 4, // Use IPv4, skip trying IPv6
+      maxPoolSize: 10, // Maintain up to 10 socket connections
+      minPoolSize: 5, // Maintain minimum 5 socket connections
+      maxIdleTimeMS: 30000, // Close connections after 30 seconds of inactivity
+    });
+
+    console.log("✅ Connected to MongoDB");
+    console.log("📊 Database:", conn.connection.name);
+    console.log("🏠 Host:", conn.connection.host);
+    console.log("🔌 Port:", conn.connection.port);
+
+    return conn;
+  } catch (err) {
+    console.error("❌ MongoDB connection failed:", err.message);
+    console.log(
+      "🔄 Will continue without database - using memory storage for development",
+    );
+
+    // Set a flag to indicate database is not available
+    global.DB_CONNECTED = false;
+    return null;
+  }
+};
+
+// Connect to database
+connectDB().then((conn) => {
+  global.DB_CONNECTED = !!conn;
+});
+
+// Enhanced connection event handlers
+mongoose.connection.on("connected", () => {
+  console.log("📡 Mongoose connected to MongoDB");
+  global.DB_CONNECTED = true;
+});
+
+mongoose.connection.on("error", (err) => {
+  console.error("❌ Mongoose connection error:", err.message);
+  global.DB_CONNECTED = false;
+});
+
+mongoose.connection.on("disconnected", () => {
+  console.log("📡 Mongoose disconnected from MongoDB");
+  global.DB_CONNECTED = false;
+});
+
+mongoose.connection.on("reconnected", () => {
+  console.log("📡 Mongoose reconnected to MongoDB");
+  global.DB_CONNECTED = true;
+});
 
 // ==========================
 // ✅ Routes

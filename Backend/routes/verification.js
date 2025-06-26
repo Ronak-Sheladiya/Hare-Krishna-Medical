@@ -4,6 +4,7 @@ const User = require("../models/User");
 const Verification = require("../models/Verification");
 const Invoice = require("../models/Invoice");
 const Letterhead = require("../models/Letterhead");
+
 const { auth } = require("../middleware/auth");
 const { body, validationResult, query } = require("express-validator");
 const emailService = require("../utils/emailService");
@@ -347,7 +348,7 @@ router.post("/resend-email", auth, async (req, res) => {
 });
 
 // @route   GET /api/verification/document
-// @desc    Verify document (Invoice, Letterhead, etc.) by ID and type
+// @desc    Verify document (Invoice) by ID and type
 // @access  Public
 router.get(
   "/document",
@@ -401,14 +402,14 @@ router.get(
           };
         }
       } else if (type === "letterhead") {
-        // Check if it's MongoDB ObjectId or Letter ID
+        // Check if it's MongoDB ObjectId or Letterhead ID
         if (id.match(/^[0-9a-fA-F]{24}$/)) {
           document = await Letterhead.findById(id).populate(
             "createdBy",
             "fullName email",
           );
         } else {
-          document = await Letterhead.findOne({ letterId: id }).populate(
+          document = await Letterhead.findOne({ letterheadId: id }).populate(
             "createdBy",
             "fullName email",
           );
@@ -416,16 +417,18 @@ router.get(
 
         if (document) {
           documentData = {
-            id: document.letterId,
+            id: document.letterheadId,
             type: "letterhead",
             title: document.title,
             letterType: document.letterType,
-            recipientName: document.recipientFullName,
+            recipientName: document.recipient.name,
+            recipientOrganization: document.recipient.organization,
             subject: document.subject,
-            date: document.createdAt,
+            issuerName: document.issuer.name,
+            issuerDesignation: document.issuer.designation,
+            issueDate: document.issueDate,
+            validUntil: document.validUntil,
             status: document.status,
-            hostName: document.host.name,
-            hostDesignation: document.host.designation,
             qrCodeData: document.qrCodeData,
             verified: true,
           };

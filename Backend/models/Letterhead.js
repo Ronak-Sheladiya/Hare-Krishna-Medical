@@ -3,117 +3,170 @@ const QRCode = require("qrcode");
 
 const letterheadSchema = new mongoose.Schema(
   {
-    letterId: {
+    letterheadId: {
       type: String,
       required: true,
       unique: true,
+    },
+    // Header Information (similar to invoice header)
+    header: {
+      companyName: {
+        type: String,
+        default: "Hare Krishna Medical Store",
+      },
+      companyAddress: {
+        type: String,
+        default: "123 Main Street, Healthcare District",
+      },
+      companyCity: {
+        type: String,
+        default: "Medical City, State 12345",
+      },
+      companyPhone: {
+        type: String,
+        default: "+91 98765 43210",
+      },
+      companyEmail: {
+        type: String,
+        default: "info@harekrishnamedical.com",
+      },
+      logo: {
+        type: String, // URL or base64 image
+        default: "",
+      },
+    },
+    // Letterhead Content
+    title: {
+      type: String,
+      required: [true, "Letterhead title is required"],
+      trim: true,
     },
     letterType: {
       type: String,
       required: true,
       enum: [
         "certificate",
-        "request",
-        "application",
-        "notice",
         "recommendation",
+        "authorization",
+        "notice",
+        "announcement",
+        "invitation",
+        "acknowledgment",
+        "verification",
       ],
+      default: "certificate",
     },
-    title: {
-      type: String,
-      required: true,
-    },
-    context: {
-      type: String,
-      required: true,
-      enum: ["respected", "dear", "to_whom_it_may_concern"],
-      default: "respected",
-    },
+    // Recipient Information
     recipient: {
-      prefix: {
-        type: String,
-        enum: ["Mr.", "Mrs.", "Ms.", "Dr.", "Prof.", "Hon.", "Company"],
-        default: "Mr.",
-      },
-      firstName: {
-        type: String,
-        required: true,
-      },
-      middleName: {
-        type: String,
-        default: "",
-      },
-      lastName: {
-        type: String,
-        required: true,
-      },
-      designation: String,
-      company: String,
-    },
-    subject: {
-      type: String,
-      required: true,
-    },
-    content: {
-      type: String,
-      required: true, // Rich text content
-    },
-    header: {
-      type: String,
-      default: "",
-    },
-    footer: {
-      type: String,
-      default: "",
-    },
-    host: {
       name: {
         type: String,
-        required: true,
+        required: [true, "Recipient name is required"],
+        trim: true,
       },
       designation: {
         type: String,
-        required: true,
+        trim: true,
       },
-      signature: String, // Base64 image or signature path
+      organization: {
+        type: String,
+        trim: true,
+      },
+      address: {
+        type: String,
+        trim: true,
+      },
     },
+    // Letter Content
+    subject: {
+      type: String,
+      required: [true, "Subject is required"],
+      trim: true,
+    },
+    content: {
+      type: String,
+      required: [true, "Letter content is required"],
+    },
+    // Issuer Information (similar to invoice issuer)
+    issuer: {
+      name: {
+        type: String,
+        required: [true, "Issuer name is required"],
+        trim: true,
+      },
+      designation: {
+        type: String,
+        required: [true, "Issuer designation is required"],
+        trim: true,
+      },
+      signature: {
+        type: String, // base64 image or URL
+        default: "",
+      },
+    },
+    // Footer Information (similar to invoice footer)
+    footer: {
+      terms: {
+        type: String,
+        default:
+          "This is an official document issued by Hare Krishna Medical Store. For verification, please contact us at the above details.",
+      },
+      additionalInfo: {
+        type: String,
+        default: "",
+      },
+    },
+    // Status and Metadata
     status: {
       type: String,
-      enum: ["draft", "finalized", "sent", "archived"],
+      enum: ["draft", "issued", "sent", "archived"],
       default: "draft",
     },
-    language: {
-      type: String,
-      enum: ["english", "hindi", "gujarati"],
-      default: "english",
+    issueDate: {
+      type: Date,
+      default: Date.now,
     },
-    qrCode: String,
-    qrCodeData: String,
-    letterUrl: String,
+    validUntil: {
+      type: Date,
+      default: function () {
+        return new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year from now
+      },
+    },
+    // QR Code and Verification (similar to invoice)
+    qrCode: {
+      type: String,
+    },
+    qrCodeData: {
+      type: String,
+    },
+    verificationUrl: {
+      type: String,
+    },
+    // Metadata
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    sentDate: Date,
-    notes: String,
-    attachments: [
+    tags: [
       {
-        name: String,
-        url: String,
-        size: Number,
         type: String,
+        trim: true,
       },
     ],
+    notes: {
+      type: String,
+      trim: true,
+    },
   },
   {
     timestamps: true,
   },
 );
 
-// Generate letter ID and QR code
+// Generate letterhead ID and QR code before saving
 letterheadSchema.pre("save", async function (next) {
-  if (!this.letterId) {
+  // Generate letterheadId if not exists
+  if (!this.letterheadId) {
     const year = new Date().getFullYear();
     const month = String(new Date().getMonth() + 1).padStart(2, "0");
     const day = String(new Date().getDate()).padStart(2, "0");
@@ -121,34 +174,32 @@ letterheadSchema.pre("save", async function (next) {
       .toString()
       .padStart(3, "0");
 
-    // Format: HK/[letter type]/[year][month][day][random]
-    const typeCode = this.letterType.substring(0, 3).toUpperCase();
-    this.letterId = `HK/${typeCode}/${year}${month}${day}${random}`;
+    // Format: HKMS/LH/YYYY/MM/DD/XXX
+    this.letterheadId = `HKMS/LH/${year}/${month}/${day}/${random}`;
   }
 
-  // Always generate/update QR code for letterhead
-  if (this.letterId) {
+  // Generate QR code for verification
+  if (this.letterheadId) {
     try {
-      // Create public verification URL for QR code
       const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-      const verificationUrl = `${frontendUrl}/verify-docs?id=${this.letterId}&type=letterhead`;
+      this.verificationUrl = `${frontendUrl}/verify-docs?id=${this.letterheadId}&type=letterhead`;
 
-      // Store comprehensive data for verification
+      // Create verification data
       this.qrCodeData = JSON.stringify({
-        letter_id: this.letterId,
+        letterhead_id: this.letterheadId,
         letter_type: this.letterType,
-        recipient_name: `${this.recipient.prefix} ${this.recipient.firstName} ${this.recipient.lastName}`,
+        recipient_name: this.recipient.name,
         subject: this.subject,
-        verification_url: verificationUrl,
-        generated_at: new Date().toISOString(),
-        company: "Hare Krishna Medical",
+        issue_date: this.issueDate,
+        verification_url: this.verificationUrl,
+        issued_by: this.issuer.name,
+        company: "Hare Krishna Medical Store",
         type: "letterhead_verification",
-        host: this.host.name,
       });
 
-      // Generate high-quality QR code with verification URL
-      this.qrCode = await QRCode.toDataURL(verificationUrl, {
-        width: 180,
+      // Generate QR code
+      this.qrCode = await QRCode.toDataURL(this.verificationUrl, {
+        width: 200,
         margin: 2,
         color: {
           dark: "#1a202c",
@@ -158,7 +209,6 @@ letterheadSchema.pre("save", async function (next) {
       });
     } catch (error) {
       console.error("QR Code generation error:", error);
-      // Don't fail the save if QR generation fails
       this.qrCode = null;
       this.qrCodeData = null;
     }
@@ -168,14 +218,14 @@ letterheadSchema.pre("save", async function (next) {
 });
 
 // Instance methods
-letterheadSchema.methods.markAsSent = function () {
-  this.status = "sent";
-  this.sentDate = new Date();
+letterheadSchema.methods.markAsIssued = function () {
+  this.status = "issued";
+  this.issueDate = new Date();
   return this.save();
 };
 
-letterheadSchema.methods.finalize = function () {
-  this.status = "finalized";
+letterheadSchema.methods.markAsSent = function () {
+  this.status = "sent";
   return this.save();
 };
 
@@ -184,51 +234,33 @@ letterheadSchema.methods.archive = function () {
   return this.save();
 };
 
-// Virtual for full recipient name
-letterheadSchema.virtual("recipientFullName").get(function () {
-  const parts = [this.recipient.prefix, this.recipient.firstName];
-  if (this.recipient.middleName) {
-    parts.push(this.recipient.middleName);
-  }
-  parts.push(this.recipient.lastName);
-  return parts.join(" ");
-});
-
-// Static methods for analytics
-letterheadSchema.statics.getLetterheadStats = async function () {
+// Static methods
+letterheadSchema.statics.getStats = async function () {
   const stats = await this.aggregate([
     {
       $group: {
         _id: null,
-        totalLetterheads: { $sum: 1 },
-        draftLetterheads: {
-          $sum: { $cond: [{ $eq: ["$status", "draft"] }, 1, 0] },
-        },
-        finalizedLetterheads: {
-          $sum: { $cond: [{ $eq: ["$status", "finalized"] }, 1, 0] },
-        },
-        sentLetterheads: {
-          $sum: { $cond: [{ $eq: ["$status", "sent"] }, 1, 0] },
-        },
-        archivedLetterheads: {
-          $sum: { $cond: [{ $eq: ["$status", "archived"] }, 1, 0] },
-        },
+        total: { $sum: 1 },
+        draft: { $sum: { $cond: [{ $eq: ["$status", "draft"] }, 1, 0] } },
+        issued: { $sum: { $cond: [{ $eq: ["$status", "issued"] }, 1, 0] } },
+        sent: { $sum: { $cond: [{ $eq: ["$status", "sent"] }, 1, 0] } },
+        archived: { $sum: { $cond: [{ $eq: ["$status", "archived"] }, 1, 0] } },
       },
     },
   ]);
 
   return (
     stats[0] || {
-      totalLetterheads: 0,
-      draftLetterheads: 0,
-      finalizedLetterheads: 0,
-      sentLetterheads: 0,
-      archivedLetterheads: 0,
+      total: 0,
+      draft: 0,
+      issued: 0,
+      sent: 0,
+      archived: 0,
     }
   );
 };
 
-letterheadSchema.statics.getLetterTypeStats = async function () {
+letterheadSchema.statics.getTypeStats = async function () {
   return await this.aggregate([
     {
       $group: {
@@ -242,7 +274,19 @@ letterheadSchema.statics.getLetterTypeStats = async function () {
   ]);
 };
 
-// Ensure virtual fields are serialized
+// Virtual for full recipient display
+letterheadSchema.virtual("recipientDisplay").get(function () {
+  let display = this.recipient.name;
+  if (this.recipient.designation) {
+    display += `, ${this.recipient.designation}`;
+  }
+  if (this.recipient.organization) {
+    display += ` (${this.recipient.organization})`;
+  }
+  return display;
+});
+
+// Ensure virtuals are serialized
 letterheadSchema.set("toJSON", { virtuals: true });
 
 module.exports = mongoose.model("Letterhead", letterheadSchema);
