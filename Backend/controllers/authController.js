@@ -110,6 +110,18 @@ class AuthController {
     try {
       const { email, password } = req.body;
 
+      // Use development fallback if database is not available
+      if (shouldUseFallback()) {
+        console.log("🔄 Using development fallback for login");
+        const result = await devAuth.login(email, password);
+
+        return res.json({
+          message: "Login successful (Development Mode)",
+          token: result.token,
+          user: result.user,
+        });
+      }
+
       // Check database connectivity
       this.checkDBConnection();
 
