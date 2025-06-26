@@ -464,7 +464,7 @@ const AddLetterhead = () => {
           color: #333;
         }
 
-        .email-template {
+        .letterhead-template {
           background: white;
           width: 100%;
           max-width: 800px;
@@ -473,26 +473,29 @@ const AddLetterhead = () => {
           font-size: 14px;
           line-height: 1.6;
           color: #333;
-          border: 1px solid #ddd;
-          border-radius: 8px;
+          border: 2px solid #dc3545;
+          border-radius: 0;
           overflow: hidden;
+          page-break-inside: avoid;
         }
 
-        .email-header {
+        .letterhead-header {
           background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%);
           color: white;
           padding: 2rem;
           text-align: center;
+          border-bottom: 3px solid #dc3545;
         }
 
-        .email-body {
-          padding: 2rem;
+        .letterhead-content {
+          padding: 2.5rem;
+          min-height: 400px;
         }
 
-        .email-footer {
+        .letterhead-footer {
           background: #f8f9fa;
           padding: 1.5rem 2rem;
-          border-top: 1px solid #dee2e6;
+          border-top: 2px solid #dc3545;
           font-size: 12px;
           color: #6c757d;
           text-align: center;
