@@ -1412,8 +1412,8 @@ const AddLetterhead = () => {
                         </div>
                       </div>
                       <div style={{ fontSize: "10px", color: "#999" }}>
-                        This is a computer-generated professional letterhead. QR
-                        code verification available.
+                        This is a computer-generated letterhead. QR code
+                        verification available.
                       </div>
                     </div>
                   </div>
