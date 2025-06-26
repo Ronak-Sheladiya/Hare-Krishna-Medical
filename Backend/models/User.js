@@ -70,7 +70,6 @@ const userSchema = new mongoose.Schema(
     preferences: {
       notifications: {
         email: { type: Boolean, default: true },
-        sms: { type: Boolean, default: true },
       },
       newsletter: { type: Boolean, default: false },
     },
