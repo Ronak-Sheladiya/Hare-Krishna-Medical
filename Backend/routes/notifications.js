@@ -267,9 +267,7 @@ const addNotification = (
   return createNotification(type, title, message, actionUrl, metadata);
 };
 
-// Export the router and helper function
-module.exports = {
-  router,
-  addNotification,
-  createNotification,
-};
+// Export the router as default, and helper functions as properties
+module.exports = router;
+module.exports.addNotification = addNotification;
+module.exports.createNotification = createNotification;
