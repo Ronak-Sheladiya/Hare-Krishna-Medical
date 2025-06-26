@@ -1351,8 +1351,8 @@ const AddLetterhead = () => {
 
                   <div className="mt-3 text-center">
                     <span className="badge-professional">
-                      <i className="bi bi-envelope-check me-1"></i>
-                      Email-Ready Template
+                      <i className="bi bi-file-text-check me-1"></i>
+                      Official Document Template
                     </span>
                   </div>
                 </div>
