@@ -258,7 +258,7 @@ export const refreshHelpers = {
       "analytics",
       "messages",
       "invoices",
-
+      "letterheads",
       "dashboard",
       "profile",
     ];
