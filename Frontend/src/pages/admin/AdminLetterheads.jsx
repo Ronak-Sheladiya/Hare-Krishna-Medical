@@ -943,101 +943,15 @@ const AdminLetterheads = () => {
           </Modal.Header>
           <Modal.Body>
             {selectedLetterhead && (
-              <Row>
-                <Col md={6}>
-                  <h6 className="fw-bold text-danger mb-3">
-                    Basic Information
-                  </h6>
-                  <div className="mb-2">
-                    <strong>Letter ID:</strong>
-                    <code className="ms-2 bg-light px-2 py-1 rounded">
-                      {selectedLetterhead.letterId}
-                    </code>
-                  </div>
-                  <div className="mb-2">
-                    <strong>Type:</strong>{" "}
-                    <span className="ms-2">
-                      {getTypeBadge(selectedLetterhead.letterType)}
-                    </span>
-                  </div>
-                  <div className="mb-2">
-                    <strong>Title:</strong> {selectedLetterhead.title}
-                  </div>
-                  <div className="mb-2">
-                    <strong>Status:</strong>{" "}
-                    <span className="ms-2">
-                      {getStatusBadge(selectedLetterhead.status)}
-                    </span>
-                  </div>
-                  <div className="mb-2">
-                    <strong>Language:</strong> {selectedLetterhead.language}
-                  </div>
-                </Col>
-                <Col md={6}>
-                  <h6 className="fw-bold text-danger mb-3">
-                    Recipient Information
-                  </h6>
-                  <div className="mb-2">
-                    <strong>Name:</strong>{" "}
-                    {selectedLetterhead.recipientFullName}
-                  </div>
-                  {selectedLetterhead.recipient?.designation && (
-                    <div className="mb-2">
-                      <strong>Designation:</strong>{" "}
-                      {selectedLetterhead.recipient.designation}
-                    </div>
-                  )}
-                  {selectedLetterhead.recipient?.company && (
-                    <div className="mb-2">
-                      <strong>Company:</strong>{" "}
-                      {selectedLetterhead.recipient.company}
-                    </div>
-                  )}
-                </Col>
-                <Col md={12} className="mt-3">
-                  <h6 className="fw-bold text-danger mb-3">Content</h6>
-                  <div className="mb-3">
-                    <strong>Subject:</strong> {selectedLetterhead.subject}
-                  </div>
-                  <div
-                    className="border rounded p-3 bg-light"
-                    style={{ maxHeight: "200px", overflowY: "auto" }}
-                  >
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: selectedLetterhead.content,
-                      }}
-                    />
-                  </div>
-                </Col>
-                <Col md={6} className="mt-3">
-                  <h6 className="fw-bold text-danger mb-3">Host Information</h6>
-                  <div className="mb-2">
-                    <strong>Name:</strong> {selectedLetterhead.host?.name}
-                  </div>
-                  <div className="mb-2">
-                    <strong>Designation:</strong>{" "}
-                    {selectedLetterhead.host?.designation}
-                  </div>
-                </Col>
-                <Col md={6} className="mt-3">
-                  <h6 className="fw-bold text-danger mb-3">Metadata</h6>
-                  <div className="mb-2">
-                    <strong>Created:</strong>{" "}
-                    {formatDateTime(selectedLetterhead.createdAt)}
-                  </div>
-                  <div className="mb-2">
-                    <strong>Created By:</strong>{" "}
-                    {selectedLetterhead.createdBy?.fullName}
-                  </div>
-                  {selectedLetterhead.sentDate && (
-                    <div className="mb-2">
-                      <strong>Sent Date:</strong>{" "}
-                      {formatDateTime(selectedLetterhead.sentDate)}
-                    </div>
-                  )}
-                </Col>
-              </Row>
+              <OfficialLetterheadDesign
+                letterheadData={selectedLetterhead}
+                qrCode={selectedLetterhead.qrCode}
+                showActionButtons={true}
+                onPrint={() => {
+                  // The print functionality is handled by the component
+                }}
+                onDownload={() => handleDownloadPDF(selectedLetterhead._id)}
+              />
             )}
           </Modal.Body>
           <Modal.Footer>
