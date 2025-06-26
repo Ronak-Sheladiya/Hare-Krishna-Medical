@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Row,
@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../store/slices/cartSlice";
 import { setFeaturedProducts } from "../store/slices/productsSlice";
 import { api, safeApiCall } from "../utils/apiClient";
+import QRCameraScanner from "../components/common/QRCameraScanner";
 
 const Home = () => {
   const dispatch = useDispatch();
