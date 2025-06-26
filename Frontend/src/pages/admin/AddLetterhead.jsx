@@ -1454,7 +1454,7 @@ const AddLetterhead = () => {
                     dangerouslySetInnerHTML={{
                       __html:
                         formData.content ||
-                        "Your professional email content will appear here...",
+                        "Your professional letterhead content will appear here...",
                     }}
                   />
                 </div>
