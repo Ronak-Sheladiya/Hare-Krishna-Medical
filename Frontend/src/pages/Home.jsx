@@ -81,6 +81,18 @@ const Home = () => {
           position: "relative",
           display: "flex",
           alignItems: "center",
+          transition: "all 0.6s ease",
+          cursor: "default",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background =
+            "linear-gradient(135deg, #e3e6ea 0%, #f1f3f5 50%, #fafbfc 100%)";
+          e.currentTarget.style.transform = "scale(1.002)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background =
+            "linear-gradient(135deg, #e9ecef 0%, #f8f9fa 50%, #ffffff 100%)";
+          e.currentTarget.style.transform = "scale(1)";
         }}
       >
         <div
