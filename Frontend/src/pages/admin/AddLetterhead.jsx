@@ -697,8 +697,8 @@ const AddLetterhead = () => {
               </h1>
               <p className="lead opacity-90">
                 {isEditing
-                  ? "Update your letterhead with professional formatting and responsive email design"
-                  : "Design professional letterheads with our advanced email-ready editor"}
+                  ? "Update your letterhead with proper formatting and design"
+                  : "Design letterheads with our advanced editor"}
               </p>
             </div>
           </Container>
