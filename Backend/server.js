@@ -32,7 +32,7 @@ app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
-  })
+  }),
 );
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
@@ -48,10 +48,14 @@ app.use("/api/", limiter);
 // ✅ Database Connection
 // ==========================
 mongoose
-  .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/Hare_Krishna_Medical_db", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(
+    process.env.MONGODB_URI ||
+      "mongodb://localhost:27017/Hare_Krishna_Medical_db",
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    },
+  )
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
@@ -68,6 +72,7 @@ app.use("/api/messages", require("./routes/messages"));
 app.use("/api/analytics", require("./routes/analytics"));
 app.use("/api/upload", require("./routes/upload"));
 app.use("/api/verification", require("./routes/verification"));
+app.use("/api/admin/notifications", require("./routes/notifications").router);
 
 // ==========================
 // ✅ Health Check Route
@@ -117,7 +122,10 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
     message: "Something went wrong!",
-    error: process.env.NODE_ENV === "development" ? err.message : "Internal Server Error",
+    error:
+      process.env.NODE_ENV === "development"
+        ? err.message
+        : "Internal Server Error",
   });
 });
 
