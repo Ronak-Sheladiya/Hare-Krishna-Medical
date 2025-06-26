@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Row,
@@ -14,11 +14,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../store/slices/cartSlice";
 import { setFeaturedProducts } from "../store/slices/productsSlice";
 import { api, safeApiCall } from "../utils/apiClient";
+import QRCameraScanner from "../components/common/QRCameraScanner";
 
 const Home = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { featuredProducts } = useSelector((state) => state.products);
+  const [showQRScanner, setShowQRScanner] = useState(false);
 
   // Fetch featured products from API
   const fetchFeaturedProducts = async () => {
@@ -53,6 +55,14 @@ const Home = () => {
     navigate(`/products/${productId}`);
   };
 
+  const handleQRScanSuccess = (invoiceId) => {
+    navigate(`/verify/${invoiceId}`);
+  };
+
+  const handleQRScanError = (error) => {
+    console.error("QR Scan Error:", error);
+  };
+
   useEffect(() => {
     fetchFeaturedProducts();
   }, [dispatch]);
@@ -71,9 +81,22 @@ const Home = () => {
           position: "relative",
           display: "flex",
           alignItems: "center",
+          transition: "all 0.6s ease",
+          cursor: "default",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background =
+            "linear-gradient(135deg, #e3e6ea 0%, #f1f3f5 50%, #fafbfc 100%)";
+          e.currentTarget.style.transform = "scale(1.002)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background =
+            "linear-gradient(135deg, #e9ecef 0%, #f8f9fa 50%, #ffffff 100%)";
+          e.currentTarget.style.transform = "scale(1)";
         }}
       >
         <div
+          className="hero-pattern"
           style={{
             position: "absolute",
             top: 0,
@@ -82,6 +105,18 @@ const Home = () => {
             bottom: 0,
             background:
               "repeating-linear-gradient(45deg, transparent, transparent 100px, rgba(230, 57, 70, 0.05) 100px, rgba(230, 57, 70, 0.05) 200px)",
+            transition: "all 0.6s ease",
+            opacity: 1,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background =
+              "repeating-linear-gradient(45deg, transparent, transparent 100px, rgba(230, 57, 70, 0.08) 100px, rgba(230, 57, 70, 0.08) 200px)";
+            e.currentTarget.style.opacity = "0.9";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background =
+              "repeating-linear-gradient(45deg, transparent, transparent 100px, rgba(230, 57, 70, 0.05) 100px, rgba(230, 57, 70, 0.05) 200px)";
+            e.currentTarget.style.opacity = "1";
           }}
         ></div>
 
@@ -92,26 +127,83 @@ const Home = () => {
               className="mb-4 mb-lg-0"
               style={{ paddingRight: "1rem" }}
             >
-              <div className="hero-content">
+              <div
+                className="hero-content"
+                style={{
+                  transition: "all 0.4s ease",
+                }}
+                onMouseEnter={(e) => {
+                  const title = e.currentTarget.querySelector(".hero-title");
+                  const subtitle =
+                    e.currentTarget.querySelector(".hero-subtitle");
+                  if (title) {
+                    title.style.transform = "translateY(-5px)";
+                    title.style.textShadow = "0 5px 15px rgba(51, 51, 51, 0.1)";
+                  }
+                  if (subtitle) {
+                    subtitle.style.transform = "translateY(-3px)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  const title = e.currentTarget.querySelector(".hero-title");
+                  const subtitle =
+                    e.currentTarget.querySelector(".hero-subtitle");
+                  if (title) {
+                    title.style.transform = "translateY(0)";
+                    title.style.textShadow = "none";
+                  }
+                  if (subtitle) {
+                    subtitle.style.transform = "translateY(0)";
+                  }
+                }}
+              >
                 <h1
+                  className="hero-title"
                   style={{
                     color: "#333333",
                     fontSize: "3.5rem",
                     fontWeight: "800",
                     lineHeight: "1.1",
                     marginBottom: "24px",
+                    transition: "all 0.4s ease",
                   }}
                 >
                   Your Health, <br />
-                  <span style={{ color: "#e63946" }}>Our Priority</span>
+                  <span
+                    style={{
+                      color: "#e63946",
+                      transition: "all 0.4s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.color = "#dc3545";
+                      e.target.style.textShadow =
+                        "0 3px 10px rgba(230, 57, 70, 0.3)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.color = "#e63946";
+                      e.target.style.textShadow = "none";
+                    }}
+                  >
+                    Our Priority
+                  </span>
                 </h1>
                 <p
+                  className="hero-subtitle"
                   style={{
                     color: "#495057",
                     fontSize: "1.2rem",
                     lineHeight: "1.6",
                     marginBottom: "32px",
                     maxWidth: "500px",
+                    transition: "all 0.4s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.color = "#343a40";
+                    e.target.style.transform = "translateX(5px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.color = "#495057";
+                    e.target.style.transform = "translateX(0)";
                   }}
                 >
                   Quality medical products with professional service. Get
@@ -738,8 +830,7 @@ const Home = () => {
                         e.target.style.transform = "translateY(0)";
                         e.target.style.boxShadow = "none";
                       }}
-                      as={Link}
-                      to="/verify"
+                      onClick={() => setShowQRScanner(true)}
                     >
                       <i className="bi bi-qr-code-scan me-1"></i>
                       Scan QR
@@ -838,6 +929,14 @@ const Home = () => {
           </Row>
         </Container>
       </section>
+
+      {/* QR Camera Scanner Modal */}
+      <QRCameraScanner
+        show={showQRScanner}
+        onHide={() => setShowQRScanner(false)}
+        onScanSuccess={handleQRScanSuccess}
+        onScanError={handleQRScanError}
+      />
     </div>
   );
 };
