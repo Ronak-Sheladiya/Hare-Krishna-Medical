@@ -435,8 +435,8 @@ class MessagesController {
       const io = req.app.get("io");
       if (io) {
         io.to("admin-room").emit("message-responded", {
-          messageId: message.id,
-          respondedBy: req.user.fullName,
+          messageId: message._id,
+          respondedBy: req.user ? req.user.fullName : "Admin",
           respondedAt: message.respondedAt,
         });
       }
@@ -445,7 +445,7 @@ class MessagesController {
         success: true,
         message: "Response sent successfully",
         data: {
-          id: message.id,
+          id: message._id,
           status: message.status,
           response: message.response,
           respondedAt: message.respondedAt,
