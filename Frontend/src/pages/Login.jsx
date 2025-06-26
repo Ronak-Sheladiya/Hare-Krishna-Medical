@@ -39,6 +39,19 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
 
+  // Handle prefilled email from registration
+  useEffect(() => {
+    const prefilledEmail = sessionStorage.getItem("prefillEmail");
+    if (prefilledEmail) {
+      setFormData((prev) => ({
+        ...prev,
+        emailOrMobile: prefilledEmail,
+      }));
+      // Clear the stored email
+      sessionStorage.removeItem("prefillEmail");
+    }
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
