@@ -75,12 +75,13 @@ export const apiCall = async (endpoint, options = {}) => {
 
         // Add authentication token if available
         try {
-          const token = localStorage.getItem("token");
+          const token =
+            localStorage.getItem("token") || sessionStorage.getItem("token");
           if (token) {
             config.headers.Authorization = `Bearer ${token}`;
           }
         } catch (e) {
-          // Ignore localStorage errors
+          // Ignore localStorage/sessionStorage errors
         }
 
         // Create abort controller for timeout
