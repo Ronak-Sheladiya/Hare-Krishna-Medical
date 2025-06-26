@@ -3,7 +3,7 @@ const router = express.Router();
 const letterheadController = require("../controllers/letterheadController");
 const { auth, adminAuth } = require("../middleware/auth");
 const { body, param, query } = require("express-validator");
-const validate = require("../middleware/validate");
+const { handleValidationErrors } = require("../middleware/validate");
 
 // Validation middleware
 const validateLetterheadId = [
