@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const letterheadController = require("../controllers/letterheadController");
-const auth = require("../middleware/auth");
+const { auth, adminAuth } = require("../middleware/auth");
 const { body, param, query } = require("express-validator");
 const validate = require("../middleware/validate");
 
