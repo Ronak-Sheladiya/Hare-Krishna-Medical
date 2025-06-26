@@ -924,7 +924,7 @@ const AddLetterhead = () => {
                     <Card.Header>
                       <h5 className="mb-0">
                         <i className="bi bi-file-text me-2"></i>
-                        Professional Email Content
+                        Professional Document Content
                       </h5>
                     </Card.Header>
                     <Card.Body className="p-4">
