@@ -1081,7 +1081,7 @@ const AddLetterhead = () => {
                             name="footer"
                             value={formData.footer}
                             onChange={handleInputChange}
-                            placeholder="Footer content (appears at the bottom of the letterhead email)"
+                            placeholder="Footer content (appears at the bottom of the letterhead document)"
                             className="letterhead-form-control"
                           />
                           <Form.Text className="text-muted">
