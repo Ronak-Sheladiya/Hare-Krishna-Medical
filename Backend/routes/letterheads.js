@@ -173,7 +173,7 @@ router.get(
   "/:id/pdf",
   adminAuth,
   validateLetterheadId,
-  validate,
+  handleValidationErrors,
   letterheadController.generateLetterheadPDF,
 );
 
