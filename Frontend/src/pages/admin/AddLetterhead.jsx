@@ -1218,7 +1218,7 @@ const AddLetterhead = () => {
                 <div className="preview-panel">
                   <h6 className="fw-bold mb-3 text-center text-danger">
                     <i className="bi bi-eye me-2"></i>
-                    Live Email Preview
+                    Live Letterhead Preview
                   </h6>
 
                   <div className="email-template">
