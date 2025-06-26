@@ -861,52 +861,6 @@ const AddLetterhead = () => {
                       </h5>
                     </Card.Header>
                     <Card.Body className="p-4">
-                  <div className="letterhead-template">
-                    <div className="letterhead-header">
-                      <h4
-                        style={{
-                          margin: 0,
-                          fontSize: "20px",
-                          fontWeight: "bold",
-                          letterSpacing: "1px",
-                        }}
-                      >
-                        HARE KRISHNA MEDICAL STORE
-                      </h4>
-                      <div style={{ fontSize: "12px", marginTop: "1rem" }}>
-                        3 Sahyog Complex, Man Sarovar circle, Amroli, 394107,
-                        Gujarat
-                      </div>
-                      <div style={{ fontSize: "12px" }}>
-                        Phone: +91 76989 13354 | Email: hkmedicalamroli@gmail.com
-                      </div>
-                      <div style={{ fontSize: "12px", marginTop: "0.5rem" }}>
-                        GST No: 24XXXXX1234Z1Z5 | Drug License: GJ-XXX-XXX
-                      </div>
-                      {formData.title && (
-                        <div
-                          style={{
-                            fontSize: "16px",
-                            fontWeight: "600",
-                            marginTop: "1.5rem",
-                            padding: "1rem",
-                            background: "rgba(255,255,255,0.2)",
-                            borderRadius: "8px",
-                          }}
-                        >
-                          {formData.title}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="letterhead-content"
-                                required
-                              />
-                            </Form.Group>
-                          </Col>
-                        </Row>
-                      </div>
-
                       <div className="form-section">
                         <h6 className="section-title">Professional Details</h6>
                         <Row>
