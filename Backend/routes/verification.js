@@ -2,8 +2,10 @@ const express = require("express");
 const crypto = require("crypto");
 const User = require("../models/User");
 const Verification = require("../models/Verification");
+const Invoice = require("../models/Invoice");
+const Letterhead = require("../models/Letterhead");
 const { auth } = require("../middleware/auth");
-const { body, validationResult } = require("express-validator");
+const { body, validationResult, query } = require("express-validator");
 const emailService = require("../utils/emailService");
 
 const router = express.Router();
@@ -343,5 +345,117 @@ router.post("/resend-email", auth, async (req, res) => {
     });
   }
 });
+
+// @route   GET /api/verification/document
+// @desc    Verify document (Invoice, Letterhead, etc.) by ID and type
+// @access  Public
+router.get(
+  "/document",
+  [
+    query("id").notEmpty().withMessage("Document ID is required"),
+    query("type")
+      .isIn(["invoice", "letterhead"])
+      .withMessage("Document type must be invoice or letterhead"),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: errors.array(),
+        });
+      }
+
+      const { id, type } = req.query;
+      let document = null;
+      let documentData = {};
+
+      if (type === "invoice") {
+        // Check if it's MongoDB ObjectId or Invoice ID
+        if (id.match(/^[0-9a-fA-F]{24}$/)) {
+          document = await Invoice.findById(id).populate(
+            "user",
+            "fullName email",
+          );
+        } else {
+          document = await Invoice.findOne({ invoiceId: id }).populate(
+            "user",
+            "fullName email",
+          );
+        }
+
+        if (document) {
+          documentData = {
+            id: document.invoiceId,
+            type: "invoice",
+            title: `Invoice ${document.invoiceId}`,
+            customerName: document.customerDetails?.fullName || "N/A",
+            amount: document.total,
+            date: document.invoiceDate,
+            status: document.status,
+            paymentStatus: document.paymentStatus,
+            qrCodeData: document.qrCodeData,
+            verified: true,
+          };
+        }
+      } else if (type === "letterhead") {
+        // Check if it's MongoDB ObjectId or Letter ID
+        if (id.match(/^[0-9a-fA-F]{24}$/)) {
+          document = await Letterhead.findById(id).populate(
+            "createdBy",
+            "fullName email",
+          );
+        } else {
+          document = await Letterhead.findOne({ letterId: id }).populate(
+            "createdBy",
+            "fullName email",
+          );
+        }
+
+        if (document) {
+          documentData = {
+            id: document.letterId,
+            type: "letterhead",
+            title: document.title,
+            letterType: document.letterType,
+            recipientName: document.recipientFullName,
+            subject: document.subject,
+            date: document.createdAt,
+            status: document.status,
+            hostName: document.host.name,
+            hostDesignation: document.host.designation,
+            qrCodeData: document.qrCodeData,
+            verified: true,
+          };
+        }
+      }
+
+      if (!document) {
+        return res.status(404).json({
+          success: false,
+          message: `${type.charAt(0).toUpperCase() + type.slice(1)} not found`,
+          verified: false,
+        });
+      }
+
+      res.json({
+        success: true,
+        verified: true,
+        document: documentData,
+        message: `${type.charAt(0).toUpperCase() + type.slice(1)} verified successfully`,
+      });
+    } catch (error) {
+      console.error("Document verification error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Document verification failed",
+        error: error.message,
+        verified: false,
+      });
+    }
+  },
+);
 
 module.exports = router;

@@ -57,6 +57,9 @@ import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminMessages from "./pages/admin/AdminMessages";
 import AdminInvoices from "./pages/admin/AdminInvoices";
 import AdminPaymentMethods from "./pages/admin/AdminPaymentMethods";
+import AdminLetterheads from "./pages/admin/AdminLetterheads";
+import AddLetterhead from "./pages/admin/AddLetterhead";
+import VerifyDocs from "./pages/VerifyDocs";
 
 // User
 import UserDashboard from "./pages/UserDashboard";
@@ -189,6 +192,7 @@ function App() {
             <Route path="/invoice/:invoiceId" element={<InvoiceView />} />
             <Route path="/verify/:invoiceId" element={<InvoiceVerify />} />
             <Route path="/verify" element={<InvoiceVerify />} />
+            <Route path="/verify-docs" element={<VerifyDocs />} />
             <Route path="/user-guide" element={<UserGuide />} />
             <Route path="/backend-docs" element={<BackendDocs />} />
             <Route path="/localsetup-guide" element={<LocalSetupGuide />} />
@@ -286,6 +290,30 @@ function App() {
               element={
                 <ProtectedRoute adminOnly>
                   <AdminPaymentMethods />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/letterheads"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminLetterheads />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/letterheads/add"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AddLetterhead />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/letterheads/edit/:id"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AddLetterhead />
                 </ProtectedRoute>
               }
             />

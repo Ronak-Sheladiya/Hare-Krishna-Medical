@@ -16,6 +16,7 @@ import {
 } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { updateUser } from "../../store/slices/authSlice";
+import { api } from "../../utils/apiClient";
 import {
   PageHeroSection,
   ThemeCard,
@@ -132,24 +133,48 @@ const UserProfile = () => {
     setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Prepare profile data for API
+      const profileData = {
+        fullName: personalInfo.fullName,
+        mobile: personalInfo.mobile,
+        dateOfBirth: personalInfo.dateOfBirth,
+        gender: personalInfo.gender,
+        profileImage: personalInfo.profileImage,
+      };
 
-      // Update Redux store with new user data including profile image
-      dispatch(
-        updateUser({
-          name: personalInfo.fullName,
-          fullName: personalInfo.fullName,
-          mobile: personalInfo.mobile,
-          dateOfBirth: personalInfo.dateOfBirth,
-          gender: personalInfo.gender,
-          profileImage: personalInfo.profileImage,
-        }),
-      );
+      // Make actual API call to update profile
+      const result = await api.put("/api/auth/update-profile", profileData);
 
-      showAlert("Personal information updated successfully!", "success");
+      if (result.success !== false) {
+        // Update Redux store with new user data
+        dispatch(
+          updateUser({
+            name: personalInfo.fullName,
+            fullName: personalInfo.fullName,
+            mobile: personalInfo.mobile,
+            dateOfBirth: personalInfo.dateOfBirth,
+            gender: personalInfo.gender,
+            profileImage: personalInfo.profileImage,
+          }),
+        );
+
+        // Trigger real-time sync event for other components
+        window.dispatchEvent(
+          new CustomEvent("profileUpdated", {
+            detail: profileData,
+          }),
+        );
+
+        showAlert("Personal information updated successfully!", "success");
+      } else {
+        throw new Error(result.error || "Failed to update profile");
+      }
     } catch (error) {
-      showAlert("Failed to update information. Please try again.", "danger");
+      console.error("Profile update error:", error);
+      showAlert(
+        error.message || "Failed to update information. Please try again.",
+        "danger",
+      );
     } finally {
       setLoading(false);
     }
@@ -160,11 +185,36 @@ const UserProfile = () => {
     setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      showAlert("Address updated successfully!", "success");
+      // Make actual API call to update address
+      const result = await api.put("/api/auth/update-profile", {
+        address: addressInfo,
+      });
+
+      if (result.success !== false) {
+        // Update Redux store with new address data
+        dispatch(
+          updateUser({
+            address: addressInfo,
+          }),
+        );
+
+        // Trigger real-time sync event
+        window.dispatchEvent(
+          new CustomEvent("profileUpdated", {
+            detail: { address: addressInfo },
+          }),
+        );
+
+        showAlert("Address updated successfully!", "success");
+      } else {
+        throw new Error(result.error || "Failed to update address");
+      }
     } catch (error) {
-      showAlert("Failed to update address. Please try again.", "danger");
+      console.error("Address update error:", error);
+      showAlert(
+        error.message || "Failed to update address. Please try again.",
+        "danger",
+      );
     } finally {
       setLoading(false);
     }
@@ -186,17 +236,29 @@ const UserProfile = () => {
     setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
+      // Make actual API call to change password
+      const result = await api.put("/api/auth/change-password", {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
       });
-      setShowPasswordModal(false);
-      showAlert("Password changed successfully!", "success");
+
+      if (result.success !== false) {
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+        setShowPasswordModal(false);
+        showAlert("Password changed successfully!", "success");
+      } else {
+        throw new Error(result.error || "Failed to change password");
+      }
     } catch (error) {
-      showAlert("Failed to change password. Please try again.", "danger");
+      console.error("Password change error:", error);
+      showAlert(
+        error.message || "Failed to change password. Please try again.",
+        "danger",
+      );
     } finally {
       setLoading(false);
     }
