@@ -292,74 +292,151 @@ class LetterheadController {
     const pageHeight = doc.page.height;
     const margin = 50;
 
-    // Header section
-    if (letterhead.header) {
-      doc
-        .fontSize(12)
-        .font("Times-Roman")
-        .text(letterhead.header, margin, margin, {
-          width: pageWidth - 2 * margin,
-          align: "center",
-        });
+    // Red theme colors
+    const redColor = "#e63946";
+    const lightRed = "#fff5f5";
 
-      doc.moveDown(1);
-    }
+    // Header with red background
+    doc.rect(0, 0, pageWidth, 120).fill(redColor);
 
-    // Company Header
+    // Company Header in white text
     doc
-      .fontSize(16)
+      .fontSize(20)
       .font("Times-Bold")
-      .text("HARE KRISHNA MEDICAL", margin, doc.y, {
-        width: pageWidth - 2 * margin,
+      .fillColor("white")
+      .text("HARE KRISHNA MEDICAL STORE", margin, 30, {
+        width: pageWidth - 2 * margin - 100, // Leave space for QR code
         align: "center",
       });
 
-    doc.moveDown(0.5);
+    doc
+      .fontSize(10)
+      .font("Times-Roman")
+      .text(
+        "3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat",
+        margin,
+        55,
+        {
+          width: pageWidth - 2 * margin - 100,
+          align: "center",
+        },
+      );
 
-    // QR Code (left side)
+    doc.text(
+      "Phone: +91 76989 13354 | Email: hkmedicalamroli@gmail.com",
+      margin,
+      70,
+      {
+        width: pageWidth - 2 * margin - 100,
+        align: "center",
+      },
+    );
+
+    doc.text("GST No: 24XXXXX1234Z1Z5 | Drug License: GJ-XXX-XXX", margin, 85, {
+      width: pageWidth - 2 * margin - 100,
+      align: "center",
+    });
+
+    // QR Code (top-right)
     if (letterhead.qrCode) {
       try {
         const qrBuffer = Buffer.from(letterhead.qrCode.split(",")[1], "base64");
-        doc.image(qrBuffer, margin, doc.y, { width: 80, height: 80 });
+        doc.image(qrBuffer, pageWidth - 130, 20, { width: 80, height: 80 });
       } catch (error) {
         console.error("QR Code insertion error:", error);
       }
     }
 
-    // Reference number (right side)
+    // Header content
+    if (letterhead.header) {
+      doc
+        .fontSize(12)
+        .font("Times-Bold")
+        .fillColor("white")
+        .text(letterhead.header, margin, 100, {
+          width: pageWidth - 2 * margin,
+          align: "center",
+        });
+    }
+
+    // Reset text color to black
+    doc.fillColor("black");
+
+    // Reference and Date section (right-aligned)
+    const startY = 140;
     doc
       .fontSize(12)
-      .font("Times-Roman")
-      .text(`Ref: ${letterhead.letterId}`, pageWidth - 200, doc.y - 60, {
+      .font("Times-Bold")
+      .fillColor(redColor)
+      .text(`Ref: ${letterhead.letterId}`, pageWidth - 200, startY, {
         width: 150,
         align: "right",
       });
 
-    // Date
     doc.text(
-      `Date: ${new Date().toLocaleDateString("en-GB")}`,
+      `Date: ${new Date(letterhead.createdAt).toLocaleDateString("en-GB")}`,
       pageWidth - 200,
-      doc.y + 20,
+      startY + 15,
       {
         width: 150,
         align: "right",
       },
     );
 
-    doc.moveDown(2);
+    // Letter meta information box
+    doc.fillColor("black");
+    doc.rect(margin, startY + 40, pageWidth - 2 * margin, 60).fill(lightRed);
+    doc.rect(margin, startY + 40, pageWidth - 2 * margin, 60).stroke(redColor);
 
-    // Title
     doc
-      .fontSize(14)
+      .fontSize(11)
       .font("Times-Bold")
-      .text(letterhead.title, margin, doc.y, {
-        width: pageWidth - 2 * margin,
-        align: "center",
+      .fillColor(redColor)
+      .text("Letter Type:", margin + 10, startY + 50)
+      .font("Times-Roman")
+      .fillColor("black")
+      .text(
+        letterhead.letterType.charAt(0).toUpperCase() +
+          letterhead.letterType.slice(1),
+        margin + 80,
+        startY + 50,
+      );
+
+    doc
+      .font("Times-Bold")
+      .fillColor(redColor)
+      .text("Subject:", margin + 10, startY + 65)
+      .font("Times-Roman")
+      .fillColor("black")
+      .text(letterhead.subject, margin + 60, startY + 65, {
+        width: pageWidth - 2 * margin - 70,
       });
 
-    doc.moveDown(1.5);
+    doc
+      .font("Times-Bold")
+      .fillColor(redColor)
+      .text("To:", pageWidth - 200, startY + 50)
+      .font("Times-Roman")
+      .fillColor("black")
+      .text(letterhead.recipientFullName, pageWidth - 180, startY + 50, {
+        width: 160,
+      });
 
-    // Context and Recipient
+    if (letterhead.recipient.designation) {
+      doc
+        .font("Times-Bold")
+        .fillColor(redColor)
+        .text("Designation:", pageWidth - 200, startY + 65)
+        .font("Times-Roman")
+        .fillColor("black")
+        .text(letterhead.recipient.designation, pageWidth - 130, startY + 65, {
+          width: 110,
+        });
+    }
+
+    doc.y = startY + 120;
+
+    // Context and greeting
     const contextText = {
       respected: "Respected",
       dear: "Dear",
@@ -368,37 +445,21 @@ class LetterheadController {
 
     doc
       .fontSize(12)
-      .font("Times-Roman")
+      .font("Times-Bold")
+      .fillColor("black")
       .text(
         `${contextText[letterhead.context]} ${letterhead.recipientFullName},`,
         margin,
       );
 
-    if (letterhead.recipient.designation) {
-      doc.text(letterhead.recipient.designation, margin);
-    }
-
-    if (letterhead.recipient.company) {
-      doc.text(letterhead.recipient.company, margin);
-    }
-
-    doc.moveDown(1);
-
-    // Subject
-    doc
-      .font("Times-Bold")
-      .text("Subject: ", margin, doc.y, { continued: true })
-      .font("Times-Roman")
-      .text(letterhead.subject);
-
     doc.moveDown(1);
 
     // Main content
-    // Strip HTML tags and handle basic formatting
     const cleanContent = letterhead.content
       .replace(/<br\s*\/?>/gi, "\n")
       .replace(/<\/p>/gi, "\n\n")
-      .replace(/<[^>]*>/g, "");
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ");
 
     doc
       .fontSize(12)
@@ -406,38 +467,82 @@ class LetterheadController {
       .text(cleanContent, margin, doc.y, {
         width: pageWidth - 2 * margin,
         align: "justify",
-        lineGap: 2,
+        lineGap: 3,
       });
 
     doc.moveDown(2);
 
     // Closing
-    doc.text("With regards,", margin);
-
+    doc.text("Thank you for your time and consideration.", margin);
+    doc.moveDown(1);
+    doc.text("Sincerely,", margin);
     doc.moveDown(3);
 
-    // Signature section
-    doc.text("_____________________", margin);
-    doc.text(`${letterhead.host.name}`, margin);
-    doc.text(`${letterhead.host.designation}`, margin);
-    doc.text("Hare Krishna Medical", margin);
+    // Footer with red border
+    const footerY = doc.y + 50;
+    doc.rect(0, footerY, pageWidth, 2).fill(redColor);
 
-    // Stamp space
-    doc.text("Place for Official Stamp", pageWidth - 200, doc.y - 60, {
+    // Signature section (right side)
+    doc
+      .fontSize(12)
+      .font("Times-Roman")
+      .text("_____________________", pageWidth - 200, footerY + 20, {
+        width: 150,
+        align: "center",
+      });
+
+    doc
+      .font("Times-Bold")
+      .fillColor(redColor)
+      .text(`${letterhead.host.name}`, pageWidth - 200, footerY + 35, {
+        width: 150,
+        align: "center",
+      });
+
+    doc
+      .font("Times-Roman")
+      .fillColor("black")
+      .text(`${letterhead.host.designation}`, pageWidth - 200, footerY + 50, {
+        width: 150,
+        align: "center",
+      });
+
+    doc.text("Hare Krishna Medical Store", pageWidth - 200, footerY + 65, {
       width: 150,
       align: "center",
     });
 
-    // Footer
+    // Footer content (left side)
     if (letterhead.footer) {
       doc
         .fontSize(10)
         .font("Times-Roman")
-        .text(letterhead.footer, margin, pageHeight - 100, {
-          width: pageWidth - 2 * margin,
-          align: "center",
+        .fillColor("#666")
+        .text(letterhead.footer, margin, footerY + 20, {
+          width: 300,
         });
     }
+
+    // Verification note
+    doc
+      .fontSize(9)
+      .font("Times-Roman")
+      .fillColor("#666")
+      .text(
+        "This is a computer generated official letterhead document",
+        margin,
+        footerY + 80,
+      );
+
+    doc.text("Scan QR code for digital verification", margin, footerY + 95);
+
+    // Verification URL
+    const verificationUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/verify-docs?id=${letterhead.letterId}&type=letterhead`;
+    doc
+      .fontSize(8)
+      .text(`Verification: ${verificationUrl}`, margin, footerY + 110, {
+        width: pageWidth - 2 * margin,
+      });
   }
 
   // Mark letterhead as sent

@@ -215,18 +215,19 @@ const AddLetterhead = () => {
     <div className="letterhead-container">
       <style>{`
         .letterhead-container {
-          background: #f8f9fa;
+          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
           min-height: 100vh;
-          padding-bottom: 2rem;
+          padding-bottom: 3rem;
         }
 
         .letterhead-hero {
-          background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%);
+          background: linear-gradient(135deg, #e63946 0%, #dc3545 50%, #c82333 100%);
           color: white;
-          padding: 4rem 0 3rem 0;
+          padding: 3rem 0 2rem 0;
           margin-bottom: 2rem;
           position: relative;
           overflow: hidden;
+          box-shadow: 0 8px 32px rgba(230, 57, 70, 0.3);
         }
 
         .letterhead-hero::before {
@@ -236,7 +237,13 @@ const AddLetterhead = () => {
           left: 0;
           right: 0;
           bottom: 0;
-          background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+          background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Cpath d='M40 40c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20zM80 40c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+          animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
         }
 
         .letterhead-hero .container {
@@ -244,56 +251,182 @@ const AddLetterhead = () => {
           z-index: 2;
         }
 
+        .letterhead-hero h1 {
+          text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+          font-weight: 700;
+          letter-spacing: -0.5px;
+        }
+
+        .letterhead-hero p {
+          font-size: 1.1rem;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .progress-indicator {
+          background: white;
+          border-radius: 15px;
+          padding: 1rem 2rem;
+          margin-bottom: 2rem;
+          box-shadow: 0 4px 20px rgba(230, 57, 70, 0.1);
+          border: 2px solid rgba(230, 57, 70, 0.1);
+        }
+
+        .progress-steps {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          position: relative;
+        }
+
+        .progress-step {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          flex: 1;
+          position: relative;
+          z-index: 2;
+        }
+
+        .progress-step-icon {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 18px;
+          font-weight: 600;
+          margin-bottom: 8px;
+          transition: all 0.3s ease;
+          border: 3px solid #e9ecef;
+          background: white;
+          color: #6c757d;
+        }
+
+        .progress-step.active .progress-step-icon {
+          background: linear-gradient(135deg, #e63946, #dc3545);
+          color: white;
+          border-color: #e63946;
+          box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
+          transform: scale(1.1);
+        }
+
+        .progress-step.completed .progress-step-icon {
+          background: linear-gradient(135deg, #28a745, #20c997);
+          color: white;
+          border-color: #28a745;
+        }
+
+        .progress-step-label {
+          font-size: 12px;
+          font-weight: 600;
+          color: #6c757d;
+          text-align: center;
+        }
+
+        .progress-step.active .progress-step-label {
+          color: #e63946;
+        }
+
+        .progress-line {
+          position: absolute;
+          top: 25px;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: #e9ecef;
+          z-index: 1;
+        }
+
+        .progress-line-fill {
+          height: 100%;
+          background: linear-gradient(90deg, #e63946, #dc3545);
+          transition: width 0.5s ease;
+          border-radius: 3px;
+        }
+
         .letterhead-card {
           border: none;
-          border-radius: 15px;
-          box-shadow: 0 10px 30px rgba(220, 53, 69, 0.1);
+          border-radius: 20px;
+          box-shadow: 0 8px 32px rgba(230, 57, 70, 0.08);
           margin-bottom: 2rem;
           overflow: hidden;
           transition: all 0.3s ease;
           background: white;
+          border: 1px solid rgba(230, 57, 70, 0.1);
         }
 
         .letterhead-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 15px 40px rgba(220, 53, 69, 0.15);
+          transform: translateY(-3px);
+          box-shadow: 0 12px 40px rgba(230, 57, 70, 0.12);
+          border-color: rgba(230, 57, 70, 0.2);
         }
 
         .letterhead-card .card-header {
-          background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%);
+          background: linear-gradient(135deg, #e63946 0%, #dc3545 100%);
           color: white;
           border: none;
-          padding: 1.5rem;
+          padding: 1.75rem 2rem;
+          position: relative;
+          overflow: hidden;
         }
 
-        .letterhead-tabs {
+        .letterhead-card .card-header::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm20 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E") repeat;
+        }
+
+        .letterhead-card .card-header h5 {
+          position: relative;
+          z-index: 2;
+          margin: 0;
+          font-weight: 600;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .letterhead-card .card-body {
+          padding: 2rem;
+          background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+        }
+
+        .form-section {
           background: white;
           border-radius: 15px;
-          padding: 1rem;
-          margin-bottom: 2rem;
-          box-shadow: 0 5px 20px rgba(220, 53, 69, 0.1);
-          display: flex;
-          gap: 0.5rem;
-          flex-wrap: wrap;
-          justify-content: center;
+          padding: 1.5rem;
+          margin-bottom: 1.5rem;
+          border: 1px solid #f1f3f4;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+          transition: all 0.3s ease;
         }
 
-        .letterhead-tab {
-          background: transparent;
-          border: 2px solid #e9ecef;
-          color: #6c757d;
-          padding: 1rem 1.5rem;
-          border-radius: 10px;
-          font-weight: 500;
-          transition: all 0.3s ease;
-          cursor: pointer;
+        .form-section:hover {
+          border-color: rgba(230, 57, 70, 0.2);
+          box-shadow: 0 4px 12px rgba(230, 57, 70, 0.08);
+        }
+
+        .section-title {
+          color: #e63946;
+          font-weight: 600;
+          font-size: 1.1rem;
+          margin-bottom: 1rem;
+          padding-bottom: 0.5rem;
+          border-bottom: 2px solid rgba(230, 57, 70, 0.1);
           display: flex;
           align-items: center;
-          text-decoration: none;
-          min-width: 120px;
-          justify-content: center;
-          flex: 1;
-          max-width: 200px;
+        }
+
+        .section-title::before {
+          content: "";
+          width: 4px;
+          height: 20px;
+          background: linear-gradient(135deg, #e63946, #dc3545);
+          border-radius: 2px;
+          margin-right: 10px;
         }
 
         .letterhead-tab:hover {
@@ -312,58 +445,224 @@ const AddLetterhead = () => {
 
         .letterhead-form-control {
           border: 2px solid #e9ecef;
-          border-radius: 10px;
-          padding: 0.75rem 1rem;
-          transition: all 0.3s ease;
+          border-radius: 12px;
+          padding: 0.875rem 1.25rem;
           font-size: 0.95rem;
-          width: 100%;
+          transition: all 0.3s ease;
+          background: white;
+          font-family: 'Times New Roman', Times, serif;
+          line-height: 1.5;
         }
 
         .letterhead-form-control:focus {
-          border-color: #dc3545;
-          box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+          border-color: #e63946;
+          box-shadow: 0 0 0 0.25rem rgba(230, 57, 70, 0.15);
+          background: white;
           transform: translateY(-1px);
         }
 
-        .letterhead-btn {
-          background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%);
-          border: none;
-          color: white;
-          padding: 0.75rem 2rem;
-          border-radius: 10px;
-          font-weight: 600;
-          transition: all 0.3s ease;
-          display: inline-flex;
+        .letterhead-form-control:hover:not(:focus) {
+          border-color: rgba(230, 57, 70, 0.3);
+          box-shadow: 0 2px 8px rgba(230, 57, 70, 0.08);
+        }
+
+        .form-floating {
+          position: relative;
+        }
+
+        .form-floating > .letterhead-form-control {
+          padding-top: 1.625rem;
+          padding-bottom: 0.625rem;
+        }
+
+        .form-floating > label {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          padding: 1rem 1.25rem;
+          pointer-events: none;
+          border: 1px solid transparent;
+          transform-origin: 0 0;
+          transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
+          color: #6c757d;
+          font-weight: 500;
+        }
+
+        .form-floating > .letterhead-form-control:focus ~ label,
+        .form-floating > .letterhead-form-control:not(:placeholder-shown) ~ label {
+          opacity: 0.65;
+          transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+          color: #e63946;
+        }
+
+        .input-group-enhanced {
+          position: relative;
+          display: flex;
           align-items: center;
+          background: white;
+          border-radius: 12px;
+          border: 2px solid #e9ecef;
+          transition: all 0.3s ease;
+          overflow: hidden;
+        }
+
+        .input-group-enhanced:focus-within {
+          border-color: #e63946;
+          box-shadow: 0 0 0 0.25rem rgba(230, 57, 70, 0.15);
+          transform: translateY(-1px);
+        }
+
+        .input-group-enhanced .input-group-text {
+          background: linear-gradient(135deg, #e63946, #dc3545);
+          color: white;
+          border: none;
+          padding: 0.875rem 1rem;
+          font-weight: 600;
+        }
+
+        .input-group-enhanced .letterhead-form-control {
+          border: none;
+          border-radius: 0;
+          box-shadow: none;
+        }
+
+        .input-group-enhanced .letterhead-form-control:focus {
+          border: none;
+          box-shadow: none;
+          transform: none;
+        }
+
+        .letterhead-btn {
+          background: linear-gradient(135deg, #e63946 0%, #dc3545 100%);
+          border: none;
+          border-radius: 12px;
+          padding: 1rem 2.5rem;
+          font-weight: 600;
+          color: white;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
+          font-size: 1rem;
+          font-family: 'Times New Roman', Times, serif;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .letterhead-btn::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+          transition: left 0.5s ease;
+        }
+
+        .letterhead-btn:hover::before {
+          left: 100%;
         }
 
         .letterhead-btn:hover:not(:disabled) {
           transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+          box-shadow: 0 8px 25px rgba(230, 57, 70, 0.4);
           color: white;
         }
 
         .letterhead-btn:disabled {
           opacity: 0.7;
-          transform: none;
+          cursor: not-allowed;
         }
 
         .letterhead-btn-outline {
           background: transparent;
-          border: 2px solid #dc3545;
-          color: #dc3545;
-          padding: 0.75rem 2rem;
-          border-radius: 10px;
+          border: 2px solid #e63946;
+          color: #e63946;
+          border-radius: 12px;
+          padding: 1rem 2.5rem;
           font-weight: 600;
           transition: all 0.3s ease;
-          display: inline-flex;
-          align-items: center;
-          text-decoration: none;
+          font-size: 1rem;
+          font-family: 'Times New Roman', Times, serif;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .letterhead-btn-outline::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 0;
+          height: 100%;
+          background: linear-gradient(135deg, #e63946, #dc3545);
+          transition: width 0.3s ease;
+          z-index: 1;
+        }
+
+        .letterhead-btn-outline:hover::before {
+          width: 100%;
+        }
+
+        .letterhead-btn-outline span {
+          position: relative;
+          z-index: 2;
         }
 
         .letterhead-btn-outline:hover {
-          background: #dc3545;
           color: white;
+          border-color: #e63946;
+          transform: translateY(-2px);
+        }
+
+        .letterhead-btn-secondary {
+          background: linear-gradient(135deg, #6c757d, #5a6268);
+          border: none;
+          border-radius: 12px;
+          padding: 1rem 2rem;
+          font-weight: 600;
+          color: white;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+          font-size: 1rem;
+          font-family: 'Times New Roman', Times, serif;
+        }
+
+        .letterhead-btn-secondary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+          color: white;
+        }
+
+        .action-section {
+          background: linear-gradient(135deg, #ffffff, #f8f9fa);
+          border-radius: 20px;
+          padding: 2rem;
+          margin-top: 2rem;
+          border: 2px solid rgba(230, 57, 70, 0.1);
+          box-shadow: 0 8px 32px rgba(230, 57, 70, 0.08);
+        }
+
+        .button-group {
+          display: flex;
+          gap: 1rem;
+          justify-content: center;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+
+        .save-indicator {
+          background: white;
+          border: 2px solid #28a745;
+          border-radius: 12px;
+          padding: 1rem;
+          margin-top: 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #28a745;
+          font-weight: 600;
+        }
           transform: translateY(-2px);
         }
 
@@ -598,20 +897,20 @@ const AddLetterhead = () => {
             font-size: 11px;
           }
 
-          .email-template {
+          .letterhead-template {
             margin: 0;
-            border-radius: 0;
+            border-radius: 8px;
           }
 
-          .email-header, .email-body {
+          .letterhead-header, .letterhead-body {
             padding: 1.5rem 1rem;
+            border-radius: 8px;
           }
 
-          .email-footer {
+          .letterhead-footer {
             padding: 1rem;
+            background: #f8f9fa;
           }
-
-          .action-buttons {
             flex-direction: column;
           }
 
@@ -650,26 +949,26 @@ const AddLetterhead = () => {
             padding: 0.75rem;
           }
 
-          .email-header, .email-body {
+          .letterhead-header, .letterhead-body {
             padding: 1rem 0.75rem;
+            font-size: 0.9rem;
           }
-
           .form-section {
             margin-bottom: 2rem;
             padding-bottom: 1.5rem;
           }
         }
 
-        /* Print Styles for Email Templates */
+        /* Print Styles for Letterhead Templates */
         @media print {
           .letterhead-container {
             background: white;
           }
 
-          .email-template {
+          .letterhead-template {
             border: none;
             box-shadow: none;
-            max-width: none;
+          }
             width: 100%;
           }
 
@@ -733,23 +1032,62 @@ const AddLetterhead = () => {
             </div>
           )}
 
-          {/* Navigation Tabs */}
-          <div className="letterhead-tabs">
-            {[
-              { key: "basic", label: "Basic Info", icon: "bi-info-circle" },
-              { key: "recipient", label: "Recipient", icon: "bi-person" },
-              { key: "content", label: "Content", icon: "bi-file-text" },
-              { key: "signature", label: "Signature", icon: "bi-pen" },
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                className={`letterhead-tab ${activeTab === tab.key ? "active" : ""}`}
-                onClick={() => setActiveTab(tab.key)}
-              >
-                <i className={`${tab.icon} me-2`}></i>
-                {tab.label}
-              </button>
-            ))}
+          {/* Progress Indicator */}
+          <div className="progress-indicator">
+            <div className="progress-steps">
+              <div className="progress-line">
+                <div
+                  className="progress-line-fill"
+                  style={{
+                    width: `${
+                      activeTab === "basic"
+                        ? "0%"
+                        : activeTab === "recipient"
+                          ? "33%"
+                          : activeTab === "content"
+                            ? "66%"
+                            : activeTab === "signature"
+                              ? "100%"
+                              : "0%"
+                    }`,
+                  }}
+                ></div>
+              </div>
+              {[
+                { key: "basic", label: "Basic Information", icon: "1" },
+                { key: "recipient", label: "Recipient Details", icon: "2" },
+                { key: "content", label: "Document Content", icon: "3" },
+                { key: "signature", label: "Signature & Review", icon: "4" },
+              ].map((step, index) => (
+                <div
+                  key={step.key}
+                  className={`progress-step ${
+                    activeTab === step.key
+                      ? "active"
+                      : (activeTab === "recipient" && index < 1) ||
+                          (activeTab === "content" && index < 2) ||
+                          (activeTab === "signature" && index < 3)
+                        ? "completed"
+                        : ""
+                  }`}
+                  onClick={() => setActiveTab(step.key)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <div className="progress-step-icon">
+                    {activeTab === step.key ? (
+                      <i className="bi bi-arrow-right"></i>
+                    ) : (activeTab === "recipient" && index < 1) ||
+                      (activeTab === "content" && index < 2) ||
+                      (activeTab === "signature" && index < 3) ? (
+                      <i className="bi bi-check"></i>
+                    ) : (
+                      step.icon
+                    )}
+                  </div>
+                  <div className="progress-step-label">{step.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
 
           <Form onSubmit={handleSubmit}>
@@ -924,7 +1262,7 @@ const AddLetterhead = () => {
                     <Card.Header>
                       <h5 className="mb-0">
                         <i className="bi bi-file-text me-2"></i>
-                        Professional Email Content
+                        Professional Document Content
                       </h5>
                     </Card.Header>
                     <Card.Body className="p-4">
@@ -946,12 +1284,14 @@ const AddLetterhead = () => {
                       </div>
 
                       <div className="form-section">
-                        <h6 className="section-title">Main Email Content *</h6>
+                        <h6 className="section-title">
+                          Main Document Content *
+                        </h6>
                         <div className="content-editor">
                           <div className="content-toolbar">
                             <div className="d-flex align-items-center gap-2 flex-wrap">
                               <small className="text-muted me-3 fw-semibold">
-                                Email Formatting Tools:
+                                Document Formatting Tools:
                               </small>
 
                               <OverlayTrigger
@@ -1059,7 +1399,7 @@ const AddLetterhead = () => {
                             dangerouslySetInnerHTML={{
                               __html: formData.content,
                             }}
-                            placeholder="Write your professional email content here. Use the toolbar for formatting..."
+                            placeholder="Write your professional letterhead content here. Use the toolbar for formatting..."
                           />
                         </div>
                         <Form.Text className="text-muted">
@@ -1081,7 +1421,7 @@ const AddLetterhead = () => {
                             name="footer"
                             value={formData.footer}
                             onChange={handleInputChange}
-                            placeholder="Footer content (appears at the bottom of the letterhead email)"
+                            placeholder="Footer content (appears at the bottom of the letterhead document)"
                             className="letterhead-form-control"
                           />
                           <Form.Text className="text-muted">
@@ -1154,12 +1494,12 @@ const AddLetterhead = () => {
                             name="notes"
                             value={formData.notes}
                             onChange={handleInputChange}
-                            placeholder="Internal notes and comments (not visible in the letterhead email)"
+                            placeholder="Internal notes and comments (not visible in the letterhead document)"
                             className="letterhead-form-control"
                           />
                           <Form.Text className="text-muted">
                             These notes are for internal use only and will not
-                            appear in the final letterhead email.
+                            appear in the final letterhead document.
                           </Form.Text>
                         </Form.Group>
                       </div>
@@ -1206,7 +1546,7 @@ const AddLetterhead = () => {
                     onClick={() => setShowPreview(true)}
                   >
                     <i className="bi bi-eye me-2"></i>
-                    Full Email Preview
+                    Full Letterhead Preview
                   </button>
                 </div>
               </Col>
@@ -1216,11 +1556,11 @@ const AddLetterhead = () => {
                 <div className="preview-panel">
                   <h6 className="fw-bold mb-3 text-center text-danger">
                     <i className="bi bi-eye me-2"></i>
-                    Live Email Preview
+                    Live Letterhead Preview
                   </h6>
 
-                  <div className="email-template">
-                    <div className="email-header">
+                  <div className="letterhead-template">
+                    <div className="letterhead-header">
                       <h6
                         style={{
                           margin: 0,
@@ -1243,7 +1583,7 @@ const AddLetterhead = () => {
                       )}
                     </div>
 
-                    <div className="email-body">
+                    <div className="letterhead-body">
                       <div
                         className="d-flex justify-content-between mb-3"
                         style={{ fontSize: "11px", color: "#666" }}
@@ -1452,7 +1792,7 @@ const AddLetterhead = () => {
                     dangerouslySetInnerHTML={{
                       __html:
                         formData.content ||
-                        "Your professional email content will appear here...",
+                        "Your professional letterhead content will appear here...",
                     }}
                   />
                 </div>
@@ -1476,7 +1816,7 @@ const AddLetterhead = () => {
                 </div>
               </div>
 
-              <div className="email-footer">
+              <div className="letterhead-footer">
                 <div style={{ marginBottom: "1.5rem" }}>
                   <div
                     style={{
@@ -1529,7 +1869,7 @@ const AddLetterhead = () => {
             </Button>
             <Button variant="danger" onClick={() => window.print()}>
               <i className="bi bi-printer me-2"></i>
-              Print Email
+              Print Letterhead
             </Button>
           </Modal.Footer>
         </Modal>

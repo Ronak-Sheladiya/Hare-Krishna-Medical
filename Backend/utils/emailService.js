@@ -347,39 +347,75 @@ class EmailService {
       to: email,
       subject: "Email Verification OTP - Hare Krishna Medical Store",
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: linear-gradient(135deg, #007bff, #0056b3); color: white; padding: 30px; border-radius: 10px; text-align: center;">
-            <h1 style="margin: 0; font-size: 28px;">Email Verification 📧</h1>
-            <p style="margin: 10px 0 0 0; font-size: 16px;">Hare Krishna Medical Store</p>
-          </div>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Email Verification OTP</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Times New Roman', Times, serif; background: linear-gradient(135deg, #f8f9fa, #e9ecef);">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 10px 40px rgba(230, 57, 70, 0.15); border-radius: 15px; overflow: hidden;">
 
-          <div style="padding: 30px; background: #f8f9fa; border-radius: 10px; margin-top: 20px;">
-            <h2 style="color: #333; margin-top: 0;">Hello ${fullName}!</h2>
-
-            <p style="color: #666; line-height: 1.6;">
-              Thank you for registering with Hare Krishna Medical Store. To complete your registration, please verify your email address using the OTP below:
-            </p>
-
-            <div style="background: white; padding: 30px; border-radius: 8px; margin: 30px 0; text-align: center; border: 2px dashed #007bff;">
-              <h2 style="color: #007bff; margin: 0; font-size: 36px; letter-spacing: 8px; font-family: monospace;">${otp}</h2>
-              <p style="color: #666; margin: 10px 0 0 0;">Enter this 6-digit code to verify your email</p>
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #e63946 0%, #dc3545 50%, #c82333 100%); color: #ffffff; padding: 40px 30px; text-align: center; position: relative;">
+              <div style="background: rgba(255, 255, 255, 0.95); border-radius: 50%; padding: 15px; width: 100px; height: 100px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,0.2);">
+                <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=200"
+                     alt="Hare Krishna Medical"
+                     style="width: 70px; height: 70px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(230,57,70,0.3));" />
+              </div>
+              <h1 style="margin: 0; font-size: 28px; font-weight: 700; text-shadow: 0 3px 6px rgba(0,0,0,0.3);">📧 Email Verification</h1>
+              <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.95;">Hare Krishna Medical Store</p>
             </div>
 
-            <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 20px 0;">
-              <p style="margin: 0; color: #856404;">
-                <strong>⏰ This OTP will expire in 10 minutes</strong><br>
-                If you didn't create an account, please ignore this email.
+            <!-- Content -->
+            <div style="padding: 40px 30px;">
+              <h2 style="color: #e63946; margin: 0 0 20px 0; font-family: 'Times New Roman', Times, serif;">Hello ${fullName}!</h2>
+
+              <p style="color: #6c757d; line-height: 1.7; font-size: 16px;">
+                Thank you for registering with Hare Krishna Medical Store. To complete your registration, please verify your email address using the OTP below:
+              </p>
+
+              <!-- OTP Box -->
+              <div style="background: linear-gradient(135deg, #fff5f5, #ffeaea); padding: 35px; border-radius: 15px; margin: 30px 0; text-align: center; border: 3px solid #e63946; box-shadow: 0 8px 25px rgba(230,57,70,0.1);">
+                <h2 style="color: #e63946; margin: 0 0 15px 0; font-size: 42px; letter-spacing: 12px; font-family: 'Courier New', monospace; font-weight: 700; text-shadow: 0 2px 4px rgba(230,57,70,0.2);">${otp}</h2>
+                <p style="color: #e63946; margin: 0; font-weight: 600; font-size: 16px;">Enter this 6-digit code to verify your email</p>
+              </div>
+
+              <!-- Warning Box -->
+              <div style="background: linear-gradient(135deg, #fff3cd, #ffeaa7); border: 2px solid #e63946; border-radius: 10px; padding: 20px; margin: 25px 0;">
+                <h4 style="margin: 0 0 10px 0; color: #e63946;">⏰ Important Security Notice:</h4>
+                <p style="margin: 0; color: #856404; line-height: 1.6;">
+                  <strong>This OTP will expire in 10 minutes</strong> for your security.<br>
+                  If you didn't create an account, please ignore this email.
+                </p>
+              </div>
+
+              <!-- Features Info -->
+              <div style="background: linear-gradient(135deg, #d4edda, #c3e6cb); border: 2px solid #28a745; border-radius: 10px; padding: 20px; margin: 25px 0;">
+                <h4 style="margin: 0 0 10px 0; color: #155724;">🏥 After Verification, You Can:</h4>
+                <ul style="margin: 0; color: #155724; line-height: 1.6;">
+                  <li>Browse our premium medical products</li>
+                  <li>Place orders with professional invoicing</li>
+                  <li>Track your orders in real-time</li>
+                  <li>Access digital receipts and records</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="background: linear-gradient(135deg, #2c3e50, #34495e); color: #ffffff; padding: 25px 30px; text-align: center;">
+              <h4 style="margin: 0 0 15px 0; font-family: 'Times New Roman', Times, serif; font-size: 18px;">Hare Krishna Medical Store</h4>
+              <p style="margin: 0 0 10px 0; font-size: 13px; opacity: 0.9;">
+                📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat
+              </p>
+              <p style="margin: 0; font-size: 12px; opacity: 0.7;">
+                📞 +91 76989 13354 | +91 91060 18508 | 📧 hkmedicalamroli@gmail.com | 🌐 @harekrishna_medical
               </p>
             </div>
-
-            <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px; text-align: center;">
-              <p style="color: #888; font-size: 14px; margin: 0;">
-                📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat<br>
-                📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
-              </p>
-            </div>
           </div>
-        </div>
+        </body>
+        </html>
       `,
     };
 
