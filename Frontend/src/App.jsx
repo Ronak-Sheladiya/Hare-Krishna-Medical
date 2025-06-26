@@ -354,7 +354,7 @@ function App() {
               path="/socket-diagnostics"
               element={
                 <ProtectedRoute adminOnly>
-                  <SocketDiagnostic />
+                  <SocketDiagnostics />
                 </ProtectedRoute>
               }
             />
