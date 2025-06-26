@@ -5,7 +5,6 @@ const Verification = require("../models/Verification");
 const { auth } = require("../middleware/auth");
 const { body, validationResult } = require("express-validator");
 const emailService = require("../utils/emailService");
-const smsService = require("../utils/smsService");
 
 const router = express.Router();
 
