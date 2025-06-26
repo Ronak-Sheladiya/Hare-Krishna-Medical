@@ -1396,7 +1396,7 @@ const AddLetterhead = () => {
                 )}
               </div>
 
-              <div className="email-body" style={{ padding: "3rem" }}>
+              <div className="letterhead-content" style={{ padding: "3rem" }}>
                 <div
                   className="d-flex justify-content-between mb-4"
                   style={{ fontSize: "12px", color: "#666" }}
