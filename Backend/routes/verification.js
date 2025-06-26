@@ -401,6 +401,38 @@ router.get(
             verified: true,
           };
         }
+      } else if (type === "letterhead") {
+        // Check if it's MongoDB ObjectId or Letterhead ID
+        if (id.match(/^[0-9a-fA-F]{24}$/)) {
+          document = await Letterhead.findById(id).populate(
+            "createdBy",
+            "fullName email",
+          );
+        } else {
+          document = await Letterhead.findOne({ letterheadId: id }).populate(
+            "createdBy",
+            "fullName email",
+          );
+        }
+
+        if (document) {
+          documentData = {
+            id: document.letterheadId,
+            type: "letterhead",
+            title: document.title,
+            letterType: document.letterType,
+            recipientName: document.recipient.name,
+            recipientOrganization: document.recipient.organization,
+            subject: document.subject,
+            issuerName: document.issuer.name,
+            issuerDesignation: document.issuer.designation,
+            issueDate: document.issueDate,
+            validUntil: document.validUntil,
+            status: document.status,
+            qrCodeData: document.qrCodeData,
+            verified: true,
+          };
+        }
       }
 
       if (!document) {
