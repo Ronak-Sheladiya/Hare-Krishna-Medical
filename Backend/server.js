@@ -13,7 +13,7 @@ const server = http.createServer(app);
 // Socket.io setup for real-time updates
 const io = socketIo(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: process.env.FRONTEND_URL || "https://hare-krishna-medical.vercel.app/",
     methods: ["GET", "POST", "PUT", "DELETE"],
   },
 });
@@ -25,7 +25,7 @@ app.set("io", io);
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: process.env.FRONTEND_URL || "https://hare-krishna-medical.vercel.app/",
     credentials: true,
   }),
 );
@@ -45,7 +45,7 @@ app.use(express.urlencoded({ extended: true }));
 // Database Connection
 mongoose
   .connect(
-    process.env.MONGODB_URI || "mongodb://localhost:27017/hare-krishna-medical",
+    process.env.MONGODB_URI || "mongodb+srv://ronaksheladiya652:Ronak95865@cluster0.nlceoex.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
