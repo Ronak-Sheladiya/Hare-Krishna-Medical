@@ -120,6 +120,49 @@ const validateQueryParams = [
 
 // Routes
 
+// Development route to add mock letterhead (only in development)
+if (process.env.NODE_ENV === "development") {
+  router.post("/create-mock", adminAuth, async (req, res) => {
+    try {
+      const Letterhead = require("../models/Letterhead");
+
+      // Check if mock letterhead already exists
+      const existing = await Letterhead.findOne({
+        letterId: mockLetterhead.letterId,
+      });
+      if (existing) {
+        return res.json({
+          success: true,
+          message: "Mock letterhead already exists",
+          data: existing,
+        });
+      }
+
+      // Set the admin user as creator
+      const letterheadData = {
+        ...mockLetterhead,
+        createdBy: req.user._id,
+      };
+
+      const letterhead = new Letterhead(letterheadData);
+      await letterhead.save();
+
+      res.status(201).json({
+        success: true,
+        message: "Mock letterhead created successfully",
+        data: letterhead,
+      });
+    } catch (error) {
+      console.error("Mock letterhead creation error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create mock letterhead",
+        error: error.message,
+      });
+    }
+  });
+}
+
 // GET /api/letterheads - Get all letterheads (Admin only)
 router.get(
   "/",
