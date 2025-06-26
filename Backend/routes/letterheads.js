@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const letterheadController = require("../controllers/letterheadController");
 const { auth, adminAuth } = require("../middleware/auth");
+const { mockLetterhead } = require("../scripts/create-mock-letterhead");
 const { body, param, query } = require("express-validator");
 const { handleValidationErrors } = require("../middleware/validate");
 
