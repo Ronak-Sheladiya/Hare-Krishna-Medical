@@ -83,50 +83,92 @@ const OfficialLetterheadDesign = ({
           <!DOCTYPE html>
           <html>
             <head>
-              <title>Letterhead ${letterId}</title>
+              <title>Official Letterhead ${letterId}</title>
               <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
               <style>
-                @page { size: A4; margin: 20mm; }
+                @page {
+                  size: A4;
+                  margin: 15mm 20mm 20mm 20mm;
+                }
                 @media print {
-                  body { margin: 0; color: black !important; font-size: 12px; line-height: 1.4; -webkit-print-color-adjust: exact; }
+                  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                  body {
+                    margin: 0;
+                    padding: 0;
+                    color: black !important;
+                    font-size: 12px;
+                    line-height: 1.5;
+                    font-family: 'Times New Roman', Times, serif;
+                    direction: ltr;
+                    text-align: left;
+                  }
                   .no-print { display: none !important; }
-                  .print-break { page-break-after: always; }
-                  .letterhead-container { padding: 0; margin: 0; }
-                  .letterhead-header { border-bottom: 3px solid #e63946; padding-bottom: 15px; margin-bottom: 20px; }
-                  .letterhead-footer { border-top: 2px solid #e63946; padding-top: 15px; margin-top: 30px; }
-                  .letterhead-content { margin: 25px 0; line-height: 1.6; }
-                  .qr-code { width: 80px !important; height: 80px !important; }
-                  .company-logo { max-height: 60px; }
+                  .letterhead-container {
+                    padding: 0;
+                    margin: 0;
+                    width: 100%;
+                    direction: ltr;
+                    text-align: left;
+                  }
+                  .letterhead-header {
+                    border-bottom: 3px solid #e63946;
+                    padding-bottom: 15px;
+                    margin-bottom: 25px;
+                  }
+                  .letterhead-footer {
+                    border-top: 2px solid #e63946;
+                    padding-top: 15px;
+                    margin-top: 30px;
+                  }
+                  .letterhead-content {
+                    margin: 25px 0;
+                    line-height: 1.7;
+                    text-align: justify;
+                    direction: ltr;
+                  }
+                  .qr-code {
+                    width: 80px !important;
+                    height: 80px !important;
+                  }
+                  .company-logo {
+                    max-height: 50px;
+                  }
+                  .ref-date-section {
+                    text-align: right;
+                    margin: 20px 0;
+                  }
                 }
                 .letterhead-container {
                   max-width: 800px;
                   margin: 0 auto;
                   background: white;
-                  font-family: 'Times New Roman', serif;
+                  font-family: 'Times New Roman', Times, serif;
+                  direction: ltr;
+                  text-align: left;
                 }
                 .letterhead-header {
                   text-align: center;
                   border-bottom: 3px solid #e63946;
                   padding-bottom: 20px;
                   margin-bottom: 30px;
+                  position: relative;
                 }
                 .company-info {
                   color: #e63946;
                   font-weight: bold;
                 }
                 .letterhead-meta {
-                  display: flex;
-                  justify-content: space-between;
-                  align-items: flex-start;
                   margin: 20px 0;
                   padding: 15px;
-                  background: #f8f9fa;
+                  background: #fff5f5;
                   border-left: 4px solid #e63946;
+                  border-radius: 5px;
                 }
                 .letterhead-content {
                   margin: 30px 0;
                   line-height: 1.8;
                   text-align: justify;
+                  direction: ltr;
                 }
                 .letterhead-footer {
                   border-top: 2px solid #e63946;
@@ -143,10 +185,15 @@ const OfficialLetterheadDesign = ({
                   width: 100px;
                   height: 100px;
                 }
-                .letterhead-date {
+                .ref-date-section {
                   text-align: right;
                   margin: 20px 0;
                   font-weight: bold;
+                }
+                .qr-header-position {
+                  position: absolute;
+                  top: 20px;
+                  right: 20px;
                 }
               </style>
             </head>
@@ -156,8 +203,10 @@ const OfficialLetterheadDesign = ({
           </html>
         `);
         printWindow.document.close();
-        printWindow.print();
-        printWindow.close();
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 500);
       }
     }
   };
@@ -167,40 +216,80 @@ const OfficialLetterheadDesign = ({
       onDownload();
     } else {
       // Import html2canvas and jsPDF dynamically
-      import("html2canvas").then((html2canvas) => {
-        import("jspdf").then((jsPDF) => {
-          const element = document.getElementById("letterhead-print-content");
-          html2canvas
-            .default(element, {
-              scale: 2,
-              useCORS: true,
-              allowTaint: true,
-              backgroundColor: "#ffffff",
-            })
-            .then((canvas) => {
-              const imgData = canvas.toDataURL("image/png");
-              const pdf = new jsPDF.jsPDF("p", "mm", "a4");
-              const imgWidth = 210;
-              const pageHeight = 295;
-              const imgHeight = (canvas.height * imgWidth) / canvas.width;
-              let heightLeft = imgHeight;
-
-              let position = 0;
-
-              pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-              heightLeft -= pageHeight;
-
-              while (heightLeft >= 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
+      import("html2canvas")
+        .then((html2canvas) => {
+          import("jspdf")
+            .then((jsPDF) => {
+              const element = document.getElementById(
+                "letterhead-print-content",
+              );
+              if (!element) {
+                console.error("Print content element not found");
+                return;
               }
 
-              pdf.save(`letterhead-${letterId}.pdf`);
+              html2canvas
+                .default(element, {
+                  scale: 2,
+                  useCORS: true,
+                  allowTaint: true,
+                  backgroundColor: "#ffffff",
+                  logging: false,
+                  width: element.scrollWidth,
+                  height: element.scrollHeight,
+                })
+                .then((canvas) => {
+                  const imgData = canvas.toDataURL("image/png", 1.0);
+                  const pdf = new jsPDF.jsPDF("p", "mm", "a4");
+
+                  const pdfWidth = pdf.internal.pageSize.getWidth();
+                  const pdfHeight = pdf.internal.pageSize.getHeight();
+                  const imgWidth = pdfWidth;
+                  const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+                  let heightLeft = imgHeight;
+                  let position = 0;
+
+                  pdf.addImage(
+                    imgData,
+                    "PNG",
+                    0,
+                    position,
+                    imgWidth,
+                    imgHeight,
+                  );
+                  heightLeft -= pdfHeight;
+
+                  while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(
+                      imgData,
+                      "PNG",
+                      0,
+                      position,
+                      imgWidth,
+                      imgHeight,
+                    );
+                    heightLeft -= pdfHeight;
+                  }
+
+                  pdf.save(`official-letterhead-${letterId}.pdf`);
+                })
+                .catch((error) => {
+                  console.error("Error generating PDF:", error);
+                  alert("Error generating PDF. Please try again.");
+                });
+            })
+            .catch((error) => {
+              console.error("Error loading jsPDF:", error);
+              alert("Error loading PDF library. Please try again.");
             });
+        })
+        .catch((error) => {
+          console.error("Error loading html2canvas:", error);
+          alert("Error loading canvas library. Please try again.");
         });
-      });
     }
   };
 
