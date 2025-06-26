@@ -303,6 +303,13 @@ const Register = () => {
                     </p>
                   </div>
 
+                  {errors.general && (
+                    <Alert variant="danger" className="mb-4">
+                      <i className="bi bi-exclamation-circle me-2"></i>
+                      {errors.general}
+                    </Alert>
+                  )}
+
                   <Form onSubmit={handleSubmit}>
                     <Row>
                       {/* Personal Information */}
