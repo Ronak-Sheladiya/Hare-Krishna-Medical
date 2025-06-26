@@ -1370,16 +1370,16 @@ const AddLetterhead = () => {
         >
           <Modal.Header closeButton className="bg-danger text-white">
             <Modal.Title>
-              <i className="bi bi-envelope me-2"></i>
-              Full Professional Email Preview
+              <i className="bi bi-file-text me-2"></i>
+              Full Letterhead Document Preview
             </Modal.Title>
           </Modal.Header>
           <Modal.Body style={{ padding: 0 }}>
             <div
-              className="email-template"
+              className="letterhead-template"
               style={{ margin: 0, borderRadius: 0 }}
             >
-              <div className="email-header">
+              <div className="letterhead-header">
                 <h4 style={{ margin: 0, fontSize: "18px", fontWeight: "bold" }}>
                   HARE KRISHNA MEDICAL
                 </h4>
