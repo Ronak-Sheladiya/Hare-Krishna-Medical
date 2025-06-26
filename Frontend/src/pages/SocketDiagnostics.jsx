@@ -54,81 +54,118 @@ const SocketDiagnostics = () => {
       });
 
       // Test 2: Check backend connectivity
+      let backendTestSkipped = false;
       try {
         const backendUrl =
           import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+        const isProduction =
+          window.location.hostname.includes("fly.dev") ||
+          window.location.hostname.includes("vercel.app") ||
+          window.location.hostname.includes("netlify.app");
 
-        // Try to detect if we're in production and adjust backend URL
-        let testUrl = backendUrl;
-        if (
-          window.location.hostname.includes("fly.dev") &&
-          backendUrl.includes("localhost")
-        ) {
-          // In production but backend URL is localhost, try to guess the backend URL
-          testUrl = backendUrl.replace(
-            "localhost:5000",
-            window.location.hostname.replace(/^[^-]+-/, "") + ":5000",
-          );
-          results.push({
-            test: "Backend URL Detection",
-            status: "warning",
-            message: `Production environment detected. Backend URL auto-adjusted from ${backendUrl} to ${testUrl}`,
-          });
-        }
-
-        // Add timeout and proper error handling
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
-        const response = await fetch(`${testUrl}/api/health`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeoutId);
-
-        if (response.ok) {
-          const data = await response.json();
+        // Skip backend test if in production with localhost URL
+        if (isProduction && backendUrl.includes("localhost")) {
+          backendTestSkipped = true;
           results.push({
             test: "Backend Connectivity",
-            status: "pass",
-            message: `Backend is reachable at ${testUrl}. Status: ${data.status || "OK"}`,
+            status: "fail",
+            message: `Skipped - Production environment with localhost backend URL (${backendUrl}). Set VITE_BACKEND_URL environment variable.`,
+          });
+
+          results.push({
+            test: "Configuration Issue",
+            status: "fail",
+            message:
+              "VITE_BACKEND_URL must be set to your actual backend URL in production deployments",
           });
         } else {
-          results.push({
-            test: "Backend Connectivity",
-            status: "warning",
-            message: `Backend responded with status ${response.status} from ${testUrl}`,
-          });
+          // Try to detect and fix backend URL for production
+          let testUrl = backendUrl;
+
+          if (isProduction && backendUrl.includes("localhost")) {
+            // Try common production patterns
+            const hostname = window.location.hostname;
+            if (hostname.includes("fly.dev")) {
+              // For Fly.dev, try to guess backend URL
+              testUrl = `https://${hostname.replace("frontend", "backend")}`;
+            } else {
+              testUrl = `https://api.${hostname}`;
+            }
+
+            results.push({
+              test: "Backend URL Auto-Detection",
+              status: "warning",
+              message: `Attempted to fix URL from ${backendUrl} to ${testUrl}`,
+            });
+          }
+
+          // Add timeout and proper error handling
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+          try {
+            const response = await fetch(`${testUrl}/api/health`, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              credentials: "omit", // Don't send credentials for health check
+              signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId);
+
+            if (response.ok) {
+              const data = await response.json();
+              results.push({
+                test: "Backend Connectivity",
+                status: "pass",
+                message: `Backend is reachable at ${testUrl}. Status: ${data.status || "OK"}`,
+              });
+            } else {
+              results.push({
+                test: "Backend Connectivity",
+                status: "warning",
+                message: `Backend responded with status ${response.status} from ${testUrl}`,
+              });
+            }
+          } catch (fetchError) {
+            clearTimeout(timeoutId);
+            throw fetchError; // Re-throw to be caught by outer catch
+          }
         }
       } catch (error) {
-        let errorMessage = `Cannot reach backend: ${error.message}`;
+        if (!backendTestSkipped) {
+          let errorMessage = `Cannot reach backend: ${error.message}`;
 
-        if (error.name === "AbortError") {
-          errorMessage = "Backend connection timed out (10s)";
-        } else if (error.message.includes("Failed to fetch")) {
-          errorMessage = "Network error - Backend unreachable or CORS issue";
+          if (error.name === "AbortError") {
+            errorMessage = "Backend connection timed out (5s)";
+          } else if (error.message.includes("Failed to fetch")) {
+            errorMessage =
+              "Network error - Backend unreachable, CORS issue, or wrong URL";
+          } else if (error.message.includes("TypeError")) {
+            errorMessage =
+              "Network request failed - Check backend URL and CORS configuration";
+          }
+
+          results.push({
+            test: "Backend Connectivity",
+            status: "fail",
+            message: errorMessage,
+          });
+
+          // Add helpful debugging info
+          const currentUrl = window.location.href;
+          const backendUrl =
+            import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+          const isProduction = !window.location.hostname.includes("localhost");
+
+          results.push({
+            test: "Connection Debug Info",
+            status: "info",
+            message: `Frontend: ${currentUrl} | Backend URL: ${backendUrl} | Production: ${isProduction} | Error: ${error.name}`,
+          });
         }
-
-        results.push({
-          test: "Backend Connectivity",
-          status: "fail",
-          message: errorMessage,
-        });
-
-        // Add additional debugging info
-        const currentUrl = window.location.href;
-        const backendUrl =
-          import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-        results.push({
-          test: "Debug Info",
-          status: "info",
-          message: `Frontend: ${currentUrl}, Backend URL: ${backendUrl}, Error: ${error.name}`,
-        });
       }
 
       // Test 3: Socket connection attempt
