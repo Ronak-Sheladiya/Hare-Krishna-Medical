@@ -174,55 +174,78 @@ class MessagesController {
         search,
         startDate,
         endDate,
+        category,
+        priority,
+        sortBy = "createdAt",
+        sortOrder = "desc",
       } = req.query;
 
-      let filteredMessages = [...this.messages];
+      // Build query
+      const query = { isDeleted: false };
 
       // Filter by status
       if (status) {
-        filteredMessages = filteredMessages.filter(
-          (msg) => msg.status === status,
-        );
+        query.status = status;
       }
 
-      // Search filter
-      if (search) {
-        const searchLower = search.toLowerCase();
-        filteredMessages = filteredMessages.filter(
-          (msg) =>
-            msg.name.toLowerCase().includes(searchLower) ||
-            msg.email.toLowerCase().includes(searchLower) ||
-            msg.subject.toLowerCase().includes(searchLower) ||
-            msg.message.toLowerCase().includes(searchLower),
-        );
+      // Filter by category
+      if (category) {
+        query.category = category;
+      }
+
+      // Filter by priority
+      if (priority) {
+        query.priority = priority;
       }
 
       // Date range filter
       if (startDate || endDate) {
-        filteredMessages = filteredMessages.filter((msg) => {
-          const msgDate = new Date(msg.createdAt);
-          if (startDate && msgDate < new Date(startDate)) return false;
-          if (endDate && msgDate > new Date(endDate)) return false;
-          return true;
-        });
+        query.createdAt = {};
+        if (startDate) {
+          query.createdAt.$gte = new Date(startDate);
+        }
+        if (endDate) {
+          query.createdAt.$lte = new Date(endDate);
+        }
       }
 
-      // Sort by date (newest first)
-      filteredMessages.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-      );
+      // Build sort object
+      const sortObj = {};
+      sortObj[sortBy] = sortOrder === "desc" ? -1 : 1;
 
-      // Pagination
-      const startIndex = (parseInt(page) - 1) * parseInt(limit);
-      const endIndex = startIndex + parseInt(limit);
-      const paginatedMessages = filteredMessages.slice(startIndex, endIndex);
+      // Count total messages for pagination
+      let totalMessages;
+      let messages;
 
-      const totalMessages = filteredMessages.length;
+      if (search) {
+        // Use text search if search term provided
+        const searchResults = await Message.searchMessages(search, {
+          skip: (parseInt(page) - 1) * parseInt(limit),
+          limit: parseInt(limit),
+        }).populate("respondedBy", "fullName email");
+
+        messages = searchResults;
+        totalMessages = await Message.countDocuments({
+          $text: { $search: search },
+          isDeleted: false,
+          ...query,
+        });
+      } else {
+        // Regular query
+        messages = await Message.find(query)
+          .populate("respondedBy", "fullName email")
+          .sort(sortObj)
+          .skip((parseInt(page) - 1) * parseInt(limit))
+          .limit(parseInt(limit));
+
+        totalMessages = await Message.countDocuments(query);
+      }
+
       const totalPages = Math.ceil(totalMessages / limit);
 
       res.json({
         success: true,
-        data: paginatedMessages,
+        data: messages,
         pagination: {
           currentPage: parseInt(page),
           totalPages,
