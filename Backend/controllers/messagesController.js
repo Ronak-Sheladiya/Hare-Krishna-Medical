@@ -5,23 +5,30 @@ class MessagesController {
   // Submit contact form
   async submitContact(req, res) {
     try {
-      const { name, email, mobile, subject, message } = req.body;
+      const { name, email, mobile, subject, message, category, priority } =
+        req.body;
 
-      // Create new message
-      const newMessage = {
-        id: this.messageIdCounter++,
+      // Get client info for tracking
+      const ipAddress =
+        req.ip ||
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        (req.connection.socket ? req.connection.socket.remoteAddress : null);
+      const userAgent = req.headers["user-agent"];
+
+      // Create new message in database
+      const newMessage = await Message.create({
         name,
         email,
         mobile: mobile || "",
         subject,
         message,
+        category: category || "general",
+        priority: priority || "normal",
+        ipAddress,
+        userAgent,
         status: "unread",
-        createdAt: new Date(),
-        respondedAt: null,
-        response: null,
-      };
-
-      this.messages.push(newMessage);
+      });
 
       // Send confirmation email to user
       try {
