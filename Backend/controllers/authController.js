@@ -411,6 +411,13 @@ class AuthController {
         user.emailVerificationToken = undefined;
         await user.save();
 
+        // Send welcome email after successful verification
+        try {
+          await emailService.sendWelcomeEmail(user.email, user.fullName);
+        } catch (emailError) {
+          console.error("Welcome email failed:", emailError);
+        }
+
         res.json({
           message: "Email verified successfully",
           user: {
