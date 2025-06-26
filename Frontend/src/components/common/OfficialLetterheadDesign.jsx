@@ -1,4 +1,5 @@
 import React from "react";
+import QRCode from "qrcode";
 
 const OfficialLetterheadDesign = ({
   letterheadData,
@@ -22,6 +23,32 @@ const OfficialLetterheadDesign = ({
     status,
     createdAt,
   } = letterheadData;
+
+  // Generate QR code if not provided
+  const [qrCodeUrl, setQrCodeUrl] = React.useState(qrCode);
+
+  React.useEffect(() => {
+    if (!qrCode && letterId) {
+      const generateQRCode = async () => {
+        try {
+          const verificationUrl = `${window.location.origin}/verify-docs?id=${letterId}&type=letterhead`;
+          const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, {
+            width: 120,
+            margin: 2,
+            color: {
+              dark: "#e63946",
+              light: "#ffffff",
+            },
+            errorCorrectionLevel: "M",
+          });
+          setQrCodeUrl(qrCodeDataUrl);
+        } catch (error) {
+          console.error("QR Code generation error:", error);
+        }
+      };
+      generateQRCode();
+    }
+  }, [qrCode, letterId]);
 
   const getContextPrefix = (context) => {
     switch (context) {
