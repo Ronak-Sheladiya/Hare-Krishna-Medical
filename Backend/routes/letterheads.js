@@ -152,8 +152,7 @@ router.post(
 // PUT /api/letterheads/:id - Update letterhead (Admin only)
 router.put(
   "/:id",
-  auth.authenticate,
-  auth.requireAdmin,
+  adminAuth,
   validateLetterheadId,
   validateUpdateLetterhead,
   validate,
