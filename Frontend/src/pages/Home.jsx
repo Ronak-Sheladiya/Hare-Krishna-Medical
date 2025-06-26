@@ -20,6 +20,7 @@ const Home = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { featuredProducts } = useSelector((state) => state.products);
+  const [showQRScanner, setShowQRScanner] = useState(false);
 
   // Fetch featured products from API
   const fetchFeaturedProducts = async () => {
