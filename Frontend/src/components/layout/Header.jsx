@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Navbar,
   Nav,
@@ -13,6 +13,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../store/slices/authSlice.js";
 import NotificationSystem from "../common/NotificationSystem.jsx";
 import UserAvatar from "../common/UserAvatar.jsx";
+import socketClient from "../../utils/socketClient.js";
 
 const Header = () => {
   const location = useLocation();
