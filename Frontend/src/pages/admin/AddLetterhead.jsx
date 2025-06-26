@@ -1159,7 +1159,7 @@ const AddLetterhead = () => {
                           />
                           <Form.Text className="text-muted">
                             These notes are for internal use only and will not
-                            appear in the final letterhead email.
+                            appear in the final letterhead document.
                           </Form.Text>
                         </Form.Group>
                       </div>
