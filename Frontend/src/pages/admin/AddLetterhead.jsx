@@ -1328,11 +1328,11 @@ const AddLetterhead = () => {
                       </div>
                     </div>
 
-                    <div className="email-footer">
+                    <div className="letterhead-footer">
                       <div style={{ marginBottom: "1rem" }}>
                         <div
                           style={{
-                            border: "2px dashed #ccc",
+                            border: "2px dashed #dc3545",
                             padding: "1rem",
                             textAlign: "center",
                             backgroundColor: "#fafafa",
@@ -1343,8 +1343,8 @@ const AddLetterhead = () => {
                         </div>
                       </div>
                       <div style={{ fontSize: "10px", color: "#999" }}>
-                        This is a computer-generated letterhead. QR code
-                        verification available.
+                        This is a computer-generated letterhead document. QR
+                        code verification available.
                       </div>
                     </div>
                   </div>
