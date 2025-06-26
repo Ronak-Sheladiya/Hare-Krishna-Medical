@@ -73,6 +73,7 @@ app.use("/api/analytics", require("./routes/analytics"));
 app.use("/api/upload", require("./routes/upload"));
 app.use("/api/verification", require("./routes/verification"));
 app.use("/api/admin/notifications", require("./routes/notifications"));
+app.use("/api/letterheads", require("./routes/letterheads"));
 
 // ==========================
 // ✅ Health Check Route
