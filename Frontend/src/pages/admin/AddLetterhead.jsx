@@ -1221,7 +1221,7 @@ const AddLetterhead = () => {
                     Live Letterhead Preview
                   </h6>
 
-                  <div className="email-template">
+                  <div className="letterhead-template">
                     <div className="email-header">
                       <h6
                         style={{
