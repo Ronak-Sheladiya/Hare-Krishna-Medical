@@ -121,7 +121,8 @@ class OrdersController {
       const io = req.app.get("io");
 
       try {
-        const { addNotification } = require("../routes/notifications");
+        const notificationsRoute = require("../routes/notifications");
+        const { addNotification } = notificationsRoute;
 
         // Create admin notification
         const notification = addNotification(
