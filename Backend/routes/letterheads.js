@@ -134,8 +134,7 @@ router.get("/stats", adminAuth, letterheadController.getLetterheadStats);
 // GET /api/letterheads/:id - Get single letterhead by ID
 router.get(
   "/:id",
-  auth.authenticate,
-  auth.requireAdmin,
+  adminAuth,
   validateLetterheadId,
   validate,
   letterheadController.getLetterheadById,
