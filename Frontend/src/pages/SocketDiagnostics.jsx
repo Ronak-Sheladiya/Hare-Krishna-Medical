@@ -57,26 +57,77 @@ const SocketDiagnostics = () => {
       try {
         const backendUrl =
           import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-        const response = await fetch(`${backendUrl}/api/health`);
+
+        // Try to detect if we're in production and adjust backend URL
+        let testUrl = backendUrl;
+        if (
+          window.location.hostname.includes("fly.dev") &&
+          backendUrl.includes("localhost")
+        ) {
+          // In production but backend URL is localhost, try to guess the backend URL
+          testUrl = backendUrl.replace(
+            "localhost:5000",
+            window.location.hostname.replace(/^[^-]+-/, "") + ":5000",
+          );
+          results.push({
+            test: "Backend URL Detection",
+            status: "warning",
+            message: `Production environment detected. Backend URL auto-adjusted from ${backendUrl} to ${testUrl}`,
+          });
+        }
+
+        // Add timeout and proper error handling
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+        const response = await fetch(`${testUrl}/api/health`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
 
         if (response.ok) {
+          const data = await response.json();
           results.push({
             test: "Backend Connectivity",
             status: "pass",
-            message: `Backend is reachable at ${backendUrl}`,
+            message: `Backend is reachable at ${testUrl}. Status: ${data.status || "OK"}`,
           });
         } else {
           results.push({
             test: "Backend Connectivity",
             status: "warning",
-            message: `Backend responded with status ${response.status}`,
+            message: `Backend responded with status ${response.status} from ${testUrl}`,
           });
         }
       } catch (error) {
+        let errorMessage = `Cannot reach backend: ${error.message}`;
+
+        if (error.name === "AbortError") {
+          errorMessage = "Backend connection timed out (10s)";
+        } else if (error.message.includes("Failed to fetch")) {
+          errorMessage = "Network error - Backend unreachable or CORS issue";
+        }
+
         results.push({
           test: "Backend Connectivity",
           status: "fail",
-          message: `Cannot reach backend: ${error.message}`,
+          message: errorMessage,
+        });
+
+        // Add additional debugging info
+        const currentUrl = window.location.href;
+        const backendUrl =
+          import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+        results.push({
+          test: "Debug Info",
+          status: "info",
+          message: `Frontend: ${currentUrl}, Backend URL: ${backendUrl}, Error: ${error.name}`,
         });
       }
 
