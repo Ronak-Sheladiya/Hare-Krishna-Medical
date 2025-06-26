@@ -437,7 +437,9 @@ const SocketDiagnostics = () => {
                       <strong>Connection Status:</strong>
                     </td>
                     <td>
-                      {socketStatus.connected ? (
+                      {hasConfigIssue ? (
+                        <Badge bg="warning">Configuration Error</Badge>
+                      ) : socketStatus.connected ? (
                         <Badge bg="success">Connected</Badge>
                       ) : (
                         <Badge bg="danger">Disconnected</Badge>
