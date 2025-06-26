@@ -33,29 +33,55 @@ class MessagesController {
       // Send confirmation email to user
       try {
         const confirmationHtml = `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 30px; border-radius: 10px; text-align: center;">
-              <h1 style="margin: 0; font-size: 28px;">Message Received! ✅</h1>
-              <p style="margin: 10px 0 0 0; font-size: 16px;">Thank you for contacting us</p>
+          <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; backgroundColor: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(220, 53, 69, 0.15);">
+            <div style="background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%); color: #ffffff; padding: 2rem; text-align: center;">
+              <h2 style="margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">🏥 HARE KRISHNA MEDICAL</h2>
+              <p style="margin: 0.5rem 0 0 0; font-size: 14px; opacity: 0.9; font-style: italic;">Your Health, Our Priority</p>
+              <div style="background-color: rgba(255, 255, 255, 0.2); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                <h3 style="margin: 0; font-size: 20px; font-weight: 600;">Message Received ✅</h3>
+              </div>
             </div>
 
-            <div style="padding: 30px; background: #f8f9fa; border-radius: 10px; margin-top: 20px;">
-              <h2 style="color: #333; margin-top: 0;">Hello ${name}!</h2>
-
-              <p style="color: #666; line-height: 1.6;">
-                We have received your message and our team will get back to you within 24 hours.
-              </p>
-
-              <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <h3 style="color: #28a745; margin-top: 0;">Your Message:</h3>
-                <p style="margin: 0;"><strong>Subject:</strong> ${subject}</p>
-                <p style="margin: 10px 0 0 0; color: #666;">${message}</p>
+            <div style="padding: 2rem;">
+              <div style="text-align: center; margin-bottom: 2rem;">
+                <h3 style="color: #dc3545; font-size: 24px; margin: 0 0 1rem 0; font-weight: 600;">Thank You for Contacting Us! 🎉</h3>
               </div>
 
-              <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px; text-align: center;">
-                <p style="color: #888; font-size: 14px; margin: 0;">
-                  📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat<br>
-                  📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
+              <div style="font-size: 16px; line-height: 1.7;">
+                <p style="margin: 1rem 0; color: #444444;">
+                  Dear <strong>${name}</strong>,
+                </p>
+
+                <p style="margin: 1rem 0; color: #444444;">
+                  We have received your message and our team will get back to you within 24 hours.
+                </p>
+
+                <div style="background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%); border: 2px solid #dc3545; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
+                  <h4 style="color: #dc3545; font-size: 18px; margin: 0 0 1rem 0; font-weight: 600;">📝 Your Message Details:</h4>
+                  <div style="background: #ffffff; padding: 1rem; border-left: 4px solid #dc3545; border-radius: 4px;">
+                    <p style="margin: 0;"><strong>Subject:</strong> ${subject}</p>
+                    <p style="margin: 10px 0 0 0; color: #666;">${message}</p>
+                  </div>
+                </div>
+
+                <p style="margin: 1rem 0; color: #444444;">
+                  If you have any urgent questions, feel free to contact our customer support team at
+                  <strong style="color: #dc3545;"> +91 76989 13354</strong> or reply to this email.
+                </p>
+              </div>
+            </div>
+
+            <div style="background: #f8f9fa; border-top: 3px solid #dc3545; padding: 2rem;">
+              <div style="text-align: center;">
+                <p style="margin: 0 0 1rem 0; font-size: 14px; color: #666666; line-height: 1.5;">
+                  <strong>Hare Krishna Medical Store</strong><br/>
+                  📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat<br/>
+                  📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com<br/>
+                  🌐 Visit our store for the best medical care
+                </p>
+
+                <p style="margin: 1rem 0 0 0; font-size: 12px; color: #999999; font-style: italic;">
+                  This is an automated email. Please do not reply to this email address.
                 </p>
               </div>
             </div>
