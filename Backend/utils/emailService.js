@@ -372,43 +372,117 @@ class EmailService {
   }
 
   async sendOrderConfirmation(email, fullName, order) {
+    const websiteUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
     const mailOptions = {
       from: `"Hare Krishna Medical" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: `Order Confirmation #${order.orderId} - Hare Krishna Medical Store`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #28a745;">Order Confirmed!</h2>
-          <p>Dear ${fullName},</p>
-          <p>Thank you for your order. Your order has been confirmed and is being processed.</p>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Order Confirmation</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
 
-          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
-            <h3>Order Details</h3>
-            <p><strong>Order ID:</strong> ${order.orderId}</p>
-            <p><strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleDateString()}</p>
-            <p><strong>Total Amount:</strong> ₹${order.totalAmount}</p>
-            <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
-          </div>
-
-          <h3>Items Ordered:</h3>
-          <div style="border: 1px solid #dee2e6; border-radius: 5px;">
-            ${order.items
-              .map(
-                (item) => `
-              <div style="padding: 10px; border-bottom: 1px solid #dee2e6;">
-                <strong>${item.name}</strong><br>
-                Quantity: ${item.quantity} × ₹${item.price} = ₹${item.quantity * item.price}
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #e63946, #dc3545); color: #ffffff; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+              <div style="background: white; border-radius: 50%; padding: 10px; width: 80px; height: 80px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;">
+                <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=200"
+                     alt="Hare Krishna Medical"
+                     style="width: 60px; height: 60px; object-fit: contain;" />
               </div>
-            `,
-              )
-              .join("")}
+              <h1 style="margin: 0; font-size: 24px; font-weight: 600;">✅ Order Confirmed!</h1>
+              <p style="margin: 10px 0 0 0; opacity: 0.95;">Order #${order.orderId}</p>
+            </div>
+
+            <!-- Content -->
+            <div style="padding: 40px 30px;">
+              <h2 style="color: #e63946; margin: 0 0 20px 0;">Thank You, ${fullName}!</h2>
+
+              <p style="color: #6c757d; line-height: 1.7; font-size: 16px;">
+                Your order has been confirmed and is being processed. We'll notify you as soon as it ships!
+              </p>
+
+              <!-- Order Details -->
+              <div style="background: linear-gradient(135deg, #fff5f5, #ffeaea); border-left: 4px solid #e63946; padding: 25px; border-radius: 8px; margin: 25px 0;">
+                <h3 style="color: #e63946; margin: 0 0 15px 0;">📋 Order Details</h3>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                  <span style="color: #495057; font-weight: 600;">Order ID:</span>
+                  <span style="color: #e63946; font-weight: 600;">${order.orderId}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                  <span style="color: #495057; font-weight: 600;">Order Date:</span>
+                  <span style="color: #6c757d;">${new Date(order.createdAt).toLocaleDateString()}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                  <span style="color: #495057; font-weight: 600;">Total Amount:</span>
+                  <span style="color: #e63946; font-weight: 700; font-size: 18px;">₹${order.total || order.totalAmount}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #495057; font-weight: 600;">Payment Method:</span>
+                  <span style="color: #6c757d;">${order.paymentMethod}</span>
+                </div>
+              </div>
+
+              <!-- Items List -->
+              <h3 style="color: #e63946; margin: 30px 0 20px 0;">🛒 Items Ordered</h3>
+              <div style="border: 2px solid #f8f9fa; border-radius: 10px; overflow: hidden;">
+                ${order.items
+                  .map(
+                    (item, index) => `
+                  <div style="padding: 20px; ${index < order.items.length - 1 ? "border-bottom: 1px solid #f8f9fa;" : ""} background: ${index % 2 === 0 ? "#ffffff" : "#fbfbfb"};">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <div>
+                        <strong style="color: #495057; font-size: 16px;">${item.name}</strong><br>
+                        <span style="color: #6c757d; font-size: 14px;">Quantity: ${item.quantity} × ₹${item.price}</span>
+                      </div>
+                      <div style="text-align: right;">
+                        <span style="color: #e63946; font-weight: 600; font-size: 16px;">₹${item.quantity * item.price}</span>
+                      </div>
+                    </div>
+                  </div>
+                `,
+                  )
+                  .join("")}
+              </div>
+
+              <!-- CTA Button -->
+              <div style="text-align: center; margin: 35px 0;">
+                <a href="${websiteUrl}/user/orders"
+                   style="display: inline-block; background: linear-gradient(135deg, #e63946, #dc3545); color: #ffffff; text-decoration: none; padding: 15px 35px; border-radius: 25px; font-weight: 600; font-size: 16px; box-shadow: 0 6px 20px rgba(230,57,70,0.3);">
+                  📱 Track Your Order
+                </a>
+              </div>
+
+              <!-- Status Update Info -->
+              <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                <h4 style="margin: 0 0 10px 0; color: #155724;">📬 What's Next?</h4>
+                <ul style="margin: 0; color: #155724; line-height: 1.6;">
+                  <li>We'll prepare your order for shipping</li>
+                  <li>You'll receive an email when it ships</li>
+                  <li>Track your order progress in your dashboard</li>
+                  <li>Enjoy your medical products!</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="background: linear-gradient(135deg, #495057, #343a40); color: #ffffff; padding: 20px 30px; text-align: center; border-radius: 0 0 10px 10px;">
+              <p style="margin: 0 0 8px 0; font-size: 13px;">
+                📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat
+              </p>
+              <p style="margin: 0; font-size: 11px; opacity: 0.7;">
+                📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
+              </p>
+            </div>
           </div>
-
-          <p style="margin-top: 20px;">We'll notify you when your order is shipped.</p>
-          <p>Track your order status in your dashboard.</p>
-
-          <p>Best regards,<br>Hare Krishna Medical Store Team</p>
-        </div>
+        </body>
+        </html>
       `,
     };
 
