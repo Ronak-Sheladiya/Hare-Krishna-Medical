@@ -534,44 +534,135 @@ const AddLetterhead = () => {
         }
 
         .letterhead-btn {
-          background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%);
+          background: linear-gradient(135deg, #e63946 0%, #dc3545 100%);
           border: none;
-          color: white;
-          padding: 0.75rem 2rem;
-          border-radius: 10px;
+          border-radius: 12px;
+          padding: 1rem 2.5rem;
           font-weight: 600;
+          color: white;
           transition: all 0.3s ease;
-          display: inline-flex;
-          align-items: center;
+          box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
+          font-size: 1rem;
+          font-family: 'Times New Roman', Times, serif;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .letterhead-btn::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+          transition: left 0.5s ease;
+        }
+
+        .letterhead-btn:hover::before {
+          left: 100%;
         }
 
         .letterhead-btn:hover:not(:disabled) {
           transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+          box-shadow: 0 8px 25px rgba(230, 57, 70, 0.4);
           color: white;
         }
 
         .letterhead-btn:disabled {
           opacity: 0.7;
-          transform: none;
+          cursor: not-allowed;
         }
 
         .letterhead-btn-outline {
           background: transparent;
-          border: 2px solid #dc3545;
-          color: #dc3545;
-          padding: 0.75rem 2rem;
-          border-radius: 10px;
+          border: 2px solid #e63946;
+          color: #e63946;
+          border-radius: 12px;
+          padding: 1rem 2.5rem;
           font-weight: 600;
           transition: all 0.3s ease;
-          display: inline-flex;
-          align-items: center;
-          text-decoration: none;
+          font-size: 1rem;
+          font-family: 'Times New Roman', Times, serif;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .letterhead-btn-outline::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 0;
+          height: 100%;
+          background: linear-gradient(135deg, #e63946, #dc3545);
+          transition: width 0.3s ease;
+          z-index: 1;
+        }
+
+        .letterhead-btn-outline:hover::before {
+          width: 100%;
+        }
+
+        .letterhead-btn-outline span {
+          position: relative;
+          z-index: 2;
         }
 
         .letterhead-btn-outline:hover {
-          background: #dc3545;
           color: white;
+          border-color: #e63946;
+          transform: translateY(-2px);
+        }
+
+        .letterhead-btn-secondary {
+          background: linear-gradient(135deg, #6c757d, #5a6268);
+          border: none;
+          border-radius: 12px;
+          padding: 1rem 2rem;
+          font-weight: 600;
+          color: white;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+          font-size: 1rem;
+          font-family: 'Times New Roman', Times, serif;
+        }
+
+        .letterhead-btn-secondary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+          color: white;
+        }
+
+        .action-section {
+          background: linear-gradient(135deg, #ffffff, #f8f9fa);
+          border-radius: 20px;
+          padding: 2rem;
+          margin-top: 2rem;
+          border: 2px solid rgba(230, 57, 70, 0.1);
+          box-shadow: 0 8px 32px rgba(230, 57, 70, 0.08);
+        }
+
+        .button-group {
+          display: flex;
+          gap: 1rem;
+          justify-content: center;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+
+        .save-indicator {
+          background: white;
+          border: 2px solid #28a745;
+          border-radius: 12px;
+          padding: 1rem;
+          margin-top: 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #28a745;
+          font-weight: 600;
+        }
           transform: translateY(-2px);
         }
 
