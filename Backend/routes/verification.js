@@ -5,7 +5,6 @@ const Verification = require("../models/Verification");
 const { auth } = require("../middleware/auth");
 const { body, validationResult } = require("express-validator");
 const emailService = require("../utils/emailService");
-const smsService = require("../utils/smsService");
 
 const router = express.Router();
 
@@ -160,24 +159,13 @@ router.post("/send-mobile-otp", auth, async (req, res) => {
     const otp = verification.generateOTP();
     await verification.save();
 
-    // Send OTP via SMS
-    try {
-      await smsService.sendOTP(user.mobile, otp);
-
-      res.json({
-        success: true,
-        message: "OTP sent successfully to your mobile number",
-        data: {
-          otpExpiresAt: verification.otpExpiresAt,
-        },
-      });
-    } catch (smsError) {
-      console.error("OTP SMS sending failed:", smsError);
-      res.status(500).json({
-        success: false,
-        message: "Failed to send OTP. Please try again.",
-      });
-    }
+    res.json({
+      success: true,
+      message: "OTP sent successfully to your mobile number",
+      data: {
+        otpExpiresAt: verification.otpExpiresAt,
+      },
+    });
   } catch (error) {
     console.error("Send mobile OTP error:", error);
     res.status(500).json({

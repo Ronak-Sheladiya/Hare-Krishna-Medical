@@ -890,7 +890,7 @@ const UserGuide = () => {
                             Click "Track Order" for real-time updates
                           </li>
                           <li style={{ marginBottom: "8px" }}>
-                            Receive SMS/Email notifications for status changes
+                            Receive Email notifications for status changes
                           </li>
                         </ol>
                       </div>
@@ -1193,8 +1193,8 @@ const UserGuide = () => {
                         You can track your order by logging into your account
                         and visiting the "My Orders" section. Each order shows
                         real-time status updates from placement to delivery. You
-                        also receive SMS and email notifications for every
-                        status change.
+                        also receive email notifications for every status
+                        change.
                       </Accordion.Body>
                     </Accordion.Item>
 

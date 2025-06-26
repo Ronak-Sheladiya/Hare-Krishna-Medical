@@ -88,7 +88,7 @@ const invoiceSchema = new mongoose.Schema(
     remindersSent: [
       {
         date: Date,
-        type: String, // 'email', 'sms'
+        type: String, // 'email'
       },
     ],
   },

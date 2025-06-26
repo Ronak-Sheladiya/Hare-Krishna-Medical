@@ -480,7 +480,7 @@ const VerificationStatus = () => {
                       }}
                     >
                       Verify your mobile number to receive order updates via
-                      SMS.
+                      email.
                     </p>
 
                     <div className="mb-3">

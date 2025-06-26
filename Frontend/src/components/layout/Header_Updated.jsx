@@ -14,6 +14,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../store/slices/authSlice.js";
 import NotificationSystem from "../common/NotificationSystem.jsx";
 import UserAvatar from "../common/UserAvatar.jsx";
+import ServerStatus from "../common/ServerStatus.jsx";
 
 const Header = () => {
   const location = useLocation();
@@ -177,6 +178,8 @@ const Header = () => {
 
             {/* Desktop Actions */}
             <div className="d-flex align-items-center gap-2">
+              {/* Server Status */}
+              <ServerStatus />
               {/* Cart */}
               <Button
                 as={Link}

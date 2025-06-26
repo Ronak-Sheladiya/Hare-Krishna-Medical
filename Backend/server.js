@@ -45,7 +45,8 @@ app.use(express.urlencoded({ extended: true }));
 // Database Connection
 mongoose
   .connect(
-    process.env.MONGODB_URI || "mongodb://localhost:27017/Hare_Krishna_Medical_db",
+    process.env.MONGODB_URI ||
+      "mongodb://localhost:27017/Hare_Krishna_Medical_db",
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -54,8 +55,8 @@ mongoose
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-  app.use(express.json());
-app.use("/api/test", testUserRoute); 
+app.use(express.json());
+app.use("/api/test", testUserRoute);
 
 // Socket.io connection handling
 io.on("connection", (socket) => {
@@ -97,8 +98,15 @@ app.use("/api/verification", require("./routes/verification"));
 
 // Health Check
 app.get("/api/health", (req, res) => {
+  // Check database connection
+  const dbStatus = mongoose.connection.readyState;
+  const databaseStatus = dbStatus === 1 ? "connected" : "disconnected";
+
   res.json({
+    success: true,
     status: "OK",
+    server: "online",
+    database: databaseStatus,
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || "development",
