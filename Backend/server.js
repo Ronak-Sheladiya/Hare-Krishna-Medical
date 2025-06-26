@@ -47,17 +47,39 @@ app.use("/api/", limiter);
 // ==========================
 // ✅ Database Connection
 // ==========================
+const mongoURI =
+  process.env.MONGODB_URI ||
+  "mongodb://localhost:27017/Hare_Krishna_Medical_db";
+console.log("🔄 Attempting MongoDB connection to:", mongoURI);
+
 mongoose
-  .connect(
-    process.env.MONGODB_URI ||
-      "mongodb://localhost:27017/Hare_Krishna_Medical_db",
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    },
-  )
-  .then(() => console.log("✅ Connected to MongoDB"))
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
+  .connect(mongoURI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then((conn) => {
+    console.log("✅ Connected to MongoDB");
+    console.log("📊 Database:", conn.connection.name);
+    console.log("🏠 Host:", conn.connection.host);
+    console.log("🔌 Port:", conn.connection.port);
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err.message);
+    console.error("Full error:", err);
+  });
+
+// Enhanced connection event handlers
+mongoose.connection.on("connected", () => {
+  console.log("📡 Mongoose connected to MongoDB");
+});
+
+mongoose.connection.on("error", (err) => {
+  console.error("❌ Mongoose connection error:", err);
+});
+
+mongoose.connection.on("disconnected", () => {
+  console.log("📡 Mongoose disconnected from MongoDB");
+});
 
 // ==========================
 // ✅ Routes
