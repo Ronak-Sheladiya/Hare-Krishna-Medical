@@ -929,6 +929,14 @@ const Home = () => {
           </Row>
         </Container>
       </section>
+
+      {/* QR Camera Scanner Modal */}
+      <QRCameraScanner
+        show={showQRScanner}
+        onHide={() => setShowQRScanner(false)}
+        onScanSuccess={handleQRScanSuccess}
+        onScanError={handleQRScanError}
+      />
     </div>
   );
 };
