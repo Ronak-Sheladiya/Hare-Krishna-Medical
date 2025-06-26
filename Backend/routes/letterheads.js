@@ -162,8 +162,7 @@ router.put(
 // DELETE /api/letterheads/:id - Delete letterhead (Admin only)
 router.delete(
   "/:id",
-  auth.authenticate,
-  auth.requireAdmin,
+  adminAuth,
   validateLetterheadId,
   validate,
   letterheadController.deleteLetterhead,
