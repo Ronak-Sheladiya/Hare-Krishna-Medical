@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const { devAuth, shouldUseFallback } = require("../utils/devFallback");
 
 // ✅ General User Authentication Middleware
 const auth = async (req, res, next) => {
