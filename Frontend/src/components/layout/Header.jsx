@@ -317,26 +317,38 @@ const Header = () => {
 
                     {user?.role === 1 && (
                       <>
-                        <Dropdown.Item as={Link} to="/admin/users">
-                          <i className="bi bi-people me-2"></i>
+                        <AdminDropdownItem
+                          to="/admin/users"
+                          icon="bi-people"
+                          count={adminCounts.users}
+                        >
                           Manage Users
-                        </Dropdown.Item>
-                        <Dropdown.Item as={Link} to="/admin/products">
-                          <i className="bi bi-box me-2"></i>
+                        </AdminDropdownItem>
+                        <AdminDropdownItem
+                          to="/admin/products"
+                          icon="bi-box"
+                          count={adminCounts.products}
+                        >
                           Manage Products
-                        </Dropdown.Item>
-                        <Dropdown.Item as={Link} to="/admin/orders">
-                          <i className="bi bi-bag-check me-2"></i>
+                        </AdminDropdownItem>
+                        <AdminDropdownItem
+                          to="/admin/orders"
+                          icon="bi-bag-check"
+                          count={adminCounts.orders}
+                        >
                           Manage Orders
-                        </Dropdown.Item>
+                        </AdminDropdownItem>
                         <Dropdown.Item as={Link} to="/admin/invoices">
                           <i className="bi bi-receipt-cutoff me-2"></i>
                           Manage Invoices
                         </Dropdown.Item>
-                        <Dropdown.Item as={Link} to="/admin/payment-methods">
-                          <i className="bi bi-credit-card me-2"></i>
+                        <AdminDropdownItem
+                          to="/admin/payment-methods"
+                          icon="bi-credit-card"
+                          count={adminCounts.payments}
+                        >
                           Payment Management
-                        </Dropdown.Item>
+                        </AdminDropdownItem>
                         <Dropdown.Item as={Link} to="/admin/analytics">
                           <i className="bi bi-graph-up me-2"></i>
                           Analytics
@@ -345,10 +357,13 @@ const Header = () => {
                           <i className="bi bi-person-gear me-2"></i>
                           Edit Profile
                         </Dropdown.Item>
-                        <Dropdown.Item as={Link} to="/admin/messages">
-                          <i className="bi bi-envelope me-2"></i>
+                        <AdminDropdownItem
+                          to="/admin/messages"
+                          icon="bi-envelope"
+                          count={adminCounts.messages}
+                        >
                           Messages
-                        </Dropdown.Item>
+                        </AdminDropdownItem>
                         <Dropdown.Divider />
                         <Dropdown.Header>
                           <small className="text-muted">Admin Tools</small>
