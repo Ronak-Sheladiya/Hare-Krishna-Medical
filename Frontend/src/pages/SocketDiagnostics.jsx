@@ -549,30 +549,108 @@ const SocketDiagnostics = () => {
         </Col>
       </Row>
 
+      {/* Production Configuration Alert */}
+      {window.location.hostname.includes("fly.dev") &&
+        (import.meta.env.VITE_BACKEND_URL || "http://localhost:5000").includes(
+          "localhost",
+        ) && (
+          <Alert variant="warning" className="mt-4">
+            <Alert.Heading>
+              ⚠️ Production Configuration Issue Detected
+            </Alert.Heading>
+            <p>
+              Your frontend is running on Fly.dev (production) but the backend
+              URL is set to localhost. This will cause connection failures.
+            </p>
+            <hr />
+            <p className="mb-0">
+              <strong>To fix this:</strong>
+              <ol>
+                <li>
+                  Set the <code>VITE_BACKEND_URL</code> environment variable in
+                  your deployment
+                </li>
+                <li>
+                  Point it to your actual backend URL (e.g.,{" "}
+                  <code>https://your-backend.fly.dev</code>)
+                </li>
+                <li>
+                  Ensure your backend allows CORS from your frontend domain
+                </li>
+              </ol>
+            </p>
+          </Alert>
+        )}
+
       {/* Troubleshooting Tips */}
       <Card className="mt-4">
         <Card.Header>
-          <h5 className="mb-0">Troubleshooting Tips</h5>
+          <h5 className="mb-0">Troubleshooting Guide</h5>
         </Card.Header>
         <Card.Body>
           <Row>
             <Col md={6}>
-              <h6>Common Issues:</h6>
+              <h6>Development Environment:</h6>
               <ul>
-                <li>Backend server is not running</li>
-                <li>CORS configuration issues</li>
-                <li>Network firewall blocking WebSocket connections</li>
-                <li>Browser blocking mixed content (HTTP/HTTPS)</li>
+                <li>
+                  Backend should run on <code>http://localhost:5000</code>
+                </li>
+                <li>
+                  Frontend should run on <code>http://localhost:5173</code>
+                </li>
+                <li>CORS should allow localhost origins</li>
+                <li>Check if backend server is running</li>
+              </ul>
+
+              <h6 className="mt-3">Common Development Issues:</h6>
+              <ul>
+                <li>Backend server not started</li>
+                <li>Port conflicts (5000 already in use)</li>
+                <li>Missing environment variables</li>
+                <li>Database connection issues</li>
               </ul>
             </Col>
             <Col md={6}>
-              <h6>Solutions:</h6>
+              <h6>Production Environment:</h6>
               <ul>
-                <li>Ensure backend is running on port 5000</li>
-                <li>Check CORS settings in backend server.js</li>
-                <li>Try using polling transport as fallback</li>
-                <li>Use HTTPS in production environments</li>
+                <li>
+                  Set <code>VITE_BACKEND_URL</code> environment variable
+                </li>
+                <li>Use HTTPS for both frontend and backend</li>
+                <li>Configure CORS for production domains</li>
+                <li>Check network security groups/firewalls</li>
               </ul>
+
+              <h6 className="mt-3">Common Production Issues:</h6>
+              <ul>
+                <li>Mixed content (HTTP backend, HTTPS frontend)</li>
+                <li>CORS policy blocking requests</li>
+                <li>Environment variables not set</li>
+                <li>Network connectivity issues</li>
+              </ul>
+            </Col>
+          </Row>
+
+          <hr />
+
+          <h6>Quick Fixes:</h6>
+          <Row>
+            <Col md={6}>
+              <div className="bg-light p-3 rounded">
+                <strong>Development:</strong>
+                <pre className="mt-2 mb-0">
+                  <code>{`cd Backend && npm start
+cd Frontend && npm run dev`}</code>
+                </pre>
+              </div>
+            </Col>
+            <Col md={6}>
+              <div className="bg-light p-3 rounded">
+                <strong>Production Environment Variable:</strong>
+                <pre className="mt-2 mb-0">
+                  <code>{`VITE_BACKEND_URL=https://your-backend.fly.dev`}</code>
+                </pre>
+              </div>
             </Col>
           </Row>
         </Card.Body>
