@@ -861,71 +861,45 @@ const AddLetterhead = () => {
                       </h5>
                     </Card.Header>
                     <Card.Body className="p-4">
-                      <div className="form-section">
-                        <h6 className="section-title">Personal Details</h6>
-                        <Row>
-                          <Col md={3}>
-                            <Form.Group className="mb-4">
-                              <Form.Label className="fw-semibold">
-                                Prefix
-                              </Form.Label>
-                              <Form.Select
-                                name="recipient.prefix"
-                                value={formData.recipient.prefix}
-                                onChange={handleInputChange}
-                                className="letterhead-form-control"
-                              >
-                                <option value="Mr.">Mr.</option>
-                                <option value="Mrs.">Mrs.</option>
-                                <option value="Miss">Miss</option>
-                                <option value="Dr.">Dr.</option>
-                                <option value="Prof.">Prof.</option>
-                              </Form.Select>
-                            </Form.Group>
-                          </Col>
-                          <Col md={3}>
-                            <Form.Group className="mb-4">
-                              <Form.Label className="fw-semibold">
-                                First Name *
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="recipient.firstName"
-                                value={formData.recipient.firstName}
-                                onChange={handleInputChange}
-                                placeholder="First name"
-                                className="letterhead-form-control"
-                                required
-                              />
-                            </Form.Group>
-                          </Col>
-                          <Col md={3}>
-                            <Form.Group className="mb-4">
-                              <Form.Label className="fw-semibold">
-                                Middle Name
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="recipient.middleName"
-                                value={formData.recipient.middleName}
-                                onChange={handleInputChange}
-                                placeholder="Middle name"
-                                className="letterhead-form-control"
-                              />
-                            </Form.Group>
-                          </Col>
-                          <Col md={3}>
-                            <Form.Group className="mb-4">
-                              <Form.Label className="fw-semibold">
-                                Last Name *
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="recipient.lastName"
-                                value={formData.recipient.lastName}
-                                onChange={handleInputChange}
-                                placeholder="Last name"
-                                className="letterhead-form-control"
+                  <div className="letterhead-template">
+                    <div className="letterhead-header">
+                      <h4
+                        style={{
+                          margin: 0,
+                          fontSize: "20px",
+                          fontWeight: "bold",
+                          letterSpacing: "1px",
+                        }}
+                      >
+                        HARE KRISHNA MEDICAL STORE
+                      </h4>
+                      <div style={{ fontSize: "12px", marginTop: "1rem" }}>
+                        3 Sahyog Complex, Man Sarovar circle, Amroli, 394107,
+                        Gujarat
+                      </div>
+                      <div style={{ fontSize: "12px" }}>
+                        Phone: +91 76989 13354 | Email: hkmedicalamroli@gmail.com
+                      </div>
+                      <div style={{ fontSize: "12px", marginTop: "0.5rem" }}>
+                        GST No: 24XXXXX1234Z1Z5 | Drug License: GJ-XXX-XXX
+                      </div>
+                      {formData.title && (
+                        <div
+                          style={{
+                            fontSize: "16px",
+                            fontWeight: "600",
+                            marginTop: "1.5rem",
+                            padding: "1rem",
+                            background: "rgba(255,255,255,0.2)",
+                            borderRadius: "8px",
+                          }}
+                        >
+                          {formData.title}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="letterhead-content"
                                 required
                               />
                             </Form.Group>
