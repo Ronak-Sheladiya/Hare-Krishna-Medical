@@ -1063,10 +1063,10 @@ const AddLetterhead = () => {
                           />
                         </div>
                         <Form.Text className="text-muted">
-                          <i className="bi bi-info-circle me-1"></i>
-                          Write the main content of your letterhead. Use the
-                          formatting toolbar for styling. This content will be
-                          displayed in a responsive email format.
+                          <div className="letterhead-footer">
+                            This is a computer-generated letterhead document
+                            with proper formatting and official verification.
+                          </div>
                         </Form.Text>
                       </div>
 
