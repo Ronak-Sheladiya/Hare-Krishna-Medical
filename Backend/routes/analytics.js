@@ -9,6 +9,11 @@ const router = express.Router();
 // @access  Admin
 router.get("/dashboard", adminAuth, analyticsController.getDashboard);
 
+// @route   GET /api/analytics/dashboard-stats
+// @desc    Get dashboard statistics (alias)
+// @access  Admin
+router.get("/dashboard-stats", adminAuth, analyticsController.getDashboard);
+
 // @route   GET /api/analytics/revenue
 // @desc    Get revenue analytics
 // @access  Admin
