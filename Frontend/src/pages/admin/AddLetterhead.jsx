@@ -650,10 +650,10 @@ const AddLetterhead = () => {
             padding: 0.75rem;
           }
 
-          .email-header, .email-body {
+          .letterhead-header, .letterhead-body {
             padding: 1rem 0.75rem;
+            font-size: 0.9rem;
           }
-
           .form-section {
             margin-bottom: 2rem;
             padding-bottom: 1.5rem;
