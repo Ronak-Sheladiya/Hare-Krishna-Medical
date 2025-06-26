@@ -45,16 +45,15 @@ class AuthController {
       user.emailOTPExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
       await user.save();
 
-      // Send welcome email with OTP
+      // Send OTP for email verification
       try {
-        await emailService.sendWelcomeEmail(user.email, user.fullName);
         await emailService.sendVerificationEmail(
           user.email,
           user.fullName,
           otp,
         );
       } catch (emailError) {
-        console.error("Welcome/OTP email failed:", emailError);
+        console.error("OTP email failed:", emailError);
       }
 
       // Emit real-time update
