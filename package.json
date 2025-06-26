@@ -3,15 +3,10 @@
   "version": "1.0.0",
   "description": "Full-stack medical store application with React frontend and Node.js backend",
   "private": true,
-  "workspaces": [
-    "Frontend",
-    "Backend"
-  ],
   "scripts": {
-    "install": "npm install --workspaces",
-    "install:frontend": "cd Frontend && npm install",
+    "install:frontend": "cd Frontend && npm install --legacy-peer-deps",
     "install:backend": "cd Backend && npm install",
-    "install:all": "npm run install:frontend && npm run install:backend",
+    "install:all": "npm run install:backend && npm run install:frontend",
     "dev": "cd Frontend && npm run dev",
     "dev:full": "cd Frontend && npm run dev:full",
     "start": "cd Backend && npm start",
