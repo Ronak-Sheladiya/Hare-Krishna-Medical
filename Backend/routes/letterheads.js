@@ -155,7 +155,7 @@ router.put(
   adminAuth,
   validateLetterheadId,
   validateUpdateLetterhead,
-  validate,
+  handleValidationErrors,
   letterheadController.updateLetterhead,
 );
 
