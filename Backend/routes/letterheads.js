@@ -164,7 +164,7 @@ router.delete(
   "/:id",
   adminAuth,
   validateLetterheadId,
-  validate,
+  handleValidationErrors,
   letterheadController.deleteLetterhead,
 );
 
