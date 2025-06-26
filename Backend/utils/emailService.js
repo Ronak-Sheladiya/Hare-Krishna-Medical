@@ -194,21 +194,27 @@ class EmailService {
                   <div style="background: linear-gradient(135deg, #2c3e50, #34495e); color: #ffffff; padding: 35px 40px; text-align: center;">
                     <div style="border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 20px; margin-bottom: 20px;">
                       <h4 style="margin: 0 0 10px 0; font-family: 'Times New Roman', Times, serif; font-size: 18px; color: #ffffff;">Hare Krishna Medical Store</h4>
-                      <p style="margin: 0; font-size: 14px; opacity: 0.9; font-style: italic;">Serving Gujarat with Excellence in Healthcare</p>
+                      <p style="margin: 0; font-size: 14px; opacity: 0.9; font-style: italic;">Your trusted partner in health and wellness</p>
                     </div>
 
                     <div style="margin-bottom: 15px;">
                       <p style="margin: 0 0 8px 0; font-size: 14px; opacity: 0.9;">
-                        📍 <strong>Professional Address:</strong> 3 Sahyog Complex, Man Sarovar Circle, Amroli, 394107, Gujarat
+                        📍 <strong>Address:</strong> 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat
+                      </p>
+                      <p style="margin: 0 0 8px 0; font-size: 14px; opacity: 0.9;">
+                        📧 <strong>Email:</strong> hkmedicalamroli@gmail.com
+                      </p>
+                      <p style="margin: 0 0 8px 0; font-size: 14px; opacity: 0.9;">
+                        📞 <strong>Phone:</strong> +91 76989 13354 | +91 91060 18508
                       </p>
                       <p style="margin: 0; font-size: 14px; opacity: 0.9;">
-                        ⏰ <strong>Business Hours:</strong> Mon-Sat 9:00 AM - 9:00 PM | Sunday 10:00 AM - 6:00 PM
+                        🌐 <strong>Instagram:</strong> @harekrishna_medical
                       </p>
                     </div>
 
                     <div style="border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px;">
                       <p style="margin: 0; font-size: 12px; opacity: 0.7;">
-                        © 2024 Hare Krishna Medical Store. All rights reserved. Licensed Medical Establishment.
+                        © 2024 Hare Krishna Medical Store. All rights reserved. Designed with ❤️ for your health.
                       </p>
                     </div>
                   </div>
@@ -312,12 +318,12 @@ class EmailService {
             </div>
 
             <!-- Footer -->
-            <div style="background: linear-gradient(135deg, #495057, #343a40); color: #ffffff; padding: 20px 30px; text-align: center; border-radius: 0 0 10px 10px;">
+            <div style="background: linear-gradient(135deg, #2c3e50, #34495e); color: #ffffff; padding: 20px 30px; text-align: center; border-radius: 0 0 10px 10px;">
               <p style="margin: 0 0 8px 0; font-size: 13px;">
                 📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat
               </p>
               <p style="margin: 0; font-size: 11px; opacity: 0.7;">
-                📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
+                📞 +91 76989 13354 | +91 91060 18508 | 📧 hkmedicalamroli@gmail.com | 🌐 @harekrishna_medical
               </p>
             </div>
           </div>
@@ -457,12 +463,12 @@ class EmailService {
             </div>
 
             <!-- Footer -->
-            <div style="background: linear-gradient(135deg, #495057, #343a40); color: #ffffff; padding: 20px 30px; text-align: center; border-radius: 0 0 10px 10px;">
+            <div style="background: linear-gradient(135deg, #2c3e50, #34495e); color: #ffffff; padding: 20px 30px; text-align: center; border-radius: 0 0 10px 10px;">
               <p style="margin: 0 0 8px 0; font-size: 13px;">
                 📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat
               </p>
               <p style="margin: 0; font-size: 11px; opacity: 0.7;">
-                📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
+                📞 +91 76989 13354 | +91 91060 18508 | 📧 hkmedicalamroli@gmail.com | 🌐 @harekrishna_medical
               </p>
             </div>
           </div>
@@ -581,12 +587,12 @@ class EmailService {
             </div>
 
             <!-- Footer -->
-            <div style="background: linear-gradient(135deg, #495057, #343a40); color: #ffffff; padding: 20px 30px; text-align: center; border-radius: 0 0 10px 10px;">
+            <div style="background: linear-gradient(135deg, #2c3e50, #34495e); color: #ffffff; padding: 20px 30px; text-align: center; border-radius: 0 0 10px 10px;">
               <p style="margin: 0 0 8px 0; font-size: 13px;">
                 📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat
               </p>
               <p style="margin: 0; font-size: 11px; opacity: 0.7;">
-                📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
+                📞 +91 76989 13354 | +91 91060 18508 | 📧 hkmedicalamroli@gmail.com | 🌐 @harekrishna_medical
               </p>
             </div>
           </div>

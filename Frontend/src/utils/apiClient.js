@@ -1,6 +1,6 @@
 // API Client utility with proper error handling and timeout
 const API_BASE_URL =
-  import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+  import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 // Store original fetch to avoid external interference
 const originalFetch = window.fetch.bind(window);
@@ -75,12 +75,13 @@ export const apiCall = async (endpoint, options = {}) => {
 
         // Add authentication token if available
         try {
-          const token = localStorage.getItem("token");
+          const token =
+            localStorage.getItem("token") || sessionStorage.getItem("token");
           if (token) {
             config.headers.Authorization = `Bearer ${token}`;
           }
         } catch (e) {
-          // Ignore localStorage errors
+          // Ignore localStorage/sessionStorage errors
         }
 
         // Create abort controller for timeout

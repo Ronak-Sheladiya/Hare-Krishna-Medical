@@ -227,7 +227,7 @@ const AddProduct = () => {
 
       // Submit to API
       const { success, data, error } = await safeApiCall(
-        () => api.post("/api/admin/products", productData),
+        () => api.post("/api/products", productData),
         null,
       );
 
