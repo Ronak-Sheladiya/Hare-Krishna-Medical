@@ -1255,9 +1255,7 @@ const AddLetterhead = () => {
                     ) : (
                       <>
                         <i className="bi bi-check-circle me-2"></i>
-                        {isEditing
-                          ? "Update Professional Letterhead"
-                          : "Create Professional Letterhead"}
+                        {isEditing ? "Update Letterhead" : "Create Letterhead"}
                       </>
                     )}
                   </button>
