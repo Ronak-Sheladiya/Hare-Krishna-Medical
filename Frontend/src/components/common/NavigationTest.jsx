@@ -46,15 +46,18 @@ const NavigationTest = () => {
 
   const testAPIConnection = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/health");
+      const backendUrl =
+        import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+      const response = await fetch(`${backendUrl}/api/health`);
       if (response.ok) {
+        const data = await response.json();
         setTestResults((prev) => [
           ...prev,
           {
             path: "/api/health",
             name: "Backend Health",
             status: "success",
-            message: "Backend is responsive",
+            message: `Backend is responsive (${data.status})`,
           },
         ]);
       } else {
@@ -67,7 +70,7 @@ const NavigationTest = () => {
           path: "/api/health",
           name: "Backend Health",
           status: "error",
-          message: `Backend error: ${error.message}`,
+          message: `Backend error: ${error.message}. Using URL: ${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"}`,
         },
       ]);
     }
