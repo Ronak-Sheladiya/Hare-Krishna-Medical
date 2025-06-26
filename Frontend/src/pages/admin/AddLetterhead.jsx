@@ -1222,7 +1222,7 @@ const AddLetterhead = () => {
                   </h6>
 
                   <div className="letterhead-template">
-                    <div className="email-header">
+                    <div className="letterhead-header">
                       <h6
                         style={{
                           margin: 0,
