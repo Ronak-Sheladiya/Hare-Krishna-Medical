@@ -830,8 +830,7 @@ const Home = () => {
                         e.target.style.transform = "translateY(0)";
                         e.target.style.boxShadow = "none";
                       }}
-                      as={Link}
-                      to="/verify"
+                      onClick={() => setShowQRScanner(true)}
                     >
                       <i className="bi bi-qr-code-scan me-1"></i>
                       Scan QR
