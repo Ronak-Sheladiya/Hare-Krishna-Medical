@@ -1208,7 +1208,7 @@ const AddLetterhead = () => {
                     onClick={() => setShowPreview(true)}
                   >
                     <i className="bi bi-eye me-2"></i>
-                    Full Email Preview
+                    Full Letterhead Preview
                   </button>
                 </div>
               </Col>
