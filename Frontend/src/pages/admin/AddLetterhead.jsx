@@ -1478,7 +1478,7 @@ const AddLetterhead = () => {
                 </div>
               </div>
 
-              <div className="email-footer">
+              <div className="letterhead-footer">
                 <div style={{ marginBottom: "1.5rem" }}>
                   <div
                     style={{
