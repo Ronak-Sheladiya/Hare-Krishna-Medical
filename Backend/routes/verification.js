@@ -400,37 +400,7 @@ router.get(
             verified: true,
           };
         }
-      } else if (type === "letterhead") {
-        // Check if it's MongoDB ObjectId or Letter ID
-        if (id.match(/^[0-9a-fA-F]{24}$/)) {
-          document = await Letterhead.findById(id).populate(
-            "createdBy",
-            "fullName email",
-          );
-        } else {
-          document = await Letterhead.findOne({ letterId: id }).populate(
-            "createdBy",
-            "fullName email",
-          );
-        }
 
-        if (document) {
-          documentData = {
-            id: document.letterId,
-            type: "letterhead",
-            title: document.title,
-            letterType: document.letterType,
-            recipientName: document.recipientFullName,
-            subject: document.subject,
-            date: document.createdAt,
-            status: document.status,
-            hostName: document.host.name,
-            hostDesignation: document.host.designation,
-            qrCodeData: document.qrCodeData,
-            verified: true,
-          };
-        }
-      }
 
       if (!document) {
         return res.status(404).json({
