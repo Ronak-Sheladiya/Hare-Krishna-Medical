@@ -355,8 +355,8 @@ router.get(
   [
     query("id").notEmpty().withMessage("Document ID is required"),
     query("type")
-      .isIn(["invoice"])
-      .withMessage("Document type must be invoice"),
+      .isIn(["invoice", "letterhead"])
+      .withMessage("Document type must be invoice or letterhead"),
   ],
   async (req, res) => {
     try {
