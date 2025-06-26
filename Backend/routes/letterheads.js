@@ -122,8 +122,7 @@ const validateQueryParams = [
 // GET /api/letterheads - Get all letterheads (Admin only)
 router.get(
   "/",
-  auth.authenticate,
-  auth.requireAdmin,
+  adminAuth,
   validateQueryParams,
   validate,
   letterheadController.getAllLetterheads,
