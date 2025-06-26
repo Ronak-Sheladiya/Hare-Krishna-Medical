@@ -222,10 +222,30 @@ class EmailService {
     };
 
     try {
-      await this.transporter.sendMail(mailOptions);
-      console.log(`Welcome email sent to ${email}`);
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log(
+        `✅ Welcome email sent successfully to ${email}:`,
+        result.messageId,
+      );
+      return result;
     } catch (error) {
-      console.error("Error sending welcome email:", error);
+      console.error(
+        "❌ Error sending welcome email to",
+        email,
+        ":",
+        error.message,
+      );
+      console.error("Email configuration check:");
+      console.error("- EMAIL_HOST:", process.env.EMAIL_HOST);
+      console.error("- EMAIL_PORT:", process.env.EMAIL_PORT);
+      console.error(
+        "- EMAIL_USER:",
+        process.env.EMAIL_USER ? "Set" : "Not Set",
+      );
+      console.error(
+        "- EMAIL_PASS:",
+        process.env.EMAIL_PASS ? "Set" : "Not Set",
+      );
       throw error;
     }
   }
