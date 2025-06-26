@@ -96,6 +96,7 @@ const Home = () => {
         }}
       >
         <div
+          className="hero-pattern"
           style={{
             position: "absolute",
             top: 0,
@@ -104,6 +105,18 @@ const Home = () => {
             bottom: 0,
             background:
               "repeating-linear-gradient(45deg, transparent, transparent 100px, rgba(230, 57, 70, 0.05) 100px, rgba(230, 57, 70, 0.05) 200px)",
+            transition: "all 0.6s ease",
+            opacity: 1,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background =
+              "repeating-linear-gradient(45deg, transparent, transparent 100px, rgba(230, 57, 70, 0.08) 100px, rgba(230, 57, 70, 0.08) 200px)";
+            e.currentTarget.style.opacity = "0.9";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background =
+              "repeating-linear-gradient(45deg, transparent, transparent 100px, rgba(230, 57, 70, 0.05) 100px, rgba(230, 57, 70, 0.05) 200px)";
+            e.currentTarget.style.opacity = "1";
           }}
         ></div>
 
