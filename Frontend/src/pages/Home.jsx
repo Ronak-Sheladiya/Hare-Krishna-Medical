@@ -55,6 +55,14 @@ const Home = () => {
     navigate(`/products/${productId}`);
   };
 
+  const handleQRScanSuccess = (invoiceId) => {
+    navigate(`/verify/${invoiceId}`);
+  };
+
+  const handleQRScanError = (error) => {
+    console.error("QR Scan Error:", error);
+  };
+
   useEffect(() => {
     fetchFeaturedProducts();
   }, [dispatch]);
