@@ -363,6 +363,15 @@ const SocketDiagnostics = () => {
     }
   };
 
+  // Check if we're in production with localhost backend
+  const backendUrl =
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+  const isProduction =
+    window.location.hostname.includes("fly.dev") ||
+    window.location.hostname.includes("vercel.app") ||
+    window.location.hostname.includes("netlify.app");
+  const hasConfigIssue = isProduction && backendUrl.includes("localhost");
+
   return (
     <Container className="my-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -371,18 +380,47 @@ const SocketDiagnostics = () => {
           <Button
             variant="outline-primary"
             onClick={testConnection}
-            disabled={testingInProgress}
+            disabled={testingInProgress || hasConfigIssue}
           >
             {testingInProgress ? "Testing..." : "Run Diagnostics"}
           </Button>
-          <Button variant="outline-warning" onClick={forceReconnect}>
+          <Button
+            variant="outline-warning"
+            onClick={forceReconnect}
+            disabled={hasConfigIssue}
+          >
             Force Reconnect
           </Button>
-          <Button variant="outline-danger" onClick={disconnectSocket}>
+          <Button
+            variant="outline-danger"
+            onClick={disconnectSocket}
+            disabled={hasConfigIssue}
+          >
             Disconnect
           </Button>
         </div>
       </div>
+
+      {/* Configuration Issue Alert */}
+      {hasConfigIssue && (
+        <Alert variant="danger" className="mb-4">
+          <Alert.Heading>❌ Configuration Error</Alert.Heading>
+          <p>
+            This app is running in production but the backend URL is set to
+            localhost. WebSocket diagnostics and real-time features are
+            disabled.
+          </p>
+          <hr />
+          <div className="mb-0">
+            <strong>Current Backend URL:</strong> <code>{backendUrl}</code>
+            <br />
+            <strong>Environment:</strong> Production ({window.location.hostname}
+            )<br />
+            <strong>Fix:</strong> Set <code>VITE_BACKEND_URL</code> environment
+            variable to your actual backend URL.
+          </div>
+        </Alert>
+      )}
 
       <Row>
         <Col md={6}>
