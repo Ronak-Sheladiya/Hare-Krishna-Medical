@@ -445,17 +445,92 @@ const AddLetterhead = () => {
 
         .letterhead-form-control {
           border: 2px solid #e9ecef;
-          border-radius: 10px;
-          padding: 0.75rem 1rem;
-          transition: all 0.3s ease;
+          border-radius: 12px;
+          padding: 0.875rem 1.25rem;
           font-size: 0.95rem;
-          width: 100%;
+          transition: all 0.3s ease;
+          background: white;
+          font-family: 'Times New Roman', Times, serif;
+          line-height: 1.5;
         }
 
         .letterhead-form-control:focus {
-          border-color: #dc3545;
-          box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+          border-color: #e63946;
+          box-shadow: 0 0 0 0.25rem rgba(230, 57, 70, 0.15);
+          background: white;
           transform: translateY(-1px);
+        }
+
+        .letterhead-form-control:hover:not(:focus) {
+          border-color: rgba(230, 57, 70, 0.3);
+          box-shadow: 0 2px 8px rgba(230, 57, 70, 0.08);
+        }
+
+        .form-floating {
+          position: relative;
+        }
+
+        .form-floating > .letterhead-form-control {
+          padding-top: 1.625rem;
+          padding-bottom: 0.625rem;
+        }
+
+        .form-floating > label {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          padding: 1rem 1.25rem;
+          pointer-events: none;
+          border: 1px solid transparent;
+          transform-origin: 0 0;
+          transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
+          color: #6c757d;
+          font-weight: 500;
+        }
+
+        .form-floating > .letterhead-form-control:focus ~ label,
+        .form-floating > .letterhead-form-control:not(:placeholder-shown) ~ label {
+          opacity: 0.65;
+          transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+          color: #e63946;
+        }
+
+        .input-group-enhanced {
+          position: relative;
+          display: flex;
+          align-items: center;
+          background: white;
+          border-radius: 12px;
+          border: 2px solid #e9ecef;
+          transition: all 0.3s ease;
+          overflow: hidden;
+        }
+
+        .input-group-enhanced:focus-within {
+          border-color: #e63946;
+          box-shadow: 0 0 0 0.25rem rgba(230, 57, 70, 0.15);
+          transform: translateY(-1px);
+        }
+
+        .input-group-enhanced .input-group-text {
+          background: linear-gradient(135deg, #e63946, #dc3545);
+          color: white;
+          border: none;
+          padding: 0.875rem 1rem;
+          font-weight: 600;
+        }
+
+        .input-group-enhanced .letterhead-form-control {
+          border: none;
+          border-radius: 0;
+          box-shadow: none;
+        }
+
+        .input-group-enhanced .letterhead-form-control:focus {
+          border: none;
+          box-shadow: none;
+          transform: none;
         }
 
         .letterhead-btn {
