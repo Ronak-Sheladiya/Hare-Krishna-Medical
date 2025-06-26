@@ -134,10 +134,12 @@ class MessagesController {
       if (io) {
         io.to("admin-room").emit("new-message", {
           message: {
-            id: newMessage.id,
+            id: newMessage._id,
             name: newMessage.name,
             email: newMessage.email,
             subject: newMessage.subject,
+            category: newMessage.category,
+            priority: newMessage.priority,
             createdAt: newMessage.createdAt,
             status: newMessage.status,
           },
@@ -148,7 +150,7 @@ class MessagesController {
         success: true,
         message: "Message sent successfully! We'll get back to you soon.",
         data: {
-          id: newMessage.id,
+          id: newMessage._id,
           status: "sent",
         },
       });
