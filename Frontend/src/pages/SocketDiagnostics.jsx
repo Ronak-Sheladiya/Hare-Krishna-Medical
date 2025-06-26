@@ -404,6 +404,47 @@ const SocketDiagnostics = () => {
                         {import.meta.env.VITE_BACKEND_URL ||
                           "http://localhost:5000"}
                       </code>
+                      {window.location.hostname.includes("fly.dev") &&
+                        (
+                          import.meta.env.VITE_BACKEND_URL ||
+                          "http://localhost:5000"
+                        ).includes("localhost") && (
+                          <div>
+                            <Badge bg="warning" className="ms-2">
+                              ⚠️ Production Issue
+                            </Badge>
+                            <div className="small text-warning mt-1">
+                              Backend URL is localhost but you're on production.
+                              Set VITE_BACKEND_URL environment variable.
+                            </div>
+                          </div>
+                        )}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Environment:</strong>
+                    </td>
+                    <td>
+                      <Badge
+                        bg={
+                          window.location.hostname.includes("localhost")
+                            ? "success"
+                            : "primary"
+                        }
+                      >
+                        {window.location.hostname.includes("localhost")
+                          ? "Development"
+                          : "Production"}
+                      </Badge>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Frontend URL:</strong>
+                    </td>
+                    <td>
+                      <code>{window.location.origin}</code>
                     </td>
                   </tr>
                   <tr>
