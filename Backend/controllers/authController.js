@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const User = require("../models/User");
 const emailService = require("../utils/emailService");
 const mongoose = require("mongoose");
+const { devAuth, shouldUseFallback } = require("../utils/devFallback");
 
 class AuthController {
   // Check database connectivity
