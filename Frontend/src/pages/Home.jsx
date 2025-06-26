@@ -188,12 +188,22 @@ const Home = () => {
                   </span>
                 </h1>
                 <p
+                  className="hero-subtitle"
                   style={{
                     color: "#495057",
                     fontSize: "1.2rem",
                     lineHeight: "1.6",
                     marginBottom: "32px",
                     maxWidth: "500px",
+                    transition: "all 0.4s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.color = "#343a40";
+                    e.target.style.transform = "translateX(5px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.color = "#495057";
+                    e.target.style.transform = "translateX(0)";
                   }}
                 >
                   Quality medical products with professional service. Get
