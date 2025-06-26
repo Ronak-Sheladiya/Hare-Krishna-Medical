@@ -178,6 +178,8 @@ const Header = () => {
 
             {/* Desktop Actions */}
             <div className="d-flex align-items-center gap-2">
+              {/* Server Status */}
+              <ServerStatus />
               {/* Cart */}
               <Button
                 as={Link}
