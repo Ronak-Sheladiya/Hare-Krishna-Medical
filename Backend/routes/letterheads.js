@@ -124,7 +124,7 @@ router.get(
   "/",
   adminAuth,
   validateQueryParams,
-  validate,
+  handleValidationErrors,
   letterheadController.getAllLetterheads,
 );
 
