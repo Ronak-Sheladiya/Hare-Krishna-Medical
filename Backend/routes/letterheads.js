@@ -171,8 +171,7 @@ router.delete(
 // GET /api/letterheads/:id/pdf - Generate PDF for letterhead
 router.get(
   "/:id/pdf",
-  auth.authenticate,
-  auth.requireAdmin,
+  adminAuth,
   validateLetterheadId,
   validate,
   letterheadController.generateLetterheadPDF,
