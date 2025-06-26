@@ -62,6 +62,108 @@ const Header = () => {
     navigate(dashboardPath);
   };
 
+  // Initialize socket connection and load admin counts
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      // Connect socket with user info
+      const socket = socketClient.connect(user.id || user._id, user.role);
+
+      if (user.role === 1) {
+        // Load initial admin notification counts
+        loadAdminCounts();
+
+        // Set up real-time count updates
+        if (socket) {
+          socket.on("admin_notification", (data) => {
+            // Update counts based on notification type
+            setAdminCounts((prev) => ({
+              ...prev,
+              [data.type]: (prev[data.type] || 0) + 1,
+            }));
+          });
+
+          socket.on("data_update", (updateData) => {
+            // Refresh counts when data updates
+            if (updateData.type === "orders" || updateData.type === "all") {
+              loadAdminCounts();
+            }
+          });
+        }
+      }
+    }
+
+    return () => {
+      // Cleanup socket listeners
+      const socket = socketClient.getSocket();
+      if (socket) {
+        socket.off("admin_notification");
+        socket.off("data_update");
+      }
+    };
+  }, [isAuthenticated, user]);
+
+  // Load admin notification counts
+  const loadAdminCounts = async () => {
+    if (!user || user.role !== 1) return;
+
+    try {
+      const { api } = await import("../../utils/apiClient");
+      const response = await api.get("/api/admin/notifications");
+
+      if (response.data.success && response.data.stats) {
+        const stats = response.data.stats;
+        setAdminCounts({
+          orders: stats.pendingOrders || 0,
+          users: stats.todayOrders || 0,
+          products: stats.lowStockProducts || 0,
+          messages: unreadCount || 0,
+          payments: 0, // You can add payment notifications later
+        });
+      }
+    } catch (error) {
+      console.warn("Could not load admin counts:", error);
+      // Use fallback values
+      setAdminCounts({
+        orders: 0,
+        users: 0,
+        products: 0,
+        messages: unreadCount || 0,
+        payments: 0,
+      });
+    }
+  };
+
+  // Helper component for admin dropdown items with badges
+  const AdminDropdownItem = ({ to, icon, children, count = 0 }) => (
+    <Dropdown.Item
+      as={Link}
+      to={to}
+      className="d-flex justify-content-between align-items-center"
+    >
+      <span>
+        <i className={`${icon} me-2`}></i>
+        {children}
+      </span>
+      {count > 0 && (
+        <Badge
+          bg="danger"
+          className="ms-2"
+          style={{
+            fontSize: "0.7rem",
+            minWidth: "18px",
+            height: "18px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: "50%",
+          }}
+        >
+          {count > 99 ? "99+" : count}
+        </Badge>
+      )}
+    </Dropdown.Item>
+  );
+
   return (
     <>
       <Navbar expand="lg" className="medical-header" sticky="top">
