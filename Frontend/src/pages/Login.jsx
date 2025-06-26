@@ -94,10 +94,75 @@ const Login = () => {
     dispatch(loginStart());
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Try backend API first
+      try {
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: formData.emailOrMobile,
+            password: formData.password,
+          }),
+        });
 
-      // Mock authentication logic
+        if (response.ok) {
+          const data = await response.json();
+          const { user, token } = data;
+
+          // Store token
+          if (formData.rememberMe) {
+            localStorage.setItem("authToken", token);
+          } else {
+            sessionStorage.setItem("authToken", token);
+          }
+
+          dispatch(
+            loginSuccess({
+              user: {
+                ...user,
+                name: user.fullName, // Ensure compatibility
+              },
+              rememberMe: formData.rememberMe,
+            }),
+          );
+
+          // Handle redirect after login
+          const redirectUrl =
+            from ||
+            sessionStorage.getItem("redirectAfterLogin") ||
+            localStorage.getItem("lastAttemptedUrl");
+
+          // Clear stored redirect URLs
+          sessionStorage.removeItem("redirectAfterLogin");
+          localStorage.removeItem("lastAttemptedUrl");
+
+          if (
+            redirectUrl &&
+            redirectUrl !== "/login" &&
+            redirectUrl !== "/register" &&
+            redirectUrl !== "/access-denied"
+          ) {
+            navigate(redirectUrl, { replace: true });
+          } else {
+            const dashboardRoute =
+              user.role === 1 ? "/admin/dashboard" : "/user/dashboard";
+            navigate(dashboardRoute, { replace: true });
+          }
+          return;
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Login failed");
+        }
+      } catch (backendError) {
+        console.log(
+          "Backend not available, using demo mode:",
+          backendError.message,
+        );
+      }
+
+      // Fallback to demo mode if backend is not available
       const { emailOrMobile, password } = formData;
 
       // Check for admin credentials
@@ -202,7 +267,7 @@ const Login = () => {
       }
 
       // If credentials don't match
-      throw new Error("Invalid credentials");
+      throw new Error("Invalid email or password");
     } catch (error) {
       dispatch(loginFailure(error.message || "Login failed"));
     }
