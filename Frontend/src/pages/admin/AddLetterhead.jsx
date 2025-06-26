@@ -693,9 +693,7 @@ const AddLetterhead = () => {
             <div className="text-center">
               <h1 className="display-5 fw-bold mb-3">
                 <i className="bi bi-file-text-fill me-3"></i>
-                {isEditing
-                  ? "Edit Professional Letterhead"
-                  : "Create Professional Letterhead"}
+                {isEditing ? "Edit Letterhead" : "Create Letterhead"}
               </h1>
               <p className="lead opacity-90">
                 {isEditing
