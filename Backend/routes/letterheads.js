@@ -143,8 +143,7 @@ router.get(
 // POST /api/letterheads - Create new letterhead (Admin only)
 router.post(
   "/",
-  auth.authenticate,
-  auth.requireAdmin,
+  adminAuth,
   validateCreateLetterhead,
   validate,
   letterheadController.createLetterhead,
