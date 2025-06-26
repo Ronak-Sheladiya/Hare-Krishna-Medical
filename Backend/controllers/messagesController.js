@@ -1,39 +1,7 @@
 const emailService = require("../utils/emailService");
+const Message = require("../models/Message");
 
 class MessagesController {
-  constructor() {
-    // Message model (simple in-memory storage for demo)
-    // In production, you'd want a proper MongoDB model
-    this.messages = [
-      {
-        id: 1,
-        name: "John Doe",
-        email: "john@example.com",
-        mobile: "+91 9876543210",
-        subject: "Product Inquiry",
-        message: "I need information about diabetes medicines.",
-        status: "unread",
-        createdAt: new Date("2024-01-15"),
-        respondedAt: null,
-        response: null,
-      },
-      {
-        id: 2,
-        name: "Jane Smith",
-        email: "jane@example.com",
-        mobile: "+91 9123456789",
-        subject: "Order Issue",
-        message: "My order was delayed, please help.",
-        status: "read",
-        createdAt: new Date("2024-01-14"),
-        respondedAt: new Date("2024-01-14"),
-        response: "We apologize for the delay. Your order is now shipped.",
-      },
-    ];
-
-    this.messageIdCounter = 3;
-  }
-
   // Submit contact form
   async submitContact(req, res) {
     try {
