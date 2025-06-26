@@ -129,12 +129,7 @@ router.get(
 );
 
 // GET /api/letterheads/stats - Get letterhead statistics (Admin only)
-router.get(
-  "/stats",
-  auth.authenticate,
-  auth.requireAdmin,
-  letterheadController.getLetterheadStats,
-);
+router.get("/stats", adminAuth, letterheadController.getLetterheadStats);
 
 // GET /api/letterheads/:id - Get single letterhead by ID
 router.get(
