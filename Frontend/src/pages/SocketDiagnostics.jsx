@@ -231,15 +231,64 @@ const SocketDiagnostics = () => {
         });
       }
 
-      // Test 5: Network configuration
-      const isLocalhost = window.location.hostname === "localhost";
+      // Test 5: Environment and Network configuration
+      const hostname = window.location.hostname;
+      const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
+      const isProduction =
+        hostname.includes("fly.dev") ||
+        hostname.includes("vercel.app") ||
+        hostname.includes("netlify.app");
+      const backendUrl =
+        import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
+      let envStatus = "info";
+      let envMessage = "";
+
+      if (isLocalhost) {
+        envStatus = "pass";
+        envMessage = "Running on localhost - development environment";
+      } else if (isProduction) {
+        if (backendUrl.includes("localhost")) {
+          envStatus = "fail";
+          envMessage = `Production environment detected but backend URL is localhost (${backendUrl}). This will not work in production.`;
+        } else {
+          envStatus = "warning";
+          envMessage = `Production environment detected. Backend URL: ${backendUrl}. Ensure CORS and network settings are correct.`;
+        }
+      } else {
+        envStatus = "warning";
+        envMessage = `Unknown environment (${hostname}). Backend URL: ${backendUrl}. Check configuration.`;
+      }
+
       results.push({
-        test: "Network Configuration",
-        status: isLocalhost ? "pass" : "info",
-        message: isLocalhost
-          ? "Running on localhost - should work fine"
-          : "Running on remote host - check CORS and network settings",
+        test: "Environment Configuration",
+        status: envStatus,
+        message: envMessage,
       });
+
+      // Test 6: CORS and Security Headers
+      if (!isLocalhost) {
+        const protocol = window.location.protocol;
+        const isHttps = protocol === "https:";
+        const backendProtocol = backendUrl.startsWith("https:")
+          ? "https:"
+          : "http:";
+
+        if (isHttps && backendProtocol === "http:") {
+          results.push({
+            test: "Security Configuration",
+            status: "fail",
+            message:
+              "Mixed content detected: HTTPS frontend trying to connect to HTTP backend. This will be blocked by browsers.",
+          });
+        } else {
+          results.push({
+            test: "Security Configuration",
+            status: "pass",
+            message: `Protocol match: Frontend (${protocol}) and Backend (${backendProtocol})`,
+          });
+        }
+      }
     } catch (error) {
       results.push({
         test: "General Test",
