@@ -145,7 +145,7 @@ router.post(
   "/",
   adminAuth,
   validateCreateLetterhead,
-  validate,
+  handleValidationErrors,
   letterheadController.createLetterhead,
 );
 
