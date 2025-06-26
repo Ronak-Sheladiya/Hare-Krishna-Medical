@@ -100,21 +100,50 @@ const AdminDashboard = () => {
     fetchDashboardData();
 
     // Setup real-time refresh listeners
-    const handleRefreshOrders = () => fetchDashboardData();
-    const handleRefreshProducts = () => fetchDashboardData();
-    const handleRefreshAnalytics = () => fetchDashboardData();
+    const handleRefreshOrders = () => {
+      console.log("Refreshing dashboard due to order updates");
+      fetchDashboardData();
+    };
 
+    const handleRefreshProducts = () => {
+      console.log("Refreshing dashboard due to product updates");
+      fetchDashboardData();
+    };
+
+    const handleRefreshAnalytics = () => {
+      console.log("Refreshing dashboard due to analytics updates");
+      fetchDashboardData();
+    };
+
+    const handleRefreshDashboard = () => {
+      console.log("Refreshing dashboard due to general updates");
+      fetchDashboardData();
+    };
+
+    const handleProfileUpdate = () => {
+      console.log("Refreshing dashboard due to profile updates");
+      fetchDashboardData();
+    };
+
+    // Add event listeners for real-time updates
     window.addEventListener("refreshOrders", handleRefreshOrders);
     window.addEventListener("refreshProducts", handleRefreshProducts);
     window.addEventListener("refreshAnalytics", handleRefreshAnalytics);
+    window.addEventListener("refreshDashboard", handleRefreshDashboard);
+    window.addEventListener("profileUpdated", handleProfileUpdate);
 
-    // Auto-refresh dashboard every 30 seconds
-    const autoRefreshInterval = setInterval(fetchDashboardData, 30000);
+    // Auto-refresh dashboard every 30 seconds for live data
+    const autoRefreshInterval = setInterval(() => {
+      console.log("Auto-refreshing dashboard data");
+      fetchDashboardData();
+    }, 30000);
 
     return () => {
       window.removeEventListener("refreshOrders", handleRefreshOrders);
       window.removeEventListener("refreshProducts", handleRefreshProducts);
       window.removeEventListener("refreshAnalytics", handleRefreshAnalytics);
+      window.removeEventListener("refreshDashboard", handleRefreshDashboard);
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
       clearInterval(autoRefreshInterval);
     };
   }, [unreadCount]);

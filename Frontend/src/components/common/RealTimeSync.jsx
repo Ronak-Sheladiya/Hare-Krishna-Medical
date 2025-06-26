@@ -190,7 +190,43 @@ const RealTimeSync = () => {
                 case "invoices":
                   window.dispatchEvent(new CustomEvent("refreshInvoices"));
                   break;
+                case "letterheads":
+                  window.dispatchEvent(new CustomEvent("refreshLetterheads"));
+                  break;
+                case "profile":
+                  window.dispatchEvent(new CustomEvent("refreshProfile"));
+                  break;
+                case "dashboard":
+                  window.dispatchEvent(new CustomEvent("refreshDashboard"));
+                  break;
               }
+            });
+
+            // Listen for profile updates
+            socket.on("profile_updated", (profileData) => {
+              if (!isMounted) return;
+
+              // Update user profile in Redux if it's the current user
+              if (profileData.userId === user?._id) {
+                dispatch(updateUser(profileData.updates));
+              }
+
+              window.dispatchEvent(
+                new CustomEvent("profileUpdated", {
+                  detail: profileData,
+                }),
+              );
+            });
+
+            // Listen for dashboard data changes
+            socket.on("dashboard_updated", (dashboardData) => {
+              if (!isMounted) return;
+
+              window.dispatchEvent(
+                new CustomEvent("refreshDashboard", {
+                  detail: dashboardData,
+                }),
+              );
             });
 
             socketConnection = socket;
@@ -202,12 +238,23 @@ const RealTimeSync = () => {
       }
     };
 
+    // Setup local event listeners for profile updates
+    const handleProfileUpdate = (event) => {
+      if (!isMounted) return;
+
+      // Trigger real-time refresh for other components that depend on profile data
+      window.dispatchEvent(new CustomEvent("refreshDashboard"));
+    };
+
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+
     // Initialize with a small delay
     const timeout = setTimeout(initializeRealTimeSync, 1000);
 
     return () => {
       isMounted = false;
       clearTimeout(timeout);
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
 
       if (socketConnection) {
         try {
@@ -219,6 +266,8 @@ const RealTimeSync = () => {
           socketConnection.off("payment_received");
           socketConnection.off("message_received");
           socketConnection.off("data_updated");
+          socketConnection.off("profile_updated");
+          socketConnection.off("dashboard_updated");
         } catch (error) {
           console.warn("Error cleaning up socket listeners:", error);
         }
