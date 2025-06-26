@@ -57,33 +57,65 @@ const mongoURI =
   "mongodb://localhost:27017/Hare_Krishna_Medical_db";
 console.log("🔄 Attempting MongoDB connection to:", mongoURI);
 
-mongoose
-  .connect(mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then((conn) => {
+// Set mongoose buffer commands to false to fail fast
+mongoose.set("bufferCommands", false);
+mongoose.set("bufferMaxEntries", 0);
+
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(mongoURI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000, // Fail fast on server selection
+      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+      family: 4, // Use IPv4, skip trying IPv6
+      maxPoolSize: 10, // Maintain up to 10 socket connections
+      minPoolSize: 5, // Maintain minimum 5 socket connections
+      maxIdleTimeMS: 30000, // Close connections after 30 seconds of inactivity
+    });
+
     console.log("✅ Connected to MongoDB");
     console.log("📊 Database:", conn.connection.name);
     console.log("🏠 Host:", conn.connection.host);
     console.log("🔌 Port:", conn.connection.port);
-  })
-  .catch((err) => {
-    console.error("❌ MongoDB connection error:", err.message);
-    console.error("Full error:", err);
-  });
+
+    return conn;
+  } catch (err) {
+    console.error("❌ MongoDB connection failed:", err.message);
+    console.log(
+      "🔄 Will continue without database - using memory storage for development",
+    );
+
+    // Set a flag to indicate database is not available
+    global.DB_CONNECTED = false;
+    return null;
+  }
+};
+
+// Connect to database
+connectDB().then((conn) => {
+  global.DB_CONNECTED = !!conn;
+});
 
 // Enhanced connection event handlers
 mongoose.connection.on("connected", () => {
   console.log("📡 Mongoose connected to MongoDB");
+  global.DB_CONNECTED = true;
 });
 
 mongoose.connection.on("error", (err) => {
-  console.error("❌ Mongoose connection error:", err);
+  console.error("❌ Mongoose connection error:", err.message);
+  global.DB_CONNECTED = false;
 });
 
 mongoose.connection.on("disconnected", () => {
   console.log("📡 Mongoose disconnected from MongoDB");
+  global.DB_CONNECTED = false;
+});
+
+mongoose.connection.on("reconnected", () => {
+  console.log("📡 Mongoose reconnected to MongoDB");
+  global.DB_CONNECTED = true;
 });
 
 // ==========================
