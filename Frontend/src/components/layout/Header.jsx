@@ -25,6 +25,15 @@ const Header = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Admin notification counts
+  const [adminCounts, setAdminCounts] = useState({
+    orders: 0,
+    users: 0,
+    products: 0,
+    messages: 0,
+    payments: 0,
+  });
+
   const isActiveRoute = (path) => {
     return location.pathname === path;
   };
