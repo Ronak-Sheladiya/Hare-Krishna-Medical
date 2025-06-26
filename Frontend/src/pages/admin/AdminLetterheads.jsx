@@ -81,6 +81,21 @@ const AdminLetterheads = () => {
 
   useEffect(() => {
     fetchLetterheads();
+
+    // Setup real-time refresh listener for letterheads
+    const handleRefreshLetterheads = () => {
+      console.log("Refreshing letterheads due to real-time updates");
+      fetchLetterheads();
+    };
+
+    window.addEventListener("refreshLetterheads", handleRefreshLetterheads);
+
+    return () => {
+      window.removeEventListener(
+        "refreshLetterheads",
+        handleRefreshLetterheads,
+      );
+    };
   }, []);
 
   // Filter letterheads based on search term, status, and type
