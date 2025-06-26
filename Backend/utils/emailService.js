@@ -16,6 +16,8 @@ class EmailService {
   async sendWelcomeEmail(email, fullName) {
     const websiteUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
+    console.log("📧 Sending welcome email to:", email);
+
     const mailOptions = {
       from: `"Hare Krishna Medical Store" <${process.env.EMAIL_USER}>`,
       to: email,
