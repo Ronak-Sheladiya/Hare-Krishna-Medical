@@ -68,6 +68,7 @@ import UserProfile from "./pages/user/UserProfile";
 import NavigationTest from "./components/common/NavigationTest";
 import ButtonFixer from "./components/common/ButtonFixer";
 import FunctionalityTest from "./components/common/FunctionalityTest";
+import SocketDiagnostics from "./pages/SocketDiagnostics";
 
 // Styles
 import "./App.css";
@@ -108,7 +109,12 @@ const ProtectedRoute = ({ children, adminOnly = false, userOnly = false }) => {
 const AuthRoute = ({ children }) => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   if (isAuthenticated) {
-    return <Navigate to={user?.role === 1 ? "/admin/dashboard" : "/user/dashboard"} replace />;
+    return (
+      <Navigate
+        to={user?.role === 1 ? "/admin/dashboard" : "/user/dashboard"}
+        replace
+      />
+    );
   }
   return children;
 };
@@ -176,43 +182,182 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/verify-email/:token" element={<VerifyEmail />} />
-            <Route path="/verification-status" element={<VerificationStatus />} />
+            <Route
+              path="/verification-status"
+              element={<VerificationStatus />}
+            />
             <Route path="/invoice/:invoiceId" element={<InvoiceView />} />
             <Route path="/verify/:invoiceId" element={<InvoiceVerify />} />
             <Route path="/verify" element={<InvoiceVerify />} />
             <Route path="/user-guide" element={<UserGuide />} />
             <Route path="/backend-docs" element={<BackendDocs />} />
             <Route path="/localsetup-guide" element={<LocalSetupGuide />} />
-            <Route path="/vercel-deployment" element={<VercelDeploymentGuide />} />
+            <Route
+              path="/vercel-deployment"
+              element={<VercelDeploymentGuide />}
+            />
 
-            <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
-            <Route path="/register" element={<AuthRoute><Register /></AuthRoute>} />
-            <Route path="/forgot-password" element={<AuthRoute><ForgotPassword /></AuthRoute>} />
+            <Route
+              path="/login"
+              element={
+                <AuthRoute>
+                  <Login />
+                </AuthRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <AuthRoute>
+                  <Register />
+                </AuthRoute>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <AuthRoute>
+                  <ForgotPassword />
+                </AuthRoute>
+              }
+            />
 
             <Route path="/access-denied" element={<AccessDenied />} />
 
             {/* Admin Routes */}
-            <Route path="/admin/dashboard" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
-            <Route path="/admin/products" element={<ProtectedRoute adminOnly><AdminProducts /></ProtectedRoute>} />
-            <Route path="/admin/orders" element={<ProtectedRoute adminOnly><AdminOrders /></ProtectedRoute>} />
-            <Route path="/admin/users" element={<ProtectedRoute adminOnly><AdminUsers /></ProtectedRoute>} />
-            <Route path="/admin/analytics" element={<ProtectedRoute adminOnly><AdminAnalytics /></ProtectedRoute>} />
-            <Route path="/admin/messages" element={<ProtectedRoute adminOnly><AdminMessages /></ProtectedRoute>} />
-            <Route path="/admin/invoices" element={<ProtectedRoute adminOnly><AdminInvoices /></ProtectedRoute>} />
-            <Route path="/admin/payment-methods" element={<ProtectedRoute adminOnly><AdminPaymentMethods /></ProtectedRoute>} />
-            <Route path="/admin/profile" element={<ProtectedRoute adminOnly><UserProfile /></ProtectedRoute>} />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/products"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminProducts />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/orders"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminOrders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminUsers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/analytics"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminAnalytics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/messages"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminMessages />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/invoices"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminInvoices />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/payment-methods"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminPaymentMethods />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/profile"
+              element={
+                <ProtectedRoute adminOnly>
+                  <UserProfile />
+                </ProtectedRoute>
+              }
+            />
 
             {/* User Routes */}
-            <Route path="/user/dashboard" element={<ProtectedRoute userOnly><UserDashboard /></ProtectedRoute>} />
-            <Route path="/user/orders" element={<ProtectedRoute userOnly><UserOrders /></ProtectedRoute>} />
-            <Route path="/user/invoices" element={<ProtectedRoute userOnly><UserInvoices /></ProtectedRoute>} />
-            <Route path="/user/profile" element={<ProtectedRoute userOnly><UserProfile /></ProtectedRoute>} />
+            <Route
+              path="/user/dashboard"
+              element={
+                <ProtectedRoute userOnly>
+                  <UserDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/user/orders"
+              element={
+                <ProtectedRoute userOnly>
+                  <UserOrders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/user/invoices"
+              element={
+                <ProtectedRoute userOnly>
+                  <UserInvoices />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/user/profile"
+              element={
+                <ProtectedRoute userOnly>
+                  <UserProfile />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Debug Routes */}
-            <Route path="/navigation-test" element={<ProtectedRoute adminOnly><NavigationTest /></ProtectedRoute>} />
+            <Route
+              path="/navigation-test"
+              element={
+                <ProtectedRoute adminOnly>
+                  <NavigationTest />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/button-fixer" element={<ButtonFixer />} />
-            <Route path="/functionality-test" element={<ProtectedRoute adminOnly><FunctionalityTest /></ProtectedRoute>} />
-            <Route path="/socket-diagnostics" element={<ProtectedRoute adminOnly><SocketDiagnostic /></ProtectedRoute>} />
+            <Route
+              path="/functionality-test"
+              element={
+                <ProtectedRoute adminOnly>
+                  <FunctionalityTest />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/socket-diagnostics"
+              element={
+                <ProtectedRoute adminOnly>
+                  <SocketDiagnostic />
+                </ProtectedRoute>
+              }
+            />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
