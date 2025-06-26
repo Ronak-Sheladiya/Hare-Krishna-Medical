@@ -20,6 +20,7 @@ import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { formatDateTime, getRelativeTime } from "../../utils/dateUtils";
 import { api, safeApiCall } from "../../utils/apiClient";
+import OfficialLetterheadDesign from "../../components/common/OfficialLetterheadDesign";
 
 const AdminLetterheads = () => {
   const [letterheads, setLetterheads] = useState([]);
