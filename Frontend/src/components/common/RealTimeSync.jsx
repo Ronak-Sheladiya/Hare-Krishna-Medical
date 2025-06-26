@@ -190,9 +190,7 @@ const RealTimeSync = () => {
                 case "invoices":
                   window.dispatchEvent(new CustomEvent("refreshInvoices"));
                   break;
-                case "letterheads":
-                  window.dispatchEvent(new CustomEvent("refreshLetterheads"));
-                  break;
+
                 case "profile":
                   window.dispatchEvent(new CustomEvent("refreshProfile"));
                   break;
