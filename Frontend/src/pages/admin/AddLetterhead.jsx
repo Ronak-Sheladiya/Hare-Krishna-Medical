@@ -1061,7 +1061,7 @@ const AddLetterhead = () => {
                             dangerouslySetInnerHTML={{
                               __html: formData.content,
                             }}
-                            placeholder="Write your professional email content here. Use the toolbar for formatting..."
+                            placeholder="Write your professional letterhead content here. Use the toolbar for formatting..."
                           />
                         </div>
                         <Form.Text className="text-muted">
