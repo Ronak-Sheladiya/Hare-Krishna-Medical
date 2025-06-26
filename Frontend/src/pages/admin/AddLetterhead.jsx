@@ -1154,7 +1154,7 @@ const AddLetterhead = () => {
                             name="notes"
                             value={formData.notes}
                             onChange={handleInputChange}
-                            placeholder="Internal notes and comments (not visible in the letterhead email)"
+                            placeholder="Internal notes and comments (not visible in the letterhead document)"
                             className="letterhead-form-control"
                           />
                           <Form.Text className="text-muted">
