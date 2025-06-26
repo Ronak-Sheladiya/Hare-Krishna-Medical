@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const userSchema = new mongoose.Schema(
   {
@@ -22,12 +23,14 @@ const userSchema = new mongoose.Schema(
     mobile: {
       type: String,
       required: [true, "Mobile number is required"],
+      unique: true,
       match: [/^[6-9]\d{9}$/, "Please enter a valid mobile number"],
     },
     password: {
       type: String,
       required: [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters"],
+      select: false, // ✅ Hide by default
     },
     role: {
       type: Number,
@@ -45,13 +48,12 @@ const userSchema = new mongoose.Schema(
       default: true,
     },
     lastLogin: Date,
-    avatar: String, // Deprecated - use profileImage instead
+    avatar: String, // Deprecated
     profileImage: {
       type: String,
       default: "",
       validate: {
         validator: function (v) {
-          // Allow empty string or valid URL/base64 image
           if (!v) return true;
           return /^(https?:\/\/|data:image\/)/.test(v);
         },
@@ -76,30 +78,34 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
-// Hash password before saving
+// ✅ Hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
+  try {
+    this.password = await bcrypt.hash(this.password, 12);
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
-// Compare password method
+// ✅ Compare password
 userSchema.methods.comparePassword = async function (candidatePassword) {
+  if (!this.password || !candidatePassword) return false;
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Generate JWT token
+// ✅ Generate JWT
 userSchema.methods.generateAuthToken = function () {
-  const jwt = require("jsonwebtoken");
   return jwt.sign({ id: this._id, role: this.role }, process.env.JWT_SECRET, {
     expiresIn: "7d",
   });
 };
 
-// Update last login
+// ✅ Update login time
 userSchema.methods.updateLastLogin = function () {
   this.lastLogin = new Date();
   return this.save();
