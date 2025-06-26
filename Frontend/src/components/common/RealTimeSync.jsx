@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { updateUser } from "../../store/slices/authSlice";
 
 /**
  * RealTimeSync Component
@@ -131,7 +132,7 @@ const RealTimeSync = () => {
                     detail: {
                       type: "payment",
                       title: "Payment Received",
-                      message: `Payment of ₹${paymentData.amount} received for Order #${paymentData.orderNumber}`,
+                      message: `Payment of ���${paymentData.amount} received for Order #${paymentData.orderNumber}`,
                       orderId: paymentData.orderId,
                       amount: paymentData.amount,
                       method: paymentData.method,
