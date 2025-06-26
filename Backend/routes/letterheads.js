@@ -180,8 +180,7 @@ router.get(
 // PUT /api/letterheads/:id/mark-sent - Mark letterhead as sent (Admin only)
 router.put(
   "/:id/mark-sent",
-  auth.authenticate,
-  auth.requireAdmin,
+  adminAuth,
   validateLetterheadId,
   validate,
   letterheadController.markAsSent,
