@@ -32,7 +32,7 @@ app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
-  })
+  }),
 );
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
@@ -48,10 +48,14 @@ app.use("/api/", limiter);
 // ✅ Database Connection
 // ==========================
 mongoose
-  .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/Hare_Krishna_Medical_db", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(
+    process.env.MONGODB_URI ||
+      "mongodb://localhost:27017/Hare_Krishna_Medical_db",
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    },
+  )
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
@@ -68,6 +72,7 @@ app.use("/api/messages", require("./routes/messages"));
 app.use("/api/analytics", require("./routes/analytics"));
 app.use("/api/upload", require("./routes/upload"));
 app.use("/api/verification", require("./routes/verification"));
+app.use("/api/admin/notifications", require("./routes/notifications"));
 
 // ==========================
 // ✅ Health Check Route
@@ -92,19 +97,64 @@ app.get("/api/health", (req, res) => {
 // ==========================
 io.on("connection", (socket) => {
   const { token, role } = socket.handshake.auth || {};
-  console.log("🔑 Connected with token:", token, "Role:", role);
-  console.log("👤 User connected:", socket.id);
+  console.log(
+    "🔑 Socket connected - ID:",
+    socket.id,
+    "Token:",
+    token,
+    "Role:",
+    role,
+  );
 
+  // Handle admin connections
   if (role === 1) {
     socket.join("admin-room");
-    console.log("👨‍💼 Admin joined admin room");
-  } else if (token) {
+    console.log("👨‍💼 Admin joined admin room:", socket.id);
+
+    // Send welcome message to admin
+    socket.emit("admin_notification", {
+      type: "system",
+      title: "Admin Connected",
+      message: "You are now connected to real-time updates",
+      timestamp: new Date().toISOString(),
+    });
+  }
+  // Handle user connections
+  else if (token) {
     socket.join(`user-${token}`);
-    console.log(`👤 User ${token} joined user room`);
+    console.log(`👤 User ${token} joined user room:`, socket.id);
   }
 
-  socket.on("disconnect", () => {
-    console.log("👤 User disconnected:", socket.id);
+  // Handle admin room join requests
+  socket.on("join-admin-room", () => {
+    socket.join("admin-room");
+    console.log("👨‍💼 Socket manually joined admin room:", socket.id);
+  });
+
+  // Handle user room join requests
+  socket.on("join-user-room", (userId) => {
+    socket.join(`user-${userId}`);
+    console.log(`👤 Socket manually joined user room ${userId}:`, socket.id);
+  });
+
+  // Handle test events for diagnostics
+  socket.on("test-event", (data) => {
+    console.log("🧪 Test event received:", data);
+    socket.emit("test-response", {
+      success: true,
+      message: "Test event processed successfully",
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  // Handle disconnection
+  socket.on("disconnect", (reason) => {
+    console.log("👤 User disconnected:", socket.id, "Reason:", reason);
+  });
+
+  // Handle connection errors
+  socket.on("error", (error) => {
+    console.error("❌ Socket error:", error);
   });
 });
 
@@ -117,7 +167,10 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
     message: "Something went wrong!",
-    error: process.env.NODE_ENV === "development" ? err.message : "Internal Server Error",
+    error:
+      process.env.NODE_ENV === "development"
+        ? err.message
+        : "Internal Server Error",
   });
 });
 

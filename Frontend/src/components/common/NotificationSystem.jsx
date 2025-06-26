@@ -42,6 +42,24 @@ const NotificationSystem = () => {
       }
 
       try {
+        // Check if we're in production with localhost backend URL
+        const backendUrl =
+          import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+        const isProduction =
+          window.location.hostname.includes("fly.dev") ||
+          window.location.hostname.includes("vercel.app") ||
+          window.location.hostname.includes("netlify.app");
+
+        if (isProduction && backendUrl.includes("localhost")) {
+          // Skip API calls in production with incorrect backend URL
+          console.info(
+            "Notifications: Skipping API call in production with localhost backend URL",
+          );
+          failureCount = maxFailures; // Mark as unavailable
+          isApiAvailable = false;
+          return;
+        }
+
         // Use the robust apiClient instead of direct fetch
         const { api, safeApiCall } = await import("../../utils/apiClient");
 
@@ -106,10 +124,13 @@ const NotificationSystem = () => {
             return;
           }
 
-          // Connect socket for real-time notifications
-          const socket = socketClient.connect();
+          // Connect socket for real-time notifications with user info
+          const socket = socketClient.connect(
+            user?.id || user?._id,
+            user?.role,
+          );
 
-          if (socket && !socket.id?.includes("mock")) {
+          if (socket && !status.fallbackMode) {
             // Listen for real-time notifications
             socket.on("admin_notification", (notificationData) => {
               if (!isMounted) return;

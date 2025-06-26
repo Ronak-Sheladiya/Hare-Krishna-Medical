@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Navbar,
   Nav,
@@ -13,6 +13,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../store/slices/authSlice.js";
 import NotificationSystem from "../common/NotificationSystem.jsx";
 import UserAvatar from "../common/UserAvatar.jsx";
+import socketClient from "../../utils/socketClient.js";
 
 const Header = () => {
   const location = useLocation();
@@ -23,6 +24,15 @@ const Header = () => {
   const { unreadCount } = useSelector((state) => state.messages);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Admin notification counts
+  const [adminCounts, setAdminCounts] = useState({
+    orders: 0,
+    users: 0,
+    products: 0,
+    messages: 0,
+    payments: 0,
+  });
 
   const isActiveRoute = (path) => {
     return location.pathname === path;
@@ -51,6 +61,108 @@ const Header = () => {
       user.role === 1 ? "/admin/dashboard" : "/user/dashboard";
     navigate(dashboardPath);
   };
+
+  // Initialize socket connection and load admin counts
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      // Connect socket with user info
+      const socket = socketClient.connect(user.id || user._id, user.role);
+
+      if (user.role === 1) {
+        // Load initial admin notification counts
+        loadAdminCounts();
+
+        // Set up real-time count updates
+        if (socket) {
+          socket.on("admin_notification", (data) => {
+            // Update counts based on notification type
+            setAdminCounts((prev) => ({
+              ...prev,
+              [data.type]: (prev[data.type] || 0) + 1,
+            }));
+          });
+
+          socket.on("data_update", (updateData) => {
+            // Refresh counts when data updates
+            if (updateData.type === "orders" || updateData.type === "all") {
+              loadAdminCounts();
+            }
+          });
+        }
+      }
+    }
+
+    return () => {
+      // Cleanup socket listeners
+      const socket = socketClient.getSocket();
+      if (socket) {
+        socket.off("admin_notification");
+        socket.off("data_update");
+      }
+    };
+  }, [isAuthenticated, user]);
+
+  // Load admin notification counts
+  const loadAdminCounts = async () => {
+    if (!user || user.role !== 1) return;
+
+    try {
+      const { api } = await import("../../utils/apiClient");
+      const response = await api.get("/api/admin/notifications");
+
+      if (response.data.success && response.data.stats) {
+        const stats = response.data.stats;
+        setAdminCounts({
+          orders: stats.pendingOrders || 0,
+          users: stats.todayOrders || 0,
+          products: stats.lowStockProducts || 0,
+          messages: unreadCount || 0,
+          payments: 0, // You can add payment notifications later
+        });
+      }
+    } catch (error) {
+      console.warn("Could not load admin counts:", error);
+      // Use fallback values
+      setAdminCounts({
+        orders: 0,
+        users: 0,
+        products: 0,
+        messages: unreadCount || 0,
+        payments: 0,
+      });
+    }
+  };
+
+  // Helper component for admin dropdown items with badges
+  const AdminDropdownItem = ({ to, icon, children, count = 0 }) => (
+    <Dropdown.Item
+      as={Link}
+      to={to}
+      className="d-flex justify-content-between align-items-center"
+    >
+      <span>
+        <i className={`${icon} me-2`}></i>
+        {children}
+      </span>
+      {count > 0 && (
+        <Badge
+          bg="danger"
+          className="ms-2"
+          style={{
+            fontSize: "0.7rem",
+            minWidth: "18px",
+            height: "18px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: "50%",
+          }}
+        >
+          {count > 99 ? "99+" : count}
+        </Badge>
+      )}
+    </Dropdown.Item>
+  );
 
   return (
     <>
@@ -205,26 +317,38 @@ const Header = () => {
 
                     {user?.role === 1 && (
                       <>
-                        <Dropdown.Item as={Link} to="/admin/users">
-                          <i className="bi bi-people me-2"></i>
+                        <AdminDropdownItem
+                          to="/admin/users"
+                          icon="bi-people"
+                          count={adminCounts.users}
+                        >
                           Manage Users
-                        </Dropdown.Item>
-                        <Dropdown.Item as={Link} to="/admin/products">
-                          <i className="bi bi-box me-2"></i>
+                        </AdminDropdownItem>
+                        <AdminDropdownItem
+                          to="/admin/products"
+                          icon="bi-box"
+                          count={adminCounts.products}
+                        >
                           Manage Products
-                        </Dropdown.Item>
-                        <Dropdown.Item as={Link} to="/admin/orders">
-                          <i className="bi bi-bag-check me-2"></i>
+                        </AdminDropdownItem>
+                        <AdminDropdownItem
+                          to="/admin/orders"
+                          icon="bi-bag-check"
+                          count={adminCounts.orders}
+                        >
                           Manage Orders
-                        </Dropdown.Item>
+                        </AdminDropdownItem>
                         <Dropdown.Item as={Link} to="/admin/invoices">
                           <i className="bi bi-receipt-cutoff me-2"></i>
                           Manage Invoices
                         </Dropdown.Item>
-                        <Dropdown.Item as={Link} to="/admin/payment-methods">
-                          <i className="bi bi-credit-card me-2"></i>
+                        <AdminDropdownItem
+                          to="/admin/payment-methods"
+                          icon="bi-credit-card"
+                          count={adminCounts.payments}
+                        >
                           Payment Management
-                        </Dropdown.Item>
+                        </AdminDropdownItem>
                         <Dropdown.Item as={Link} to="/admin/analytics">
                           <i className="bi bi-graph-up me-2"></i>
                           Analytics
@@ -233,10 +357,13 @@ const Header = () => {
                           <i className="bi bi-person-gear me-2"></i>
                           Edit Profile
                         </Dropdown.Item>
-                        <Dropdown.Item as={Link} to="/admin/messages">
-                          <i className="bi bi-envelope me-2"></i>
+                        <AdminDropdownItem
+                          to="/admin/messages"
+                          icon="bi-envelope"
+                          count={adminCounts.messages}
+                        >
                           Messages
-                        </Dropdown.Item>
+                        </AdminDropdownItem>
                         <Dropdown.Divider />
                         <Dropdown.Header>
                           <small className="text-muted">Admin Tools</small>
