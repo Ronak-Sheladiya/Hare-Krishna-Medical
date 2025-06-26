@@ -106,6 +106,9 @@ class AuthController {
     try {
       const { email, password } = req.body;
 
+      // Check database connectivity
+      this.checkDBConnection();
+
       // Find user and include password for comparison
       const user = await User.findOne({ email }).select("+password");
 
