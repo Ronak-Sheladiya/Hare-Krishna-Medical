@@ -196,7 +196,7 @@ const enhanceWindowEvents = () => {
     refreshAnalytics: "analytics",
     refreshMessages: "messages",
     refreshInvoices: "invoices",
-
+    refreshLetterheads: "letterheads",
     refreshDashboard: "dashboard",
     profileUpdated: "profile",
   };
