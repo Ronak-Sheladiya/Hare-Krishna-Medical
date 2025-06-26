@@ -400,7 +400,7 @@ router.get(
             verified: true,
           };
         }
-
+      }
 
       if (!document) {
         return res.status(404).json({
