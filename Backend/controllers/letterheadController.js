@@ -272,6 +272,35 @@ class LetterheadController {
     try {
       const { id } = req.params;
 
+      // Use development fallback if database is not available
+      if (shouldUseFallback()) {
+        console.log(
+          "🔄 Using development fallback for getting letterhead by ID",
+        );
+
+        // Initialize sample data if empty
+        if (devLetterheads.length === 0) {
+          this.getLetterheadsFallback({}, 1, 10);
+        }
+
+        const letterhead = devLetterheads.find((l) => l._id === id);
+
+        if (!letterhead) {
+          return res.status(404).json({
+            success: false,
+            message: "Letterhead not found",
+          });
+        }
+
+        return res.json({
+          success: true,
+          letterhead,
+        });
+      }
+
+      // Check database connectivity
+      this.checkDBConnection();
+
       const letterhead = await Letterhead.findById(id).populate(
         "createdBy",
         "fullName email",
