@@ -12,8 +12,12 @@ export default defineConfig({
   server: {
     proxy: {
       "/socket.io": {
-        target: "http://localhost:5000", // Backend URL
-        ws: true,                         // Enable WebSocket proxying
+        target: "http://localhost:5000",
+        ws: true,
+        changeOrigin: true,
+      },
+      "/api": {
+        target: "http://localhost:5000",
         changeOrigin: true,
       },
     },

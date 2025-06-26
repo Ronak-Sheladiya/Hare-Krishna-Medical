@@ -6,86 +6,59 @@ const rateLimit = require("express-rate-limit");
 const http = require("http");
 const socketIo = require("socket.io");
 require("dotenv").config();
+
 const testUserRoute = require("./routes/testUser");
+
 const app = express();
 const server = http.createServer(app);
 
-// Socket.io setup for real-time updates
+// ==========================
+// ✅ Socket.io Setup
+// ==========================
 const io = socketIo(server, {
   cors: {
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
   },
 });
-
-// Make io accessible to routes
 app.set("io", io);
 
-// Security Middleware
+// ==========================
+// ✅ Middleware
+// ==========================
 app.use(helmet());
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
-  }),
+  })
 );
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
 
-// Rate Limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: "Too many requests from this IP, please try again later.",
 });
 app.use("/api/", limiter);
 
-// Body Parser Middleware
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
-
-// Database Connection
+// ==========================
+// ✅ Database Connection
+// ==========================
 mongoose
-  .connect(
-    process.env.MONGODB_URI ||
-      "mongodb://localhost:27017/Hare_Krishna_Medical_db",
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    },
-  )
+  .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/Hare_Krishna_Medical_db", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-app.use(express.json());
+// ==========================
+// ✅ Routes
+// ==========================
 app.use("/api/test", testUserRoute);
-
-// Socket.io connection handling
-io.on("connection", (socket) => {
-  if (process.env.NODE_ENV === "development") {
-    console.log("👤 User connected:", socket.id);
-  }
-
-  socket.on("join-admin", () => {
-    socket.join("admin-room");
-    if (process.env.NODE_ENV === "development") {
-      console.log("👨‍💼 Admin joined admin room");
-    }
-  });
-
-  socket.on("join-user", (userId) => {
-    socket.join(`user-${userId}`);
-    if (process.env.NODE_ENV === "development") {
-      console.log(`👤 User ${userId} joined user room`);
-    }
-  });
-
-  socket.on("disconnect", () => {
-    if (process.env.NODE_ENV === "development") {
-      console.log("👤 User disconnected:", socket.id);
-    }
-  });
-});
-
-// Routes
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/users", require("./routes/users"));
 app.use("/api/products", require("./routes/products"));
@@ -96,9 +69,10 @@ app.use("/api/analytics", require("./routes/analytics"));
 app.use("/api/upload", require("./routes/upload"));
 app.use("/api/verification", require("./routes/verification"));
 
-// Health Check
+// ==========================
+// ✅ Health Check Route
+// ==========================
 app.get("/api/health", (req, res) => {
-  // Check database connection
   const dbStatus = mongoose.connection.readyState;
   const databaseStatus = dbStatus === 1 ? "connected" : "disconnected";
 
@@ -113,23 +87,47 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Error Handling Middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    message: "Something went wrong!",
-    error:
-      process.env.NODE_ENV === "development"
-        ? err.message
-        : "Internal Server Error",
+// ==========================
+// ✅ Socket.io Events
+// ==========================
+io.on("connection", (socket) => {
+  const { token, role } = socket.handshake.auth || {};
+  console.log("🔑 Connected with token:", token, "Role:", role);
+  console.log("👤 User connected:", socket.id);
+
+  if (role === 1) {
+    socket.join("admin-room");
+    console.log("👨‍💼 Admin joined admin room");
+  } else if (token) {
+    socket.join(`user-${token}`);
+    console.log(`👤 User ${token} joined user room`);
+  }
+
+  socket.on("disconnect", () => {
+    console.log("👤 User disconnected:", socket.id);
   });
 });
 
-// 404 Handler
+// ==========================
+// ✅ Error Handling
+// ==========================
+app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+
+  console.error(err.stack);
+  res.status(500).json({
+    message: "Something went wrong!",
+    error: process.env.NODE_ENV === "development" ? err.message : "Internal Server Error",
+  });
+});
+
 app.use("*", (req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
+// ==========================
+// ✅ Start Server
+// ==========================
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

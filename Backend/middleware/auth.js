@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-// Verify JWT token
+// ✅ General User Authentication Middleware
 const auth = async (req, res, next) => {
   try {
     const token = req.header("Authorization")?.replace("Bearer ", "");
@@ -36,34 +36,41 @@ const auth = async (req, res, next) => {
       });
     }
 
-    res.status(401).json({
+    return res.status(401).json({
       message: "Invalid token.",
       error: error.message,
     });
   }
 };
 
-// Admin authorization
+// ✅ Admin Only Authentication Middleware
 const adminAuth = async (req, res, next) => {
   try {
-    await auth(req, res, () => {});
+    // Authenticate user first
+    await auth(req, res, async () => {
+      // If `auth` already responded, avoid duplicate response
+      if (!req.user) return;
 
-    if (req.user.role !== 1) {
-      return res.status(403).json({
-        message: "Access denied. Admin privileges required.",
+      if (req.user.role !== 1) {
+        return res.status(403).json({
+          message: "Access denied. Admin privileges required.",
+        });
+      }
+
+      next();
+    });
+  } catch (error) {
+    // Catch fallback for unexpected errors
+    if (!res.headersSent) {
+      return res.status(500).json({
+        message: "Admin authentication failed.",
+        error: error.message,
       });
     }
-
-    next();
-  } catch (error) {
-    res.status(401).json({
-      message: "Authentication failed.",
-      error: error.message,
-    });
   }
 };
 
-// Optional auth (for public routes that benefit from user info)
+// ✅ Optional Auth Middleware (e.g., public pages showing optional user data)
 const optionalAuth = async (req, res, next) => {
   try {
     const token = req.header("Authorization")?.replace("Bearer ", "");
@@ -77,10 +84,9 @@ const optionalAuth = async (req, res, next) => {
       }
     }
 
-    next();
+    next(); // Always proceed
   } catch (error) {
-    // Continue without authentication
-    next();
+    next(); // Proceed even if token fails
   }
 };
 
