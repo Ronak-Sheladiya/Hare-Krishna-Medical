@@ -1,0 +1,26 @@
+{
+  "name": "hare-krishna-medical-app",
+  "version": "1.0.0",
+  "description": "Full-stack medical store application with React frontend and Node.js backend",
+  "private": true,
+  "workspaces": [
+    "Frontend",
+    "Backend"
+  ],
+  "scripts": {
+    "install": "npm install --workspaces",
+    "install:frontend": "cd Frontend && npm install",
+    "install:backend": "cd Backend && npm install",
+    "install:all": "npm run install:frontend && npm run install:backend",
+    "dev": "cd Frontend && npm run dev",
+    "dev:full": "cd Frontend && npm run dev:full",
+    "start": "cd Backend && npm start",
+    "start:backend": "cd Backend && npm run dev",
+    "build": "cd Frontend && npm run build",
+    "test": "cd Frontend && npm test",
+    "test:backend": "cd Backend && npm test"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
