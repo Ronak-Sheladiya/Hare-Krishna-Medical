@@ -946,7 +946,9 @@ const AddLetterhead = () => {
                       </div>
 
                       <div className="form-section">
-                        <h6 className="section-title">Main Email Content *</h6>
+                        <h6 className="section-title">
+                          Main Document Content *
+                        </h6>
                         <div className="content-editor">
                           <div className="content-toolbar">
                             <div className="d-flex align-items-center gap-2 flex-wrap">
