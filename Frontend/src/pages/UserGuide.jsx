@@ -890,7 +890,7 @@ const UserGuide = () => {
                             Click "Track Order" for real-time updates
                           </li>
                           <li style={{ marginBottom: "8px" }}>
-                            Receive SMS/Email notifications for status changes
+                            Receive Email notifications for status changes
                           </li>
                         </ol>
                       </div>
