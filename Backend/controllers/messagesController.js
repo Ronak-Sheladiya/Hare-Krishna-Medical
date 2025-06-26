@@ -464,52 +464,88 @@ class MessagesController {
   // Get message statistics (Admin)
   async getMessageStats(req, res) {
     try {
-      const totalMessages = this.messages.length;
-      const unreadMessages = this.messages.filter(
-        (msg) => msg.status === "unread",
-      ).length;
-      const readMessages = this.messages.filter(
-        (msg) => msg.status === "read",
-      ).length;
-      const respondedMessages = this.messages.filter(
-        (msg) => msg.status === "responded",
-      ).length;
+      const totalMessages = await Message.countDocuments({ isDeleted: false });
+      const unreadMessages = await Message.countDocuments({
+        status: "unread",
+        isDeleted: false,
+      });
+      const readMessages = await Message.countDocuments({
+        status: "read",
+        isDeleted: false,
+      });
+      const respondedMessages = await Message.countDocuments({
+        status: "responded",
+        isDeleted: false,
+      });
+
+      // Messages by category
+      const categoryStats = await Message.aggregate([
+        { $match: { isDeleted: false } },
+        { $group: { _id: "$category", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]);
+
+      // Messages by priority
+      const priorityStats = await Message.aggregate([
+        { $match: { isDeleted: false } },
+        { $group: { _id: "$priority", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]);
 
       // Daily message trend (last 30 days)
-      const dailyMessages = {};
       const last30Days = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const dailyMessages = await Message.aggregate([
+        {
+          $match: {
+            createdAt: { $gte: last30Days },
+            isDeleted: false,
+          },
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+            },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]);
 
-      this.messages
-        .filter((msg) => new Date(msg.createdAt) >= last30Days)
-        .forEach((msg) => {
-          const date = new Date(msg.createdAt).toISOString().split("T")[0];
-          dailyMessages[date] = (dailyMessages[date] || 0) + 1;
-        });
-
-      const messageTrend = Object.entries(dailyMessages).map(
-        ([date, count]) => ({
-          date,
-          count,
-        }),
-      );
+      const messageTrend = dailyMessages.map((item) => ({
+        date: item._id,
+        count: item.count,
+      }));
 
       // Response time analysis
-      const respondedMessagesWithTime = this.messages.filter(
-        (msg) => msg.status === "responded" && msg.respondedAt,
-      );
-
-      let avgResponseTime = 0;
-      if (respondedMessagesWithTime.length > 0) {
-        const totalResponseTime = respondedMessagesWithTime.reduce(
-          (sum, msg) => {
-            const responseTime =
-              new Date(msg.respondedAt) - new Date(msg.createdAt);
-            return sum + responseTime;
+      const responseTimeStats = await Message.aggregate([
+        {
+          $match: {
+            status: "responded",
+            respondedAt: { $exists: true },
+            isDeleted: false,
           },
-          0,
-        );
-        avgResponseTime = totalResponseTime / respondedMessagesWithTime.length;
-      }
+        },
+        {
+          $project: {
+            responseTime: {
+              $subtract: ["$respondedAt", "$createdAt"],
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            avgResponseTime: { $avg: "$responseTime" },
+            minResponseTime: { $min: "$responseTime" },
+            maxResponseTime: { $max: "$responseTime" },
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+
+      const avgResponseTime =
+        responseTimeStats.length > 0 ? responseTimeStats[0].avgResponseTime : 0;
 
       res.json({
         success: true,
@@ -518,6 +554,8 @@ class MessagesController {
           unreadMessages,
           readMessages,
           respondedMessages,
+          categoryStats,
+          priorityStats,
           messageTrend,
           avgResponseTimeHours:
             Math.round((avgResponseTime / (1000 * 60 * 60)) * 100) / 100,
