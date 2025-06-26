@@ -127,18 +127,65 @@ const Home = () => {
               className="mb-4 mb-lg-0"
               style={{ paddingRight: "1rem" }}
             >
-              <div className="hero-content">
+              <div
+                className="hero-content"
+                style={{
+                  transition: "all 0.4s ease",
+                }}
+                onMouseEnter={(e) => {
+                  const title = e.currentTarget.querySelector(".hero-title");
+                  const subtitle =
+                    e.currentTarget.querySelector(".hero-subtitle");
+                  if (title) {
+                    title.style.transform = "translateY(-5px)";
+                    title.style.textShadow = "0 5px 15px rgba(51, 51, 51, 0.1)";
+                  }
+                  if (subtitle) {
+                    subtitle.style.transform = "translateY(-3px)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  const title = e.currentTarget.querySelector(".hero-title");
+                  const subtitle =
+                    e.currentTarget.querySelector(".hero-subtitle");
+                  if (title) {
+                    title.style.transform = "translateY(0)";
+                    title.style.textShadow = "none";
+                  }
+                  if (subtitle) {
+                    subtitle.style.transform = "translateY(0)";
+                  }
+                }}
+              >
                 <h1
+                  className="hero-title"
                   style={{
                     color: "#333333",
                     fontSize: "3.5rem",
                     fontWeight: "800",
                     lineHeight: "1.1",
                     marginBottom: "24px",
+                    transition: "all 0.4s ease",
                   }}
                 >
                   Your Health, <br />
-                  <span style={{ color: "#e63946" }}>Our Priority</span>
+                  <span
+                    style={{
+                      color: "#e63946",
+                      transition: "all 0.4s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.color = "#dc3545";
+                      e.target.style.textShadow =
+                        "0 3px 10px rgba(230, 57, 70, 0.3)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.color = "#e63946";
+                      e.target.style.textShadow = "none";
+                    }}
+                  >
+                    Our Priority
+                  </span>
                 </h1>
                 <p
                   style={{
