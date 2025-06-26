@@ -1032,23 +1032,62 @@ const AddLetterhead = () => {
             </div>
           )}
 
-          {/* Navigation Tabs */}
-          <div className="letterhead-tabs">
-            {[
-              { key: "basic", label: "Basic Info", icon: "bi-info-circle" },
-              { key: "recipient", label: "Recipient", icon: "bi-person" },
-              { key: "content", label: "Content", icon: "bi-file-text" },
-              { key: "signature", label: "Signature", icon: "bi-pen" },
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                className={`letterhead-tab ${activeTab === tab.key ? "active" : ""}`}
-                onClick={() => setActiveTab(tab.key)}
-              >
-                <i className={`${tab.icon} me-2`}></i>
-                {tab.label}
-              </button>
-            ))}
+          {/* Progress Indicator */}
+          <div className="progress-indicator">
+            <div className="progress-steps">
+              <div className="progress-line">
+                <div
+                  className="progress-line-fill"
+                  style={{
+                    width: `${
+                      activeTab === "basic"
+                        ? "0%"
+                        : activeTab === "recipient"
+                          ? "33%"
+                          : activeTab === "content"
+                            ? "66%"
+                            : activeTab === "signature"
+                              ? "100%"
+                              : "0%"
+                    }`,
+                  }}
+                ></div>
+              </div>
+              {[
+                { key: "basic", label: "Basic Information", icon: "1" },
+                { key: "recipient", label: "Recipient Details", icon: "2" },
+                { key: "content", label: "Document Content", icon: "3" },
+                { key: "signature", label: "Signature & Review", icon: "4" },
+              ].map((step, index) => (
+                <div
+                  key={step.key}
+                  className={`progress-step ${
+                    activeTab === step.key
+                      ? "active"
+                      : (activeTab === "recipient" && index < 1) ||
+                          (activeTab === "content" && index < 2) ||
+                          (activeTab === "signature" && index < 3)
+                        ? "completed"
+                        : ""
+                  }`}
+                  onClick={() => setActiveTab(step.key)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <div className="progress-step-icon">
+                    {activeTab === step.key ? (
+                      <i className="bi bi-arrow-right"></i>
+                    ) : (activeTab === "recipient" && index < 1) ||
+                      (activeTab === "content" && index < 2) ||
+                      (activeTab === "signature" && index < 3) ? (
+                      <i className="bi bi-check"></i>
+                    ) : (
+                      step.icon
+                    )}
+                  </div>
+                  <div className="progress-step-label">{step.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
 
           <Form onSubmit={handleSubmit}>
