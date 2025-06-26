@@ -135,7 +135,7 @@ const AdminLetterheads = () => {
 
     if (dateFilter) {
       const today = new Date();
-      const filterDate = new Date();
+      let filterDate = new Date();
 
       switch (dateFilter) {
         case "today":
