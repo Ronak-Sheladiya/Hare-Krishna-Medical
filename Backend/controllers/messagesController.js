@@ -268,18 +268,21 @@ class MessagesController {
   // Get single message (Admin)
   async getMessage(req, res) {
     try {
-      const messageId = parseInt(req.params.id);
-      const message = this.messages.find((msg) => msg.id === messageId);
+      const messageId = req.params.id;
+      const message = await Message.findById(messageId)
+        .populate("respondedBy", "fullName email")
+        .lean();
 
-      if (!message) {
+      if (!message || message.isDeleted) {
         return res.status(404).json({
           success: false,
           message: "Message not found",
         });
       }
 
-      // Mark as read
+      // Mark as read if it's unread
       if (message.status === "unread") {
+        await Message.findByIdAndUpdate(messageId, { status: "read" });
         message.status = "read";
       }
 
