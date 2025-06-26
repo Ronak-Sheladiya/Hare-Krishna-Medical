@@ -347,15 +347,15 @@ router.post("/resend-email", auth, async (req, res) => {
 });
 
 // @route   GET /api/verification/document
-// @desc    Verify document (Invoice, Letterhead, etc.) by ID and type
+// @desc    Verify document (Invoice) by ID and type
 // @access  Public
 router.get(
   "/document",
   [
     query("id").notEmpty().withMessage("Document ID is required"),
     query("type")
-      .isIn(["invoice", "letterhead"])
-      .withMessage("Document type must be invoice or letterhead"),
+      .isIn(["invoice"])
+      .withMessage("Document type must be invoice"),
   ],
   async (req, res) => {
     try {
