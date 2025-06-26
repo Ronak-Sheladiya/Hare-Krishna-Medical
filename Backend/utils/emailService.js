@@ -149,22 +149,71 @@ class EmailService {
       to: email,
       subject: "Email Verification - Hare Krishna Medical Store",
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #007bff;">Email Verification Required</h2>
-          <p>Dear ${fullName},</p>
-          <p>Please verify your email address by clicking the link below:</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${verificationUrl}"
-               style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
-              Verify Email Address
-            </a>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Email Verification</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #e63946, #dc3545); color: #ffffff; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+              <div style="background: white; border-radius: 50%; padding: 10px; width: 80px; height: 80px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;">
+                <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=200"
+                     alt="Hare Krishna Medical"
+                     style="width: 60px; height: 60px; object-fit: contain;" />
+              </div>
+              <h1 style="margin: 0; font-size: 24px; font-weight: 600;">📧 Email Verification</h1>
+              <p style="margin: 10px 0 0 0; opacity: 0.95;">Hare Krishna Medical Store</p>
+            </div>
+
+            <!-- Content -->
+            <div style="padding: 40px 30px;">
+              <h2 style="color: #e63946; margin: 0 0 20px 0;">Hello ${fullName}!</h2>
+
+              <p style="color: #6c757d; line-height: 1.7; font-size: 16px;">
+                Thank you for registering with Hare Krishna Medical Store. To complete your registration and access all features, please verify your email address by clicking the button below:
+              </p>
+
+              <div style="text-align: center; margin: 35px 0;">
+                <a href="${verificationUrl}"
+                   style="display: inline-block; background: linear-gradient(135deg, #e63946, #dc3545); color: white; padding: 15px 35px; text-decoration: none; border-radius: 25px; font-weight: 600; font-size: 16px; box-shadow: 0 6px 20px rgba(230,57,70,0.3);">
+                  ✅ Verify Email Address
+                </a>
+              </div>
+
+              <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                <h4 style="margin: 0 0 10px 0; color: #856404;">⏰ Important:</h4>
+                <p style="margin: 0; color: #856404; line-height: 1.6;">
+                  This verification link will expire in 24 hours for security reasons.<br>
+                  If you didn't create an account, please ignore this email.
+                </p>
+              </div>
+
+              <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                <p style="margin: 0 0 10px 0; color: #495057; font-weight: 600;">Alternative Method:</p>
+                <p style="margin: 0; color: #6c757d; font-size: 14px;">
+                  If the button doesn't work, copy and paste this link in your browser:
+                </p>
+                <p style="word-break: break-all; color: #e63946; background: #ffffff; padding: 10px; border-radius: 5px; margin: 10px 0 0 0; font-family: monospace; font-size: 12px;">${verificationUrl}</p>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="background: linear-gradient(135deg, #495057, #343a40); color: #ffffff; padding: 20px 30px; text-align: center; border-radius: 0 0 10px 10px;">
+              <p style="margin: 0 0 8px 0; font-size: 13px;">
+                📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat
+              </p>
+              <p style="margin: 0; font-size: 11px; opacity: 0.7;">
+                📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
+              </p>
+            </div>
           </div>
-          <p>If the button doesn't work, copy and paste this link in your browser:</p>
-          <p style="word-break: break-all; color: #007bff;">${verificationUrl}</p>
-          <p>This link will expire in 24 hours.</p>
-          <p>If you didn't create an account, please ignore this email.</p>
-          <p>Best regards,<br>Hare Krishna Medical Store Team</p>
-        </div>
+        </body>
+        </html>
       `,
     };
 
