@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:full": "concurrently \"npm run dev\" \"cd ../Backend && npm run dev\"",
     "build": "vite build",
     "test": "vitest --run",
     "format.fix": "prettier --write ."
