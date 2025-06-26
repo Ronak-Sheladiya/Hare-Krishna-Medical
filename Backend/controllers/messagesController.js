@@ -303,7 +303,7 @@ class MessagesController {
   // Update message status (Admin)
   async updateMessageStatus(req, res) {
     try {
-      const messageId = parseInt(req.params.id);
+      const messageId = req.params.id;
       const { status } = req.body;
 
       const validStatuses = ["unread", "read", "responded", "archived"];
@@ -315,9 +315,9 @@ class MessagesController {
         });
       }
 
-      const message = this.messages.find((msg) => msg.id === messageId);
+      const message = await Message.findById(messageId);
 
-      if (!message) {
+      if (!message || message.isDeleted) {
         return res.status(404).json({
           success: false,
           message: "Message not found",
@@ -325,14 +325,18 @@ class MessagesController {
       }
 
       message.status = status;
+      if (status === "responded" && !message.respondedAt) {
+        message.respondedAt = new Date();
+      }
+      await message.save();
 
       // Emit real-time update
       const io = req.app.get("io");
       if (io) {
         io.to("admin-room").emit("message-status-updated", {
-          messageId: message.id,
+          messageId: message._id,
           newStatus: status,
-          updatedBy: req.user.fullName,
+          updatedBy: req.user ? req.user.fullName : "Admin",
         });
       }
 
@@ -340,7 +344,7 @@ class MessagesController {
         success: true,
         message: "Message status updated successfully",
         data: {
-          id: message.id,
+          id: message._id,
           status: message.status,
         },
       });
