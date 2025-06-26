@@ -515,9 +515,60 @@ class LetterheadController {
     }
   }
 
+  // Development fallback for getting stats
+  getStatsFallback() {
+    // Initialize sample data if empty
+    if (devLetterheads.length === 0) {
+      this.getLetterheadsFallback({}, 1, 10); // This will initialize sample data
+    }
+
+    const total = devLetterheads.length;
+    const statusCounts = devLetterheads.reduce((acc, letterhead) => {
+      acc[letterhead.status] = (acc[letterhead.status] || 0) + 1;
+      return acc;
+    }, {});
+
+    const typeCounts = devLetterheads.reduce((acc, letterhead) => {
+      acc[letterhead.letterType] = (acc[letterhead.letterType] || 0) + 1;
+      return acc;
+    }, {});
+
+    const generalStats = {
+      total,
+      issued: statusCounts.issued || 0,
+      sent: statusCounts.sent || 0,
+      draft: statusCounts.draft || 0,
+      archived: statusCounts.archived || 0,
+    };
+
+    const typeStats = Object.entries(typeCounts).map(([type, count]) => ({
+      _id: type,
+      count,
+    }));
+
+    return { generalStats, typeStats };
+  }
+
   // Get letterhead statistics
   async getStats(req, res) {
     try {
+      // Use development fallback if database is not available
+      if (shouldUseFallback()) {
+        console.log("🔄 Using development fallback for letterhead stats");
+        const { generalStats, typeStats } = this.getStatsFallback();
+
+        return res.json({
+          success: true,
+          stats: {
+            general: generalStats,
+            types: typeStats,
+          },
+        });
+      }
+
+      // Check database connectivity
+      this.checkDBConnection();
+
       const [generalStats, typeStats] = await Promise.all([
         Letterhead.getStats(),
         Letterhead.getTypeStats(),
