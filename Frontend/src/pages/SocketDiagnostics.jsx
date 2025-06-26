@@ -640,7 +640,7 @@ const SocketDiagnostics = () => {
               URL is set to localhost. This will cause connection failures.
             </p>
             <hr />
-            <p className="mb-0">
+            <div className="mb-0">
               <strong>To fix this:</strong>
               <ol>
                 <li>
