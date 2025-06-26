@@ -106,10 +106,13 @@ const NotificationSystem = () => {
             return;
           }
 
-          // Connect socket for real-time notifications
-          const socket = socketClient.connect();
+          // Connect socket for real-time notifications with user info
+          const socket = socketClient.connect(
+            user?.id || user?._id,
+            user?.role,
+          );
 
-          if (socket && !socket.id?.includes("mock")) {
+          if (socket && !status.fallbackMode) {
             // Listen for real-time notifications
             socket.on("admin_notification", (notificationData) => {
               if (!isMounted) return;
