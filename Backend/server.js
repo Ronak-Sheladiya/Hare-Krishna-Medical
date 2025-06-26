@@ -72,7 +72,7 @@ app.use("/api/messages", require("./routes/messages"));
 app.use("/api/analytics", require("./routes/analytics"));
 app.use("/api/upload", require("./routes/upload"));
 app.use("/api/verification", require("./routes/verification"));
-app.use("/api/admin/notifications", require("./routes/notifications").router);
+app.use("/api/admin/notifications", require("./routes/notifications"));
 
 // ==========================
 // ✅ Health Check Route
