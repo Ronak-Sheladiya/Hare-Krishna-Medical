@@ -3,6 +3,7 @@ const crypto = require("crypto");
 const User = require("../models/User");
 const Verification = require("../models/Verification");
 const Invoice = require("../models/Invoice");
+const Letterhead = require("../models/Letterhead");
 
 const { auth } = require("../middleware/auth");
 const { body, validationResult, query } = require("express-validator");
