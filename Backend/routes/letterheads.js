@@ -191,7 +191,7 @@ router.put(
 router.get(
   "/verify/:letterId",
   param("letterId").notEmpty().withMessage("Letter ID is required"),
-  validate,
+  handleValidationErrors,
   letterheadController.verifyLetterhead,
 );
 
