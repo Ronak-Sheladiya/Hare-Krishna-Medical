@@ -953,7 +953,7 @@ const AddLetterhead = () => {
                           <div className="content-toolbar">
                             <div className="d-flex align-items-center gap-2 flex-wrap">
                               <small className="text-muted me-3 fw-semibold">
-                                Email Formatting Tools:
+                                Document Formatting Tools:
                               </small>
 
                               <OverlayTrigger
