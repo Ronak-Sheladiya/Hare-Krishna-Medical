@@ -215,18 +215,19 @@ const AddLetterhead = () => {
     <div className="letterhead-container">
       <style>{`
         .letterhead-container {
-          background: #f8f9fa;
+          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
           min-height: 100vh;
-          padding-bottom: 2rem;
+          padding-bottom: 3rem;
         }
 
         .letterhead-hero {
-          background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%);
+          background: linear-gradient(135deg, #e63946 0%, #dc3545 50%, #c82333 100%);
           color: white;
-          padding: 4rem 0 3rem 0;
+          padding: 3rem 0 2rem 0;
           margin-bottom: 2rem;
           position: relative;
           overflow: hidden;
+          box-shadow: 0 8px 32px rgba(230, 57, 70, 0.3);
         }
 
         .letterhead-hero::before {
@@ -236,7 +237,13 @@ const AddLetterhead = () => {
           left: 0;
           right: 0;
           bottom: 0;
-          background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+          background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Cpath d='M40 40c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20zM80 40c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+          animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
         }
 
         .letterhead-hero .container {
@@ -244,56 +251,182 @@ const AddLetterhead = () => {
           z-index: 2;
         }
 
+        .letterhead-hero h1 {
+          text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+          font-weight: 700;
+          letter-spacing: -0.5px;
+        }
+
+        .letterhead-hero p {
+          font-size: 1.1rem;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .progress-indicator {
+          background: white;
+          border-radius: 15px;
+          padding: 1rem 2rem;
+          margin-bottom: 2rem;
+          box-shadow: 0 4px 20px rgba(230, 57, 70, 0.1);
+          border: 2px solid rgba(230, 57, 70, 0.1);
+        }
+
+        .progress-steps {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          position: relative;
+        }
+
+        .progress-step {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          flex: 1;
+          position: relative;
+          z-index: 2;
+        }
+
+        .progress-step-icon {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 18px;
+          font-weight: 600;
+          margin-bottom: 8px;
+          transition: all 0.3s ease;
+          border: 3px solid #e9ecef;
+          background: white;
+          color: #6c757d;
+        }
+
+        .progress-step.active .progress-step-icon {
+          background: linear-gradient(135deg, #e63946, #dc3545);
+          color: white;
+          border-color: #e63946;
+          box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
+          transform: scale(1.1);
+        }
+
+        .progress-step.completed .progress-step-icon {
+          background: linear-gradient(135deg, #28a745, #20c997);
+          color: white;
+          border-color: #28a745;
+        }
+
+        .progress-step-label {
+          font-size: 12px;
+          font-weight: 600;
+          color: #6c757d;
+          text-align: center;
+        }
+
+        .progress-step.active .progress-step-label {
+          color: #e63946;
+        }
+
+        .progress-line {
+          position: absolute;
+          top: 25px;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: #e9ecef;
+          z-index: 1;
+        }
+
+        .progress-line-fill {
+          height: 100%;
+          background: linear-gradient(90deg, #e63946, #dc3545);
+          transition: width 0.5s ease;
+          border-radius: 3px;
+        }
+
         .letterhead-card {
           border: none;
-          border-radius: 15px;
-          box-shadow: 0 10px 30px rgba(220, 53, 69, 0.1);
+          border-radius: 20px;
+          box-shadow: 0 8px 32px rgba(230, 57, 70, 0.08);
           margin-bottom: 2rem;
           overflow: hidden;
           transition: all 0.3s ease;
           background: white;
+          border: 1px solid rgba(230, 57, 70, 0.1);
         }
 
         .letterhead-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 15px 40px rgba(220, 53, 69, 0.15);
+          transform: translateY(-3px);
+          box-shadow: 0 12px 40px rgba(230, 57, 70, 0.12);
+          border-color: rgba(230, 57, 70, 0.2);
         }
 
         .letterhead-card .card-header {
-          background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%);
+          background: linear-gradient(135deg, #e63946 0%, #dc3545 100%);
           color: white;
           border: none;
-          padding: 1.5rem;
+          padding: 1.75rem 2rem;
+          position: relative;
+          overflow: hidden;
         }
 
-        .letterhead-tabs {
+        .letterhead-card .card-header::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm20 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E") repeat;
+        }
+
+        .letterhead-card .card-header h5 {
+          position: relative;
+          z-index: 2;
+          margin: 0;
+          font-weight: 600;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .letterhead-card .card-body {
+          padding: 2rem;
+          background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+        }
+
+        .form-section {
           background: white;
           border-radius: 15px;
-          padding: 1rem;
-          margin-bottom: 2rem;
-          box-shadow: 0 5px 20px rgba(220, 53, 69, 0.1);
-          display: flex;
-          gap: 0.5rem;
-          flex-wrap: wrap;
-          justify-content: center;
+          padding: 1.5rem;
+          margin-bottom: 1.5rem;
+          border: 1px solid #f1f3f4;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+          transition: all 0.3s ease;
         }
 
-        .letterhead-tab {
-          background: transparent;
-          border: 2px solid #e9ecef;
-          color: #6c757d;
-          padding: 1rem 1.5rem;
-          border-radius: 10px;
-          font-weight: 500;
-          transition: all 0.3s ease;
-          cursor: pointer;
+        .form-section:hover {
+          border-color: rgba(230, 57, 70, 0.2);
+          box-shadow: 0 4px 12px rgba(230, 57, 70, 0.08);
+        }
+
+        .section-title {
+          color: #e63946;
+          font-weight: 600;
+          font-size: 1.1rem;
+          margin-bottom: 1rem;
+          padding-bottom: 0.5rem;
+          border-bottom: 2px solid rgba(230, 57, 70, 0.1);
           display: flex;
           align-items: center;
-          text-decoration: none;
-          min-width: 120px;
-          justify-content: center;
-          flex: 1;
-          max-width: 200px;
+        }
+
+        .section-title::before {
+          content: "";
+          width: 4px;
+          height: 20px;
+          background: linear-gradient(135deg, #e63946, #dc3545);
+          border-radius: 2px;
+          margin-right: 10px;
         }
 
         .letterhead-tab:hover {
