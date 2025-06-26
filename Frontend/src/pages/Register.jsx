@@ -150,9 +150,34 @@ const Register = () => {
           }),
         });
 
+        const data = await response.json();
+
         if (response.ok) {
           setShowOtpModal(true);
           return;
+        } else if (
+          response.status === 400 &&
+          data.message &&
+          data.message.includes("already exists")
+        ) {
+          // User already exists, redirect to login with prefilled email
+          const isEmailExists = data.message.includes("email");
+          const message = isEmailExists
+            ? "An account with this email already exists. Redirecting to login..."
+            : "An account with this mobile number already exists. Please login instead.";
+
+          alert(message);
+
+          // Store email for prefilling login form
+          sessionStorage.setItem("prefillEmail", formData.email);
+
+          // Redirect to login after short delay
+          setTimeout(() => {
+            navigate("/login");
+          }, 1500);
+          return;
+        } else {
+          throw new Error(data.message || "Registration failed");
         }
       } catch (backendError) {
         console.log("Backend not available, using demo mode");
@@ -163,7 +188,9 @@ const Register = () => {
       setShowOtpModal(true);
     } catch (error) {
       console.error("Registration error:", error);
-      alert("Registration failed. Please try again.");
+      setErrors({
+        general: error.message || "Registration failed. Please try again.",
+      });
     } finally {
       setLoading(false);
     }
