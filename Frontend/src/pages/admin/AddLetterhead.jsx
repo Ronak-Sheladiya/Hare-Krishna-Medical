@@ -1531,7 +1531,7 @@ const AddLetterhead = () => {
             </Button>
             <Button variant="danger" onClick={() => window.print()}>
               <i className="bi bi-printer me-2"></i>
-              Print Email
+              Print Letterhead
             </Button>
           </Modal.Footer>
         </Modal>
