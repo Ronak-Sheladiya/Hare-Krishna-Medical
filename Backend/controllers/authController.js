@@ -19,6 +19,9 @@ class AuthController {
     try {
       const { fullName, email, mobile, password, address } = req.body;
 
+      // Check database connectivity
+      this.checkDBConnection();
+
       // Check if user already exists
       const existingUser = await User.findOne({
         $or: [{ email }, { mobile }],
