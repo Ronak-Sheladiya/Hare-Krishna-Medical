@@ -271,9 +271,7 @@ const SocketDiagnostics = () => {
       const hostname = window.location.hostname;
       const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
       const isProduction =
-        hostname.includes("fly.dev") ||
-        hostname.includes("vercel.app") ||
-        hostname.includes("netlify.app");
+        hostname.includes("vercel.app") || hostname.includes("netlify.app");
       const backendUrl =
         import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
