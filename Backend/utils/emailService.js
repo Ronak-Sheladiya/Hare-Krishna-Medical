@@ -1282,6 +1282,137 @@ class EmailService {
       throw error;
     }
   }
+
+  async sendMessageReplyEmail(
+    email,
+    customerName,
+    originalSubject,
+    originalMessage,
+    replyMessage,
+    adminName,
+  ) {
+    console.log(`📧 Sending message reply to: ${email}`);
+
+    const replyContent = `
+      <!-- Reply Header -->
+      <div style="text-align: center; margin-bottom: 40px;">
+        <div style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); border: 3px solid #3b82f6; border-radius: 20px; padding: 35px;">
+          <div style="background: #3b82f6; color: white; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 36px; box-shadow: 0 8px 25px rgba(59,130,246,0.3);">💬</div>
+
+          <h2 style="color: #1d4ed8; margin: 0 0 15px 0; font-family: 'Segoe UI', sans-serif; font-size: 28px; font-weight: 700;">
+            We've Responded to Your Message!
+          </h2>
+          <p style="color: #1d4ed8; font-size: 18px; margin: 0 0 10px 0;">
+            Dear <strong style="font-size: 20px;">${customerName}</strong>,
+          </p>
+          <p style="color: #1d4ed8; font-size: 16px; margin: 0;">
+            Our professional team has responded to your inquiry
+          </p>
+        </div>
+      </div>
+
+      <!-- Original Message Reference -->
+      <div style="background: linear-gradient(135deg, #f9fafb, #f3f4f6); border: 3px solid #d1d5db; border-radius: 15px; padding: 30px; margin: 35px 0;">
+        <h3 style="color: #374151; margin: 0 0 20px 0; font-family: 'Segoe UI', sans-serif; font-size: 20px; font-weight: 600;">
+          📝 Your Original Message
+        </h3>
+        <div style="background: #ffffff; border: 2px solid #e5e7eb; border-radius: 10px; padding: 20px; margin-bottom: 15px;">
+          <strong style="color: #374151; font-size: 16px; display: block; margin-bottom: 10px;">Subject:</strong>
+          <span style="color: #6b7280; font-size: 15px;">${originalSubject}</span>
+        </div>
+        <div style="background: #ffffff; border: 2px solid #e5e7eb; border-radius: 10px; padding: 20px;">
+          <strong style="color: #374151; font-size: 16px; display: block; margin-bottom: 10px;">Your Message:</strong>
+          <div style="color: #6b7280; font-size: 15px; line-height: 1.6; font-style: italic;">
+            ${originalMessage.replace(/\n/g, "<br>")}
+          </div>
+        </div>
+      </div>
+
+      <!-- Professional Reply -->
+      <div style="background: linear-gradient(135deg, #fef2f2, #fee2e2); border: 3px solid #fecaca; border-radius: 20px; padding: 35px; margin: 35px 0;">
+        <h3 style="color: #e63946; margin: 0 0 25px 0; font-family: 'Segoe UI', sans-serif; font-size: 22px; font-weight: 600; text-align: center;">
+          💼 Our Professional Response
+        </h3>
+
+        <div style="background: #ffffff; border: 3px solid #e63946; border-radius: 15px; padding: 25px; box-shadow: 0 6px 20px rgba(230,57,70,0.1);">
+          <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #fecaca;">
+            <strong style="color: #e63946; font-size: 16px;">From:</strong>
+            <span style="color: #374151; font-size: 16px; margin-left: 10px; font-weight: 500;">${adminName}</span>
+          </div>
+
+          <div style="color: #374151; font-size: 16px; line-height: 1.7;">
+            ${replyMessage.replace(/\n/g, "<br>")}
+          </div>
+        </div>
+      </div>
+
+      <!-- Further Communication -->
+      <div style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 3px solid #10b981; border-radius: 15px; padding: 25px; margin: 30px 0; text-align: center;">
+        <h4 style="margin: 0 0 15px 0; color: #047857; font-size: 18px; font-weight: 600;">💬 Need Further Assistance?</h4>
+        <p style="margin: 0 0 20px 0; color: #047857; line-height: 1.6;">
+          If you have any follow-up questions or need additional support, please don't hesitate to reach out to us.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+          <a href="mailto:hkmedicalamroli@gmail.com?subject=Re: ${originalSubject}"
+             style="background: rgba(16,185,129,0.2); padding: 10px 20px; border-radius: 25px; border: 2px solid rgba(16,185,129,0.4); color: #047857; font-weight: 500; text-decoration: none; transition: all 0.3s ease;">📧 Reply to This Email</a>
+          <span style="background: rgba(16,185,129,0.2); padding: 10px 20px; border-radius: 25px; border: 2px solid rgba(16,185,129,0.4); color: #047857; font-weight: 500;">📞 +91 76989 13354</span>
+        </div>
+      </div>
+
+      <!-- Professional Service Hours -->
+      <div style="background: linear-gradient(135deg, #ede9fe, #ddd6fe); border: 3px solid #8b5cf6; border-radius: 15px; padding: 25px; margin: 30px 0;">
+        <h4 style="margin: 0 0 15px 0; color: #5b21b6; font-size: 18px; font-weight: 600; text-align: center;">⏰ Professional Support Hours</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+          <div style="background: rgba(139,92,246,0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(139,92,246,0.3); text-align: center;">
+            <strong style="color: #5b21b6; font-size: 14px; display: block; margin-bottom: 5px;">Phone Support</strong>
+            <p style="margin: 0; color: #5b21b6; font-size: 13px;">Mon-Sat: 9 AM - 8 PM</p>
+          </div>
+          <div style="background: rgba(139,92,246,0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(139,92,246,0.3); text-align: center;">
+            <strong style="color: #5b21b6; font-size: 14px; display: block; margin-bottom: 5px;">Email Support</strong>
+            <p style="margin: 0; color: #5b21b6; font-size: 13px;">24/7 Response within 24 hours</p>
+          </div>
+          <div style="background: rgba(139,92,246,0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(139,92,246,0.3); text-align: center;">
+            <strong style="color: #5b21b6; font-size: 14px; display: block; margin-bottom: 5px;">Emergency</strong>
+            <p style="margin: 0; color: #5b21b6; font-size: 13px;">Call: +91 76989 13354</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Satisfaction Survey -->
+      <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 3px solid #f59e0b; border-radius: 15px; padding: 25px; margin: 30px 0; text-align: center;">
+        <h4 style="margin: 0 0 15px 0; color: #92400e; font-size: 18px; font-weight: 600;">⭐ Help Us Improve</h4>
+        <p style="margin: 0 0 20px 0; color: #92400e; line-height: 1.6;">
+          Your feedback helps us provide better service. How satisfied are you with our response?
+        </p>
+        <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+          <span style="background: rgba(245,158,11,0.2); padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(245,158,11,0.4); color: #92400e; font-weight: 500; font-size: 14px;">⭐⭐⭐⭐⭐ Excellent</span>
+          <span style="background: rgba(245,158,11,0.2); padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(245,158,11,0.4); color: #92400e; font-weight: 500; font-size: 14px;">⭐⭐⭐⭐ Good</span>
+          <span style="background: rgba(245,158,11,0.2); padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(245,158,11,0.4); color: #92400e; font-weight: 500; font-size: 14px;">⭐⭐⭐ Average</span>
+        </div>
+      </div>
+    `;
+
+    const mailOptions = {
+      from: `"${adminName} - Hare Krishna Medical" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: `Re: ${originalSubject} - Response from Hare Krishna Medical`,
+      html: this.getEmailTemplate(replyContent, "reply"),
+      replyTo: process.env.EMAIL_USER,
+    };
+
+    try {
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log(
+        `✅ Message reply email sent successfully to ${email}:`,
+        result.messageId,
+      );
+      return result;
+    } catch (error) {
+      console.error("❌ Error sending message reply email:", error.message);
+      await this.logEmailError(error, "reply", email);
+      throw error;
+    }
+  }
 }
 
 // Create and export singleton instance
