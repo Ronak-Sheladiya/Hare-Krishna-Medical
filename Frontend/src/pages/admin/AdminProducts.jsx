@@ -823,36 +823,38 @@ const AdminProducts = () => {
             </Row>
 
             <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
+              <Form.Label>
+                Short Description <span className="text-danger">*</span>
+              </Form.Label>
               <Form.Control
-                as="textarea"
-                rows={3}
-                placeholder="Enter detailed product description"
-                value={formData.description}
+                type="text"
+                placeholder="Enter brief product summary (max 100 characters)"
+                value={formData.shortDescription}
                 onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
+                  setFormData({ ...formData, shortDescription: e.target.value })
                 }
+                maxLength={100}
+                required
               />
+              <Form.Text className="text-muted">
+                Brief summary for product cards and listings
+              </Form.Text>
             </Form.Group>
 
             <Form.Group className="mb-3">
               <Form.Label>
-                Product Benefits <span className="text-danger">*</span>
+                Detailed Description <span className="text-danger">*</span>
               </Form.Label>
               <Form.Control
                 as="textarea"
                 rows={4}
-                placeholder="Enter product benefits (each line will be a bullet point)&#10;Example:&#10;Reduces pain and inflammation&#10;Fast-acting relief&#10;Safe for daily use"
-                value={formData.benefits}
+                placeholder="Enter comprehensive product description with all details"
+                value={formData.description}
                 onChange={(e) =>
-                  setFormData({ ...formData, benefits: e.target.value })
+                  setFormData({ ...formData, description: e.target.value })
                 }
                 required
               />
-              <Form.Text className="text-muted">
-                <i className="bi bi-info-circle me-1"></i>
-                Each new line will be displayed as a separate bullet point
-              </Form.Text>
             </Form.Group>
 
             <Form.Group className="mb-3">
