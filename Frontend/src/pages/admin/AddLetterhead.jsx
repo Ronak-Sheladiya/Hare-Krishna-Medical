@@ -932,21 +932,7 @@ const AddLetterhead = () => {
         </Row>
       </Container>
 
-      {/* A4 Preview Modal - Not Fullscreen */}
-      <Modal
-        show={showPreview}
-        onHide={() => setShowPreview(false)}
-        backdrop="static"
-        keyboard={false}
-        size="xl"
-        centered
-        style={{
-          "--bs-modal-width": "900px",
-        }}
-      >
-        <Modal.Header closeButton style={{ padding: "15px 20px" }}>
-          <Modal.Title style={{ fontSize: "18px", fontWeight: "600" }}>
-            <i className="bi bi-eye me-2"></i>
+
             A4 Letterhead Preview
           </Modal.Title>
         </Modal.Header>
