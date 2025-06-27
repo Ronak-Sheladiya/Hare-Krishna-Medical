@@ -120,19 +120,36 @@ const AdminLetterheads = () => {
       if (statusFilter) params.append("status", statusFilter);
       if (typeFilter) params.append("letterType", typeFilter);
 
+      console.log(
+        "🔄 Fetching letterheads with URL:",
+        `/api/letterheads?${params.toString()}`,
+      );
+
       const response = await safeApiCall(
         api.get(`/api/letterheads?${params.toString()}`),
       );
+
+      console.log("📋 Letterheads API Response:", response);
 
       if (response?.success) {
         setLetterheads(response.letterheads || []);
         setTotalPages(response.pagination?.totalPages || 1);
         setTotalLetterheads(response.pagination?.total || 0);
+        console.log(
+          "✅ Letterheads loaded successfully:",
+          response.letterheads?.length || 0,
+        );
       } else {
+        console.error("❌ API Response Error:", response);
         throw new Error(response?.message || "Failed to fetch letterheads");
       }
     } catch (error) {
-      console.error("Fetch letterheads error:", error);
+      console.error("❌ Fetch letterheads error:", error);
+      console.error("❌ Error details:", {
+        message: error.message,
+        response: error.response,
+        stack: error.stack,
+      });
       setError(error.message);
       setLetterheads([]);
     } finally {
