@@ -393,7 +393,7 @@ const AddLetterhead = () => {
   const generateLetterheadPDF = async () => {
     if (!formData.title || !formData.content) return null;
 
-    setPdfGenerating(true);
+    setDownloadLoading(true);
     try {
       // Import PDF service
       const pdfService = (await import("../../services/PDFService")).default;
