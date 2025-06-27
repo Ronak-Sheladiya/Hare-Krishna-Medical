@@ -402,143 +402,110 @@ const AddLetterhead = () => {
     `;
   };
 
-  // PDF generation states - separate for print and download
+  // Loading states for print and download
   const [printLoading, setPrintLoading] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
-  const [pdfUrl, setPdfUrl] = useState(null);
-  const [pdfGenerating, setPdfGenerating] = useState(false);
 
-  // Generate PDF blob for letterhead (similar to invoice system)
-  const generateLetterheadPDF = async () => {
-    if (!formData.title || !formData.content) return;
-
-    try {
-      setPdfGenerating(true);
-
-      // Ensure QR code is generated
-      if (!qrCode) {
-        const tempId = letterheadId || generateTempLetterheadId();
-        setLetterheadId(tempId);
-        const generatedQR = await generatePreviewQRCode(tempId);
-        if (generatedQR) {
-          setQrCode(generatedQR);
-        }
-      }
-
-      // Wait for QR code to render
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      const letterheadElement = document.getElementById(
-        "letterhead-print-content",
-      );
-      if (!letterheadElement) {
-        throw new Error("Letterhead content not found");
-      }
-
-      // Create letterhead data for PDF service
-      const letterheadData = {
-        letterheadId: letterheadId || generateTempLetterheadId(),
-        title: formData.title,
-        content: formData.content,
-        qrCode: qrCode,
-        issueDate: new Date().toISOString(),
-        status: "draft",
-      };
-
-      // Use optimized PDF generation with FULL page usage
-      const result = await pdfService.generatePDFFromElement(
-        letterheadElement,
-        {
-          quality: 0.9, // Higher quality
-          scale: 2.0, // Higher scale for better resolution
-          margin: 0, // ZERO margin for full page usage
-          onProgress: (message, progress) => {
-            console.log(`PDF Generation: ${message} (${progress}%)`);
-          },
-          returnBlob: true, // Request blob return
-        },
-      );
-
-      if (result.success && result.blob) {
-        // Create object URL for PDF preview
-        const pdfObjectUrl = URL.createObjectURL(result.blob);
-        setPdfUrl(pdfObjectUrl);
-      }
-    } catch (error) {
-      console.error("PDF generation failed:", error);
-    } finally {
-      setPdfGenerating(false);
-    }
-  };
-
-  // IMMEDIATE PRINT FUNCTIONALITY (from invoice system)
+  // DIRECT HTML PRINT FUNCTIONALITY
   const handlePrint = () => {
     if (!formData.title || !formData.content) {
       setError("Please fill in both title and content before printing.");
       return;
     }
 
-    if (pdfUrl) {
-      // Create print window immediately
-      const printWindow = window.open(
-        pdfUrl,
-        "_blank",
-        "width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes",
-      );
+    try {
+      setPrintLoading(true);
+      setError(null);
 
-      if (printWindow) {
-        printWindow.document.title = `${formData.title} - Letterhead Print`;
-
-        const setupPrintHandlers = () => {
-          const afterPrint = () => {
-            printWindow.close(); // Immediate close after print
-          };
-
-          printWindow.addEventListener("afterprint", afterPrint);
-          printWindow.addEventListener("beforeunload", () =>
-            printWindow.close(),
-          );
-        };
-
-        // Immediate PDF loading and printing
-        printWindow.onload = () => {
-          setupPrintHandlers();
-          printWindow.focus();
-          printWindow.print();
-        };
-
-        // Immediate fallback
-        try {
-          setupPrintHandlers();
-          printWindow.focus();
-          printWindow.print();
-        } catch (error) {
-          console.log("Fallback print trigger:", error);
-        }
-
-        // Show success feedback
-        setSuccess(
-          "Print dialog opened successfully! Check your browser for the print window.",
-        );
-        setTimeout(() => setSuccess(null), 3000);
+      // Ensure QR code is generated
+      if (!qrCode) {
+        const tempId = letterheadId || generateTempLetterheadId();
+        setLetterheadId(tempId);
+        generatePreviewQRCode(tempId).then((generatedQR) => {
+          if (generatedQR) {
+            setQrCode(generatedQR);
+          }
+        });
       }
-    } else if (pdfGenerating) {
-      setError("PDF is still being generated. Please wait and try again.");
-    } else {
-      setError("PDF not available. Generating...");
-      generateLetterheadPDF();
+
+      const letterheadElement = document.getElementById(
+        "letterhead-print-content",
+      );
+      if (!letterheadElement) {
+        throw new Error("Letterhead content not found");
+      }
+
+      // Create print window with HTML content
+      const printWindow = window.open("", "_blank");
+      const htmlContent = letterheadElement.outerHTML;
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${formData.title} - Letterhead</title>
+            <style>
+              @page {
+                size: A4;
+                margin: 0;
+              }
+              @media print {
+                body {
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  color: black !important;
+                  background: white !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                }
+                .no-print {
+                  display: none !important;
+                }
+              }
+              body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background: white;
+              }
+            </style>
+          </head>
+          <body>
+            ${htmlContent}
+            <script>
+              window.onload = function() {
+                window.print();
+                window.onafterprint = function() {
+                  window.close();
+                };
+              };
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+
+      setSuccess("Print dialog opened successfully!");
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (error) {
+      console.error("Print failed:", error);
+      setError(`Print failed: ${error.message}`);
+    } finally {
+      setPrintLoading(false);
     }
   };
 
-  // DOWNLOAD FUNCTIONALITY (from invoice system)
+  // DIRECT HTML DOWNLOAD FUNCTIONALITY
   const handleDownload = async () => {
     if (!formData.title || !formData.content) {
       setError("Please fill in both title and content before downloading.");
       return;
     }
 
-    setDownloadLoading(true);
     try {
+      setDownloadLoading(true);
+      setError(null);
+
       // Ensure QR code is generated
       if (!qrCode) {
         const tempId = letterheadId || generateTempLetterheadId();
@@ -559,87 +526,65 @@ const AddLetterhead = () => {
         throw new Error("Letterhead content not found");
       }
 
-      // Set optimal styles for capturing FULL PAGE
-      const originalDisplay = letterheadElement.style.display;
-      const originalTransform = letterheadElement.style.transform;
-      const originalWidth = letterheadElement.style.width;
-      const originalHeight = letterheadElement.style.height;
-      const originalMargin = letterheadElement.style.margin;
-      const originalPadding = letterheadElement.style.padding;
-
-      letterheadElement.style.display = "block";
-      letterheadElement.style.transform = "scale(1)";
-      letterheadElement.style.width = "794px";
-      letterheadElement.style.height = "1123px";
-      letterheadElement.style.margin = "0";
-      letterheadElement.style.padding = "0";
-
-      // Shorter wait time for style application
-      await new Promise((resolve) => setTimeout(resolve, 50));
-
-      // Create letterhead data for PDF service
-      const letterheadData = {
-        letterheadId: letterheadId || generateTempLetterheadId(),
-        title: formData.title,
-        content: formData.content,
-        qrCode: qrCode,
-        issueDate: new Date().toISOString(),
-        status: "draft",
-      };
-
-      // Use optimized PDF generation for download with FULL page usage
-      const result = await pdfService.generatePDFFromElement(
-        letterheadElement,
-        {
-          filename: `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead_${new Date().toISOString().split("T")[0]}.pdf`,
-          quality: 0.95, // Highest quality for downloads
-          scale: 2.5, // Higher scale for downloads
-          margin: 0, // ZERO margin for full page usage
-        },
-      );
-
-      // Restore original styles
-      letterheadElement.style.display = originalDisplay;
-      letterheadElement.style.transform = originalTransform;
-      letterheadElement.style.width = originalWidth;
-      letterheadElement.style.height = originalHeight;
-      letterheadElement.style.margin = originalMargin;
-      letterheadElement.style.padding = originalPadding;
-
-      if (!result.success) {
-        throw new Error(result.error);
+      // Create complete HTML document
+      const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${formData.title} - Letterhead</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 0;
+    }
+    @media print {
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+        color: black !important;
+        background: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
+      .no-print {
+        display: none !important;
+      }
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: white;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  ${letterheadElement.outerHTML}
+</body>
+</html>`;
 
-      // Show success feedback
-      setSuccess("PDF downloaded successfully! Check your downloads folder.");
+      // Create and download HTML file
+      const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead_${new Date().toISOString().split("T")[0]}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setSuccess("HTML file downloaded successfully!");
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
-      console.error("PDF download failed:", error);
-      setError(`Download failed: ${error.message}. Please try again.`);
+      console.error("Download failed:", error);
+      setError(`Download failed: ${error.message}`);
     } finally {
       setDownloadLoading(false);
     }
   };
-
-  // Auto-generate PDF when form data changes (similar to invoice system)
-  useEffect(() => {
-    if (formData.title && formData.content && qrCode) {
-      const timeoutId = setTimeout(() => {
-        generateLetterheadPDF();
-      }, 1000); // Generate PDF after 1 second of no changes
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [formData.title, formData.content, qrCode]);
-
-  // Cleanup PDF URL on component unmount
-  useEffect(() => {
-    return () => {
-      if (pdfUrl) {
-        URL.revokeObjectURL(pdfUrl);
-      }
-    };
-  }, [pdfUrl]);
 
   return (
     <Container fluid style={{ padding: "10px" }}>
