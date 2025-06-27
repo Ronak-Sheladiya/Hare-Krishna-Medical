@@ -19,6 +19,7 @@ import {
   ThemeButton,
 } from "../../components/common/ConsistentTheme";
 import "../../styles/RichTextEditor.css";
+import "../../styles/LetterheadPreview.css";
 
 const AddLetterhead = () => {
   const navigate = useNavigate();
@@ -51,19 +52,21 @@ const AddLetterhead = () => {
     }
   };
 
-  // Generate QR code for preview
+  // Generate QR code for preview - Enhanced for real-time generation
   const generatePreviewQRCode = async (tempId) => {
     try {
       const QRCode = await import("qrcode");
       const verificationUrl = `${window.location.origin}/verify-docs?id=${tempId}&type=letterhead`;
       const qrDataURL = await QRCode.toDataURL(verificationUrl, {
-        width: 150,
+        width: 200,
         margin: 2,
         color: {
           dark: "#1a202c",
           light: "#ffffff",
         },
-        errorCorrectionLevel: "M",
+        errorCorrectionLevel: "H", // High error correction for better scanning
+        type: "image/png",
+        quality: 0.95,
       });
       return qrDataURL;
     } catch (error) {
@@ -71,6 +74,30 @@ const AddLetterhead = () => {
       return null;
     }
   };
+
+  // Auto-generate QR when form data changes
+  useEffect(() => {
+    const generateQRCodeOnChange = async () => {
+      if (formData.title && formData.content) {
+        const tempId = letterheadId || generateTempLetterheadId();
+        if (!letterheadId) {
+          setLetterheadId(tempId);
+        }
+
+        // Only generate new QR if we don't have one yet
+        if (!qrCode) {
+          const generatedQR = await generatePreviewQRCode(tempId);
+          if (generatedQR) {
+            setQrCode(generatedQR);
+          }
+        }
+      }
+    };
+
+    // Debounce QR generation to avoid too many calls
+    const timeoutId = setTimeout(generateQRCodeOnChange, 500);
+    return () => clearTimeout(timeoutId);
+  }, [formData.title, formData.content, letterheadId, qrCode]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -147,82 +174,208 @@ const AddLetterhead = () => {
     setShowPreview(true);
   };
 
+  // Manual refresh QR code
+  const handleRefreshPreview = async () => {
+    if (!formData.title || !formData.content) return;
+
+    const tempId = letterheadId || generateTempLetterheadId();
+    setLetterheadId(tempId);
+
+    // Force regenerate QR code
+    const generatedQR = await generatePreviewQRCode(tempId);
+    if (generatedQR) {
+      setQrCode(generatedQR);
+    }
+  };
+
   const createLetterheadTemplate = () => {
     const currentDate = new Date().toLocaleDateString("en-IN");
     const currentLetterheadId = letterheadId || generateTempLetterheadId();
 
     return `
-      <div id="letterhead-print-content" style="font-family: Arial, sans-serif; padding: 10px; background: white; max-width: 210mm; margin: 0 auto; min-height: 277mm; page-break-inside: avoid; box-sizing: border-box;">
-        <!-- Header Section - Professional Design -->
-        <div style="background: #e63946; color: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <!-- Left Side - Company Info -->
-            <div style="flex: 1;">
-              <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <div style="position: relative; margin-right: 15px;">
-                  <div style="background: white; border-radius: 50%; padding: 8px; border: 2px solid rgba(255,255,255,0.9); box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                    <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800" alt="Hare Krishna Medical Logo" style="height: 40px; width: 40px; object-fit: contain; border-radius: 50%;" onerror="this.style.display='none';" />
-                  </div>
-                  <div style="position: absolute; top: -3px; right: -3px; width: 15px; height: 15px; background: #28a745; border-radius: 50%; border: 2px solid white;"></div>
-                </div>
-                <div>
-                  <h1 style="font-size: 22px; font-weight: 900; margin: 0; line-height: 1.1; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">HARE KRISHNA MEDICAL</h1>
-                  <p style="font-size: 11px; margin: 3px 0 0 0; opacity: 0.95; font-weight: 500; letter-spacing: 0.3px;">🏥 Your Trusted Health Partner Since 2020</p>
-                  <div style="display: flex; align-items: center; margin-top: 5px; font-size: 9px; opacity: 0.9;">
-                    <span style="background: rgba(255,255,255,0.2); padding: 1px 6px; border-radius: 8px; margin-right: 6px;">✓ Verified</span>
-                    <span style="background: rgba(255,255,255,0.2); padding: 1px 6px; border-radius: 8px;">📋 Official Document</span>
-                  </div>
-                </div>
+      <div id="letterhead-print-content" style="
+        font-family: Arial, sans-serif;
+        background: white;
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0 auto;
+        padding: 15mm;
+        box-sizing: border-box;
+        position: relative;
+        page-break-inside: avoid;
+      ">
+        <!-- Header Section -->
+        <div style="
+          background: #e63946;
+          color: white;
+          padding: 20px;
+          border-radius: 8px;
+          margin-bottom: 20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        ">
+          <!-- Company Information -->
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; margin-bottom: 12px;">
+              <div style="
+                background: white;
+                border-radius: 50%;
+                padding: 10px;
+                margin-right: 15px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+              ">
+                <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
+                     alt="Hare Krishna Medical Logo"
+                     style="height: 45px; width: 45px; object-fit: contain;"
+                     onerror="this.style.display='none';" />
               </div>
-              <div style="background: rgba(255,255,255,0.1); padding: 8px; border-radius: 6px; font-size: 9px; line-height: 1.3;">
-                <div style="display: flex; align-items: center; margin-bottom: 2px;"><i style="margin-right: 6px;">📍</i> 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat</div>
-                <div style="display: flex; align-items: center; margin-bottom: 2px;"><i style="margin-right: 6px;">📞</i> +91 76989 13354 | +91 91060 18508</div>
-                <div style="display: flex; align-items: center;"><i style="margin-right: 6px;">✉️</i> hkmedicalamroli@gmail.com</div>
+              <div>
+                <h1 style="
+                  font-size: 24px;
+                  font-weight: 900;
+                  margin: 0;
+                  line-height: 1.1;
+                  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+                  font-family: 'Georgia', serif;
+                ">HARE KRISHNA MEDICAL</h1>
+                <p style="
+                  font-size: 12px;
+                  margin: 4px 0 0 0;
+                  opacity: 0.95;
+                  font-weight: 500;
+                ">🏥 Your Trusted Health Partner Since 2020</p>
               </div>
             </div>
+            <div style="
+              background: rgba(255,255,255,0.1);
+              padding: 10px;
+              border-radius: 6px;
+              font-size: 10px;
+              line-height: 1.4;
+            ">
+              <div style="margin-bottom: 4px;">📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat</div>
+              <div style="margin-bottom: 4px;">📞 +91 76989 13354 | +91 91060 18508</div>
+              <div>✉️ hkmedicalamroli@gmail.com</div>
+            </div>
+          </div>
 
-            <!-- Right Side - QR Code Only -->
-            <div style="text-align: center; min-width: 120px;">
-              <div style="background: white; padding: 8px; border-radius: 8px; box-shadow: 0 3px 8px rgba(0,0,0,0.1);">
-                ${
-                  qrCode
-                    ? `<img src="${qrCode}" alt="Verification QR Code" style="width: 80px; height: 80px; border: 2px solid #e63946; border-radius: 6px;" />`
-                    : `<div style="width: 80px; height: 80px; border: 2px dashed #e63946; border-radius: 6px; background: #f8f9fa; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #e63946;">
-                         <div style="font-size: 12px; margin-bottom: 3px;">📱</div>
-                         <div style="font-size: 8px; font-weight: bold; text-align: center; line-height: 1.1;">QR CODE<br>VERIFICATION</div>
-                       </div>`
-                }
-                <div style="margin-top: 5px; color: #333; font-size: 8px; font-weight: bold;">📱 SCAN TO VERIFY</div>
-              </div>
+          <!-- QR Code Section - Properly Aligned -->
+          <div style="
+            text-align: center;
+            min-width: 110px;
+            margin-left: 20px;
+          ">
+            <div style="
+              background: white;
+              padding: 10px;
+              border-radius: 8px;
+              box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            ">
+              ${
+                qrCode
+                  ? `<img src="${qrCode}" alt="Verification QR Code" style="
+                       width: 85px;
+                       height: 85px;
+                       border: 2px solid #e63946;
+                       border-radius: 6px;
+                       display: block;
+                     " />`
+                  : `<div style="
+                       width: 85px;
+                       height: 85px;
+                       border: 2px dashed #e63946;
+                       border-radius: 6px;
+                       background: #f8f9fa;
+                       display: flex;
+                       flex-direction: column;
+                       align-items: center;
+                       justify-content: center;
+                       color: #e63946;
+                     ">
+                       <div style="font-size: 14px; margin-bottom: 4px;">📱</div>
+                       <div style="font-size: 9px; font-weight: bold; text-align: center; line-height: 1.1;">QR CODE<br>VERIFICATION</div>
+                     </div>`
+              }
+              <div style="
+                margin-top: 6px;
+                color: #333;
+                font-size: 9px;
+                font-weight: bold;
+              ">📱 SCAN TO VERIFY</div>
             </div>
           </div>
         </div>
 
-        <!-- Reference and Date - After Header, Right Aligned -->
-        <div style="text-align: right; margin-bottom: 15px; font-size: 10px; color: #666;">
-          <div style="margin-bottom: 2px;">Ref: ${currentLetterheadId}</div>
-          <div>Date: ${currentDate}</div>
+        <!-- Reference and Date - Top Right, Left Aligned -->
+        <div style="
+          text-align: left;
+          margin: 0 0 20px auto;
+          font-size: 11px;
+          color: #666;
+          width: fit-content;
+        ">
+          <div style="margin-bottom: 3px; font-weight: 600;">Ref: ${currentLetterheadId}</div>
+          <div style="font-weight: 600;">Date: ${currentDate}</div>
         </div>
 
-        <!-- Letterhead Title -->
-        <div style="text-align: center; margin-bottom: 20px;">
-          <h2 style="color: #e63946; font-size: 20px; font-weight: bold; margin: 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #e63946; display: inline-block; padding-bottom: 6px;">
+        <!-- Document Title -->
+        <div style="text-align: center; margin-bottom: 25px;">
+          <h2 style="
+            color: #e63946;
+            font-size: 22px;
+            font-weight: bold;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-bottom: 3px solid #e63946;
+            display: inline-block;
+            padding-bottom: 8px;
+            font-family: 'Georgia', serif;
+          ">
             ${formData.title}
           </h2>
         </div>
 
-        <!-- Letterhead Content -->
-        <div style="font-size: 12px; line-height: 1.6; text-align: justify; margin-bottom: 40px; min-height: 200px; color: #333;">
+        <!-- Content Section -->
+        <div style="
+          font-size: 13px;
+          line-height: 1.7;
+          text-align: justify;
+          margin-bottom: 80px;
+          min-height: 200px;
+          color: #333;
+          font-family: Arial, sans-serif;
+          padding-bottom: 30px;
+        ">
           ${formData.content}
         </div>
 
-        <!-- Footer Section - From VerifyDocs -->
-        <div style="position: absolute; bottom: 10px; left: 10px; right: 10px; border-top: 2px solid #e63946; padding-top: 10px;">
+        <!-- Footer Section - Better positioning to avoid overlap -->
+        <div style="
+          border-top: 2px solid #e63946;
+          padding-top: 15px;
+          margin-top: 30px;
+          position: fixed;
+          bottom: 15mm;
+          left: 15mm;
+          right: 15mm;
+        ">
           <div style="text-align: center;">
-            <p style="font-size: 10px; color: #666; margin-bottom: 3px;">
+            <p style="
+              font-size: 11px;
+              color: #666;
+              margin-bottom: 5px;
+              font-weight: 600;
+            ">
               ✅ This letterhead has been verified and is authentic
             </p>
-            <p style="font-size: 9px; color: #999; margin-bottom: 0;">
+            <p style="
+              font-size: 10px;
+              color: #999;
+              margin-bottom: 0;
+              line-height: 1.3;
+            ">
               Verified on ${new Date().toLocaleString("en-IN")} | For queries: +91 76989 13354 | hkmedicalamroli@gmail.com
             </p>
           </div>
@@ -235,7 +388,7 @@ const AddLetterhead = () => {
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
 
-  // Generate actual PDF for letterhead
+  // Generate actual PDF for letterhead with proper A4 sizing
   const generateLetterheadPDF = async () => {
     if (!formData.title || !formData.content) return null;
 
@@ -245,7 +398,7 @@ const AddLetterhead = () => {
       const pdfService = (await import("../../services/PDFService")).default;
 
       // Wait for DOM to render letterhead content
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       const letterheadElement = document.getElementById(
         "letterhead-print-content",
@@ -254,15 +407,22 @@ const AddLetterhead = () => {
         throw new Error("Letterhead content not found");
       }
 
-      // Generate actual PDF blob
+      // Generate actual PDF blob with A4 specifications
       const result = await pdfService.generatePDFFromElement(
         letterheadElement,
         {
           filename: `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`,
+          quality: 1.0, // High quality for letterheads
+          scale: 2.0, // Higher scale for better text rendering
+          backgroundColor: "#ffffff",
           onProgress: (message, progress) => {
             console.log(`PDF Generation: ${message} (${progress}%)`);
           },
           returnBlob: true, // Request blob return instead of direct download
+          // A4 specific settings
+          format: "a4",
+          orientation: "portrait",
+          margin: 0, // No additional margins since template already has proper spacing
         },
       );
 
@@ -283,7 +443,7 @@ const AddLetterhead = () => {
 
   // No auto-generation of PDF - only generate when print/download is clicked
 
-  // PRINT FUNCTIONALITY - Generate PDF and open in new window
+  // PRINT FUNCTIONALITY - Generate PDF and open in new window for printing
   const handlePrint = async () => {
     try {
       setPdfGenerating(true);
@@ -336,25 +496,43 @@ const AddLetterhead = () => {
     try {
       setPdfGenerating(true);
 
-      // Generate PDF first
-      const pdfBlob = await generateLetterheadPDF();
+      // Use html2canvas and jsPDF directly for better control
+      const html2canvas = (await import("html2canvas")).default;
+      const jsPDF = (await import("jspdf")).default;
 
-      if (pdfBlob) {
-        // Create download link and trigger download
-        const filename = `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`;
-        const url = URL.createObjectURL(pdfBlob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        console.log("PDF downloaded successfully:", filename);
-      } else {
-        alert("Failed to generate PDF for download. Please try again.");
+      const letterheadElement = document.getElementById(
+        "letterhead-print-content",
+      );
+      if (!letterheadElement) {
+        alert("Letterhead content not found. Please refresh and try again.");
+        return;
       }
+
+      // Generate canvas
+      const canvas = await html2canvas(letterheadElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+        width: letterheadElement.scrollWidth,
+        height: letterheadElement.scrollHeight,
+      });
+
+      // Create PDF
+      const pdf = new jsPDF("portrait", "mm", "a4");
+      const imgData = canvas.toDataURL("image/png", 1.0);
+
+      // A4 dimensions: 210mm x 297mm
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+
+      // Download
+      const filename = `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`;
+      pdf.save(filename);
+
+      console.log("PDF downloaded successfully:", filename);
     } catch (error) {
       console.error("Download failed:", error);
       alert("Download failed. Please try again.");
@@ -375,7 +553,7 @@ const AddLetterhead = () => {
   return (
     <Container fluid style={{ padding: "10px" }}>
       <PageHeroSection
-        title="Create Professional Letterhead"
+        title="Create Letterhead"
         subtitle="Create official letterheads with verification QR codes, real-time preview, and PDF generation"
         breadcrumbs={[
           { label: "Admin", href: "/admin" },
@@ -389,8 +567,12 @@ const AddLetterhead = () => {
           {/* Form Section */}
           <Col lg={6}>
             <Card
-              className="shadow-lg h-100"
-              style={{ borderRadius: "12px", border: "none" }}
+              className="shadow-lg"
+              style={{
+                borderRadius: "12px",
+                border: "none",
+                height: "700px",
+              }}
             >
               <Card.Header
                 className="text-white"
@@ -405,11 +587,16 @@ const AddLetterhead = () => {
                   Letterhead Information
                 </h5>
                 <small style={{ opacity: "0.9" }}>
-                  Fill in the details below to create your professional
-                  letterhead
+                  Fill in the details below to create your letterhead
                 </small>
               </Card.Header>
-              <Card.Body style={{ padding: "10px" }}>
+              <Card.Body
+                style={{
+                  padding: "15px",
+                  maxHeight: "600px",
+                  overflowY: "auto",
+                }}
+              >
                 {error && (
                   <Alert
                     variant="danger"
@@ -674,8 +861,12 @@ const AddLetterhead = () => {
           {/* Live Preview Section */}
           <Col lg={6}>
             <Card
-              className="shadow-lg h-100"
-              style={{ borderRadius: "12px", border: "none" }}
+              className="shadow-lg"
+              style={{
+                borderRadius: "12px",
+                border: "none",
+                height: "700px",
+              }}
             >
               <Card.Header
                 className="text-white"
@@ -699,9 +890,10 @@ const AddLetterhead = () => {
                     <Button
                       size="sm"
                       variant="outline-light"
-                      onClick={handlePreview}
+                      onClick={handleRefreshPreview}
                       disabled={!formData.title || !formData.content}
                       style={{ borderRadius: "8px" }}
+                      title="Refresh preview and regenerate QR code"
                     >
                       <i className="bi bi-arrow-clockwise me-1"></i>
                       Refresh
@@ -723,7 +915,8 @@ const AddLetterhead = () => {
                 className="p-2"
                 style={{
                   backgroundColor: "#f8f9fa",
-                  minHeight: "500px",
+                  height: "500px",
+                  overflowY: "auto",
                 }}
               >
                 {!formData.title || !formData.content ? (
@@ -773,16 +966,17 @@ const AddLetterhead = () => {
                 ) : (
                   <div
                     style={{
-                      transform: "scale(0.4)",
-                      transformOrigin: "top left",
-                      width: "250%",
-                      height: "250%",
+                      transform: "scale(0.35)",
+                      transformOrigin: "top center",
+                      width: "210mm",
+                      minHeight: "297mm",
                       overflow: "hidden",
                       border: "2px solid #dee2e6",
                       borderRadius: "12px",
                       backgroundColor: "white",
                       boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      margin: "0 0 -50% 0", // Prevent overlap
+                      margin: "0 auto",
+                      display: "block",
                     }}
                     dangerouslySetInnerHTML={{
                       __html: createLetterheadTemplate(),
@@ -854,7 +1048,7 @@ const AddLetterhead = () => {
                   <div className="text-center mt-1">
                     <small className="text-muted">
                       <i className="bi bi-info-circle me-1"></i>
-                      Your letterhead is ready for professional use
+                      Your letterhead is ready for use
                     </small>
                   </div>
                 )}
@@ -864,46 +1058,64 @@ const AddLetterhead = () => {
         </Row>
       </Container>
 
-      {/* Full Preview Modal */}
+      {/* A4 Preview Modal - Not Fullscreen */}
       <Modal
         show={showPreview}
         onHide={() => setShowPreview(false)}
         size="xl"
-        fullscreen
+        centered
+        style={{
+          "--bs-modal-width": "900px",
+        }}
       >
-        <Modal.Header closeButton>
-          <Modal.Title>
+        <Modal.Header closeButton style={{ padding: "15px 20px" }}>
+          <Modal.Title style={{ fontSize: "18px", fontWeight: "600" }}>
             <i className="bi bi-eye me-2"></i>
-            Full Letterhead Preview
+            A4 Letterhead Preview
           </Modal.Title>
         </Modal.Header>
         <Modal.Body
           style={{
             backgroundColor: "#f8f9fa",
-            maxHeight: "80vh",
+            height: "70vh",
             overflowY: "auto",
-            padding: "10px",
+            padding: "20px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "flex-start",
           }}
         >
-          <div className="d-flex justify-content-center">
-            <div
-              style={{
-                maxWidth: "210mm",
-                backgroundColor: "white",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                borderRadius: "8px",
-                margin: "10px",
-              }}
-              dangerouslySetInnerHTML={{ __html: createLetterheadTemplate() }}
-            />
-          </div>
+          {/* A4 Size Container */}
+          <div
+            style={{
+              width: "210mm",
+              minHeight: "297mm",
+              backgroundColor: "white",
+              boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+              borderRadius: "8px",
+              transform: "scale(0.8)",
+              transformOrigin: "top center",
+              margin: "0 auto",
+            }}
+            dangerouslySetInnerHTML={{ __html: createLetterheadTemplate() }}
+          />
         </Modal.Body>
-        <Modal.Footer style={{ padding: "10px" }}>
+        <Modal.Footer
+          style={{
+            padding: "15px 20px",
+            background: "#fff",
+            borderTop: "1px solid #dee2e6",
+          }}
+        >
           <Button
             variant="outline-secondary"
             onClick={() => setShowPreview(false)}
-            style={{ borderRadius: "8px" }}
+            style={{
+              borderRadius: "8px",
+              padding: "8px 16px",
+            }}
           >
+            <i className="bi bi-x-lg me-2"></i>
             Close Preview
           </Button>
           <Button
@@ -914,6 +1126,8 @@ const AddLetterhead = () => {
               borderRadius: "8px",
               background: "linear-gradient(135deg, #28a745, #20c997)",
               border: "none",
+              padding: "8px 16px",
+              fontWeight: "600",
             }}
           >
             {pdfGenerating ? (
@@ -936,6 +1150,8 @@ const AddLetterhead = () => {
               background: "linear-gradient(135deg, #e63946, #dc3545)",
               border: "none",
               color: "white",
+              padding: "8px 16px",
+              fontWeight: "600",
             }}
           >
             {pdfGenerating ? (
