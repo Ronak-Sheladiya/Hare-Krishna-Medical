@@ -372,7 +372,7 @@ const AddLetterhead = () => {
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
 
-  // Generate actual PDF for letterhead
+  // Generate actual PDF for letterhead with proper A4 sizing
   const generateLetterheadPDF = async () => {
     if (!formData.title || !formData.content) return null;
 
@@ -382,7 +382,7 @@ const AddLetterhead = () => {
       const pdfService = (await import("../../services/PDFService")).default;
 
       // Wait for DOM to render letterhead content
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       const letterheadElement = document.getElementById(
         "letterhead-print-content",
@@ -391,15 +391,22 @@ const AddLetterhead = () => {
         throw new Error("Letterhead content not found");
       }
 
-      // Generate actual PDF blob
+      // Generate actual PDF blob with A4 specifications
       const result = await pdfService.generatePDFFromElement(
         letterheadElement,
         {
           filename: `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`,
+          quality: 1.0, // High quality for letterheads
+          scale: 2.0, // Higher scale for better text rendering
+          backgroundColor: "#ffffff",
           onProgress: (message, progress) => {
             console.log(`PDF Generation: ${message} (${progress}%)`);
           },
           returnBlob: true, // Request blob return instead of direct download
+          // A4 specific settings
+          format: "a4",
+          orientation: "portrait",
+          margin: 0, // No additional margins since template already has proper spacing
         },
       );
 
