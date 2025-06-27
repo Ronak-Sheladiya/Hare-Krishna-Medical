@@ -6,6 +6,9 @@ const User = require("../models/User");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 const Invoice = require("../models/Invoice");
+const Message = require("../models/Message");
+const Letterhead = require("../models/Letterhead");
+const Verification = require("../models/Verification");
 
 const connectDB = async () => {
   try {
@@ -17,7 +20,7 @@ const connectDB = async () => {
         useUnifiedTopology: true,
       },
     );
-    console.log("�� Connected to MongoDB for seeding");
+    console.log("✅ Connected to MongoDB for seeding");
   } catch (error) {
     console.error("❌ MongoDB connection failed:", error.message);
     process.exit(1);
@@ -437,7 +440,7 @@ const seedDatabase = async () => {
     console.log("   Email: mayurgajera098@gmail.com");
     console.log("   Password: admin@123");
 
-    console.log("\n👤 Test User Credentials:");
+    console.log("\n���� Test User Credentials:");
     console.log("   Email: john@example.com");
     console.log("   Password: user123");
 
