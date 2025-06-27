@@ -1,10 +1,176 @@
 const Product = require("../models/Product");
 const QRCode = require("qrcode");
 
+// Fallback sample data for development when database is disconnected
+const sampleProducts = [
+  {
+    _id: "64c8b2e1f123456789abcdef",
+    name: "Paracetamol 500mg",
+    company: "Cipla",
+    price: 25.5,
+    originalPrice: 30.0,
+    stock: 150,
+    category: "Pain Relief",
+    description:
+      "Effective pain relief and fever reducer suitable for adults and children over 12 years.",
+    benefits:
+      "• Fast-acting pain relief\n• Reduces fever effectively\n• Safe for regular use\n• Gentle on stomach",
+    usage:
+      "Take 1-2 tablets every 4-6 hours as needed. Do not exceed 8 tablets in 24 hours.",
+    weight: "500mg",
+    images: [
+      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5QYXJhY2V0YW1vbDwvdGV4dD48L3N2Zz4=",
+    ],
+    isActive: true,
+    isFeatured: true,
+    rating: { average: 4.5, count: 125 },
+    sales: 250,
+    views: 1200,
+    createdAt: new Date("2024-01-15"),
+    updatedAt: new Date("2024-06-20"),
+    lastStockUpdate: new Date("2024-06-20"),
+  },
+  {
+    _id: "64c8b2e1f123456789abcde0",
+    name: "Vitamin D3 Tablets",
+    company: "Sun Pharma",
+    price: 180.0,
+    originalPrice: 200.0,
+    stock: 85,
+    category: "Vitamins",
+    description:
+      "Essential vitamin D3 supplement for bone health and immunity support.",
+    benefits:
+      "• Supports bone and teeth health\n• Boosts immune system\n• Helps calcium absorption\n• Prevents vitamin D deficiency",
+    usage: "Take 1 tablet daily with water, preferably after meals.",
+    weight: "60000 IU",
+    images: [
+      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmZlNTAwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM2NjY2NjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5WaXRhbWluIEQzPC90ZXh0Pjwvc3ZnPg==",
+    ],
+    isActive: true,
+    isFeatured: true,
+    rating: { average: 4.7, count: 89 },
+    sales: 190,
+    views: 800,
+    createdAt: new Date("2024-02-10"),
+    updatedAt: new Date("2024-06-18"),
+    lastStockUpdate: new Date("2024-06-18"),
+  },
+  {
+    _id: "64c8b2e1f123456789abcde1",
+    name: "Cough Syrup 100ml",
+    company: "Dabur",
+    price: 95.0,
+    originalPrice: 110.0,
+    stock: 65,
+    category: "Cough & Cold",
+    description: "Natural ayurvedic cough syrup for dry and wet cough relief.",
+    benefits:
+      "• Relieves dry and wet cough\n• Natural ayurvedic formula\n• Soothes throat irritation\n• Safe for all ages",
+    usage:
+      "Adults: 2 teaspoons 3 times daily. Children: 1 teaspoon 3 times daily.",
+    weight: "100ml",
+    images: [
+      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTc0YzNjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Q291Z2ggU3lydXA8L3RleHQ+PC9zdmc+",
+    ],
+    isActive: true,
+    isFeatured: false,
+    rating: { average: 4.2, count: 156 },
+    sales: 320,
+    views: 950,
+    createdAt: new Date("2024-01-25"),
+    updatedAt: new Date("2024-06-15"),
+    lastStockUpdate: new Date("2024-06-15"),
+  },
+  {
+    _id: "64c8b2e1f123456789abcde2",
+    name: "First Aid Kit",
+    company: "Johnson & Johnson",
+    price: 450.0,
+    originalPrice: 500.0,
+    stock: 25,
+    category: "First Aid",
+    description:
+      "Complete first aid kit for home and travel use with essential medical supplies.",
+    benefits:
+      "• Complete medical emergency kit\n• Travel-friendly compact size\n• Quality medical supplies\n• Essential for every home",
+    usage: "Keep in easily accessible location. Check expiry dates regularly.",
+    weight: "500g",
+    images: [
+      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGMzNTQ1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Rmlyc3QgQWlkPC90ZXh0Pjwvc3ZnPg==",
+    ],
+    isActive: true,
+    isFeatured: true,
+    rating: { average: 4.6, count: 78 },
+    sales: 120,
+    views: 600,
+    createdAt: new Date("2024-03-05"),
+    updatedAt: new Date("2024-06-22"),
+    lastStockUpdate: new Date("2024-06-22"),
+  },
+  {
+    _id: "64c8b2e1f123456789abcde3",
+    name: "Digital Thermometer",
+    company: "Omron",
+    price: 280.0,
+    originalPrice: 320.0,
+    stock: 45,
+    category: "Medical Devices",
+    description:
+      "Accurate digital thermometer with fast reading and fever alarm.",
+    benefits:
+      "• Fast 60-second reading\n• High accuracy ±0.1°C\n• Fever alarm function\n• Memory for last reading",
+    usage: "Place under tongue, armpit, or rectally. Wait for beep signal.",
+    weight: "15g",
+    images: [
+      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMDA3YmZmIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+VGhlcm1vbWV0ZXI8L3RleHQ+PC9zdmc+",
+    ],
+    isActive: true,
+    isFeatured: false,
+    rating: { average: 4.8, count: 92 },
+    sales: 85,
+    views: 720,
+    createdAt: new Date("2024-02-20"),
+    updatedAt: new Date("2024-06-10"),
+    lastStockUpdate: new Date("2024-06-10"),
+  },
+  {
+    _id: "64c8b2e1f123456789abcde4",
+    name: "Multivitamin Capsules",
+    company: "Himalaya",
+    price: 350.0,
+    originalPrice: 380.0,
+    stock: 120,
+    category: "Supplements",
+    description:
+      "Complete multivitamin and mineral supplement for daily health support.",
+    benefits:
+      "• Complete nutrition support\n• Boosts energy levels\n• Supports immune system\n• Natural herbal formula",
+    usage: "Take 1 capsule daily with water after breakfast.",
+    weight: "30 capsules",
+    images: [
+      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjhhNzQ1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+TXVsdGl2aXRhbWluPC90ZXh0Pjwvc3ZnPg==",
+    ],
+    isActive: true,
+    isFeatured: true,
+    rating: { average: 4.4, count: 167 },
+    sales: 280,
+    views: 1100,
+    createdAt: new Date("2024-01-30"),
+    updatedAt: new Date("2024-06-25"),
+    lastStockUpdate: new Date("2024-06-25"),
+  },
+];
+
 class ProductsController {
   // Get all products with filtering, sorting, and pagination
   async getAllProducts(req, res) {
     try {
+      // Check if database is connected
+      if (!global.DB_CONNECTED) {
+        return this.handleOfflineProducts(req, res);
+      }
+
       const {
         page = 1,
         limit = 12,
