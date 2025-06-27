@@ -370,7 +370,7 @@ const Header = () => {
                         </Dropdown.Item>
                         <Dropdown.Divider />
                         <Dropdown.Header>
-                          <small className="text-muted">Admin Tools</small>
+                          <small className="text-muted">Developer Tools</small>
                         </Dropdown.Header>
                         <Dropdown.Item as={Link} to="/functionality-test">
                           <i className="bi bi-gear me-2"></i>
