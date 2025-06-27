@@ -143,10 +143,10 @@ const sampleProducts = [
     originalPrice: 380.0,
     stock: 120,
     category: "Supplements",
-    description:
+    shortDescription:
       "Complete multivitamin and mineral supplement for daily health support.",
-    benefits:
-      "• Complete nutrition support\n• Boosts energy levels\n• Supports immune system\n• Natural herbal formula",
+    description:
+      "Comprehensive multivitamin formula with essential minerals for complete nutrition support. Natural herbal formula that boosts energy and supports immune system.",
     usage: "Take 1 capsule daily with water after breakfast.",
     weight: "30 capsules",
     images: [
