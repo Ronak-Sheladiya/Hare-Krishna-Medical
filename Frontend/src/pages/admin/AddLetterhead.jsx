@@ -373,7 +373,7 @@ const AddLetterhead = () => {
   }, [pdfUrl]);
 
   return (
-    <Container fluid className="py-4">
+    <Container fluid style={{ padding: "10px" }}>
       <PageHeroSection
         title="Create Professional Letterhead"
         subtitle="Create official letterheads with verification QR codes, real-time preview, and PDF generation"
@@ -384,7 +384,7 @@ const AddLetterhead = () => {
         ]}
       />
 
-      <Container className="mt-4">
+      <Container style={{ marginTop: "10px", padding: "10px" }}>
         <Row>
           {/* Form Section */}
           <Col lg={6}>
