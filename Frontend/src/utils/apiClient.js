@@ -1,6 +1,7 @@
 // API Client utility with proper error handling and timeout
-const API_BASE_URL =
-  import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+import { getBackendURL } from "./config.js";
+
+const API_BASE_URL = getBackendURL();
 
 // Store original fetch to avoid external interference
 const originalFetch = window.fetch.bind(window);
