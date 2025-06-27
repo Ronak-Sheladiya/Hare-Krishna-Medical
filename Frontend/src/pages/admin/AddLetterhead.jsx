@@ -858,9 +858,10 @@ const AddLetterhead = () => {
                     <Button
                       size="sm"
                       variant="outline-light"
-                      onClick={handlePreview}
+                      onClick={handleRefreshPreview}
                       disabled={!formData.title || !formData.content}
                       style={{ borderRadius: "8px" }}
+                      title="Refresh preview and regenerate QR code"
                     >
                       <i className="bi bi-arrow-clockwise me-1"></i>
                       Refresh
