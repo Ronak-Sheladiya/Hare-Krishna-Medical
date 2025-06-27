@@ -13,6 +13,7 @@ const validateLetterheadId = [
 const validateCreateLetterhead = [
   body("title").trim().notEmpty().withMessage("Title is required"),
   body("letterType")
+    .optional()
     .isIn([
       "certificate",
       "recommendation",
@@ -22,19 +23,23 @@ const validateCreateLetterhead = [
       "invitation",
       "acknowledgment",
       "verification",
+      "document",
     ])
     .withMessage("Invalid letter type"),
   body("recipient.name")
+    .optional()
     .trim()
-    .notEmpty()
-    .withMessage("Recipient name is required"),
-  body("subject").trim().notEmpty().withMessage("Subject is required"),
+    .withMessage("Recipient name must be a string"),
+  body("subject").optional().trim().withMessage("Subject must be a string"),
   body("content").trim().notEmpty().withMessage("Content is required"),
-  body("issuer.name").trim().notEmpty().withMessage("Issuer name is required"),
-  body("issuer.designation")
+  body("issuer.name")
+    .optional()
     .trim()
-    .notEmpty()
-    .withMessage("Issuer designation is required"),
+    .withMessage("Issuer name must be a string"),
+  body("issuer.designation")
+    .optional()
+    .trim()
+    .withMessage("Issuer designation must be a string"),
 ];
 
 const validateUpdateLetterhead = [
@@ -54,18 +59,14 @@ const validateUpdateLetterhead = [
       "invitation",
       "acknowledgment",
       "verification",
+      "document",
     ])
     .withMessage("Invalid letter type"),
   body("recipient.name")
     .optional()
     .trim()
-    .notEmpty()
-    .withMessage("Recipient name cannot be empty"),
-  body("subject")
-    .optional()
-    .trim()
-    .notEmpty()
-    .withMessage("Subject cannot be empty"),
+    .withMessage("Recipient name must be a string"),
+  body("subject").optional().trim().withMessage("Subject must be a string"),
   body("content")
     .optional()
     .trim()
@@ -74,13 +75,11 @@ const validateUpdateLetterhead = [
   body("issuer.name")
     .optional()
     .trim()
-    .notEmpty()
-    .withMessage("Issuer name cannot be empty"),
+    .withMessage("Issuer name must be a string"),
   body("issuer.designation")
     .optional()
     .trim()
-    .notEmpty()
-    .withMessage("Issuer designation cannot be empty"),
+    .withMessage("Issuer designation must be a string"),
 ];
 
 const validateQueryParams = [
@@ -107,6 +106,7 @@ const validateQueryParams = [
       "invitation",
       "acknowledgment",
       "verification",
+      "document",
     ])
     .withMessage("Invalid letter type"),
   query("startDate").optional().isISO8601().withMessage("Invalid start date"),
@@ -114,6 +114,15 @@ const validateQueryParams = [
 ];
 
 // Routes
+
+// GET /api/letterheads/health - Health check for letterheads API
+router.get("/health", (req, res) => {
+  res.json({
+    success: true,
+    message: "Letterheads API is working",
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // GET /api/letterheads - Get all letterheads (Admin only)
 router.get(

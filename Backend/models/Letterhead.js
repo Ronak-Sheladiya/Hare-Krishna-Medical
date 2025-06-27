@@ -43,7 +43,7 @@ const letterheadSchema = new mongoose.Schema(
     },
     letterType: {
       type: String,
-      required: true,
+      required: false,
       enum: [
         "certificate",
         "recommendation",
@@ -53,14 +53,15 @@ const letterheadSchema = new mongoose.Schema(
         "invitation",
         "acknowledgment",
         "verification",
+        "document", // Added for simplified letterheads
       ],
-      default: "certificate",
+      default: "document",
     },
-    // Recipient Information
+    // Recipient Information (optional for simplified letterheads)
     recipient: {
       name: {
         type: String,
-        required: [true, "Recipient name is required"],
+        required: false,
         trim: true,
       },
       designation: {
@@ -79,24 +80,26 @@ const letterheadSchema = new mongoose.Schema(
     // Letter Content
     subject: {
       type: String,
-      required: [true, "Subject is required"],
+      required: false, // Not required for simplified letterheads
       trim: true,
     },
     content: {
       type: String,
       required: [true, "Letter content is required"],
     },
-    // Issuer Information (similar to invoice issuer)
+    // Issuer Information (optional for simplified letterheads)
     issuer: {
       name: {
         type: String,
-        required: [true, "Issuer name is required"],
+        required: false,
         trim: true,
+        default: "Hare Krishna Medical Store",
       },
       designation: {
         type: String,
-        required: [true, "Issuer designation is required"],
+        required: false,
         trim: true,
+        default: "Administrator",
       },
       signature: {
         type: String, // base64 image or URL
@@ -188,11 +191,11 @@ letterheadSchema.pre("save", async function (next) {
       this.qrCodeData = JSON.stringify({
         letterhead_id: this.letterheadId,
         letter_type: this.letterType,
-        recipient_name: this.recipient.name,
-        subject: this.subject,
+        recipient_name: this.recipient?.name || "General",
+        subject: this.subject || this.title,
         issue_date: this.issueDate,
         verification_url: this.verificationUrl,
-        issued_by: this.issuer.name,
+        issued_by: this.issuer?.name || "Hare Krishna Medical Store",
         company: "Hare Krishna Medical Store",
         type: "letterhead_verification",
       });

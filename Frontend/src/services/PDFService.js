@@ -142,18 +142,32 @@ class PDFService {
 
       if (onProgress) onProgress("Finalizing PDF...", 100);
 
-      // Save the PDF
-      pdf.save(filename);
-
-      return {
-        success: true,
-        filename,
-        pageCount: pdf.internal.getNumberOfPages(),
-        size: {
-          width: imgWidth,
-          height: imgHeight,
-        },
-      };
+      // Check if we should return blob or download
+      if (options.returnBlob) {
+        const pdfBlob = pdf.output("blob");
+        return {
+          success: true,
+          blob: pdfBlob,
+          filename,
+          pageCount: pdf.internal.getNumberOfPages(),
+          size: {
+            width: imgWidth,
+            height: imgHeight,
+          },
+        };
+      } else {
+        // Save the PDF (download)
+        pdf.save(filename);
+        return {
+          success: true,
+          filename,
+          pageCount: pdf.internal.getNumberOfPages(),
+          size: {
+            width: imgWidth,
+            height: imgHeight,
+          },
+        };
+      }
     } catch (error) {
       console.error("PDF generation error:", error);
       return {

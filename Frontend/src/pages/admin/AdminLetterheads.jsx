@@ -120,19 +120,44 @@ const AdminLetterheads = () => {
       if (statusFilter) params.append("status", statusFilter);
       if (typeFilter) params.append("letterType", typeFilter);
 
-      const response = await safeApiCall(
+      console.log(
+        "🔄 Fetching letterheads with URL:",
+        `/api/letterheads?${params.toString()}`,
+      );
+
+      const safeResponse = await safeApiCall(() =>
         api.get(`/api/letterheads?${params.toString()}`),
       );
 
-      if (response?.success) {
-        setLetterheads(response.letterheads || []);
-        setTotalPages(response.pagination?.totalPages || 1);
-        setTotalLetterheads(response.pagination?.total || 0);
+      console.log("📋 safeApiCall Response:", safeResponse);
+
+      if (safeResponse?.success) {
+        const response = safeResponse.data;
+        console.log("📋 Actual API Response:", response);
+
+        if (response?.success) {
+          setLetterheads(response.letterheads || []);
+          setTotalPages(response.pagination?.totalPages || 1);
+          setTotalLetterheads(response.pagination?.total || 0);
+          console.log(
+            "✅ Letterheads loaded successfully:",
+            response.letterheads?.length || 0,
+          );
+        } else {
+          console.error("❌ API Response Error:", response);
+          throw new Error(response?.message || "Failed to fetch letterheads");
+        }
       } else {
-        throw new Error(response?.message || "Failed to fetch letterheads");
+        console.error("❌ safeApiCall Error:", safeResponse);
+        throw new Error(safeResponse?.error || "Failed to fetch letterheads");
       }
     } catch (error) {
-      console.error("Fetch letterheads error:", error);
+      console.error("❌ Fetch letterheads error:", error);
+      console.error("❌ Error details:", {
+        message: error.message,
+        response: error.response,
+        stack: error.stack,
+      });
       setError(error.message);
       setLetterheads([]);
     } finally {
@@ -143,9 +168,14 @@ const AdminLetterheads = () => {
   // Fetch statistics
   const fetchStats = async () => {
     try {
-      const response = await safeApiCall(api.get("/api/letterheads/stats"));
-      if (response?.success) {
-        setStats(response.stats?.general || stats);
+      const safeResponse = await safeApiCall(() =>
+        api.get("/api/letterheads/stats"),
+      );
+      if (safeResponse?.success) {
+        const response = safeResponse.data;
+        if (response?.success) {
+          setStats(response.stats?.general || stats);
+        }
       }
     } catch (error) {
       console.error("Fetch stats error:", error);
@@ -158,16 +188,21 @@ const AdminLetterheads = () => {
 
     try {
       setActionLoading(true);
-      const response = await safeApiCall(
+      const safeResponse = await safeApiCall(() =>
         api.delete(`/api/letterheads/${letterheadToDelete._id}`),
       );
 
-      if (response?.success) {
-        showNotification("Letterhead deleted successfully", "success");
-        fetchLetterheads();
-        setShowDeleteModal(false);
+      if (safeResponse?.success) {
+        const response = safeResponse.data;
+        if (response?.success) {
+          showNotification("Letterhead deleted successfully", "success");
+          fetchLetterheads();
+          setShowDeleteModal(false);
+        } else {
+          throw new Error(response?.message || "Failed to delete letterhead");
+        }
       } else {
-        throw new Error(response?.message || "Failed to delete letterhead");
+        throw new Error(safeResponse?.error || "Failed to delete letterhead");
       }
     } catch (error) {
       console.error("Delete letterhead error:", error);
@@ -182,15 +217,20 @@ const AdminLetterheads = () => {
   const handleMarkAsIssued = async (letterhead) => {
     try {
       setActionLoading(true);
-      const response = await safeApiCall(
+      const safeResponse = await safeApiCall(() =>
         api.put(`/api/letterheads/${letterhead._id}/mark-issued`),
       );
 
-      if (response?.success) {
-        showNotification("Letterhead marked as issued", "success");
-        fetchLetterheads();
+      if (safeResponse?.success) {
+        const response = safeResponse.data;
+        if (response?.success) {
+          showNotification("Letterhead marked as issued", "success");
+          fetchLetterheads();
+        } else {
+          throw new Error(response?.message || "Failed to mark as issued");
+        }
       } else {
-        throw new Error(response?.message || "Failed to mark as issued");
+        throw new Error(safeResponse?.error || "Failed to mark as issued");
       }
     } catch (error) {
       console.error("Mark as issued error:", error);
@@ -204,15 +244,20 @@ const AdminLetterheads = () => {
   const handleMarkAsSent = async (letterhead) => {
     try {
       setActionLoading(true);
-      const response = await safeApiCall(
+      const safeResponse = await safeApiCall(() =>
         api.put(`/api/letterheads/${letterhead._id}/mark-sent`),
       );
 
-      if (response?.success) {
-        showNotification("Letterhead marked as sent", "success");
-        fetchLetterheads();
+      if (safeResponse?.success) {
+        const response = safeResponse.data;
+        if (response?.success) {
+          showNotification("Letterhead marked as sent", "success");
+          fetchLetterheads();
+        } else {
+          throw new Error(response?.message || "Failed to mark as sent");
+        }
       } else {
-        throw new Error(response?.message || "Failed to mark as sent");
+        throw new Error(safeResponse?.error || "Failed to mark as sent");
       }
     } catch (error) {
       console.error("Mark as sent error:", error);
@@ -438,12 +483,12 @@ const AdminLetterheads = () => {
               <td>
                 <Badge bg="info">
                   {letterhead.letterType?.charAt(0).toUpperCase() +
-                    letterhead.letterType?.slice(1)}
+                    letterhead.letterType?.slice(1) || "Document"}
                 </Badge>
               </td>
               <td>
                 <div>
-                  <strong>{letterhead.recipient?.name}</strong>
+                  <strong>{letterhead.recipient?.name || "General"}</strong>
                   {letterhead.recipient?.organization && (
                     <>
                       <br />
@@ -451,6 +496,9 @@ const AdminLetterheads = () => {
                         {letterhead.recipient.organization}
                       </small>
                     </>
+                  )}
+                  {!letterhead.recipient?.name && (
+                    <small className="text-muted">No specific recipient</small>
                   )}
                 </div>
               </td>

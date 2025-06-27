@@ -147,21 +147,34 @@ class AuthController {
       const user = await User.findOne({ email }).select("+password");
 
       if (!user) {
+        console.log(`❌ Login failed: User not found for email: ${email}`);
         return res.status(400).json({
           message: "Invalid email or password",
         });
       }
 
       if (!user.isActive) {
+        console.log(`❌ Login failed: Account inactive for email: ${email}`);
         return res.status(400).json({
           message: "Account has been deactivated. Please contact support.",
         });
       }
 
+      // Debug password comparison
+      console.log(`🔐 Attempting login for: ${email}`);
+      console.log(`🔐 User found: ${user._id}`);
+      console.log(
+        `🔐 Password provided length: ${password ? password.length : 0}`,
+      );
+      console.log(`🔐 Stored password hash exists: ${!!user.password}`);
+
       // Check password
       const isMatch = await user.comparePassword(password);
 
+      console.log(`🔐 Password match result: ${isMatch}`);
+
       if (!isMatch) {
+        console.log(`❌ Login failed: Password mismatch for email: ${email}`);
         return res.status(400).json({
           message: "Invalid email or password",
         });
