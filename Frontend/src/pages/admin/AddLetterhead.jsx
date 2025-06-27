@@ -209,9 +209,9 @@ const AddLetterhead = () => {
         flex-direction: column;
         overflow: hidden;
       ">
-        <!-- Page Content Container with proper spacing -->
+        <!-- Page Content Container using full A4 page -->
         <div style="
-          padding: 15mm;
+          padding: 10mm;
           height: 100%;
           display: flex;
           flex-direction: column;
@@ -221,9 +221,9 @@ const AddLetterhead = () => {
           <div style="
             background: #e63946;
             color: white;
-            padding: 18px;
-            border-radius: 8px;
-            margin-bottom: 18px;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -355,14 +355,14 @@ const AddLetterhead = () => {
           <!-- Content Section - Uses remaining space -->
           <div style="
             font-size: 13px;
-            line-height: 1.6;
+            line-height: 1.5;
             text-align: justify;
             color: #333;
             font-family: Arial, sans-serif;
             flex: 1;
             overflow: hidden;
-            margin-bottom: 20px;
-            min-height: 150px;
+            margin-bottom: 15px;
+            min-height: 180px;
           ">
             ${formData.content}
           </div>
@@ -370,7 +370,7 @@ const AddLetterhead = () => {
           <!-- Footer Section - Fixed at bottom -->
           <div style="
             border-top: 2px solid #e63946;
-            padding-top: 12px;
+            padding-top: 10px;
             margin-top: auto;
             background: white;
             flex-shrink: 0;
@@ -524,28 +524,49 @@ const AddLetterhead = () => {
         return;
       }
 
-      // Calculate exact A4 dimensions in pixels (96 DPI)
-      const A4_WIDTH_PX = 794; // 210mm at 96 DPI
-      const A4_HEIGHT_PX = 1123; // 297mm at 96 DPI
+      // Calculate exact A4 dimensions in pixels at high DPI for better quality
+      const A4_WIDTH_PX = 2480; // 210mm at 300 DPI for high quality
+      const A4_HEIGHT_PX = 3508; // 297mm at 300 DPI for high quality
 
-      // Generate canvas with exact A4 dimensions
+      // Force the element to exact A4 size temporarily
+      const originalStyle = letterheadElement.style.cssText;
+      letterheadElement.style.width = "210mm";
+      letterheadElement.style.height = "297mm";
+      letterheadElement.style.transform = "none";
+      letterheadElement.style.margin = "0";
+      letterheadElement.style.padding = "0";
+
+      // Generate high-quality canvas with exact A4 dimensions
       const canvas = await html2canvas(letterheadElement, {
-        scale: 1,
+        scale: 3, // High DPI scaling for crisp output
         useCORS: true,
         allowTaint: false,
         backgroundColor: "#ffffff",
-        width: A4_WIDTH_PX,
-        height: A4_HEIGHT_PX,
-        windowWidth: A4_WIDTH_PX,
-        windowHeight: A4_HEIGHT_PX,
+        width: 794, // Base A4 width in pixels
+        height: 1123, // Base A4 height in pixels
+        windowWidth: 794,
+        windowHeight: 1123,
+        scrollX: 0,
+        scrollY: 0,
+        x: 0,
+        y: 0,
       });
 
-      // Create PDF with exact A4 size
-      const pdf = new jsPDF("portrait", "mm", "a4");
-      const imgData = canvas.toDataURL("image/png", 1.0);
+      // Restore original styles
+      letterheadElement.style.cssText = originalStyle;
 
-      // Add image to fill entire A4 page
-      pdf.addImage(imgData, "PNG", 0, 0, 210, 297);
+      // Create PDF with exact A4 size and no margins
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+        compress: true,
+      });
+
+      const imgData = canvas.toDataURL("image/png", 0.95);
+
+      // Add image to fill the entire A4 page with no margins
+      pdf.addImage(imgData, "PNG", 0, 0, 210, 297, undefined, "FAST");
 
       // Download
       const filename = `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`;
