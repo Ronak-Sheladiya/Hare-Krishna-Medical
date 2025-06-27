@@ -267,6 +267,216 @@ const AdminLetterheads = () => {
     }
   };
 
+  // Professional Actions Handlers
+  const handleViewLetterhead = (letterhead) => {
+    // Navigate to edit page which has the preview functionality
+    window.open(`/admin/letterheads/edit/${letterhead._id}`, "_blank");
+  };
+
+  const handlePrintLetterhead = async (letterhead) => {
+    try {
+      setActionLoading(true);
+
+      // Create a temporary element with letterhead content
+      const printElement = document.createElement("div");
+      printElement.innerHTML = createLetterheadPrintTemplate(letterhead);
+
+      // Create professional print window
+      const printWindow = window.open("", "_blank");
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${letterhead.title} - Professional Letterhead</title>
+            <meta charset="UTF-8">
+            <style>
+              @page {
+                size: A4 portrait;
+                margin: 15mm;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+
+              @media print {
+                * {
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  box-shadow: none !important;
+                }
+
+                body {
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  font-family: 'Times New Roman', serif !important;
+                  font-size: 12pt !important;
+                  line-height: 1.6 !important;
+                  color: #000 !important;
+                  background: white !important;
+                }
+
+                .letterhead-header {
+                  border-bottom: 4px solid #dc3545 !important;
+                  margin-bottom: 20pt !important;
+                  padding-bottom: 15pt !important;
+                }
+
+                .letterhead-footer {
+                  border-top: 2px solid #6c757d !important;
+                  margin-top: 20pt !important;
+                  padding-top: 15pt !important;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            ${printElement.innerHTML}
+            <script>
+              window.onload = function() {
+                setTimeout(function() {
+                  window.print();
+                  window.close();
+                }, 500);
+              };
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+
+      showNotification("Print dialog opened successfully", "success");
+    } catch (error) {
+      console.error("Print error:", error);
+      showNotification("Failed to print letterhead", "error");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDownloadPDF = async (letterhead) => {
+    try {
+      setActionLoading(true);
+
+      const response = await api.get(`/api/letterheads/${letterhead._id}/pdf`, {
+        responseType: "blob",
+      });
+
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${letterhead.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      showNotification("PDF downloaded successfully", "success");
+    } catch (error) {
+      console.error("PDF download error:", error);
+      showNotification("Failed to download PDF", "error");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDownloadHTML = async (letterhead) => {
+    try {
+      setActionLoading(true);
+
+      const htmlContent = createLetterheadPrintTemplate(letterhead);
+      const blob = new Blob([htmlContent], { type: "text/html" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${letterhead.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.html`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      showNotification("HTML downloaded successfully", "success");
+    } catch (error) {
+      console.error("HTML download error:", error);
+      showNotification("Failed to download HTML", "error");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleViewVerification = (letterhead) => {
+    const verificationUrl = `${window.location.origin}/verify?id=${letterhead.letterheadId}&type=letterhead`;
+    window.open(verificationUrl, "_blank");
+  };
+
+  const createLetterheadPrintTemplate = (letterhead) => {
+    const currentDate = new Date().toLocaleDateString("en-IN");
+
+    return `
+      <div style="
+        font-family: 'Times New Roman', serif;
+        max-width: 210mm;
+        margin: 0 auto;
+        padding: 40px;
+        background: white;
+        color: #333;
+        line-height: 1.6;
+      ">
+        <!-- Header -->
+        <div class="letterhead-header" style="
+          border-bottom: 4px solid #dc3545;
+          margin-bottom: 30px;
+          padding-bottom: 20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        ">
+          <div>
+            <h1 style="color: #dc3545; margin: 0; font-size: 28px; font-weight: bold;">
+              Hare Krishna Medical
+            </h1>
+            <p style="margin: 5px 0 0 0; color: #666;">
+              Professional Healthcare Services
+            </p>
+          </div>
+          <div style="text-align: right;">
+            <div style="margin-bottom: 3px; font-weight: 600;">Ref: ${letterhead.letterheadId}</div>
+            <div style="font-weight: 600;">Date: ${currentDate}</div>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div style="margin: 40px 0;">
+          <h2 style="color: #dc3545; margin-bottom: 20px; font-size: 24px; text-align: center;">
+            ${letterhead.title}
+          </h2>
+          <div style="font-size: 14px; line-height: 1.8;">
+            ${letterhead.content}
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="letterhead-footer" style="
+          border-top: 2px solid #6c757d;
+          margin-top: 40px;
+          padding-top: 20px;
+          text-align: center;
+          font-size: 12px;
+          color: #666;
+        ">
+          <p style="margin: 0 0 10px 0;">
+            <strong>Hare Krishna Medical</strong> | Professional Healthcare Services
+          </p>
+          <p style="margin: 0 0 10px 0;">
+            📧 info@harekrishnamedical.com | 📞 +91-XXXXX-XXXXX
+          </p>
+          <p style="margin: 10px 0 0 0; font-size: 11px; color: #28a745;">
+            ✅ This letterhead has been verified and is authentic
+          </p>
+        </div>
+      </div>
+    `;
+  };
+
   // Utility functions
   const showNotification = (message, type) => {
     // You can implement a toast notification system here
