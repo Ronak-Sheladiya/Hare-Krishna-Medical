@@ -445,13 +445,13 @@ const AddLetterhead = () => {
         status: "draft",
       };
 
-      // Use optimized PDF generation with 98% page usage
+      // Use optimized PDF generation with FULL page usage
       const result = await pdfService.generatePDFFromElement(
         letterheadElement,
         {
-          quality: 0.8, // Reduced quality for faster generation
-          scale: 1.5, // Reduced scale for faster processing
-          margin: 2.1, // Minimal margin (1% of A4 width = 2.1mm) for 98% usage
+          quality: 0.9, // Higher quality
+          scale: 2.0, // Higher scale for better resolution
+          margin: 0, // ZERO margin for full page usage
           onProgress: (message, progress) => {
             console.log(`PDF Generation: ${message} (${progress}%)`);
           },
