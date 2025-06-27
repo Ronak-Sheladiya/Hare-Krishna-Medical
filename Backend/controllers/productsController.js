@@ -240,9 +240,103 @@ class ProductsController {
       });
     } catch (error) {
       console.error("Get products error:", error);
+      // Fallback to offline mode if database fails
+      return this.handleOfflineProducts(req, res);
+    }
+  }
+
+  // Handle products when database is offline
+  handleOfflineProducts(req, res) {
+    try {
+      const {
+        page = 1,
+        limit = 12,
+        category,
+        brand,
+        minPrice,
+        maxPrice,
+        sort = "createdAt",
+        order = "desc",
+        q,
+        featured,
+      } = req.query;
+
+      let filteredProducts = [...sampleProducts];
+
+      // Apply filters
+      if (category) {
+        filteredProducts = filteredProducts.filter(
+          (p) => p.category === category,
+        );
+      }
+      if (brand) {
+        filteredProducts = filteredProducts.filter((p) =>
+          p.company.toLowerCase().includes(brand.toLowerCase()),
+        );
+      }
+      if (featured !== undefined) {
+        filteredProducts = filteredProducts.filter(
+          (p) => p.isFeatured === (featured === "true"),
+        );
+      }
+      if (minPrice || maxPrice) {
+        filteredProducts = filteredProducts.filter((p) => {
+          const price = p.price;
+          return (
+            (!minPrice || price >= parseFloat(minPrice)) &&
+            (!maxPrice || price <= parseFloat(maxPrice))
+          );
+        });
+      }
+      if (q) {
+        const query = q.toLowerCase();
+        filteredProducts = filteredProducts.filter(
+          (p) =>
+            p.name.toLowerCase().includes(query) ||
+            p.company.toLowerCase().includes(query) ||
+            p.description.toLowerCase().includes(query),
+        );
+      }
+
+      // Apply sorting
+      filteredProducts.sort((a, b) => {
+        const aVal =
+          sort === "price" ? a.price : new Date(a[sort] || a.createdAt);
+        const bVal =
+          sort === "price" ? b.price : new Date(b[sort] || b.createdAt);
+        return order === "desc" ? (bVal > aVal ? 1 : -1) : aVal > bVal ? 1 : -1;
+      });
+
+      // Apply pagination
+      const totalProducts = filteredProducts.length;
+      const skip = (parseInt(page) - 1) * parseInt(limit);
+      const paginatedProducts = filteredProducts.slice(
+        skip,
+        skip + parseInt(limit),
+      );
+
+      const totalPages = Math.ceil(totalProducts / limit);
+      const hasNextPage = page < totalPages;
+      const hasPrevPage = page > 1;
+
+      res.json({
+        success: true,
+        data: paginatedProducts,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages,
+          totalProducts,
+          hasNextPage,
+          hasPrevPage,
+          limit: parseInt(limit),
+        },
+        offline: true,
+      });
+    } catch (error) {
+      console.error("Offline products error:", error);
       res.status(500).json({
         success: false,
-        message: "Failed to fetch products",
+        message: "Failed to fetch products (offline mode)",
         error: error.message,
       });
     }
