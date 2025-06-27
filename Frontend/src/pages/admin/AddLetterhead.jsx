@@ -152,9 +152,9 @@ const AddLetterhead = () => {
     const currentLetterheadId = letterheadId || generateTempLetterheadId();
 
     return `
-      <div id="letterhead-print-content" style="font-family: Arial, sans-serif; padding: 15px; background: white; max-width: 210mm; margin: 0 auto; min-height: 297mm;">
-        <!-- Header Section - Professional Design like Invoice -->
-        <div style="background: #e63946; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; position: relative;">
+      <div id="letterhead-print-content" style="font-family: Arial, sans-serif; padding: 15px; background: white; max-width: 210mm; margin: 0 auto; min-height: 297mm; page-break-inside: avoid;">
+        <!-- Header Section - Professional Design -->
+        <div style="background: #e63946; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <!-- Left Side - Company Info -->
             <div style="flex: 1;">
@@ -180,11 +180,10 @@ const AddLetterhead = () => {
                 <div style="display: flex; align-items: center;"><i style="margin-right: 8px;">✉️</i> hkmedicalamroli@gmail.com</div>
               </div>
             </div>
-            
-            <!-- Right Side - QR Code and Reference Info -->
-            <div style="text-align: right; min-width: 200px;">
-              <!-- QR Code Section -->
-              <div style="background: white; padding: 12px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 15px;">
+
+            <!-- Right Side - QR Code Only -->
+            <div style="text-align: center; min-width: 160px;">
+              <div style="background: white; padding: 12px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                 ${
                   qrCode
                     ? `<img src="${qrCode}" alt="Verification QR Code" style="width: 120px; height: 120px; border: 2px solid #e63946; border-radius: 8px;" />`
@@ -195,16 +194,14 @@ const AddLetterhead = () => {
                 }
                 <div style="margin-top: 8px; color: #333; font-size: 10px; font-weight: bold;">📱 SCAN TO VERIFY</div>
               </div>
-              
-              <!-- Reference and Date Info -->
-              <div style="background: rgba(255,255,255,0.95); color: #333; padding: 15px; border-radius: 8px; font-size: 12px; text-align: left;">
-                <div style="margin-bottom: 8px; font-weight: bold; color: #e63946;">LETTERHEAD</div>
-                <div style="margin-bottom: 6px;"><strong>Ref:</strong> ${currentLetterheadId}</div>
-                <div style="margin-bottom: 6px;"><strong>Date:</strong> ${currentDate}</div>
-                <div><strong>Status:</strong> <span style="background: #27ae60; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold;">Official</span></div>
-              </div>
             </div>
           </div>
+        </div>
+
+        <!-- Reference and Date - After Header, Right Aligned -->
+        <div style="text-align: right; margin-bottom: 20px; font-size: 12px; color: #666;">
+          <div style="margin-bottom: 4px;">Ref: ${currentLetterheadId}</div>
+          <div>Date: ${currentDate}</div>
         </div>
 
         <!-- Letterhead Title -->
@@ -215,42 +212,19 @@ const AddLetterhead = () => {
         </div>
 
         <!-- Letterhead Content -->
-        <div style="font-size: 14px; line-height: 1.8; text-align: justify; margin-bottom: 50px; min-height: 300px; color: #333;">
+        <div style="font-size: 14px; line-height: 1.8; text-align: justify; margin-bottom: 80px; min-height: 300px; color: #333;">
           ${formData.content}
         </div>
 
-        <!-- Footer Section - Enhanced like Invoice -->
-        <div style="position: absolute; bottom: 20px; left: 20px; right: 20px;">
-          <div style="display: flex; justify-content: space-between; align-items: stretch; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 20px; border-radius: 12px; border: 1px solid #e0e0e0;">
-            <div style="flex: 1;">
-              <h5 style="font-size: 16px; font-weight: bold; margin: 0 0 12px 0; color: #e63946;">🙏 Hare Krishna Medical Store</h5>
-              <div style="font-size: 12px; line-height: 1.6; color: #444;">
-                <div style="background: white; padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #e63946;">
-                  <strong>Verification Notice:</strong><br>
-                  • This is an official document issued by Hare Krishna Medical Store<br>
-                  • For verification, scan the QR code or contact us at the above details<br>
-                  • Document valid for all official purposes
-                </div>
-                <div style="display: flex; align-items: center; margin-top: 10px; font-size: 11px;">
-                  <span style="background: #e63946; color: white; padding: 4px 8px; border-radius: 12px; margin-right: 8px; font-weight: bold;">📞 24/7 Support</span>
-                  <span>hkmedicalamroli@gmail.com | +91 76989 13354</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Footer QR placeholder if needed -->
-            <div style="margin-left: 25px; text-align: center; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e0e0e0; min-width: 140px;">
-              <div style="margin-bottom: 10px;">
-                <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800" alt="Logo" style="height: 30px; width: 30px; object-fit: contain;" onerror="this.style.display='none';" />
-              </div>
-              <div style="font-size: 11px; font-weight: bold; color: #e63946;">OFFICIAL DOCUMENT</div>
-              <div style="font-size: 9px; color: #666; margin-top: 2px;">Ref: ${currentLetterheadId}</div>
-            </div>
-          </div>
-          
-          <!-- Computer Generated Note -->
-          <div style="text-align: center; margin-top: 10px; font-size: 10px; color: #888; background: #f8f9fa; padding: 8px; border-radius: 5px;">
-            Computer generated letterhead - No signature required | Generated: ${new Date().toLocaleString()}
+        <!-- Footer Section - From VerifyDocs -->
+        <div style="position: absolute; bottom: 20px; left: 15px; right: 15px; border-top: 2px solid #28a745; padding-top: 15px;">
+          <div style="text-align: center;">
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">
+              ✅ This letterhead has been verified and is authentic
+            </p>
+            <p style="font-size: 0.8rem; color: #999; margin-bottom: 0;">
+              Verified on ${new Date().toLocaleString("en-IN")} | For queries: +91 76989 13354 | hkmedicalamroli@gmail.com
+            </p>
           </div>
         </div>
       </div>
