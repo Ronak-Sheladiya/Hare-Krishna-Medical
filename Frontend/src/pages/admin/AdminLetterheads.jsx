@@ -125,23 +125,31 @@ const AdminLetterheads = () => {
         `/api/letterheads?${params.toString()}`,
       );
 
-      const response = await safeApiCall(
+      const safeResponse = await safeApiCall(() =>
         api.get(`/api/letterheads?${params.toString()}`),
       );
 
-      console.log("📋 Letterheads API Response:", response);
+      console.log("📋 safeApiCall Response:", safeResponse);
 
-      if (response?.success) {
-        setLetterheads(response.letterheads || []);
-        setTotalPages(response.pagination?.totalPages || 1);
-        setTotalLetterheads(response.pagination?.total || 0);
-        console.log(
-          "✅ Letterheads loaded successfully:",
-          response.letterheads?.length || 0,
-        );
+      if (safeResponse?.success) {
+        const response = safeResponse.data;
+        console.log("📋 Actual API Response:", response);
+
+        if (response?.success) {
+          setLetterheads(response.letterheads || []);
+          setTotalPages(response.pagination?.totalPages || 1);
+          setTotalLetterheads(response.pagination?.total || 0);
+          console.log(
+            "✅ Letterheads loaded successfully:",
+            response.letterheads?.length || 0,
+          );
+        } else {
+          console.error("❌ API Response Error:", response);
+          throw new Error(response?.message || "Failed to fetch letterheads");
+        }
       } else {
-        console.error("❌ API Response Error:", response);
-        throw new Error(response?.message || "Failed to fetch letterheads");
+        console.error("❌ safeApiCall Error:", safeResponse);
+        throw new Error(safeResponse?.error || "Failed to fetch letterheads");
       }
     } catch (error) {
       console.error("❌ Fetch letterheads error:", error);
