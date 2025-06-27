@@ -8,7 +8,8 @@
     "dev": "nodemon server.js",
     "test": "jest",
     "seed": "node scripts/seed.js",
-    "migrate-images": "node scripts/migrate-images.js"
+    "migrate-images": "node scripts/migrate-images.js",
+    "build": "echo 'No build step needed for backend'"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -38,4 +39,7 @@
   "engines": {
     "node": ">=16.0.0"
   }
+  
+
 }
+
