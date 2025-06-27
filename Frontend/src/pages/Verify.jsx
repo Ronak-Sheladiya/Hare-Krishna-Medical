@@ -22,7 +22,8 @@ import QRCameraScanner from "../components/common/QRCameraScanner";
 import { formatDateTime } from "../utils/dateUtils";
 
 const Verify = () => {
-  const { invoiceId: urlInvoiceId } = useParams();
+  const { invoiceId: urlInvoiceId, letterheadId: urlLetterheadId } =
+    useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -73,7 +74,15 @@ const Verify = () => {
       setInvoiceId(urlInvoiceId);
       handleInvoiceVerify(urlInvoiceId);
     }
-  }, [searchParams, urlInvoiceId]);
+
+    // Handle new /verify/letterhead/:letterheadId route
+    if (urlLetterheadId) {
+      setActiveTab("documents");
+      setDocumentId(urlLetterheadId);
+      setDocumentType("letterhead");
+      handleDocumentVerify(urlLetterheadId, "letterhead");
+    }
+  }, [searchParams, urlInvoiceId, urlLetterheadId]);
 
   // Document verification logic
   const handleDocumentVerify = async (id = documentId, type = documentType) => {
