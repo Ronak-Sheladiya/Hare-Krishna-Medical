@@ -1,4 +1,5 @@
 import { io } from "socket.io-client";
+import { getSocketURL, isProduction, isDevelopment } from "./config.js";
 
 let socket = null;
 let connectionAttempts = 0;
@@ -22,16 +23,10 @@ const socketClient = {
     isConnecting = true;
 
     try {
-      let SOCKET_URL =
-        import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+      const SOCKET_URL = getSocketURL();
 
       // Production environment check - if backend URL is localhost in production, go to fallback mode
-      const isProduction =
-        window.location.hostname.includes("fly.dev") ||
-        window.location.hostname.includes("vercel.app") ||
-        window.location.hostname.includes("netlify.app");
-
-      if (isProduction && SOCKET_URL.includes("localhost")) {
+      if (isProduction() && SOCKET_URL.includes("localhost")) {
         console.warn(
           "🚨 Production environment detected with localhost backend URL. Entering fallback mode.",
         );
