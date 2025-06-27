@@ -195,17 +195,19 @@ const AddLetterhead = () => {
     return `
       <div id="letterhead-print-content" style="
         font-family: Arial, sans-serif;
-        background: white;
         width: 210mm;
         min-height: 297mm;
+        background: white;
+        position: relative;
         margin: 0 auto;
         padding: 15mm;
         box-sizing: border-box;
-        position: relative;
-        page-break-inside: avoid;
-      ">
-        <!-- Header Section -->
-        <div style="
+        font-size: 13px;
+        line-height: 1.6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+      ">`;
           background: #e63946;
           color: white;
           padding: 20px;
