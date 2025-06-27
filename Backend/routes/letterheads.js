@@ -115,6 +115,15 @@ const validateQueryParams = [
 
 // Routes
 
+// GET /api/letterheads/health - Health check for letterheads API
+router.get("/health", (req, res) => {
+  res.json({
+    success: true,
+    message: "Letterheads API is working",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // GET /api/letterheads - Get all letterheads (Admin only)
 router.get(
   "/",
