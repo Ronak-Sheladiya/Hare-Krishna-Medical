@@ -42,7 +42,7 @@ const LetterheadDesign = ({
 
   const generateQRCode = async () => {
     try {
-      const verificationUrl = `${window.location.origin}/verify?id=${letterheadId}&type=letterhead`;
+      const verificationUrl = `${window.location.origin}/verify/letterhead/${letterheadId}`;
       const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, {
         width: 120,
         margin: 2,
