@@ -721,20 +721,42 @@ const AddLetterhead = () => {
                     variant="outline-success"
                     size="sm"
                     onClick={handlePrint}
-                    disabled={!formData.title || !formData.content}
+                    disabled={
+                      !formData.title || !formData.content || pdfGenerating
+                    }
                   >
-                    <i className="bi bi-printer me-2"></i>
-                    Print
+                    {pdfGenerating ? (
+                      <>
+                        <Spinner size="sm" className="me-2" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-printer me-2"></i>
+                        Print PDF
+                      </>
+                    )}
                   </Button>
 
                   <Button
                     variant="outline-primary"
                     size="sm"
                     onClick={handleDownload}
-                    disabled={!formData.title || !formData.content}
+                    disabled={
+                      !formData.title || !formData.content || pdfGenerating
+                    }
                   >
-                    <i className="bi bi-download me-2"></i>
-                    Download
+                    {pdfGenerating ? (
+                      <>
+                        <Spinner size="sm" className="me-2" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-download me-2"></i>
+                        Download PDF
+                      </>
+                    )}
                   </Button>
                 </div>
               </Card.Footer>
