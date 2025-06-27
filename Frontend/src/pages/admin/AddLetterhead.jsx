@@ -791,9 +791,9 @@ const AddLetterhead = () => {
               </Card.Body>
               <Card.Footer
                 className="bg-transparent border-0"
-                style={{ padding: "20px" }}
+                style={{ padding: "10px" }}
               >
-                <div className="d-flex gap-3 justify-content-center">
+                <div className="d-flex gap-2 justify-content-center">
                   <Button
                     variant="success"
                     onClick={handlePrint}
@@ -801,9 +801,9 @@ const AddLetterhead = () => {
                       !formData.title || !formData.content || pdfGenerating
                     }
                     style={{
-                      borderRadius: "10px",
+                      borderRadius: "8px",
                       fontWeight: "600",
-                      padding: "10px 20px",
+                      padding: "8px 16px",
                       border: "none",
                       background: "linear-gradient(135deg, #28a745, #20c997)",
                     }}
@@ -828,11 +828,11 @@ const AddLetterhead = () => {
                       !formData.title || !formData.content || pdfGenerating
                     }
                     style={{
-                      borderRadius: "10px",
+                      borderRadius: "8px",
                       fontWeight: "600",
-                      padding: "10px 20px",
+                      padding: "8px 16px",
                       border: "none",
-                      background: "linear-gradient(135deg, #007bff, #0056b3)",
+                      background: "linear-gradient(135deg, #e63946, #dc3545)",
                     }}
                   >
                     {pdfGenerating ? (
@@ -850,7 +850,7 @@ const AddLetterhead = () => {
                 </div>
 
                 {formData.title && formData.content && (
-                  <div className="text-center mt-2">
+                  <div className="text-center mt-1">
                     <small className="text-muted">
                       <i className="bi bi-info-circle me-1"></i>
                       Your letterhead is ready for professional use
