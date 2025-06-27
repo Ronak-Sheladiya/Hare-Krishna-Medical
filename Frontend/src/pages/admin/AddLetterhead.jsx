@@ -1141,70 +1141,94 @@ const AddLetterhead = () => {
         </Modal.Body>
         <Modal.Footer
           style={{
-            padding: "15px 20px",
-            background: "#fff",
+            padding: "20px",
+            background: "#f8f9fa",
             borderTop: "1px solid #dee2e6",
+            borderRadius: "0 0 0.5rem 0.5rem",
           }}
         >
-          <Button
-            variant="outline-secondary"
-            onClick={() => setShowPreview(false)}
-            style={{
-              borderRadius: "8px",
-              padding: "8px 16px",
-            }}
-          >
-            <i className="bi bi-x-lg me-2"></i>
-            Close Preview
-          </Button>
-          <Button
-            variant="success"
-            onClick={handlePrint}
-            disabled={printLoading}
-            style={{
-              borderRadius: "8px",
-              background: "linear-gradient(135deg, #28a745, #20c997)",
-              border: "none",
-              padding: "8px 16px",
-              fontWeight: "600",
-            }}
-          >
-            {printLoading ? (
-              <>
-                <Spinner size="sm" className="me-2" />
-                Printing...
-              </>
-            ) : (
-              <>
-                <i className="bi bi-printer me-2"></i>
-                Print PDF
-              </>
-            )}
-          </Button>
-          <Button
-            onClick={handleDownload}
-            disabled={downloadLoading}
-            style={{
-              borderRadius: "8px",
-              background: "linear-gradient(135deg, #e63946, #dc3545)",
-              border: "none",
-              color: "white",
-              padding: "8px 16px",
-              fontWeight: "600",
-            }}
-          >
-            {downloadLoading ? (
-              <>
-                <Spinner size="sm" className="me-2" />
-                Downloading...
-              </>
-            ) : (
-              <>
-                <i className="bi bi-download me-2"></i>
-                Download PDF
-              </>
-            )}
-          </Button>
+          <div className="d-flex gap-2 w-100 justify-content-between align-items-center flex-wrap">
+            <div>
+              <Button
+                variant="outline-secondary"
+                onClick={() => setShowPreview(false)}
+                style={{
+                  borderRadius: "8px",
+                  padding: "10px 20px",
+                  fontWeight: "500",
+                }}
+              >
+                <i className="bi bi-x-lg me-2"></i>
+                Close Preview
+              </Button>
+            </div>
+
+            <div className="d-flex gap-2">
+              <Button
+                variant="success"
+                onClick={handlePrint}
+                disabled={printLoading || downloadLoading}
+                style={{
+                  borderRadius: "8px",
+                  background: "linear-gradient(135deg, #28a745, #20c997)",
+                  border: "none",
+                  padding: "10px 20px",
+                  fontWeight: "600",
+                  boxShadow: "0 3px 8px rgba(40, 167, 69, 0.3)",
+                  minWidth: "120px",
+                }}
+              >
+                {printLoading ? (
+                  <>
+                    <Spinner size="sm" className="me-2" />
+                    Printing...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-printer me-2"></i>
+                    Print
+                  </>
+                )}
+              </Button>
+
+              <Button
+                onClick={handleDownload}
+                disabled={downloadLoading || printLoading}
+                style={{
+                  borderRadius: "8px",
+                  background: "linear-gradient(135deg, #e63946, #dc3545)",
+                  border: "none",
+                  color: "white",
+                  padding: "10px 20px",
+                  fontWeight: "600",
+                  boxShadow: "0 3px 8px rgba(230, 57, 70, 0.3)",
+                  minWidth: "120px",
+                }}
+              >
+                {downloadLoading ? (
+                  <>
+                    <Spinner size="sm" className="me-2" />
+                    Downloading...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-download me-2"></i>
+                    Download
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Footer info */}
+          <div className="w-100 mt-2">
+            <small className="text-muted d-flex align-items-center justify-content-center gap-1">
+              <i className="bi bi-info-circle"></i>
+              <span>
+                Actions will use the content shown in the preview above
+              </span>
+            </small>
+          </div>
         </Modal.Footer>
       </Modal>
     </Container>
