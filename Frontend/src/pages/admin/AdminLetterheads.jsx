@@ -217,15 +217,20 @@ const AdminLetterheads = () => {
   const handleMarkAsIssued = async (letterhead) => {
     try {
       setActionLoading(true);
-      const response = await safeApiCall(
+      const safeResponse = await safeApiCall(() =>
         api.put(`/api/letterheads/${letterhead._id}/mark-issued`),
       );
 
-      if (response?.success) {
-        showNotification("Letterhead marked as issued", "success");
-        fetchLetterheads();
+      if (safeResponse?.success) {
+        const response = safeResponse.data;
+        if (response?.success) {
+          showNotification("Letterhead marked as issued", "success");
+          fetchLetterheads();
+        } else {
+          throw new Error(response?.message || "Failed to mark as issued");
+        }
       } else {
-        throw new Error(response?.message || "Failed to mark as issued");
+        throw new Error(safeResponse?.error || "Failed to mark as issued");
       }
     } catch (error) {
       console.error("Mark as issued error:", error);
