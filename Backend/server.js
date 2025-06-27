@@ -92,8 +92,47 @@ const connectDB = async () => {
 };
 
 // Connect to database
-connectDB().then((conn) => {
+connectDB().then(async (conn) => {
   global.DB_CONNECTED = !!conn;
+
+  if (conn) {
+    // Auto-create database collections and seed data if empty
+    try {
+      const { seedDatabase } = require("./scripts/seed");
+      const User = require("./models/User");
+
+      // Check if database is empty (no users exist)
+      const userCount = await User.countDocuments();
+
+      if (userCount === 0) {
+        console.log("🌱 Database is empty, initializing with seed data...");
+        await seedDatabase();
+        console.log("✅ Database initialized successfully!");
+      } else {
+        console.log(
+          `📊 Database already has ${userCount} users, skipping seeding`,
+        );
+      }
+    } catch (error) {
+      console.error("❌ Database initialization error:", error.message);
+    }
+
+    // Test email service connection
+    try {
+      const emailService = require("./utils/emailService");
+      const isEmailConnected = await emailService.testConnection();
+
+      if (isEmailConnected) {
+        console.log("✅ Email service is ready");
+      } else {
+        console.log(
+          "⚠️ Email service connection failed - emails will not be sent",
+        );
+      }
+    } catch (error) {
+      console.error("❌ Email service test error:", error.message);
+    }
+  }
 });
 
 // Enhanced connection event handlers
