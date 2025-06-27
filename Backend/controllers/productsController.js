@@ -1173,11 +1173,7 @@ module.exports = {
   createProduct: productsController.createProduct.bind(productsController),
   updateProduct: productsController.updateProduct.bind(productsController),
   deleteProduct: productsController.deleteProduct.bind(productsController),
-  toggleFeatured: productsController.toggleFeatured.bind(productsController),
   updateStock: productsController.updateStock.bind(productsController),
-  bulkUpdateStock: productsController.bulkUpdateStock.bind(productsController),
-  uploadProductImage:
-    productsController.uploadProductImage.bind(productsController),
-  deleteProductImage:
-    productsController.deleteProductImage.bind(productsController),
+  uploadImages: productsController.uploadImages.bind(productsController),
+  deleteImage: productsController.deleteImage.bind(productsController),
 };
