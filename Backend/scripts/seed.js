@@ -13,10 +13,14 @@ const Verification = require("../models/Verification");
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || "mongodb+srv://ronaksheladiya652:Ronak95865@cluster0.loaubzp.mongodb.net/Hare_Krishna_Medical_db?retryWrites=true&w=majority&appName=Cluster0", {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(
+      process.env.MONGODB_URI ||
+        "mongodb+srv://ronaksheladiya652:Ronak95865@cluster0.loaubzp.mongodb.net/Hare_Krishna_Medical_db?retryWrites=true&w=majority&appName=Cluster0",
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      }
+    );
     console.log("✅ Connected to MongoDB for seeding");
   } catch (error) {
     console.error("❌ MongoDB connection failed:", error.message);
@@ -24,14 +28,12 @@ const connectDB = async () => {
   }
 };
 
-// 👇 Helper to hash passwords
 const hashPasswords = async (users) => {
   for (const user of users) {
     user.password = await require("bcryptjs").hash(user.password, 10);
   }
 };
 
-// 👇 Fix for seeding users
 const seedUsers = async () => {
   await User.deleteMany({});
   const users = [
@@ -117,15 +119,100 @@ const seedUsers = async () => {
   return createdUsers;
 };
 
-// 👇 All other seed functions remain the same as you provided
-//    - seedProducts()
-//    - seedMessages(users)
-//    - seedLetterheads(users)
-//    - seedVerifications(users) ✅ fix: include user ref field if required
-//    - seedOrders(users, products)
-//    - seedInvoices(users, orders)
+const seedProducts = async () => {
+  await Product.deleteMany({});
+  const products = [
+    {
+      name: "Paracetamol 500mg",
+      description: "Pain reliever and fever reducer",
+      category: "Tablet",
+      price: 20,
+      stock: 100,
+      minStock: 10,
+      manufacturer: "ABC Pharma",
+      expiryDate: new Date("2026-12-31"),
+    },
+    {
+      name: "Cough Syrup",
+      description: "Relief from cough and cold",
+      category: "Syrup",
+      price: 60,
+      stock: 50,
+      minStock: 5,
+      manufacturer: "XYZ Labs",
+      expiryDate: new Date("2025-08-15"),
+    },
+  ];
+  const createdProducts = await Product.insertMany(products);
+  console.log(`✅ ${createdProducts.length} products created`);
+  return createdProducts;
+};
 
-// 👇 Final seed runner
+const seedMessages = async (users) => {
+  await Message.deleteMany({});
+  const messages = users.map((user) => ({
+    user: user._id,
+    content: `Welcome, ${user.fullName}!`,
+  }));
+  const createdMessages = await Message.insertMany(messages);
+  console.log(`✅ ${createdMessages.length} messages created`);
+  return createdMessages;
+};
+
+const seedLetterheads = async (users) => {
+  await Letterhead.deleteMany({});
+  const letters = users.map((user) => ({
+    user: user._id,
+    content: `Letterhead for ${user.fullName}`,
+  }));
+  const createdLetters = await Letterhead.insertMany(letters);
+  console.log(`✅ ${createdLetters.length} letterheads created`);
+  return createdLetters;
+};
+
+const seedVerifications = async (users) => {
+  await Verification.deleteMany({});
+  const verifications = users.map((user) => ({
+    user: user._id,
+    otp: Math.floor(100000 + Math.random() * 900000),
+    createdAt: new Date(),
+  }));
+  const createdVerifications = await Verification.insertMany(verifications);
+  console.log(`✅ ${createdVerifications.length} verifications created`);
+  return createdVerifications;
+};
+
+const seedOrders = async (users, products) => {
+  await Order.deleteMany({});
+  const orders = users.map((user, idx) => ({
+    user: user._id,
+    products: [
+      {
+        product: products[idx % products.length]._id,
+        quantity: 2,
+      },
+    ],
+    totalAmount: products[idx % products.length].price * 2,
+    status: "Placed",
+  }));
+  const createdOrders = await Order.insertMany(orders);
+  console.log(`✅ ${createdOrders.length} orders created`);
+  return createdOrders;
+};
+
+const seedInvoices = async (users, orders) => {
+  await Invoice.deleteMany({});
+  const invoices = orders.map((order) => ({
+    user: order.user,
+    order: order._id,
+    amount: order.totalAmount,
+    issuedDate: new Date(),
+  }));
+  const createdInvoices = await Invoice.insertMany(invoices);
+  console.log(`✅ ${createdInvoices.length} invoices created`);
+  return createdInvoices;
+};
+
 const seedDatabase = async () => {
   try {
     console.log("🌱 Starting database seeding...");
