@@ -172,6 +172,7 @@ const AdminProducts = () => {
       originalPrice:
         parseFloat(formData.originalPrice) || parseFloat(formData.price),
       stock: parseInt(formData.stock),
+      benefits: formatBenefits(formData.benefits),
     };
 
     const { success, error: apiError } = isEdit
