@@ -1165,28 +1165,16 @@ const AdminProducts = () => {
                         </p>
                       </Col>
                       <Col md={6}>
-                        <h6>Description</h6>
+                        <h6>Short Description</h6>
+                        <p className="text-muted">
+                          {selectedProduct.shortDescription ||
+                            "No short description available"}
+                        </p>
+                        <h6>Detailed Description</h6>
                         <p className="text-muted">
                           {selectedProduct.description ||
                             "No description available"}
                         </p>
-                        <h6>Benefits</h6>
-                        {selectedProduct.benefits ? (
-                          <div className="text-muted">
-                            {selectedProduct.benefits.split("\n").map(
-                              (benefit, index) =>
-                                benefit.trim() && (
-                                  <div key={index} className="mb-1">
-                                    {benefit.startsWith("•")
-                                      ? benefit
-                                      : `• ${benefit}`}
-                                  </div>
-                                ),
-                            )}
-                          </div>
-                        ) : (
-                          <p className="text-muted">No benefits listed</p>
-                        )}
 
                         <h6 className="mt-3">Usage</h6>
                         <p className="text-muted">
