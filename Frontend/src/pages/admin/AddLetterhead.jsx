@@ -984,11 +984,11 @@ const AddLetterhead = () => {
                     flexShrink: 0,
                   }}
                 >
-                  <div className="d-flex gap-3 justify-content-center">
+                  <div className="d-flex gap-3 justify-content-center flex-wrap">
                     <Button
                       variant="success"
                       onClick={handlePrint}
-                      disabled={printLoading}
+                      disabled={printLoading || downloadLoading}
                       style={{
                         borderRadius: "10px",
                         fontWeight: "600",
@@ -996,12 +996,24 @@ const AddLetterhead = () => {
                         border: "none",
                         background: "linear-gradient(135deg, #28a745, #20c997)",
                         minWidth: "140px",
+                        boxShadow: "0 4px 12px rgba(40, 167, 69, 0.3)",
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.transform = "translateY(-1px)";
+                        e.target.style.boxShadow =
+                          "0 6px 16px rgba(40, 167, 69, 0.4)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.transform = "translateY(0)";
+                        e.target.style.boxShadow =
+                          "0 4px 12px rgba(40, 167, 69, 0.3)";
                       }}
                     >
                       {printLoading ? (
                         <>
                           <Spinner size="sm" className="me-2" />
-                          Printing...
+                          Preparing Print...
                         </>
                       ) : (
                         <>
@@ -1014,7 +1026,7 @@ const AddLetterhead = () => {
                     <Button
                       variant="primary"
                       onClick={handleDownload}
-                      disabled={downloadLoading}
+                      disabled={downloadLoading || printLoading}
                       style={{
                         borderRadius: "10px",
                         fontWeight: "600",
@@ -1022,12 +1034,24 @@ const AddLetterhead = () => {
                         border: "none",
                         background: "linear-gradient(135deg, #e63946, #dc3545)",
                         minWidth: "140px",
+                        boxShadow: "0 4px 12px rgba(230, 57, 70, 0.3)",
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.transform = "translateY(-1px)";
+                        e.target.style.boxShadow =
+                          "0 6px 16px rgba(230, 57, 70, 0.4)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.transform = "translateY(0)";
+                        e.target.style.boxShadow =
+                          "0 4px 12px rgba(230, 57, 70, 0.3)";
                       }}
                     >
                       {downloadLoading ? (
                         <>
                           <Spinner size="sm" className="me-2" />
-                          Downloading...
+                          Generating PDF...
                         </>
                       ) : (
                         <>
@@ -1037,11 +1061,32 @@ const AddLetterhead = () => {
                       )}
                     </Button>
                   </div>
-                  <div className="text-center mt-2">
-                    <small className="text-muted">
-                      <i className="bi bi-info-circle me-1"></i>
-                      Professional A4 letterhead ready for use
+                  <div className="text-center mt-3">
+                    <small className="text-muted d-flex align-items-center justify-content-center gap-1">
+                      <i className="bi bi-shield-check text-success"></i>
+                      <span>
+                        Professional A4 letterhead with QR verification ready
+                        for official use
+                      </span>
                     </small>
+                  </div>
+
+                  {/* Additional Info */}
+                  <div className="text-center mt-2">
+                    <div className="d-flex justify-content-center gap-3 flex-wrap">
+                      <small className="text-muted d-flex align-items-center gap-1">
+                        <i className="bi bi-file-earmark-pdf text-danger"></i>
+                        <span>A4 PDF Format</span>
+                      </small>
+                      <small className="text-muted d-flex align-items-center gap-1">
+                        <i className="bi bi-qr-code text-primary"></i>
+                        <span>QR Code Included</span>
+                      </small>
+                      <small className="text-muted d-flex align-items-center gap-1">
+                        <i className="bi bi-printer text-success"></i>
+                        <span>Print Ready</span>
+                      </small>
+                    </div>
                   </div>
                 </div>
               )}
