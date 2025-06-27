@@ -645,7 +645,7 @@ const SocketDiagnostics = () => {
                 </li>
                 <li>
                   Point it to your actual backend URL (e.g.,{" "}
-                  <code>https://your-backend.fly.dev</code>)
+                  <code>https://hare-krishna-medical.onrender.com</code>)
                 </li>
                 <li>
                   Ensure your backend allows CORS from your frontend domain
