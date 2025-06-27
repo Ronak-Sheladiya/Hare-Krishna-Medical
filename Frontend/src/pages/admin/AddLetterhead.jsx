@@ -295,7 +295,7 @@ const AddLetterhead = () => {
                     </Form.Label>
 
                     {/* Formatting Toolbar */}
-                    <Card className="mb-2">
+                    <Card className="mb-2 editor-toolbar">
                       <Card.Body className="py-2">
                         <div className="d-flex flex-wrap gap-2 align-items-center">
                           {/* Font Size */}
