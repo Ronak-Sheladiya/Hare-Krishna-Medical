@@ -402,7 +402,10 @@ const seedDatabase = async () => {
   try {
     console.log("🌱 Starting database seeding...");
 
-    await connectDB();
+    // Only connect if not already connected (when called from server.js)
+    if (mongoose.connection.readyState !== 1) {
+      await connectDB();
+    }
 
     const users = await seedUsers();
     const products = await seedProducts();
@@ -427,10 +430,18 @@ const seedDatabase = async () => {
     console.log("   Email: john@example.com");
     console.log("   Password: user123");
 
-    process.exit(0);
+    // Only exit if called directly, not when imported
+    if (require.main === module) {
+      process.exit(0);
+    }
+
+    return { users, products, orders, invoices };
   } catch (error) {
     console.error("❌ Database seeding failed:", error);
-    process.exit(1);
+    if (require.main === module) {
+      process.exit(1);
+    }
+    throw error;
   }
 };
 
