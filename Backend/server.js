@@ -206,10 +206,41 @@ app.get("/api/health", (req, res) => {
 });
 
 // ==========================
-// ✅ Email Test Route (Development Only)
+// ✅ Email Test Routes (Development Only)
 // ==========================
 if (process.env.NODE_ENV === "development") {
-  app.post("/api/test-email", async (req, res) => {
+  // Test email connection
+  app.get("/api/test-email/connection", async (req, res) => {
+    try {
+      const emailService = require("./utils/emailService");
+      const isConnected = await emailService.testConnection();
+
+      res.json({
+        success: isConnected,
+        connected: isConnected,
+        message: isConnected
+          ? "Email service is working"
+          : "Email service connection failed",
+        configuration: {
+          host: process.env.EMAIL_HOST || "smtp.gmail.com",
+          port: process.env.EMAIL_PORT || 587,
+          user: process.env.EMAIL_USER ? "Configured" : "Not configured",
+          pass: process.env.EMAIL_PASS ? "Configured" : "Not configured",
+        },
+      });
+    } catch (error) {
+      console.error("Email connection test error:", error);
+      res.status(500).json({
+        success: false,
+        connected: false,
+        message: "Email connection test failed",
+        error: error.message,
+      });
+    }
+  });
+
+  // Send test email
+  app.post("/api/test-email/send", async (req, res) => {
     try {
       const emailService = require("./utils/emailService");
       const { email, fullName } = req.body;
@@ -226,7 +257,7 @@ if (process.env.NODE_ENV === "development") {
       if (!connectionTest) {
         return res.status(500).json({
           success: false,
-          message: "Email service connection failed",
+          message: "Email service connection failed - check configuration",
         });
       }
 
