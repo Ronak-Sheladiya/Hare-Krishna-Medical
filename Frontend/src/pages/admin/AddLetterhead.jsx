@@ -152,77 +152,77 @@ const AddLetterhead = () => {
     const currentLetterheadId = letterheadId || generateTempLetterheadId();
 
     return `
-      <div id="letterhead-print-content" style="font-family: Arial, sans-serif; padding: 15px; background: white; max-width: 210mm; margin: 0 auto; min-height: 297mm; page-break-inside: avoid;">
+      <div id="letterhead-print-content" style="font-family: Arial, sans-serif; padding: 10px; background: white; max-width: 210mm; margin: 0 auto; min-height: 277mm; page-break-inside: avoid; box-sizing: border-box;">
         <!-- Header Section - Professional Design -->
-        <div style="background: #e63946; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <div style="background: #e63946; color: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <!-- Left Side - Company Info -->
             <div style="flex: 1;">
-              <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                <div style="position: relative; margin-right: 20px;">
-                  <div style="background: white; border-radius: 50%; padding: 12px; border: 3px solid rgba(255,255,255,0.9); box-shadow: 0 6px 20px rgba(0,0,0,0.15);">
-                    <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800" alt="Hare Krishna Medical Logo" style="height: 56px; width: 56px; object-fit: contain; border-radius: 50%;" onerror="this.style.display='none';" />
+              <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="position: relative; margin-right: 15px;">
+                  <div style="background: white; border-radius: 50%; padding: 8px; border: 2px solid rgba(255,255,255,0.9); box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800" alt="Hare Krishna Medical Logo" style="height: 40px; width: 40px; object-fit: contain; border-radius: 50%;" onerror="this.style.display='none';" />
                   </div>
-                  <div style="position: absolute; top: -5px; right: -5px; width: 20px; height: 20px; background: #27ae60; border-radius: 50%; border: 2px solid white;"></div>
+                  <div style="position: absolute; top: -3px; right: -3px; width: 15px; height: 15px; background: #28a745; border-radius: 50%; border: 2px solid white;"></div>
                 </div>
                 <div>
-                  <h1 style="font-size: 28px; font-weight: 900; margin: 0; line-height: 1.1; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">HARE KRISHNA MEDICAL</h1>
-                  <p style="font-size: 14px; margin: 5px 0 0 0; opacity: 0.95; font-weight: 500; letter-spacing: 0.5px;">🏥 Your Trusted Health Partner Since 2020</p>
-                  <div style="display: flex; align-items: center; margin-top: 8px; font-size: 12px; opacity: 0.9;">
-                    <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; margin-right: 8px;">✓ Verified</span>
-                    <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px;">📋 Official Document</span>
+                  <h1 style="font-size: 22px; font-weight: 900; margin: 0; line-height: 1.1; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">HARE KRISHNA MEDICAL</h1>
+                  <p style="font-size: 11px; margin: 3px 0 0 0; opacity: 0.95; font-weight: 500; letter-spacing: 0.3px;">🏥 Your Trusted Health Partner Since 2020</p>
+                  <div style="display: flex; align-items: center; margin-top: 5px; font-size: 9px; opacity: 0.9;">
+                    <span style="background: rgba(255,255,255,0.2); padding: 1px 6px; border-radius: 8px; margin-right: 6px;">✓ Verified</span>
+                    <span style="background: rgba(255,255,255,0.2); padding: 1px 6px; border-radius: 8px;">📋 Official Document</span>
                   </div>
                 </div>
               </div>
-              <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; font-size: 11px; line-height: 1.5;">
-                <div style="display: flex; align-items: center; margin-bottom: 4px;"><i style="margin-right: 8px;">📍</i> 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat</div>
-                <div style="display: flex; align-items: center; margin-bottom: 4px;"><i style="margin-right: 8px;">📞</i> +91 76989 13354 | +91 91060 18508</div>
-                <div style="display: flex; align-items: center;"><i style="margin-right: 8px;">✉️</i> hkmedicalamroli@gmail.com</div>
+              <div style="background: rgba(255,255,255,0.1); padding: 8px; border-radius: 6px; font-size: 9px; line-height: 1.3;">
+                <div style="display: flex; align-items: center; margin-bottom: 2px;"><i style="margin-right: 6px;">📍</i> 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat</div>
+                <div style="display: flex; align-items: center; margin-bottom: 2px;"><i style="margin-right: 6px;">📞</i> +91 76989 13354 | +91 91060 18508</div>
+                <div style="display: flex; align-items: center;"><i style="margin-right: 6px;">✉️</i> hkmedicalamroli@gmail.com</div>
               </div>
             </div>
 
             <!-- Right Side - QR Code Only -->
-            <div style="text-align: center; min-width: 160px;">
-              <div style="background: white; padding: 12px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <div style="text-align: center; min-width: 120px;">
+              <div style="background: white; padding: 8px; border-radius: 8px; box-shadow: 0 3px 8px rgba(0,0,0,0.1);">
                 ${
                   qrCode
-                    ? `<img src="${qrCode}" alt="Verification QR Code" style="width: 120px; height: 120px; border: 2px solid #e63946; border-radius: 8px;" />`
-                    : `<div style="width: 120px; height: 120px; border: 2px dashed #e63946; border-radius: 8px; background: #f8f9fa; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #e63946;">
-                         <div style="font-size: 14px; margin-bottom: 5px;">📱</div>
-                         <div style="font-size: 10px; font-weight: bold; text-align: center; line-height: 1.2;">QR CODE<br>VERIFICATION</div>
+                    ? `<img src="${qrCode}" alt="Verification QR Code" style="width: 80px; height: 80px; border: 2px solid #e63946; border-radius: 6px;" />`
+                    : `<div style="width: 80px; height: 80px; border: 2px dashed #e63946; border-radius: 6px; background: #f8f9fa; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #e63946;">
+                         <div style="font-size: 12px; margin-bottom: 3px;">📱</div>
+                         <div style="font-size: 8px; font-weight: bold; text-align: center; line-height: 1.1;">QR CODE<br>VERIFICATION</div>
                        </div>`
                 }
-                <div style="margin-top: 8px; color: #333; font-size: 10px; font-weight: bold;">📱 SCAN TO VERIFY</div>
+                <div style="margin-top: 5px; color: #333; font-size: 8px; font-weight: bold;">📱 SCAN TO VERIFY</div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Reference and Date - After Header, Right Aligned -->
-        <div style="text-align: right; margin-bottom: 20px; font-size: 12px; color: #666;">
-          <div style="margin-bottom: 4px;">Ref: ${currentLetterheadId}</div>
+        <div style="text-align: right; margin-bottom: 15px; font-size: 10px; color: #666;">
+          <div style="margin-bottom: 2px;">Ref: ${currentLetterheadId}</div>
           <div>Date: ${currentDate}</div>
         </div>
 
         <!-- Letterhead Title -->
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h2 style="color: #e63946; font-size: 28px; font-weight: bold; margin: 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #e63946; display: inline-block; padding-bottom: 8px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <h2 style="color: #e63946; font-size: 20px; font-weight: bold; margin: 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #e63946; display: inline-block; padding-bottom: 6px;">
             ${formData.title}
           </h2>
         </div>
 
         <!-- Letterhead Content -->
-        <div style="font-size: 14px; line-height: 1.8; text-align: justify; margin-bottom: 80px; min-height: 300px; color: #333;">
+        <div style="font-size: 12px; line-height: 1.6; text-align: justify; margin-bottom: 40px; min-height: 200px; color: #333;">
           ${formData.content}
         </div>
 
         <!-- Footer Section - From VerifyDocs -->
-        <div style="position: absolute; bottom: 20px; left: 15px; right: 15px; border-top: 2px solid #28a745; padding-top: 15px;">
+        <div style="position: absolute; bottom: 10px; left: 10px; right: 10px; border-top: 2px solid #e63946; padding-top: 10px;">
           <div style="text-align: center;">
-            <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">
+            <p style="font-size: 10px; color: #666; margin-bottom: 3px;">
               ✅ This letterhead has been verified and is authentic
             </p>
-            <p style="font-size: 0.8rem; color: #999; margin-bottom: 0;">
+            <p style="font-size: 9px; color: #999; margin-bottom: 0;">
               Verified on ${new Date().toLocaleString("en-IN")} | For queries: +91 76989 13354 | hkmedicalamroli@gmail.com
             </p>
           </div>
