@@ -281,12 +281,7 @@ const AddLetterhead = () => {
     }
   };
 
-  // Generate PDF when letterhead content changes
-  useEffect(() => {
-    if (formData.title && formData.content) {
-      generateLetterheadPDF();
-    }
-  }, [formData.title, formData.content, qrCode]);
+  // No auto-generation of PDF - only generate when print/download is clicked
 
   // PRINT FUNCTIONALITY - Generate PDF and open in new window
   const handlePrint = async () => {
