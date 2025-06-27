@@ -81,7 +81,8 @@ const validateUpdateLetterhead = [
     .trim()
     .withMessage("Subject must be a string"),
   body("content")
-    .optional()
+    .optional({ values: "falsy" })
+    .isString()
     .trim()
     .notEmpty()
     .withMessage("Content cannot be empty"),
