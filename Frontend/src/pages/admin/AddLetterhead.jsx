@@ -538,7 +538,7 @@ const AddLetterhead = () => {
       console.error("Download failed:", error);
       alert("Download failed. Please try again.");
     } finally {
-      setPdfGenerating(false);
+      setDownloadLoading(false);
     }
   };
 
