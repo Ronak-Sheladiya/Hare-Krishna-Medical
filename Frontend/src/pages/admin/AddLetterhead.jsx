@@ -397,7 +397,7 @@ const AddLetterhead = () => {
                 style={{
                   background: "linear-gradient(135deg, #e63946, #dc3545)",
                   borderRadius: "12px 12px 0 0",
-                  padding: "20px",
+                  padding: "10px",
                 }}
               >
                 <h5 className="mb-0" style={{ fontWeight: "600" }}>
@@ -409,7 +409,7 @@ const AddLetterhead = () => {
                   letterhead
                 </small>
               </Card.Header>
-              <Card.Body>
+              <Card.Body style={{ padding: "10px" }}>
                 {error && (
                   <Alert
                     variant="danger"
