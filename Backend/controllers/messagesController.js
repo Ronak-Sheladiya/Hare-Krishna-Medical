@@ -30,25 +30,15 @@ class MessagesController {
         status: "unread",
       });
 
-      // Send confirmation email to user
+      // Send professional notification email to admin
       try {
-        const confirmationHtml = `
-          <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; backgroundColor: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(220, 53, 69, 0.15);">
-            <div style="background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%); color: #ffffff; padding: 2rem; text-align: center;">
-              <h2 style="margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">🏥 HARE KRISHNA MEDICAL</h2>
-              <p style="margin: 0.5rem 0 0 0; font-size: 14px; opacity: 0.9; font-style: italic;">Your Health, Our Priority</p>
-              <div style="background-color: rgba(255, 255, 255, 0.2); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
-                <h3 style="margin: 0; font-size: 20px; font-weight: 600;">Message Received ✅</h3>
-              </div>
-            </div>
-
-            <div style="padding: 2rem;">
-              <div style="text-align: center; margin-bottom: 2rem;">
-                <h3 style="color: #dc3545; font-size: 24px; margin: 0 0 1rem 0; font-weight: 600;">Thank You for Contacting Us! 🎉</h3>
-              </div>
-
-              <div style="font-size: 16px; line-height: 1.7;">
-                <p style="margin: 1rem 0; color: #444444;">
+        await emailService.sendContactFormEmail({
+          name: fullName,
+          email: email,
+          phone: phone,
+          subject: subject,
+          message: messageText,
+        });
                   Dear <strong>${name}</strong>,
                 </p>
 
