@@ -117,10 +117,10 @@ const sampleProducts = [
     originalPrice: 320.0,
     stock: 45,
     category: "Medical Devices",
-    description:
+    shortDescription:
       "Accurate digital thermometer with fast reading and fever alarm.",
-    benefits:
-      "• Fast 60-second reading\n• High accuracy ±0.1°C\n• Fever alarm function\n• Memory for last reading",
+    description:
+      "High-precision digital thermometer with fast 60-second reading, ±0.1°C accuracy, fever alarm function, and memory for last reading.",
     usage: "Place under tongue, armpit, or rectally. Wait for beep signal.",
     weight: "15g",
     images: [
