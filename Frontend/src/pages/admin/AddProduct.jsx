@@ -265,6 +265,7 @@ const AddProduct = () => {
       weight: "",
       shortDescription: "",
       description: "",
+      benefits: "",
       usage: "",
       composition: "",
       sideEffects: "",
