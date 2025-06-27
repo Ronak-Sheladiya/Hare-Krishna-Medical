@@ -119,7 +119,7 @@ const sampleProducts = [
     description:
       "Accurate digital thermometer with fast reading and fever alarm.",
     benefits:
-      "• Fast 60-second reading\n• High accuracy ±0.1°C\n• Fever alarm function\n�� Memory for last reading",
+      "• Fast 60-second reading\n• High accuracy ±0.1°C\n• Fever alarm function\n• Memory for last reading",
     usage: "Place under tongue, armpit, or rectally. Wait for beep signal.",
     weight: "15g",
     images: [
@@ -245,8 +245,10 @@ class ProductsController {
     }
   }
 
-  // Handle products when database is offline
-  handleOfflineProducts(req, res) {
+}
+
+// Handle products when database is offline
+const handleOfflineProducts = (req, res) => {
     try {
       const {
         page = 1,
