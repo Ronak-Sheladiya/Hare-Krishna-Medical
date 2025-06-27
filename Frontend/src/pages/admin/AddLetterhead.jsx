@@ -384,8 +384,9 @@ const AddLetterhead = () => {
     `;
   };
 
-  // PDF generation state
-  const [pdfGenerating, setPdfGenerating] = useState(false);
+  // PDF generation states - separate for print and download
+  const [printLoading, setPrintLoading] = useState(false);
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
 
   // Generate actual PDF for letterhead with proper A4 sizing
