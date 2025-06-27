@@ -1305,6 +1305,7 @@ const AddLetterhead = () => {
                   }}
                 >
                   <div className="d-flex gap-3 justify-content-center flex-wrap">
+                    {/* Professional Print Button */}
                     <Button
                       variant="success"
                       onClick={handlePrint}
@@ -1312,14 +1313,17 @@ const AddLetterhead = () => {
                         printLoading || downloadLoading || pdfDownloadLoading
                       }
                       style={{
-                        borderRadius: "10px",
+                        borderRadius: "12px",
                         fontWeight: "600",
-                        padding: "12px 24px",
+                        padding: "14px 28px",
                         border: "none",
                         background: "linear-gradient(135deg, #28a745, #20c997)",
-                        minWidth: "140px",
-                        boxShadow: "0 4px 12px rgba(40, 167, 69, 0.3)",
-                        transition: "all 0.2s ease",
+                        minWidth: "160px",
+                        boxShadow: "0 4px 15px rgba(40, 167, 69, 0.25)",
+                        transition: "all 0.3s ease",
+                        fontSize: "14px",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
                       }}
                       onMouseEnter={(e) => {
                         if (
@@ -1327,9 +1331,9 @@ const AddLetterhead = () => {
                           !downloadLoading &&
                           !pdfDownloadLoading
                         ) {
-                          e.target.style.transform = "translateY(-1px)";
+                          e.target.style.transform = "translateY(-2px)";
                           e.target.style.boxShadow =
-                            "0 6px 16px rgba(40, 167, 69, 0.4)";
+                            "0 8px 25px rgba(40, 167, 69, 0.35)";
                         }
                       }}
                       onMouseLeave={(e) => {
@@ -1340,23 +1344,25 @@ const AddLetterhead = () => {
                         ) {
                           e.target.style.transform = "translateY(0)";
                           e.target.style.boxShadow =
-                            "0 4px 12px rgba(40, 167, 69, 0.3)";
+                            "0 4px 15px rgba(40, 167, 69, 0.25)";
                         }
                       }}
+                      title="Print professional letterhead directly from browser"
                     >
                       {printLoading ? (
                         <>
                           <Spinner size="sm" className="me-2" />
-                          Printing...
+                          Preparing Print...
                         </>
                       ) : (
                         <>
-                          <i className="bi bi-printer me-2"></i>
-                          Print HTML
+                          <i className="bi bi-printer-fill me-2"></i>
+                          Professional Print
                         </>
                       )}
                     </Button>
 
+                    {/* Professional PDF Download Button */}
                     <Button
                       variant="warning"
                       onClick={handlePDFDownload}
@@ -1364,15 +1370,18 @@ const AddLetterhead = () => {
                         pdfDownloadLoading || downloadLoading || printLoading
                       }
                       style={{
-                        borderRadius: "10px",
+                        borderRadius: "12px",
                         fontWeight: "600",
-                        padding: "12px 24px",
+                        padding: "14px 28px",
                         border: "none",
-                        background: "linear-gradient(135deg, #fd7e14, #f63d3d)",
+                        background: "linear-gradient(135deg, #fd7e14, #e63946)",
                         color: "white",
-                        minWidth: "140px",
-                        boxShadow: "0 4px 12px rgba(253, 126, 20, 0.3)",
-                        transition: "all 0.2s ease",
+                        minWidth: "160px",
+                        boxShadow: "0 4px 15px rgba(253, 126, 20, 0.25)",
+                        transition: "all 0.3s ease",
+                        fontSize: "14px",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
                       }}
                       onMouseEnter={(e) => {
                         if (
@@ -1380,9 +1389,9 @@ const AddLetterhead = () => {
                           !downloadLoading &&
                           !printLoading
                         ) {
-                          e.target.style.transform = "translateY(-1px)";
+                          e.target.style.transform = "translateY(-2px)";
                           e.target.style.boxShadow =
-                            "0 6px 16px rgba(253, 126, 20, 0.4)";
+                            "0 8px 25px rgba(253, 126, 20, 0.35)";
                         }
                       }}
                       onMouseLeave={(e) => {
@@ -1393,9 +1402,10 @@ const AddLetterhead = () => {
                         ) {
                           e.target.style.transform = "translateY(0)";
                           e.target.style.boxShadow =
-                            "0 4px 12px rgba(253, 126, 20, 0.3)";
+                            "0 4px 15px rgba(253, 126, 20, 0.25)";
                         }
                       }}
+                      title="Download high-quality PDF with professional formatting"
                     >
                       {pdfDownloadLoading ? (
                         <>
@@ -1404,12 +1414,13 @@ const AddLetterhead = () => {
                         </>
                       ) : (
                         <>
-                          <i className="bi bi-file-earmark-pdf me-2"></i>
+                          <i className="bi bi-file-earmark-pdf-fill me-2"></i>
                           Download PDF
                         </>
                       )}
                     </Button>
 
+                    {/* HTML Download Button */}
                     <Button
                       variant="primary"
                       onClick={handleDownload}
@@ -1417,14 +1428,17 @@ const AddLetterhead = () => {
                         downloadLoading || printLoading || pdfDownloadLoading
                       }
                       style={{
-                        borderRadius: "10px",
+                        borderRadius: "12px",
                         fontWeight: "600",
-                        padding: "12px 24px",
+                        padding: "14px 28px",
                         border: "none",
-                        background: "linear-gradient(135deg, #e63946, #dc3545)",
-                        minWidth: "140px",
-                        boxShadow: "0 4px 12px rgba(230, 57, 70, 0.3)",
-                        transition: "all 0.2s ease",
+                        background: "linear-gradient(135deg, #6f42c1, #6610f2)",
+                        minWidth: "160px",
+                        boxShadow: "0 4px 15px rgba(111, 66, 193, 0.25)",
+                        transition: "all 0.3s ease",
+                        fontSize: "14px",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
                       }}
                       onMouseEnter={(e) => {
                         if (
@@ -1432,9 +1446,9 @@ const AddLetterhead = () => {
                           !printLoading &&
                           !pdfDownloadLoading
                         ) {
-                          e.target.style.transform = "translateY(-1px)";
+                          e.target.style.transform = "translateY(-2px)";
                           e.target.style.boxShadow =
-                            "0 6px 16px rgba(230, 57, 70, 0.4)";
+                            "0 8px 25px rgba(111, 66, 193, 0.35)";
                         }
                       }}
                       onMouseLeave={(e) => {
@@ -1445,7 +1459,7 @@ const AddLetterhead = () => {
                         ) {
                           e.target.style.transform = "translateY(0)";
                           e.target.style.boxShadow =
-                            "0 4px 12px rgba(230, 57, 70, 0.3)";
+                            "0 4px 15px rgba(111, 66, 193, 0.25)";
                         }
                       }}
                     >
