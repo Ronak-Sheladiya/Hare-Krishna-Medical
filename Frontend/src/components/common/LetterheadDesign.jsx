@@ -42,7 +42,7 @@ const LetterheadDesign = ({
 
   const generateQRCode = async () => {
     try {
-      const verificationUrl = `${window.location.origin}/verify-docs?id=${letterheadId}&type=letterhead`;
+      const verificationUrl = `${window.location.origin}/verify?id=${letterheadId}&type=letterhead`;
       const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, {
         width: 120,
         margin: 2,
@@ -70,27 +70,27 @@ const LetterheadDesign = ({
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
             <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
             <style>
-              @page { 
-                size: A4; 
-                margin: 15mm; 
+              @page {
+                size: A4;
+                margin: 15mm;
                 -webkit-print-color-adjust: exact;
                 color-adjust: exact;
               }
               @media print {
-                body { 
-                  margin: 0; 
-                  color: black !important; 
-                  font-size: 12px; 
-                  line-height: 1.4; 
+                body {
+                  margin: 0;
+                  color: black !important;
+                  font-size: 12px;
+                  line-height: 1.4;
                   -webkit-print-color-adjust: exact;
                   color-adjust: exact;
                   font-family: 'Times New Roman', serif;
                 }
                 .no-print { display: none !important; }
                 .print-break { page-break-before: always; }
-                .letterhead-container { 
-                  width: 100% !important; 
-                  max-width: none !important; 
+                .letterhead-container {
+                  width: 100% !important;
+                  max-width: none !important;
                   margin: 0 !important;
                   padding: 0 !important;
                   box-shadow: none !important;
@@ -765,12 +765,12 @@ const LetterheadDesign = ({
           min-height: 100vh;
           padding: 20px 0;
         }
-        
+
         .print-mode {
           background: white !important;
           padding: 0 !important;
         }
-        
+
         .letterhead-container {
           max-width: 794px; /* A4 width in pixels at 96 DPI */
           margin: 0 auto;
@@ -779,21 +779,21 @@ const LetterheadDesign = ({
           border-radius: 8px;
           overflow: hidden;
         }
-        
+
         .letterhead-document {
           padding: 40px;
           font-family: 'Times New Roman', serif;
           line-height: 1.6;
           color: #2c3e50;
         }
-        
+
         /* Header Styles */
         .letterhead-header {
           border-bottom: 4px solid #dc3545;
           padding-bottom: 20px;
           margin-bottom: 25px;
         }
-        
+
         .company-name {
           color: #dc3545;
           font-family: 'Georgia', serif;
@@ -801,40 +801,40 @@ const LetterheadDesign = ({
           font-weight: bold;
           margin: 0;
         }
-        
+
         .company-tagline {
           font-size: 0.9rem;
           font-style: italic;
         }
-        
+
         .company-details {
           margin-top: 10px;
         }
-        
+
         .contact-item {
           font-size: 0.9rem;
           color: #495057;
           display: flex;
           align-items: center;
         }
-        
+
         .contact-row {
           margin-top: 8px;
         }
-        
+
         .meta-section {
           border-left: 2px solid #e9ecef;
           padding-left: 20px;
         }
-        
+
         .qr-section {
           text-align: center;
         }
-        
+
         .qr-label {
           font-weight: 500;
         }
-        
+
         /* Document Info Bar */
         .document-info-bar {
           background: #f8f9fa;
@@ -842,17 +842,17 @@ const LetterheadDesign = ({
           margin: 0 -40px 25px -40px;
           border-left: 4px solid #28a745;
         }
-        
+
         .tag-badge {
           font-size: 0.75rem;
           padding: 4px 8px;
         }
-        
+
         /* Title Section */
         .document-title-section {
           margin: 30px 0 40px 0;
         }
-        
+
         .document-title {
           font-family: 'Georgia', serif;
           font-size: 2.2rem;
@@ -862,19 +862,19 @@ const LetterheadDesign = ({
           position: relative;
           display: inline-block;
         }
-        
+
         .title-underline {
           width: 100px;
           height: 3px;
           background: linear-gradient(90deg, #dc3545, #fd7e14);
           margin: 15px auto 0;
         }
-        
+
         /* Participants Section */
         .participants-section {
           margin: 30px 0;
         }
-        
+
         .recipient-card,
         .issuer-card {
           border: 1px solid #e9ecef;
@@ -883,19 +883,19 @@ const LetterheadDesign = ({
           background: #fafafa;
           height: 100%;
         }
-        
+
         .recipient-card {
           border-left: 4px solid #28a745;
         }
-        
+
         .issuer-card {
           border-left: 4px solid #6f42c1;
         }
-        
+
         .card-header {
           margin-bottom: 15px;
         }
-        
+
         .section-title {
           color: #495057;
           font-weight: 600;
@@ -903,13 +903,13 @@ const LetterheadDesign = ({
           letter-spacing: 0.5px;
           margin: 0;
         }
-        
+
         .recipient-name h5,
         .issuer-name h5 {
           color: #2c3e50;
           font-size: 1.25rem;
         }
-        
+
         .recipient-detail,
         .issuer-detail {
           font-size: 0.95rem;
@@ -917,12 +917,12 @@ const LetterheadDesign = ({
           display: flex;
           align-items: center;
         }
-        
+
         /* Subject Section */
         .subject-section {
           margin: 30px 0;
         }
-        
+
         .subject-card {
           background: linear-gradient(135deg, #fff8e1 0%, #f3e5f5 100%);
           border: 1px solid #e1bee7;
@@ -930,68 +930,68 @@ const LetterheadDesign = ({
           padding: 20px;
           border-left: 4px solid #fd7e14;
         }
-        
+
         .subject-text {
           color: #2c3e50;
           font-weight: 600;
           margin: 0;
           font-size: 1.1rem;
         }
-        
+
         /* Content Section */
         .content-section {
           margin: 30px 0;
           padding: 0 10px;
         }
-        
+
         .content-body {
           font-size: 1.05rem;
           line-height: 1.8;
           text-align: justify;
         }
-        
+
         .content-paragraph {
           margin-bottom: 18px;
           color: #2c3e50;
         }
-        
+
         .achievement-item {
           margin: 12px 0;
           padding: 8px 0;
         }
-        
+
         .achievement-text {
           color: #2c3e50;
           font-size: 1rem;
         }
-        
+
         .content-spacing {
           margin: 10px 0;
         }
-        
+
         /* Certification Section */
         .certification-section {
           margin: 40px 0 30px 0;
           padding-top: 25px;
           border-top: 2px solid #e9ecef;
         }
-        
+
         .certification-statement {
           font-size: 1.05rem;
           color: #2c3e50;
           display: flex;
           align-items-flex-start;
         }
-        
+
         .detail-item {
           font-size: 0.95rem;
           color: #495057;
         }
-        
+
         .official-seal {
           margin-top: 10px;
         }
-        
+
         .seal-container {
           border: 2px solid #dc3545;
           border-radius: 50%;
@@ -1003,11 +1003,11 @@ const LetterheadDesign = ({
           margin: 0 auto;
           background: white;
         }
-        
+
         .seal-content {
           text-align: center;
         }
-        
+
         .seal-title {
           font-size: 0.65rem;
           font-weight: bold;
@@ -1015,13 +1015,13 @@ const LetterheadDesign = ({
           line-height: 1;
           margin-top: 5px;
         }
-        
+
         .seal-year {
           font-size: 0.7rem;
           color: #6c757d;
           line-height: 1;
         }
-        
+
         /* Footer Styles */
         .letterhead-footer {
           border-top: 2px solid #6c757d;
@@ -1035,7 +1035,7 @@ const LetterheadDesign = ({
           padding-right: 40px;
           padding-bottom: 25px;
         }
-        
+
         .footer-title {
           color: #495057;
           font-weight: 600;
@@ -1043,27 +1043,27 @@ const LetterheadDesign = ({
           letter-spacing: 0.5px;
           margin-bottom: 8px;
         }
-        
+
         .footer-text {
           font-size: 0.9rem;
           color: #6c757d;
           line-height: 1.5;
         }
-        
+
         .footer-additional {
           color: #6c757d;
         }
-        
+
         .verification-details {
           color: #6c757d;
         }
-        
+
         .verification-item {
           display: flex;
           align-items: center;
           font-size: 0.85rem;
         }
-        
+
         /* Action Buttons */
         .action-bar {
           position: sticky;
@@ -1075,27 +1075,27 @@ const LetterheadDesign = ({
           border-radius: 8px;
           box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
-        
+
         .action-btn {
           transition: all 0.3s ease;
         }
-        
+
         .action-btn:hover {
           transform: translateY(-2px);
           box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        
+
         /* Responsive Design */
         @media (max-width: 768px) {
           .letterhead-container {
             margin: 0 10px;
             max-width: none;
           }
-          
+
           .letterhead-document {
             padding: 20px;
           }
-          
+
           .letterhead-header,
           .letterhead-footer {
             margin-left: -20px;
@@ -1103,24 +1103,24 @@ const LetterheadDesign = ({
             padding-left: 20px;
             padding-right: 20px;
           }
-          
+
           .letterhead-footer {
             margin-bottom: -20px;
           }
-          
+
           .document-info-bar {
             margin-left: -20px;
             margin-right: -20px;
           }
-          
+
           .document-title {
             font-size: 1.8rem;
           }
-          
+
           .company-name {
             font-size: 1.5rem;
           }
-          
+
           .meta-section {
             border-left: none;
             border-top: 2px solid #e9ecef;
@@ -1128,48 +1128,48 @@ const LetterheadDesign = ({
             padding-top: 15px;
             margin-top: 15px;
           }
-          
+
           .contact-row {
             flex-direction: column;
             gap: 8px !important;
           }
-          
+
           .seal-container {
             width: 80px;
             height: 80px;
           }
-          
+
           .seal-title {
             font-size: 0.6rem;
           }
         }
-        
+
         /* Print Styles */
         @media print {
           .letterhead-wrapper {
             background: white !important;
             padding: 0 !important;
           }
-          
+
           .letterhead-container {
             max-width: none !important;
             margin: 0 !important;
             box-shadow: none !important;
             border-radius: 0 !important;
           }
-          
+
           .letterhead-document {
             padding: 15mm !important;
           }
-          
+
           .no-print {
             display: none !important;
           }
-          
+
           .letterhead-header {
             border-bottom: 3px solid #dc3545 !important;
           }
-          
+
           .letterhead-footer {
             border-top: 2px solid #6c757d !important;
             margin-left: -15mm !important;
@@ -1178,23 +1178,23 @@ const LetterheadDesign = ({
             padding-left: 15mm !important;
             padding-right: 15mm !important;
           }
-          
+
           .document-info-bar {
             margin-left: -15mm !important;
             margin-right: -15mm !important;
             padding-left: 15mm !important;
             padding-right: 15mm !important;
           }
-          
+
           .qr-code {
             width: 60px !important;
             height: 60px !important;
           }
-          
+
           .company-logo {
             max-height: 45px !important;
           }
-          
+
           body {
             -webkit-print-color-adjust: exact;
             color-adjust: exact;
