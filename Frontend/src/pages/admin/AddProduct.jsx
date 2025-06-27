@@ -32,6 +32,7 @@ const AddProduct = () => {
     weight: "",
     shortDescription: "",
     description: "",
+    benefits: "",
     usage: "",
     composition: "",
     sideEffects: "",
@@ -264,6 +265,7 @@ const AddProduct = () => {
       weight: "",
       shortDescription: "",
       description: "",
+      benefits: "",
       usage: "",
       composition: "",
       sideEffects: "",
@@ -474,6 +476,21 @@ const AddProduct = () => {
                         <Form.Control.Feedback type="invalid">
                           {errors.description}
                         </Form.Control.Feedback>
+                      </Col>
+                      <Col md={12} className="mb-3">
+                        <Form.Label>Product Benefits</Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={3}
+                          name="benefits"
+                          value={formData.benefits}
+                          onChange={handleInputChange}
+                          placeholder="Enter product benefits (each line will be a bullet point)"
+                        />
+                        <Form.Text className="text-muted">
+                          Each new line will be displayed as a separate bullet
+                          point
+                        </Form.Text>
                       </Col>
                     </Row>
                   </Card.Body>

@@ -328,6 +328,15 @@ const ProductDetails = () => {
                         </Badge>
                       )}
                     </div>
+                    {/* Short Description */}
+                    {product.shortDescription && (
+                      <p
+                        className="text-muted mb-3"
+                        style={{ fontSize: "16px", lineHeight: "1.5" }}
+                      >
+                        {product.shortDescription}
+                      </p>
+                    )}
                   </div>
 
                   {/* Price */}
@@ -514,32 +523,56 @@ const ProductDetails = () => {
                   }
                 >
                   <div style={{ padding: "30px" }}>
-                    <h5 className="mb-3">
-                      <i className="bi bi-info-circle me-2"></i>
-                      Product Description
+                    {product.shortDescription && (
+                      <>
+                        <h5 className="mb-3">
+                          <i className="bi bi-info-circle me-2"></i>
+                          Overview
+                        </h5>
+                        <p
+                          style={{
+                            lineHeight: "1.8",
+                            fontSize: "18px",
+                            fontWeight: "500",
+                            color: "#2c3e50",
+                          }}
+                        >
+                          {product.shortDescription}
+                        </p>
+                      </>
+                    )}
+
+                    <h5 className="mb-3 mt-4">
+                      <i className="bi bi-file-text me-2"></i>
+                      Detailed Description
                     </h5>
                     <p style={{ lineHeight: "1.8", fontSize: "16px" }}>
                       {product.description ||
-                        "No description available for this product."}
+                        "No detailed description available for this product."}
                     </p>
 
-                    {product.benefits && product.benefits.length > 0 && (
+                    {product.benefits && (
                       <div className="mt-4">
                         <h6 className="fw-bold mb-3">
                           <i className="bi bi-check-circle me-2"></i>
                           Key Benefits
                         </h6>
-                        <ListGroup variant="flush">
-                          {product.benefits.map((benefit, index) => (
-                            <ListGroup.Item
-                              key={index}
-                              className="d-flex align-items-center border-0 px-0"
-                            >
-                              <i className="bi bi-check text-success me-2"></i>
-                              {benefit}
-                            </ListGroup.Item>
-                          ))}
-                        </ListGroup>
+                        <div className="benefits-list">
+                          {product.benefits.split("\n").map(
+                            (benefit, index) =>
+                              benefit.trim() && (
+                                <div
+                                  key={index}
+                                  className="d-flex align-items-start mb-2"
+                                >
+                                  <i className="bi bi-check text-success me-2 mt-1"></i>
+                                  <span style={{ lineHeight: "1.6" }}>
+                                    {benefit.replace(/^•\s*/, "")}
+                                  </span>
+                                </div>
+                              ),
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>

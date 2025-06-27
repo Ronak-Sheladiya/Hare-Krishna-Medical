@@ -8,43 +8,50 @@ const productSchema = new mongoose.Schema(
       trim: true,
       maxlength: [200, "Product name cannot exceed 200 characters"],
     },
+    shortDescription: {
+      type: String,
+      required: [true, "Short description is required"],
+      trim: true,
+      maxlength: [100, "Short description cannot exceed 100 characters"],
+    },
     description: {
       type: String,
       required: [true, "Product description is required"],
       maxlength: [2000, "Description cannot exceed 2000 characters"],
+    },
+    company: {
+      type: String,
+      required: [true, "Company name is required"],
+      trim: true,
     },
     price: {
       type: Number,
       required: [true, "Product price is required"],
       min: [0, "Price cannot be negative"],
     },
-    mrp: {
+    originalPrice: {
       type: Number,
-      required: [true, "MRP is required"],
-      min: [0, "MRP cannot be negative"],
-    },
-    discount: {
-      type: Number,
-      default: 0,
-      min: [0, "Discount cannot be negative"],
-      max: [100, "Discount cannot exceed 100%"],
+      min: [0, "Original price cannot be negative"],
     },
     category: {
       type: String,
       required: [true, "Product category is required"],
       enum: [
-        "Medicine",
-        "Healthcare",
-        "Personal Care",
+        "Pain Relief",
+        "Vitamins",
+        "Cough & Cold",
+        "First Aid",
+        "Medical Devices",
         "Supplements",
-        "Baby Care",
-        "Ayurvedic",
+        "Antibiotics",
+        "Digestive Health",
+        "Heart & Blood Pressure",
+        "Diabetes Care",
       ],
     },
-    subCategory: String,
-    brand: {
+    weight: {
       type: String,
-      required: [true, "Brand is required"],
+      trim: true,
     },
     stock: {
       type: Number,
@@ -74,15 +81,35 @@ const productSchema = new mongoose.Schema(
         alt: String,
       },
     ],
-    specifications: {
-      composition: String,
-      dosage: String,
-      sideEffects: String,
-      precautions: String,
-      manufacturer: String,
-      expiryMonths: Number,
-      weight: String,
-      dimensions: String,
+    benefits: {
+      type: String,
+      trim: true,
+    },
+    composition: {
+      type: String,
+      trim: true,
+    },
+    usage: {
+      type: String,
+      trim: true,
+    },
+    sideEffects: {
+      type: String,
+      trim: true,
+    },
+    contraindications: {
+      type: String,
+      trim: true,
+    },
+    batchNo: {
+      type: String,
+      trim: true,
+    },
+    mfgDate: {
+      type: Date,
+    },
+    expDate: {
+      type: Date,
     },
     tags: [String],
     isActive: {

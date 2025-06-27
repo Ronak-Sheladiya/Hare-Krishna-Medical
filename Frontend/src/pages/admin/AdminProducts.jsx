@@ -57,6 +57,7 @@ const AdminProducts = () => {
     originalPrice: "",
     stock: "",
     category: "",
+    shortDescription: "",
     description: "",
     benefits: "",
     usage: "",
@@ -171,7 +172,7 @@ const AdminProducts = () => {
       originalPrice:
         parseFloat(formData.originalPrice) || parseFloat(formData.price),
       stock: parseInt(formData.stock),
-      benefits: formatBenefits(formData.benefits), // Format benefits as bullet points
+      benefits: formatBenefits(formData.benefits),
     };
 
     const { success, error: apiError } = isEdit
@@ -230,6 +231,7 @@ const AdminProducts = () => {
       originalPrice: "",
       stock: "",
       category: "",
+      shortDescription: "",
       description: "",
       benefits: "",
       usage: "",
@@ -326,6 +328,7 @@ const AdminProducts = () => {
       originalPrice: product.originalPrice || "",
       stock: product.stock || "",
       category: product.category || "",
+      shortDescription: product.shortDescription || "",
       description: product.description || "",
       benefits: product.benefits || "",
       usage: product.usage || "",
@@ -834,64 +837,50 @@ const AdminProducts = () => {
             </Row>
 
             <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                placeholder="Enter detailed product description"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
               <Form.Label>
-                Product Benefits <span className="text-danger">*</span>
+                Short Description <span className="text-danger">*</span>
               </Form.Label>
               <Form.Control
-                as="textarea"
-                rows={4}
-                placeholder="Enter product benefits (each line will be a bullet point)&#10;Example:&#10;Reduces pain and inflammation&#10;Fast-acting relief&#10;Safe for daily use"
-                value={formData.benefits}
+                type="text"
+                placeholder="Enter brief product summary (max 100 characters)"
+                value={formData.shortDescription}
                 onChange={(e) =>
-                  setFormData({ ...formData, benefits: e.target.value })
+                  setFormData({ ...formData, shortDescription: e.target.value })
                 }
+                maxLength={100}
                 required
               />
               <Form.Text className="text-muted">
-                <i className="bi bi-info-circle me-1"></i>
-                Each new line will be displayed as a separate bullet point
+                Brief summary for product cards and listings
               </Form.Text>
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Usage Instructions</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                placeholder="Enter detailed usage instructions"
-                value={formData.usage}
-                onChange={(e) =>
-                  setFormData({ ...formData, usage: e.target.value })
-                }
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
               <Form.Label>
-                Product Benefits <span className="text-danger">*</span>
+                Detailed Description <span className="text-danger">*</span>
               </Form.Label>
               <Form.Control
                 as="textarea"
                 rows={4}
+                placeholder="Enter comprehensive product description with all details"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                required
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Product Benefits</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
                 placeholder="Enter product benefits (each line will be a bullet point)&#10;Example:&#10;Reduces pain and inflammation&#10;Fast-acting relief&#10;Safe for daily use"
                 value={formData.benefits}
                 onChange={(e) =>
                   setFormData({ ...formData, benefits: e.target.value })
                 }
-                required
               />
               <Form.Text className="text-muted">
                 <i className="bi bi-info-circle me-1"></i>
@@ -1207,7 +1196,12 @@ const AdminProducts = () => {
                         </p>
                       </Col>
                       <Col md={6}>
-                        <h6>Description</h6>
+                        <h6>Short Description</h6>
+                        <p className="text-muted">
+                          {selectedProduct.shortDescription ||
+                            "No short description available"}
+                        </p>
+                        <h6>Detailed Description</h6>
                         <p className="text-muted">
                           {selectedProduct.description ||
                             "No description available"}

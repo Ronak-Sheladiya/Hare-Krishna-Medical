@@ -11,8 +11,10 @@ const sampleProducts = [
     originalPrice: 30.0,
     stock: 150,
     category: "Pain Relief",
+    shortDescription:
+      "Fast-acting pain relief and fever reducer for adults and children over 12 years.",
     description:
-      "Effective pain relief and fever reducer suitable for adults and children over 12 years.",
+      "Effective pain relief and fever reducer suitable for adults and children over 12 years. Gentle on stomach with proven efficacy.",
     benefits:
       "• Fast-acting pain relief\n• Reduces fever effectively\n• Safe for regular use\n• Gentle on stomach",
     usage:
@@ -38,8 +40,10 @@ const sampleProducts = [
     originalPrice: 200.0,
     stock: 85,
     category: "Vitamins",
-    description:
+    shortDescription:
       "Essential vitamin D3 supplement for bone health and immunity support.",
+    description:
+      "High potency vitamin D3 supplement that supports bone and teeth health, boosts immune system, and helps calcium absorption.",
     benefits:
       "• Supports bone and teeth health\n• Boosts immune system\n• Helps calcium absorption\n• Prevents vitamin D deficiency",
     usage: "Take 1 tablet daily with water, preferably after meals.",
@@ -64,9 +68,10 @@ const sampleProducts = [
     originalPrice: 110.0,
     stock: 65,
     category: "Cough & Cold",
-    description: "Natural ayurvedic cough syrup for dry and wet cough relief.",
-    benefits:
-      "• Relieves dry and wet cough\n• Natural ayurvedic formula\n• Soothes throat irritation\n• Safe for all ages",
+    shortDescription:
+      "Natural ayurvedic cough syrup for dry and wet cough relief.",
+    description:
+      "Effective natural ayurvedic formula that relieves both dry and wet cough, soothes throat irritation, and is safe for all ages.",
     usage:
       "Adults: 2 teaspoons 3 times daily. Children: 1 teaspoon 3 times daily.",
     weight: "100ml",
@@ -90,10 +95,10 @@ const sampleProducts = [
     originalPrice: 500.0,
     stock: 25,
     category: "First Aid",
-    description:
+    shortDescription:
       "Complete first aid kit for home and travel use with essential medical supplies.",
-    benefits:
-      "• Complete medical emergency kit\n• Travel-friendly compact size\n• Quality medical supplies\n• Essential for every home",
+    description:
+      "Comprehensive medical emergency kit with quality supplies for home and travel. Travel-friendly compact design with essential medical items.",
     usage: "Keep in easily accessible location. Check expiry dates regularly.",
     weight: "500g",
     images: [
@@ -116,10 +121,10 @@ const sampleProducts = [
     originalPrice: 320.0,
     stock: 45,
     category: "Medical Devices",
-    description:
+    shortDescription:
       "Accurate digital thermometer with fast reading and fever alarm.",
-    benefits:
-      "• Fast 60-second reading\n• High accuracy ±0.1°C\n• Fever alarm function\n• Memory for last reading",
+    description:
+      "High-precision digital thermometer with fast 60-second reading, ±0.1°C accuracy, fever alarm function, and memory for last reading.",
     usage: "Place under tongue, armpit, or rectally. Wait for beep signal.",
     weight: "15g",
     images: [
@@ -142,10 +147,10 @@ const sampleProducts = [
     originalPrice: 380.0,
     stock: 120,
     category: "Supplements",
-    description:
+    shortDescription:
       "Complete multivitamin and mineral supplement for daily health support.",
-    benefits:
-      "• Complete nutrition support\n• Boosts energy levels\n• Supports immune system\n• Natural herbal formula",
+    description:
+      "Comprehensive multivitamin formula with essential minerals for complete nutrition support. Natural herbal formula that boosts energy and supports immune system.",
     usage: "Take 1 capsule daily with water after breakfast.",
     weight: "30 capsules",
     images: [

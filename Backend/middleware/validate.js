@@ -40,28 +40,43 @@ const validateProduct = [
     .trim()
     .isLength({ min: 2, max: 200 })
     .withMessage("Product name must be between 2 and 200 characters"),
+  body("shortDescription")
+    .trim()
+    .isLength({ min: 10, max: 100 })
+    .withMessage("Short description must be between 10 and 100 characters"),
   body("description")
     .trim()
     .isLength({ min: 10, max: 2000 })
     .withMessage("Description must be between 10 and 2000 characters"),
+  body("company").trim().notEmpty().withMessage("Company name is required"),
   body("price")
     .isFloat({ min: 0 })
     .withMessage("Price must be a positive number"),
-  body("mrp").isFloat({ min: 0 }).withMessage("MRP must be a positive number"),
+  body("originalPrice")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage("Original price must be a positive number"),
   body("category")
     .isIn([
-      "Medicine",
-      "Healthcare",
-      "Personal Care",
+      "Pain Relief",
+      "Vitamins",
+      "Cough & Cold",
+      "First Aid",
+      "Medical Devices",
       "Supplements",
-      "Baby Care",
-      "Ayurvedic",
+      "Antibiotics",
+      "Digestive Health",
+      "Heart & Blood Pressure",
+      "Diabetes Care",
     ])
     .withMessage("Invalid category"),
-  body("brand").trim().notEmpty().withMessage("Brand is required"),
   body("stock")
     .isInt({ min: 0 })
     .withMessage("Stock must be a non-negative integer"),
+  body("images")
+    .optional()
+    .isArray({ min: 1, max: 5 })
+    .withMessage("Product must have between 1 and 5 images"),
   handleValidationErrors,
 ];
 
