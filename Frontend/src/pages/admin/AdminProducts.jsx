@@ -319,6 +319,7 @@ const AdminProducts = () => {
       category: product.category || "",
       shortDescription: product.shortDescription || "",
       description: product.description || "",
+      benefits: product.benefits || "",
       usage: product.usage || "",
       weight: product.weight || "",
       images: product.images || [],
