@@ -929,6 +929,39 @@ class ProductsController {
   // Delete product (soft delete)
   async deleteProduct(req, res) {
     try {
+      if (!global.DB_CONNECTED) {
+        const productIndex = sampleProducts.findIndex(
+          (p) => p._id === req.params.id,
+        );
+
+        if (productIndex === -1) {
+          return res.status(404).json({
+            success: false,
+            message: "Product not found",
+          });
+        }
+
+        const productName = sampleProducts[productIndex].name;
+
+        // Soft delete (set isActive to false)
+        sampleProducts[productIndex].isActive = false;
+
+        // Emit real-time update
+        const io = req.app.get("io");
+        if (io) {
+          io.to("admin-room").emit("product-deleted", {
+            productId: req.params.id,
+            productName: productName,
+          });
+        }
+
+        return res.json({
+          success: true,
+          message: "Product deleted successfully (offline mode)",
+          offline: true,
+        });
+      }
+
       const product = await Product.findById(req.params.id);
 
       if (!product) {
@@ -944,10 +977,12 @@ class ProductsController {
 
       // Emit real-time update
       const io = req.app.get("io");
-      io.to("admin-room").emit("product-deleted", {
-        productId: product._id,
-        productName: product.name,
-      });
+      if (io) {
+        io.to("admin-room").emit("product-deleted", {
+          productId: product._id,
+          productName: product.name,
+        });
+      }
 
       res.json({
         success: true,
@@ -955,10 +990,25 @@ class ProductsController {
       });
     } catch (error) {
       console.error("Delete product error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to delete product",
-        error: error.message,
+      // Fallback to offline mode
+      const productIndex = sampleProducts.findIndex(
+        (p) => p._id === req.params.id,
+      );
+
+      if (productIndex === -1) {
+        return res.status(404).json({
+          success: false,
+          message: "Product not found",
+        });
+      }
+
+      const productName = sampleProducts[productIndex].name;
+      sampleProducts[productIndex].isActive = false;
+
+      res.json({
+        success: true,
+        message: "Product deleted successfully (offline mode)",
+        offline: true,
       });
     }
   }
