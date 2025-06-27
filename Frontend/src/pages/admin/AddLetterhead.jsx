@@ -559,16 +559,20 @@ const AddLetterhead = () => {
         throw new Error("Letterhead content not found");
       }
 
-      // Set optimal styles for capturing (from invoice system)
+      // Set optimal styles for capturing FULL PAGE
       const originalDisplay = letterheadElement.style.display;
       const originalTransform = letterheadElement.style.transform;
       const originalWidth = letterheadElement.style.width;
       const originalHeight = letterheadElement.style.height;
+      const originalMargin = letterheadElement.style.margin;
+      const originalPadding = letterheadElement.style.padding;
 
       letterheadElement.style.display = "block";
-      letterheadElement.style.transform = "none";
-      letterheadElement.style.width = "210mm";
-      letterheadElement.style.height = "auto";
+      letterheadElement.style.transform = "scale(1)";
+      letterheadElement.style.width = "794px";
+      letterheadElement.style.height = "1123px";
+      letterheadElement.style.margin = "0";
+      letterheadElement.style.padding = "0";
 
       // Shorter wait time for style application
       await new Promise((resolve) => setTimeout(resolve, 50));
