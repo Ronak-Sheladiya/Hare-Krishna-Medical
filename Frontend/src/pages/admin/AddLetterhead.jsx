@@ -1232,71 +1232,7 @@ const AddLetterhead = () => {
               </small>
             </div>
 
-            <div className="d-flex gap-2 align-items-center">
-              {/* Professional Print Button */}
-              <Button
-                variant="success"
-                onClick={handlePrint}
-                disabled={printLoading || downloadLoading || pdfDownloadLoading}
-                style={{
-                  borderRadius: "10px",
-                  padding: "12px 20px",
-                  fontWeight: "600",
-                  border: "none",
-                  background: "linear-gradient(135deg, #28a745, #20c997)",
-                  boxShadow: "0 4px 12px rgba(40, 167, 69, 0.25)",
-                  transition: "all 0.2s ease",
-                  minWidth: "130px",
-                }}
-                title="Print with professional formatting"
-              >
-                {printLoading ? (
-                  <>
-                    <Spinner size="sm" className="me-2" />
-                    Printing...
-                  </>
-                ) : (
-                  <>
-                    <i className="bi bi-printer-fill me-2"></i>
-                    Print
-                  </>
-                )}
-              </Button>
 
-              {/* Professional PDF Download Button */}
-              <Button
-                variant="warning"
-                onClick={handlePDFDownload}
-                disabled={pdfDownloadLoading || downloadLoading || printLoading}
-                style={{
-                  borderRadius: "10px",
-                  padding: "12px 20px",
-                  fontWeight: "600",
-                  border: "none",
-                  background: "linear-gradient(135deg, #fd7e14, #e63946)",
-                  color: "white",
-                  boxShadow: "0 4px 12px rgba(253, 126, 20, 0.25)",
-                  transition: "all 0.2s ease",
-                  minWidth: "130px",
-                }}
-                title="Download high-quality PDF"
-              >
-                {pdfDownloadLoading ? (
-                  <>
-                    <Spinner size="sm" className="me-2" />
-                    PDF...
-                  </>
-                ) : (
-                  <>
-                    <i className="bi bi-file-earmark-pdf-fill me-2"></i>
-                    PDF
-                  </>
-                )}
-              </Button>
-
-              {/* HTML Download Button */}
-              <Button
-                variant="info"
                 onClick={handleDownload}
                 disabled={downloadLoading || printLoading || pdfDownloadLoading}
                 style={{
