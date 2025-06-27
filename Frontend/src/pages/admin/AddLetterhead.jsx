@@ -13,6 +13,9 @@ import {
   ButtonGroup,
   Dropdown,
 } from "react-bootstrap";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import html2pdf from "html2pdf.js";
 import { api, safeApiCall } from "../../utils/apiClient";
 import {
   PageHeroSection,
@@ -205,6 +208,235 @@ const AddLetterhead = () => {
     }
   };
 
+  // Professional PDF generation using html2canvas + jsPDF
+  const generateLetterheadPDF = async () => {
+    setPdfDownloadLoading(true);
+    setError(null);
+
+    try {
+      // Create a simple, clean container for PDF generation
+      const pdfContainer = document.createElement("div");
+      pdfContainer.style.cssText = `
+        position: absolute;
+        top: -10000px;
+        left: 0;
+        width: 794px;
+        height: 1123px;
+        background: white;
+        font-family: Arial, sans-serif;
+        box-sizing: border-box;
+        padding: 15px;
+        overflow: visible;
+      `;
+
+      // Create simplified content for PDF
+      const currentDate = new Date().toLocaleDateString("en-IN");
+      const currentLetterheadId = letterheadId || generateTempLetterheadId();
+
+      pdfContainer.innerHTML = `
+        <div style="width: 764px; height: 1093px; background: white; font-family: Arial, sans-serif; position: relative;">
+          <!-- Header Section -->
+          <div style="background: #e63946; color: white; padding: 15px; border-radius: 6px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                <div style="background: white; border-radius: 50%; padding: 10px; margin-right: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                  <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
+                       alt="Hare Krishna Medical Logo"
+                       style="height: 45px; width: 45px; object-fit: contain; border-radius: 50%;"
+                       crossorigin="anonymous" />
+                </div>
+                <div>
+                  <h1 style="font-size: 24px; font-weight: 900; margin: 0; line-height: 1.1; font-family: Georgia, serif;">HARE KRISHNA MEDICAL</h1>
+                  <p style="font-size: 12px; margin: 4px 0 0 0; opacity: 0.95; font-weight: 500;">🏥 Your Trusted Health Partner Since 2020</p>
+                </div>
+              </div>
+              <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 6px; font-size: 10px; line-height: 1.4;">
+                <div style="margin-bottom: 4px;">📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat</div>
+                <div style="margin-bottom: 4px;">📞 +91 76989 13354 | +91 91060 18508</div>
+                <div>✉️ hkmedicalamroli@gmail.com</div>
+              </div>
+            </div>
+            <div style="text-align: center; min-width: 110px; margin-left: 20px;">
+              <div style="background: white; padding: 10px; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.15);">
+                ${
+                  qrCode
+                    ? `<img src="${qrCode}" alt="Verification QR Code" style="width: 85px; height: 85px; border: 2px solid #e63946; border-radius: 6px; display: block;" crossorigin="anonymous" />`
+                    : `<div style="width: 85px; height: 85px; border: 2px dashed #e63946; border-radius: 6px; background: #f8f9fa; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #e63946;">
+                     <div style="font-size: 14px; margin-bottom: 4px;">📱</div>
+                     <div style="font-size: 9px; font-weight: bold; text-align: center; line-height: 1.1;">QR CODE<br>VERIFICATION</div>
+                   </div>`
+                }
+                <div style="margin-top: 6px; color: #333; font-size: 9px; font-weight: bold;">📱 SCAN TO VERIFY</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reference and Date -->
+          <div style="text-align: left; margin: 0 0 16px auto; font-size: 11px; color: #666; width: fit-content;">
+            <div style="margin-bottom: 3px; font-weight: 600;">Ref: ${currentLetterheadId}</div>
+            <div style="font-weight: 600;">Date: ${currentDate}</div>
+          </div>
+
+          <!-- Document Title -->
+          <div style="text-align: center; margin-bottom: 20px;">
+            <h2 style="color: #e63946; font-size: 20px; font-weight: bold; margin: 0; text-transform: uppercase; letter-spacing: 1.2px; border-bottom: 3px solid #e63946; display: inline-block; padding-bottom: 6px; font-family: Georgia, serif;">
+              ${formData.title}
+            </h2>
+          </div>
+
+          <!-- Content Section -->
+          <div style="font-size: 13px; line-height: 1.5; text-align: justify; color: #333; font-family: Arial, sans-serif; margin-bottom: 60px; min-height: 300px;">
+            ${formData.content}
+          </div>
+
+          <!-- Footer Section -->
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; border-top: 2px solid #e63946; padding-top: 10px; background: white;">
+            <div style="text-align: center;">
+              <p style="font-size: 11px; color: #666; margin-bottom: 5px; font-weight: 600;">
+                ✅ This letterhead has been verified and is authentic
+              </p>
+              <p style="font-size: 10px; color: #999; margin-bottom: 0; line-height: 1.3;">
+                Verified on ${new Date().toLocaleString("en-IN")} | For queries: +91 76989 13354 | hkmedicalamroli@gmail.com
+              </p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Append to body for rendering
+      document.body.appendChild(pdfContainer);
+
+      // Wait for rendering and images to load
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Ensure all images are loaded
+      const images = pdfContainer.querySelectorAll("img");
+      const imageLoadPromises = Array.from(images).map((img) => {
+        return new Promise((resolve) => {
+          if (img.complete && img.naturalHeight !== 0) {
+            resolve();
+          } else {
+            img.onload = resolve;
+            img.onerror = resolve; // Continue even if image fails to load
+            // Set a timeout to prevent hanging
+            setTimeout(resolve, 3000);
+          }
+        });
+      });
+
+      if (imageLoadPromises.length > 0) {
+        await Promise.all(imageLoadPromises);
+        // Additional wait after images load
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+
+      // Capture with html2canvas
+      const canvas = await html2canvas(pdfContainer, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+        width: 794,
+        height: 1123,
+        scrollX: 0,
+        scrollY: 0,
+        logging: false,
+      });
+
+      // Create PDF with jsPDF
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "pt",
+        format: "a4",
+      });
+
+      // A4 dimensions in points: 595.28 x 841.89
+      // Add the image with 15px margins (converted to points: 15 * 0.75 = 11.25pt)
+      const imgWidth = 595.28 - 11.25 * 2; // A4 width minus margins
+      const imgHeight = 841.89 - 11.25 * 2; // A4 height minus margins
+
+      pdf.addImage(imgData, "JPEG", 11.25, 11.25, imgWidth, imgHeight);
+
+      // Save the PDF
+      pdf.save(`Letterhead-${letterheadId || "Draft"}.pdf`);
+
+      // Cleanup
+      document.body.removeChild(pdfContainer);
+    } catch (error) {
+      console.error("PDF Generation Error:", error);
+      setError("Failed to generate PDF. Please try again.");
+    } finally {
+      setPdfDownloadLoading(false);
+    }
+  };
+
+  // Professional print functionality
+  const handlePrint = () => {
+    setPrintLoading(true);
+
+    try {
+      const printContent = createLetterheadTemplate();
+      const printWindow = window.open("", "_blank", "width=794,height=1123");
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Print Letterhead - ${formData.title}</title>
+          <style>
+            @page {
+              size: A4;
+              margin: 15px; /* 15px margins for print */
+            }
+            * {
+              box-sizing: border-box;
+            }
+            body {
+              margin: 0;
+              padding: 0;
+              font-family: Arial, sans-serif;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            @media print {
+              body {
+                margin: 0 !important;
+                padding: 0 !important;
+              }
+              #letterhead-print-content {
+                page-break-inside: avoid;
+                transform: none !important;
+                width: 100% !important;
+                height: 100% !important;
+                margin: 0 !important;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          ${printContent}
+          <script>
+            window.onload = function() {
+              setTimeout(() => {
+                window.print();
+                window.close();
+              }, 100);
+            };
+          </script>
+        </body>
+        </html>
+      `);
+
+      printWindow.document.close();
+    } catch (error) {
+      console.error("Print Error:", error);
+      setError("Failed to open print dialog. Please try again.");
+    } finally {
+      setPrintLoading(false);
+    }
+  };
+
   const createLetterheadTemplate = () => {
     const currentDate = new Date().toLocaleDateString("en-IN");
     const currentLetterheadId = letterheadId || generateTempLetterheadId();
@@ -212,12 +444,12 @@ const AddLetterhead = () => {
     return `
       <div id="letterhead-print-content" style="
         font-family: Arial, sans-serif;
-        width: 794px;
-        height: 1123px;
+        width: 764px;
+        height: 1093px;
         background: white;
         position: relative;
-        margin: 0 !important;
-        padding: 0 !important;
+        margin: 15px;
+        padding: 0;
         box-sizing: border-box;
         font-size: 13px;
         line-height: 1.5;
@@ -227,13 +459,14 @@ const AddLetterhead = () => {
         overflow: hidden;
         transform: scale(1) !important;
       ">
-        <!-- Page Content Container using full page -->
+        <!-- Page Content Container with 15px safe margins -->
         <div style="
-          padding: 8px;
-          height: 100%;
+          padding: 15px;
+          height: calc(100% - 30px);
           display: flex;
           flex-direction: column;
           box-sizing: border-box;
+          min-height: 1063px;
         ">
           <!-- Header Section -->
           <div style="
@@ -392,6 +625,11 @@ const AddLetterhead = () => {
             margin-top: auto;
             background: white;
             flex-shrink: 0;
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            right: 15px;
+            width: calc(100% - 30px);
           ">
           <div style="text-align: center;">
             <p style="
@@ -417,272 +655,6 @@ const AddLetterhead = () => {
     `;
   };
 
-  // PDF GENERATION FUNCTIONALITY
-  const generateLetterheadPDF = async () => {
-    if (!formData.title || !formData.content) {
-      setError("Please fill in both title and content before generating PDF.");
-      return null;
-    }
-
-    try {
-      // Ensure QR code is generated
-      if (!qrCode) {
-        const tempId = letterheadId || generateTempLetterheadId();
-        setLetterheadId(tempId);
-        const generatedQR = await generatePreviewQRCode(tempId);
-        if (generatedQR) {
-          setQrCode(generatedQR);
-        }
-      }
-
-      // Wait for QR code to render
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      const letterheadElement = document.getElementById(
-        "letterhead-print-content",
-      );
-      if (!letterheadElement) {
-        throw new Error("Letterhead content not found");
-      }
-
-      // Force element dimensions for PDF generation
-      letterheadElement.style.width = "794px";
-      letterheadElement.style.height = "1123px";
-      letterheadElement.style.transform = "scale(1)";
-
-      const result = await PDFService.generatePDFFromElement(
-        letterheadElement,
-        {
-          filename: `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead_${new Date().toISOString().split("T")[0]}.pdf`,
-          returnBlob: true,
-          quality: 0.95,
-          scale: 2.5,
-          margin: 0, // Full page usage
-          backgroundColor: "#ffffff",
-        },
-      );
-
-      if (result.success) {
-        const pdfBlobUrl = URL.createObjectURL(result.blob);
-        setPdfUrl(pdfBlobUrl);
-        return pdfBlobUrl;
-      } else {
-        throw new Error(result.error);
-      }
-    } catch (error) {
-      console.error("PDF generation failed:", error);
-      setError(`PDF generation failed: ${error.message}`);
-      return null;
-    }
-  };
-
-  // PDF DOWNLOAD FUNCTIONALITY
-  const handlePDFDownload = async () => {
-    try {
-      setPdfDownloadLoading(true);
-      setError(null);
-
-      const pdfBlobUrl = await generateLetterheadPDF();
-      if (pdfBlobUrl) {
-        // Create download link
-        const a = document.createElement("a");
-        a.href = pdfBlobUrl;
-        a.download = `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead_${new Date().toISOString().split("T")[0]}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        setSuccess("PDF downloaded successfully!");
-        setTimeout(() => setSuccess(null), 3000);
-      }
-    } catch (error) {
-      console.error("PDF download failed:", error);
-      setError(`PDF download failed: ${error.message}`);
-    } finally {
-      setPdfDownloadLoading(false);
-    }
-  };
-
-  // DIRECT HTML PRINT FUNCTIONALITY
-  const handlePrint = () => {
-    if (!formData.title || !formData.content) {
-      setError("Please fill in both title and content before printing.");
-      return;
-    }
-
-    try {
-      setPrintLoading(true);
-      setError(null);
-
-      // Ensure QR code is generated
-      if (!qrCode) {
-        const tempId = letterheadId || generateTempLetterheadId();
-        setLetterheadId(tempId);
-        generatePreviewQRCode(tempId).then((generatedQR) => {
-          if (generatedQR) {
-            setQrCode(generatedQR);
-          }
-        });
-      }
-
-      const letterheadElement = document.getElementById(
-        "letterhead-print-content",
-      );
-      if (!letterheadElement) {
-        throw new Error("Letterhead content not found");
-      }
-
-      // Create print window with HTML content
-      const printWindow = window.open("", "_blank");
-      const htmlContent = letterheadElement.outerHTML;
-
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>${formData.title} - Letterhead</title>
-            <style>
-              @page {
-                size: A4;
-                margin: 0;
-              }
-              @media print {
-                body {
-                  margin: 0 !important;
-                  padding: 0 !important;
-                  color: black !important;
-                  background: white !important;
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                }
-                .no-print {
-                  display: none !important;
-                }
-              }
-              body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-                background: white;
-              }
-            </style>
-          </head>
-          <body>
-            ${htmlContent}
-            <script>
-              window.onload = function() {
-                window.print();
-                window.onafterprint = function() {
-                  window.close();
-                };
-              };
-            </script>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-
-      setSuccess("Print dialog opened successfully!");
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (error) {
-      console.error("Print failed:", error);
-      setError(`Print failed: ${error.message}`);
-    } finally {
-      setPrintLoading(false);
-    }
-  };
-
-  // DIRECT HTML DOWNLOAD FUNCTIONALITY
-  const handleDownload = async () => {
-    if (!formData.title || !formData.content) {
-      setError("Please fill in both title and content before downloading.");
-      return;
-    }
-
-    try {
-      setDownloadLoading(true);
-      setError(null);
-
-      // Ensure QR code is generated
-      if (!qrCode) {
-        const tempId = letterheadId || generateTempLetterheadId();
-        setLetterheadId(tempId);
-        const generatedQR = await generatePreviewQRCode(tempId);
-        if (generatedQR) {
-          setQrCode(generatedQR);
-        }
-      }
-
-      // Wait for QR code to render
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      const letterheadElement = document.getElementById(
-        "letterhead-print-content",
-      );
-      if (!letterheadElement) {
-        throw new Error("Letterhead content not found");
-      }
-
-      // Create complete HTML document
-      const htmlContent = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>${formData.title} - Letterhead</title>
-  <style>
-    @page {
-      size: A4;
-      margin: 0;
-    }
-    @media print {
-      body {
-        margin: 0 !important;
-        padding: 0 !important;
-        color: black !important;
-        background: white !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-      .no-print {
-        display: none !important;
-      }
-    }
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: white;
-      color: black;
-    }
-  </style>
-</head>
-<body>
-  ${letterheadElement.outerHTML}
-</body>
-</html>`;
-
-      // Create and download HTML file
-      const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead_${new Date().toISOString().split("T")[0]}.html`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      setSuccess("HTML file downloaded successfully!");
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (error) {
-      console.error("Download failed:", error);
-      setError(`Download failed: ${error.message}`);
-    } finally {
-      setDownloadLoading(false);
-    }
-  };
-
   return (
     <Container fluid style={{ padding: "10px" }}>
       <PageHeroSection
@@ -698,7 +670,7 @@ const AddLetterhead = () => {
       <Container fluid style={{ marginTop: "10px", padding: "20px" }}>
         <Row className="g-3" style={{ minHeight: "calc(100vh - 150px)" }}>
           {/* Form Section */}
-          <Col lg={4} md={5}>
+          <Col lg={6} md={6}>
             <Card
               className="shadow-lg"
               style={{
@@ -971,23 +943,32 @@ const AddLetterhead = () => {
                     </Form.Text>
                   </Form.Group>
 
-                  {/* Action Buttons */}
-                  <div className="d-flex gap-3 justify-content-between">
-                    <div>
+                  {/* Form Buttons */}
+                  <div className="d-flex gap-3 flex-wrap">
+                    <div className="flex-grow-1">
                       <Button
-                        type="button"
                         variant="outline-secondary"
                         onClick={() => navigate("/admin/letterheads")}
                         disabled={loading}
+                        className="me-3"
                       >
                         <i className="bi bi-arrow-left me-2"></i>
                         Back to Letterheads
                       </Button>
                     </div>
-
-                    <div className="d-flex gap-2 flex-wrap">
-                      <ThemeButton
+                    <div>
+                      <Button
+                        variant="outline-primary"
+                        onClick={() => setShowPreview(true)}
+                        disabled={!formData.title || !formData.content}
+                        className="me-3"
+                      >
+                        <i className="bi bi-eye me-2"></i>
+                        Preview
+                      </Button>
+                      <Button
                         type="submit"
+                        variant="success"
                         disabled={
                           loading || !formData.title || !formData.content
                         }
@@ -1003,7 +984,7 @@ const AddLetterhead = () => {
                             Create Letterhead
                           </>
                         )}
-                      </ThemeButton>
+                      </Button>
                     </div>
                   </div>
                 </Form>
@@ -1011,85 +992,124 @@ const AddLetterhead = () => {
             </Card>
           </Col>
 
-          {/* Live Preview Section */}
-          <Col lg={8} md={7}>
-            <div
+          {/* Preview Column */}
+          <Col lg={6}>
+            <Card
               style={{
                 height: "calc(100vh - 180px)",
                 display: "flex",
                 flexDirection: "column",
-                background: "white",
-                borderRadius: "12px",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                overflow: "hidden",
+                background: "linear-gradient(135deg, #f8f9fa, #ffffff)",
+                border: "1px solid #e0e6ed",
+                borderRadius: "20px",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
               }}
             >
-              {/* Preview Header */}
-              <div
+              <Card.Header
                 style={{
-                  background: "linear-gradient(135deg, #28a745, #20c997)",
+                  background: "linear-gradient(135deg, #e63946, #dc3545)",
                   color: "white",
-                  padding: "15px 20px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  flexShrink: 0,
+                  borderRadius: "20px 20px 0 0",
+                  padding: "20px",
+                  border: "none",
                 }}
               >
-                <div>
-                  <h5 className="mb-0" style={{ fontWeight: "600" }}>
-                    <i className="bi bi-eye me-2"></i>
-                    A4 Letterhead Preview
-                  </h5>
-                  <small style={{ opacity: "0.9" }}>
-                    Real-time preview with professional A4 layout
-                  </small>
-                </div>
-                <div className="d-flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline-light"
-                    onClick={handleRefreshPreview}
-                    disabled={!formData.title || !formData.content}
-                    style={{ borderRadius: "8px" }}
-                  >
-                    <i className="bi bi-arrow-clockwise me-1"></i>
-                    Refresh
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline-light"
-                    onClick={() => setShowPreview(true)}
-                    disabled={!formData.title || !formData.content}
-                    style={{ borderRadius: "8px" }}
-                  >
-                    <i className="bi bi-arrows-fullscreen me-1"></i>
-                    Full View
-                  </Button>
-                </div>
-              </div>
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h5 className="mb-0 d-flex align-items-center">
+                      <i className="bi bi-eye me-2"></i>
+                      A4 Letterhead Preview
+                    </h5>
+                    <small style={{ opacity: "0.9" }}>
+                      Real-time preview with A4 dimensions (210mm × 297mm)
+                    </small>
+                  </div>
 
-              {/* Preview Content */}
-              <div
+                  {/* Professional Action Buttons */}
+                  {formData.title && formData.content && (
+                    <div className="d-flex gap-2">
+                      <Button
+                        variant="light"
+                        size="sm"
+                        onClick={handlePrint}
+                        disabled={printLoading}
+                        style={{
+                          background: "rgba(255,255,255,0.9)",
+                          border: "none",
+                          borderRadius: "8px",
+                          fontWeight: "600",
+                          padding: "8px 16px",
+                        }}
+                      >
+                        {printLoading ? (
+                          <Spinner size="sm" />
+                        ) : (
+                          <>
+                            <i className="bi bi-printer me-2"></i>
+                            Print
+                          </>
+                        )}
+                      </Button>
+
+                      <Button
+                        variant="light"
+                        size="sm"
+                        onClick={generateLetterheadPDF}
+                        disabled={pdfDownloadLoading}
+                        style={{
+                          background: "rgba(255,255,255,0.9)",
+                          border: "none",
+                          borderRadius: "8px",
+                          fontWeight: "600",
+                          padding: "8px 16px",
+                        }}
+                      >
+                        {pdfDownloadLoading ? (
+                          <Spinner size="sm" />
+                        ) : (
+                          <>
+                            <i className="bi bi-filetype-pdf me-2"></i>
+                            PDF
+                          </>
+                        )}
+                      </Button>
+
+                      <Button
+                        variant="light"
+                        size="sm"
+                        onClick={() => setShowPreview(true)}
+                        style={{
+                          background: "rgba(255,255,255,0.9)",
+                          border: "none",
+                          borderRadius: "8px",
+                          fontWeight: "600",
+                          padding: "8px 16px",
+                        }}
+                      >
+                        <i className="bi bi-arrows-fullscreen me-2"></i>
+                        Full
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </Card.Header>
+
+              <Card.Body
                 style={{
-                  flex: 1,
-                  background: "#f1f3f5",
                   display: "flex",
-                  alignItems: "center",
                   justifyContent: "center",
+                  alignItems: "center",
+                  overflow: "auto",
+                  flexGrow: 1,
+                  background: "#f8f9fa",
                   padding: "20px",
-                  overflow: "hidden",
                 }}
               >
                 {!formData.title || !formData.content ? (
                   <div
-                    className="d-flex flex-column align-items-center justify-content-center text-muted"
                     style={{
-                      background: "white",
-                      borderRadius: "12px",
-                      border: "2px dashed #dee2e6",
-                      padding: "60px 40px",
                       textAlign: "center",
+                      color: "#6c757d",
                       maxWidth: "400px",
                     }}
                   >
@@ -1104,6 +1124,7 @@ const AddLetterhead = () => {
                         justifyContent: "center",
                         marginBottom: "20px",
                         color: "white",
+                        margin: "0 auto 20px",
                       }}
                     >
                       <i
@@ -1116,244 +1137,77 @@ const AddLetterhead = () => {
                     </h5>
                     <p style={{ marginBottom: "0", color: "#6c757d" }}>
                       Enter your letterhead title and content to see a perfect
-                      A4 preview
+                      A4 preview with print and PDF options
                     </p>
                   </div>
                 ) : (
                   <div
                     style={{
-                      width: "794px",
-                      height: "1123px",
+                      width: "250px", // Reduced width for smaller column
+                      height: "353px", // Proportional height
                       backgroundColor: "white",
                       boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
                       borderRadius: "4px",
                       overflow: "hidden",
-                      transform: "scale(0.45)",
-                      transformOrigin: "center center",
                       border: "1px solid #ddd",
+                      position: "relative",
                     }}
                   >
                     <div
-                      style={{ width: "100%", height: "100%" }}
+                      style={{
+                        width: "794px",
+                        height: "1123px",
+                        transform: "scale(0.315)", // Adjusted scale for smaller preview
+                        transformOrigin: "top left",
+                        position: "absolute",
+                        top: "0",
+                        left: "0",
+                      }}
                       dangerouslySetInnerHTML={{
                         __html: createLetterheadTemplate(),
                       }}
                     />
                   </div>
                 )}
-              </div>
+              </Card.Body>
 
-              {/* Action Buttons - Only show when content exists */}
+              {/* Professional Features Info */}
               {formData.title && formData.content && (
                 <div
                   style={{
-                    padding: "20px",
-                    background: "white",
-                    borderTop: "1px solid #e9ecef",
-                    flexShrink: 0,
+                    padding: "15px 20px",
+                    background: "linear-gradient(135deg, #f8f9fa, #ffffff)",
+                    borderTop: "1px solid #e0e6ed",
+                    borderRadius: "0 0 20px 20px",
                   }}
                 >
-                  <div className="d-flex gap-3 justify-content-center flex-wrap">
-                    <Button
-                      variant="success"
-                      onClick={handlePrint}
-                      disabled={
-                        printLoading || downloadLoading || pdfDownloadLoading
-                      }
-                      style={{
-                        borderRadius: "10px",
-                        fontWeight: "600",
-                        padding: "12px 24px",
-                        border: "none",
-                        background: "linear-gradient(135deg, #28a745, #20c997)",
-                        minWidth: "140px",
-                        boxShadow: "0 4px 12px rgba(40, 167, 69, 0.3)",
-                        transition: "all 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        if (
-                          !printLoading &&
-                          !downloadLoading &&
-                          !pdfDownloadLoading
-                        ) {
-                          e.target.style.transform = "translateY(-1px)";
-                          e.target.style.boxShadow =
-                            "0 6px 16px rgba(40, 167, 69, 0.4)";
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (
-                          !printLoading &&
-                          !downloadLoading &&
-                          !pdfDownloadLoading
-                        ) {
-                          e.target.style.transform = "translateY(0)";
-                          e.target.style.boxShadow =
-                            "0 4px 12px rgba(40, 167, 69, 0.3)";
-                        }
-                      }}
-                    >
-                      {printLoading ? (
-                        <>
-                          <Spinner size="sm" className="me-2" />
-                          Printing...
-                        </>
-                      ) : (
-                        <>
-                          <i className="bi bi-printer me-2"></i>
-                          Print HTML
-                        </>
-                      )}
-                    </Button>
-
-                    <Button
-                      variant="warning"
-                      onClick={handlePDFDownload}
-                      disabled={
-                        pdfDownloadLoading || downloadLoading || printLoading
-                      }
-                      style={{
-                        borderRadius: "10px",
-                        fontWeight: "600",
-                        padding: "12px 24px",
-                        border: "none",
-                        background: "linear-gradient(135deg, #fd7e14, #f63d3d)",
-                        color: "white",
-                        minWidth: "140px",
-                        boxShadow: "0 4px 12px rgba(253, 126, 20, 0.3)",
-                        transition: "all 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        if (
-                          !pdfDownloadLoading &&
-                          !downloadLoading &&
-                          !printLoading
-                        ) {
-                          e.target.style.transform = "translateY(-1px)";
-                          e.target.style.boxShadow =
-                            "0 6px 16px rgba(253, 126, 20, 0.4)";
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (
-                          !pdfDownloadLoading &&
-                          !downloadLoading &&
-                          !printLoading
-                        ) {
-                          e.target.style.transform = "translateY(0)";
-                          e.target.style.boxShadow =
-                            "0 4px 12px rgba(253, 126, 20, 0.3)";
-                        }
-                      }}
-                    >
-                      {pdfDownloadLoading ? (
-                        <>
-                          <Spinner size="sm" className="me-2" />
-                          Generating PDF...
-                        </>
-                      ) : (
-                        <>
-                          <i className="bi bi-file-earmark-pdf me-2"></i>
-                          Download PDF
-                        </>
-                      )}
-                    </Button>
-
-                    <Button
-                      variant="primary"
-                      onClick={handleDownload}
-                      disabled={
-                        downloadLoading || printLoading || pdfDownloadLoading
-                      }
-                      style={{
-                        borderRadius: "10px",
-                        fontWeight: "600",
-                        padding: "12px 24px",
-                        border: "none",
-                        background: "linear-gradient(135deg, #e63946, #dc3545)",
-                        minWidth: "140px",
-                        boxShadow: "0 4px 12px rgba(230, 57, 70, 0.3)",
-                        transition: "all 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        if (
-                          !downloadLoading &&
-                          !printLoading &&
-                          !pdfDownloadLoading
-                        ) {
-                          e.target.style.transform = "translateY(-1px)";
-                          e.target.style.boxShadow =
-                            "0 6px 16px rgba(230, 57, 70, 0.4)";
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (
-                          !downloadLoading &&
-                          !printLoading &&
-                          !pdfDownloadLoading
-                        ) {
-                          e.target.style.transform = "translateY(0)";
-                          e.target.style.boxShadow =
-                            "0 4px 12px rgba(230, 57, 70, 0.3)";
-                        }
-                      }}
-                    >
-                      {downloadLoading ? (
-                        <>
-                          <Spinner size="sm" className="me-2" />
-                          Downloading...
-                        </>
-                      ) : (
-                        <>
-                          <i className="bi bi-download me-2"></i>
-                          Download HTML
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                  <div className="text-center mt-3">
-                    <small className="text-success d-flex align-items-center justify-content-center gap-1">
-                      <i className="bi bi-shield-check text-success"></i>
-                      <span>
-                        Professional A4 letterhead with QR verification ready
-                        for official use
-                      </span>
-                    </small>
-                  </div>
-
-                  {/* Additional Info */}
-                  <div className="text-center mt-2">
-                    <div className="d-flex justify-content-center gap-3 flex-wrap">
-                      <small className="text-muted d-flex align-items-center gap-1">
-                        <i className="bi bi-file-earmark-pdf text-warning"></i>
-                        <span>PDF Available</span>
+                  <div className="d-flex justify-content-between align-items-center text-muted">
+                    <div className="d-flex gap-4">
+                      <small>
+                        <i className="bi bi-check-circle text-success me-1"></i>
+                        A4 Format Ready
                       </small>
-                      <small className="text-muted d-flex align-items-center gap-1">
-                        <i className="bi bi-file-earmark-code text-primary"></i>
-                        <span>HTML Format</span>
+                      <small>
+                        <i className="bi bi-qr-code text-primary me-1"></i>
+                        QR Verification
                       </small>
-                      <small className="text-muted d-flex align-items-center gap-1">
-                        <i
-                          className={`bi ${qrCode ? "bi-qr-code text-success" : "bi-qr-code text-primary"}`}
-                        ></i>
-                        <span>
-                          {qrCode ? "QR Generated" : "QR Code Included"}
-                        </span>
-                      </small>
-                      <small className="text-muted d-flex align-items-center gap-1">
-                        <i className="bi bi-printer text-success"></i>
-                        <span>Print Ready</span>
+                      <small>
+                        <i className="bi bi-printer text-info me-1"></i>
+                        Print Optimized
                       </small>
                     </div>
+                    <small>
+                      ID: <code>{letterheadId || "Not Generated"}</code>
+                    </small>
                   </div>
                 </div>
               )}
-            </div>
+            </Card>
           </Col>
         </Row>
       </Container>
 
-      {/* A4 Preview Modal - Not Fullscreen */}
+      {/* A4 Preview Modal */}
       <Modal
         show={showPreview}
         onHide={() => setShowPreview(false)}
@@ -1382,7 +1236,6 @@ const AddLetterhead = () => {
             alignItems: "flex-start",
           }}
         >
-          {/* A4 Size Container */}
           <div
             style={{
               width: "210mm",
@@ -1400,120 +1253,78 @@ const AddLetterhead = () => {
         <Modal.Footer
           style={{
             padding: "20px",
-            background: "#f8f9fa",
+            background: "linear-gradient(135deg, #f8f9fa, #ffffff)",
             borderTop: "1px solid #dee2e6",
             borderRadius: "0 0 0.5rem 0.5rem",
           }}
         >
-          <div className="d-flex gap-2 w-100 justify-content-between align-items-center flex-wrap">
-            <div>
+          <div className="d-flex gap-3 w-100 justify-content-between align-items-center flex-wrap">
+            <div className="d-flex align-items-center gap-2">
               <Button
                 variant="outline-secondary"
                 onClick={() => setShowPreview(false)}
                 style={{
-                  borderRadius: "8px",
-                  padding: "10px 20px",
+                  borderRadius: "10px",
+                  padding: "12px 20px",
                   fontWeight: "500",
+                  border: "2px solid #6c757d",
+                  transition: "all 0.2s ease",
                 }}
               >
                 <i className="bi bi-x-lg me-2"></i>
                 Close Preview
               </Button>
+
+              <small className="text-muted ms-2">
+                <i className="bi bi-info-circle me-1"></i>
+                Preview in A4 format (scaled 80%)
+              </small>
             </div>
 
+            {/* Professional Action Buttons */}
             <div className="d-flex gap-2">
               <Button
-                variant="success"
                 onClick={handlePrint}
-                disabled={printLoading || downloadLoading || pdfDownloadLoading}
+                disabled={printLoading}
                 style={{
-                  borderRadius: "8px",
                   background: "linear-gradient(135deg, #28a745, #20c997)",
                   border: "none",
-                  padding: "10px 20px",
+                  borderRadius: "10px",
+                  padding: "12px 20px",
                   fontWeight: "600",
-                  boxShadow: "0 3px 8px rgba(40, 167, 69, 0.3)",
-                  minWidth: "120px",
+                  color: "white",
+                  boxShadow: "0 4px 15px rgba(40, 167, 69, 0.3)",
                 }}
               >
                 {printLoading ? (
-                  <>
-                    <Spinner size="sm" className="me-2" />
-                    Printing...
-                  </>
+                  <Spinner size="sm" className="me-2" />
                 ) : (
-                  <>
-                    <i className="bi bi-printer me-2"></i>
-                    Print
-                  </>
+                  <i className="bi bi-printer me-2"></i>
                 )}
+                Print
               </Button>
 
               <Button
-                variant="warning"
-                onClick={handlePDFDownload}
-                disabled={pdfDownloadLoading || downloadLoading || printLoading}
+                onClick={generateLetterheadPDF}
+                disabled={pdfDownloadLoading}
                 style={{
-                  borderRadius: "8px",
-                  background: "linear-gradient(135deg, #fd7e14, #f63d3d)",
+                  background: "linear-gradient(135deg, #dc3545, #c82333)",
                   border: "none",
-                  color: "white",
-                  padding: "10px 20px",
+                  borderRadius: "10px",
+                  padding: "12px 20px",
                   fontWeight: "600",
-                  boxShadow: "0 3px 8px rgba(253, 126, 20, 0.3)",
-                  minWidth: "120px",
+                  color: "white",
+                  boxShadow: "0 4px 15px rgba(220, 53, 69, 0.3)",
                 }}
               >
                 {pdfDownloadLoading ? (
-                  <>
-                    <Spinner size="sm" className="me-2" />
-                    PDF...
-                  </>
+                  <Spinner size="sm" className="me-2" />
                 ) : (
-                  <>
-                    <i className="bi bi-file-earmark-pdf me-2"></i>
-                    PDF
-                  </>
+                  <i className="bi bi-filetype-pdf me-2"></i>
                 )}
-              </Button>
-
-              <Button
-                onClick={handleDownload}
-                disabled={downloadLoading || printLoading || pdfDownloadLoading}
-                style={{
-                  borderRadius: "8px",
-                  background: "linear-gradient(135deg, #e63946, #dc3545)",
-                  border: "none",
-                  color: "white",
-                  padding: "10px 20px",
-                  fontWeight: "600",
-                  boxShadow: "0 3px 8px rgba(230, 57, 70, 0.3)",
-                  minWidth: "120px",
-                }}
-              >
-                {downloadLoading ? (
-                  <>
-                    <Spinner size="sm" className="me-2" />
-                    HTML...
-                  </>
-                ) : (
-                  <>
-                    <i className="bi bi-download me-2"></i>
-                    HTML
-                  </>
-                )}
+                Download PDF
               </Button>
             </div>
-          </div>
-
-          {/* Footer info */}
-          <div className="w-100 mt-2">
-            <small className="text-muted d-flex align-items-center justify-content-center gap-1">
-              <i className="bi bi-info-circle"></i>
-              <span>
-                Actions will use the content shown in the preview above
-              </span>
-            </small>
           </div>
         </Modal.Footer>
       </Modal>
