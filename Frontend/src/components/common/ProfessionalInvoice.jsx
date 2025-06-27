@@ -47,8 +47,8 @@ const ProfessionalInvoice = ({
           return;
         }
 
-        // Generate new QR code with verify-docs URL format
-        const verifyUrl = `${window.location.origin}/verify-docs?id=${invoiceId}&type=invoice`;
+        // Generate new QR code with verify URL format
+        const verifyUrl = `${window.location.origin}/verify?id=${invoiceId}&type=invoice`;
         const qrText = verifyUrl;
         const qrDataURL = await QRCode.toDataURL(qrText, {
           width: 180,
