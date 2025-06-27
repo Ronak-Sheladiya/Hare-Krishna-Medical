@@ -508,81 +508,16 @@ const AdminLetterheads = () => {
               </td>
               <td>
                 <div className="btn-group" role="group">
-                  {/* View/Edit Actions */}
                   <Button
                     as={Link}
                     to={`/admin/letterheads/edit/${letterhead._id}`}
                     variant="outline-primary"
                     size="sm"
-                    title="Edit Letterhead"
+                    title="Edit"
                   >
                     <i className="bi bi-pencil"></i>
                   </Button>
 
-                  {/* Professional Actions Dropdown */}
-                  <div className="btn-group">
-                    <Button
-                      variant="outline-success"
-                      size="sm"
-                      onClick={() => handleViewLetterhead(letterhead)}
-                      title="View & Download Options"
-                    >
-                      <i className="bi bi-eye"></i>
-                    </Button>
-                    <Button
-                      variant="outline-success"
-                      size="sm"
-                      className="dropdown-toggle dropdown-toggle-split"
-                      data-bs-toggle="dropdown"
-                      aria-expanded="false"
-                      title="More Actions"
-                    >
-                      <span className="visually-hidden">Toggle Dropdown</span>
-                    </Button>
-                    <ul className="dropdown-menu">
-                      <li>
-                        <button
-                          className="dropdown-item"
-                          onClick={() => handlePrintLetterhead(letterhead)}
-                        >
-                          <i className="bi bi-printer-fill me-2 text-success"></i>
-                          Professional Print
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          className="dropdown-item"
-                          onClick={() => handleDownloadPDF(letterhead)}
-                        >
-                          <i className="bi bi-file-earmark-pdf-fill me-2 text-danger"></i>
-                          Download PDF
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          className="dropdown-item"
-                          onClick={() => handleDownloadHTML(letterhead)}
-                        >
-                          <i className="bi bi-file-earmark-code-fill me-2 text-primary"></i>
-                          Download HTML
-                        </button>
-                      </li>
-                      <li>
-                        <hr className="dropdown-divider" />
-                      </li>
-                      <li>
-                        <button
-                          className="dropdown-item"
-                          onClick={() => handleViewVerification(letterhead)}
-                        >
-                          <i className="bi bi-qr-code-scan me-2 text-info"></i>
-                          View Verification
-                        </button>
-                      </li>
-                    </ul>
-                  </div>
-
-                  {/* Status Actions */}
                   {letterhead.status === "draft" && (
                     <Button
                       variant="outline-success"
