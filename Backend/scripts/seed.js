@@ -17,7 +17,7 @@ const connectDB = async () => {
         useUnifiedTopology: true,
       },
     );
-    console.log("✅ Connected to MongoDB for seeding");
+    console.log("�� Connected to MongoDB for seeding");
   } catch (error) {
     console.error("❌ MongoDB connection failed:", error.message);
     process.exit(1);
@@ -155,31 +155,36 @@ const seedProducts = async () => {
       },
       {
         name: "Vitamin D3 Capsules",
-        description:
+        shortDescription:
           "Essential vitamin D3 supplement for bone health and immunity support.",
-        price: 45.5,
-        mrp: 55.0,
-        discount: 17,
-        category: "Supplements",
-        subCategory: "Vitamins",
-        brand: "Health Plus",
-        stock: 89,
+        description:
+          "High potency vitamin D3 supplement that supports bone and teeth health, boosts immune system, and helps calcium absorption.",
+        company: "Sun Pharma",
+        price: 180.0,
+        originalPrice: 200.0,
+        category: "Vitamins",
+        weight: "60000 IU",
+        stock: 85,
         minStock: 15,
         images: [
-          {
-            url: "https://via.placeholder.com/400x400?text=Vitamin+D3",
-            alt: "Vitamin D3 Capsules",
-          },
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmZlNTAwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM2NjY2NjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5WaXRhbWluIEQzPC90ZXh0Pjwvc3ZnPg==",
         ],
-        specifications: {
-          composition: "Cholecalciferol 60,000 IU",
-          dosage: "One capsule weekly",
-          manufacturer: "Health Plus Industries",
-          expiryMonths: 24,
-        },
+        benefits:
+          "• Supports bone and teeth health\n• Boosts immune system\n• Helps calcium absorption\n• Prevents vitamin D deficiency",
+        composition: "Cholecalciferol 60,000 IU",
+        usage: "Take 1 tablet daily with water, preferably after meals.",
+        sideEffects: "Rare: Nausea, headache if overdosed.",
+        contraindications:
+          "Do not exceed recommended dose. Consult doctor if taking other medications.",
+        batchNo: "VD32024002",
+        mfgDate: new Date("2024-02-01"),
+        expDate: new Date("2026-02-01"),
         tags: ["vitamin", "immunity", "bone health", "supplements"],
+        isActive: true,
         isFeatured: true,
-        sales: 156,
+        rating: { average: 4.7, count: 89 },
+        sales: 190,
+        views: 800,
       },
       {
         name: "Cough Syrup with Honey",
