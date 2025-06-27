@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Container,
@@ -13,6 +13,7 @@ import {
   Badge,
   Toast,
   ToastContainer,
+  ProgressBar,
 } from "react-bootstrap";
 import { api, safeApiCall } from "../../utils/apiClient";
 import {
@@ -27,6 +28,7 @@ const AddLetterhead = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = Boolean(id);
+  const timelineRef = useRef(null);
 
   const [loading, setLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -35,6 +37,9 @@ const AddLetterhead = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+  const [currentStep, setCurrentStep] = useState(0);
+  const [completedSteps, setCompletedSteps] = useState(new Set());
+  const [autoSaveStatus, setAutoSaveStatus] = useState("saved"); // 'saving', 'saved', 'error'
 
   const [formData, setFormData] = useState({
     title: "",
@@ -58,7 +63,7 @@ const AddLetterhead = () => {
       companyCity: "Medical City, State 12345",
       companyPhone: "+91 98765 43210",
       companyEmail: "info@harekrishnamedical.com",
-      logo: "",
+      logo: "https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800",
     },
     footer: {
       terms:
@@ -69,26 +74,151 @@ const AddLetterhead = () => {
     notes: "",
   });
 
+  const timelineSteps = [
+    {
+      id: 0,
+      title: "Document Type & Title",
+      description: "Choose document type and set the main title",
+      icon: "bi-file-earmark-text",
+      color: "#e63946",
+      fields: ["letterType", "title"],
+    },
+    {
+      id: 1,
+      title: "Subject & Content",
+      description: "Define the subject and main content",
+      icon: "bi-chat-square-quote",
+      color: "#fd7e14",
+      fields: ["subject", "content"],
+    },
+    {
+      id: 2,
+      title: "Recipient Details",
+      description: "Add recipient information",
+      icon: "bi-person-badge",
+      color: "#28a745",
+      fields: [
+        "recipient.name",
+        "recipient.designation",
+        "recipient.organization",
+        "recipient.address",
+      ],
+    },
+    {
+      id: 3,
+      title: "Issuer Information",
+      description: "Configure issuer details and signature",
+      icon: "bi-person-check",
+      color: "#6f42c1",
+      fields: ["issuer.name", "issuer.designation", "issuer.signature"],
+    },
+    {
+      id: 4,
+      title: "Header & Branding",
+      description: "Customize company header and logo",
+      icon: "bi-building",
+      color: "#20c997",
+      fields: ["header.companyName", "header.logo"],
+    },
+    {
+      id: 5,
+      title: "Review & Finalize",
+      description: "Review all details and create letterhead",
+      icon: "bi-check-circle",
+      color: "#0d6efd",
+      fields: [],
+    },
+  ];
+
   const letterTypes = [
-    { value: "certificate", label: "Certificate", icon: "bi-award" },
+    {
+      value: "certificate",
+      label: "Certificate",
+      icon: "bi-award",
+      description: "Official certification documents",
+    },
     {
       value: "recommendation",
       label: "Recommendation",
       icon: "bi-hand-thumbs-up",
+      description: "Professional recommendations",
     },
-    { value: "authorization", label: "Authorization", icon: "bi-check-circle" },
-    { value: "notice", label: "Notice", icon: "bi-megaphone" },
-    { value: "announcement", label: "Announcement", icon: "bi-broadcast" },
-    { value: "invitation", label: "Invitation", icon: "bi-envelope-heart" },
+    {
+      value: "authorization",
+      label: "Authorization",
+      icon: "bi-check-circle",
+      description: "Authorization letters",
+    },
+    {
+      value: "notice",
+      label: "Notice",
+      icon: "bi-megaphone",
+      description: "Official notices",
+    },
+    {
+      value: "announcement",
+      label: "Announcement",
+      icon: "bi-broadcast",
+      description: "Public announcements",
+    },
+    {
+      value: "invitation",
+      label: "Invitation",
+      icon: "bi-envelope-heart",
+      description: "Event invitations",
+    },
     {
       value: "acknowledgment",
       label: "Acknowledgment",
       icon: "bi-chat-square-text",
+      description: "Acknowledgment letters",
     },
-    { value: "verification", label: "Verification", icon: "bi-shield-check" },
+    {
+      value: "verification",
+      label: "Verification",
+      icon: "bi-shield-check",
+      description: "Verification documents",
+    },
   ];
 
-  // Load mock data for professional demonstration
+  // Auto-save functionality
+  useEffect(() => {
+    const autoSaveTimer = setTimeout(() => {
+      if (formData.title || formData.subject || formData.content) {
+        handleAutoSave();
+      }
+    }, 3000);
+
+    return () => clearTimeout(autoSaveTimer);
+  }, [formData]);
+
+  const handleAutoSave = async () => {
+    if (!formData.title && !formData.subject) return;
+
+    setAutoSaveStatus("saving");
+    try {
+      localStorage.setItem("letterhead_draft", JSON.stringify(formData));
+      setAutoSaveStatus("saved");
+    } catch (error) {
+      setAutoSaveStatus("error");
+    }
+  };
+
+  // Load draft from localStorage
+  const loadDraft = () => {
+    try {
+      const draft = localStorage.getItem("letterhead_draft");
+      if (draft) {
+        const parsedDraft = JSON.parse(draft);
+        setFormData(parsedDraft);
+        setShowToast(true);
+      }
+    } catch (error) {
+      console.error("Error loading draft:", error);
+    }
+  };
+
+  // Professional sample data
   const loadMockData = () => {
     const mockData = {
       title: "Certificate of Professional Excellence",
@@ -102,7 +232,7 @@ const AddLetterhead = () => {
       },
       subject:
         "Recognition of Outstanding Professional Achievement and Dedication",
-      content: `We are pleased to certify that Dr. Sarah Johnson has demonstrated exceptional professional excellence and unwavering dedication in the field of pharmaceutical sciences. 
+      content: `We are pleased to certify that Dr. Sarah Johnson has demonstrated exceptional professional excellence and unwavering dedication in the field of pharmaceutical sciences.
 
 Through her outstanding contributions to patient care, innovative pharmaceutical research, and commitment to medical ethics, Dr. Johnson has consistently exceeded industry standards and expectations.
 
@@ -126,16 +256,12 @@ This certification is awarded in recognition of proven competency, professional 
         companyCity: "Medical City, State 12345",
         companyPhone: "+91 98765 43210",
         companyEmail: "info@harekrishnamedical.com",
-        logo: "",
+        logo: "https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800",
       },
       footer: {
         terms:
-          "This certificate is issued by Hare Krishna Medical Store, a certified healthcare institution. For verification and authentication, please contact us through the provided official channels. This document is valid for professional reference and verification purposes.",
-        additionalInfo:
-          "Certificate ID: CERT-2024-001 | Issue Date: " +
-          new Date().toLocaleDateString() +
-          " | Valid Until: " +
-          new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+          "This certificate is issued by Hare Krishna Medical Store, a certified healthcare institution. For verification and authentication, please contact us through the provided official channels.",
+        additionalInfo: `Certificate ID: CERT-2024-001 | Issue Date: ${new Date().toLocaleDateString()} | Valid Until: ${new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString()}`,
       },
       tags: [
         "certificate",
@@ -149,10 +275,33 @@ This certification is awarded in recognition of proven competency, professional 
     };
 
     setFormData(mockData);
+    setCurrentStep(5); // Jump to review step
+    setCompletedSteps(new Set([0, 1, 2, 3, 4]));
     setShowToast(true);
   };
 
   // Validation function
+  const validateStep = (stepId) => {
+    const step = timelineSteps[stepId];
+    const errors = {};
+    let isValid = true;
+
+    step.fields.forEach((field) => {
+      const value = getNestedValue(formData, field);
+      if (!value || !value.toString().trim()) {
+        errors[field] = `${field.split(".").pop()} is required`;
+        isValid = false;
+      }
+    });
+
+    setValidationErrors((prev) => ({ ...prev, ...errors }));
+    return isValid;
+  };
+
+  const getNestedValue = (obj, path) => {
+    return path.split(".").reduce((o, p) => o && o[p], obj);
+  };
+
   const validateForm = () => {
     const errors = {};
 
@@ -170,64 +319,35 @@ This certification is awarded in recognition of proven competency, professional 
     return Object.keys(errors).length === 0;
   };
 
-  // Fetch letterhead data for editing
-  const fetchLetterhead = async () => {
-    if (!isEditing) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await safeApiCall(api.get(`/api/letterheads/${id}`));
-
-      if (response?.success) {
-        const letterhead = response.letterhead;
-        setFormData({
-          title: letterhead.title || "",
-          letterType: letterhead.letterType || "certificate",
-          recipient: {
-            name: letterhead.recipient?.name || "",
-            designation: letterhead.recipient?.designation || "",
-            organization: letterhead.recipient?.organization || "",
-            address: letterhead.recipient?.address || "",
-          },
-          subject: letterhead.subject || "",
-          content: letterhead.content || "",
-          issuer: {
-            name: letterhead.issuer?.name || "",
-            designation: letterhead.issuer?.designation || "",
-            signature: letterhead.issuer?.signature || "",
-          },
-          header: {
-            companyName:
-              letterhead.header?.companyName || "Hare Krishna Medical Store",
-            companyAddress:
-              letterhead.header?.companyAddress ||
-              "123 Main Street, Healthcare District",
-            companyCity:
-              letterhead.header?.companyCity || "Medical City, State 12345",
-            companyPhone: letterhead.header?.companyPhone || "+91 98765 43210",
-            companyEmail:
-              letterhead.header?.companyEmail || "info@harekrishnamedical.com",
-            logo: letterhead.header?.logo || "",
-          },
-          footer: {
-            terms:
-              letterhead.footer?.terms ||
-              "This is an official document issued by Hare Krishna Medical Store. For verification, please contact us at the above details.",
-            additionalInfo: letterhead.footer?.additionalInfo || "",
-          },
-          tags: letterhead.tags || [],
-          notes: letterhead.notes || "",
-        });
-      } else {
-        throw new Error(response?.message || "Failed to fetch letterhead");
+  // Step navigation
+  const nextStep = () => {
+    if (validateStep(currentStep)) {
+      setCompletedSteps((prev) => new Set([...prev, currentStep]));
+      if (currentStep < timelineSteps.length - 1) {
+        setCurrentStep(currentStep + 1);
+        scrollToTimeline();
       }
-    } catch (error) {
-      console.error("Fetch letterhead error:", error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+      scrollToTimeline();
+    }
+  };
+
+  const goToStep = (stepId) => {
+    setCurrentStep(stepId);
+    scrollToTimeline();
+  };
+
+  const scrollToTimeline = () => {
+    if (timelineRef.current) {
+      timelineRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   };
 
@@ -256,8 +376,8 @@ This certification is awarded in recognition of proven competency, professional 
             ? "Letterhead updated successfully!"
             : "Letterhead created successfully!",
         );
+        localStorage.removeItem("letterhead_draft");
 
-        // Redirect after a short delay
         setTimeout(() => {
           navigate("/admin/letterheads");
         }, 1500);
@@ -309,10 +429,17 @@ This certification is awarded in recognition of proven competency, professional 
       .split(",")
       .map((tag) => tag.trim())
       .filter((tag) => tag);
-    setFormData((prev) => ({
-      ...prev,
-      tags,
-    }));
+    setFormData((prev) => ({ ...prev, tags }));
+  };
+
+  // Progress calculation
+  const getProgress = () => {
+    return (
+      ((completedSteps.size +
+        (currentStep === timelineSteps.length - 1 ? 1 : 0)) /
+        timelineSteps.length) *
+      100
+    );
   };
 
   // Create preview data
@@ -331,8 +458,74 @@ This certification is awarded in recognition of proven competency, professional 
     createdAt: new Date().toISOString(),
   });
 
+  // Fetch letterhead data for editing
+  const fetchLetterhead = async () => {
+    if (!isEditing) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await safeApiCall(api.get(`/api/letterheads/${id}`));
+
+      if (response?.success) {
+        const letterhead = response.letterhead;
+        setFormData({
+          title: letterhead.title || "",
+          letterType: letterhead.letterType || "certificate",
+          recipient: {
+            name: letterhead.recipient?.name || "",
+            designation: letterhead.recipient?.designation || "",
+            organization: letterhead.recipient?.organization || "",
+            address: letterhead.recipient?.address || "",
+          },
+          subject: letterhead.subject || "",
+          content: letterhead.content || "",
+          issuer: {
+            name: letterhead.issuer?.name || "",
+            designation: letterhead.issuer?.designation || "",
+            signature: letterhead.issuer?.signature || "",
+          },
+          header: {
+            companyName:
+              letterhead.header?.companyName || "Hare Krishna Medical Store",
+            companyAddress:
+              letterhead.header?.companyAddress ||
+              "123 Main Street, Healthcare District",
+            companyCity:
+              letterhead.header?.companyCity || "Medical City, State 12345",
+            companyPhone: letterhead.header?.companyPhone || "+91 98765 43210",
+            companyEmail:
+              letterhead.header?.companyEmail || "info@harekrishnamedical.com",
+            logo:
+              letterhead.header?.logo ||
+              "https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800",
+          },
+          footer: {
+            terms:
+              letterhead.footer?.terms ||
+              "This is an official document issued by Hare Krishna Medical Store.",
+            additionalInfo: letterhead.footer?.additionalInfo || "",
+          },
+          tags: letterhead.tags || [],
+          notes: letterhead.notes || "",
+        });
+      } else {
+        throw new Error(response?.message || "Failed to fetch letterhead");
+      }
+    } catch (error) {
+      console.error("Fetch letterhead error:", error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchLetterhead();
+    if (!isEditing) {
+      loadDraft();
+    }
   }, [id]);
 
   if (loading) {
@@ -351,11 +544,11 @@ This certification is awarded in recognition of proven competency, professional 
   return (
     <Container fluid>
       <PageHeroSection
-        title={isEditing ? "Edit Letterhead" : "Create Letterhead"}
+        title={isEditing ? "Edit Letterhead" : "Create Professional Letterhead"}
         subtitle={
           isEditing
             ? "Update letterhead details and preview changes"
-            : "Create a new professional letterhead with live preview"
+            : "Create a new professional letterhead with guided workflow"
         }
         breadcrumbs={[
           { label: "Admin", href: "/admin" },
@@ -365,39 +558,164 @@ This certification is awarded in recognition of proven competency, professional 
       />
 
       <ThemeSection>
-        {/* Action Bar */}
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <div>
-            <h4 className="mb-1 fw-bold text-dark">
-              {isEditing ? "Edit Letterhead" : "Create New Letterhead"}
-            </h4>
-            <p className="text-muted mb-0">
-              <i className="bi bi-info-circle me-1"></i>
-              Fill in the details below to create a professional letterhead
-            </p>
-          </div>
-          <div className="d-flex gap-2">
-            <Button
-              variant="outline-info"
-              size="sm"
-              onClick={loadMockData}
-              className="d-flex align-items-center"
-            >
-              <i className="bi bi-magic me-1"></i>
-              Load Sample Data
-            </Button>
-            <Button
-              variant="outline-primary"
-              size="sm"
-              onClick={() => setShowPreview(true)}
-              disabled={!formData.title && !formData.subject}
-              className="d-flex align-items-center"
-            >
-              <i className="bi bi-eye me-1"></i>
-              Preview Letterhead
-            </Button>
-          </div>
+        {/* Progress Header */}
+        <div className="progress-header mb-4" ref={timelineRef}>
+          <Card className="border-0 shadow-sm">
+            <Card.Body className="py-3">
+              <Row className="align-items-center">
+                <Col md={8}>
+                  <div className="d-flex align-items-center">
+                    <div className="me-3">
+                      <div
+                        className="progress-circle"
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          borderRadius: "50%",
+                          background: `conic-gradient(#e63946 ${getProgress()}%, #e9ecef 0%)`,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <div
+                          className="bg-white rounded-circle d-flex align-items-center justify-content-center"
+                          style={{ width: "40px", height: "40px" }}
+                        >
+                          <span className="fw-bold text-primary">
+                            {Math.round(getProgress())}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h5 className="mb-1 fw-bold">
+                        Step {currentStep + 1} of {timelineSteps.length}:{" "}
+                        {timelineSteps[currentStep].title}
+                      </h5>
+                      <p className="text-muted mb-0">
+                        {timelineSteps[currentStep].description}
+                      </p>
+                    </div>
+                  </div>
+                </Col>
+                <Col md={4} className="text-end">
+                  <div className="d-flex gap-2 justify-content-end">
+                    {autoSaveStatus === "saving" && (
+                      <Badge
+                        bg="secondary"
+                        className="d-flex align-items-center"
+                      >
+                        <Spinner size="sm" className="me-1" />
+                        Auto-saving...
+                      </Badge>
+                    )}
+                    {autoSaveStatus === "saved" && (
+                      <Badge bg="success" className="d-flex align-items-center">
+                        <i className="bi bi-check-circle me-1"></i>
+                        Saved
+                      </Badge>
+                    )}
+                    <Button
+                      variant="outline-info"
+                      size="sm"
+                      onClick={loadMockData}
+                    >
+                      <i className="bi bi-magic me-1"></i>
+                      Load Sample
+                    </Button>
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      onClick={() => setShowPreview(true)}
+                      disabled={!formData.title && !formData.subject}
+                    >
+                      <i className="bi bi-eye me-1"></i>
+                      Preview
+                    </Button>
+                  </div>
+                </Col>
+              </Row>
+              <ProgressBar
+                now={getProgress()}
+                className="mt-3"
+                style={{ height: "6px" }}
+                variant="danger"
+              />
+            </Card.Body>
+          </Card>
         </div>
+
+        {/* Timeline Navigation */}
+        <Card className="mb-4 border-0 shadow-sm">
+          <Card.Body className="py-3">
+            <div
+              className="timeline-nav d-flex justify-content-between align-items-center"
+              style={{ overflowX: "auto" }}
+            >
+              {timelineSteps.map((step, index) => (
+                <div
+                  key={step.id}
+                  className={`timeline-step d-flex flex-column align-items-center cursor-pointer ${currentStep === index ? "active" : ""} ${completedSteps.has(index) ? "completed" : ""}`}
+                  onClick={() => goToStep(index)}
+                  style={{
+                    minWidth: "120px",
+                    transition: "all 0.3s ease",
+                    opacity:
+                      currentStep === index
+                        ? 1
+                        : completedSteps.has(index)
+                          ? 0.8
+                          : 0.5,
+                  }}
+                >
+                  <div
+                    className={`timeline-icon rounded-circle d-flex align-items-center justify-content-center mb-2`}
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      backgroundColor:
+                        currentStep === index
+                          ? step.color
+                          : completedSteps.has(index)
+                            ? "#28a745"
+                            : "#dee2e6",
+                      color: "white",
+                      transition: "all 0.3s ease",
+                    }}
+                  >
+                    <i
+                      className={
+                        completedSteps.has(index) ? "bi bi-check-lg" : step.icon
+                      }
+                    ></i>
+                  </div>
+                  <span
+                    className={`small text-center ${currentStep === index ? "fw-bold text-dark" : "text-muted"}`}
+                  >
+                    {step.title}
+                  </span>
+                  {index < timelineSteps.length - 1 && (
+                    <div
+                      className="timeline-connector"
+                      style={{
+                        position: "absolute",
+                        top: "20px",
+                        left: "calc(100% - 10px)",
+                        width: "20px",
+                        height: "2px",
+                        backgroundColor: completedSteps.has(index)
+                          ? step.color
+                          : "#dee2e6",
+                        zIndex: -1,
+                      }}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          </Card.Body>
+        </Card>
 
         {/* Alerts */}
         {error && (
@@ -420,328 +738,654 @@ This certification is awarded in recognition of proven competency, professional 
 
         <Form onSubmit={handleSubmit}>
           <Row className="g-4">
-            {/* Main Content - Left Column */}
+            {/* Main Content */}
             <Col xl={8} lg={7}>
-              {/* Basic Information */}
-              <ThemeCard
-                className="mb-4"
-                style={{ borderLeft: "4px solid #e63946" }}
-              >
-                <Card.Header className="bg-light border-0 rounded-top">
-                  <div className="d-flex align-items-center justify-content-between">
-                    <div className="d-flex align-items-center">
-                      <i className="bi bi-file-earmark-text text-primary me-2 fs-5"></i>
-                      <h5 className="mb-0 fw-bold">Basic Information</h5>
-                    </div>
-                    <Badge bg="primary" className="fs-6">
-                      Step 1
-                    </Badge>
-                  </div>
-                </Card.Header>
-                <Card.Body className="p-4">
-                  <Row className="g-3">
-                    <Col lg={8} md={7}>
-                      <Form.Group className="position-relative">
-                        <Form.Label className="fw-semibold">
-                          <i className="bi bi-card-heading me-1"></i>
-                          Title <span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="title"
-                          value={formData.title}
-                          onChange={handleChange}
-                          placeholder="e.g., Certificate of Professional Excellence"
-                          required
-                          className={`form-control-lg ${validationErrors.title ? "is-invalid" : ""}`}
-                          style={{ borderLeft: "3px solid #e63946" }}
-                        />
-                        {validationErrors.title && (
-                          <div className="invalid-feedback">
-                            {validationErrors.title}
-                          </div>
-                        )}
-                      </Form.Group>
-                    </Col>
-                    <Col lg={4} md={5}>
-                      <Form.Group>
-                        <Form.Label className="fw-semibold">
-                          <i className="bi bi-tag me-1"></i>
-                          Letter Type <span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Select
-                          name="letterType"
-                          value={formData.letterType}
-                          onChange={handleChange}
-                          required
-                          className="form-select-lg"
-                          style={{ borderLeft: "3px solid #28a745" }}
-                        >
-                          {letterTypes.map((type) => (
-                            <option key={type.value} value={type.value}>
-                              {type.label}
-                            </option>
-                          ))}
-                        </Form.Select>
-                      </Form.Group>
-                    </Col>
-                    <Col xs={12}>
-                      <Form.Group>
-                        <Form.Label className="fw-semibold">
-                          <i className="bi bi-chat-square-quote me-1"></i>
-                          Subject <span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="subject"
-                          value={formData.subject}
-                          onChange={handleChange}
-                          placeholder="e.g., Recognition of Outstanding Professional Achievement"
-                          required
-                          className={`form-control-lg ${validationErrors.subject ? "is-invalid" : ""}`}
-                          style={{ borderLeft: "3px solid #fd7e14" }}
-                        />
-                        {validationErrors.subject && (
-                          <div className="invalid-feedback">
-                            {validationErrors.subject}
-                          </div>
-                        )}
-                      </Form.Group>
-                    </Col>
-                    <Col xs={12}>
-                      <Form.Group>
-                        <Form.Label className="fw-semibold">
-                          <i className="bi bi-file-text me-1"></i>
-                          Content <span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Control
-                          as="textarea"
-                          rows={8}
-                          name="content"
-                          value={formData.content}
-                          onChange={handleChange}
-                          placeholder="Enter the detailed content of the letterhead. Use professional language and include all relevant information..."
-                          required
-                          className={`${validationErrors.content ? "is-invalid" : ""}`}
-                          style={{
-                            resize: "vertical",
-                            minHeight: "200px",
-                            borderLeft: "3px solid #6f42c1",
-                          }}
-                        />
-                        {validationErrors.content && (
-                          <div className="invalid-feedback">
-                            {validationErrors.content}
-                          </div>
-                        )}
-                        <Form.Text className="text-muted">
-                          <i className="bi bi-lightbulb me-1"></i>
-                          Use professional language, include bullet points for
-                          achievements, and maintain formal tone
-                        </Form.Text>
-                      </Form.Group>
-                    </Col>
-                  </Row>
-                </Card.Body>
-              </ThemeCard>
-
-              {/* Recipient & Issuer Information */}
-              <Row className="g-4 mb-4">
-                <Col lg={6}>
-                  {/* Recipient Information */}
-                  <ThemeCard
-                    className="h-100"
-                    style={{ borderLeft: "4px solid #28a745" }}
-                  >
-                    <Card.Header className="bg-light border-0 rounded-top">
-                      <div className="d-flex align-items-center justify-content-between">
-                        <div className="d-flex align-items-center">
-                          <i className="bi bi-person-badge text-success me-2 fs-5"></i>
-                          <h5 className="mb-0 fw-bold">Recipient Details</h5>
-                        </div>
-                        <Badge bg="success" className="fs-6">
-                          Step 2
-                        </Badge>
-                      </div>
-                    </Card.Header>
-                    <Card.Body className="p-4">
-                      <Form.Group className="mb-3">
-                        <Form.Label className="fw-semibold">
-                          <i className="bi bi-person me-1"></i>
-                          Full Name <span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="recipient.name"
-                          value={formData.recipient.name}
-                          onChange={handleChange}
-                          placeholder="Dr. Sarah Johnson"
-                          required
-                          className={`${validationErrors.recipientName ? "is-invalid" : ""}`}
-                          style={{ borderLeft: "3px solid #28a745" }}
-                        />
-                        {validationErrors.recipientName && (
-                          <div className="invalid-feedback">
-                            {validationErrors.recipientName}
-                          </div>
-                        )}
-                      </Form.Group>
-
-                      <Form.Group className="mb-3">
-                        <Form.Label className="fw-semibold">
-                          <i className="bi bi-briefcase me-1"></i>
-                          Designation
-                        </Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="recipient.designation"
-                          value={formData.recipient.designation}
-                          onChange={handleChange}
-                          placeholder="Senior Pharmacist"
-                        />
-                      </Form.Group>
-
-                      <Form.Group className="mb-3">
-                        <Form.Label className="fw-semibold">
-                          <i className="bi bi-building me-1"></i>
-                          Organization
-                        </Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="recipient.organization"
-                          value={formData.recipient.organization}
-                          onChange={handleChange}
-                          placeholder="HealthCare Plus Medical Center"
-                        />
-                      </Form.Group>
-
-                      <Form.Group className="mb-0">
-                        <Form.Label className="fw-semibold">
-                          <i className="bi bi-geo-alt me-1"></i>
-                          Address
-                        </Form.Label>
-                        <Form.Control
-                          as="textarea"
-                          rows={3}
-                          name="recipient.address"
-                          value={formData.recipient.address}
-                          onChange={handleChange}
-                          placeholder="Complete mailing address"
-                          style={{ resize: "vertical" }}
-                        />
-                      </Form.Group>
-                    </Card.Body>
-                  </ThemeCard>
-                </Col>
-
-                <Col lg={6}>
-                  {/* Issuer Information */}
-                  <ThemeCard
-                    className="h-100"
-                    style={{ borderLeft: "4px solid #fd7e14" }}
-                  >
-                    <Card.Header className="bg-light border-0 rounded-top">
-                      <div className="d-flex align-items-center justify-content-between">
-                        <div className="d-flex align-items-center">
-                          <i className="bi bi-person-check text-warning me-2 fs-5"></i>
-                          <h5 className="mb-0 fw-bold">Issuer Details</h5>
-                        </div>
-                        <Badge bg="warning" className="fs-6">
-                          Step 3
-                        </Badge>
-                      </div>
-                    </Card.Header>
-                    <Card.Body className="p-4">
-                      <Form.Group className="mb-3">
-                        <Form.Label className="fw-semibold">
-                          <i className="bi bi-person-check me-1"></i>
-                          Issuer Name <span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="issuer.name"
-                          value={formData.issuer.name}
-                          onChange={handleChange}
-                          placeholder="Dr. Rajesh Kumar Sharma"
-                          required
-                          className={`${validationErrors.issuerName ? "is-invalid" : ""}`}
-                          style={{ borderLeft: "3px solid #fd7e14" }}
-                        />
-                        {validationErrors.issuerName && (
-                          <div className="invalid-feedback">
-                            {validationErrors.issuerName}
-                          </div>
-                        )}
-                      </Form.Group>
-
-                      <Form.Group className="mb-3">
-                        <Form.Label className="fw-semibold">
-                          <i className="bi bi-award me-1"></i>
-                          Designation <span className="text-danger">*</span>
-                        </Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="issuer.designation"
-                          value={formData.issuer.designation}
-                          onChange={handleChange}
-                          placeholder="Chief Medical Officer & Director"
-                          required
-                          className={`${validationErrors.issuerDesignation ? "is-invalid" : ""}`}
-                          style={{ borderLeft: "3px solid #fd7e14" }}
-                        />
-                        {validationErrors.issuerDesignation && (
-                          <div className="invalid-feedback">
-                            {validationErrors.issuerDesignation}
-                          </div>
-                        )}
-                      </Form.Group>
-
-                      <Form.Group className="mb-0">
-                        <Form.Label className="fw-semibold">
-                          <i className="bi bi-image me-1"></i>
-                          Digital Signature
-                          <small className="text-muted ms-1">(Optional)</small>
-                        </Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="issuer.signature"
-                          value={formData.issuer.signature}
-                          onChange={handleChange}
-                          placeholder="Signature image URL or base64"
-                        />
-                        <Form.Text className="text-muted">
-                          <i className="bi bi-upload me-1"></i>
-                          Upload signature image for professional appearance
-                        </Form.Text>
-                      </Form.Group>
-                    </Card.Body>
-                  </ThemeCard>
-                </Col>
-              </Row>
-            </Col>
-
-            {/* Configuration Sidebar - Right Column */}
-            <Col xl={4} lg={5}>
-              {/* Sticky Configuration Panel */}
-              <div className="sticky-top" style={{ top: "100px" }}>
-                {/* Primary Actions */}
+              {/* Step Content */}
+              {currentStep === 0 && (
                 <ThemeCard
-                  className="mb-4"
-                  style={{ borderLeft: "4px solid #6f42c1" }}
+                  className="step-card"
+                  style={{ borderLeft: `4px solid ${timelineSteps[0].color}` }}
                 >
-                  <Card.Header className="bg-light border-0 rounded-top">
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div className="d-flex align-items-center">
-                        <i className="bi bi-lightning text-primary me-2 fs-5"></i>
-                        <h5 className="mb-0 fw-bold">Actions</h5>
-                      </div>
-                      <Badge bg="primary" className="fs-6">
-                        Final
-                      </Badge>
+                  <Card.Header className="bg-light border-0">
+                    <div className="d-flex align-items-center">
+                      <i
+                        className={`${timelineSteps[0].icon} text-primary me-2 fs-5`}
+                      ></i>
+                      <h5 className="mb-0 fw-bold">{timelineSteps[0].title}</h5>
                     </div>
                   </Card.Header>
                   <Card.Body className="p-4">
-                    <div className="d-grid gap-3">
+                    <Row className="g-4">
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            <i className="bi bi-tag me-1"></i>
+                            Document Type <span className="text-danger">*</span>
+                          </Form.Label>
+                          <Form.Select
+                            name="letterType"
+                            value={formData.letterType}
+                            onChange={handleChange}
+                            required
+                            className="form-select-lg"
+                            style={{
+                              borderLeft: `3px solid ${timelineSteps[0].color}`,
+                            }}
+                          >
+                            {letterTypes.map((type) => (
+                              <option key={type.value} value={type.value}>
+                                {type.label}
+                              </option>
+                            ))}
+                          </Form.Select>
+                          <Form.Text className="text-muted">
+                            <i className="bi bi-info-circle me-1"></i>
+                            {
+                              letterTypes.find(
+                                (t) => t.value === formData.letterType,
+                              )?.description
+                            }
+                          </Form.Text>
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <div className="selected-type-preview p-3 bg-light rounded border">
+                          <div className="text-center">
+                            <i
+                              className={`${letterTypes.find((t) => t.value === formData.letterType)?.icon} fs-1 text-primary mb-2`}
+                            ></i>
+                            <h6 className="fw-bold">
+                              {
+                                letterTypes.find(
+                                  (t) => t.value === formData.letterType,
+                                )?.label
+                              }
+                            </h6>
+                            <small className="text-muted">
+                              {
+                                letterTypes.find(
+                                  (t) => t.value === formData.letterType,
+                                )?.description
+                              }
+                            </small>
+                          </div>
+                        </div>
+                      </Col>
+                      <Col xs={12}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            <i className="bi bi-card-heading me-1"></i>
+                            Document Title{" "}
+                            <span className="text-danger">*</span>
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="title"
+                            value={formData.title}
+                            onChange={handleChange}
+                            placeholder="e.g., Certificate of Professional Excellence"
+                            required
+                            className={`form-control-lg ${validationErrors.title ? "is-invalid" : ""}`}
+                            style={{
+                              borderLeft: `3px solid ${timelineSteps[0].color}`,
+                            }}
+                          />
+                          {validationErrors.title && (
+                            <div className="invalid-feedback">
+                              {validationErrors.title}
+                            </div>
+                          )}
+                          <Form.Text className="text-muted">
+                            <i className="bi bi-lightbulb me-1"></i>
+                            This will be the main heading of your letterhead
+                            document
+                          </Form.Text>
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                  </Card.Body>
+                </ThemeCard>
+              )}
+
+              {currentStep === 1 && (
+                <ThemeCard
+                  className="step-card"
+                  style={{ borderLeft: `4px solid ${timelineSteps[1].color}` }}
+                >
+                  <Card.Header className="bg-light border-0">
+                    <div className="d-flex align-items-center">
+                      <i
+                        className={`${timelineSteps[1].icon} text-warning me-2 fs-5`}
+                      ></i>
+                      <h5 className="mb-0 fw-bold">{timelineSteps[1].title}</h5>
+                    </div>
+                  </Card.Header>
+                  <Card.Body className="p-4">
+                    <Row className="g-4">
+                      <Col xs={12}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            <i className="bi bi-chat-square-quote me-1"></i>
+                            Subject <span className="text-danger">*</span>
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="subject"
+                            value={formData.subject}
+                            onChange={handleChange}
+                            placeholder="e.g., Recognition of Outstanding Professional Achievement"
+                            required
+                            className={`form-control-lg ${validationErrors.subject ? "is-invalid" : ""}`}
+                            style={{
+                              borderLeft: `3px solid ${timelineSteps[1].color}`,
+                            }}
+                          />
+                          {validationErrors.subject && (
+                            <div className="invalid-feedback">
+                              {validationErrors.subject}
+                            </div>
+                          )}
+                        </Form.Group>
+                      </Col>
+                      <Col xs={12}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            <i className="bi bi-file-text me-1"></i>
+                            Content <span className="text-danger">*</span>
+                          </Form.Label>
+                          <Form.Control
+                            as="textarea"
+                            rows={12}
+                            name="content"
+                            value={formData.content}
+                            onChange={handleChange}
+                            placeholder="Enter the detailed content of the letterhead. Use professional language and include all relevant information..."
+                            required
+                            className={`${validationErrors.content ? "is-invalid" : ""}`}
+                            style={{
+                              resize: "vertical",
+                              minHeight: "300px",
+                              borderLeft: `3px solid ${timelineSteps[1].color}`,
+                              fontSize: "15px",
+                              lineHeight: "1.6",
+                            }}
+                          />
+                          {validationErrors.content && (
+                            <div className="invalid-feedback">
+                              {validationErrors.content}
+                            </div>
+                          )}
+                          <Form.Text className="text-muted">
+                            <i className="bi bi-lightbulb me-1"></i>
+                            Use professional language, include bullet points (•)
+                            for achievements, and maintain formal tone
+                          </Form.Text>
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                  </Card.Body>
+                </ThemeCard>
+              )}
+
+              {currentStep === 2 && (
+                <ThemeCard
+                  className="step-card"
+                  style={{ borderLeft: `4px solid ${timelineSteps[2].color}` }}
+                >
+                  <Card.Header className="bg-light border-0">
+                    <div className="d-flex align-items-center">
+                      <i
+                        className={`${timelineSteps[2].icon} text-success me-2 fs-5`}
+                      ></i>
+                      <h5 className="mb-0 fw-bold">{timelineSteps[2].title}</h5>
+                    </div>
+                  </Card.Header>
+                  <Card.Body className="p-4">
+                    <Row className="g-4">
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            <i className="bi bi-person me-1"></i>
+                            Full Name <span className="text-danger">*</span>
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="recipient.name"
+                            value={formData.recipient.name}
+                            onChange={handleChange}
+                            placeholder="Dr. Sarah Johnson"
+                            required
+                            className={`${validationErrors.recipientName ? "is-invalid" : ""}`}
+                            style={{
+                              borderLeft: `3px solid ${timelineSteps[2].color}`,
+                            }}
+                          />
+                          {validationErrors.recipientName && (
+                            <div className="invalid-feedback">
+                              {validationErrors.recipientName}
+                            </div>
+                          )}
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            <i className="bi bi-briefcase me-1"></i>
+                            Designation
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="recipient.designation"
+                            value={formData.recipient.designation}
+                            onChange={handleChange}
+                            placeholder="Senior Pharmacist"
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col xs={12}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            <i className="bi bi-building me-1"></i>
+                            Organization
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="recipient.organization"
+                            value={formData.recipient.organization}
+                            onChange={handleChange}
+                            placeholder="HealthCare Plus Medical Center"
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col xs={12}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            <i className="bi bi-geo-alt me-1"></i>
+                            Complete Address
+                          </Form.Label>
+                          <Form.Control
+                            as="textarea"
+                            rows={3}
+                            name="recipient.address"
+                            value={formData.recipient.address}
+                            onChange={handleChange}
+                            placeholder="456 Wellness Boulevard, Medical District, Healthcare City, HC 54321"
+                            style={{ resize: "vertical" }}
+                          />
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                  </Card.Body>
+                </ThemeCard>
+              )}
+
+              {currentStep === 3 && (
+                <ThemeCard
+                  className="step-card"
+                  style={{ borderLeft: `4px solid ${timelineSteps[3].color}` }}
+                >
+                  <Card.Header className="bg-light border-0">
+                    <div className="d-flex align-items-center">
+                      <i
+                        className={`${timelineSteps[3].icon} text-primary me-2 fs-5`}
+                      ></i>
+                      <h5 className="mb-0 fw-bold">{timelineSteps[3].title}</h5>
+                    </div>
+                  </Card.Header>
+                  <Card.Body className="p-4">
+                    <Row className="g-4">
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            <i className="bi bi-person-check me-1"></i>
+                            Issuer Name <span className="text-danger">*</span>
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="issuer.name"
+                            value={formData.issuer.name}
+                            onChange={handleChange}
+                            placeholder="Dr. Rajesh Kumar Sharma"
+                            required
+                            className={`${validationErrors.issuerName ? "is-invalid" : ""}`}
+                            style={{
+                              borderLeft: `3px solid ${timelineSteps[3].color}`,
+                            }}
+                          />
+                          {validationErrors.issuerName && (
+                            <div className="invalid-feedback">
+                              {validationErrors.issuerName}
+                            </div>
+                          )}
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            <i className="bi bi-award me-1"></i>
+                            Designation <span className="text-danger">*</span>
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="issuer.designation"
+                            value={formData.issuer.designation}
+                            onChange={handleChange}
+                            placeholder="Chief Medical Officer & Director"
+                            required
+                            className={`${validationErrors.issuerDesignation ? "is-invalid" : ""}`}
+                            style={{
+                              borderLeft: `3px solid ${timelineSteps[3].color}`,
+                            }}
+                          />
+                          {validationErrors.issuerDesignation && (
+                            <div className="invalid-feedback">
+                              {validationErrors.issuerDesignation}
+                            </div>
+                          )}
+                        </Form.Group>
+                      </Col>
+                      <Col xs={12}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            <i className="bi bi-image me-1"></i>
+                            Digital Signature
+                            <small className="text-muted ms-1">
+                              (Optional)
+                            </small>
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="issuer.signature"
+                            value={formData.issuer.signature}
+                            onChange={handleChange}
+                            placeholder="https://example.com/signature.png or base64 data"
+                          />
+                          <Form.Text className="text-muted">
+                            <i className="bi bi-upload me-1"></i>
+                            Upload signature image URL for professional
+                            appearance
+                          </Form.Text>
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                  </Card.Body>
+                </ThemeCard>
+              )}
+
+              {currentStep === 4 && (
+                <ThemeCard
+                  className="step-card"
+                  style={{ borderLeft: `4px solid ${timelineSteps[4].color}` }}
+                >
+                  <Card.Header className="bg-light border-0">
+                    <div className="d-flex align-items-center">
+                      <i
+                        className={`${timelineSteps[4].icon} text-info me-2 fs-5`}
+                      ></i>
+                      <h5 className="mb-0 fw-bold">{timelineSteps[4].title}</h5>
+                    </div>
+                  </Card.Header>
+                  <Card.Body className="p-4">
+                    <Row className="g-4">
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            <i className="bi bi-shop me-1"></i>
+                            Company Name
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="header.companyName"
+                            value={formData.header.companyName}
+                            onChange={handleChange}
+                            placeholder="Hare Krishna Medical Store"
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            <i className="bi bi-image me-1"></i>
+                            Company Logo URL
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="header.logo"
+                            value={formData.header.logo}
+                            onChange={handleChange}
+                            placeholder="https://example.com/logo.png"
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col xs={12}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            <i className="bi bi-geo-alt me-1"></i>
+                            Address
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="header.companyAddress"
+                            value={formData.header.companyAddress}
+                            onChange={handleChange}
+                            placeholder="123 Main Street, Healthcare District"
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            <i className="bi bi-telephone me-1"></i>
+                            Phone
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="header.companyPhone"
+                            value={formData.header.companyPhone}
+                            onChange={handleChange}
+                            placeholder="+91 98765 43210"
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label className="fw-semibold">
+                            <i className="bi bi-envelope me-1"></i>
+                            Email
+                          </Form.Label>
+                          <Form.Control
+                            type="email"
+                            name="header.companyEmail"
+                            value={formData.header.companyEmail}
+                            onChange={handleChange}
+                            placeholder="info@harekrishnamedical.com"
+                          />
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                  </Card.Body>
+                </ThemeCard>
+              )}
+
+              {currentStep === 5 && (
+                <ThemeCard
+                  className="step-card"
+                  style={{ borderLeft: `4px solid ${timelineSteps[5].color}` }}
+                >
+                  <Card.Header className="bg-light border-0">
+                    <div className="d-flex align-items-center">
+                      <i
+                        className={`${timelineSteps[5].icon} text-primary me-2 fs-5`}
+                      ></i>
+                      <h5 className="mb-0 fw-bold">{timelineSteps[5].title}</h5>
+                    </div>
+                  </Card.Header>
+                  <Card.Body className="p-4">
+                    <div className="review-summary">
+                      <Row className="g-4">
+                        <Col md={6}>
+                          <div className="summary-section">
+                            <h6 className="fw-bold text-primary mb-3">
+                              <i className="bi bi-file-earmark-text me-2"></i>
+                              Document Information
+                            </h6>
+                            <div className="summary-item mb-2">
+                              <strong>Type:</strong>{" "}
+                              <span className="ms-2">
+                                {
+                                  letterTypes.find(
+                                    (t) => t.value === formData.letterType,
+                                  )?.label
+                                }
+                              </span>
+                            </div>
+                            <div className="summary-item mb-2">
+                              <strong>Title:</strong>{" "}
+                              <span className="ms-2">
+                                {formData.title || "Not set"}
+                              </span>
+                            </div>
+                            <div className="summary-item mb-2">
+                              <strong>Subject:</strong>{" "}
+                              <span className="ms-2">
+                                {formData.subject || "Not set"}
+                              </span>
+                            </div>
+                          </div>
+                        </Col>
+                        <Col md={6}>
+                          <div className="summary-section">
+                            <h6 className="fw-bold text-success mb-3">
+                              <i className="bi bi-person-badge me-2"></i>
+                              Recipient
+                            </h6>
+                            <div className="summary-item mb-2">
+                              <strong>Name:</strong>{" "}
+                              <span className="ms-2">
+                                {formData.recipient.name || "Not set"}
+                              </span>
+                            </div>
+                            <div className="summary-item mb-2">
+                              <strong>Designation:</strong>{" "}
+                              <span className="ms-2">
+                                {formData.recipient.designation || "Not set"}
+                              </span>
+                            </div>
+                            <div className="summary-item mb-2">
+                              <strong>Organization:</strong>{" "}
+                              <span className="ms-2">
+                                {formData.recipient.organization || "Not set"}
+                              </span>
+                            </div>
+                          </div>
+                        </Col>
+                        <Col md={6}>
+                          <div className="summary-section">
+                            <h6 className="fw-bold text-warning mb-3">
+                              <i className="bi bi-person-check me-2"></i>
+                              Issuer
+                            </h6>
+                            <div className="summary-item mb-2">
+                              <strong>Name:</strong>{" "}
+                              <span className="ms-2">
+                                {formData.issuer.name || "Not set"}
+                              </span>
+                            </div>
+                            <div className="summary-item mb-2">
+                              <strong>Designation:</strong>{" "}
+                              <span className="ms-2">
+                                {formData.issuer.designation || "Not set"}
+                              </span>
+                            </div>
+                          </div>
+                        </Col>
+                        <Col md={6}>
+                          <div className="summary-section">
+                            <h6 className="fw-bold text-info mb-3">
+                              <i className="bi bi-building me-2"></i>
+                              Company
+                            </h6>
+                            <div className="summary-item mb-2">
+                              <strong>Name:</strong>{" "}
+                              <span className="ms-2">
+                                {formData.header.companyName}
+                              </span>
+                            </div>
+                            <div className="summary-item mb-2">
+                              <strong>Logo:</strong>{" "}
+                              <span className="ms-2">
+                                {formData.header.logo ? "Set" : "Not set"}
+                              </span>
+                            </div>
+                          </div>
+                        </Col>
+                        <Col xs={12}>
+                          <Form.Group className="mb-3">
+                            <Form.Label className="fw-semibold">
+                              <i className="bi bi-tags me-1"></i>
+                              Tags
+                            </Form.Label>
+                            <Form.Control
+                              type="text"
+                              value={formData.tags.join(", ")}
+                              onChange={handleTagsChange}
+                              placeholder="certificate, professional, excellence"
+                            />
+                            <Form.Text className="text-muted">
+                              <i className="bi bi-lightbulb me-1"></i>
+                              Comma-separated keywords for organization
+                            </Form.Text>
+                          </Form.Group>
+                        </Col>
+                        <Col xs={12}>
+                          <Form.Group>
+                            <Form.Label className="fw-semibold">
+                              <i className="bi bi-journal-text me-1"></i>
+                              Internal Notes
+                            </Form.Label>
+                            <Form.Control
+                              as="textarea"
+                              rows={3}
+                              name="notes"
+                              value={formData.notes}
+                              onChange={handleChange}
+                              placeholder="Private notes for internal reference"
+                              style={{ resize: "vertical" }}
+                            />
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                    </div>
+                  </Card.Body>
+                </ThemeCard>
+              )}
+
+              {/* Step Navigation */}
+              <div className="step-navigation mt-4">
+                <Row>
+                  <Col>
+                    {currentStep > 0 && (
+                      <Button
+                        variant="outline-secondary"
+                        onClick={prevStep}
+                        className="me-2"
+                      >
+                        <i className="bi bi-arrow-left me-1"></i>
+                        Previous
+                      </Button>
+                    )}
+                  </Col>
+                  <Col className="text-end">
+                    {currentStep < timelineSteps.length - 1 ? (
+                      <Button
+                        variant="primary"
+                        onClick={nextStep}
+                        className="btn-gradient"
+                      >
+                        Next
+                        <i className="bi bi-arrow-right ms-1"></i>
+                      </Button>
+                    ) : (
                       <ThemeButton
                         type="submit"
                         disabled={submitLoading}
@@ -762,208 +1406,133 @@ This certification is awarded in recognition of proven competency, professional 
                           </>
                         )}
                       </ThemeButton>
+                    )}
+                  </Col>
+                </Row>
+              </div>
+            </Col>
 
+            {/* Sidebar */}
+            <Col xl={4} lg={5}>
+              <div className="sticky-top" style={{ top: "100px" }}>
+                {/* Quick Actions */}
+                <ThemeCard className="mb-4">
+                  <Card.Header className="bg-light border-0">
+                    <h5 className="mb-0 fw-bold">
+                      <i className="bi bi-lightning me-2"></i>
+                      Quick Actions
+                    </h5>
+                  </Card.Header>
+                  <Card.Body>
+                    <div className="d-grid gap-2">
                       <Button
-                        type="button"
+                        variant="outline-primary"
+                        onClick={() => setShowPreview(true)}
+                        disabled={!formData.title && !formData.subject}
+                      >
+                        <i className="bi bi-eye me-2"></i>
+                        Preview Letterhead
+                      </Button>
+                      <Button variant="outline-info" onClick={loadMockData}>
+                        <i className="bi bi-magic me-2"></i>
+                        Load Sample Data
+                      </Button>
+                      <Button
                         variant="outline-secondary"
-                        size="lg"
                         onClick={() => navigate("/admin/letterheads")}
                         disabled={submitLoading}
                       >
                         <i className="bi bi-arrow-left me-2"></i>
-                        Back to Letterheads
+                        Back to List
                       </Button>
                     </div>
                   </Card.Body>
                 </ThemeCard>
 
-                {/* Company Header Configuration */}
-                <ThemeCard
-                  className="mb-4"
-                  style={{ borderLeft: "4px solid #20c997" }}
-                >
-                  <Card.Header className="bg-light border-0 rounded-top">
-                    <div className="d-flex align-items-center">
-                      <i className="bi bi-building text-info me-2 fs-5"></i>
-                      <h5 className="mb-0 fw-bold">Header Configuration</h5>
-                    </div>
+                {/* Progress Summary */}
+                <ThemeCard className="mb-4">
+                  <Card.Header className="bg-light border-0">
+                    <h5 className="mb-0 fw-bold">
+                      <i className="bi bi-list-check me-2"></i>
+                      Progress Summary
+                    </h5>
                   </Card.Header>
-                  <Card.Body className="p-4">
-                    <Row className="g-3">
-                      <Col xs={12}>
-                        <Form.Group>
-                          <Form.Label className="fw-semibold">
-                            <i className="bi bi-shop me-1"></i>
-                            Company Name
-                          </Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="header.companyName"
-                            value={formData.header.companyName}
-                            onChange={handleChange}
-                            placeholder="Hare Krishna Medical Store"
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col xs={12}>
-                        <Form.Group>
-                          <Form.Label className="fw-semibold">
-                            <i className="bi bi-geo-alt me-1"></i>
-                            Address
-                          </Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="header.companyAddress"
-                            value={formData.header.companyAddress}
-                            onChange={handleChange}
-                            placeholder="123 Main Street, Healthcare District"
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col xs={12}>
-                        <Form.Group>
-                          <Form.Label className="fw-semibold">
-                            <i className="bi bi-pin-map me-1"></i>
-                            City & State
-                          </Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="header.companyCity"
-                            value={formData.header.companyCity}
-                            onChange={handleChange}
-                            placeholder="Medical City, State 12345"
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col md={12}>
-                        <Form.Group>
-                          <Form.Label className="fw-semibold">
-                            <i className="bi bi-telephone me-1"></i>
-                            Phone
-                          </Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="header.companyPhone"
-                            value={formData.header.companyPhone}
-                            onChange={handleChange}
-                            placeholder="+91 98765 43210"
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col md={12}>
-                        <Form.Group>
-                          <Form.Label className="fw-semibold">
-                            <i className="bi bi-envelope me-1"></i>
-                            Email
-                          </Form.Label>
-                          <Form.Control
-                            type="email"
-                            name="header.companyEmail"
-                            value={formData.header.companyEmail}
-                            onChange={handleChange}
-                            placeholder="info@harekrishnamedical.com"
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col xs={12}>
-                        <Form.Group>
-                          <Form.Label className="fw-semibold">
-                            <i className="bi bi-image me-1"></i>
-                            Logo URL
-                          </Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="header.logo"
-                            value={formData.header.logo}
-                            onChange={handleChange}
-                            placeholder="https://example.com/logo.png"
-                          />
-                          <Form.Text className="text-muted">
-                            <i className="bi bi-cloud-upload me-1"></i>
-                            Company logo for letterhead header
-                          </Form.Text>
-                        </Form.Group>
-                      </Col>
-                    </Row>
+                  <Card.Body>
+                    {timelineSteps.map((step, index) => (
+                      <div
+                        key={step.id}
+                        className={`d-flex align-items-center mb-2 ${completedSteps.has(index) ? "text-success" : currentStep === index ? "text-primary" : "text-muted"}`}
+                      >
+                        <i
+                          className={`${completedSteps.has(index) ? "bi-check-circle-fill" : currentStep === index ? "bi-arrow-right-circle" : "bi-circle"} me-2`}
+                        ></i>
+                        <span
+                          className={`${currentStep === index ? "fw-bold" : ""}`}
+                        >
+                          {step.title}
+                        </span>
+                      </div>
+                    ))}
                   </Card.Body>
                 </ThemeCard>
 
-                {/* Footer & Metadata Configuration */}
-                <ThemeCard
-                  className="mb-4"
-                  style={{ borderLeft: "4px solid #dc3545" }}
-                >
-                  <Card.Header className="bg-light border-0 rounded-top">
-                    <div className="d-flex align-items-center">
-                      <i className="bi bi-card-text text-danger me-2 fs-5"></i>
-                      <h5 className="mb-0 fw-bold">Footer & Metadata</h5>
-                    </div>
+                {/* Tips */}
+                <ThemeCard>
+                  <Card.Header className="bg-light border-0">
+                    <h5 className="mb-0 fw-bold">
+                      <i className="bi bi-lightbulb me-2"></i>
+                      Professional Tips
+                    </h5>
                   </Card.Header>
-                  <Card.Body className="p-4">
-                    <Form.Group className="mb-3">
-                      <Form.Label className="fw-semibold">
-                        <i className="bi bi-shield-check me-1"></i>
-                        Terms & Verification
-                      </Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={3}
-                        name="footer.terms"
-                        value={formData.footer.terms}
-                        onChange={handleChange}
-                        placeholder="Legal terms and verification information"
-                        style={{ resize: "vertical" }}
-                      />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                      <Form.Label className="fw-semibold">
-                        <i className="bi bi-info-circle me-1"></i>
-                        Additional Information
-                      </Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={2}
-                        name="footer.additionalInfo"
-                        value={formData.footer.additionalInfo}
-                        onChange={handleChange}
-                        placeholder="Certificate ID, validity period, etc."
-                        style={{ resize: "vertical" }}
-                      />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                      <Form.Label className="fw-semibold">
-                        <i className="bi bi-tags me-1"></i>
-                        Tags
-                      </Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={formData.tags.join(", ")}
-                        onChange={handleTagsChange}
-                        placeholder="certificate, professional, excellence"
-                      />
-                      <Form.Text className="text-muted">
-                        <i className="bi bi-lightbulb me-1"></i>
-                        Comma-separated keywords for organization
-                      </Form.Text>
-                    </Form.Group>
-
-                    <Form.Group className="mb-0">
-                      <Form.Label className="fw-semibold">
-                        <i className="bi bi-journal-text me-1"></i>
-                        Internal Notes
-                      </Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={2}
-                        name="notes"
-                        value={formData.notes}
-                        onChange={handleChange}
-                        placeholder="Private notes for internal reference"
-                        style={{ resize: "vertical" }}
-                      />
-                    </Form.Group>
+                  <Card.Body>
+                    <div className="tips-list">
+                      <div className="tip-item mb-3">
+                        <div className="d-flex">
+                          <i className="bi bi-check-circle text-success me-2 mt-1"></i>
+                          <div>
+                            <strong>Professional Language:</strong>
+                            <small className="d-block text-muted">
+                              Use formal, clear, and respectful language
+                              throughout
+                            </small>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="tip-item mb-3">
+                        <div className="d-flex">
+                          <i className="bi bi-check-circle text-success me-2 mt-1"></i>
+                          <div>
+                            <strong>Complete Information:</strong>
+                            <small className="d-block text-muted">
+                              Include all necessary details for verification
+                            </small>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="tip-item mb-3">
+                        <div className="d-flex">
+                          <i className="bi bi-check-circle text-success me-2 mt-1"></i>
+                          <div>
+                            <strong>Logo Quality:</strong>
+                            <small className="d-block text-muted">
+                              Use high-resolution logo for professional
+                              appearance
+                            </small>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="tip-item">
+                        <div className="d-flex">
+                          <i className="bi bi-check-circle text-success me-2 mt-1"></i>
+                          <div>
+                            <strong>Preview Before Saving:</strong>
+                            <small className="d-block text-muted">
+                              Always preview to ensure proper formatting
+                            </small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </Card.Body>
                 </ThemeCard>
               </div>
@@ -981,13 +1550,13 @@ This certification is awarded in recognition of proven competency, professional 
           <Modal.Header closeButton className="bg-light">
             <Modal.Title className="d-flex align-items-center">
               <i className="bi bi-eye me-2"></i>
-              Letterhead Preview
+              Letterhead Preview - A4 Format
             </Modal.Title>
           </Modal.Header>
-          <Modal.Body className="p-0">
+          <Modal.Body className="p-0" style={{ backgroundColor: "#f8f9fa" }}>
             <LetterheadDesign
               letterheadData={getPreviewData()}
-              showActions={false}
+              showActions={true}
               printMode={false}
             />
           </Modal.Body>
@@ -1006,16 +1575,17 @@ This certification is awarded in recognition of proven competency, professional 
           <Toast
             show={showToast}
             onClose={() => setShowToast(false)}
-            delay={3000}
+            delay={4000}
             autohide
           >
             <Toast.Header>
               <i className="bi bi-magic text-primary me-2"></i>
-              <strong className="me-auto">Sample Data Loaded</strong>
+              <strong className="me-auto">Data Loaded</strong>
             </Toast.Header>
             <Toast.Body>
-              Professional sample data has been loaded. You can customize it as
-              needed.
+              {isEditing
+                ? "Letterhead data loaded successfully!"
+                : "Professional sample data loaded. Customize as needed."}
             </Toast.Body>
           </Toast>
         </ToastContainer>
@@ -1029,26 +1599,93 @@ This certification is awarded in recognition of proven competency, professional 
           color: white;
           transition: all 0.3s ease;
         }
-        
+
         .btn-gradient:hover {
           background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
           transform: translateY(-2px);
           box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
         }
-        
+
         .form-control:focus,
         .form-select:focus {
           border-color: #e63946;
           box-shadow: 0 0 0 0.2rem rgba(230, 57, 70, 0.25);
         }
-        
-        .sticky-top {
-          z-index: 1020;
+
+        .step-card {
+          transition: all 0.3s ease;
+          border: 1px solid rgba(0,0,0,.125);
         }
-        
-        .badge {
-          font-size: 0.7rem;
-          padding: 0.25rem 0.5rem;
+
+        .step-card:hover {
+          box-shadow: 0 8px 25px rgba(0,0,0,.1);
+        }
+
+        .timeline-step {
+          cursor: pointer;
+          transition: all 0.3s ease;
+          position: relative;
+        }
+
+        .timeline-step:hover {
+          transform: translateY(-2px);
+        }
+
+        .timeline-step.active .timeline-icon {
+          transform: scale(1.1);
+          box-shadow: 0 4px 15px rgba(0,0,0,.2);
+        }
+
+        .summary-item {
+          padding: 8px 0;
+          border-bottom: 1px solid #f8f9fa;
+        }
+
+        .summary-item:last-child {
+          border-bottom: none;
+        }
+
+        .cursor-pointer {
+          cursor: pointer;
+        }
+
+        .progress-header {
+          position: relative;
+          z-index: 10;
+        }
+
+        .selected-type-preview {
+          transition: all 0.3s ease;
+        }
+
+        .tip-item {
+          transition: all 0.3s ease;
+        }
+
+        .tip-item:hover {
+          transform: translateX(5px);
+        }
+
+        @media (max-width: 768px) {
+          .timeline-nav {
+            flex-direction: column;
+            gap: 15px;
+          }
+
+          .timeline-step {
+            flex-direction: row;
+            width: 100%;
+            text-align: left;
+          }
+
+          .timeline-icon {
+            margin-right: 15px !important;
+            margin-bottom: 0 !important;
+          }
+
+          .timeline-connector {
+            display: none !important;
+          }
         }
       `}</style>
     </Container>
