@@ -1080,13 +1080,13 @@ const AddLetterhead = () => {
                 ) : (
                   <div
                     style={{
-                      width: "210mm",
-                      height: "297mm",
+                      width: "794px",
+                      height: "1123px",
                       backgroundColor: "white",
                       boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
                       borderRadius: "4px",
                       overflow: "hidden",
-                      transform: "scale(0.5)",
+                      transform: "scale(0.45)",
                       transformOrigin: "center center",
                       border: "1px solid #ddd",
                     }}
