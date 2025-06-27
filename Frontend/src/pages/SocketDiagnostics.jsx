@@ -85,9 +85,9 @@ const SocketDiagnostics = () => {
           if (isProduction && backendUrl.includes("localhost")) {
             // Try common production patterns
             const hostname = window.location.hostname;
-            if (hostname.includes("fly.dev")) {
-              // For Fly.dev, try to guess backend URL
-              testUrl = `https://${hostname.replace("frontend", "backend")}`;
+            if (hostname.includes("vercel.app")) {
+              // For Vercel, use configured production backend
+              testUrl = "https://hare-krishna-medical.onrender.com";
             } else {
               testUrl = `https://api.${hostname}`;
             }
