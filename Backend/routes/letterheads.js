@@ -38,7 +38,8 @@ const validateCreateLetterhead = [
     .withMessage("Subject must be a string"),
   body("content").trim().notEmpty().withMessage("Content is required"),
   body("issuer.name")
-    .optional()
+    .optional({ values: "falsy" })
+    .isString()
     .trim()
     .withMessage("Issuer name must be a string"),
   body("issuer.designation")
