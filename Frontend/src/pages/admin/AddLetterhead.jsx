@@ -460,12 +460,26 @@ const AddLetterhead = () => {
   // DOWNLOAD FUNCTIONALITY - Using html2pdf.js for PDF generation
   const handleDownload = async () => {
     if (!formData.title || !formData.content) {
-      alert("Please fill in both title and content before downloading.");
+      setError("Please fill in both title and content before downloading.");
       return;
     }
 
     try {
       setDownloadLoading(true);
+      setError(null); // Clear any previous errors
+
+      // Ensure QR code is generated
+      if (!qrCode) {
+        const tempId = letterheadId || generateTempLetterheadId();
+        setLetterheadId(tempId);
+        const generatedQR = await generatePreviewQRCode(tempId);
+        if (generatedQR) {
+          setQrCode(generatedQR);
+        }
+      }
+
+      // Wait a moment for QR code to render if it was just generated
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Use html2pdf.js for better HTML to PDF conversion
       const html2pdf = (await import("html2pdf.js")).default;
@@ -474,8 +488,9 @@ const AddLetterhead = () => {
         "letterhead-print-content",
       );
       if (!letterheadElement) {
-        alert("Letterhead content not found. Please refresh and try again.");
-        return;
+        throw new Error(
+          "Letterhead content not found. Please refresh and try again.",
+        );
       }
 
       // Clone the element to avoid modifying the original
@@ -540,10 +555,14 @@ const AddLetterhead = () => {
       // Clean up
       document.body.removeChild(clonedElement);
 
+      // Show success feedback
+      setSuccess("PDF downloaded successfully! Check your downloads folder.");
+      setTimeout(() => setSuccess(null), 3000);
+
       console.log("PDF downloaded successfully");
     } catch (error) {
       console.error("Download failed:", error);
-      alert("Download failed. Please try again.");
+      setError(`Download failed: ${error.message}. Please try again.`);
     } finally {
       setDownloadLoading(false);
     }
