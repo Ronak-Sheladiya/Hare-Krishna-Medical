@@ -388,18 +388,26 @@ const AddLetterhead = () => {
       const letterheadElement = document.getElementById(
         "letterhead-print-content",
       );
-      if (!letterheadElement) return;
+      if (!letterheadElement) {
+        alert("Letterhead content not found. Please try again.");
+        return;
+      }
 
       const result = await pdfService.generatePDFFromElement(
         letterheadElement,
         {
           filename: `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`,
-          download: true,
+          onProgress: (message, progress) => {
+            console.log(`PDF Download: ${message} (${progress}%)`);
+          },
         },
       );
 
       if (!result.success) {
         alert("PDF download failed. Please try again.");
+        console.error("PDF generation error:", result.error);
+      } else {
+        console.log("PDF downloaded successfully:", result.filename);
       }
     } catch (error) {
       console.error("PDF download failed:", error);
