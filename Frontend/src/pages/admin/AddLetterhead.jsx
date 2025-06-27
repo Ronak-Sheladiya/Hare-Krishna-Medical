@@ -1059,7 +1059,7 @@ const AddLetterhead = () => {
                     <Button
                       variant="success"
                       onClick={handlePrint}
-                      disabled={downloadLoading || pdfGenerating}
+                      disabled={printLoading || downloadLoading}
                       style={{
                         borderRadius: "10px",
                         fontWeight: "600",
@@ -1071,29 +1071,29 @@ const AddLetterhead = () => {
                         transition: "all 0.2s ease",
                       }}
                       onMouseEnter={(e) => {
-                        if (!downloadLoading && !pdfGenerating) {
+                        if (!printLoading && !downloadLoading) {
                           e.target.style.transform = "translateY(-1px)";
                           e.target.style.boxShadow =
                             "0 6px 16px rgba(40, 167, 69, 0.4)";
                         }
                       }}
                       onMouseLeave={(e) => {
-                        if (!downloadLoading && !pdfGenerating) {
+                        if (!printLoading && !downloadLoading) {
                           e.target.style.transform = "translateY(0)";
                           e.target.style.boxShadow =
                             "0 4px 12px rgba(40, 167, 69, 0.3)";
                         }
                       }}
                     >
-                      {pdfGenerating ? (
+                      {printLoading ? (
                         <>
                           <Spinner size="sm" className="me-2" />
-                          Preparing PDF...
+                          Printing...
                         </>
                       ) : (
                         <>
                           <i className="bi bi-printer me-2"></i>
-                          Print A4
+                          Print HTML
                         </>
                       )}
                     </Button>
@@ -1101,7 +1101,7 @@ const AddLetterhead = () => {
                     <Button
                       variant="primary"
                       onClick={handleDownload}
-                      disabled={downloadLoading || pdfGenerating}
+                      disabled={downloadLoading || printLoading}
                       style={{
                         borderRadius: "10px",
                         fontWeight: "600",
@@ -1113,14 +1113,14 @@ const AddLetterhead = () => {
                         transition: "all 0.2s ease",
                       }}
                       onMouseEnter={(e) => {
-                        if (!downloadLoading && !pdfGenerating) {
+                        if (!downloadLoading && !printLoading) {
                           e.target.style.transform = "translateY(-1px)";
                           e.target.style.boxShadow =
                             "0 6px 16px rgba(230, 57, 70, 0.4)";
                         }
                       }}
                       onMouseLeave={(e) => {
-                        if (!downloadLoading && !pdfGenerating) {
+                        if (!downloadLoading && !printLoading) {
                           e.target.style.transform = "translateY(0)";
                           e.target.style.boxShadow =
                             "0 4px 12px rgba(230, 57, 70, 0.3)";
@@ -1130,12 +1130,12 @@ const AddLetterhead = () => {
                       {downloadLoading ? (
                         <>
                           <Spinner size="sm" className="me-2" />
-                          Generating PDF...
+                          Downloading...
                         </>
                       ) : (
                         <>
                           <i className="bi bi-download me-2"></i>
-                          Download PDF
+                          Download HTML
                         </>
                       )}
                     </Button>
