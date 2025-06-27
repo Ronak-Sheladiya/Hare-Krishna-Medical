@@ -928,9 +928,10 @@ const AddLetterhead = () => {
             </div>
 
             </div>
-          </Col>
-        </Row>
-      </Container>
+          </div>
+        </Modal.Footer>
+      </Modal>
+    </Container>
 
 
 
