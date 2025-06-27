@@ -101,6 +101,15 @@ const AddLetterhead = () => {
     return () => clearTimeout(timeoutId);
   }, [formData.title, formData.content, letterheadId, qrCode]);
 
+  // Cleanup PDF URL on unmount
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    };
+  }, [pdfUrl]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
