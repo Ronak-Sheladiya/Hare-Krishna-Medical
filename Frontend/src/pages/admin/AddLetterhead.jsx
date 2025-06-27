@@ -196,17 +196,18 @@ const AddLetterhead = () => {
       <div id="letterhead-print-content" style="
         font-family: Arial, sans-serif;
         width: 210mm;
-        min-height: 297mm;
+        height: 297mm;
         background: white;
         position: relative;
-        margin: 0 auto;
+        margin: 0;
         padding: 15mm;
         box-sizing: border-box;
         font-size: 13px;
-        line-height: 1.6;
+        line-height: 1.5;
         color: #333;
         display: flex;
         flex-direction: column;
+        overflow: hidden;
       ">
         <!-- Header Section -->
         <div style="
@@ -344,28 +345,24 @@ const AddLetterhead = () => {
         <!-- Content Section -->
         <div style="
           font-size: 13px;
-          line-height: 1.7;
+          line-height: 1.6;
           text-align: justify;
-          margin-bottom: 100px;
-          min-height: 300px;
           color: #333;
           font-family: Arial, sans-serif;
-          padding-bottom: 40px;
           flex: 1;
+          overflow: hidden;
+          margin-bottom: 20px;
         ">
           ${formData.content}
         </div>
 
-        <!-- Footer Section - Better positioning to avoid overlap -->
+        <!-- Footer Section - Fixed at bottom -->
         <div style="
           border-top: 2px solid #e63946;
           padding-top: 15px;
           margin-top: auto;
-          position: absolute;
-          bottom: 15mm;
-          left: 15mm;
-          right: 15mm;
           background: white;
+          flex-shrink: 0;
         ">
           <div style="text-align: center;">
             <p style="
@@ -569,16 +566,18 @@ const AddLetterhead = () => {
         ]}
       />
 
-      <Container style={{ marginTop: "10px", padding: "20px" }}>
-        <Row className="g-4">
+      <Container fluid style={{ marginTop: "10px", padding: "20px" }}>
+        <Row className="g-3" style={{ minHeight: "calc(100vh - 150px)" }}>
           {/* Form Section */}
-          <Col xl={5} lg={6}>
+          <Col lg={4} md={5}>
             <Card
-              className="shadow-lg h-100"
+              className="shadow-lg"
               style={{
                 borderRadius: "12px",
                 border: "none",
-                maxHeight: "calc(100vh - 200px)",
+                height: "calc(100vh - 180px)",
+                display: "flex",
+                flexDirection: "column",
               }}
             >
               <Card.Header
@@ -601,7 +600,7 @@ const AddLetterhead = () => {
                 style={{
                   padding: "20px",
                   overflowY: "auto",
-                  height: "calc(100vh - 350px)",
+                  flex: 1,
                 }}
               >
                 {error && (
@@ -866,78 +865,85 @@ const AddLetterhead = () => {
           </Col>
 
           {/* Live Preview Section */}
-          <Col xl={7} lg={6}>
-            <Card
-              className="shadow-lg h-100"
+          <Col lg={8} md={7}>
+            <div
               style={{
+                height: "calc(100vh - 180px)",
+                display: "flex",
+                flexDirection: "column",
+                background: "white",
                 borderRadius: "12px",
-                border: "none",
-                maxHeight: "calc(100vh - 200px)",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                overflow: "hidden",
               }}
             >
-              <Card.Header
-                className="text-white"
+              {/* Preview Header */}
+              <div
                 style={{
                   background: "linear-gradient(135deg, #28a745, #20c997)",
-                  borderRadius: "12px 12px 0 0",
-                  padding: "15px",
+                  color: "white",
+                  padding: "15px 20px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexShrink: 0,
                 }}
               >
-                <div className="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h5 className="mb-0" style={{ fontWeight: "600" }}>
-                      <i className="bi bi-eye me-2"></i>
-                      Live A4 Preview
-                    </h5>
-                    <small style={{ opacity: "0.9" }}>
-                      Real-time A4 letterhead preview with print/download
-                    </small>
-                  </div>
-                  <div className="d-flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline-light"
-                      onClick={handleRefreshPreview}
-                      disabled={!formData.title || !formData.content}
-                      style={{ borderRadius: "8px" }}
-                      title="Refresh preview and regenerate QR code"
-                    >
-                      <i className="bi bi-arrow-clockwise me-1"></i>
-                      Refresh
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline-light"
-                      onClick={() => setShowPreview(true)}
-                      disabled={!formData.title || !formData.content}
-                      style={{ borderRadius: "8px" }}
-                    >
-                      <i className="bi bi-arrows-fullscreen me-1"></i>
-                      Full View
-                    </Button>
-                  </div>
+                <div>
+                  <h5 className="mb-0" style={{ fontWeight: "600" }}>
+                    <i className="bi bi-eye me-2"></i>
+                    A4 Letterhead Preview
+                  </h5>
+                  <small style={{ opacity: "0.9" }}>
+                    Real-time preview with professional A4 layout
+                  </small>
                 </div>
-              </Card.Header>
-              <Card.Body
-                className="p-3"
+                <div className="d-flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline-light"
+                    onClick={handleRefreshPreview}
+                    disabled={!formData.title || !formData.content}
+                    style={{ borderRadius: "8px" }}
+                  >
+                    <i className="bi bi-arrow-clockwise me-1"></i>
+                    Refresh
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline-light"
+                    onClick={() => setShowPreview(true)}
+                    disabled={!formData.title || !formData.content}
+                    style={{ borderRadius: "8px" }}
+                  >
+                    <i className="bi bi-arrows-fullscreen me-1"></i>
+                    Full View
+                  </Button>
+                </div>
+              </div>
+
+              {/* Preview Content */}
+              <div
                 style={{
-                  backgroundColor: "#f8f9fa",
-                  height: "calc(100vh - 350px)",
-                  overflowY: "auto",
+                  flex: 1,
+                  background: "#f1f3f5",
                   display: "flex",
-                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "20px",
+                  overflow: "hidden",
                 }}
               >
                 {!formData.title || !formData.content ? (
                   <div
-                    className="d-flex flex-column align-items-center justify-content-center text-muted flex-grow-1"
+                    className="d-flex flex-column align-items-center justify-content-center text-muted"
                     style={{
-                      background:
-                        "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+                      background: "white",
                       borderRadius: "12px",
                       border: "2px dashed #dee2e6",
-                      padding: "40px",
-                      minHeight: "400px",
+                      padding: "60px 40px",
+                      textAlign: "center",
+                      maxWidth: "400px",
                     }}
                   >
                     <div
@@ -961,60 +967,45 @@ const AddLetterhead = () => {
                     <h5 style={{ fontWeight: "600", color: "#495057" }}>
                       A4 Preview Ready
                     </h5>
-                    <p
-                      style={{
-                        textAlign: "center",
-                        marginBottom: "0",
-                        color: "#6c757d",
-                      }}
-                    >
-                      Enter your letterhead title and content to see a real-time
-                      A4 preview
+                    <p style={{ marginBottom: "0", color: "#6c757d" }}>
+                      Enter your letterhead title and content to see a perfect A4 preview
                     </p>
                   </div>
                 ) : (
                   <div
-                    className="flex-grow-1 d-flex align-items-center justify-content-center"
                     style={{
-                      minHeight: "400px",
-                      padding: "10px",
-                      background: "#e9ecef",
-                      borderRadius: "8px",
+                      width: "210mm",
+                      height: "297mm",
+                      backgroundColor: "white",
+                      boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+                      borderRadius: "4px",
+                      overflow: "hidden",
+                      transform: "scale(0.5)",
+                      transformOrigin: "center center",
+                      border: "1px solid #ddd",
                     }}
                   >
-                    {/* A4 Preview Container */}
                     <div
-                      style={{
-                        width: "210mm",
-                        height: "297mm",
-                        backgroundColor: "white",
-                        boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-                        borderRadius: "8px",
-                        transform: "scale(0.45)",
-                        transformOrigin: "center center",
-                        overflow: "hidden",
-                        position: "relative",
-                      }}
+                      style={{ width: "100%", height: "100%" }}
                       dangerouslySetInnerHTML={{
                         __html: createLetterheadTemplate(),
                       }}
                     />
                   </div>
                 )}
-              </Card.Body>
+              </div>
 
-              {/* Action Buttons - Fixed at bottom */}
+              {/* Action Buttons - Only show when content exists */}
               {formData.title && formData.content && (
-                <Card.Footer
-                  className="bg-transparent border-0"
+                <div
                   style={{
-                    padding: "15px 20px",
-                    background:
-                      "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)",
-                    borderRadius: "0 0 12px 12px",
+                    padding: "20px",
+                    background: "white",
+                    borderTop: "1px solid #e9ecef",
+                    flexShrink: 0,
                   }}
                 >
-                  <div className="d-flex gap-3 justify-content-center flex-wrap">
+                  <div className="d-flex gap-3 justify-content-center">
                     <Button
                       variant="success"
                       onClick={handlePrint}
@@ -1022,13 +1013,11 @@ const AddLetterhead = () => {
                       style={{
                         borderRadius: "10px",
                         fontWeight: "600",
-                        padding: "10px 20px",
+                        padding: "12px 24px",
                         border: "none",
                         background: "linear-gradient(135deg, #28a745, #20c997)",
-                        minWidth: "130px",
-                        transition: "all 0.3s ease",
+                        minWidth: "140px",
                       }}
-                      className="shadow-sm"
                     >
                       {printLoading ? (
                         <>
@@ -1050,13 +1039,11 @@ const AddLetterhead = () => {
                       style={{
                         borderRadius: "10px",
                         fontWeight: "600",
-                        padding: "10px 20px",
+                        padding: "12px 24px",
                         border: "none",
                         background: "linear-gradient(135deg, #e63946, #dc3545)",
-                        minWidth: "130px",
-                        transition: "all 0.3s ease",
+                        minWidth: "140px",
                       }}
-                      className="shadow-sm"
                     >
                       {downloadLoading ? (
                         <>
@@ -1071,15 +1058,16 @@ const AddLetterhead = () => {
                       )}
                     </Button>
                   </div>
-
                   <div className="text-center mt-2">
                     <small className="text-muted">
                       <i className="bi bi-info-circle me-1"></i>
-                      Perfect A4 letterhead ready for professional use
+                      Professional A4 letterhead ready for use
                     </small>
                   </div>
-                </Card.Footer>
+                </div>
               )}
+            </div>
+          </Col>
             </Card>
           </Col>
         </Row>
