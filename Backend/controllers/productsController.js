@@ -15,6 +15,8 @@ const sampleProducts = [
       "Fast-acting pain relief and fever reducer for adults and children over 12 years.",
     description:
       "Effective pain relief and fever reducer suitable for adults and children over 12 years. Gentle on stomach with proven efficacy.",
+    benefits:
+      "• Fast-acting pain relief\n• Reduces fever effectively\n• Safe for regular use\n• Gentle on stomach",
     usage:
       "Take 1-2 tablets every 4-6 hours as needed. Do not exceed 8 tablets in 24 hours.",
     weight: "500mg",
