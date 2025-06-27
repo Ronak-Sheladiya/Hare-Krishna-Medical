@@ -163,6 +163,10 @@ class LetterheadController {
   // Get all letterheads with pagination and filtering
   async getAllLetterheads(req, res) {
     try {
+      console.log("📋 GET /api/letterheads called");
+      console.log("👤 User:", req.user?.email, "Role:", req.user?.role);
+      console.log("🔍 Query params:", req.query);
+
       const {
         page = 1,
         limit = 10,
