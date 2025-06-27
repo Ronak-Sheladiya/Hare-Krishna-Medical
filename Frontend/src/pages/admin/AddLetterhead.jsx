@@ -211,9 +211,9 @@ const AddLetterhead = () => {
         flex-direction: column;
         overflow: hidden;
       ">
-        <!-- Page Content Container using full A4 page -->
+        <!-- Page Content Container using 98% of A4 page -->
         <div style="
-          padding: 10mm;
+          padding: 2mm;
           height: 100%;
           display: flex;
           flex-direction: column;
