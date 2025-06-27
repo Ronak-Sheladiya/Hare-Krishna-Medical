@@ -589,16 +589,42 @@ const seedDatabase = async () => {
       await connectDB();
     }
 
+    console.log("👥 Seeding users...");
     const users = await seedUsers();
+
+    console.log("📦 Seeding products...");
     const products = await seedProducts();
+
+    console.log("💬 Seeding messages...");
+    const messages = await seedMessages(users);
+
+    console.log("📋 Seeding letterheads...");
+    const letterheads = await seedLetterheads(users);
+
+    console.log("🔐 Seeding verification tokens...");
+    const verifications = await seedVerifications(users);
+
+    console.log("🛒 Seeding orders and invoices...");
     const { orders, invoices } = await seedOrders(users, products);
 
     console.log("✅ Database seeding completed successfully!");
     console.log(`📊 Summary:`);
-    console.log(`   - Users: ${users.length}`);
-    console.log(`   - Products: ${products.length}`);
-    console.log(`   - Orders: ${orders.length}`);
-    console.log(`   - Invoices: ${invoices.length}`);
+    console.log(`   - Users: ${users?.length || 0}`);
+    console.log(`   - Products: ${products?.length || 0}`);
+    console.log(`   - Messages: ${messages?.length || 0}`);
+    console.log(`   - Letterheads: ${letterheads?.length || 0}`);
+    console.log(`   - Verification Tokens: ${verifications?.length || 0}`);
+    console.log(`   - Orders: ${orders?.length || 0}`);
+    console.log(`   - Invoices: ${invoices?.length || 0}`);
+
+    console.log("\n🗄️ Collections created in database:");
+    console.log("   - users ✅");
+    console.log("   - products ✅");
+    console.log("   - messages ✅");
+    console.log("   - letterheads ✅");
+    console.log("   - verifications ✅");
+    console.log("   - orders ✅");
+    console.log("   - invoices ✅");
 
     console.log("\n🔐 Admin Login Credentials:");
     console.log("   Email: admin@harekrishnamedical.com");
@@ -617,7 +643,15 @@ const seedDatabase = async () => {
       process.exit(0);
     }
 
-    return { users, products, orders, invoices };
+    return {
+      users,
+      products,
+      messages,
+      letterheads,
+      verifications,
+      orders,
+      invoices,
+    };
   } catch (error) {
     console.error("❌ Database seeding failed:", error);
     if (require.main === module) {
