@@ -65,6 +65,7 @@ class PDFService {
         addQR = false,
         qrUrl = null,
         qrPosition = { x: 170, y: 10, width: 30, height: 30 },
+        margin = 5.3, // Default margin, can be overridden for 98% usage
         onProgress = null,
       } = options;
 
@@ -91,25 +92,25 @@ class PDFService {
         this.defaultOptions.format,
       );
 
-      // Calculate dimensions with 15px margins (approximately 5.3mm)
-      const margin = 5.3; // 15px converted to mm
+      // Calculate dimensions with custom margins (0 for full page, default 5.3mm for normal usage)
       const imgWidth = 210 - margin * 2; // A4 width minus margins
       const pageHeight = 297; // A4 height in mm
       const availableHeight = pageHeight - margin * 2; // Available height minus margins
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
       let heightLeft = imgHeight;
-      let position = margin; // Start with top margin
+      let position = margin; // Start with top margin (0 for full page)
 
       if (onProgress) onProgress("Adding content to PDF...", 70);
 
-      // Add first page with margins
+      // Add first page with or without margins
       if (imgHeight <= availableHeight) {
-        // Single page - center vertically within available space
-        const yOffset = margin + (availableHeight - imgHeight) / 2;
+        // Single page - position based on margin (0 for full page means top-aligned)
+        const yOffset =
+          margin === 0 ? 0 : margin + (availableHeight - imgHeight) / 2;
         pdf.addImage(imgData, "PNG", margin, yOffset, imgWidth, imgHeight);
       } else {
-        // Multiple pages with margins
+        // Multiple pages
         pdf.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
         heightLeft -= availableHeight;
 
