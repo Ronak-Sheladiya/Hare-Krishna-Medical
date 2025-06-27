@@ -245,10 +245,8 @@ class ProductsController {
     }
   }
 
-}
-
-// Handle products when database is offline
-const handleOfflineProducts = (req, res) => {
+  // Handle products when database is offline
+  handleOfflineProducts(req, res) {
     try {
       const {
         page = 1,
