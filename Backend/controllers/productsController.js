@@ -64,9 +64,10 @@ const sampleProducts = [
     originalPrice: 110.0,
     stock: 65,
     category: "Cough & Cold",
-    description: "Natural ayurvedic cough syrup for dry and wet cough relief.",
-    benefits:
-      "• Relieves dry and wet cough\n• Natural ayurvedic formula\n• Soothes throat irritation\n• Safe for all ages",
+    shortDescription:
+      "Natural ayurvedic cough syrup for dry and wet cough relief.",
+    description:
+      "Effective natural ayurvedic formula that relieves both dry and wet cough, soothes throat irritation, and is safe for all ages.",
     usage:
       "Adults: 2 teaspoons 3 times daily. Children: 1 teaspoon 3 times daily.",
     weight: "100ml",
