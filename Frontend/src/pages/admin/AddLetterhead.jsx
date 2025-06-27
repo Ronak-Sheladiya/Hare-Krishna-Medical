@@ -895,10 +895,11 @@ const AddLetterhead = () => {
             />
           </div>
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer style={{ padding: "10px" }}>
           <Button
             variant="outline-secondary"
             onClick={() => setShowPreview(false)}
+            style={{ borderRadius: "8px" }}
           >
             Close Preview
           </Button>
@@ -906,6 +907,11 @@ const AddLetterhead = () => {
             variant="success"
             onClick={handlePrint}
             disabled={pdfGenerating}
+            style={{
+              borderRadius: "8px",
+              background: "linear-gradient(135deg, #28a745, #20c997)",
+              border: "none",
+            }}
           >
             {pdfGenerating ? (
               <>
@@ -920,9 +926,14 @@ const AddLetterhead = () => {
             )}
           </Button>
           <Button
-            variant="primary"
             onClick={handleDownload}
             disabled={pdfGenerating}
+            style={{
+              borderRadius: "8px",
+              background: "linear-gradient(135deg, #e63946, #dc3545)",
+              border: "none",
+              color: "white",
+            }}
           >
             {pdfGenerating ? (
               <>
