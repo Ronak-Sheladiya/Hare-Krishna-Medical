@@ -59,7 +59,6 @@ const SocketDiagnostics = () => {
         const backendUrl =
           import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
         const isProduction =
-          window.location.hostname.includes("fly.dev") ||
           window.location.hostname.includes("vercel.app") ||
           window.location.hostname.includes("netlify.app");
 
