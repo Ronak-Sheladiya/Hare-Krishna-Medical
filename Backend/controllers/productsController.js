@@ -345,6 +345,35 @@ class ProductsController {
   // Get all product categories with counts
   async getCategories(req, res) {
     try {
+      if (!global.DB_CONNECTED) {
+        // Offline category data
+        const categories = {};
+        sampleProducts.forEach((product) => {
+          if (!categories[product.category]) {
+            categories[product.category] = { count: 0, prices: [] };
+          }
+          categories[product.category].count++;
+          categories[product.category].prices.push(product.price);
+        });
+
+        const categoryData = Object.entries(categories)
+          .map(([category, data]) => ({
+            _id: category,
+            count: data.count,
+            avgPrice:
+              data.prices.reduce((a, b) => a + b, 0) / data.prices.length,
+            minPrice: Math.min(...data.prices),
+            maxPrice: Math.max(...data.prices),
+          }))
+          .sort((a, b) => b.count - a.count);
+
+        return res.json({
+          success: true,
+          data: categoryData,
+          offline: true,
+        });
+      }
+
       const categories = await Product.aggregate([
         { $match: { isActive: true } },
         {
@@ -365,10 +394,30 @@ class ProductsController {
       });
     } catch (error) {
       console.error("Get categories error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to fetch categories",
-        error: error.message,
+      // Fallback to offline mode
+      const categories = {};
+      sampleProducts.forEach((product) => {
+        if (!categories[product.category]) {
+          categories[product.category] = { count: 0, prices: [] };
+        }
+        categories[product.category].count++;
+        categories[product.category].prices.push(product.price);
+      });
+
+      const categoryData = Object.entries(categories)
+        .map(([category, data]) => ({
+          _id: category,
+          count: data.count,
+          avgPrice: data.prices.reduce((a, b) => a + b, 0) / data.prices.length,
+          minPrice: Math.min(...data.prices),
+          maxPrice: Math.max(...data.prices),
+        }))
+        .sort((a, b) => b.count - a.count);
+
+      res.json({
+        success: true,
+        data: categoryData,
+        offline: true,
       });
     }
   }
@@ -376,6 +425,19 @@ class ProductsController {
   // Get featured products
   async getFeaturedProducts(req, res) {
     try {
+      if (!global.DB_CONNECTED) {
+        const featuredProducts = sampleProducts
+          .filter((p) => p.isActive && p.isFeatured)
+          .sort((a, b) => b.sales - a.sales)
+          .slice(0, 8);
+
+        return res.json({
+          success: true,
+          data: featuredProducts,
+          offline: true,
+        });
+      }
+
       const featuredProducts = await Product.find({
         isActive: true,
         isFeatured: true,
@@ -389,10 +451,16 @@ class ProductsController {
       });
     } catch (error) {
       console.error("Get featured products error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to fetch featured products",
-        error: error.message,
+      // Fallback to offline mode
+      const featuredProducts = sampleProducts
+        .filter((p) => p.isActive && p.isFeatured)
+        .sort((a, b) => b.sales - a.sales)
+        .slice(0, 8);
+
+      res.json({
+        success: true,
+        data: featuredProducts,
+        offline: true,
       });
     }
   }
