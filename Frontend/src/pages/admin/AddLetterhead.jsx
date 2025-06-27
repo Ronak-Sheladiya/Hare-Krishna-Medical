@@ -417,31 +417,13 @@ const AddLetterhead = () => {
     `;
   };
 
-  // DIRECT HTML DOWNLOAD FUNCTIONALITY
-  const handleDownload = async () => {
-    if (!formData.title || !formData.content) {
-      setError("Please fill in both title and content before downloading.");
-      return;
-    }
 
-    try {
-      setDownloadLoading(true);
-      setError(null);
 
-      // Ensure QR code is generated
-      if (!qrCode) {
-        const tempId = letterheadId || generateTempLetterheadId();
-        setLetterheadId(tempId);
-        const generatedQR = await generatePreviewQRCode(tempId);
-        if (generatedQR) {
-          setQrCode(generatedQR);
-        }
-      }
 
-      // Wait for QR code to render
-      await new Promise((resolve) => setTimeout(resolve, 300));
 
-      const letterheadElement = document.getElementById(
+
+
+
         "letterhead-print-content",
       );
       if (!letterheadElement) {
