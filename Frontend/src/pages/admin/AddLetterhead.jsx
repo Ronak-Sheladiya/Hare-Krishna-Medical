@@ -1231,57 +1231,6 @@ const AddLetterhead = () => {
                 Preview in A4 format (scaled 80%)
               </small>
             </div>
-
-
-                onClick={handleDownload}
-                disabled={downloadLoading || printLoading || pdfDownloadLoading}
-                style={{
-                  borderRadius: "10px",
-                  padding: "12px 20px",
-                  fontWeight: "600",
-                  border: "none",
-                  background: "linear-gradient(135deg, #6f42c1, #6610f2)",
-                  boxShadow: "0 4px 12px rgba(111, 66, 193, 0.25)",
-                  transition: "all 0.2s ease",
-                  minWidth: "130px",
-                }}
-                title="Download editable HTML source"
-              >
-                {downloadLoading ? (
-                  <>
-                    <Spinner size="sm" className="me-2" />
-                    HTML...
-                  </>
-                ) : (
-                  <>
-                    <i className="bi bi-file-earmark-code-fill me-2"></i>
-                    HTML
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-
-          {/* Professional Features Summary */}
-          <div className="w-100 mt-3 pt-3 border-top">
-            <div className="d-flex justify-content-center gap-4 flex-wrap">
-              <small className="text-muted d-flex align-items-center gap-1">
-                <i className="bi bi-shield-check-fill text-success"></i>
-                <span>QR Verified</span>
-              </small>
-              <small className="text-muted d-flex align-items-center gap-1">
-                <i className="bi bi-file-earmark-pdf-fill text-danger"></i>
-                <span>PDF Ready</span>
-              </small>
-              <small className="text-muted d-flex align-items-center gap-1">
-                <i className="bi bi-printer-fill text-success"></i>
-                <span>Print Optimized</span>
-              </small>
-              <small className="text-muted d-flex align-items-center gap-1">
-                <i className="bi bi-aspect-ratio text-primary"></i>
-                <span>A4 Format</span>
-              </small>
-            </div>
           </div>
         </Modal.Footer>
       </Modal>
