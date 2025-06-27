@@ -1462,53 +1462,109 @@ const AddLetterhead = () => {
                             "0 4px 15px rgba(111, 66, 193, 0.25)";
                         }
                       }}
+                      title="Download editable HTML version of the letterhead"
                     >
                       {downloadLoading ? (
                         <>
                           <Spinner size="sm" className="me-2" />
-                          Downloading...
+                          Preparing HTML...
                         </>
                       ) : (
                         <>
-                          <i className="bi bi-download me-2"></i>
-                          Download HTML
+                          <i className="bi bi-file-earmark-code-fill me-2"></i>
+                          HTML Source
                         </>
                       )}
                     </Button>
                   </div>
-                  <div className="text-center mt-3">
-                    <small className="text-success d-flex align-items-center justify-content-center gap-1">
-                      <i className="bi bi-shield-check text-success"></i>
-                      <span>
-                        Professional A4 letterhead with QR verification ready
-                        for official use
-                      </span>
-                    </small>
-                  </div>
 
-                  {/* Additional Info */}
-                  <div className="text-center mt-2">
-                    <div className="d-flex justify-content-center gap-3 flex-wrap">
-                      <small className="text-muted d-flex align-items-center gap-1">
-                        <i className="bi bi-file-earmark-pdf text-warning"></i>
-                        <span>PDF Available</span>
-                      </small>
-                      <small className="text-muted d-flex align-items-center gap-1">
-                        <i className="bi bi-file-earmark-code text-primary"></i>
-                        <span>HTML Format</span>
-                      </small>
-                      <small className="text-muted d-flex align-items-center gap-1">
-                        <i
-                          className={`bi ${qrCode ? "bi-qr-code text-success" : "bi-qr-code text-primary"}`}
-                        ></i>
-                        <span>
-                          {qrCode ? "QR Generated" : "QR Code Included"}
-                        </span>
-                      </small>
-                      <small className="text-muted d-flex align-items-center gap-1">
-                        <i className="bi bi-printer text-success"></i>
-                        <span>Print Ready</span>
-                      </small>
+                  {/* Professional Features Info */}
+                  <div className="text-center mt-4">
+                    <div
+                      style={{
+                        background: "linear-gradient(135deg, #f8f9fa, #e9ecef)",
+                        borderRadius: "12px",
+                        padding: "20px",
+                        border: "1px solid #dee2e6",
+                      }}
+                    >
+                      <div className="mb-3">
+                        <small className="text-success d-flex align-items-center justify-content-center gap-2 mb-2">
+                          <i
+                            className="bi bi-shield-check-fill text-success"
+                            style={{ fontSize: "16px" }}
+                          ></i>
+                          <span style={{ fontWeight: "600", fontSize: "14px" }}>
+                            Professional A4 Letterhead with QR Verification
+                            Ready for Official Use
+                          </span>
+                        </small>
+                      </div>
+
+                      <div className="d-flex justify-content-center gap-4 flex-wrap">
+                        <small className="text-muted d-flex align-items-center gap-1">
+                          <i
+                            className="bi bi-file-earmark-pdf-fill text-danger"
+                            style={{ fontSize: "14px" }}
+                          ></i>
+                          <span style={{ fontWeight: "500" }}>
+                            High-Quality PDF
+                          </span>
+                        </small>
+                        <small className="text-muted d-flex align-items-center gap-1">
+                          <i
+                            className="bi bi-printer-fill text-success"
+                            style={{ fontSize: "14px" }}
+                          ></i>
+                          <span style={{ fontWeight: "500" }}>
+                            Professional Print
+                          </span>
+                        </small>
+                        <small className="text-muted d-flex align-items-center gap-1">
+                          <i
+                            className="bi bi-file-earmark-code-fill text-primary"
+                            style={{ fontSize: "14px" }}
+                          ></i>
+                          <span style={{ fontWeight: "500" }}>
+                            Editable HTML
+                          </span>
+                        </small>
+                        <small className="text-muted d-flex align-items-center gap-1">
+                          <i
+                            className={`bi ${qrCode ? "bi-qr-code-scan text-success" : "bi-qr-code text-warning"}`}
+                            style={{ fontSize: "14px" }}
+                          ></i>
+                          <span style={{ fontWeight: "500" }}>
+                            {qrCode ? "QR Verified" : "QR Processing"}
+                          </span>
+                        </small>
+                      </div>
+
+                      {letterheadId && (
+                        <div className="mt-3 pt-3 border-top">
+                          <small className="text-info d-flex align-items-center justify-content-center gap-2">
+                            <i className="bi bi-info-circle-fill"></i>
+                            <span>
+                              <strong>Letterhead ID:</strong>{" "}
+                              <code>{letterheadId}</code> |
+                              <strong className="ms-2">
+                                Verification URL:
+                              </strong>{" "}
+                              <a
+                                href={`${window.location.origin}/verify?id=${letterheadId}&type=letterhead`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  textDecoration: "none",
+                                  color: "#0d6efd",
+                                }}
+                              >
+                                View Verification Page
+                              </a>
+                            </span>
+                          </small>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
