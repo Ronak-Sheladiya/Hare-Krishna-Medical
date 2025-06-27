@@ -288,63 +288,50 @@ const AddLetterhead = () => {
     }
   }, [formData.title, formData.content, qrCode]);
 
-  // IMMEDIATE PRINT FUNCTIONALITY - Like Invoice Verify Page
-  const handlePrint = () => {
-    const printContent = createLetterheadTemplate();
+  // PRINT FUNCTIONALITY - Generate PDF and open in new window
+  const handlePrint = async () => {
+    try {
+      setPdfGenerating(true);
 
-    // Create print window immediately with proper PDF-like content
-    const printWindow = window.open("", "_blank");
+      // Generate PDF first
+      const pdfBlob = await generateLetterheadPDF();
 
-    if (printWindow) {
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>${formData.title} - Letterhead</title>
-            <style>
-              @page {
-                size: A4;
-                margin: 15mm;
-              }
-              @media print {
-                body {
-                  margin: 0 !important;
-                  color: black !important;
-                  font-size: 11px !important;
-                  line-height: 1.3 !important;
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                }
-                .no-print {
-                  display: none !important;
-                }
-              }
-              body {
-                font-family: Arial, sans-serif !important;
-                line-height: 1.3 !important;
-                color: #333 !important;
-                font-size: 12px !important;
-              }
-              .letterhead-header {
-                background: #e63946 !important;
-                color: white !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-              }
-            </style>
-          </head>
-          <body>
-            ${printContent}
-            <script>
-              window.onload = function() {
-                window.focus();
-                window.print();
-              };
-            </script>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
+      if (pdfBlob) {
+        // Create PDF URL and open in new window for printing
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        const printWindow = window.open(
+          pdfUrl,
+          "_blank",
+          "width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes",
+        );
+
+        if (printWindow) {
+          printWindow.document.title = `${formData.title} - Letterhead Print`;
+
+          // Setup print handlers
+          printWindow.onload = () => {
+            printWindow.focus();
+            printWindow.print();
+          };
+
+          // Fallback print trigger
+          setTimeout(() => {
+            try {
+              printWindow.focus();
+              printWindow.print();
+            } catch (error) {
+              console.log("Fallback print trigger:", error);
+            }
+          }, 1000);
+        }
+      } else {
+        alert("Failed to generate PDF for printing. Please try again.");
+      }
+    } catch (error) {
+      console.error("Print failed:", error);
+      alert("Print failed. Please try again.");
+    } finally {
+      setPdfGenerating(false);
     }
   };
 
