@@ -17,7 +17,7 @@ const server = http.createServer(app);
 // ==========================
 const io = socketIo(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: process.env.FRONTEND_URL || "https://hk-medical.vercel.app,https://hkmedical.vercel.app,https://harekrishnamedical.vercel.app,https://hare-krishna-medical.vercel.app,",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
@@ -33,7 +33,7 @@ app.set("trust proxy", 1);
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: process.env.FRONTEND_URL || "https://hk-medical.vercel.app,https://hkmedical.vercel.app,https://harekrishnamedical.vercel.app,https://hare-krishna-medical.vercel.app,",
     credentials: true,
   }),
 );
@@ -54,7 +54,7 @@ app.use("/api/", limiter);
 // ==========================
 const mongoURI =
   process.env.MONGODB_URI ||
-  "mongodb://localhost:27017/Hare_Krishna_Medical_db";
+  "mongodb+srv://ronaksheladiya652:Ronak95865@cluster0.idf2afh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 console.log("🔄 Attempting MongoDB connection to:", mongoURI);
 
 // Set mongoose buffer commands to false to fail fast
