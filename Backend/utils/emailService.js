@@ -7,6 +7,7 @@ class EmailService {
       console.warn("⚠️ Email service: EMAIL_USER or EMAIL_PASS not configured");
     }
 
+    // Create transporter using correct nodemailer method
     this.transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST || "smtp.gmail.com",
       port: parseInt(process.env.EMAIL_PORT) || 587,
