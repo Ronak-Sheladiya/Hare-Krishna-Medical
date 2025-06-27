@@ -933,50 +933,7 @@ const AddLetterhead = () => {
       </Container>
 
 
-            A4 Letterhead Preview
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body
-          style={{
-            backgroundColor: "#f8f9fa",
-            height: "70vh",
-            overflowY: "auto",
-            padding: "20px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "flex-start",
-          }}
-        >
-          {/* A4 Size Container */}
-          <div
-            style={{
-              width: "210mm",
-              minHeight: "297mm",
-              backgroundColor: "white",
-              boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-              borderRadius: "8px",
-              transform: "scale(0.8)",
-              transformOrigin: "top center",
-              margin: "0 auto",
-            }}
-            dangerouslySetInnerHTML={{ __html: createLetterheadTemplate() }}
-          />
-        </Modal.Body>
-        <Modal.Footer
-          style={{
-            padding: "20px",
-            background: "linear-gradient(135deg, #f8f9fa, #ffffff)",
-            borderTop: "1px solid #dee2e6",
-            borderRadius: "0 0 0.5rem 0.5rem",
-          }}
-        >
-          <div className="d-flex gap-3 w-100 justify-content-between align-items-center flex-wrap">
-            <div className="d-flex align-items-center gap-2">
-              <Button
-                variant="outline-secondary"
-                onClick={() => setShowPreview(false)}
-                style={{
-                  borderRadius: "10px",
+
                   padding: "12px 20px",
                   fontWeight: "500",
                   border: "2px solid #6c757d",
