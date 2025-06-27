@@ -1293,7 +1293,7 @@ const AddLetterhead = () => {
               <Button
                 variant="success"
                 onClick={handlePrint}
-                disabled={printLoading || downloadLoading}
+                disabled={downloadLoading || pdfGenerating}
                 style={{
                   borderRadius: "8px",
                   background: "linear-gradient(135deg, #28a745, #20c997)",
@@ -1304,10 +1304,10 @@ const AddLetterhead = () => {
                   minWidth: "120px",
                 }}
               >
-                {printLoading ? (
+                {pdfGenerating ? (
                   <>
                     <Spinner size="sm" className="me-2" />
-                    Printing...
+                    Preparing...
                   </>
                 ) : (
                   <>
@@ -1319,7 +1319,7 @@ const AddLetterhead = () => {
 
               <Button
                 onClick={handleDownload}
-                disabled={downloadLoading || printLoading}
+                disabled={downloadLoading || pdfGenerating}
                 style={{
                   borderRadius: "8px",
                   background: "linear-gradient(135deg, #e63946, #dc3545)",
