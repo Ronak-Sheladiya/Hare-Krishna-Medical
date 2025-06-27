@@ -443,45 +443,67 @@ const AddLetterhead = () => {
 
   // No auto-generation of PDF - only generate when print/download is clicked
 
-  // PRINT FUNCTIONALITY - Generate PDF and open in new window
+  // PRINT FUNCTIONALITY - Direct HTML print
   const handlePrint = async () => {
     try {
       setPdfGenerating(true);
 
-      // Generate PDF first
-      const pdfBlob = await generateLetterheadPDF();
-
-      if (pdfBlob) {
-        // Create PDF URL and open in new window for printing
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        const printWindow = window.open(
-          pdfUrl,
-          "_blank",
-          "width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes",
-        );
-
-        if (printWindow) {
-          printWindow.document.title = `${formData.title} - Letterhead Print`;
-
-          // Setup print handlers
-          printWindow.onload = () => {
-            printWindow.focus();
-            printWindow.print();
-          };
-
-          // Fallback print trigger
-          setTimeout(() => {
-            try {
-              printWindow.focus();
-              printWindow.print();
-            } catch (error) {
-              console.log("Fallback print trigger:", error);
-            }
-          }, 1000);
-        }
-      } else {
-        alert("Failed to generate PDF for printing. Please try again.");
+      // Get the letterhead content
+      const letterheadElement = document.getElementById(
+        "letterhead-print-content",
+      );
+      if (!letterheadElement) {
+        alert("Letterhead content not found. Please refresh and try again.");
+        return;
       }
+
+      // Create print window
+      const printWindow = window.open("", "_blank");
+
+      // Print styles for A4
+      const printStyles = `
+        @page {
+          size: A4;
+          margin: 0;
+        }
+        @media print {
+          body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            -webkit-print-color-adjust: exact;
+            color-adjust: exact;
+          }
+          .no-print { display: none !important; }
+        }
+        body {
+          margin: 0;
+          font-family: Arial, sans-serif;
+        }
+      `;
+
+      // Write HTML content to print window
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${formData.title} - Letterhead</title>
+            <style>${printStyles}</style>
+          </head>
+          <body>
+            ${letterheadElement.outerHTML}
+            <script>
+              window.onload = function() {
+                setTimeout(function() {
+                  window.print();
+                  window.close();
+                }, 500);
+              };
+            </script>
+          </body>
+        </html>
+      `);
+
+      printWindow.document.close();
     } catch (error) {
       console.error("Print failed:", error);
       alert("Print failed. Please try again.");
