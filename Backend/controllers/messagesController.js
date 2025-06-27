@@ -30,74 +30,37 @@ class MessagesController {
         status: "unread",
       });
 
+      console.log("📝 New contact message created:", {
+        id: newMessage._id,
+        name: name,
+        subject: subject,
+        category: category || "general",
+        priority: priority || "normal",
+      });
+
       // Send professional notification email to admin
       try {
         await emailService.sendContactFormEmail({
-          name: fullName,
+          name: name,
           email: email,
-          phone: phone,
+          phone: mobile,
           subject: subject,
-          message: messageText,
+          message: message,
         });
-                  Dear <strong>${name}</strong>,
-                </p>
-
-                <p style="margin: 1rem 0; color: #444444;">
-                  We have received your message and our team will get back to you within 24 hours.
-                </p>
-
-                <div style="background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%); border: 2px solid #dc3545; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
-                  <h4 style="color: #dc3545; font-size: 18px; margin: 0 0 1rem 0; font-weight: 600;">📝 Your Message Details:</h4>
-                  <div style="background: #ffffff; padding: 1rem; border-left: 4px solid #dc3545; border-radius: 4px;">
-                    <p style="margin: 0;"><strong>Subject:</strong> ${subject}</p>
-                    <p style="margin: 10px 0 0 0; color: #666;">${message}</p>
-                  </div>
-                </div>
-
-                <p style="margin: 1rem 0; color: #444444;">
-                  If you have any urgent questions, feel free to contact our customer support team at
-                  <strong style="color: #dc3545;"> +91 76989 13354</strong> or reply to this email.
-                </p>
-              </div>
-            </div>
-
-            <div style="background: #f8f9fa; border-top: 3px solid #dc3545; padding: 2rem;">
-              <div style="text-align: center;">
-                <p style="margin: 0 0 1rem 0; font-size: 14px; color: #666666; line-height: 1.5;">
-                  <strong>Hare Krishna Medical Store</strong><br/>
-                  📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat<br/>
-                  📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com<br/>
-                  🌐 Visit our store for the best medical care
-                </p>
-
-                <p style="margin: 1rem 0 0 0; font-size: 12px; color: #999999; font-style: italic;">
-                  This is an automated email. Please do not reply to this email address.
-                </p>
-              </div>
-            </div>
-          </div>
-        `;
-
-        await emailService.transporter.sendMail({
-          from: `"Hare Krishna Medical" <${process.env.EMAIL_USER}>`,
-          to: email,
-          subject: "Message Received - Hare Krishna Medical",
-          html: confirmationHtml,
-        });
+        console.log("✅ Admin notification email sent successfully");
       } catch (emailError) {
-        console.error("Confirmation email failed:", emailError);
+        console.error("❌ Admin notification email failed:", emailError);
       }
 
       // Send professional confirmation email to user
       try {
-        await emailService.sendMessageConfirmationEmail(
-          email,
-          fullName,
-          messageText,
-        );
+        await emailService.sendMessageConfirmationEmail(email, name, message);
+        console.log("✅ User confirmation email sent successfully");
       } catch (emailError) {
-        console.error("Confirmation email failed:", emailError);
+        console.error("❌ User confirmation email failed:", emailError);
       }
+
+      // Send real-time notification to admin dashboard
       const io = req.app.get("io");
       if (io) {
         io.to("admin-room").emit("new-message", {
@@ -112,6 +75,7 @@ class MessagesController {
             status: newMessage.status,
           },
         });
+        console.log("📡 Real-time notification sent to admin dashboard");
       }
 
       res.status(201).json({
@@ -123,7 +87,7 @@ class MessagesController {
         },
       });
     } catch (error) {
-      console.error("Contact form error:", error);
+      console.error("❌ Contact form submission error:", error);
       res.status(500).json({
         success: false,
         message: "Failed to send message. Please try again.",
@@ -187,44 +151,76 @@ class MessagesController {
 
       if (search) {
         // Use text search if search term provided
-        const searchResults = await Message.searchMessages(search, {
-          skip: (parseInt(page) - 1) * parseInt(limit),
-          limit: parseInt(limit),
-        }).populate("respondedBy", "fullName email");
-
-        messages = searchResults;
-        totalMessages = await Message.countDocuments({
-          $text: { $search: search },
-          isDeleted: false,
+        const searchRegex = new RegExp(search, "i");
+        const searchQuery = {
           ...query,
-        });
-      } else {
-        // Regular query
-        messages = await Message.find(query)
-          .populate("respondedBy", "fullName email")
-          .sort(sortObj)
-          .skip((parseInt(page) - 1) * parseInt(limit))
-          .limit(parseInt(limit));
+          $or: [
+            { name: searchRegex },
+            { email: searchRegex },
+            { subject: searchRegex },
+            { message: searchRegex },
+          ],
+        };
 
+        totalMessages = await Message.countDocuments(searchQuery);
+        messages = await Message.find(searchQuery)
+          .sort(sortObj)
+          .limit(parseInt(limit))
+          .skip((parseInt(page) - 1) * parseInt(limit))
+          .lean();
+      } else {
         totalMessages = await Message.countDocuments(query);
+        messages = await Message.find(query)
+          .sort(sortObj)
+          .limit(parseInt(limit))
+          .skip((parseInt(page) - 1) * parseInt(limit))
+          .lean();
       }
 
-      const totalPages = Math.ceil(totalMessages / limit);
+      // Calculate pagination info
+      const totalPages = Math.ceil(totalMessages / parseInt(limit));
+      const hasNextPage = parseInt(page) < totalPages;
+      const hasPrevPage = parseInt(page) > 1;
+
+      // Get message statistics
+      const stats = await Message.aggregate([
+        { $match: { isDeleted: false } },
+        {
+          $group: {
+            _id: "$status",
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+
+      const statsObj = stats.reduce((acc, stat) => {
+        acc[stat._id] = stat.count;
+        return acc;
+      }, {});
 
       res.json({
         success: true,
-        data: messages,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages,
-          totalMessages,
-          hasNextPage: page < totalPages,
-          hasPrevPage: page > 1,
-          limit: parseInt(limit),
+        data: {
+          messages,
+          pagination: {
+            currentPage: parseInt(page),
+            totalPages,
+            totalMessages,
+            hasNextPage,
+            hasPrevPage,
+            limit: parseInt(limit),
+          },
+          stats: {
+            unread: statsObj.unread || 0,
+            read: statsObj.read || 0,
+            replied: statsObj.replied || 0,
+            archived: statsObj.archived || 0,
+            total: totalMessages,
+          },
         },
       });
     } catch (error) {
-      console.error("Get messages error:", error);
+      console.error("❌ Error fetching messages:", error);
       res.status(500).json({
         success: false,
         message: "Failed to fetch messages",
@@ -233,33 +229,29 @@ class MessagesController {
     }
   }
 
-  // Get single message (Admin)
-  async getMessage(req, res) {
+  // Get single message by ID (Admin)
+  async getMessageById(req, res) {
     try {
-      const messageId = req.params.id;
-      const message = await Message.findById(messageId)
-        .populate("respondedBy", "fullName email")
-        .lean();
+      const { id } = req.params;
 
-      if (!message || message.isDeleted) {
+      const message = await Message.findOne({
+        _id: id,
+        isDeleted: false,
+      });
+
+      if (!message) {
         return res.status(404).json({
           success: false,
           message: "Message not found",
         });
       }
 
-      // Mark as read if it's unread
-      if (message.status === "unread") {
-        await Message.findByIdAndUpdate(messageId, { status: "read" });
-        message.status = "read";
-      }
-
       res.json({
         success: true,
-        data: message,
+        data: { message },
       });
     } catch (error) {
-      console.error("Get message error:", error);
+      console.error("❌ Error fetching message:", error);
       res.status(500).json({
         success: false,
         message: "Failed to fetch message",
@@ -271,53 +263,59 @@ class MessagesController {
   // Update message status (Admin)
   async updateMessageStatus(req, res) {
     try {
-      const messageId = req.params.id;
+      const { id } = req.params;
       const { status } = req.body;
 
-      const validStatuses = ["unread", "read", "responded", "archived"];
-
+      const validStatuses = ["unread", "read", "replied", "archived"];
       if (!validStatuses.includes(status)) {
         return res.status(400).json({
           success: false,
-          message: "Invalid status",
+          message:
+            "Invalid status. Must be: unread, read, replied, or archived",
         });
       }
 
-      const message = await Message.findById(messageId);
+      const message = await Message.findOneAndUpdate(
+        { _id: id, isDeleted: false },
+        {
+          status,
+          updatedAt: new Date(),
+          ...(status === "read" && { readAt: new Date() }),
+          ...(status === "replied" && { repliedAt: new Date() }),
+        },
+        { new: true },
+      );
 
-      if (!message || message.isDeleted) {
+      if (!message) {
         return res.status(404).json({
           success: false,
           message: "Message not found",
         });
       }
 
-      message.status = status;
-      if (status === "responded" && !message.respondedAt) {
-        message.respondedAt = new Date();
-      }
-      await message.save();
-
-      // Emit real-time update
+      // Send real-time update to admin dashboard
       const io = req.app.get("io");
       if (io) {
         io.to("admin-room").emit("message-status-updated", {
-          messageId: message._id,
+          messageId: id,
           newStatus: status,
-          updatedBy: req.user ? req.user.fullName : "Admin",
+          updatedAt: message.updatedAt,
         });
       }
+
+      console.log("📝 Message status updated:", {
+        id: id,
+        oldStatus: req.body.oldStatus || "unknown",
+        newStatus: status,
+      });
 
       res.json({
         success: true,
         message: "Message status updated successfully",
-        data: {
-          id: message._id,
-          status: message.status,
-        },
+        data: { message },
       });
     } catch (error) {
-      console.error("Update message status error:", error);
+      console.error("❌ Error updating message status:", error);
       res.status(500).json({
         success: false,
         message: "Failed to update message status",
@@ -326,104 +324,138 @@ class MessagesController {
     }
   }
 
-  // Respond to message (Admin)
-  async respondToMessage(req, res) {
+  // Reply to message (Admin)
+  async replyToMessage(req, res) {
     try {
-      const messageId = req.params.id;
-      const { response } = req.body;
+      const { id } = req.params;
+      const { replyMessage, adminName = "Hare Krishna Medical Team" } =
+        req.body;
 
-      const message = await Message.findById(messageId);
+      if (!replyMessage || replyMessage.trim().length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Reply message is required",
+        });
+      }
 
-      if (!message || message.isDeleted) {
+      const message = await Message.findOne({
+        _id: id,
+        isDeleted: false,
+      });
+
+      if (!message) {
         return res.status(404).json({
           success: false,
           message: "Message not found",
         });
       }
 
-      // Update message
-      message.response = response;
-      message.status = "responded";
-      message.respondedAt = new Date();
-      if (req.user) {
-        message.respondedBy = req.user._id;
-      }
-      await message.save();
+      // Update message with reply
+      const updatedMessage = await Message.findByIdAndUpdate(
+        id,
+        {
+          status: "replied",
+          replyMessage,
+          repliedAt: new Date(),
+          repliedBy: adminName,
+          updatedAt: new Date(),
+        },
+        { new: true },
+      );
 
-      // Send response email
+      // Send professional reply email to user
       try {
-        const responseHtml = `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #17a2b8, #20c997); color: white; padding: 30px; border-radius: 10px; text-align: center;">
-              <h1 style="margin: 0; font-size: 28px;">Response from Hare Krishna Medical 💬</h1>
-              <p style="margin: 10px 0 0 0; font-size: 16px;">Re: ${message.subject}</p>
-            </div>
-
-            <div style="padding: 30px; background: #f8f9fa; border-radius: 10px; margin-top: 20px;">
-              <h2 style="color: #333; margin-top: 0;">Hello ${message.name}!</h2>
-
-              <div style="background: #e7f3ff; border-left: 4px solid #17a2b8; padding: 20px; margin: 20px 0;">
-                <h3 style="color: #17a2b8; margin-top: 0;">Your Original Message:</h3>
-                <p style="color: #666; margin: 0; font-style: italic;">"${message.message}"</p>
-              </div>
-
-              <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <h3 style="color: #17a2b8; margin-top: 0;">Our Response:</h3>
-                <p style="color: #333; line-height: 1.6; margin: 0;">${response}</p>
-              </div>
-
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.FRONTEND_URL}/contact"
-                   style="background: #17a2b8; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
-                  Contact Us Again
-                </a>
-              </div>
-
-              <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px; text-align: center;">
-                <p style="color: #888; font-size: 14px; margin: 0;">
-                  📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat<br>
-                  📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
-                </p>
-              </div>
-            </div>
-          </div>
-        `;
-
-        await emailService.transporter.sendMail({
-          from: `"Hare Krishna Medical" <${process.env.EMAIL_USER}>`,
-          to: message.email,
-          subject: `Re: ${message.subject} - Hare Krishna Medical`,
-          html: responseHtml,
-        });
+        await emailService.sendMessageReplyEmail(
+          message.email,
+          message.name,
+          message.subject,
+          message.message,
+          replyMessage,
+          adminName,
+        );
+        console.log("✅ Reply email sent successfully to user");
       } catch (emailError) {
-        console.error("Response email failed:", emailError);
+        console.error("❌ Reply email failed:", emailError);
+        // Don't fail the entire operation if email fails
       }
 
-      // Emit real-time update
+      // Send real-time update to admin dashboard
       const io = req.app.get("io");
       if (io) {
-        io.to("admin-room").emit("message-responded", {
-          messageId: message._id,
-          respondedBy: req.user ? req.user.fullName : "Admin",
-          respondedAt: message.respondedAt,
+        io.to("admin-room").emit("message-replied", {
+          messageId: id,
+          repliedAt: updatedMessage.repliedAt,
+          repliedBy: adminName,
         });
       }
+
+      console.log("💬 Message reply sent:", {
+        id: id,
+        customerEmail: message.email,
+        repliedBy: adminName,
+      });
 
       res.json({
         success: true,
-        message: "Response sent successfully",
-        data: {
-          id: message._id,
-          status: message.status,
-          response: message.response,
-          respondedAt: message.respondedAt,
-        },
+        message: "Reply sent successfully",
+        data: { message: updatedMessage },
       });
     } catch (error) {
-      console.error("Send response error:", error);
+      console.error("❌ Error replying to message:", error);
       res.status(500).json({
         success: false,
-        message: "Failed to send response",
+        message: "Failed to send reply",
+        error: error.message,
+      });
+    }
+  }
+
+  // Delete message (Admin)
+  async deleteMessage(req, res) {
+    try {
+      const { id } = req.params;
+
+      const message = await Message.findOneAndUpdate(
+        { _id: id, isDeleted: false },
+        {
+          isDeleted: true,
+          deletedAt: new Date(),
+          updatedAt: new Date(),
+        },
+        { new: true },
+      );
+
+      if (!message) {
+        return res.status(404).json({
+          success: false,
+          message: "Message not found",
+        });
+      }
+
+      // Send real-time update to admin dashboard
+      const io = req.app.get("io");
+      if (io) {
+        io.to("admin-room").emit("message-deleted", {
+          messageId: id,
+          deletedAt: message.deletedAt,
+        });
+      }
+
+      console.log("🗑️ Message deleted:", {
+        id: id,
+        customerEmail: message.email,
+        subject: message.subject,
+      });
+
+      res.json({
+        success: true,
+        message: "Message deleted successfully",
+      });
+    } catch (error) {
+      console.error("❌ Error deleting message:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to delete message",
         error: error.message,
       });
     }
@@ -432,72 +464,100 @@ class MessagesController {
   // Get message statistics (Admin)
   async getMessageStats(req, res) {
     try {
-      const totalMessages = await Message.countDocuments({ isDeleted: false });
-      const unreadMessages = await Message.countDocuments({
-        status: "unread",
-        isDeleted: false,
-      });
-      const readMessages = await Message.countDocuments({
-        status: "read",
-        isDeleted: false,
-      });
-      const respondedMessages = await Message.countDocuments({
-        status: "responded",
-        isDeleted: false,
-      });
+      const { period = "week" } = req.query;
 
-      // Messages by category
-      const categoryStats = await Message.aggregate([
-        { $match: { isDeleted: false } },
-        { $group: { _id: "$category", count: { $sum: 1 } } },
-        { $sort: { count: -1 } },
-      ]);
+      let dateFilter = {};
+      const now = new Date();
 
-      // Messages by priority
-      const priorityStats = await Message.aggregate([
-        { $match: { isDeleted: false } },
-        { $group: { _id: "$priority", count: { $sum: 1 } } },
-        { $sort: { count: -1 } },
-      ]);
+      switch (period) {
+        case "today":
+          dateFilter = {
+            createdAt: {
+              $gte: new Date(now.setHours(0, 0, 0, 0)),
+              $lt: new Date(now.setHours(23, 59, 59, 999)),
+            },
+          };
+          break;
+        case "week":
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          dateFilter = { createdAt: { $gte: weekAgo } };
+          break;
+        case "month":
+          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          dateFilter = { createdAt: { $gte: monthAgo } };
+          break;
+        case "year":
+          const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+          dateFilter = { createdAt: { $gte: yearAgo } };
+          break;
+      }
 
-      // Daily message trend (last 30 days)
-      const last30Days = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      const dailyMessages = await Message.aggregate([
+      // Get status distribution
+      const statusStats = await Message.aggregate([
+        { $match: { isDeleted: false, ...dateFilter } },
         {
-          $match: {
-            createdAt: { $gte: last30Days },
-            isDeleted: false,
+          $group: {
+            _id: "$status",
+            count: { $sum: 1 },
           },
         },
+      ]);
+
+      // Get category distribution
+      const categoryStats = await Message.aggregate([
+        { $match: { isDeleted: false, ...dateFilter } },
+        {
+          $group: {
+            _id: "$category",
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+
+      // Get priority distribution
+      const priorityStats = await Message.aggregate([
+        { $match: { isDeleted: false, ...dateFilter } },
+        {
+          $group: {
+            _id: "$priority",
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+
+      // Get daily message counts for the period
+      const dailyStats = await Message.aggregate([
+        { $match: { isDeleted: false, ...dateFilter } },
         {
           $group: {
             _id: {
-              $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+              year: { $year: "$createdAt" },
+              month: { $month: "$createdAt" },
+              day: { $dayOfMonth: "$createdAt" },
             },
             count: { $sum: 1 },
           },
         },
-        { $sort: { _id: 1 } },
+        { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } },
       ]);
 
-      const messageTrend = dailyMessages.map((item) => ({
-        date: item._id,
-        count: item.count,
-      }));
-
-      // Response time analysis
+      // Calculate response time statistics
       const responseTimeStats = await Message.aggregate([
         {
           $match: {
-            status: "responded",
-            respondedAt: { $exists: true },
             isDeleted: false,
+            status: "replied",
+            repliedAt: { $exists: true },
+            ...dateFilter,
           },
         },
         {
           $project: {
             responseTime: {
-              $subtract: ["$respondedAt", "$createdAt"],
+              $divide: [
+                { $subtract: ["$repliedAt", "$createdAt"] },
+                1000 * 60 * 60, // Convert to hours
+              ],
             },
           },
         },
@@ -507,34 +567,43 @@ class MessagesController {
             avgResponseTime: { $avg: "$responseTime" },
             minResponseTime: { $min: "$responseTime" },
             maxResponseTime: { $max: "$responseTime" },
-            count: { $sum: 1 },
+            totalReplies: { $sum: 1 },
           },
         },
       ]);
 
-      const avgResponseTime =
-        responseTimeStats.length > 0 ? responseTimeStats[0].avgResponseTime : 0;
+      const stats = {
+        period,
+        statusDistribution: statusStats.reduce((acc, stat) => {
+          acc[stat._id] = stat.count;
+          return acc;
+        }, {}),
+        categoryDistribution: categoryStats.reduce((acc, stat) => {
+          acc[stat._id] = stat.count;
+          return acc;
+        }, {}),
+        priorityDistribution: priorityStats.reduce((acc, stat) => {
+          acc[stat._id] = stat.count;
+          return acc;
+        }, {}),
+        dailyTrend: dailyStats.map((stat) => ({
+          date: `${stat._id.year}-${String(stat._id.month).padStart(2, "0")}-${String(stat._id.day).padStart(2, "0")}`,
+          count: stat.count,
+        })),
+        responseTime: responseTimeStats[0] || {
+          avgResponseTime: 0,
+          minResponseTime: 0,
+          maxResponseTime: 0,
+          totalReplies: 0,
+        },
+      };
 
       res.json({
         success: true,
-        data: {
-          totalMessages,
-          unreadMessages,
-          readMessages,
-          respondedMessages,
-          categoryStats,
-          priorityStats,
-          messageTrend,
-          avgResponseTimeHours:
-            Math.round((avgResponseTime / (1000 * 60 * 60)) * 100) / 100,
-          responseRate:
-            totalMessages > 0
-              ? Math.round((respondedMessages / totalMessages) * 100)
-              : 0,
-        },
+        data: { stats },
       });
     } catch (error) {
-      console.error("Message stats error:", error);
+      console.error("❌ Error fetching message statistics:", error);
       res.status(500).json({
         success: false,
         message: "Failed to fetch message statistics",
