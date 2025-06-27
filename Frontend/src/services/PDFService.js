@@ -92,8 +92,7 @@ class PDFService {
         this.defaultOptions.format,
       );
 
-      // Calculate dimensions with 15px margins (approximately 5.3mm)
-      const margin = 5.3; // 15px converted to mm
+      // Calculate dimensions with custom margins (default 5.3mm, can be 2.1mm for 98% usage)
       const imgWidth = 210 - margin * 2; // A4 width minus margins
       const pageHeight = 297; // A4 height in mm
       const availableHeight = pageHeight - margin * 2; // Available height minus margins
