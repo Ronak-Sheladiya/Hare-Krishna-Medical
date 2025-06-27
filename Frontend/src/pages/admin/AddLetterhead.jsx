@@ -417,7 +417,7 @@ const AddLetterhead = () => {
     `;
   };
 
-  // PDF GENERATION FUNCTIONALITY
+  // PROFESSIONAL PDF GENERATION FUNCTIONALITY
   const generateLetterheadPDF = async () => {
     if (!formData.title || !formData.content) {
       setError("Please fill in both title and content before generating PDF.");
@@ -436,7 +436,7 @@ const AddLetterhead = () => {
       }
 
       // Wait for QR code to render
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const letterheadElement = document.getElementById(
         "letterhead-print-content",
@@ -445,26 +445,102 @@ const AddLetterhead = () => {
         throw new Error("Letterhead content not found");
       }
 
-      // Force element dimensions for PDF generation
-      letterheadElement.style.width = "794px";
-      letterheadElement.style.height = "1123px";
-      letterheadElement.style.transform = "scale(1)";
+      // Apply professional styling for PDF generation
+      const originalStyles = letterheadElement.style.cssText;
+      const originalClass = letterheadElement.className;
 
+      // Enhanced styling for professional PDF output
+      letterheadElement.style.cssText = `
+        width: 794px !important;
+        height: auto !important;
+        min-height: 1123px !important;
+        transform: scale(1) !important;
+        background: white !important;
+        font-family: 'Times New Roman', serif !important;
+        color: #000 !important;
+        line-height: 1.6 !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 40px !important;
+        position: relative !important;
+        z-index: 1 !important;
+        border: none !important;
+        outline: none !important;
+      `;
+
+      letterheadElement.className = originalClass + " pdf-export-mode";
+
+      // Add temporary CSS for enhanced PDF quality
+      const tempStyle = document.createElement("style");
+      tempStyle.textContent = `
+        .pdf-export-mode * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+        .pdf-export-mode .letterhead-header {
+          border-bottom: 4px solid #dc3545 !important;
+          margin-bottom: 30px !important;
+          padding-bottom: 20px !important;
+        }
+        .pdf-export-mode .letterhead-footer {
+          border-top: 2px solid #6c757d !important;
+          margin-top: 40px !important;
+          padding-top: 20px !important;
+        }
+        .pdf-export-mode .company-logo {
+          max-width: 80px !important;
+          height: auto !important;
+        }
+        .pdf-export-mode h1, .pdf-export-mode h2, .pdf-export-mode h3 {
+          color: #dc3545 !important;
+          font-weight: bold !important;
+        }
+        .pdf-export-mode .qr-code {
+          border: 2px solid #ddd !important;
+          padding: 5px !important;
+          background: white !important;
+        }
+        .pdf-export-mode table {
+          border-collapse: collapse !important;
+        }
+        .pdf-export-mode table td, .pdf-export-mode table th {
+          border: 1px solid #000 !important;
+          padding: 8px !important;
+        }
+      `;
+      document.head.appendChild(tempStyle);
+
+      // Professional PDF generation with highest quality settings
       const result = await PDFService.generatePDFFromElement(
         letterheadElement,
         {
           filename: `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead_${new Date().toISOString().split("T")[0]}.pdf`,
           returnBlob: true,
-          quality: 0.95,
-          scale: 2.5,
-          margin: 0, // Full page usage
+          margin: 0, // Full page for professional letterhead
+          quality: 0.98, // Highest quality for professional documents
+          scale: 3, // Very high resolution for crisp text and graphics
           backgroundColor: "#ffffff",
+          useCORS: true,
+          allowTaint: false,
+          logging: false,
+          onProgress: (message, progress) => {
+            console.log(`PDF Generation: ${message} (${progress}%)`);
+            // You could show progress to user here if needed
+          },
         },
       );
+
+      // Cleanup: Restore original styles and remove temp CSS
+      letterheadElement.style.cssText = originalStyles;
+      letterheadElement.className = originalClass;
+      document.head.removeChild(tempStyle);
 
       if (result.success) {
         const pdfBlobUrl = URL.createObjectURL(result.blob);
         setPdfUrl(pdfBlobUrl);
+        setSuccess("Professional letterhead PDF generated successfully!");
+        setTimeout(() => setSuccess(null), 3000);
         return pdfBlobUrl;
       } else {
         throw new Error(result.error);
