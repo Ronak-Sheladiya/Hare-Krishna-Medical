@@ -56,7 +56,7 @@ const AddLetterhead = () => {
   const generatePreviewQRCode = async (tempId) => {
     try {
       const QRCode = await import("qrcode");
-      const verificationUrl = `${window.location.origin}/verify-docs?id=${tempId}&type=letterhead`;
+      const verificationUrl = `${window.location.origin}/verify?id=${tempId}&type=letterhead`;
       const qrDataURL = await QRCode.toDataURL(verificationUrl, {
         width: 200,
         margin: 2,
