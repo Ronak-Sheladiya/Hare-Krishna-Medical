@@ -231,69 +231,145 @@ const AddLetterhead = () => {
     `;
   };
 
+  // PDF generation state
+  const [pdfGenerating, setPdfGenerating] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState(null);
+
+  // Generate PDF for letterhead
+  const generateLetterheadPDF = async () => {
+    setPdfGenerating(true);
+    try {
+      // Import PDF service
+      const pdfService = (await import("../../services/PDFService")).default;
+
+      // Wait for DOM to render letterhead content
+      setTimeout(async () => {
+        const letterheadElement = document.getElementById(
+          "letterhead-print-content",
+        );
+        if (!letterheadElement) {
+          setPdfGenerating(false);
+          return;
+        }
+
+        const letterheadData = {
+          letterheadId: letterheadId || generateTempLetterheadId(),
+          title: formData.title,
+          content: formData.content,
+        };
+
+        const result = await pdfService.generatePDFFromElement(
+          letterheadElement,
+          {
+            filename: `Letterhead_${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.pdf`,
+            onProgress: (message, progress) => {
+              console.log(`PDF Generation: ${message} (${progress}%)`);
+            },
+          },
+        );
+
+        if (result.success && result.blob) {
+          const pdfObjectUrl = URL.createObjectURL(result.blob);
+          setPdfUrl(pdfObjectUrl);
+        }
+        setPdfGenerating(false);
+      }, 1000);
+    } catch (error) {
+      console.error("PDF generation failed:", error);
+      setPdfGenerating(false);
+    }
+  };
+
+  // Generate PDF when letterhead content changes
+  useEffect(() => {
+    if (formData.title && formData.content) {
+      generateLetterheadPDF();
+    }
+  }, [formData.title, formData.content, qrCode]);
+
+  // IMMEDIATE PRINT FUNCTIONALITY - Like Invoice Verify Page
   const handlePrint = () => {
-    const printContent = createLetterheadTemplate();
-    const printWindow = window.open("", "_blank");
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${formData.title} - Letterhead</title>
-        <style>
-          @page { size: A4; margin: 15mm; }
-          @media print {
-            body { margin: 0; color: black !important; font-size: 11px; line-height: 1.3; -webkit-print-color-adjust: exact; }
-            .no-print { display: none !important; }
-          }
-          body { font-family: 'Times New Roman', serif; }
-        </style>
-      </head>
-      <body>
-        ${printContent}
-        <script>
-          window.onload = function() {
-            setTimeout(function() { window.print(); }, 500);
+    if (pdfUrl) {
+      // Create print window immediately
+      const printWindow = window.open(
+        pdfUrl,
+        "_blank",
+        "width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes",
+      );
+
+      if (printWindow) {
+        printWindow.document.title = `${formData.title} - Letterhead Print`;
+
+        const setupPrintHandlers = () => {
+          const afterPrint = () => {
+            // Keep window open after printing for user convenience
+            console.log("Print completed - PDF viewer remains open");
           };
-        </script>
-      </body>
-      </html>
-    `);
-    printWindow.document.close();
+
+          printWindow.addEventListener("afterprint", afterPrint);
+        };
+
+        // Immediate PDF loading and printing
+        printWindow.onload = () => {
+          setupPrintHandlers();
+          printWindow.focus();
+          printWindow.print();
+        };
+
+        // Immediate fallback - no timeout
+        try {
+          setupPrintHandlers();
+          printWindow.focus();
+          printWindow.print();
+        } catch (error) {
+          console.log("Fallback print trigger:", error);
+        }
+      }
+    } else if (pdfGenerating) {
+      console.log("PDF is generating, please wait...");
+    } else {
+      alert("PDF not available. Regenerating...");
+      generateLetterheadPDF();
+    }
   };
 
-  const handleDownload = () => {
-    const content = createLetterheadTemplate();
-    const blob = new Blob(
-      [
-        `
-<!DOCTYPE html>
-<html>
-<head>
-  <title>${formData.title} - Letterhead</title>
-  <meta charset="UTF-8">
-  <style>
-    @page { size: A4; margin: 15mm; }
-    body { font-family: 'Times New Roman', serif; line-height: 1.6; margin: 0; }
-  </style>
-</head>
-<body>
-  ${content}
-</body>
-</html>
-    `,
-      ],
-      { type: "text/html" },
-    );
+  const handleDownload = async () => {
+    if (!formData.title || !formData.content) return;
 
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    try {
+      // Import PDF service
+      const pdfService = (await import("../../services/PDFService")).default;
+
+      const letterheadElement = document.getElementById(
+        "letterhead-print-content",
+      );
+      if (!letterheadElement) return;
+
+      const result = await pdfService.generatePDFFromElement(
+        letterheadElement,
+        {
+          filename: `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`,
+          download: true,
+        },
+      );
+
+      if (!result.success) {
+        alert("PDF download failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("PDF download failed:", error);
+      alert("PDF download failed. Please try again.");
+    }
   };
+
+  // Cleanup PDF URL on unmount
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    };
+  }, [pdfUrl]);
 
   return (
     <Container fluid className="py-4">
