@@ -1188,29 +1188,49 @@ const AddLetterhead = () => {
                     </Button>
                   </div>
                   <div className="text-center mt-3">
-                    <small className="text-muted d-flex align-items-center justify-content-center gap-1">
-                      <i className="bi bi-shield-check text-success"></i>
-                      <span>
-                        Professional A4 letterhead with QR verification ready
-                        for official use
-                      </span>
-                    </small>
+                    {pdfGenerating ? (
+                      <small className="text-muted d-flex align-items-center justify-content-center gap-1">
+                        <Spinner size="sm" className="me-1" />
+                        <span>Generating PDF for print and download...</span>
+                      </small>
+                    ) : pdfUrl ? (
+                      <small className="text-success d-flex align-items-center justify-content-center gap-1">
+                        <i className="bi bi-check-circle text-success"></i>
+                        <span>PDF ready for print and download</span>
+                      </small>
+                    ) : (
+                      <small className="text-muted d-flex align-items-center justify-content-center gap-1">
+                        <i className="bi bi-shield-check text-success"></i>
+                        <span>
+                          Professional A4 letterhead with QR verification ready
+                          for official use
+                        </span>
+                      </small>
+                    )}
                   </div>
 
                   {/* Additional Info */}
                   <div className="text-center mt-2">
                     <div className="d-flex justify-content-center gap-3 flex-wrap">
                       <small className="text-muted d-flex align-items-center gap-1">
-                        <i className="bi bi-file-earmark-pdf text-danger"></i>
-                        <span>A4 PDF Format</span>
+                        <i
+                          className={`bi ${pdfUrl ? "bi-file-earmark-pdf text-success" : "bi-file-earmark-pdf text-danger"}`}
+                        ></i>
+                        <span>{pdfUrl ? "PDF Ready" : "A4 PDF Format"}</span>
                       </small>
                       <small className="text-muted d-flex align-items-center gap-1">
-                        <i className="bi bi-qr-code text-primary"></i>
-                        <span>QR Code Included</span>
+                        <i
+                          className={`bi ${qrCode ? "bi-qr-code text-success" : "bi-qr-code text-primary"}`}
+                        ></i>
+                        <span>
+                          {qrCode ? "QR Generated" : "QR Code Included"}
+                        </span>
                       </small>
                       <small className="text-muted d-flex align-items-center gap-1">
-                        <i className="bi bi-printer text-success"></i>
-                        <span>Print Ready</span>
+                        <i
+                          className={`bi ${pdfUrl ? "bi-printer text-success" : "bi-printer text-secondary"}`}
+                        ></i>
+                        <span>{pdfUrl ? "Print Ready" : "Preparing..."}</span>
                       </small>
                     </div>
                   </div>
