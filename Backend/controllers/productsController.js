@@ -168,7 +168,7 @@ class ProductsController {
     try {
       // Check if database is connected
       if (!global.DB_CONNECTED) {
-        return handleOfflineProducts(req, res);
+        return this.handleOfflineProducts(req, res);
       }
 
       const {
