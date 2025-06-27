@@ -1157,4 +1157,27 @@ class ProductsController {
   }
 }
 
-module.exports = new ProductsController();
+const productsController = new ProductsController();
+
+// Bind methods to maintain context
+module.exports = {
+  getAllProducts: productsController.getAllProducts.bind(productsController),
+  getCategories: productsController.getCategories.bind(productsController),
+  getFeaturedProducts:
+    productsController.getFeaturedProducts.bind(productsController),
+  getSearchSuggestions:
+    productsController.getSearchSuggestions.bind(productsController),
+  getLowStockProducts:
+    productsController.getLowStockProducts.bind(productsController),
+  getProduct: productsController.getProduct.bind(productsController),
+  createProduct: productsController.createProduct.bind(productsController),
+  updateProduct: productsController.updateProduct.bind(productsController),
+  deleteProduct: productsController.deleteProduct.bind(productsController),
+  toggleFeatured: productsController.toggleFeatured.bind(productsController),
+  updateStock: productsController.updateStock.bind(productsController),
+  bulkUpdateStock: productsController.bulkUpdateStock.bind(productsController),
+  uploadProductImage:
+    productsController.uploadProductImage.bind(productsController),
+  deleteProductImage:
+    productsController.deleteProductImage.bind(productsController),
+};
