@@ -430,9 +430,7 @@ const AddLetterhead = () => {
         });
       }
 
-      const letterheadElement = document.getElementById(
-        "letterhead-print-content",
-      );
+      const letterheadElement = document.getElementById("letterhead-print-content");
       if (!letterheadElement) {
         throw new Error("Letterhead content not found");
       }
@@ -494,6 +492,87 @@ const AddLetterhead = () => {
       setError(`Print failed: ${error.message}`);
     } finally {
       setPrintLoading(false);
+    }
+  };
+
+  // PDF GENERATION FUNCTIONALITY
+  const generateLetterheadPDF = async () => {
+    if (!formData.title || !formData.content) {
+      setError("Please fill in both title and content before generating PDF.");
+      return null;
+    }
+
+    try {
+      // Ensure QR code is generated
+      if (!qrCode) {
+        const tempId = letterheadId || generateTempLetterheadId();
+        setLetterheadId(tempId);
+        const generatedQR = await generatePreviewQRCode(tempId);
+        if (generatedQR) {
+          setQrCode(generatedQR);
+        }
+      }
+
+      // Wait for QR code to render
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      const letterheadElement = document.getElementById("letterhead-print-content");
+      if (!letterheadElement) {
+        throw new Error("Letterhead content not found");
+      }
+
+      // Force element dimensions for PDF generation
+      letterheadElement.style.width = "794px";
+      letterheadElement.style.height = "1123px";
+      letterheadElement.style.transform = "scale(1)";
+
+      const result = await PDFService.generatePDFFromElement(letterheadElement, {
+        filename: `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead_${new Date().toISOString().split("T")[0]}.pdf`,
+        returnBlob: true,
+        quality: 0.95,
+        scale: 2.5,
+        margin: 0, // Full page usage
+        backgroundColor: "#ffffff",
+      });
+
+      if (result.success) {
+        const pdfBlobUrl = URL.createObjectURL(result.blob);
+        setPdfUrl(pdfBlobUrl);
+        return pdfBlobUrl;
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      console.error("PDF generation failed:", error);
+      setError(`PDF generation failed: ${error.message}`);
+      return null;
+    }
+  };
+
+  // PDF DOWNLOAD FUNCTIONALITY
+  const handlePDFDownload = async () => {
+    try {
+      setPdfDownloadLoading(true);
+      setError(null);
+
+      const pdfBlobUrl = await generateLetterheadPDF();
+      if (pdfBlobUrl) {
+        // Create download link
+        const a = document.createElement("a");
+        a.href = pdfBlobUrl;
+        a.download = `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead_${new Date().toISOString().split("T")[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        setSuccess("PDF downloaded successfully!");
+        setTimeout(() => setSuccess(null), 3000);
+      }
+    } catch (error) {
+      console.error("PDF download failed:", error);
+      setError(`PDF download failed: ${error.message}`);
+    } finally {
+      setPdfDownloadLoading(false);
     }
   };
 
@@ -587,8 +666,6 @@ const AddLetterhead = () => {
       setDownloadLoading(false);
     }
   };
-
-  return (
     <Container fluid style={{ padding: "10px" }}>
       <PageHeroSection
         title="Create Letterhead"
@@ -1076,15 +1153,13 @@ const AddLetterhead = () => {
                       onMouseEnter={(e) => {
                         if (!printLoading && !downloadLoading) {
                           e.target.style.transform = "translateY(-1px)";
-                          e.target.style.boxShadow =
-                            "0 6px 16px rgba(40, 167, 69, 0.4)";
+                          e.target.style.boxShadow = "0 6px 16px rgba(40, 167, 69, 0.4)";
                         }
                       }}
                       onMouseLeave={(e) => {
                         if (!printLoading && !downloadLoading) {
                           e.target.style.transform = "translateY(0)";
-                          e.target.style.boxShadow =
-                            "0 4px 12px rgba(40, 167, 69, 0.3)";
+                          e.target.style.boxShadow = "0 4px 12px rgba(40, 167, 69, 0.3)";
                         }
                       }}
                     >
@@ -1118,15 +1193,13 @@ const AddLetterhead = () => {
                       onMouseEnter={(e) => {
                         if (!downloadLoading && !printLoading) {
                           e.target.style.transform = "translateY(-1px)";
-                          e.target.style.boxShadow =
-                            "0 6px 16px rgba(230, 57, 70, 0.4)";
+                          e.target.style.boxShadow = "0 6px 16px rgba(230, 57, 70, 0.4)";
                         }
                       }}
                       onMouseLeave={(e) => {
                         if (!downloadLoading && !printLoading) {
                           e.target.style.transform = "translateY(0)";
-                          e.target.style.boxShadow =
-                            "0 4px 12px rgba(230, 57, 70, 0.3)";
+                          e.target.style.boxShadow = "0 4px 12px rgba(230, 57, 70, 0.3)";
                         }
                       }}
                     >
@@ -1146,10 +1219,7 @@ const AddLetterhead = () => {
                   <div className="text-center mt-3">
                     <small className="text-success d-flex align-items-center justify-content-center gap-1">
                       <i className="bi bi-shield-check text-success"></i>
-                      <span>
-                        Professional A4 letterhead with QR verification ready
-                        for official use
-                      </span>
+                      <span>Professional A4 letterhead with QR verification ready for official use</span>
                     </small>
                   </div>
 
@@ -1161,12 +1231,8 @@ const AddLetterhead = () => {
                         <span>HTML Format</span>
                       </small>
                       <small className="text-muted d-flex align-items-center gap-1">
-                        <i
-                          className={`bi ${qrCode ? "bi-qr-code text-success" : "bi-qr-code text-primary"}`}
-                        ></i>
-                        <span>
-                          {qrCode ? "QR Generated" : "QR Code Included"}
-                        </span>
+                        <i className={`bi ${qrCode ? 'bi-qr-code text-success' : 'bi-qr-code text-primary'}`}></i>
+                        <span>{qrCode ? 'QR Generated' : 'QR Code Included'}</span>
                       </small>
                       <small className="text-muted d-flex align-items-center gap-1">
                         <i className="bi bi-printer text-success"></i>
