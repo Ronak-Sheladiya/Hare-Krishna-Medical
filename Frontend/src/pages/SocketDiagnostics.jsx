@@ -477,7 +477,7 @@ const SocketDiagnostics = () => {
                         {import.meta.env.VITE_BACKEND_URL ||
                           "http://localhost:5000"}
                       </code>
-                      {window.location.hostname.includes("fly.dev") &&
+                      {window.location.hostname.includes("vercel.app") &&
                         (
                           import.meta.env.VITE_BACKEND_URL ||
                           "http://localhost:5000"
