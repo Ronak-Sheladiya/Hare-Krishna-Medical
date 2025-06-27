@@ -13,6 +13,7 @@ const validateLetterheadId = [
 const validateCreateLetterhead = [
   body("title").trim().notEmpty().withMessage("Title is required"),
   body("letterType")
+    .optional()
     .isIn([
       "certificate",
       "recommendation",
@@ -22,19 +23,23 @@ const validateCreateLetterhead = [
       "invitation",
       "acknowledgment",
       "verification",
+      "document",
     ])
     .withMessage("Invalid letter type"),
   body("recipient.name")
+    .optional()
     .trim()
-    .notEmpty()
-    .withMessage("Recipient name is required"),
-  body("subject").trim().notEmpty().withMessage("Subject is required"),
+    .withMessage("Recipient name must be a string"),
+  body("subject").optional().trim().withMessage("Subject must be a string"),
   body("content").trim().notEmpty().withMessage("Content is required"),
-  body("issuer.name").trim().notEmpty().withMessage("Issuer name is required"),
-  body("issuer.designation")
+  body("issuer.name")
+    .optional()
     .trim()
-    .notEmpty()
-    .withMessage("Issuer designation is required"),
+    .withMessage("Issuer name must be a string"),
+  body("issuer.designation")
+    .optional()
+    .trim()
+    .withMessage("Issuer designation must be a string"),
 ];
 
 const validateUpdateLetterhead = [
