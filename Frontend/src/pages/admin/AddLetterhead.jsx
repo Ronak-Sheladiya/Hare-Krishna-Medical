@@ -534,7 +534,7 @@ const AddLetterhead = () => {
   return (
     <Container fluid style={{ padding: "10px" }}>
       <PageHeroSection
-        title="Create Professional Letterhead"
+        title="Create Letterhead"
         subtitle="Create official letterheads with verification QR codes, real-time preview, and PDF generation"
         breadcrumbs={[
           { label: "Admin", href: "/admin" },
