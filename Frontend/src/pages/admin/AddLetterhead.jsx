@@ -579,8 +579,8 @@ const AddLetterhead = () => {
     }
   };
 
-  // DIRECT HTML PRINT FUNCTIONALITY
-  const handlePrint = () => {
+  // PROFESSIONAL PRINT FUNCTIONALITY
+  const handlePrint = async () => {
     if (!formData.title || !formData.content) {
       setError("Please fill in both title and content before printing.");
       return;
@@ -594,12 +594,14 @@ const AddLetterhead = () => {
       if (!qrCode) {
         const tempId = letterheadId || generateTempLetterheadId();
         setLetterheadId(tempId);
-        generatePreviewQRCode(tempId).then((generatedQR) => {
-          if (generatedQR) {
-            setQrCode(generatedQR);
-          }
-        });
+        const generatedQR = await generatePreviewQRCode(tempId);
+        if (generatedQR) {
+          setQrCode(generatedQR);
+        }
       }
+
+      // Wait for QR code to render
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const letterheadElement = document.getElementById(
         "letterhead-print-content",
@@ -608,7 +610,7 @@ const AddLetterhead = () => {
         throw new Error("Letterhead content not found");
       }
 
-      // Create print window with HTML content
+      // Create professional print window with enhanced styling
       const printWindow = window.open("", "_blank");
       const htmlContent = letterheadElement.outerHTML;
 
@@ -616,30 +618,101 @@ const AddLetterhead = () => {
         <!DOCTYPE html>
         <html>
           <head>
-            <title>${formData.title} - Letterhead</title>
+            <title>${formData.title} - Professional Letterhead</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
               @page {
-                size: A4;
-                margin: 0;
+                size: A4 portrait;
+                margin: 15mm;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                color-adjust: exact;
               }
+
               @media print {
+                * {
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  color-adjust: exact !important;
+                  box-shadow: none !important;
+                  text-shadow: none !important;
+                }
+
                 body {
                   margin: 0 !important;
                   padding: 0 !important;
-                  color: black !important;
+                  color: #000 !important;
                   background: white !important;
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
+                  font-family: 'Times New Roman', serif !important;
+                  font-size: 12pt !important;
+                  line-height: 1.6 !important;
                 }
-                .no-print {
+
+                .no-print, .print-button, button, .btn {
                   display: none !important;
                 }
+
+                .letterhead-header {
+                  border-bottom: 4px solid #dc3545 !important;
+                  margin-bottom: 20pt !important;
+                  padding-bottom: 15pt !important;
+                  page-break-inside: avoid;
+                }
+
+                .letterhead-footer {
+                  border-top: 2px solid #6c757d !important;
+                  margin-top: 20pt !important;
+                  padding-top: 15pt !important;
+                  page-break-inside: avoid;
+                }
+
+                .company-logo {
+                  max-width: 60pt !important;
+                  height: auto !important;
+                }
+
+                h1, h2, h3, h4, h5, h6 {
+                  color: #dc3545 !important;
+                  font-weight: bold !important;
+                  page-break-after: avoid;
+                }
+
+                .qr-code {
+                  border: 1pt solid #ddd !important;
+                  padding: 3pt !important;
+                  background: white !important;
+                }
+
+                table {
+                  border-collapse: collapse !important;
+                  width: 100% !important;
+                }
+
+                table td, table th {
+                  border: 1pt solid #000 !important;
+                  padding: 6pt !important;
+                  text-align: left !important;
+                }
+
+                p, div {
+                  orphans: 3;
+                  widows: 3;
+                }
+
+                .letterhead-content {
+                  page-break-inside: avoid;
+                }
               }
-              body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-                background: white;
+
+              @media screen {
+                body {
+                  font-family: 'Times New Roman', serif;
+                  max-width: 210mm;
+                  margin: 0 auto;
+                  background: white;
+                  padding: 20px;
+                }
               }
             </style>
           </head>
@@ -647,10 +720,12 @@ const AddLetterhead = () => {
             ${htmlContent}
             <script>
               window.onload = function() {
-                window.print();
-                window.onafterprint = function() {
-                  window.close();
-                };
+                setTimeout(function() {
+                  window.print();
+                  window.onafterprint = function() {
+                    window.close();
+                  };
+                }, 500);
               };
             </script>
           </body>
@@ -658,7 +733,7 @@ const AddLetterhead = () => {
       `);
       printWindow.document.close();
 
-      setSuccess("Print dialog opened successfully!");
+      setSuccess("Professional print dialog opened successfully!");
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
       console.error("Print failed:", error);
