@@ -65,6 +65,7 @@ class PDFService {
         addQR = false,
         qrUrl = null,
         qrPosition = { x: 170, y: 10, width: 30, height: 30 },
+        margin = 5.3, // Default margin, can be overridden for 98% usage
         onProgress = null,
       } = options;
 
