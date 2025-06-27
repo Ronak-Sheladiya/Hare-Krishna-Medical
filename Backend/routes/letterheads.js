@@ -51,7 +51,8 @@ const validateCreateLetterhead = [
 
 const validateUpdateLetterhead = [
   body("title")
-    .optional()
+    .optional({ values: "falsy" })
+    .isString()
     .trim()
     .notEmpty()
     .withMessage("Title cannot be empty"),
