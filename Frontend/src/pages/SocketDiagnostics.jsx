@@ -623,7 +623,7 @@ const SocketDiagnostics = () => {
       </Row>
 
       {/* Production Configuration Alert */}
-      {window.location.hostname.includes("fly.dev") &&
+      {window.location.hostname.includes("vercel.app") &&
         (import.meta.env.VITE_BACKEND_URL || "http://localhost:5000").includes(
           "localhost",
         ) && (
