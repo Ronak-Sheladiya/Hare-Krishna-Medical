@@ -244,15 +244,20 @@ const AdminLetterheads = () => {
   const handleMarkAsSent = async (letterhead) => {
     try {
       setActionLoading(true);
-      const response = await safeApiCall(
+      const safeResponse = await safeApiCall(() =>
         api.put(`/api/letterheads/${letterhead._id}/mark-sent`),
       );
 
-      if (response?.success) {
-        showNotification("Letterhead marked as sent", "success");
-        fetchLetterheads();
+      if (safeResponse?.success) {
+        const response = safeResponse.data;
+        if (response?.success) {
+          showNotification("Letterhead marked as sent", "success");
+          fetchLetterheads();
+        } else {
+          throw new Error(response?.message || "Failed to mark as sent");
+        }
       } else {
-        throw new Error(response?.message || "Failed to mark as sent");
+        throw new Error(safeResponse?.error || "Failed to mark as sent");
       }
     } catch (error) {
       console.error("Mark as sent error:", error);
