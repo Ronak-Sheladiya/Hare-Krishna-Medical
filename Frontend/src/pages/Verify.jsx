@@ -66,7 +66,14 @@ const Verify = () => {
       setInvoiceId(id);
       handleInvoiceVerify(id);
     }
-  }, [searchParams]);
+
+    // Handle legacy /verify/:invoiceId route
+    if (urlInvoiceId) {
+      setActiveTab("invoices");
+      setInvoiceId(urlInvoiceId);
+      handleInvoiceVerify(urlInvoiceId);
+    }
+  }, [searchParams, urlInvoiceId]);
 
   // Document verification logic
   const handleDocumentVerify = async (id = documentId, type = documentType) => {
