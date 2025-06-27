@@ -870,19 +870,6 @@ const AdminProducts = () => {
               />
             </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Usage Instructions</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                placeholder="Enter detailed usage instructions"
-                value={formData.usage}
-                onChange={(e) =>
-                  setFormData({ ...formData, usage: e.target.value })
-                }
-              />
-            </Form.Group>
-
             <Form.Group className="mb-4">
               <Form.Label>
                 Product Images <span className="text-danger">*</span>
