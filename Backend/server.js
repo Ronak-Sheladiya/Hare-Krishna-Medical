@@ -223,6 +223,41 @@ app.get("/api/health", (req, res) => {
 });
 
 // ==========================
+// ✅ Database Seed Route (Development Only)
+// ==========================
+if (process.env.NODE_ENV === "development") {
+  // Manual database seeding endpoint
+  app.post("/api/seed-database", async (req, res) => {
+    try {
+      console.log("🌱 Manual database seeding triggered...");
+      const { seedDatabase } = require("./scripts/seed");
+      const result = await seedDatabase();
+
+      res.json({
+        success: true,
+        message: "Database seeded successfully",
+        data: {
+          users: result.users?.length || 0,
+          products: result.products?.length || 0,
+          messages: result.messages?.length || 0,
+          letterheads: result.letterheads?.length || 0,
+          verifications: result.verifications?.length || 0,
+          orders: result.orders?.length || 0,
+          invoices: result.invoices?.length || 0,
+        },
+      });
+    } catch (error) {
+      console.error("❌ Manual seeding error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Database seeding failed",
+        error: error.message,
+      });
+    }
+  });
+}
+
+// ==========================
 // ✅ Email Test Routes (Development Only)
 // ==========================
 if (process.env.NODE_ENV === "development") {
