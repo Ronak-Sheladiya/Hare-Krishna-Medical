@@ -240,7 +240,10 @@ const AddLetterhead = () => {
             <div style="flex: 1;">
               <div style="display: flex; align-items: center; margin-bottom: 12px;">
                 <div style="background: white; border-radius: 50%; padding: 10px; margin-right: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                  <div style="width: 45px; height: 45px; background: #e63946; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; font-weight: bold;">HK</div>
+                  <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
+                       alt="Hare Krishna Medical Logo"
+                       style="height: 45px; width: 45px; object-fit: contain; border-radius: 50%;"
+                       crossorigin="anonymous" />
                 </div>
                 <div>
                   <h1 style="font-size: 24px; font-weight: 900; margin: 0; line-height: 1.1; font-family: Georgia, serif;">HARE KRISHNA MEDICAL</h1>
@@ -255,10 +258,14 @@ const AddLetterhead = () => {
             </div>
             <div style="text-align: center; min-width: 110px; margin-left: 20px;">
               <div style="background: white; padding: 10px; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.15);">
-                <div style="width: 85px; height: 85px; border: 2px dashed #e63946; border-radius: 6px; background: #f8f9fa; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #e63946;">
-                  <div style="font-size: 14px; margin-bottom: 4px;">📱</div>
-                  <div style="font-size: 9px; font-weight: bold; text-align: center; line-height: 1.1;">QR CODE<br>VERIFICATION</div>
-                </div>
+                ${
+                  qrCode
+                    ? `<img src="${qrCode}" alt="Verification QR Code" style="width: 85px; height: 85px; border: 2px solid #e63946; border-radius: 6px; display: block;" crossorigin="anonymous" />`
+                    : `<div style="width: 85px; height: 85px; border: 2px dashed #e63946; border-radius: 6px; background: #f8f9fa; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #e63946;">
+                     <div style="font-size: 14px; margin-bottom: 4px;">📱</div>
+                     <div style="font-size: 9px; font-weight: bold; text-align: center; line-height: 1.1;">QR CODE<br>VERIFICATION</div>
+                   </div>`
+                }
                 <div style="margin-top: 6px; color: #333; font-size: 9px; font-weight: bold;">📱 SCAN TO VERIFY</div>
               </div>
             </div>
@@ -299,8 +306,29 @@ const AddLetterhead = () => {
       // Append to body for rendering
       document.body.appendChild(pdfContainer);
 
-      // Wait for rendering
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Wait for rendering and images to load
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Ensure all images are loaded
+      const images = pdfContainer.querySelectorAll("img");
+      const imageLoadPromises = Array.from(images).map((img) => {
+        return new Promise((resolve) => {
+          if (img.complete && img.naturalHeight !== 0) {
+            resolve();
+          } else {
+            img.onload = resolve;
+            img.onerror = resolve; // Continue even if image fails to load
+            // Set a timeout to prevent hanging
+            setTimeout(resolve, 3000);
+          }
+        });
+      });
+
+      if (imageLoadPromises.length > 0) {
+        await Promise.all(imageLoadPromises);
+        // Additional wait after images load
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
 
       // Capture with html2canvas
       const canvas = await html2canvas(pdfContainer, {
