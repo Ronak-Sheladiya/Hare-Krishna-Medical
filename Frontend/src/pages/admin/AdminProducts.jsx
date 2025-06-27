@@ -59,6 +59,7 @@ const AdminProducts = () => {
     category: "",
     shortDescription: "",
     description: "",
+    benefits: "",
     usage: "",
     weight: "",
     images: [],
