@@ -478,29 +478,28 @@ const seedVerifications = async (users) => {
 const seedOrders = async (users, products) => {
   try {
     await Order.deleteMany({});
-    await Invoice.deleteMany({});
 
     const orders = [
       {
-        user: users[1]._id, // John Smith
+        user: users[3]._id, // John Smith (user at index 3)
         items: [
           {
             product: products[0]._id,
             name: products[0].name,
             price: products[0].price,
-            mrp: products[0].mrp,
+            mrp: products[0].originalPrice,
             quantity: 2,
             total: products[0].price * 2,
-            image: products[0].images[0]?.url,
+            image: products[0].images[0],
           },
           {
             product: products[1]._id,
             name: products[1].name,
             price: products[1].price,
-            mrp: products[1].mrp,
+            mrp: products[1].originalPrice,
             quantity: 1,
             total: products[1].price * 1,
-            image: products[1].images[0]?.url,
+            image: products[1].images[0],
           },
         ],
         shippingAddress: {
@@ -519,16 +518,16 @@ const seedOrders = async (users, products) => {
         actualDeliveryDate: new Date("2024-01-17"),
       },
       {
-        user: users[2]._id, // Jane Doe
+        user: users[4]._id, // Jane Doe (user at index 4)
         items: [
           {
             product: products[2]._id,
             name: products[2].name,
             price: products[2].price,
-            mrp: products[2].mrp,
+            mrp: products[2].originalPrice,
             quantity: 1,
             total: products[2].price * 1,
-            image: products[2].images[0]?.url,
+            image: products[2].images[0],
           },
         ],
         shippingAddress: {
@@ -547,36 +546,64 @@ const seedOrders = async (users, products) => {
       },
     ];
 
+    // Calculate order totals
+    orders.forEach((order) => {
+      const subtotal = order.items.reduce((sum, item) => sum + item.total, 0);
+      const tax = Math.round(subtotal * 0.18 * 100) / 100; // 18% GST
+      const shipping = subtotal > 500 ? 0 : 50; // Free shipping above 500
+
+      order.subtotal = subtotal;
+      order.tax = tax;
+      order.shippingCharges = shipping;
+      order.total = subtotal + tax + shipping;
+    });
+
     const createdOrders = await Order.insertMany(orders);
     console.log(`✅ ${createdOrders.length} orders created`);
+    return createdOrders;
+  } catch (error) {
+    console.error("❌ Error seeding orders:", error);
+    return [];
+  }
+};
 
-    // Create invoices for orders
-    const invoices = createdOrders.map((order) => ({
+const seedInvoices = async (users, orders) => {
+  try {
+    await Invoice.deleteMany({});
+
+    const invoices = orders.map((order) => ({
       order: order._id,
       user: order.user,
+      invoiceDate: order.createdAt,
+      dueDate: new Date(order.createdAt.getTime() + 30 * 24 * 60 * 60 * 1000), // 30 days after order
       items: order.items,
       customerDetails: order.shippingAddress,
       subtotal: order.subtotal,
       tax: order.tax,
       shipping: order.shippingCharges,
+      discount: 0,
       total: order.total,
       paymentMethod: order.paymentMethod,
       paymentStatus: order.paymentStatus,
       status: order.orderStatus === "Delivered" ? "Paid" : "Sent",
+      paymentDate:
+        order.orderStatus === "Delivered" ? order.actualDeliveryDate : null,
+      notes: "Thank you for your business!",
     }));
 
     const createdInvoices = await Invoice.insertMany(invoices);
     console.log(`✅ ${createdInvoices.length} invoices created`);
 
     // Update orders with invoice references
-    for (let i = 0; i < createdOrders.length; i++) {
-      createdOrders[i].invoice = createdInvoices[i]._id;
-      await createdOrders[i].save();
+    for (let i = 0; i < orders.length; i++) {
+      orders[i].invoice = createdInvoices[i]._id;
+      await orders[i].save();
     }
 
-    return { orders: createdOrders, invoices: createdInvoices };
+    return createdInvoices;
   } catch (error) {
-    console.error("❌ Error seeding orders:", error);
+    console.error("❌ Error seeding invoices:", error);
+    return [];
   }
 };
 
