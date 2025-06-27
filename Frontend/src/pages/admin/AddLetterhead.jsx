@@ -405,6 +405,8 @@ const AddLetterhead = () => {
   // Loading states for print and download
   const [printLoading, setPrintLoading] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
+  const [pdfDownloadLoading, setPdfDownloadLoading] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState(null);
 
   // DIRECT HTML PRINT FUNCTIONALITY
   const handlePrint = () => {
