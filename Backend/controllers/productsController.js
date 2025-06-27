@@ -91,10 +91,10 @@ const sampleProducts = [
     originalPrice: 500.0,
     stock: 25,
     category: "First Aid",
-    description:
+    shortDescription:
       "Complete first aid kit for home and travel use with essential medical supplies.",
-    benefits:
-      "• Complete medical emergency kit\n• Travel-friendly compact size\n• Quality medical supplies\n• Essential for every home",
+    description:
+      "Comprehensive medical emergency kit with quality supplies for home and travel. Travel-friendly compact design with essential medical items.",
     usage: "Keep in easily accessible location. Check expiry dates regularly.",
     weight: "500g",
     images: [
