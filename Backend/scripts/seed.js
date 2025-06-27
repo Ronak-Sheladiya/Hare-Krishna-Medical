@@ -190,112 +190,136 @@ const seedProducts = async () => {
         views: 800,
       },
       {
-        name: "Cough Syrup with Honey",
+        name: "Cough Syrup 100ml",
+        shortDescription:
+          "Natural ayurvedic cough syrup for dry and wet cough relief.",
         description:
-          "Natural cough syrup with honey for dry and wet cough relief.",
-        price: 35.75,
-        mrp: 42.0,
-        discount: 15,
-        category: "Medicine",
-        subCategory: "Cough & Cold",
-        brand: "Wellness Care",
-        stock: 76,
-        minStock: 10,
+          "Effective natural ayurvedic formula that relieves both dry and wet cough, soothes throat irritation, and is safe for all ages.",
+        company: "Dabur",
+        price: 95.0,
+        originalPrice: 110.0,
+        category: "Cough & Cold",
+        weight: "100ml",
+        stock: 65,
+        minStack: 10,
         images: [
-          {
-            url: "https://via.placeholder.com/400x400?text=Cough+Syrup",
-            alt: "Cough Syrup",
-          },
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTc0YzNjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Q291Z2ggU3lydXA8L3RleHQ+PC9zdmc+",
         ],
-        specifications: {
-          composition: "Honey, Tulsi extract, Ginger",
-          dosage: "2 teaspoons twice daily",
-          manufacturer: "Wellness Care Ltd",
-          expiryMonths: 18,
-        },
+        benefits:
+          "• Relieves dry and wet cough\n• Natural ayurvedic formula\n• Soothes throat irritation\n• Safe for all ages",
+        composition: "Honey, Tulsi extract, Ginger",
+        usage:
+          "Adults: 2 teaspoons 3 times daily. Children: 1 teaspoon 3 times daily.",
+        sideEffects: "Generally safe. Discontinue if allergic reaction occurs.",
+        contraindications: "Not recommended for children under 2 years.",
+        batchNo: "CS2024003",
+        mfgDate: new Date("2024-01-15"),
+        expDate: new Date("2025-07-15"),
         tags: ["cough", "honey", "natural", "syrup"],
-        sales: 98,
+        isActive: true,
+        isFeatured: false,
+        rating: { average: 4.2, count: 156 },
+        sales: 320,
+        views: 950,
       },
       {
-        name: "Hand Sanitizer 500ml",
+        name: "First Aid Kit",
+        shortDescription:
+          "Complete first aid kit for home and travel use with essential medical supplies.",
         description:
-          "70% alcohol-based hand sanitizer for effective germ protection.",
-        price: 89.0,
-        mrp: 99.0,
-        discount: 10,
-        category: "Personal Care",
-        subCategory: "Hygiene",
-        brand: "SafeGuard",
-        stock: 234,
-        minStock: 50,
+          "Comprehensive medical emergency kit with quality supplies for home and travel. Travel-friendly compact design with essential medical items.",
+        company: "Johnson & Johnson",
+        price: 450.0,
+        originalPrice: 500.0,
+        category: "First Aid",
+        weight: "500g",
+        stock: 25,
+        minStack: 5,
         images: [
-          {
-            url: "https://via.placeholder.com/400x400?text=Hand+Sanitizer",
-            alt: "Hand Sanitizer",
-          },
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGMzNTQ1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Rmlyc3QgQWlkPC90ZXh0Pjwvc3ZnPg==",
         ],
-        specifications: {
-          composition: "70% Isopropyl Alcohol",
-          manufacturer: "SafeGuard Personal Care",
-          expiryMonths: 36,
-        },
-        tags: ["sanitizer", "hygiene", "protection", "alcohol"],
+        benefits:
+          "• Complete medical emergency kit\n• Travel-friendly compact size\n• Quality medical supplies\n• Essential for every home",
+        composition:
+          "Bandages, antiseptic, pain relief tablets, gauze, thermometer",
+        usage:
+          "Keep in easily accessible location. Check expiry dates regularly.",
+        contraindications: "Check individual item expiry dates before use.",
+        batchNo: "FA2024004",
+        mfgDate: new Date("2024-03-01"),
+        expDate: new Date("2027-03-01"),
+        tags: ["first aid", "emergency", "medical", "supplies"],
+        isActive: true,
         isFeatured: true,
-        sales: 312,
+        rating: { average: 4.6, count: 78 },
+        sales: 120,
+        views: 600,
       },
       {
-        name: "Baby Diaper Size M (Pack of 40)",
+        name: "Digital Thermometer",
+        shortDescription:
+          "Accurate digital thermometer with fast reading and fever alarm.",
         description:
-          "Soft and comfortable baby diapers with 12-hour protection.",
-        price: 299.0,
-        mrp: 349.0,
-        discount: 14,
-        category: "Baby Care",
-        subCategory: "Diapers",
-        brand: "Little Angels",
-        stock: 145,
-        minStock: 25,
+          "High-precision digital thermometer with fast 60-second reading, ±0.1°C accuracy, fever alarm function, and memory for last reading.",
+        company: "Omron",
+        price: 280.0,
+        originalPrice: 320.0,
+        category: "Medical Devices",
+        weight: "15g",
+        stock: 45,
+        minStack: 10,
         images: [
-          {
-            url: "https://via.placeholder.com/400x400?text=Baby+Diaper",
-            alt: "Baby Diapers",
-          },
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMDA3YmZmIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+VGhlcm1vbWV0ZXI8L3RleHQ+PC9zdmc+",
         ],
-        specifications: {
-          weight: "6-11 kg",
-          count: "40 pieces",
-          manufacturer: "Little Angels Baby Care",
-        },
-        tags: ["baby", "diaper", "comfort", "protection"],
-        sales: 87,
+        benefits:
+          "• Fast 60-second reading\n• High accuracy ±0.1°C\n• Fever alarm function\n• Memory for last reading",
+        composition: "Digital sensor, LCD display, plastic body",
+        usage: "Place under tongue, armpit, or rectally. Wait for beep signal.",
+        contraindications:
+          "Clean before and after each use. Replace battery when needed.",
+        batchNo: "DT2024005",
+        mfgDate: new Date("2024-02-10"),
+        expDate: new Date("2029-02-10"),
+        tags: ["thermometer", "digital", "temperature", "medical"],
+        isActive: true,
+        isFeatured: false,
+        rating: { average: 4.8, count: 92 },
+        sales: 85,
+        views: 720,
       },
       {
-        name: "Ayurvedic Chyawanprash",
+        name: "Multivitamin Capsules",
+        shortDescription:
+          "Complete multivitamin and mineral supplement for daily health support.",
         description:
-          "Traditional Ayurvedic immunity booster with herbs and spices.",
-        price: 185.0,
-        mrp: 220.0,
-        discount: 16,
-        category: "Ayurvedic",
-        subCategory: "Immunity",
-        brand: "Herbal Wellness",
-        stock: 67,
-        minStock: 12,
+          "Comprehensive multivitamin formula with essential minerals for complete nutrition support. Natural herbal formula that boosts energy and supports immune system.",
+        company: "Himalaya",
+        price: 350.0,
+        originalPrice: 380.0,
+        category: "Supplements",
+        weight: "30 capsules",
+        stock: 120,
+        minStack: 20,
         images: [
-          {
-            url: "https://via.placeholder.com/400x400?text=Chyawanprash",
-            alt: "Chyawanprash",
-          },
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjhhNzQ1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+TXVsdGl2aXRhbWluPC90ZXh0Pjwvc3ZnPg==",
         ],
-        specifications: {
-          composition: "Amla, Ashwagandha, Giloy, Honey",
-          dosage: "1 teaspoon twice daily",
-          manufacturer: "Herbal Wellness Pvt Ltd",
-          expiryMonths: 24,
-        },
-        tags: ["ayurvedic", "immunity", "herbal", "chyawanprash"],
+        benefits:
+          "• Complete nutrition support\n• Boosts energy levels\n• Supports immune system\n• Natural herbal formula",
+        composition:
+          "Vitamins A, B-complex, C, D, E, Minerals: Iron, Calcium, Zinc",
+        usage: "Take 1 capsule daily with water after breakfast.",
+        sideEffects: "May cause mild stomach upset if taken on empty stomach.",
+        contraindications:
+          "Consult doctor if pregnant, nursing or taking medications.",
+        batchNo: "MV2024006",
+        mfgDate: new Date("2024-01-20"),
+        expDate: new Date("2026-01-20"),
+        tags: ["multivitamin", "supplements", "nutrition", "health"],
+        isActive: true,
         isFeatured: true,
-        sales: 203,
+        rating: { average: 4.4, count: 167 },
+        sales: 280,
+        views: 1100,
       },
     ];
 
@@ -440,7 +464,7 @@ const seedDatabase = async () => {
     console.log("   Email: mayurgajera098@gmail.com");
     console.log("   Password: admin@123");
 
-    console.log("\n���� Test User Credentials:");
+    console.log("\n👤 Test User Credentials:");
     console.log("   Email: john@example.com");
     console.log("   Password: user123");
 
