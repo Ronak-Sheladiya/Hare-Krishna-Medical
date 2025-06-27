@@ -771,27 +771,69 @@ const AddLetterhead = () => {
                   </div>
                 </div>
               </Card.Header>
-              <Card.Body className="p-2" style={{ backgroundColor: "#f8f9fa" }}>
+              <Card.Body
+                className="p-3"
+                style={{
+                  backgroundColor: "#f8f9fa",
+                  minHeight: "500px",
+                }}
+              >
                 {!formData.title || !formData.content ? (
-                  <div className="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
-                    <i
-                      className="bi bi-file-earmark-text"
-                      style={{ fontSize: "4rem" }}
-                    ></i>
-                    <h5>Enter title and content to see preview</h5>
-                    <p>Your letterhead will appear here as you type</p>
+                  <div
+                    className="d-flex flex-column align-items-center justify-content-center text-muted"
+                    style={{
+                      height: "100%",
+                      background:
+                        "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+                      borderRadius: "12px",
+                      border: "2px dashed #dee2e6",
+                      padding: "40px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "80px",
+                        height: "80px",
+                        background: "linear-gradient(135deg, #28a745, #20c997)",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: "20px",
+                        color: "white",
+                      }}
+                    >
+                      <i
+                        className="bi bi-file-earmark-text"
+                        style={{ fontSize: "2rem" }}
+                      ></i>
+                    </div>
+                    <h5 style={{ fontWeight: "600", color: "#495057" }}>
+                      Live Preview Ready
+                    </h5>
+                    <p
+                      style={{
+                        textAlign: "center",
+                        marginBottom: "0",
+                        color: "#6c757d",
+                      }}
+                    >
+                      Enter your letterhead title and content in the form to see
+                      a real-time preview here
+                    </p>
                   </div>
                 ) : (
                   <div
                     style={{
-                      transform: "scale(0.5)",
+                      transform: "scale(0.45)",
                       transformOrigin: "top left",
-                      width: "200%",
-                      height: "200%",
+                      width: "222%",
+                      height: "222%",
                       overflow: "hidden",
-                      border: "1px solid #ddd",
-                      borderRadius: "8px",
+                      border: "2px solid #dee2e6",
+                      borderRadius: "12px",
                       backgroundColor: "white",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                     }}
                     dangerouslySetInnerHTML={{
                       __html: createLetterheadTemplate(),
