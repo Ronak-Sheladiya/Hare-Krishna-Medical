@@ -194,7 +194,7 @@ const AddLetterhead = () => {
 
     return `
       <div id="letterhead-print-content" style="
-        font-family: 'Times New Roman', serif;
+        font-family: Arial, sans-serif;
         background: white;
         width: 210mm;
         min-height: 297mm;
