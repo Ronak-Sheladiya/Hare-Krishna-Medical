@@ -842,8 +842,12 @@ const AddLetterhead = () => {
           {/* Live Preview Section */}
           <Col lg={6}>
             <Card
-              className="shadow-lg h-100"
-              style={{ borderRadius: "12px", border: "none" }}
+              className="shadow-lg"
+              style={{
+                borderRadius: "12px",
+                border: "none",
+                height: "700px",
+              }}
             >
               <Card.Header
                 className="text-white"
