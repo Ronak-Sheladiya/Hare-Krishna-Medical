@@ -339,36 +339,32 @@ const AddLetterhead = () => {
     if (!formData.title || !formData.content) return;
 
     try {
-      // Import PDF service
-      const pdfService = (await import("../../services/PDFService")).default;
+      setPdfGenerating(true);
 
-      const letterheadElement = document.getElementById(
-        "letterhead-print-content",
-      );
-      if (!letterheadElement) {
-        alert("Letterhead content not found. Please try again.");
-        return;
-      }
+      // Generate PDF first
+      const pdfBlob = await generateLetterheadPDF();
 
-      const result = await pdfService.generatePDFFromElement(
-        letterheadElement,
-        {
-          filename: `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`,
-          onProgress: (message, progress) => {
-            console.log(`PDF Download: ${message} (${progress}%)`);
-          },
-        },
-      );
+      if (pdfBlob) {
+        // Create download link and trigger download
+        const filename = `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`;
+        const url = URL.createObjectURL(pdfBlob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
 
-      if (!result.success) {
-        alert("PDF download failed. Please try again.");
-        console.error("PDF generation error:", result.error);
+        console.log("PDF downloaded successfully:", filename);
       } else {
-        console.log("PDF downloaded successfully:", result.filename);
+        alert("Failed to generate PDF for download. Please try again.");
       }
     } catch (error) {
-      console.error("PDF download failed:", error);
-      alert("PDF download failed. Please try again.");
+      console.error("Download failed:", error);
+      alert("Download failed. Please try again.");
+    } finally {
+      setPdfGenerating(false);
     }
   };
 
