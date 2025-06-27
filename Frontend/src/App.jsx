@@ -191,6 +191,10 @@ function App() {
             <Route path="/invoice/:invoiceId" element={<InvoiceView />} />
             <Route path="/verify" element={<Verify />} />
             <Route path="/verify/:invoiceId" element={<Verify />} />
+            <Route
+              path="/verify/letterhead/:letterheadId"
+              element={<Verify />}
+            />
             <Route path="/user-guide" element={<UserGuide />} />
             <Route path="/backend-docs" element={<BackendDocs />} />
             <Route path="/localsetup-guide" element={<LocalSetupGuide />} />
