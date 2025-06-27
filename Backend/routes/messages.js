@@ -63,7 +63,7 @@ router.get("/admin/stats", adminAuth, messagesController.getMessageStats);
 // @route   GET /api/messages/admin/:id
 // @desc    Get single message (Admin)
 // @access  Admin
-router.get("/admin/:id", adminAuth, messagesController.getMessage);
+router.get("/admin/:id", adminAuth, messagesController.getMessageById);
 
 // @route   PUT /api/messages/admin/:id/status
 // @desc    Update message status (Admin)
@@ -97,7 +97,7 @@ router.post(
     }
     next();
   },
-  messagesController.respondToMessage,
+  messagesController.replyToMessage,
 );
 
 module.exports = router;

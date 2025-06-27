@@ -168,11 +168,11 @@ const Header = () => {
               </Nav.Link>
               <Nav.Link
                 as={Link}
-                to="/verify-docs"
-                style={navLinkStyle(isActiveRoute("/verify-docs"))}
+                to="/verify"
+                style={navLinkStyle(isActiveRoute("/verify"))}
               >
                 <i className="bi bi-shield-check me-1"></i>
-                Verify Docs
+                Verify
               </Nav.Link>
             </Nav>
 

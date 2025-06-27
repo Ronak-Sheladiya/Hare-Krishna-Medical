@@ -56,7 +56,7 @@ const AddLetterhead = () => {
   const generatePreviewQRCode = async (tempId) => {
     try {
       const QRCode = await import("qrcode");
-      const verificationUrl = `${window.location.origin}/verify-docs?id=${tempId}&type=letterhead`;
+      const verificationUrl = `${window.location.origin}/verify/letterhead/${tempId}`;
       const qrDataURL = await QRCode.toDataURL(verificationUrl, {
         width: 200,
         margin: 2,
@@ -195,26 +195,40 @@ const AddLetterhead = () => {
     return `
       <div id="letterhead-print-content" style="
         font-family: Arial, sans-serif;
-        background: white;
         width: 210mm;
-        min-height: 297mm;
-        margin: 0 auto;
-        padding: 15mm;
-        box-sizing: border-box;
+        height: 297mm;
+        background: white;
         position: relative;
-        page-break-inside: avoid;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-size: 13px;
+        line-height: 1.5;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
       ">
-        <!-- Header Section -->
+        <!-- Page Content Container using full A4 page -->
         <div style="
-          background: #e63946;
-          color: white;
-          padding: 20px;
-          border-radius: 8px;
-          margin-bottom: 20px;
+          padding: 10mm;
+          height: 100%;
           display: flex;
-          justify-content: space-between;
-          align-items: center;
+          flex-direction: column;
+          box-sizing: border-box;
         ">
+          <!-- Header Section -->
+          <div style="
+            background: #e63946;
+            color: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+          ">
           <!-- Company Information -->
           <div style="flex: 1;">
             <div style="display: flex; align-items: center; margin-bottom: 12px;">
@@ -307,60 +321,60 @@ const AddLetterhead = () => {
           </div>
         </div>
 
-        <!-- Reference and Date - Top Right, Left Aligned -->
-        <div style="
-          text-align: left;
-          margin: 0 0 20px auto;
-          font-size: 11px;
-          color: #666;
-          width: fit-content;
-        ">
-          <div style="margin-bottom: 3px; font-weight: 600;">Ref: ${currentLetterheadId}</div>
-          <div style="font-weight: 600;">Date: ${currentDate}</div>
-        </div>
-
-        <!-- Document Title -->
-        <div style="text-align: center; margin-bottom: 25px;">
-          <h2 style="
-            color: #e63946;
-            font-size: 22px;
-            font-weight: bold;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            border-bottom: 3px solid #e63946;
-            display: inline-block;
-            padding-bottom: 8px;
-            font-family: 'Georgia', serif;
+          <!-- Reference and Date - Top Right, Left Aligned -->
+          <div style="
+            text-align: left;
+            margin: 0 0 16px auto;
+            font-size: 11px;
+            color: #666;
+            width: fit-content;
+            flex-shrink: 0;
           ">
-            ${formData.title}
-          </h2>
-        </div>
+            <div style="margin-bottom: 3px; font-weight: 600;">Ref: ${currentLetterheadId}</div>
+            <div style="font-weight: 600;">Date: ${currentDate}</div>
+          </div>
 
-        <!-- Content Section -->
-        <div style="
-          font-size: 13px;
-          line-height: 1.7;
-          text-align: justify;
-          margin-bottom: 80px;
-          min-height: 200px;
-          color: #333;
-          font-family: Arial, sans-serif;
-          padding-bottom: 30px;
-        ">
-          ${formData.content}
-        </div>
+          <!-- Document Title -->
+          <div style="text-align: center; margin-bottom: 20px; flex-shrink: 0;">
+            <h2 style="
+              color: #e63946;
+              font-size: 20px;
+              font-weight: bold;
+              margin: 0;
+              text-transform: uppercase;
+              letter-spacing: 1.2px;
+              border-bottom: 3px solid #e63946;
+              display: inline-block;
+              padding-bottom: 6px;
+              font-family: 'Georgia', serif;
+            ">
+              ${formData.title}
+            </h2>
+          </div>
 
-        <!-- Footer Section - Better positioning to avoid overlap -->
-        <div style="
-          border-top: 2px solid #e63946;
-          padding-top: 15px;
-          margin-top: 30px;
-          position: fixed;
-          bottom: 15mm;
-          left: 15mm;
-          right: 15mm;
-        ">
+          <!-- Content Section - Uses remaining space -->
+          <div style="
+            font-size: 13px;
+            line-height: 1.5;
+            text-align: justify;
+            color: #333;
+            font-family: Arial, sans-serif;
+            flex: 1;
+            overflow: hidden;
+            margin-bottom: 15px;
+            min-height: 180px;
+          ">
+            ${formData.content}
+          </div>
+
+          <!-- Footer Section - Fixed at bottom -->
+          <div style="
+            border-top: 2px solid #e63946;
+            padding-top: 10px;
+            margin-top: auto;
+            background: white;
+            flex-shrink: 0;
+          ">
           <div style="text-align: center;">
             <p style="
               font-size: 11px;
@@ -380,19 +394,21 @@ const AddLetterhead = () => {
             </p>
           </div>
         </div>
+        </div>
       </div>
     `;
   };
 
-  // PDF generation state
-  const [pdfGenerating, setPdfGenerating] = useState(false);
+  // PDF generation states - separate for print and download
+  const [printLoading, setPrintLoading] = useState(false);
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
 
   // Generate actual PDF for letterhead with proper A4 sizing
   const generateLetterheadPDF = async () => {
     if (!formData.title || !formData.content) return null;
 
-    setPdfGenerating(true);
+    setDownloadLoading(true);
     try {
       // Import PDF service
       const pdfService = (await import("../../services/PDFService")).default;
@@ -429,14 +445,14 @@ const AddLetterhead = () => {
       if (result.success && result.blob) {
         const pdfObjectUrl = URL.createObjectURL(result.blob);
         setPdfUrl(pdfObjectUrl);
-        setPdfGenerating(false);
+        setDownloadLoading(false);
         return result.blob;
       } else {
-        throw new Error(result.error || "PDF generation failed");
+        throw new Error("Failed to generate PDF");
       }
     } catch (error) {
       console.error("PDF generation failed:", error);
-      setPdfGenerating(false);
+      setDownloadLoading(false);
       return null;
     }
   };
@@ -446,10 +462,80 @@ const AddLetterhead = () => {
   // PRINT FUNCTIONALITY - Generate PDF and open in new window for printing
   const handlePrint = async () => {
     try {
-      setPdfGenerating(true);
+      setPrintLoading(true);
 
-      // Generate PDF first
-      const pdfBlob = await generateLetterheadPDF();
+      // Use html2pdf.js for better printing
+      const html2pdf = (await import("html2pdf.js")).default;
+
+      const letterheadElement = document.getElementById(
+        "letterhead-print-content",
+      );
+      if (!letterheadElement) {
+        alert("Letterhead content not found. Please refresh and try again.");
+        return;
+      }
+
+      // Clone the element to avoid modifying the original
+      const clonedElement = letterheadElement.cloneNode(true);
+
+      // Configure html2pdf options for perfect A4 layout
+      const options = {
+        margin: 0,
+        filename: `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`,
+        image: {
+          type: "jpeg",
+          quality: 0.98,
+        },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: "#ffffff",
+          width: 794,
+          height: 1123,
+          letterRendering: true,
+          logging: false,
+          windowWidth: 794,
+          windowHeight: 1123,
+        },
+        jsPDF: {
+          unit: "mm",
+          format: "a4",
+          orientation: "portrait",
+          compress: true,
+        },
+      };
+
+      // Force exact A4 dimensions on the cloned element
+      clonedElement.style.cssText = `
+        width: 210mm !important;
+        height: 297mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+        background: white !important;
+        font-family: Arial, sans-serif !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        position: relative !important;
+      `;
+
+      // Temporarily add to DOM for processing
+      clonedElement.style.position = "fixed";
+      clonedElement.style.top = "-9999px";
+      clonedElement.style.left = "-9999px";
+      clonedElement.style.zIndex = "-1";
+      document.body.appendChild(clonedElement);
+
+      // Generate PDF blob for printing
+      const pdfBlob = await html2pdf()
+        .set(options)
+        .from(clonedElement)
+        .outputPdf("blob");
+
+      // Clean up
+      document.body.removeChild(clonedElement);
 
       if (pdfBlob) {
         // Create PDF URL and open in new window for printing
@@ -486,7 +572,7 @@ const AddLetterhead = () => {
       console.error("Print failed:", error);
       alert("Print failed. Please try again.");
     } finally {
-      setPdfGenerating(false);
+      setPrintLoading(false);
     }
   };
 
@@ -494,11 +580,10 @@ const AddLetterhead = () => {
     if (!formData.title || !formData.content) return;
 
     try {
-      setPdfGenerating(true);
+      setDownloadLoading(true);
 
-      // Use html2canvas and jsPDF directly for better control
-      const html2canvas = (await import("html2canvas")).default;
-      const jsPDF = (await import("jspdf")).default;
+      // Use html2pdf.js for better HTML to PDF conversion
+      const html2pdf = (await import("html2pdf.js")).default;
 
       const letterheadElement = document.getElementById(
         "letterhead-print-content",
@@ -508,36 +593,74 @@ const AddLetterhead = () => {
         return;
       }
 
-      // Generate canvas
-      const canvas = await html2canvas(letterheadElement, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: "#ffffff",
-        width: letterheadElement.scrollWidth,
-        height: letterheadElement.scrollHeight,
-      });
+      // Clone the element to avoid modifying the original
+      const clonedElement = letterheadElement.cloneNode(true);
 
-      // Create PDF
-      const pdf = new jsPDF("portrait", "mm", "a4");
-      const imgData = canvas.toDataURL("image/png", 1.0);
+      // Configure html2pdf options for perfect A4 layout
+      const options = {
+        margin: 0, // No margins for full page usage
+        filename: `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`,
+        image: {
+          type: "jpeg",
+          quality: 0.98,
+        },
+        html2canvas: {
+          scale: 2, // High DPI for crisp text
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: "#ffffff",
+          width: 794, // A4 width in pixels at 96 DPI
+          height: 1123, // A4 height in pixels at 96 DPI
+          letterRendering: true,
+          logging: false,
+          windowWidth: 794,
+          windowHeight: 1123,
+        },
+        jsPDF: {
+          unit: "mm",
+          format: "a4",
+          orientation: "portrait",
+          compress: true,
+        },
+        pagebreak: {
+          mode: ["avoid-all", "css", "legacy"],
+        },
+      };
 
-      // A4 dimensions: 210mm x 297mm
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      // Force exact A4 dimensions on the cloned element
+      clonedElement.style.cssText = `
+        width: 210mm !important;
+        height: 297mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+        background: white !important;
+        font-family: Arial, sans-serif !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        position: relative !important;
+      `;
 
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      // Temporarily add to DOM for processing
+      clonedElement.style.position = "fixed";
+      clonedElement.style.top = "-9999px";
+      clonedElement.style.left = "-9999px";
+      clonedElement.style.zIndex = "-1";
+      document.body.appendChild(clonedElement);
 
-      // Download
-      const filename = `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`;
-      pdf.save(filename);
+      // Generate PDF
+      await html2pdf().set(options).from(clonedElement).save();
 
-      console.log("PDF downloaded successfully:", filename);
+      // Clean up
+      document.body.removeChild(clonedElement);
+
+      console.log("PDF downloaded successfully");
     } catch (error) {
       console.error("Download failed:", error);
       alert("Download failed. Please try again.");
     } finally {
-      setPdfGenerating(false);
+      setDownloadLoading(false);
     }
   };
 
@@ -562,16 +685,18 @@ const AddLetterhead = () => {
         ]}
       />
 
-      <Container style={{ marginTop: "10px", padding: "10px" }}>
-        <Row>
+      <Container fluid style={{ marginTop: "10px", padding: "20px" }}>
+        <Row className="g-3" style={{ minHeight: "calc(100vh - 150px)" }}>
           {/* Form Section */}
-          <Col lg={6}>
+          <Col lg={4} md={5}>
             <Card
               className="shadow-lg"
               style={{
                 borderRadius: "12px",
                 border: "none",
-                height: "700px",
+                height: "calc(100vh - 180px)",
+                display: "flex",
+                flexDirection: "column",
               }}
             >
               <Card.Header
@@ -579,7 +704,7 @@ const AddLetterhead = () => {
                 style={{
                   background: "linear-gradient(135deg, #e63946, #dc3545)",
                   borderRadius: "12px 12px 0 0",
-                  padding: "10px",
+                  padding: "15px",
                 }}
               >
                 <h5 className="mb-0" style={{ fontWeight: "600" }}>
@@ -592,9 +717,9 @@ const AddLetterhead = () => {
               </Card.Header>
               <Card.Body
                 style={{
-                  padding: "15px",
-                  maxHeight: "600px",
+                  padding: "20px",
                   overflowY: "auto",
+                  flex: 1,
                 }}
               >
                 {error && (
@@ -859,76 +984,85 @@ const AddLetterhead = () => {
           </Col>
 
           {/* Live Preview Section */}
-          <Col lg={6}>
-            <Card
-              className="shadow-lg"
+          <Col lg={8} md={7}>
+            <div
               style={{
+                height: "calc(100vh - 180px)",
+                display: "flex",
+                flexDirection: "column",
+                background: "white",
                 borderRadius: "12px",
-                border: "none",
-                height: "700px",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                overflow: "hidden",
               }}
             >
-              <Card.Header
-                className="text-white"
+              {/* Preview Header */}
+              <div
                 style={{
                   background: "linear-gradient(135deg, #28a745, #20c997)",
-                  borderRadius: "12px 12px 0 0",
-                  padding: "10px",
+                  color: "white",
+                  padding: "15px 20px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexShrink: 0,
                 }}
               >
-                <div className="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h5 className="mb-0" style={{ fontWeight: "600" }}>
-                      <i className="bi bi-eye me-2"></i>
-                      Live Preview
-                    </h5>
-                    <small style={{ opacity: "0.9" }}>
-                      Real-time preview of your letterhead design
-                    </small>
-                  </div>
-                  <div className="d-flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline-light"
-                      onClick={handleRefreshPreview}
-                      disabled={!formData.title || !formData.content}
-                      style={{ borderRadius: "8px" }}
-                      title="Refresh preview and regenerate QR code"
-                    >
-                      <i className="bi bi-arrow-clockwise me-1"></i>
-                      Refresh
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline-light"
-                      onClick={() => setShowPreview(true)}
-                      disabled={!formData.title || !formData.content}
-                      style={{ borderRadius: "8px" }}
-                    >
-                      <i className="bi bi-arrows-fullscreen me-1"></i>
-                      Full View
-                    </Button>
-                  </div>
+                <div>
+                  <h5 className="mb-0" style={{ fontWeight: "600" }}>
+                    <i className="bi bi-eye me-2"></i>
+                    A4 Letterhead Preview
+                  </h5>
+                  <small style={{ opacity: "0.9" }}>
+                    Real-time preview with professional A4 layout
+                  </small>
                 </div>
-              </Card.Header>
-              <Card.Body
-                className="p-2"
+                <div className="d-flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline-light"
+                    onClick={handleRefreshPreview}
+                    disabled={!formData.title || !formData.content}
+                    style={{ borderRadius: "8px" }}
+                  >
+                    <i className="bi bi-arrow-clockwise me-1"></i>
+                    Refresh
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline-light"
+                    onClick={() => setShowPreview(true)}
+                    disabled={!formData.title || !formData.content}
+                    style={{ borderRadius: "8px" }}
+                  >
+                    <i className="bi bi-arrows-fullscreen me-1"></i>
+                    Full View
+                  </Button>
+                </div>
+              </div>
+
+              {/* Preview Content */}
+              <div
                 style={{
-                  backgroundColor: "#f8f9fa",
-                  height: "500px",
-                  overflowY: "auto",
+                  flex: 1,
+                  background: "#f1f3f5",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "20px",
+                  overflow: "hidden",
                 }}
               >
                 {!formData.title || !formData.content ? (
                   <div
                     className="d-flex flex-column align-items-center justify-content-center text-muted"
                     style={{
-                      height: "100%",
-                      background:
-                        "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+                      background: "white",
                       borderRadius: "12px",
                       border: "2px dashed #dee2e6",
-                      padding: "40px",
+                      padding: "60px 40px",
+                      textAlign: "center",
+                      maxWidth: "400px",
                     }}
                   >
                     <div
@@ -950,110 +1084,109 @@ const AddLetterhead = () => {
                       ></i>
                     </div>
                     <h5 style={{ fontWeight: "600", color: "#495057" }}>
-                      Live Preview Ready
+                      A4 Preview Ready
                     </h5>
-                    <p
-                      style={{
-                        textAlign: "center",
-                        marginBottom: "0",
-                        color: "#6c757d",
-                      }}
-                    >
-                      Enter your letterhead title and content in the form to see
-                      a real-time preview here
+                    <p style={{ marginBottom: "0", color: "#6c757d" }}>
+                      Enter your letterhead title and content to see a perfect
+                      A4 preview
                     </p>
                   </div>
                 ) : (
                   <div
                     style={{
-                      transform: "scale(0.35)",
-                      transformOrigin: "top center",
                       width: "210mm",
-                      minHeight: "297mm",
-                      overflow: "hidden",
-                      border: "2px solid #dee2e6",
-                      borderRadius: "12px",
+                      height: "297mm",
                       backgroundColor: "white",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      margin: "0 auto",
-                      display: "block",
-                    }}
-                    dangerouslySetInnerHTML={{
-                      __html: createLetterheadTemplate(),
-                    }}
-                  />
-                )}
-              </Card.Body>
-              <Card.Footer
-                className="bg-transparent border-0"
-                style={{ padding: "10px" }}
-              >
-                <div className="d-flex gap-2 justify-content-center">
-                  <Button
-                    variant="success"
-                    onClick={handlePrint}
-                    disabled={
-                      !formData.title || !formData.content || pdfGenerating
-                    }
-                    style={{
-                      borderRadius: "8px",
-                      fontWeight: "600",
-                      padding: "8px 16px",
-                      border: "none",
-                      background: "linear-gradient(135deg, #28a745, #20c997)",
+                      boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+                      borderRadius: "4px",
+                      overflow: "hidden",
+                      transform: "scale(0.5)",
+                      transformOrigin: "center center",
+                      border: "1px solid #ddd",
                     }}
                   >
-                    {pdfGenerating ? (
-                      <>
-                        <Spinner size="sm" className="me-2" />
-                        Preparing...
-                      </>
-                    ) : (
-                      <>
-                        <i className="bi bi-printer me-2"></i>
-                        Print PDF
-                      </>
-                    )}
-                  </Button>
-
-                  <Button
-                    variant="primary"
-                    onClick={handleDownload}
-                    disabled={
-                      !formData.title || !formData.content || pdfGenerating
-                    }
-                    style={{
-                      borderRadius: "8px",
-                      fontWeight: "600",
-                      padding: "8px 16px",
-                      border: "none",
-                      background: "linear-gradient(135deg, #e63946, #dc3545)",
-                    }}
-                  >
-                    {pdfGenerating ? (
-                      <>
-                        <Spinner size="sm" className="me-2" />
-                        Preparing...
-                      </>
-                    ) : (
-                      <>
-                        <i className="bi bi-download me-2"></i>
-                        Download PDF
-                      </>
-                    )}
-                  </Button>
-                </div>
-
-                {formData.title && formData.content && (
-                  <div className="text-center mt-1">
-                    <small className="text-muted">
-                      <i className="bi bi-info-circle me-1"></i>
-                      Your letterhead is ready for use
-                    </small>
+                    <div
+                      style={{ width: "100%", height: "100%" }}
+                      dangerouslySetInnerHTML={{
+                        __html: createLetterheadTemplate(),
+                      }}
+                    />
                   </div>
                 )}
-              </Card.Footer>
-            </Card>
+              </div>
+
+              {/* Action Buttons - Only show when content exists */}
+              {formData.title && formData.content && (
+                <div
+                  style={{
+                    padding: "20px",
+                    background: "white",
+                    borderTop: "1px solid #e9ecef",
+                    flexShrink: 0,
+                  }}
+                >
+                  <div className="d-flex gap-3 justify-content-center">
+                    <Button
+                      variant="success"
+                      onClick={handlePrint}
+                      disabled={printLoading}
+                      style={{
+                        borderRadius: "10px",
+                        fontWeight: "600",
+                        padding: "12px 24px",
+                        border: "none",
+                        background: "linear-gradient(135deg, #28a745, #20c997)",
+                        minWidth: "140px",
+                      }}
+                    >
+                      {printLoading ? (
+                        <>
+                          <Spinner size="sm" className="me-2" />
+                          Printing...
+                        </>
+                      ) : (
+                        <>
+                          <i className="bi bi-printer me-2"></i>
+                          Print A4
+                        </>
+                      )}
+                    </Button>
+
+                    <Button
+                      variant="primary"
+                      onClick={handleDownload}
+                      disabled={downloadLoading}
+                      style={{
+                        borderRadius: "10px",
+                        fontWeight: "600",
+                        padding: "12px 24px",
+                        border: "none",
+                        background: "linear-gradient(135deg, #e63946, #dc3545)",
+                        minWidth: "140px",
+                      }}
+                    >
+                      {downloadLoading ? (
+                        <>
+                          <Spinner size="sm" className="me-2" />
+                          Downloading...
+                        </>
+                      ) : (
+                        <>
+                          <i className="bi bi-download me-2"></i>
+                          Download PDF
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <div className="text-center mt-2">
+                    <small className="text-muted">
+                      <i className="bi bi-info-circle me-1"></i>
+                      Professional A4 letterhead ready for use
+                    </small>
+                  </div>
+                </div>
+              )}
+            </div>
           </Col>
         </Row>
       </Container>
@@ -1062,6 +1195,8 @@ const AddLetterhead = () => {
       <Modal
         show={showPreview}
         onHide={() => setShowPreview(false)}
+        backdrop="static"
+        keyboard={false}
         size="xl"
         centered
         style={{
@@ -1121,7 +1256,7 @@ const AddLetterhead = () => {
           <Button
             variant="success"
             onClick={handlePrint}
-            disabled={pdfGenerating}
+            disabled={printLoading}
             style={{
               borderRadius: "8px",
               background: "linear-gradient(135deg, #28a745, #20c997)",
@@ -1130,10 +1265,10 @@ const AddLetterhead = () => {
               fontWeight: "600",
             }}
           >
-            {pdfGenerating ? (
+            {printLoading ? (
               <>
                 <Spinner size="sm" className="me-2" />
-                Generating PDF...
+                Printing...
               </>
             ) : (
               <>
@@ -1144,7 +1279,7 @@ const AddLetterhead = () => {
           </Button>
           <Button
             onClick={handleDownload}
-            disabled={pdfGenerating}
+            disabled={downloadLoading}
             style={{
               borderRadius: "8px",
               background: "linear-gradient(135deg, #e63946, #dc3545)",
@@ -1154,10 +1289,10 @@ const AddLetterhead = () => {
               fontWeight: "600",
             }}
           >
-            {pdfGenerating ? (
+            {downloadLoading ? (
               <>
                 <Spinner size="sm" className="me-2" />
-                Generating PDF...
+                Downloading...
               </>
             ) : (
               <>

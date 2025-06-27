@@ -27,24 +27,32 @@ const validateCreateLetterhead = [
     ])
     .withMessage("Invalid letter type"),
   body("recipient.name")
-    .optional()
+    .optional({ values: "falsy" })
+    .isString()
     .trim()
     .withMessage("Recipient name must be a string"),
-  body("subject").optional().trim().withMessage("Subject must be a string"),
+  body("subject")
+    .optional({ values: "falsy" })
+    .isString()
+    .trim()
+    .withMessage("Subject must be a string"),
   body("content").trim().notEmpty().withMessage("Content is required"),
   body("issuer.name")
-    .optional()
+    .optional({ values: "falsy" })
+    .isString()
     .trim()
     .withMessage("Issuer name must be a string"),
   body("issuer.designation")
-    .optional()
+    .optional({ values: "falsy" })
+    .isString()
     .trim()
     .withMessage("Issuer designation must be a string"),
 ];
 
 const validateUpdateLetterhead = [
   body("title")
-    .optional()
+    .optional({ values: "falsy" })
+    .isString()
     .trim()
     .notEmpty()
     .withMessage("Title cannot be empty"),
@@ -63,21 +71,29 @@ const validateUpdateLetterhead = [
     ])
     .withMessage("Invalid letter type"),
   body("recipient.name")
-    .optional()
+    .optional({ values: "falsy" })
+    .isString()
     .trim()
     .withMessage("Recipient name must be a string"),
-  body("subject").optional().trim().withMessage("Subject must be a string"),
+  body("subject")
+    .optional({ values: "falsy" })
+    .isString()
+    .trim()
+    .withMessage("Subject must be a string"),
   body("content")
-    .optional()
+    .optional({ values: "falsy" })
+    .isString()
     .trim()
     .notEmpty()
     .withMessage("Content cannot be empty"),
   body("issuer.name")
-    .optional()
+    .optional({ values: "falsy" })
+    .isString()
     .trim()
     .withMessage("Issuer name must be a string"),
   body("issuer.designation")
-    .optional()
+    .optional({ values: "falsy" })
+    .isString()
     .trim()
     .withMessage("Issuer designation must be a string"),
 ];

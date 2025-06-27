@@ -95,7 +95,7 @@ const AdminInvoices = () => {
   // Generate QR code for invoice
   const generateQRCode = async (invoice) => {
     try {
-      const verifyUrl = `${window.location.origin}/verify-docs?id=${invoice.invoiceId || invoice._id}&type=invoice`;
+      const verifyUrl = `${window.location.origin}/verify?id=${invoice.invoiceId || invoice._id}&type=invoice`;
 
       const qrCodeDataUrl = await QRCode.toDataURL(verifyUrl, {
         width: 256,

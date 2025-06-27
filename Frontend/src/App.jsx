@@ -59,7 +59,7 @@ import AdminInvoices from "./pages/admin/AdminInvoices";
 import AdminPaymentMethods from "./pages/admin/AdminPaymentMethods";
 import AdminLetterheads from "./pages/admin/AdminLetterheads";
 import AddLetterhead from "./pages/admin/AddLetterhead";
-import VerifyDocs from "./pages/VerifyDocs";
+import Verify from "./pages/Verify";
 // User
 import UserDashboard from "./pages/UserDashboard";
 import UserOrders from "./pages/user/UserOrders";
@@ -189,9 +189,12 @@ function App() {
               element={<VerificationStatus />}
             />
             <Route path="/invoice/:invoiceId" element={<InvoiceView />} />
-            <Route path="/verify/:invoiceId" element={<InvoiceVerify />} />
-            <Route path="/verify" element={<InvoiceVerify />} />
-            <Route path="/verify-docs" element={<VerifyDocs />} />
+            <Route path="/verify" element={<Verify />} />
+            <Route path="/verify/:invoiceId" element={<Verify />} />
+            <Route
+              path="/verify/letterhead/:letterheadId"
+              element={<Verify />}
+            />
             <Route path="/user-guide" element={<UserGuide />} />
             <Route path="/backend-docs" element={<BackendDocs />} />
             <Route path="/localsetup-guide" element={<LocalSetupGuide />} />
