@@ -303,6 +303,16 @@ const AdminProducts = () => {
     }
   };
 
+  const formatBenefits = (benefitsText) => {
+    if (!benefitsText) return "";
+
+    return benefitsText
+      .split("\n")
+      .filter((line) => line.trim() !== "")
+      .map((line) => `• ${line.trim()}`)
+      .join("\n");
+  };
+
   const handleAddClick = () => {
     resetForm();
     setSelectedProduct(null);
