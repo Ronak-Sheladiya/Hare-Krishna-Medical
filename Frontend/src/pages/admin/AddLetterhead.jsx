@@ -14,9 +14,6 @@ import {
   Toast,
   ToastContainer,
   ProgressBar,
-  Stepper,
-  Step,
-  StepLabel,
 } from "react-bootstrap";
 import { api, safeApiCall } from "../../utils/apiClient";
 import {
@@ -1602,90 +1599,90 @@ This certification is awarded in recognition of proven competency, professional 
           color: white;
           transition: all 0.3s ease;
         }
-        
+
         .btn-gradient:hover {
           background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
           transform: translateY(-2px);
           box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
         }
-        
+
         .form-control:focus,
         .form-select:focus {
           border-color: #e63946;
           box-shadow: 0 0 0 0.2rem rgba(230, 57, 70, 0.25);
         }
-        
+
         .step-card {
           transition: all 0.3s ease;
           border: 1px solid rgba(0,0,0,.125);
         }
-        
+
         .step-card:hover {
           box-shadow: 0 8px 25px rgba(0,0,0,.1);
         }
-        
+
         .timeline-step {
           cursor: pointer;
           transition: all 0.3s ease;
           position: relative;
         }
-        
+
         .timeline-step:hover {
           transform: translateY(-2px);
         }
-        
+
         .timeline-step.active .timeline-icon {
           transform: scale(1.1);
           box-shadow: 0 4px 15px rgba(0,0,0,.2);
         }
-        
+
         .summary-item {
           padding: 8px 0;
           border-bottom: 1px solid #f8f9fa;
         }
-        
+
         .summary-item:last-child {
           border-bottom: none;
         }
-        
+
         .cursor-pointer {
           cursor: pointer;
         }
-        
+
         .progress-header {
           position: relative;
           z-index: 10;
         }
-        
+
         .selected-type-preview {
           transition: all 0.3s ease;
         }
-        
+
         .tip-item {
           transition: all 0.3s ease;
         }
-        
+
         .tip-item:hover {
           transform: translateX(5px);
         }
-        
+
         @media (max-width: 768px) {
           .timeline-nav {
             flex-direction: column;
             gap: 15px;
           }
-          
+
           .timeline-step {
             flex-direction: row;
             width: 100%;
             text-align: left;
           }
-          
+
           .timeline-icon {
             margin-right: 15px !important;
             margin-bottom: 0 !important;
           }
-          
+
           .timeline-connector {
             display: none !important;
           }
