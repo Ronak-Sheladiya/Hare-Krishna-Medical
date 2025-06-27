@@ -847,7 +847,7 @@ const AddLetterhead = () => {
                     />
                   </div>
                 )}
-              </div>
+              </Card.Body>
             </Card>
           </Col>
         </Row>
