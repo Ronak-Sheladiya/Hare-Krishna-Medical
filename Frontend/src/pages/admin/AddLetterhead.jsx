@@ -200,7 +200,7 @@ const AddLetterhead = () => {
         background: white;
         position: relative;
         margin: 0;
-        padding: 15mm;
+        padding: 0;
         box-sizing: border-box;
         font-size: 13px;
         line-height: 1.5;
@@ -209,17 +209,26 @@ const AddLetterhead = () => {
         flex-direction: column;
         overflow: hidden;
       ">
-        <!-- Header Section -->
+        <!-- Page Content Container with proper spacing -->
         <div style="
-          background: #e63946;
-          color: white;
-          padding: 20px;
-          border-radius: 8px;
-          margin-bottom: 20px;
+          padding: 15mm;
+          height: 100%;
           display: flex;
-          justify-content: space-between;
-          align-items: center;
+          flex-direction: column;
+          box-sizing: border-box;
         ">
+          <!-- Header Section -->
+          <div style="
+            background: #e63946;
+            color: white;
+            padding: 18px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+          ">
           <!-- Company Information -->
           <div style="flex: 1;">
             <div style="display: flex; align-items: center; margin-bottom: 12px;">
@@ -312,58 +321,60 @@ const AddLetterhead = () => {
           </div>
         </div>
 
-        <!-- Reference and Date - Top Right, Left Aligned -->
-        <div style="
-          text-align: left;
-          margin: 0 0 20px auto;
-          font-size: 11px;
-          color: #666;
-          width: fit-content;
-        ">
-          <div style="margin-bottom: 3px; font-weight: 600;">Ref: ${currentLetterheadId}</div>
-          <div style="font-weight: 600;">Date: ${currentDate}</div>
-        </div>
-
-        <!-- Document Title -->
-        <div style="text-align: center; margin-bottom: 25px;">
-          <h2 style="
-            color: #e63946;
-            font-size: 22px;
-            font-weight: bold;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            border-bottom: 3px solid #e63946;
-            display: inline-block;
-            padding-bottom: 8px;
-            font-family: 'Georgia', serif;
+          <!-- Reference and Date - Top Right, Left Aligned -->
+          <div style="
+            text-align: left;
+            margin: 0 0 16px auto;
+            font-size: 11px;
+            color: #666;
+            width: fit-content;
+            flex-shrink: 0;
           ">
-            ${formData.title}
-          </h2>
-        </div>
+            <div style="margin-bottom: 3px; font-weight: 600;">Ref: ${currentLetterheadId}</div>
+            <div style="font-weight: 600;">Date: ${currentDate}</div>
+          </div>
 
-        <!-- Content Section -->
-        <div style="
-          font-size: 13px;
-          line-height: 1.6;
-          text-align: justify;
-          color: #333;
-          font-family: Arial, sans-serif;
-          flex: 1;
-          overflow: hidden;
-          margin-bottom: 20px;
-        ">
-          ${formData.content}
-        </div>
+          <!-- Document Title -->
+          <div style="text-align: center; margin-bottom: 20px; flex-shrink: 0;">
+            <h2 style="
+              color: #e63946;
+              font-size: 20px;
+              font-weight: bold;
+              margin: 0;
+              text-transform: uppercase;
+              letter-spacing: 1.2px;
+              border-bottom: 3px solid #e63946;
+              display: inline-block;
+              padding-bottom: 6px;
+              font-family: 'Georgia', serif;
+            ">
+              ${formData.title}
+            </h2>
+          </div>
 
-        <!-- Footer Section - Fixed at bottom -->
-        <div style="
-          border-top: 2px solid #e63946;
-          padding-top: 15px;
-          margin-top: auto;
-          background: white;
-          flex-shrink: 0;
-        ">
+          <!-- Content Section - Uses remaining space -->
+          <div style="
+            font-size: 13px;
+            line-height: 1.6;
+            text-align: justify;
+            color: #333;
+            font-family: Arial, sans-serif;
+            flex: 1;
+            overflow: hidden;
+            margin-bottom: 20px;
+            min-height: 150px;
+          ">
+            ${formData.content}
+          </div>
+
+          <!-- Footer Section - Fixed at bottom -->
+          <div style="
+            border-top: 2px solid #e63946;
+            padding-top: 12px;
+            margin-top: auto;
+            background: white;
+            flex-shrink: 0;
+          ">
           <div style="text-align: center;">
             <p style="
               font-size: 11px;
@@ -382,6 +393,7 @@ const AddLetterhead = () => {
               Verified on ${new Date().toLocaleString("en-IN")} | For queries: +91 76989 13354 | hkmedicalamroli@gmail.com
             </p>
           </div>
+        </div>
         </div>
       </div>
     `;
@@ -512,25 +524,28 @@ const AddLetterhead = () => {
         return;
       }
 
-      // Generate canvas
+      // Calculate exact A4 dimensions in pixels (96 DPI)
+      const A4_WIDTH_PX = 794; // 210mm at 96 DPI
+      const A4_HEIGHT_PX = 1123; // 297mm at 96 DPI
+
+      // Generate canvas with exact A4 dimensions
       const canvas = await html2canvas(letterheadElement, {
-        scale: 2,
+        scale: 1,
         useCORS: true,
         allowTaint: false,
         backgroundColor: "#ffffff",
-        width: letterheadElement.scrollWidth,
-        height: letterheadElement.scrollHeight,
+        width: A4_WIDTH_PX,
+        height: A4_HEIGHT_PX,
+        windowWidth: A4_WIDTH_PX,
+        windowHeight: A4_HEIGHT_PX,
       });
 
-      // Create PDF
+      // Create PDF with exact A4 size
       const pdf = new jsPDF("portrait", "mm", "a4");
       const imgData = canvas.toDataURL("image/png", 1.0);
 
-      // A4 dimensions: 210mm x 297mm
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      // Add image to fill entire A4 page
+      pdf.addImage(imgData, "PNG", 0, 0, 210, 297);
 
       // Download
       const filename = `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`;
