@@ -250,6 +250,10 @@ class LetterheadController {
         });
       }
 
+      console.log(
+        `✅ Returning ${letterheads.length} letterheads (total: ${total})`,
+      );
+
       res.json({
         success: true,
         letterheads,
@@ -262,7 +266,7 @@ class LetterheadController {
         },
       });
     } catch (error) {
-      console.error("Get letterheads error:", error);
+      console.error("❌ Get letterheads error:", error);
       res.status(500).json({
         success: false,
         message: "Failed to fetch letterheads",
