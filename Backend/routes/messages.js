@@ -97,7 +97,7 @@ router.post(
     }
     next();
   },
-  messagesController.respondToMessage,
+  messagesController.replyToMessage,
 );
 
 module.exports = router;
