@@ -1145,7 +1145,7 @@ const AddLetterhead = () => {
           </Button>
           <Button
             onClick={handleDownload}
-            disabled={pdfGenerating}
+            disabled={downloadLoading}
             style={{
               borderRadius: "8px",
               background: "linear-gradient(135deg, #e63946, #dc3545)",
@@ -1155,10 +1155,10 @@ const AddLetterhead = () => {
               fontWeight: "600",
             }}
           >
-            {pdfGenerating ? (
+            {downloadLoading ? (
               <>
                 <Spinner size="sm" className="me-2" />
-                Generating PDF...
+                Downloading...
               </>
             ) : (
               <>
