@@ -92,7 +92,8 @@ const validateUpdateLetterhead = [
     .trim()
     .withMessage("Issuer name must be a string"),
   body("issuer.designation")
-    .optional()
+    .optional({ values: "falsy" })
+    .isString()
     .trim()
     .withMessage("Issuer designation must be a string"),
 ];
