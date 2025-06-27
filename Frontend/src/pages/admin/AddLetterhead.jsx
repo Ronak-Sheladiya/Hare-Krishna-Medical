@@ -487,7 +487,7 @@ const AddLetterhead = () => {
       console.error("Print failed:", error);
       alert("Print failed. Please try again.");
     } finally {
-      setPdfGenerating(false);
+      setPrintLoading(false);
     }
   };
 
