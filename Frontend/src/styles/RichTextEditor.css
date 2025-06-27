@@ -217,3 +217,68 @@
   color: #6c757d;
   text-align: center;
 }
+
+/* Professional letterhead print styles */
+@media print {
+  .letterhead-print {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .letterhead-header {
+    background: #e63946 !important;
+    color: white !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Live preview container */
+.live-preview-container {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.live-preview-container .preview-wrapper {
+  overflow: hidden;
+  height: 100%;
+}
+
+/* Letterhead template styling */
+.letterhead-template {
+  font-family: Arial, sans-serif;
+  background: white;
+  min-height: 297mm;
+  position: relative;
+}
+
+.letterhead-template .header-section {
+  background: #e63946;
+  color: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.letterhead-template .qr-section {
+  background: white;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.letterhead-template .footer-section {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
