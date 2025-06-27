@@ -571,7 +571,13 @@ const AddLetterhead = () => {
                   Fill in the details below to create your letterhead
                 </small>
               </Card.Header>
-              <Card.Body style={{ padding: "10px" }}>
+              <Card.Body
+                style={{
+                  padding: "15px",
+                  maxHeight: "600px",
+                  overflowY: "auto",
+                }}
+              >
                 {error && (
                   <Alert
                     variant="danger"
