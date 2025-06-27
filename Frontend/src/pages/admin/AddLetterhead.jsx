@@ -1070,7 +1070,7 @@ const AddLetterhead = () => {
                   <div className="text-center mt-1">
                     <small className="text-muted">
                       <i className="bi bi-info-circle me-1"></i>
-                      Your letterhead is ready for professional use
+                      Your letterhead is ready for use
                     </small>
                   </div>
                 )}
