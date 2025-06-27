@@ -707,55 +707,7 @@ const AddLetterhead = () => {
 
 
 
-                        <small className="text-muted d-flex align-items-center gap-1">
-                          <i
-                            className="bi bi-file-earmark-code-fill text-primary"
-                            style={{ fontSize: "14px" }}
-                          ></i>
-                          <span style={{ fontWeight: "500" }}>
-                            Editable HTML
-                          </span>
-                        </small>
-                        <small className="text-muted d-flex align-items-center gap-1">
-                          <i
-                            className={`bi ${qrCode ? "bi-qr-code-scan text-success" : "bi-qr-code text-warning"}`}
-                            style={{ fontSize: "14px" }}
-                          ></i>
-                          <span style={{ fontWeight: "500" }}>
-                            {qrCode ? "QR Verified" : "QR Processing"}
-                          </span>
-                        </small>
-                      </div>
 
-                      {letterheadId && (
-                        <div className="mt-3 pt-3 border-top">
-                          <small className="text-info d-flex align-items-center justify-content-center gap-2">
-                            <i className="bi bi-info-circle-fill"></i>
-                            <span>
-                              <strong>Letterhead ID:</strong>{" "}
-                              <code>{letterheadId}</code> |
-                              <strong className="ms-2">
-                                Verification URL:
-                              </strong>{" "}
-                              <a
-                                href={`${window.location.origin}/verify?id=${letterheadId}&type=letterhead`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{
-                                  textDecoration: "none",
-                                  color: "#0d6efd",
-                                }}
-                              >
-                                View Verification Page
-                              </a>
-                            </span>
-                          </small>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </Col>
         </Row>
