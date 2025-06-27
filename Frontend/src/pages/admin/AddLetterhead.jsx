@@ -841,20 +841,29 @@ const AddLetterhead = () => {
                   />
                 )}
               </Card.Body>
-              <Card.Footer className="bg-transparent">
-                <div className="d-flex gap-2 justify-content-center">
+              <Card.Footer
+                className="bg-transparent border-0"
+                style={{ padding: "20px" }}
+              >
+                <div className="d-flex gap-3 justify-content-center">
                   <Button
-                    variant="outline-success"
-                    size="sm"
+                    variant="success"
                     onClick={handlePrint}
                     disabled={
                       !formData.title || !formData.content || pdfGenerating
                     }
+                    style={{
+                      borderRadius: "10px",
+                      fontWeight: "600",
+                      padding: "10px 20px",
+                      border: "none",
+                      background: "linear-gradient(135deg, #28a745, #20c997)",
+                    }}
                   >
                     {pdfGenerating ? (
                       <>
                         <Spinner size="sm" className="me-2" />
-                        Generating...
+                        Preparing...
                       </>
                     ) : (
                       <>
@@ -865,17 +874,23 @@ const AddLetterhead = () => {
                   </Button>
 
                   <Button
-                    variant="outline-primary"
-                    size="sm"
+                    variant="primary"
                     onClick={handleDownload}
                     disabled={
                       !formData.title || !formData.content || pdfGenerating
                     }
+                    style={{
+                      borderRadius: "10px",
+                      fontWeight: "600",
+                      padding: "10px 20px",
+                      border: "none",
+                      background: "linear-gradient(135deg, #007bff, #0056b3)",
+                    }}
                   >
                     {pdfGenerating ? (
                       <>
                         <Spinner size="sm" className="me-2" />
-                        Generating...
+                        Preparing...
                       </>
                     ) : (
                       <>
@@ -885,6 +900,15 @@ const AddLetterhead = () => {
                     )}
                   </Button>
                 </div>
+
+                {formData.title && formData.content && (
+                  <div className="text-center mt-2">
+                    <small className="text-muted">
+                      <i className="bi bi-info-circle me-1"></i>
+                      Your letterhead is ready for professional use
+                    </small>
+                  </div>
+                )}
               </Card.Footer>
             </Card>
           </Col>
