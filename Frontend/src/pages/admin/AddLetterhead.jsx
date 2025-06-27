@@ -882,6 +882,7 @@ const AddLetterhead = () => {
             backgroundColor: "#f8f9fa",
             maxHeight: "80vh",
             overflowY: "auto",
+            padding: "10px",
           }}
         >
           <div className="d-flex justify-content-center">
@@ -891,6 +892,7 @@ const AddLetterhead = () => {
                 backgroundColor: "white",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                 borderRadius: "8px",
+                margin: "10px",
               }}
               dangerouslySetInnerHTML={{ __html: createLetterheadTemplate() }}
             />
