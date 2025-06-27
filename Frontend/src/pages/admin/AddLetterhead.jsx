@@ -207,7 +207,9 @@ const AddLetterhead = () => {
         color: #333;
         display: flex;
         flex-direction: column;
-      ">`;
+      ">
+        <!-- Header Section -->
+        <div style="
           background: #e63946;
           color: white;
           padding: 20px;
