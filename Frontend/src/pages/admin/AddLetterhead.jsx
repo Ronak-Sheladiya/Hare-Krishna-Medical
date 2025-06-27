@@ -731,7 +731,9 @@ const AddLetterhead = () => {
                       <Button
                         type="submit"
                         variant="success"
-                        disabled={loading || !formData.title || !formData.content}
+                        disabled={
+                          loading || !formData.title || !formData.content
+                        }
                       >
                         {loading ? (
                           <>
@@ -925,8 +927,6 @@ const AddLetterhead = () => {
                 <i className="bi bi-info-circle me-1"></i>
                 Preview in A4 format (scaled 80%)
               </small>
-            </div>
-
             </div>
           </div>
         </Modal.Footer>
