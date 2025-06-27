@@ -96,7 +96,7 @@ const ProductCard = ({ product, onAddToCart }) => {
           by {product.company}
         </Card.Text>
         <Card.Text className="text-muted small flex-grow-1">
-          {product.description}
+          {product.shortDescription || product.description}
         </Card.Text>
 
         <div className="product-details mb-3">
