@@ -721,7 +721,7 @@ cd Frontend && npm run dev`}</code>
               <div className="bg-light p-3 rounded">
                 <strong>Production Environment Variable:</strong>
                 <pre className="mt-2 mb-0">
-                  <code>{`VITE_BACKEND_URL=https://your-backend.fly.dev`}</code>
+                  <code>{`VITE_BACKEND_URL=https://hare-krishna-medical.onrender.com`}</code>
                 </pre>
               </div>
             </Col>
