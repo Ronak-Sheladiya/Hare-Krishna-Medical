@@ -2,15 +2,35 @@ const nodemailer = require("nodemailer");
 
 class EmailService {
   constructor() {
-    this.transporter = nodemailer.createTransport({
+    // Validate email configuration
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.warn("⚠️ Email service: EMAIL_USER or EMAIL_PASS not configured");
+    }
+
+    this.transporter = nodemailer.createTransporter({
       host: process.env.EMAIL_HOST || "smtp.gmail.com",
-      port: process.env.EMAIL_PORT || 587,
-      secure: false,
+      port: parseInt(process.env.EMAIL_PORT) || 587,
+      secure: false, // true for 465, false for other ports
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
+      // Add timeout and connection options
+      connectionTimeout: 10000, // 10 seconds
+      greetingTimeout: 5000, // 5 seconds
+      socketTimeout: 10000, // 10 seconds
     });
+
+    // Log email configuration status
+    console.log("📧 Email Service Configuration:");
+    console.log(`   - Host: ${process.env.EMAIL_HOST || "smtp.gmail.com"}`);
+    console.log(`   - Port: ${process.env.EMAIL_PORT || 587}`);
+    console.log(
+      `   - User: ${process.env.EMAIL_USER ? "Configured" : "Not configured"}`,
+    );
+    console.log(
+      `   - Pass: ${process.env.EMAIL_PASS ? "Configured" : "Not configured"}`,
+    );
   }
 
   async sendWelcomeEmail(email, fullName) {
