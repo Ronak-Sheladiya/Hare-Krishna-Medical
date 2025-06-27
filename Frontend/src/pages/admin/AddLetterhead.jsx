@@ -994,7 +994,7 @@ const AddLetterhead = () => {
                     variant="success"
                     onClick={handlePrint}
                     disabled={
-                      !formData.title || !formData.content || pdfGenerating
+                      !formData.title || !formData.content || printLoading
                     }
                     style={{
                       borderRadius: "8px",
@@ -1004,10 +1004,10 @@ const AddLetterhead = () => {
                       background: "linear-gradient(135deg, #28a745, #20c997)",
                     }}
                   >
-                    {pdfGenerating ? (
+                    {printLoading ? (
                       <>
                         <Spinner size="sm" className="me-2" />
-                        Preparing...
+                        Printing...
                       </>
                     ) : (
                       <>
