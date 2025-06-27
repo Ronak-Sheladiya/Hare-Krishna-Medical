@@ -241,7 +241,7 @@ class ProductsController {
     } catch (error) {
       console.error("Get products error:", error);
       // Fallback to offline mode if database fails
-      return handleOfflineProducts(req, res);
+      return this.handleOfflineProducts(req, res);
     }
   }
 
