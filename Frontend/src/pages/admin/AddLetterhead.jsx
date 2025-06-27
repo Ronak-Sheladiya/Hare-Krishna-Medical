@@ -1021,7 +1021,7 @@ const AddLetterhead = () => {
                     variant="primary"
                     onClick={handleDownload}
                     disabled={
-                      !formData.title || !formData.content || pdfGenerating
+                      !formData.title || !formData.content || downloadLoading
                     }
                     style={{
                       borderRadius: "8px",
@@ -1031,10 +1031,10 @@ const AddLetterhead = () => {
                       background: "linear-gradient(135deg, #e63946, #dc3545)",
                     }}
                   >
-                    {pdfGenerating ? (
+                    {downloadLoading ? (
                       <>
                         <Spinner size="sm" className="me-2" />
-                        Preparing...
+                        Downloading...
                       </>
                     ) : (
                       <>
