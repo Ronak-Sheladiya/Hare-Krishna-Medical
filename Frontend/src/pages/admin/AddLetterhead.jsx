@@ -214,39 +214,68 @@ const AddLetterhead = () => {
     setError(null);
 
     try {
-      const element = document.createElement("div");
-      element.innerHTML = createLetterheadTemplate();
-      element.style.width = "794px";
-      element.style.height = "1123px";
-      element.style.position = "absolute";
-      element.style.left = "-9999px";
-      element.style.top = "-9999px";
-      document.body.appendChild(element);
+      // Create a clean container for PDF generation
+      const pdfContainer = document.createElement("div");
+      pdfContainer.style.cssText = `
+        width: 794px;
+        height: 1123px;
+        position: absolute;
+        left: -10000px;
+        top: 0;
+        background: white;
+        font-family: Arial, sans-serif;
+        box-sizing: border-box;
+        padding: 20px;
+      `;
+
+      // Create content with 20px safe margins
+      const contentHtml = createLetterheadTemplate();
+      pdfContainer.innerHTML = contentHtml;
+
+      // Append to body for rendering
+      document.body.appendChild(pdfContainer);
+
+      // Wait for fonts and images to load
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const options = {
-        margin: [0, 0, 0, 0],
+        margin: [20, 20, 20, 20], // 20px margins on all sides
         filename: `Letterhead-${letterheadId || "Draft"}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
+        image: {
+          type: "jpeg",
+          quality: 0.98,
+        },
         html2canvas: {
-          scale: 3,
+          scale: 2,
           useCORS: true,
-          letterRendering: true,
           allowTaint: false,
           backgroundColor: "#ffffff",
           width: 794,
           height: 1123,
+          scrollX: 0,
+          scrollY: 0,
+          windowWidth: 794,
+          windowHeight: 1123,
         },
         jsPDF: {
-          unit: "px",
-          format: [794, 1123],
+          unit: "pt",
+          format: "a4",
           orientation: "portrait",
           compress: true,
         },
-        pagebreak: { mode: ["avoid-all"] },
+        pagebreak: {
+          mode: ["avoid-all"],
+          before: ".page-break-before",
+          after: ".page-break-after",
+          avoid: ".avoid-break",
+        },
       };
 
-      await html2pdf().set(options).from(element).save();
-      document.body.removeChild(element);
+      // Generate and save PDF
+      await html2pdf().set(options).from(pdfContainer).save();
+
+      // Cleanup
+      document.body.removeChild(pdfContainer);
     } catch (error) {
       console.error("PDF Generation Error:", error);
       setError("Failed to generate PDF. Please try again.");
@@ -320,64 +349,6 @@ const AddLetterhead = () => {
     }
   };
 
-  // HTML download functionality
-  const handleDownloadHTML = () => {
-    setDownloadLoading(true);
-
-    try {
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Letterhead - ${formData.title}</title>
-          <style>
-            body {
-              margin: 0;
-              padding: 20px;
-              font-family: Arial, sans-serif;
-              background: #f5f5f5;
-            }
-            .letterhead-container {
-              max-width: 794px;
-              margin: 0 auto;
-              background: white;
-              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-              border-radius: 8px;
-              overflow: hidden;
-            }
-            @media print {
-              body { background: white; padding: 0; }
-              .letterhead-container { box-shadow: none; border-radius: 0; max-width: none; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="letterhead-container">
-            ${createLetterheadTemplate()}
-          </div>
-        </body>
-        </html>
-      `;
-
-      const blob = new Blob([htmlContent], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `Letterhead-${letterheadId || "Draft"}.html`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("HTML Download Error:", error);
-      setError("Failed to download HTML. Please try again.");
-    } finally {
-      setDownloadLoading(false);
-    }
-  };
-
   const createLetterheadTemplate = () => {
     const currentDate = new Date().toLocaleDateString("en-IN");
     const currentLetterheadId = letterheadId || generateTempLetterheadId();
@@ -385,12 +356,12 @@ const AddLetterhead = () => {
     return `
       <div id="letterhead-print-content" style="
         font-family: Arial, sans-serif;
-        width: 794px;
-        height: 1123px;
+        width: 754px;
+        height: 1083px;
         background: white;
         position: relative;
-        margin: 0 !important;
-        padding: 0 !important;
+        margin: 20px;
+        padding: 0;
         box-sizing: border-box;
         font-size: 13px;
         line-height: 1.5;
@@ -400,13 +371,14 @@ const AddLetterhead = () => {
         overflow: hidden;
         transform: scale(1) !important;
       ">
-        <!-- Page Content Container using full page -->
+        <!-- Page Content Container with 20px safe margins -->
         <div style="
-          padding: 8px;
-          height: 100%;
+          padding: 20px;
+          height: calc(100% - 40px);
           display: flex;
           flex-direction: column;
           box-sizing: border-box;
+          min-height: 1043px;
         ">
           <!-- Header Section -->
           <div style="
@@ -565,6 +537,11 @@ const AddLetterhead = () => {
             margin-top: auto;
             background: white;
             flex-shrink: 0;
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            width: calc(100% - 40px);
           ">
           <div style="text-align: center;">
             <p style="
@@ -605,7 +582,7 @@ const AddLetterhead = () => {
       <Container fluid style={{ marginTop: "10px", padding: "20px" }}>
         <Row className="g-3" style={{ minHeight: "calc(100vh - 150px)" }}>
           {/* Form Section */}
-          <Col lg={4} md={5}>
+          <Col lg={6} md={6}>
             <Card
               className="shadow-lg"
               style={{
@@ -928,7 +905,7 @@ const AddLetterhead = () => {
           </Col>
 
           {/* Preview Column */}
-          <Col lg={8}>
+          <Col lg={6}>
             <Card
               style={{
                 height: "calc(100vh - 180px)",
@@ -1009,31 +986,21 @@ const AddLetterhead = () => {
                         )}
                       </Button>
 
-                      <Dropdown>
-                        <Dropdown.Toggle
-                          variant="light"
-                          size="sm"
-                          style={{
-                            background: "rgba(255,255,255,0.9)",
-                            border: "none",
-                            borderRadius: "8px",
-                            fontWeight: "600",
-                            padding: "8px 16px",
-                          }}
-                        >
-                          <i className="bi bi-three-dots-vertical"></i>
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                          <Dropdown.Item onClick={handleDownloadHTML}>
-                            <i className="bi bi-filetype-html me-2"></i>
-                            Download HTML
-                          </Dropdown.Item>
-                          <Dropdown.Item onClick={() => setShowPreview(true)}>
-                            <i className="bi bi-arrows-fullscreen me-2"></i>
-                            Full Preview
-                          </Dropdown.Item>
-                        </Dropdown.Menu>
-                      </Dropdown>
+                      <Button
+                        variant="light"
+                        size="sm"
+                        onClick={() => setShowPreview(true)}
+                        style={{
+                          background: "rgba(255,255,255,0.9)",
+                          border: "none",
+                          borderRadius: "8px",
+                          fontWeight: "600",
+                          padding: "8px 16px",
+                        }}
+                      >
+                        <i className="bi bi-arrows-fullscreen me-2"></i>
+                        Full
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -1088,8 +1055,8 @@ const AddLetterhead = () => {
                 ) : (
                   <div
                     style={{
-                      width: "297px", // A4 width scaled to fit
-                      height: "420px", // A4 height scaled to fit
+                      width: "250px", // Reduced width for smaller column
+                      height: "353px", // Proportional height
                       backgroundColor: "white",
                       boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
                       borderRadius: "4px",
@@ -1102,7 +1069,7 @@ const AddLetterhead = () => {
                       style={{
                         width: "794px",
                         height: "1123px",
-                        transform: "scale(0.375)",
+                        transform: "scale(0.315)", // Adjusted scale for smaller preview
                         transformOrigin: "top left",
                         position: "absolute",
                         top: "0",
@@ -1268,27 +1235,6 @@ const AddLetterhead = () => {
                   <i className="bi bi-filetype-pdf me-2"></i>
                 )}
                 Download PDF
-              </Button>
-
-              <Button
-                onClick={handleDownloadHTML}
-                disabled={downloadLoading}
-                style={{
-                  background: "linear-gradient(135deg, #6f42c1, #5a2d91)",
-                  border: "none",
-                  borderRadius: "10px",
-                  padding: "12px 20px",
-                  fontWeight: "600",
-                  color: "white",
-                  boxShadow: "0 4px 15px rgba(111, 66, 193, 0.3)",
-                }}
-              >
-                {downloadLoading ? (
-                  <Spinner size="sm" className="me-2" />
-                ) : (
-                  <i className="bi bi-filetype-html me-2"></i>
-                )}
-                HTML
               </Button>
             </div>
           </div>
