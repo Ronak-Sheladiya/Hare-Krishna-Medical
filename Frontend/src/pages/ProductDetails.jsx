@@ -550,6 +550,31 @@ const ProductDetails = () => {
                       {product.description ||
                         "No detailed description available for this product."}
                     </p>
+
+                    {product.benefits && (
+                      <div className="mt-4">
+                        <h6 className="fw-bold mb-3">
+                          <i className="bi bi-check-circle me-2"></i>
+                          Key Benefits
+                        </h6>
+                        <div className="benefits-list">
+                          {product.benefits.split("\n").map(
+                            (benefit, index) =>
+                              benefit.trim() && (
+                                <div
+                                  key={index}
+                                  className="d-flex align-items-start mb-2"
+                                >
+                                  <i className="bi bi-check text-success me-2 mt-1"></i>
+                                  <span style={{ lineHeight: "1.6" }}>
+                                    {benefit.replace(/^•\s*/, "")}
+                                  </span>
+                                </div>
+                              ),
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </Tab>
 
