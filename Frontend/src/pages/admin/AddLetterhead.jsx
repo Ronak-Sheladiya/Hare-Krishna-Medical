@@ -975,46 +975,64 @@ const AddLetterhead = () => {
         </Row>
       </Container>
 
-      {/* Full Preview Modal */}
+      {/* A4 Preview Modal - Not Fullscreen */}
       <Modal
         show={showPreview}
         onHide={() => setShowPreview(false)}
         size="xl"
-        fullscreen
+        centered
+        style={{
+          "--bs-modal-width": "900px",
+        }}
       >
-        <Modal.Header closeButton>
-          <Modal.Title>
+        <Modal.Header closeButton style={{ padding: "15px 20px" }}>
+          <Modal.Title style={{ fontSize: "18px", fontWeight: "600" }}>
             <i className="bi bi-eye me-2"></i>
-            Full Letterhead Preview
+            A4 Letterhead Preview
           </Modal.Title>
         </Modal.Header>
         <Modal.Body
           style={{
             backgroundColor: "#f8f9fa",
-            maxHeight: "80vh",
+            height: "70vh",
             overflowY: "auto",
-            padding: "10px",
+            padding: "20px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "flex-start",
           }}
         >
-          <div className="d-flex justify-content-center">
-            <div
-              style={{
-                maxWidth: "210mm",
-                backgroundColor: "white",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                borderRadius: "8px",
-                margin: "10px",
-              }}
-              dangerouslySetInnerHTML={{ __html: createLetterheadTemplate() }}
-            />
-          </div>
+          {/* A4 Size Container */}
+          <div
+            style={{
+              width: "210mm",
+              minHeight: "297mm",
+              backgroundColor: "white",
+              boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+              borderRadius: "8px",
+              transform: "scale(0.8)",
+              transformOrigin: "top center",
+              margin: "0 auto",
+            }}
+            dangerouslySetInnerHTML={{ __html: createLetterheadTemplate() }}
+          />
         </Modal.Body>
-        <Modal.Footer style={{ padding: "10px" }}>
+        <Modal.Footer
+          style={{
+            padding: "15px 20px",
+            background: "#fff",
+            borderTop: "1px solid #dee2e6",
+          }}
+        >
           <Button
             variant="outline-secondary"
             onClick={() => setShowPreview(false)}
-            style={{ borderRadius: "8px" }}
+            style={{
+              borderRadius: "8px",
+              padding: "8px 16px",
+            }}
           >
+            <i className="bi bi-x-lg me-2"></i>
             Close Preview
           </Button>
           <Button
@@ -1025,6 +1043,8 @@ const AddLetterhead = () => {
               borderRadius: "8px",
               background: "linear-gradient(135deg, #28a745, #20c997)",
               border: "none",
+              padding: "8px 16px",
+              fontWeight: "600",
             }}
           >
             {pdfGenerating ? (
@@ -1047,6 +1067,8 @@ const AddLetterhead = () => {
               background: "linear-gradient(135deg, #e63946, #dc3545)",
               border: "none",
               color: "white",
+              padding: "8px 16px",
+              fontWeight: "600",
             }}
           >
             {pdfGenerating ? (
