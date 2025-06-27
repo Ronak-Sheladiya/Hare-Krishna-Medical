@@ -22,6 +22,7 @@ import QRCameraScanner from "../components/common/QRCameraScanner";
 import { formatDateTime } from "../utils/dateUtils";
 
 const Verify = () => {
+  const { invoiceId: urlInvoiceId } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -578,16 +579,16 @@ const Verify = () => {
             .hero-title {
               font-size: 2.5rem;
             }
-            
+
             .hero-subtitle {
               font-size: 1.2rem;
             }
-            
+
             .hero-features {
               flex-direction: column;
               gap: 1rem;
             }
-            
+
             .tab-content {
               padding: 1.5rem;
             }
