@@ -682,7 +682,7 @@ const AddLetterhead = () => {
                 style={{
                   background: "linear-gradient(135deg, #28a745, #20c997)",
                   borderRadius: "12px 12px 0 0",
-                  padding: "20px",
+                  padding: "10px",
                 }}
               >
                 <div className="d-flex justify-content-between align-items-center">
@@ -720,7 +720,7 @@ const AddLetterhead = () => {
                 </div>
               </Card.Header>
               <Card.Body
-                className="p-3"
+                className="p-2"
                 style={{
                   backgroundColor: "#f8f9fa",
                   minHeight: "500px",
