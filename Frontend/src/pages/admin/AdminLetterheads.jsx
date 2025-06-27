@@ -168,9 +168,14 @@ const AdminLetterheads = () => {
   // Fetch statistics
   const fetchStats = async () => {
     try {
-      const response = await safeApiCall(api.get("/api/letterheads/stats"));
-      if (response?.success) {
-        setStats(response.stats?.general || stats);
+      const safeResponse = await safeApiCall(() =>
+        api.get("/api/letterheads/stats"),
+      );
+      if (safeResponse?.success) {
+        const response = safeResponse.data;
+        if (response?.success) {
+          setStats(response.stats?.general || stats);
+        }
       }
     } catch (error) {
       console.error("Fetch stats error:", error);
