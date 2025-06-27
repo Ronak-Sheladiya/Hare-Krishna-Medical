@@ -968,7 +968,8 @@ const AddLetterhead = () => {
                       A4 Preview Ready
                     </h5>
                     <p style={{ marginBottom: "0", color: "#6c757d" }}>
-                      Enter your letterhead title and content to see a perfect A4 preview
+                      Enter your letterhead title and content to see a perfect
+                      A4 preview
                     </p>
                   </div>
                 ) : (
@@ -1067,8 +1068,6 @@ const AddLetterhead = () => {
                 </div>
               )}
             </div>
-          </Col>
-            </Card>
           </Col>
         </Row>
       </Container>
