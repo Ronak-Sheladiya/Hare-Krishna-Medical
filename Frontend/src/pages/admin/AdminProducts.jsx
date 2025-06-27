@@ -871,26 +871,6 @@ const AdminProducts = () => {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>
-                Product Benefits <span className="text-danger">*</span>
-              </Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={4}
-                placeholder="Enter product benefits (each line will be a bullet point)&#10;Example:&#10;Reduces pain and inflammation&#10;Fast-acting relief&#10;Safe for daily use"
-                value={formData.benefits}
-                onChange={(e) =>
-                  setFormData({ ...formData, benefits: e.target.value })
-                }
-                required
-              />
-              <Form.Text className="text-muted">
-                <i className="bi bi-info-circle me-1"></i>
-                Each new line will be displayed as a separate bullet point
-              </Form.Text>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
               <Form.Label>Usage Instructions</Form.Label>
               <Form.Control
                 as="textarea"
