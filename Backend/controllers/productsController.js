@@ -38,10 +38,10 @@ const sampleProducts = [
     originalPrice: 200.0,
     stock: 85,
     category: "Vitamins",
-    description:
+    shortDescription:
       "Essential vitamin D3 supplement for bone health and immunity support.",
-    benefits:
-      "• Supports bone and teeth health\n• Boosts immune system\n• Helps calcium absorption\n• Prevents vitamin D deficiency",
+    description:
+      "High potency vitamin D3 supplement that supports bone and teeth health, boosts immune system, and helps calcium absorption.",
     usage: "Take 1 tablet daily with water, preferably after meals.",
     weight: "60000 IU",
     images: [
