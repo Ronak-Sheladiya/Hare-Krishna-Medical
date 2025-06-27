@@ -705,8 +705,227 @@ const AddLetterhead = () => {
                     </Form.Text>
                   </Form.Group>
 
+                  {/* Form Buttons */}
+                  <div className="d-flex gap-3 flex-wrap">
+                    <div className="flex-grow-1">
+                      <Button
+                        variant="outline-secondary"
+                        onClick={() => navigate("/admin/letterheads")}
+                        disabled={loading}
+                        className="me-3"
+                      >
+                        <i className="bi bi-arrow-left me-2"></i>
+                        Back to Letterheads
+                      </Button>
+                    </div>
+                    <div>
+                      <Button
+                        variant="outline-primary"
+                        onClick={() => setShowPreview(true)}
+                        disabled={!formData.title || !formData.content}
+                        className="me-3"
+                      >
+                        <i className="bi bi-eye me-2"></i>
+                        Preview
+                      </Button>
+                      <Button
+                        type="submit"
+                        variant="success"
+                        disabled={loading || !formData.title || !formData.content}
+                      >
+                        {loading ? (
+                          <>
+                            <Spinner size="sm" className="me-2" />
+                            Creating...
+                          </>
+                        ) : (
+                          <>
+                            <i className="bi bi-save me-2"></i>
+                            Create Letterhead
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </Form>
+              </Card.Body>
+            </Card>
+          </Col>
 
+          {/* Preview Column */}
+          <Col lg={8}>
+            <Card
+              style={{
+                height: "calc(100vh - 180px)",
+                display: "flex",
+                flexDirection: "column",
+                background: "linear-gradient(135deg, #f8f9fa, #ffffff)",
+                border: "1px solid #e0e6ed",
+                borderRadius: "20px",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+              }}
+            >
+              <Card.Header
+                style={{
+                  background: "linear-gradient(135deg, #e63946, #dc3545)",
+                  color: "white",
+                  borderRadius: "20px 20px 0 0",
+                  padding: "20px",
+                  border: "none",
+                }}
+              >
+                <h5 className="mb-0 d-flex align-items-center">
+                  <i className="bi bi-eye me-2"></i>
+                  A4 Letterhead Preview
+                </h5>
+              </Card.Header>
 
+              <Card.Body
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  overflow: "auto",
+                  flexGrow: 1,
+                  background: "#f8f9fa",
+                  padding: "30px",
+                }}
+              >
+                {!formData.title || !formData.content ? (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      color: "#6c757d",
+                      maxWidth: "400px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "80px",
+                        height: "80px",
+                        background: "linear-gradient(135deg, #28a745, #20c997)",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: "20px",
+                        color: "white",
+                      }}
+                    >
+                      <i
+                        className="bi bi-file-earmark-text"
+                        style={{ fontSize: "2rem" }}
+                      ></i>
+                    </div>
+                    <h5 style={{ fontWeight: "600", color: "#495057" }}>
+                      A4 Preview Ready
+                    </h5>
+                    <p style={{ marginBottom: "0", color: "#6c757d" }}>
+                      Enter your letterhead title and content to see a perfect
+                      A4 preview
+                    </p>
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      width: "794px",
+                      height: "1123px",
+                      backgroundColor: "white",
+                      boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+                      borderRadius: "4px",
+                      overflow: "hidden",
+                      transform: "scale(0.45)",
+                      transformOrigin: "center center",
+                      border: "1px solid #ddd",
+                    }}
+                  >
+                    <div
+                      style={{ width: "100%", height: "100%" }}
+                      dangerouslySetInnerHTML={{
+                        __html: createLetterheadTemplate(),
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+
+      {/* A4 Preview Modal */}
+      <Modal
+        show={showPreview}
+        onHide={() => setShowPreview(false)}
+        backdrop="static"
+        keyboard={false}
+        size="xl"
+        centered
+        style={{
+          "--bs-modal-width": "900px",
+        }}
+      >
+        <Modal.Header closeButton style={{ padding: "15px 20px" }}>
+          <Modal.Title style={{ fontSize: "18px", fontWeight: "600" }}>
+            <i className="bi bi-eye me-2"></i>
+            A4 Letterhead Preview
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body
+          style={{
+            backgroundColor: "#f8f9fa",
+            height: "70vh",
+            overflowY: "auto",
+            padding: "20px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "flex-start",
+          }}
+        >
+          <div
+            style={{
+              width: "210mm",
+              minHeight: "297mm",
+              backgroundColor: "white",
+              boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+              borderRadius: "8px",
+              transform: "scale(0.8)",
+              transformOrigin: "top center",
+              margin: "0 auto",
+            }}
+            dangerouslySetInnerHTML={{ __html: createLetterheadTemplate() }}
+          />
+        </Modal.Body>
+        <Modal.Footer
+          style={{
+            padding: "20px",
+            background: "linear-gradient(135deg, #f8f9fa, #ffffff)",
+            borderTop: "1px solid #dee2e6",
+            borderRadius: "0 0 0.5rem 0.5rem",
+          }}
+        >
+          <div className="d-flex gap-3 w-100 justify-content-between align-items-center flex-wrap">
+            <div className="d-flex align-items-center gap-2">
+              <Button
+                variant="outline-secondary"
+                onClick={() => setShowPreview(false)}
+                style={{
+                  borderRadius: "10px",
+                  padding: "12px 20px",
+                  fontWeight: "500",
+                  border: "2px solid #6c757d",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <i className="bi bi-x-lg me-2"></i>
+                Close Preview
+              </Button>
+
+              <small className="text-muted ms-2">
+                <i className="bi bi-info-circle me-1"></i>
+                Preview in A4 format (scaled 80%)
+              </small>
+            </div>
 
             </div>
           </Col>
