@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Container,
@@ -28,6 +28,8 @@ const AddLetterhead = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [letterheadId, setLetterheadId] = useState("");
+  const [qrCode, setQrCode] = useState("");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -46,6 +48,27 @@ const AddLetterhead = () => {
         ...prev,
         content: editorRef.current.innerHTML,
       }));
+    }
+  };
+
+  // Generate QR code for preview
+  const generatePreviewQRCode = async (tempId) => {
+    try {
+      const QRCode = await import("qrcode");
+      const verificationUrl = `${window.location.origin}/verify-docs?id=${tempId}&type=letterhead`;
+      const qrDataURL = await QRCode.toDataURL(verificationUrl, {
+        width: 150,
+        margin: 2,
+        color: {
+          dark: "#1a202c",
+          light: "#ffffff",
+        },
+        errorCorrectionLevel: "M",
+      });
+      return qrDataURL;
+    } catch (error) {
+      console.error("QR generation error:", error);
+      return null;
     }
   };
 
@@ -73,6 +96,12 @@ const AddLetterhead = () => {
         const response = safeResponse.data;
         if (response?.success) {
           setSuccess("Letterhead created successfully!");
+          // Set letterhead ID and QR from response for immediate use
+          const createdLetterhead = response.letterhead;
+          if (createdLetterhead) {
+            setLetterheadId(createdLetterhead.letterheadId);
+            setQrCode(createdLetterhead.qrCode);
+          }
           setTimeout(() => {
             navigate("/admin/letterheads");
           }, 1500);
@@ -90,133 +119,198 @@ const AddLetterhead = () => {
     }
   };
 
+  // Generate temp letterhead ID for preview
+  const generateTempLetterheadId = () => {
+    const year = new Date().getFullYear();
+    const month = String(new Date().getMonth() + 1).padStart(2, "0");
+    const day = String(new Date().getDate()).padStart(2, "0");
+    const random = Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(3, "0");
+    return `HKMS/LH/${year}/${month}/${day}/${random}`;
+  };
+
+  // Handle preview with QR generation
+  const handlePreview = async () => {
+    if (!formData.title || !formData.content) return;
+
+    const tempId = letterheadId || generateTempLetterheadId();
+    setLetterheadId(tempId);
+
+    if (!qrCode) {
+      const generatedQR = await generatePreviewQRCode(tempId);
+      if (generatedQR) {
+        setQrCode(generatedQR);
+      }
+    }
+
+    setShowPreview(true);
+  };
+
+  const createLetterheadTemplate = () => {
+    const currentDate = new Date().toLocaleDateString("en-IN");
+    const currentLetterheadId = letterheadId || generateTempLetterheadId();
+
+    return `
+      <div id="letterhead-print-content" style="font-family: Arial, sans-serif; padding: 15px; background: white; max-width: 210mm; margin: 0 auto; min-height: 297mm;">
+        <!-- Header Section - Professional Design like Invoice -->
+        <div style="background: #e63946; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; position: relative;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <!-- Left Side - Company Info -->
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                <div style="position: relative; margin-right: 20px;">
+                  <div style="background: white; border-radius: 50%; padding: 12px; border: 3px solid rgba(255,255,255,0.9); box-shadow: 0 6px 20px rgba(0,0,0,0.15);">
+                    <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800" alt="Hare Krishna Medical Logo" style="height: 56px; width: 56px; object-fit: contain; border-radius: 50%;" onerror="this.style.display='none';" />
+                  </div>
+                  <div style="position: absolute; top: -5px; right: -5px; width: 20px; height: 20px; background: #27ae60; border-radius: 50%; border: 2px solid white;"></div>
+                </div>
+                <div>
+                  <h1 style="font-size: 28px; font-weight: 900; margin: 0; line-height: 1.1; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">HARE KRISHNA MEDICAL</h1>
+                  <p style="font-size: 14px; margin: 5px 0 0 0; opacity: 0.95; font-weight: 500; letter-spacing: 0.5px;">🏥 Your Trusted Health Partner Since 2020</p>
+                  <div style="display: flex; align-items: center; margin-top: 8px; font-size: 12px; opacity: 0.9;">
+                    <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; margin-right: 8px;">✓ Verified</span>
+                    <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px;">📋 Official Document</span>
+                  </div>
+                </div>
+              </div>
+              <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; font-size: 11px; line-height: 1.5;">
+                <div style="display: flex; align-items: center; margin-bottom: 4px;"><i style="margin-right: 8px;">📍</i> 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat</div>
+                <div style="display: flex; align-items: center; margin-bottom: 4px;"><i style="margin-right: 8px;">📞</i> +91 76989 13354 | +91 91060 18508</div>
+                <div style="display: flex; align-items: center;"><i style="margin-right: 8px;">✉️</i> hkmedicalamroli@gmail.com</div>
+              </div>
+            </div>
+            
+            <!-- Right Side - QR Code and Reference Info -->
+            <div style="text-align: right; min-width: 200px;">
+              <!-- QR Code Section -->
+              <div style="background: white; padding: 12px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 15px;">
+                ${
+                  qrCode
+                    ? `<img src="${qrCode}" alt="Verification QR Code" style="width: 120px; height: 120px; border: 2px solid #e63946; border-radius: 8px;" />`
+                    : `<div style="width: 120px; height: 120px; border: 2px dashed #e63946; border-radius: 8px; background: #f8f9fa; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #e63946;">
+                         <div style="font-size: 14px; margin-bottom: 5px;">📱</div>
+                         <div style="font-size: 10px; font-weight: bold; text-align: center; line-height: 1.2;">QR CODE<br>VERIFICATION</div>
+                       </div>`
+                }
+                <div style="margin-top: 8px; color: #333; font-size: 10px; font-weight: bold;">📱 SCAN TO VERIFY</div>
+              </div>
+              
+              <!-- Reference and Date Info -->
+              <div style="background: rgba(255,255,255,0.95); color: #333; padding: 15px; border-radius: 8px; font-size: 12px; text-align: left;">
+                <div style="margin-bottom: 8px; font-weight: bold; color: #e63946;">LETTERHEAD</div>
+                <div style="margin-bottom: 6px;"><strong>Ref:</strong> ${currentLetterheadId}</div>
+                <div style="margin-bottom: 6px;"><strong>Date:</strong> ${currentDate}</div>
+                <div><strong>Status:</strong> <span style="background: #27ae60; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold;">Official</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Letterhead Title -->
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h2 style="color: #e63946; font-size: 28px; font-weight: bold; margin: 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #e63946; display: inline-block; padding-bottom: 8px;">
+            ${formData.title}
+          </h2>
+        </div>
+
+        <!-- Letterhead Content -->
+        <div style="font-size: 14px; line-height: 1.8; text-align: justify; margin-bottom: 50px; min-height: 300px; color: #333;">
+          ${formData.content}
+        </div>
+
+        <!-- Footer Section - Enhanced like Invoice -->
+        <div style="position: absolute; bottom: 20px; left: 20px; right: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: stretch; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 20px; border-radius: 12px; border: 1px solid #e0e0e0;">
+            <div style="flex: 1;">
+              <h5 style="font-size: 16px; font-weight: bold; margin: 0 0 12px 0; color: #e63946;">🙏 Hare Krishna Medical Store</h5>
+              <div style="font-size: 12px; line-height: 1.6; color: #444;">
+                <div style="background: white; padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #e63946;">
+                  <strong>Verification Notice:</strong><br>
+                  • This is an official document issued by Hare Krishna Medical Store<br>
+                  • For verification, scan the QR code or contact us at the above details<br>
+                  • Document valid for all official purposes
+                </div>
+                <div style="display: flex; align-items: center; margin-top: 10px; font-size: 11px;">
+                  <span style="background: #e63946; color: white; padding: 4px 8px; border-radius: 12px; margin-right: 8px; font-weight: bold;">📞 24/7 Support</span>
+                  <span>hkmedicalamroli@gmail.com | +91 76989 13354</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer QR placeholder if needed -->
+            <div style="margin-left: 25px; text-align: center; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e0e0e0; min-width: 140px;">
+              <div style="margin-bottom: 10px;">
+                <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800" alt="Logo" style="height: 30px; width: 30px; object-fit: contain;" onerror="this.style.display='none';" />
+              </div>
+              <div style="font-size: 11px; font-weight: bold; color: #e63946;">OFFICIAL DOCUMENT</div>
+              <div style="font-size: 9px; color: #666; margin-top: 2px;">Ref: ${currentLetterheadId}</div>
+            </div>
+          </div>
+          
+          <!-- Computer Generated Note -->
+          <div style="text-align: center; margin-top: 10px; font-size: 10px; color: #888; background: #f8f9fa; padding: 8px; border-radius: 5px;">
+            Computer generated letterhead - No signature required | Generated: ${new Date().toLocaleString()}
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
   const handlePrint = () => {
-    const printContent = `
+    const printContent = createLetterheadTemplate();
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
       <!DOCTYPE html>
       <html>
       <head>
-        <title>${formData.title}</title>
+        <title>${formData.title} - Letterhead</title>
         <style>
-          body {
-            font-family: 'Times New Roman', serif;
-            line-height: 1.6;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-          }
-          .letterhead-header {
-            text-align: center;
-            border-bottom: 2px solid #e63946;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-          }
-          .letterhead-title {
-            color: #e63946;
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-          }
-          .letterhead-content {
-            font-size: 14px;
-            text-align: justify;
-          }
+          @page { size: A4; margin: 15mm; }
           @media print {
-            body { margin: 0; }
+            body { margin: 0; color: black !important; font-size: 11px; line-height: 1.3; -webkit-print-color-adjust: exact; }
+            .no-print { display: none !important; }
           }
+          body { font-family: 'Times New Roman', serif; }
         </style>
       </head>
       <body>
-        <div class="letterhead-header">
-          <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
-            <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
-                 alt="Hare Krishna Medical" style="width: 60px; height: 60px; margin-right: 15px;" />
-            <div>
-              <h1 style="margin: 0; color: #e63946; font-size: 20px;">HARE KRISHNA MEDICAL STORE</h1>
-              <p style="margin: 0; font-size: 12px; color: #666;">Your Trusted Health & Wellness Partner</p>
-            </div>
-          </div>
-          <p style="font-size: 12px; color: #666; margin: 5px 0;">
-            📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat<br/>
-            📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
-          </p>
-        </div>
-
-        <div class="letterhead-title">${formData.title}</div>
-        <div class="letterhead-content">${formData.content}</div>
-
-        <div style="margin-top: 50px; border-top: 1px solid #ddd; padding-top: 20px; font-size: 12px; color: #666; text-align: center;">
-          Generated on ${new Date().toLocaleDateString()} | Hare Krishna Medical Store
-        </div>
+        ${printContent}
+        <script>
+          window.onload = function() {
+            setTimeout(function() { window.print(); }, 500);
+          };
+        </script>
       </body>
       </html>
-    `;
-
-    const printWindow = window.open("", "_blank");
-    printWindow.document.write(printContent);
+    `);
     printWindow.document.close();
-    printWindow.print();
   };
 
   const handleDownload = () => {
-    const content = `
+    const content = createLetterheadTemplate();
+    const blob = new Blob(
+      [
+        `
 <!DOCTYPE html>
 <html>
 <head>
-  <title>${formData.title}</title>
+  <title>${formData.title} - Letterhead</title>
   <meta charset="UTF-8">
   <style>
-    body {
-      font-family: 'Times New Roman', serif;
-      line-height: 1.6;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    .letterhead-header {
-      text-align: center;
-      border-bottom: 2px solid #e63946;
-      padding-bottom: 20px;
-      margin-bottom: 30px;
-    }
-    .letterhead-title {
-      color: #e63946;
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    .letterhead-content {
-      font-size: 14px;
-      text-align: justify;
-    }
+    @page { size: A4; margin: 15mm; }
+    body { font-family: 'Times New Roman', serif; line-height: 1.6; margin: 0; }
   </style>
 </head>
 <body>
-  <div class="letterhead-header">
-    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
-      <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
-           alt="Hare Krishna Medical" style="width: 60px; height: 60px; margin-right: 15px;" />
-      <div>
-        <h1 style="margin: 0; color: #e63946; font-size: 20px;">HARE KRISHNA MEDICAL STORE</h1>
-        <p style="margin: 0; font-size: 12px; color: #666;">Your Trusted Health & Wellness Partner</p>
-      </div>
-    </div>
-    <p style="font-size: 12px; color: #666; margin: 5px 0;">
-      📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat<br/>
-      📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
-    </p>
-  </div>
-
-  <div class="letterhead-title">${formData.title}</div>
-  <div class="letterhead-content">${formData.content}</div>
-
-  <div style="margin-top: 50px; border-top: 1px solid #ddd; padding-top: 20px; font-size: 12px; color: #666; text-align: center;">
-    Generated on ${new Date().toLocaleDateString()} | Hare Krishna Medical Store
-  </div>
+  ${content}
 </body>
 </html>
-    `;
+    `,
+      ],
+      { type: "text/html" },
+    );
 
-    const blob = new Blob([content], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -230,8 +324,8 @@ const AddLetterhead = () => {
   return (
     <Container fluid className="py-4">
       <PageHeroSection
-        title="Create Letterhead"
-        subtitle="Create professional letterheads with rich text formatting"
+        title="Create Professional Letterhead"
+        subtitle="Create official letterheads with verification QR codes and professional formatting"
         breadcrumbs={[
           { label: "Admin", href: "/admin" },
           { label: "Letterheads", href: "/admin/letterheads" },
@@ -240,13 +334,14 @@ const AddLetterhead = () => {
       />
 
       <Container className="mt-4">
-        <Row className="justify-content-center">
-          <Col lg={10}>
-            <Card className="shadow-sm">
+        <Row>
+          {/* Form Section */}
+          <Col lg={6}>
+            <Card className="shadow-sm h-100">
               <Card.Header className="bg-primary text-white">
                 <h5 className="mb-0">
                   <i className="bi bi-file-earmark-text me-2"></i>
-                  New Letterhead
+                  Letterhead Information
                 </h5>
               </Card.Header>
               <Card.Body>
@@ -485,37 +580,7 @@ const AddLetterhead = () => {
                       </Button>
                     </div>
 
-                    <div className="d-flex gap-2">
-                      <Button
-                        type="button"
-                        variant="outline-info"
-                        onClick={() => setShowPreview(true)}
-                        disabled={!formData.title || !formData.content}
-                      >
-                        <i className="bi bi-eye me-2"></i>
-                        Preview
-                      </Button>
-
-                      <Button
-                        type="button"
-                        variant="outline-success"
-                        onClick={handlePrint}
-                        disabled={!formData.title || !formData.content}
-                      >
-                        <i className="bi bi-printer me-2"></i>
-                        Print
-                      </Button>
-
-                      <Button
-                        type="button"
-                        variant="outline-primary"
-                        onClick={handleDownload}
-                        disabled={!formData.title || !formData.content}
-                      >
-                        <i className="bi bi-download me-2"></i>
-                        Download
-                      </Button>
-
+                    <div className="d-flex gap-2 flex-wrap">
                       <ThemeButton
                         type="submit"
                         disabled={
@@ -540,112 +605,124 @@ const AddLetterhead = () => {
               </Card.Body>
             </Card>
           </Col>
+
+          {/* Live Preview Section */}
+          <Col lg={6}>
+            <Card className="shadow-sm h-100">
+              <Card.Header className="bg-success text-white">
+                <div className="d-flex justify-content-between align-items-center">
+                  <h5 className="mb-0">
+                    <i className="bi bi-eye me-2"></i>
+                    Live Preview
+                  </h5>
+                  <div className="d-flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline-light"
+                      onClick={handlePreview}
+                      disabled={!formData.title || !formData.content}
+                    >
+                      <i className="bi bi-arrow-clockwise me-1"></i>
+                      Refresh
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline-light"
+                      onClick={() => setShowPreview(true)}
+                      disabled={!formData.title || !formData.content}
+                    >
+                      <i className="bi bi-arrows-fullscreen me-1"></i>
+                      Full View
+                    </Button>
+                  </div>
+                </div>
+              </Card.Header>
+              <Card.Body className="p-2" style={{ backgroundColor: "#f8f9fa" }}>
+                {!formData.title || !formData.content ? (
+                  <div className="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+                    <i
+                      className="bi bi-file-earmark-text"
+                      style={{ fontSize: "4rem" }}
+                    ></i>
+                    <h5>Enter title and content to see preview</h5>
+                    <p>Your letterhead will appear here as you type</p>
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      transform: "scale(0.5)",
+                      transformOrigin: "top left",
+                      width: "200%",
+                      height: "200%",
+                      overflow: "hidden",
+                      border: "1px solid #ddd",
+                      borderRadius: "8px",
+                      backgroundColor: "white",
+                    }}
+                    dangerouslySetInnerHTML={{
+                      __html: createLetterheadTemplate(),
+                    }}
+                  />
+                )}
+              </Card.Body>
+              <Card.Footer className="bg-transparent">
+                <div className="d-flex gap-2 justify-content-center">
+                  <Button
+                    variant="outline-success"
+                    size="sm"
+                    onClick={handlePrint}
+                    disabled={!formData.title || !formData.content}
+                  >
+                    <i className="bi bi-printer me-2"></i>
+                    Print
+                  </Button>
+
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={handleDownload}
+                    disabled={!formData.title || !formData.content}
+                  >
+                    <i className="bi bi-download me-2"></i>
+                    Download
+                  </Button>
+                </div>
+              </Card.Footer>
+            </Card>
+          </Col>
         </Row>
       </Container>
 
-      {/* Preview Modal */}
-      <Modal show={showPreview} onHide={() => setShowPreview(false)} size="lg">
+      {/* Full Preview Modal */}
+      <Modal
+        show={showPreview}
+        onHide={() => setShowPreview(false)}
+        size="xl"
+        fullscreen
+      >
         <Modal.Header closeButton>
           <Modal.Title>
             <i className="bi bi-eye me-2"></i>
-            Letterhead Preview
+            Full Letterhead Preview
           </Modal.Title>
         </Modal.Header>
         <Modal.Body
           style={{
             backgroundColor: "#f8f9fa",
-            maxHeight: "70vh",
+            maxHeight: "80vh",
             overflowY: "auto",
           }}
         >
-          <div
-            className="letterhead-preview"
-            style={{ margin: "20px auto", maxWidth: "800px" }}
-          >
-            <div className="preview-content">
-              {/* Header */}
-              <div
-                style={{
-                  textAlign: "center",
-                  borderBottom: "2px solid #e63946",
-                  paddingBottom: "20px",
-                  marginBottom: "30px",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginBottom: "10px",
-                  }}
-                >
-                  <img
-                    src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
-                    alt="Hare Krishna Medical"
-                    style={{
-                      width: "60px",
-                      height: "60px",
-                      marginRight: "15px",
-                    }}
-                  />
-                  <div>
-                    <h1
-                      style={{
-                        margin: "0",
-                        color: "#e63946",
-                        fontSize: "20px",
-                      }}
-                    >
-                      HARE KRISHNA MEDICAL STORE
-                    </h1>
-                    <p style={{ margin: "0", fontSize: "12px", color: "#666" }}>
-                      Your Trusted Health & Wellness Partner
-                    </p>
-                  </div>
-                </div>
-                <p style={{ fontSize: "12px", color: "#666", margin: "5px 0" }}>
-                  📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107,
-                  Gujarat
-                  <br />
-                  📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
-                </p>
-              </div>
-
-              {/* Title */}
-              <div
-                style={{
-                  color: "#e63946",
-                  fontSize: "24px",
-                  fontWeight: "bold",
-                  marginBottom: "20px",
-                  textAlign: "center",
-                }}
-              >
-                {formData.title}
-              </div>
-
-              {/* Content */}
-              <div
-                style={{ fontSize: "14px", textAlign: "justify" }}
-                dangerouslySetInnerHTML={{ __html: formData.content }}
-              />
-
-              {/* Footer */}
-              <div
-                style={{
-                  marginTop: "50px",
-                  borderTop: "1px solid #ddd",
-                  paddingTop: "20px",
-                  fontSize: "12px",
-                  color: "#666",
-                  textAlign: "center",
-                }}
-              >
-                Generated on {new Date().toLocaleDateString()} | Hare Krishna
-                Medical Store
-              </div>
-            </div>
+          <div className="d-flex justify-content-center">
+            <div
+              style={{
+                maxWidth: "210mm",
+                backgroundColor: "white",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                borderRadius: "8px",
+              }}
+              dangerouslySetInnerHTML={{ __html: createLetterheadTemplate() }}
+            />
           </div>
         </Modal.Body>
         <Modal.Footer>
