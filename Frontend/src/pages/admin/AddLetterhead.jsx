@@ -235,79 +235,49 @@ const AddLetterhead = () => {
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
 
-  // Generate PDF blob for letterhead preview
+  // Generate actual PDF for letterhead
   const generateLetterheadPDF = async () => {
+    if (!formData.title || !formData.content) return null;
+
     setPdfGenerating(true);
     try {
+      // Import PDF service
+      const pdfService = (await import("../../services/PDFService")).default;
+
       // Wait for DOM to render letterhead content
-      setTimeout(async () => {
-        const letterheadElement = document.getElementById(
-          "letterhead-print-content",
-        );
-        if (!letterheadElement) {
-          setPdfGenerating(false);
-          return;
-        }
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-        // Create a print-friendly version
-        const printContent = createLetterheadTemplate();
+      const letterheadElement = document.getElementById(
+        "letterhead-print-content",
+      );
+      if (!letterheadElement) {
+        throw new Error("Letterhead content not found");
+      }
 
-        // Create temporary iframe for PDF generation
-        const iframe = document.createElement("iframe");
-        iframe.style.display = "none";
-        document.body.appendChild(iframe);
+      // Generate actual PDF blob
+      const result = await pdfService.generatePDFFromElement(
+        letterheadElement,
+        {
+          filename: `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`,
+          onProgress: (message, progress) => {
+            console.log(`PDF Generation: ${message} (${progress}%)`);
+          },
+          returnBlob: true, // Request blob return instead of direct download
+        },
+      );
 
-        const iframeDoc =
-          iframe.contentDocument || iframe.contentWindow.document;
-        iframeDoc.write(`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>${formData.title} - Letterhead</title>
-              <style>
-                @page { size: A4; margin: 15mm; }
-                body {
-                  font-family: Arial, sans-serif;
-                  margin: 0;
-                  color: black !important;
-                  font-size: 11px;
-                  line-height: 1.3;
-                  -webkit-print-color-adjust: exact;
-                  print-color-adjust: exact;
-                }
-                .letterhead-header {
-                  background: #e63946 !important;
-                  color: white !important;
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                }
-              </style>
-            </head>
-            <body>${printContent}</body>
-          </html>
-        `);
-        iframeDoc.close();
-
-        // Create blob URL for preview
-        setTimeout(() => {
-          try {
-            const htmlContent = iframeDoc.documentElement.outerHTML;
-            const blob = new Blob([htmlContent], { type: "text/html" });
-            const pdfObjectUrl = URL.createObjectURL(blob);
-            setPdfUrl(pdfObjectUrl);
-
-            // Clean up iframe
-            document.body.removeChild(iframe);
-          } catch (error) {
-            document.body.removeChild(iframe);
-            throw error;
-          }
-          setPdfGenerating(false);
-        }, 500);
-      }, 1000);
+      if (result.success && result.blob) {
+        const pdfObjectUrl = URL.createObjectURL(result.blob);
+        setPdfUrl(pdfObjectUrl);
+        setPdfGenerating(false);
+        return result.blob;
+      } else {
+        throw new Error(result.error || "PDF generation failed");
+      }
     } catch (error) {
       console.error("PDF generation failed:", error);
       setPdfGenerating(false);
+      return null;
     }
   };
 
