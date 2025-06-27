@@ -430,14 +430,14 @@ const AddLetterhead = () => {
       if (result.success && result.blob) {
         const pdfObjectUrl = URL.createObjectURL(result.blob);
         setPdfUrl(pdfObjectUrl);
-        setPdfGenerating(false);
+        setDownloadLoading(false);
         return result.blob;
       } else {
-        throw new Error(result.error || "PDF generation failed");
+        throw new Error("Failed to generate PDF");
       }
     } catch (error) {
       console.error("PDF generation failed:", error);
-      setPdfGenerating(false);
+      setDownloadLoading(false);
       return null;
     }
   };
