@@ -42,9 +42,9 @@ const AddLetterhead = () => {
 
   const handleContentChange = () => {
     if (editorRef.current) {
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
-        content: editorRef.current.innerHTML,
+        content: editorRef.current.innerHTML
       }));
     }
   };
@@ -66,7 +66,7 @@ const AddLetterhead = () => {
           content: formData.content,
           letterType: "document",
           createdAt: new Date().toISOString(),
-        }),
+        })
       );
 
       if (response?.success) {
@@ -146,7 +146,7 @@ const AddLetterhead = () => {
       </html>
     `;
 
-    const printWindow = window.open("", "_blank");
+    const printWindow = window.open('', '_blank');
     printWindow.document.write(printContent);
     printWindow.document.close();
     printWindow.print();
@@ -211,11 +211,11 @@ const AddLetterhead = () => {
 </html>
     `;
 
-    const blob = new Blob([content], { type: "text/html" });
+    const blob = new Blob([content], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
-    a.download = `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.html`;
+    a.download = `${formData.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_letterhead.html`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -246,21 +246,13 @@ const AddLetterhead = () => {
               </Card.Header>
               <Card.Body>
                 {error && (
-                  <Alert
-                    variant="danger"
-                    dismissible
-                    onClose={() => setError(null)}
-                  >
+                  <Alert variant="danger" dismissible onClose={() => setError(null)}>
                     {error}
                   </Alert>
                 )}
 
                 {success && (
-                  <Alert
-                    variant="success"
-                    dismissible
-                    onClose={() => setSuccess(null)}
-                  >
+                  <Alert variant="success" dismissible onClose={() => setSuccess(null)}>
                     {success}
                   </Alert>
                 )}
@@ -276,12 +268,7 @@ const AddLetterhead = () => {
                       type="text"
                       placeholder="Enter letterhead title (e.g., Certificate of Appreciation, Medical Report, etc.)"
                       value={formData.title}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          title: e.target.value,
-                        }))
-                      }
+                      onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                       required
                       size="lg"
                     />
@@ -300,39 +287,16 @@ const AddLetterhead = () => {
                         <div className="d-flex flex-wrap gap-2 align-items-center">
                           {/* Font Size */}
                           <Dropdown>
-                            <Dropdown.Toggle
-                              variant="outline-secondary"
-                              size="sm"
-                            >
+                            <Dropdown.Toggle variant="outline-secondary" size="sm">
                               <i className="bi bi-fonts me-1"></i>
                               Size
                             </Dropdown.Toggle>
                             <Dropdown.Menu>
-                              <Dropdown.Item
-                                onClick={() => formatText("fontSize", "1")}
-                              >
-                                Small
-                              </Dropdown.Item>
-                              <Dropdown.Item
-                                onClick={() => formatText("fontSize", "3")}
-                              >
-                                Normal
-                              </Dropdown.Item>
-                              <Dropdown.Item
-                                onClick={() => formatText("fontSize", "4")}
-                              >
-                                Medium
-                              </Dropdown.Item>
-                              <Dropdown.Item
-                                onClick={() => formatText("fontSize", "5")}
-                              >
-                                Large
-                              </Dropdown.Item>
-                              <Dropdown.Item
-                                onClick={() => formatText("fontSize", "6")}
-                              >
-                                Extra Large
-                              </Dropdown.Item>
+                              <Dropdown.Item onClick={() => formatText('fontSize', '1')}>Small</Dropdown.Item>
+                              <Dropdown.Item onClick={() => formatText('fontSize', '3')}>Normal</Dropdown.Item>
+                              <Dropdown.Item onClick={() => formatText('fontSize', '4')}>Medium</Dropdown.Item>
+                              <Dropdown.Item onClick={() => formatText('fontSize', '5')}>Large</Dropdown.Item>
+                              <Dropdown.Item onClick={() => formatText('fontSize', '6')}>Extra Large</Dropdown.Item>
                             </Dropdown.Menu>
                           </Dropdown>
 
@@ -343,7 +307,7 @@ const AddLetterhead = () => {
                             <Button
                               variant="outline-secondary"
                               size="sm"
-                              onClick={() => formatText("bold")}
+                              onClick={() => formatText('bold')}
                               title="Bold"
                             >
                               <i className="bi bi-type-bold"></i>
@@ -351,7 +315,7 @@ const AddLetterhead = () => {
                             <Button
                               variant="outline-secondary"
                               size="sm"
-                              onClick={() => formatText("italic")}
+                              onClick={() => formatText('italic')}
                               title="Italic"
                             >
                               <i className="bi bi-type-italic"></i>
@@ -359,7 +323,7 @@ const AddLetterhead = () => {
                             <Button
                               variant="outline-secondary"
                               size="sm"
-                              onClick={() => formatText("underline")}
+                              onClick={() => formatText('underline')}
                               title="Underline"
                             >
                               <i className="bi bi-type-underline"></i>
@@ -373,7 +337,7 @@ const AddLetterhead = () => {
                             <Button
                               variant="outline-secondary"
                               size="sm"
-                              onClick={() => formatText("justifyLeft")}
+                              onClick={() => formatText('justifyLeft')}
                               title="Align Left"
                             >
                               <i className="bi bi-text-left"></i>
@@ -381,7 +345,7 @@ const AddLetterhead = () => {
                             <Button
                               variant="outline-secondary"
                               size="sm"
-                              onClick={() => formatText("justifyCenter")}
+                              onClick={() => formatText('justifyCenter')}
                               title="Center"
                             >
                               <i className="bi bi-text-center"></i>
@@ -389,7 +353,7 @@ const AddLetterhead = () => {
                             <Button
                               variant="outline-secondary"
                               size="sm"
-                              onClick={() => formatText("justifyRight")}
+                              onClick={() => formatText('justifyRight')}
                               title="Align Right"
                             >
                               <i className="bi bi-text-right"></i>
@@ -397,7 +361,7 @@ const AddLetterhead = () => {
                             <Button
                               variant="outline-secondary"
                               size="sm"
-                              onClick={() => formatText("justifyFull")}
+                              onClick={() => formatText('justifyFull')}
                               title="Justify"
                             >
                               <i className="bi bi-justify"></i>
@@ -411,7 +375,7 @@ const AddLetterhead = () => {
                             <Button
                               variant="outline-secondary"
                               size="sm"
-                              onClick={() => formatText("insertUnorderedList")}
+                              onClick={() => formatText('insertUnorderedList')}
                               title="Bullet List"
                             >
                               <i className="bi bi-list-ul"></i>
@@ -419,7 +383,7 @@ const AddLetterhead = () => {
                             <Button
                               variant="outline-secondary"
                               size="sm"
-                              onClick={() => formatText("insertOrderedList")}
+                              onClick={() => formatText('insertOrderedList')}
                               title="Numbered List"
                             >
                               <i className="bi bi-list-ol"></i>
@@ -433,7 +397,7 @@ const AddLetterhead = () => {
                             <Button
                               variant="outline-secondary"
                               size="sm"
-                              onClick={() => formatText("removeFormat")}
+                              onClick={() => formatText('removeFormat')}
                               title="Clear Formatting"
                             >
                               <i className="bi bi-eraser"></i>
@@ -441,7 +405,7 @@ const AddLetterhead = () => {
                             <Button
                               variant="outline-secondary"
                               size="sm"
-                              onClick={() => formatText("insertHorizontalRule")}
+                              onClick={() => formatText('insertHorizontalRule')}
                               title="Insert Line"
                             >
                               <i className="bi bi-hr"></i>
@@ -461,8 +425,7 @@ const AddLetterhead = () => {
                       data-placeholder="Start typing your letterhead content here. Use the formatting tools above to style your text..."
                     />
                     <Form.Text className="text-muted">
-                      Use the formatting toolbar above to style your content
-                      like in Microsoft Word.
+                      Use the formatting toolbar above to style your content like in Microsoft Word.
                     </Form.Text>
                   </Form.Group>
 
@@ -513,9 +476,7 @@ const AddLetterhead = () => {
 
                       <ThemeButton
                         type="submit"
-                        disabled={
-                          loading || !formData.title || !formData.content
-                        }
+                        disabled={loading || !formData.title || !formData.content}
                       >
                         {loading ? (
                           <>
@@ -546,74 +507,30 @@ const AddLetterhead = () => {
             Letterhead Preview
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body
-          style={{
-            backgroundColor: "#f8f9fa",
-            maxHeight: "70vh",
-            overflowY: "auto",
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              padding: "40px",
-              margin: "20px auto",
-              maxWidth: "800px",
-              boxShadow: "0 0 20px rgba(0,0,0,0.1)",
-              fontFamily: '"Times New Roman", serif',
-              lineHeight: "1.6",
-            }}
-          >
+        <Modal.Body style={{ backgroundColor: "#f8f9fa", maxHeight: "70vh", overflowY: "auto" }}>
+          <div className="letterhead-preview" style={{ margin: "20px auto", maxWidth: "800px" }}>
+            <div className="preview-content">
             {/* Header */}
-            <div
-              style={{
-                textAlign: "center",
-                borderBottom: "2px solid #e63946",
-                paddingBottom: "20px",
-                marginBottom: "30px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginBottom: "10px",
-                }}
-              >
+            <div style={{ textAlign: "center", borderBottom: "2px solid #e63946", paddingBottom: "20px", marginBottom: "30px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "10px" }}>
                 <img
                   src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
                   alt="Hare Krishna Medical"
                   style={{ width: "60px", height: "60px", marginRight: "15px" }}
                 />
                 <div>
-                  <h1
-                    style={{ margin: "0", color: "#e63946", fontSize: "20px" }}
-                  >
-                    HARE KRISHNA MEDICAL STORE
-                  </h1>
-                  <p style={{ margin: "0", fontSize: "12px", color: "#666" }}>
-                    Your Trusted Health & Wellness Partner
-                  </p>
+                  <h1 style={{ margin: "0", color: "#e63946", fontSize: "20px" }}>HARE KRISHNA MEDICAL STORE</h1>
+                  <p style={{ margin: "0", fontSize: "12px", color: "#666" }}>Your Trusted Health & Wellness Partner</p>
                 </div>
               </div>
               <p style={{ fontSize: "12px", color: "#666", margin: "5px 0" }}>
-                📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat
-                <br />
+                📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat<br/>
                 📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
               </p>
             </div>
 
             {/* Title */}
-            <div
-              style={{
-                color: "#e63946",
-                fontSize: "24px",
-                fontWeight: "bold",
-                marginBottom: "20px",
-                textAlign: "center",
-              }}
-            >
+            <div style={{ color: "#e63946", fontSize: "24px", fontWeight: "bold", marginBottom: "20px", textAlign: "center" }}>
               {formData.title}
             </div>
 
@@ -624,26 +541,13 @@ const AddLetterhead = () => {
             />
 
             {/* Footer */}
-            <div
-              style={{
-                marginTop: "50px",
-                borderTop: "1px solid #ddd",
-                paddingTop: "20px",
-                fontSize: "12px",
-                color: "#666",
-                textAlign: "center",
-              }}
-            >
-              Generated on {new Date().toLocaleDateString()} | Hare Krishna
-              Medical Store
+            <div style={{ marginTop: "50px", borderTop: "1px solid #ddd", paddingTop: "20px", fontSize: "12px", color: "#666", textAlign: "center" }}>
+              Generated on {new Date().toLocaleDateString()} | Hare Krishna Medical Store
             </div>
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="outline-secondary"
-            onClick={() => setShowPreview(false)}
-          >
+          <Button variant="outline-secondary" onClick={() => setShowPreview(false)}>
             Close Preview
           </Button>
           <Button variant="success" onClick={handlePrint}>
