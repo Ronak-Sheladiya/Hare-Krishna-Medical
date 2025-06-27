@@ -417,27 +417,6 @@ const AddLetterhead = () => {
     `;
   };
 
-
-
-
-
-
-
-
-
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      setSuccess("HTML file downloaded successfully!");
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (error) {
-      console.error("Download failed:", error);
-      setError(`Download failed: ${error.message}`);
-    } finally {
-      setDownloadLoading(false);
-    }
-  };
-
   return (
     <Container fluid style={{ padding: "10px" }}>
       <PageHeroSection
