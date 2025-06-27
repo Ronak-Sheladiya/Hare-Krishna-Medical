@@ -632,7 +632,7 @@ const SocketDiagnostics = () => {
               ⚠️ Production Configuration Issue Detected
             </Alert.Heading>
             <p>
-              Your frontend is running on Fly.dev (production) but the backend
+              Your frontend is running on Vercel (production) but the backend
               URL is set to localhost. This will cause connection failures.
             </p>
             <hr />
