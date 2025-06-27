@@ -407,12 +407,23 @@ const AddLetterhead = () => {
   // PRINT FUNCTIONALITY - Using LetterheadService for consistency with invoice system
   const handlePrint = async () => {
     if (!formData.title || !formData.content) {
-      alert("Please fill in both title and content before printing.");
+      setError("Please fill in both title and content before printing.");
       return;
     }
 
     try {
       setPrintLoading(true);
+      setError(null); // Clear any previous errors
+
+      // Ensure QR code is generated
+      if (!qrCode) {
+        const tempId = letterheadId || generateTempLetterheadId();
+        setLetterheadId(tempId);
+        const generatedQR = await generatePreviewQRCode(tempId);
+        if (generatedQR) {
+          setQrCode(generatedQR);
+        }
+      }
 
       // Create letterhead data object
       const letterheadData = {
@@ -431,10 +442,16 @@ const AddLetterhead = () => {
         throw new Error(result.error || "Print failed");
       }
 
+      // Show success feedback
+      setSuccess(
+        "Print dialog opened successfully! Check your browser for the print window.",
+      );
+      setTimeout(() => setSuccess(null), 3000);
+
       console.log("Print initiated successfully");
     } catch (error) {
       console.error("Print failed:", error);
-      alert("Print failed. Please try again.");
+      setError(`Print failed: ${error.message}. Please try again.`);
     } finally {
       setPrintLoading(false);
     }
