@@ -1122,7 +1122,7 @@ const AddLetterhead = () => {
           <Button
             variant="success"
             onClick={handlePrint}
-            disabled={pdfGenerating}
+            disabled={printLoading}
             style={{
               borderRadius: "8px",
               background: "linear-gradient(135deg, #28a745, #20c997)",
@@ -1131,10 +1131,10 @@ const AddLetterhead = () => {
               fontWeight: "600",
             }}
           >
-            {pdfGenerating ? (
+            {printLoading ? (
               <>
                 <Spinner size="sm" className="me-2" />
-                Generating PDF...
+                Printing...
               </>
             ) : (
               <>
