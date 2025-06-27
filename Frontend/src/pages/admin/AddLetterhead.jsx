@@ -464,8 +464,78 @@ const AddLetterhead = () => {
     try {
       setPrintLoading(true);
 
-      // Generate PDF first
-      const pdfBlob = await generateLetterheadPDF();
+      // Use html2pdf.js for better printing
+      const html2pdf = (await import("html2pdf.js")).default;
+
+      const letterheadElement = document.getElementById(
+        "letterhead-print-content",
+      );
+      if (!letterheadElement) {
+        alert("Letterhead content not found. Please refresh and try again.");
+        return;
+      }
+
+      // Clone the element to avoid modifying the original
+      const clonedElement = letterheadElement.cloneNode(true);
+
+      // Configure html2pdf options for perfect A4 layout
+      const options = {
+        margin: 0,
+        filename: `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`,
+        image: {
+          type: "jpeg",
+          quality: 0.98,
+        },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: "#ffffff",
+          width: 794,
+          height: 1123,
+          letterRendering: true,
+          logging: false,
+          windowWidth: 794,
+          windowHeight: 1123,
+        },
+        jsPDF: {
+          unit: "mm",
+          format: "a4",
+          orientation: "portrait",
+          compress: true,
+        },
+      };
+
+      // Force exact A4 dimensions on the cloned element
+      clonedElement.style.cssText = `
+        width: 210mm !important;
+        height: 297mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+        background: white !important;
+        font-family: Arial, sans-serif !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        position: relative !important;
+      `;
+
+      // Temporarily add to DOM for processing
+      clonedElement.style.position = "fixed";
+      clonedElement.style.top = "-9999px";
+      clonedElement.style.left = "-9999px";
+      clonedElement.style.zIndex = "-1";
+      document.body.appendChild(clonedElement);
+
+      // Generate PDF blob for printing
+      const pdfBlob = await html2pdf()
+        .set(options)
+        .from(clonedElement)
+        .outputPdf("blob");
+
+      // Clean up
+      document.body.removeChild(clonedElement);
 
       if (pdfBlob) {
         // Create PDF URL and open in new window for printing
@@ -512,9 +582,8 @@ const AddLetterhead = () => {
     try {
       setDownloadLoading(true);
 
-      // Use html2canvas and jsPDF directly for better control
-      const html2canvas = (await import("html2canvas")).default;
-      const jsPDF = (await import("jspdf")).default;
+      // Use html2pdf.js for better HTML to PDF conversion
+      const html2pdf = (await import("html2pdf.js")).default;
 
       const letterheadElement = document.getElementById(
         "letterhead-print-content",
@@ -524,55 +593,69 @@ const AddLetterhead = () => {
         return;
       }
 
-      // Calculate exact A4 dimensions in pixels at high DPI for better quality
-      const A4_WIDTH_PX = 2480; // 210mm at 300 DPI for high quality
-      const A4_HEIGHT_PX = 3508; // 297mm at 300 DPI for high quality
+      // Clone the element to avoid modifying the original
+      const clonedElement = letterheadElement.cloneNode(true);
 
-      // Force the element to exact A4 size temporarily
-      const originalStyle = letterheadElement.style.cssText;
-      letterheadElement.style.width = "210mm";
-      letterheadElement.style.height = "297mm";
-      letterheadElement.style.transform = "none";
-      letterheadElement.style.margin = "0";
-      letterheadElement.style.padding = "0";
+      // Configure html2pdf options for perfect A4 layout
+      const options = {
+        margin: 0, // No margins for full page usage
+        filename: `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`,
+        image: {
+          type: "jpeg",
+          quality: 0.98,
+        },
+        html2canvas: {
+          scale: 2, // High DPI for crisp text
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: "#ffffff",
+          width: 794, // A4 width in pixels at 96 DPI
+          height: 1123, // A4 height in pixels at 96 DPI
+          letterRendering: true,
+          logging: false,
+          windowWidth: 794,
+          windowHeight: 1123,
+        },
+        jsPDF: {
+          unit: "mm",
+          format: "a4",
+          orientation: "portrait",
+          compress: true,
+        },
+        pagebreak: {
+          mode: ["avoid-all", "css", "legacy"],
+        },
+      };
 
-      // Generate high-quality canvas with exact A4 dimensions
-      const canvas = await html2canvas(letterheadElement, {
-        scale: 3, // High DPI scaling for crisp output
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: "#ffffff",
-        width: 794, // Base A4 width in pixels
-        height: 1123, // Base A4 height in pixels
-        windowWidth: 794,
-        windowHeight: 1123,
-        scrollX: 0,
-        scrollY: 0,
-        x: 0,
-        y: 0,
-      });
+      // Force exact A4 dimensions on the cloned element
+      clonedElement.style.cssText = `
+        width: 210mm !important;
+        height: 297mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+        background: white !important;
+        font-family: Arial, sans-serif !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        position: relative !important;
+      `;
 
-      // Restore original styles
-      letterheadElement.style.cssText = originalStyle;
+      // Temporarily add to DOM for processing
+      clonedElement.style.position = "fixed";
+      clonedElement.style.top = "-9999px";
+      clonedElement.style.left = "-9999px";
+      clonedElement.style.zIndex = "-1";
+      document.body.appendChild(clonedElement);
 
-      // Create PDF with exact A4 size and no margins
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-        compress: true,
-      });
+      // Generate PDF
+      await html2pdf().set(options).from(clonedElement).save();
 
-      const imgData = canvas.toDataURL("image/png", 0.95);
+      // Clean up
+      document.body.removeChild(clonedElement);
 
-      // Add image to fill the entire A4 page with no margins
-      pdf.addImage(imgData, "PNG", 0, 0, 210, 297, undefined, "FAST");
-
-      // Download
-      const filename = `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`;
-      pdf.save(filename);
-
-      console.log("PDF downloaded successfully:", filename);
+      console.log("PDF downloaded successfully");
     } catch (error) {
       console.error("Download failed:", error);
       alert("Download failed. Please try again.");
