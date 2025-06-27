@@ -106,6 +106,7 @@ const validateQueryParams = [
       "invitation",
       "acknowledgment",
       "verification",
+      "document",
     ])
     .withMessage("Invalid letter type"),
   query("startDate").optional().isISO8601().withMessage("Invalid start date"),
