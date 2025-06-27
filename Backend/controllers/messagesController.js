@@ -98,82 +98,16 @@ class MessagesController {
         console.error("Confirmation email failed:", emailError);
       }
 
-      // Send notification email to admin
+      // Send professional confirmation email to user
       try {
-        const adminNotificationHtml = `
-          <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; backgroundColor: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(220, 53, 69, 0.15);">
-            <div style="background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%); color: #ffffff; padding: 2rem; text-align: center;">
-              <h2 style="margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">🏥 HARE KRISHNA MEDICAL</h2>
-              <div style="background-color: rgba(255, 255, 255, 0.2); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
-                <h3 style="margin: 0; font-size: 20px; font-weight: 600;">New Contact Message 📧</h3>
-                <p style="margin: 0.5rem 0 0 0; font-size: 16px; opacity: 0.9;">Admin Notification</p>
-              </div>
-            </div>
-
-            <div style="padding: 2rem;">
-              <div style="font-size: 16px; line-height: 1.7;">
-                <p style="margin: 1rem 0; color: #444444;">
-                  A new message has been received through the contact form.
-                </p>
-
-                <div style="background: #f8f9fa; border: 2px solid #dc3545; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
-                  <h4 style="color: #dc3545; font-size: 18px; margin: 0 0 1rem 0; font-weight: 600;">📋 Message Details:</h4>
-                  <table style="width: 100%; border-collapse: collapse;">
-                    <tr>
-                      <td style="padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: bold; color: #dc3545;">Name:</td>
-                      <td style="padding: 8px 0; border-bottom: 1px solid #ddd;">${name}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: bold; color: #dc3545;">Email:</td>
-                      <td style="padding: 8px 0; border-bottom: 1px solid #ddd;">${email}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: bold; color: #dc3545;">Mobile:</td>
-                      <td style="padding: 8px 0; border-bottom: 1px solid #ddd;">${mobile || "Not provided"}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: bold; color: #dc3545;">Subject:</td>
-                      <td style="padding: 8px 0; border-bottom: 1px solid #ddd;">${subject}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 8px 0; vertical-align: top; font-weight: bold; color: #dc3545;">Message:</td>
-                      <td style="padding: 8px 0;">${message}</td>
-                    </tr>
-                  </table>
-                </div>
-
-                <div style="text-align: center; margin: 2rem 0;">
-                  <a href="${process.env.FRONTEND_URL}/admin/messages"
-                     style="display: inline-block; background: linear-gradient(135deg, #dc3545 0%, #b91c2c 100%); color: #ffffff; padding: 1rem 2rem; text-decoration: none; border-radius: 25px; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);">
-                    View in Admin Panel
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <div style="background: #f8f9fa; border-top: 3px solid #dc3545; padding: 2rem;">
-              <div style="text-align: center;">
-                <p style="margin: 0 0 1rem 0; font-size: 14px; color: #666666; line-height: 1.5;">
-                  <strong>Hare Krishna Medical Store - Admin Panel</strong><br/>
-                  📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat<br/>
-                  📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
-                </p>
-              </div>
-            </div>
-          </div>
-        `;
-
-        await emailService.transporter.sendMail({
-          from: `"Hare Krishna Medical" <${process.env.EMAIL_USER}>`,
-          to: process.env.EMAIL_USER,
-          subject: `New Contact Form Message - ${subject}`,
-          html: adminNotificationHtml,
-        });
+        await emailService.sendMessageConfirmationEmail(
+          email,
+          fullName,
+          messageText,
+        );
       } catch (emailError) {
-        console.error("Admin notification email failed:", emailError);
+        console.error("Confirmation email failed:", emailError);
       }
-
-      // Emit real-time notification to admin
       const io = req.app.get("io");
       if (io) {
         io.to("admin-room").emit("new-message", {
