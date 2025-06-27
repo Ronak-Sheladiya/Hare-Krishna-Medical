@@ -548,8 +548,12 @@ const AddLetterhead = () => {
           {/* Form Section */}
           <Col lg={6}>
             <Card
-              className="shadow-lg h-100"
-              style={{ borderRadius: "12px", border: "none" }}
+              className="shadow-lg"
+              style={{
+                borderRadius: "12px",
+                border: "none",
+                height: "700px",
+              }}
             >
               <Card.Header
                 className="text-white"
@@ -564,8 +568,7 @@ const AddLetterhead = () => {
                   Letterhead Information
                 </h5>
                 <small style={{ opacity: "0.9" }}>
-                  Fill in the details below to create your professional
-                  letterhead
+                  Fill in the details below to create your letterhead
                 </small>
               </Card.Header>
               <Card.Body style={{ padding: "10px" }}>
