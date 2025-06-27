@@ -19,7 +19,6 @@ import {
   ThemeButton,
 } from "../../components/common/ConsistentTheme";
 import letterheadService from "../../services/LetterheadService";
-import pdfService from "../../services/PDFService";
 import "../../styles/RichTextEditor.css";
 import "../../styles/LetterheadPreview.css";
 
