@@ -1063,6 +1063,8 @@ const AddLetterhead = () => {
       <Modal
         show={showPreview}
         onHide={() => setShowPreview(false)}
+        backdrop="static"
+        keyboard={false}
         size="xl"
         centered
         style={{
