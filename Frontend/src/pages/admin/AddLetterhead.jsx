@@ -896,7 +896,8 @@ const AddLetterhead = () => {
                 className="p-2"
                 style={{
                   backgroundColor: "#f8f9fa",
-                  minHeight: "500px",
+                  height: "500px",
+                  overflowY: "auto",
                 }}
               >
                 {!formData.title || !formData.content ? (
