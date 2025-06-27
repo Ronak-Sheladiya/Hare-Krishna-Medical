@@ -725,19 +725,35 @@ const AddLetterhead = () => {
 
           {/* Live Preview Section */}
           <Col lg={6}>
-            <Card className="shadow-sm h-100">
-              <Card.Header className="bg-success text-white">
+            <Card
+              className="shadow-lg h-100"
+              style={{ borderRadius: "12px", border: "none" }}
+            >
+              <Card.Header
+                className="text-white"
+                style={{
+                  background: "linear-gradient(135deg, #28a745, #20c997)",
+                  borderRadius: "12px 12px 0 0",
+                  padding: "20px",
+                }}
+              >
                 <div className="d-flex justify-content-between align-items-center">
-                  <h5 className="mb-0">
-                    <i className="bi bi-eye me-2"></i>
-                    Live Preview
-                  </h5>
+                  <div>
+                    <h5 className="mb-0" style={{ fontWeight: "600" }}>
+                      <i className="bi bi-eye me-2"></i>
+                      Live Preview
+                    </h5>
+                    <small style={{ opacity: "0.9" }}>
+                      Real-time preview of your letterhead design
+                    </small>
+                  </div>
                   <div className="d-flex gap-2">
                     <Button
                       size="sm"
                       variant="outline-light"
                       onClick={handlePreview}
                       disabled={!formData.title || !formData.content}
+                      style={{ borderRadius: "8px" }}
                     >
                       <i className="bi bi-arrow-clockwise me-1"></i>
                       Refresh
@@ -747,6 +763,7 @@ const AddLetterhead = () => {
                       variant="outline-light"
                       onClick={() => setShowPreview(true)}
                       disabled={!formData.title || !formData.content}
+                      style={{ borderRadius: "8px" }}
                     >
                       <i className="bi bi-arrows-fullscreen me-1"></i>
                       Full View
