@@ -119,7 +119,7 @@ const sampleProducts = [
     description:
       "Accurate digital thermometer with fast reading and fever alarm.",
     benefits:
-      "• Fast 60-second reading\n• High accuracy ±0.1°C\n• Fever alarm function\n• Memory for last reading",
+      "• Fast 60-second reading\n• High accuracy ±0.1°C\n• Fever alarm function\n�� Memory for last reading",
     usage: "Place under tongue, armpit, or rectally. Wait for beep signal.",
     weight: "15g",
     images: [
@@ -241,7 +241,7 @@ class ProductsController {
     } catch (error) {
       console.error("Get products error:", error);
       // Fallback to offline mode if database fails
-      return this.handleOfflineProducts(req, res);
+      return handleOfflineProducts(req, res);
     }
   }
 
