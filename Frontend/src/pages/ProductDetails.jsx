@@ -520,7 +520,14 @@ const ProductDetails = () => {
                           <i className="bi bi-info-circle me-2"></i>
                           Overview
                         </h5>
-                        <p style={{ lineHeight: "1.8", fontSize: "18px", fontWeight: "500", color: "#2c3e50" }}>
+                        <p
+                          style={{
+                            lineHeight: "1.8",
+                            fontSize: "18px",
+                            fontWeight: "500",
+                            color: "#2c3e50",
+                          }}
+                        >
                           {product.shortDescription}
                         </p>
                       </>
@@ -534,11 +541,6 @@ const ProductDetails = () => {
                       {product.description ||
                         "No detailed description available for this product."}
                     </p>
-                            </ListGroup.Item>
-                          ))}
-                        </ListGroup>
-                      </div>
-                    )}
                   </div>
                 </Tab>
 
