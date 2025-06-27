@@ -638,6 +638,24 @@ const AddLetterhead = () => {
                 )}
 
                 <Form onSubmit={handleSubmit}>
+                  {/* Letterhead ID Display */}
+                  {letterheadId && (
+                    <Alert variant="info" className="mb-4">
+                      <div className="d-flex align-items-center">
+                        <i className="bi bi-info-circle me-2"></i>
+                        <div>
+                          <strong>Letterhead ID:</strong>{" "}
+                          <code>{letterheadId}</code>
+                          <br />
+                          <small>
+                            This ID will be used for verification and QR code
+                            generation
+                          </small>
+                        </div>
+                      </div>
+                    </Alert>
+                  )}
+
                   {/* Title Input */}
                   <Form.Group className="mb-4">
                     <Form.Label className="fw-bold">
