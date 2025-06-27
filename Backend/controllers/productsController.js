@@ -477,6 +477,31 @@ class ProductsController {
         });
       }
 
+      if (!global.DB_CONNECTED) {
+        const query = q.toLowerCase();
+        const suggestions = sampleProducts
+          .filter(
+            (product) =>
+              product.isActive &&
+              (product.name.toLowerCase().includes(query) ||
+                product.company.toLowerCase().includes(query) ||
+                product.category.toLowerCase().includes(query)),
+          )
+          .slice(0, 10)
+          .map((product) => ({
+            _id: product._id,
+            name: product.name,
+            brand: product.company,
+            category: product.category,
+          }));
+
+        return res.json({
+          success: true,
+          data: suggestions,
+          offline: true,
+        });
+      }
+
       const suggestions = await Product.find({
         isActive: true,
         $or: [
@@ -494,10 +519,28 @@ class ProductsController {
       });
     } catch (error) {
       console.error("Search suggestions error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to fetch search suggestions",
-        error: error.message,
+      // Fallback to offline mode
+      const query = req.query.q?.toLowerCase() || "";
+      const suggestions = sampleProducts
+        .filter(
+          (product) =>
+            product.isActive &&
+            (product.name.toLowerCase().includes(query) ||
+              product.company.toLowerCase().includes(query) ||
+              product.category.toLowerCase().includes(query)),
+        )
+        .slice(0, 10)
+        .map((product) => ({
+          _id: product._id,
+          name: product.name,
+          brand: product.company,
+          category: product.category,
+        }));
+
+      res.json({
+        success: true,
+        data: suggestions,
+        offline: true,
       });
     }
   }
@@ -505,6 +548,44 @@ class ProductsController {
   // Get single product
   async getProduct(req, res) {
     try {
+      if (!global.DB_CONNECTED) {
+        const product = sampleProducts.find((p) => p._id === req.params.id);
+
+        if (!product) {
+          return res.status(404).json({
+            success: false,
+            message: "Product not found",
+          });
+        }
+
+        // Get related products
+        const relatedProducts = sampleProducts
+          .filter(
+            (p) =>
+              p.category === product.category &&
+              p._id !== product._id &&
+              p.isActive,
+          )
+          .slice(0, 4)
+          .map((p) => ({
+            _id: p._id,
+            name: p.name,
+            price: p.price,
+            originalPrice: p.originalPrice,
+            images: p.images,
+            rating: p.rating,
+          }));
+
+        return res.json({
+          success: true,
+          data: {
+            product,
+            relatedProducts,
+          },
+          offline: true,
+        });
+      }
+
       const product = await Product.findById(req.params.id).populate(
         "createdBy",
         "fullName",
@@ -538,10 +619,40 @@ class ProductsController {
       });
     } catch (error) {
       console.error("Get product error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to fetch product",
-        error: error.message,
+      // Fallback to offline mode
+      const product = sampleProducts.find((p) => p._id === req.params.id);
+
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: "Product not found",
+        });
+      }
+
+      const relatedProducts = sampleProducts
+        .filter(
+          (p) =>
+            p.category === product.category &&
+            p._id !== product._id &&
+            p.isActive,
+        )
+        .slice(0, 4)
+        .map((p) => ({
+          _id: p._id,
+          name: p.name,
+          price: p.price,
+          originalPrice: p.originalPrice,
+          images: p.images,
+          rating: p.rating,
+        }));
+
+      res.json({
+        success: true,
+        data: {
+          product,
+          relatedProducts,
+        },
+        offline: true,
       });
     }
   }
