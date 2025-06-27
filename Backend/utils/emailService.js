@@ -804,11 +804,43 @@ class EmailService {
 
   async testConnection() {
     try {
+      // Check if email credentials are configured
+      if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        console.error(
+          "❌ Email service: Missing EMAIL_USER or EMAIL_PASS environment variables",
+        );
+        return false;
+      }
+
+      // Test SMTP connection
+      console.log("🔄 Testing email service connection...");
       await this.transporter.verify();
       console.log("✅ Email service connection successful");
+      console.log(
+        `   - Connected to: ${process.env.EMAIL_HOST || "smtp.gmail.com"}:${process.env.EMAIL_PORT || 587}`,
+      );
+      console.log(`   - Using account: ${process.env.EMAIL_USER}`);
       return true;
     } catch (error) {
-      console.error("❌ Email service connection failed:", error);
+      console.error("❌ Email service connection failed:");
+      console.error(`   - Error: ${error.message}`);
+      console.error(`   - Code: ${error.code || "Unknown"}`);
+
+      // Provide helpful error messages
+      if (error.code === "EAUTH") {
+        console.error(
+          "   - Issue: Authentication failed. Check EMAIL_USER and EMAIL_PASS",
+        );
+      } else if (error.code === "ECONNECTION") {
+        console.error(
+          "   - Issue: Connection failed. Check EMAIL_HOST and EMAIL_PORT",
+        );
+      } else if (error.code === "ETIMEDOUT") {
+        console.error(
+          "   - Issue: Connection timeout. Check network connectivity",
+        );
+      }
+
       return false;
     }
   }
