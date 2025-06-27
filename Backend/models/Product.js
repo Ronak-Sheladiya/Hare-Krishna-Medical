@@ -81,6 +81,10 @@ const productSchema = new mongoose.Schema(
         alt: String,
       },
     ],
+    benefits: {
+      type: String,
+      trim: true,
+    },
     composition: {
       type: String,
       trim: true,
