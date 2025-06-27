@@ -440,12 +440,26 @@ const AddLetterhead = () => {
         <Row>
           {/* Form Section */}
           <Col lg={6}>
-            <Card className="shadow-sm h-100">
-              <Card.Header className="bg-primary text-white">
-                <h5 className="mb-0">
+            <Card
+              className="shadow-lg h-100"
+              style={{ borderRadius: "12px", border: "none" }}
+            >
+              <Card.Header
+                className="text-white"
+                style={{
+                  background: "linear-gradient(135deg, #e63946, #dc3545)",
+                  borderRadius: "12px 12px 0 0",
+                  padding: "20px",
+                }}
+              >
+                <h5 className="mb-0" style={{ fontWeight: "600" }}>
                   <i className="bi bi-file-earmark-text me-2"></i>
                   Letterhead Information
                 </h5>
+                <small style={{ opacity: "0.9" }}>
+                  Fill in the details below to create your professional
+                  letterhead
+                </small>
               </Card.Header>
               <Card.Body>
                 {error && (
