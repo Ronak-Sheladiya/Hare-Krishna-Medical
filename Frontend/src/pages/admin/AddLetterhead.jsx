@@ -934,24 +934,6 @@ const AddLetterhead = () => {
 
 
 
-                  padding: "12px 20px",
-                  fontWeight: "500",
-                  border: "2px solid #6c757d",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                <i className="bi bi-x-lg me-2"></i>
-                Close Preview
-              </Button>
-
-              <small className="text-muted ms-2">
-                <i className="bi bi-info-circle me-1"></i>
-                Preview in A4 format (scaled 80%)
-              </small>
-            </div>
-          </div>
-        </Modal.Footer>
-      </Modal>
     </Container>
   );
 };
