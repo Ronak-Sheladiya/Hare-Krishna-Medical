@@ -121,31 +121,37 @@ const seedProducts = async () => {
     const products = [
       {
         name: "Paracetamol Tablets 500mg",
+        shortDescription:
+          "Fast-acting pain relief and fever reducer for adults and children over 12 years.",
         description:
-          "Effective pain relief and fever reducer. Used for headaches, muscle aches, and fever.",
-        price: 25.99,
-        mrp: 30.0,
-        discount: 13,
-        category: "Medicine",
-        subCategory: "Pain Relief",
-        brand: "Hare Krishna Pharma",
+          "Effective pain relief and fever reducer suitable for adults and children over 12 years. Gentle on stomach with proven efficacy for headaches, muscle aches, and fever.",
+        company: "Cipla",
+        price: 25.5,
+        originalPrice: 30.0,
+        category: "Pain Relief",
+        weight: "500mg",
         stock: 150,
         minStock: 20,
         images: [
-          {
-            url: "https://via.placeholder.com/400x400?text=Paracetamol",
-            alt: "Paracetamol Tablets",
-          },
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5QYXJhY2V0YW1vbDwvdGV4dD48L3N2Zz4=",
         ],
-        specifications: {
-          composition: "Paracetamol 500mg",
-          dosage: "1-2 tablets every 4-6 hours",
-          manufacturer: "Hare Krishna Pharmaceuticals",
-          expiryMonths: 36,
-        },
+        benefits:
+          "• Fast-acting pain relief\n• Reduces fever effectively\n• Safe for regular use\n• Gentle on stomach",
+        composition: "Paracetamol 500mg",
+        usage:
+          "Take 1-2 tablets every 4-6 hours as needed. Do not exceed 8 tablets in 24 hours.",
+        sideEffects: "Rare: Nausea, skin rash. Stop use if symptoms occur.",
+        contraindications:
+          "Avoid if allergic to paracetamol. Consult doctor if pregnant or breastfeeding.",
+        batchNo: "PCT2024001",
+        mfgDate: new Date("2024-01-01"),
+        expDate: new Date("2027-01-01"),
         tags: ["pain relief", "fever", "headache", "tablets"],
+        isActive: true,
         isFeatured: true,
-        sales: 245,
+        rating: { average: 4.5, count: 125 },
+        sales: 250,
+        views: 1200,
       },
       {
         name: "Vitamin D3 Capsules",
