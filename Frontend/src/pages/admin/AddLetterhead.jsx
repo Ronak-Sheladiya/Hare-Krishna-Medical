@@ -342,20 +342,21 @@ const AddLetterhead = () => {
           font-size: 13px;
           line-height: 1.7;
           text-align: justify;
-          margin-bottom: 50px;
-          min-height: 250px;
+          margin-bottom: 80px;
+          min-height: 200px;
           color: #333;
-          font-family: 'Times New Roman', serif;
+          font-family: Arial, sans-serif;
+          padding-bottom: 30px;
         ">
           ${formData.content}
         </div>
 
-        <!-- Footer Section - Fixed positioning without overlap -->
+        <!-- Footer Section - Better positioning to avoid overlap -->
         <div style="
           border-top: 2px solid #e63946;
           padding-top: 15px;
-          margin-top: auto;
-          position: absolute;
+          margin-top: 30px;
+          position: fixed;
           bottom: 15mm;
           left: 15mm;
           right: 15mm;
