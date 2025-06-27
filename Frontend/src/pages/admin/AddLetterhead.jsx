@@ -1364,7 +1364,7 @@ const AddLetterhead = () => {
               <Button
                 variant="success"
                 onClick={handlePrint}
-                disabled={printLoading || downloadLoading}
+                disabled={printLoading || downloadLoading || pdfDownloadLoading}
                 style={{
                   borderRadius: "8px",
                   background: "linear-gradient(135deg, #28a745, #20c997)",
@@ -1389,8 +1389,36 @@ const AddLetterhead = () => {
               </Button>
 
               <Button
+                variant="warning"
+                onClick={handlePDFDownload}
+                disabled={pdfDownloadLoading || downloadLoading || printLoading}
+                style={{
+                  borderRadius: "8px",
+                  background: "linear-gradient(135deg, #fd7e14, #f63d3d)",
+                  border: "none",
+                  color: "white",
+                  padding: "10px 20px",
+                  fontWeight: "600",
+                  boxShadow: "0 3px 8px rgba(253, 126, 20, 0.3)",
+                  minWidth: "120px",
+                }}
+              >
+                {pdfDownloadLoading ? (
+                  <>
+                    <Spinner size="sm" className="me-2" />
+                    PDF...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-file-earmark-pdf me-2"></i>
+                    PDF
+                  </>
+                )}
+              </Button>
+
+              <Button
                 onClick={handleDownload}
-                disabled={downloadLoading || printLoading}
+                disabled={downloadLoading || printLoading || pdfDownloadLoading}
                 style={{
                   borderRadius: "8px",
                   background: "linear-gradient(135deg, #e63946, #dc3545)",
@@ -1405,12 +1433,12 @@ const AddLetterhead = () => {
                 {downloadLoading ? (
                   <>
                     <Spinner size="sm" className="me-2" />
-                    Downloading...
+                    HTML...
                   </>
                 ) : (
                   <>
                     <i className="bi bi-download me-2"></i>
-                    Download
+                    HTML
                   </>
                 )}
               </Button>
