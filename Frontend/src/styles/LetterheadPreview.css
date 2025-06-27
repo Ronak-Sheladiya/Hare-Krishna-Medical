@@ -1,0 +1,590 @@
+/* Enhanced Letterhead Preview Styles - Professional A4 Layout */
+
+/* Global reset for letterhead container */
+.letterhead-preview-container {
+  font-family: "Arial", sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background: white;
+}
+
+/* A4 Page Dimensions - Exact sizing */
+.letterhead-a4-container {
+  width: 210mm;
+  height: 297mm;
+  background: white;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #333;
+  box-sizing: border-box;
+  position: relative;
+  margin: 0 auto;
+  padding: 15mm;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Print-specific styles */
+@media print {
+  /* Reset all margins and padding for print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 0mm;
+  }
+
+  #letterhead-print-content {
+    width: 210mm !important;
+    height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: white !important;
+    position: relative !important;
+    overflow: hidden !important;
+    transform: none !important;
+    scale: 1 !important;
+    page-break-inside: avoid !important;
+    page-break-after: avoid !important;
+    page-break-before: avoid !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+  }
+
+  .letterhead-a4-container {
+    width: 210mm !important;
+    height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: white !important;
+    position: relative !important;
+    overflow: hidden !important;
+    transform: none !important;
+    scale: 1 !important;
+    page-break-inside: avoid !important;
+    page-break-after: avoid !important;
+    page-break-before: avoid !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Hide action buttons in print */
+  .no-print,
+  .action-buttons {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Ensure proper layout structure for print */
+  #letterhead-print-content > div {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 10mm !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Fix header positioning */
+  .letterhead-header {
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin-bottom: 16px !important;
+    flex-shrink: 0 !important;
+    background: #e63946 !important;
+    color: white !important;
+  }
+
+  /* Fix content positioning - use remaining space */
+  .letterhead-content {
+    flex: 1 !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    overflow: visible !important;
+    page-break-inside: avoid !important;
+    min-height: 150px !important;
+  }
+
+  /* Fix footer positioning for print */
+  .letterhead-footer {
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    width: 100% !important;
+    margin: 0 !important;
+    margin-top: auto !important;
+    padding-top: 12px !important;
+    border-top: 2px solid #e63946 !important;
+    background: white !important;
+    page-break-inside: avoid !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Remove transforms and shadows that can cause print issues */
+  .letterhead-qr-container,
+  .letterhead-logo-container {
+    box-shadow: none !important;
+    transform: none !important;
+    border-radius: 8px !important;
+  }
+
+  /* Ensure proper text rendering */
+  .letterhead-company-name,
+  .letterhead-title {
+    color: #e63946 !important;
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Fix background colors for print */
+  .letterhead-header {
+    background: #e63946 !important;
+    color: white !important;
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .letterhead-contact-info {
+    background: rgba(255, 255, 255, 0.1) !important;
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+/* Header styles */
+.letterhead-header {
+  background: #e63946;
+  color: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Company logo container */
+.letterhead-logo-container {
+  background: white;
+  border-radius: 50%;
+  padding: 10px;
+  margin-right: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.letterhead-logo {
+  height: 45px;
+  width: 45px;
+  object-fit: contain;
+}
+
+/* Company information section */
+.letterhead-company-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.letterhead-company-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+/* Company name and tagline */
+.letterhead-company-name {
+  font-size: 24px;
+  font-weight: 900;
+  margin: 0;
+  line-height: 1.1;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  font-family: "Georgia", serif;
+  color: white;
+}
+
+.letterhead-tagline {
+  font-size: 12px;
+  margin: 4px 0 0 0;
+  opacity: 0.95;
+  font-weight: 500;
+}
+
+/* Contact information */
+.letterhead-contact-info {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.letterhead-contact-item {
+  margin-bottom: 4px;
+}
+
+.letterhead-contact-item:last-child {
+  margin-bottom: 0;
+}
+
+/* QR Code Section */
+.letterhead-qr-section {
+  text-align: center;
+  min-width: 110px;
+  margin-left: 20px;
+  flex-shrink: 0;
+}
+
+.letterhead-qr-container {
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+.letterhead-qr-code {
+  width: 85px;
+  height: 85px;
+  border: 2px solid #e63946;
+  border-radius: 6px;
+  display: block;
+  margin: 0 auto;
+}
+
+.letterhead-qr-placeholder {
+  width: 85px;
+  height: 85px;
+  border: 2px dashed #e63946;
+  border-radius: 6px;
+  background: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #e63946;
+  margin: 0 auto;
+}
+
+.letterhead-qr-label {
+  margin-top: 6px;
+  color: #333;
+  font-size: 9px;
+  font-weight: bold;
+}
+
+/* Reference and date section */
+.letterhead-ref-date {
+  text-align: left;
+  margin: 0 0 20px auto;
+  font-size: 11px;
+  color: #666;
+  width: fit-content;
+}
+
+.letterhead-ref-item {
+  margin-bottom: 3px;
+  font-weight: 600;
+}
+
+/* Document title section */
+.letterhead-title-section {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.letterhead-title {
+  color: #e63946;
+  font-size: 22px;
+  font-weight: bold;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border-bottom: 3px solid #e63946;
+  display: inline-block;
+  padding-bottom: 8px;
+  font-family: "Georgia", serif;
+}
+
+/* Content area - flexible height */
+.letterhead-content {
+  font-size: 13px;
+  line-height: 1.7;
+  text-align: justify;
+  color: #333;
+  font-family: Arial, sans-serif;
+  flex: 1;
+  min-height: 300px;
+  padding-bottom: 20px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.letterhead-content p {
+  margin-bottom: 15px;
+}
+
+.letterhead-content ul,
+.letterhead-content ol {
+  margin-bottom: 15px;
+  padding-left: 20px;
+}
+
+.letterhead-content li {
+  margin-bottom: 5px;
+}
+
+/* Footer - fixed at bottom */
+.letterhead-footer {
+  border-top: 2px solid #e63946;
+  padding-top: 15px;
+  margin-top: auto;
+  text-align: center;
+  flex-shrink: 0;
+  background: white;
+}
+
+.letterhead-footer-main {
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.letterhead-footer-sub {
+  font-size: 10px;
+  color: #999;
+  margin-bottom: 0;
+  line-height: 1.3;
+}
+
+/* Action buttons (not for print) */
+.action-buttons {
+  margin-top: 20px;
+  text-align: center;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.action-button {
+  margin: 0 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.print-button {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+}
+
+.download-button {
+  background: linear-gradient(135deg, #e63946, #dc3545);
+  color: white;
+}
+
+/* Utility classes */
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  align-items: center;
+}
+
+.flex-between {
+  justify-content: space-between;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.font-bold {
+  font-weight: bold;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-normal {
+  font-weight: normal;
+}
+
+/* Responsive adjustments for preview */
+@media (max-width: 1200px) {
+  .letterhead-a4-container {
+    transform: scale(0.8);
+    transform-origin: top center;
+  }
+}
+
+@media (max-width: 992px) {
+  .letterhead-a4-container {
+    transform: scale(0.7);
+    transform-origin: top center;
+  }
+
+  .letterhead-header {
+    padding: 15px;
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .letterhead-qr-section {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .letterhead-a4-container {
+    transform: scale(0.6);
+    transform-origin: top center;
+    margin: 0 10px;
+  }
+
+  .letterhead-company-name {
+    font-size: 20px;
+  }
+
+  .letterhead-title {
+    font-size: 18px;
+  }
+
+  .letterhead-content {
+    font-size: 12px;
+  }
+
+  .letterhead-company-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .letterhead-logo-container {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+}
+
+/* Enhanced print preview mode */
+.print-preview-mode {
+  background: white !important;
+  padding: 0 !important;
+}
+
+.print-preview-mode .letterhead-a4-container {
+  transform: none !important;
+  box-shadow: none !important;
+  border: 1px solid #ddd !important;
+}
+
+/* Rich text editor content styling */
+.letterhead-content h1,
+.letterhead-content h2,
+.letterhead-content h3,
+.letterhead-content h4,
+.letterhead-content h5,
+.letterhead-content h6 {
+  color: #2c3e50;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.letterhead-content h1 {
+  font-size: 1.5em;
+}
+.letterhead-content h2 {
+  font-size: 1.3em;
+}
+.letterhead-content h3 {
+  font-size: 1.2em;
+}
+.letterhead-content h4 {
+  font-size: 1.1em;
+}
+.letterhead-content h5 {
+  font-size: 1.05em;
+}
+.letterhead-content h6 {
+  font-size: 1em;
+}
+
+.letterhead-content strong {
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.letterhead-content em {
+  font-style: italic;
+  color: #495057;
+}
+
+.letterhead-content u {
+  text-decoration: underline;
+}
+
+/* Ensure proper line breaks and spacing */
+.letterhead-content br {
+  line-height: 1.8;
+}
+
+.letterhead-content hr {
+  border: none;
+  border-top: 1px solid #dee2e6;
+  margin: 20px 0;
+}

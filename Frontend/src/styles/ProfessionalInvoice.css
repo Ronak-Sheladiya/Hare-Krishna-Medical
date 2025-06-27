@@ -1,0 +1,152 @@
+/* Professional Invoice A4 Print Styles */
+
+@media print {
+  /* Hide all other content when printing */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Show only invoice content */
+  #invoice-content,
+  #invoice-content * {
+    visibility: visible;
+  }
+
+  /* Position invoice content for print */
+  #invoice-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  /* A4 page setup */
+  @page {
+    size: A4;
+    margin: 10px;
+    padding: 0;
+  }
+
+  /* Ensure colors print correctly */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Force single page */
+  html,
+  body {
+    height: 287mm;
+    overflow: hidden;
+  }
+
+  /* Remove page breaks */
+  * {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Hide web elements */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Professional invoice table styling for print */
+  table {
+    border-collapse: collapse !important;
+  }
+
+  th,
+  td {
+    border: 1px solid #333 !important;
+    padding: 8px !important;
+  }
+
+  /* Ensure background colors print */
+  .professional-invoice {
+    background: white !important;
+  }
+}
+
+/* Professional Invoice Screen Styles */
+.professional-invoice {
+  font-family: "Segoe UI", Arial, sans-serif;
+  max-width: 210mm;
+  margin: 0 auto;
+  background: white;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.professional-invoice table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.professional-invoice th,
+.professional-invoice td {
+  border: 1px solid #dee2e6;
+  padding: 8px;
+  text-align: left;
+}
+
+.professional-invoice .header-section {
+  border-bottom: 3px solid #2c5aa0;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+}
+
+.professional-invoice .company-name {
+  color: #2c5aa0;
+  font-size: 22px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.professional-invoice .invoice-title {
+  color: #2c5aa0;
+  font-size: 32px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.professional-invoice .customer-section {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.professional-invoice .items-table thead {
+  background: #2c5aa0;
+  color: white;
+}
+
+.professional-invoice .total-row {
+  background: #2c5aa0;
+  color: white;
+  font-weight: bold;
+}
+
+.professional-invoice .footer-section {
+  border-top: 2px solid #2c5aa0;
+  margin-top: 30px;
+  padding-top: 15px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .professional-invoice {
+    margin: 10px;
+    max-width: calc(100% - 20px);
+  }
+}
+
+/* A4 aspect ratio maintenance */
+.professional-invoice-container {
+  aspect-ratio: 210/297;
+  max-width: 100%;
+  margin: 0 auto;
+}

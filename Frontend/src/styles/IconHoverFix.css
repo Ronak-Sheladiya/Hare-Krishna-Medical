@@ -1,0 +1,191 @@
+/* Fix icon hover visibility issues */
+
+/* Ensure icons remain visible on hover */
+.btn:hover .bi,
+.nav-link:hover .bi,
+.dropdown-item:hover .bi {
+  color: inherit !important;
+  opacity: 1 !important;
+}
+
+/* Fix specific hover color conflicts */
+.btn-primary:hover .bi {
+  color: white !important;
+}
+
+.btn-success:hover .bi {
+  color: white !important;
+}
+
+.btn-danger:hover .bi {
+  color: white !important;
+}
+
+.btn-warning:hover .bi {
+  color: white !important;
+}
+
+.btn-info:hover .bi {
+  color: white !important;
+}
+
+.btn-dark:hover .bi {
+  color: white !important;
+}
+
+.btn-secondary:hover .bi {
+  color: white !important;
+}
+
+/* Fix outline button hover icons */
+.btn-outline-primary:hover .bi {
+  color: white !important;
+}
+
+.btn-outline-secondary:hover .bi {
+  color: white !important;
+}
+
+.btn-outline-success:hover .bi {
+  color: white !important;
+}
+
+.btn-outline-danger:hover .bi {
+  color: white !important;
+}
+
+.btn-outline-warning:hover .bi {
+  color: black !important;
+}
+
+.btn-outline-info:hover .bi {
+  color: white !important;
+}
+
+.btn-outline-dark:hover .bi {
+  color: white !important;
+}
+
+/* Fix navigation hover icons */
+.nav-link:hover .bi {
+  color: var(--color-medical-red, #e63946) !important;
+}
+
+/* Fix dropdown item hover icons */
+.dropdown-item:hover .bi {
+  color: var(--color-medical-red, #e63946) !important;
+}
+
+/* Fix cart icon hover */
+.nav-link:hover .bi-cart3 {
+  color: var(--color-medical-red, #e63946) !important;
+}
+
+/* Fix notification bell hover */
+.dropdown-toggle:hover .bi-bell {
+  color: var(--color-medical-red, #e63946) !important;
+}
+
+/* Fix text colors on hover for specific components */
+.btn-medical-primary:hover .bi {
+  color: white !important;
+}
+
+.btn-medical-outline:hover .bi {
+  color: white !important;
+}
+
+/* Ensure icon visibility in cards */
+.card:hover .bi,
+.medical-card:hover .bi {
+  opacity: 1 !important;
+  color: inherit !important;
+}
+
+/* Fix icon visibility in alerts */
+.alert .bi {
+  opacity: 1 !important;
+  color: inherit !important;
+}
+
+/* Fix social media icon hover */
+.social-icon:hover .bi {
+  color: white !important;
+  transform: scale(1.1);
+}
+
+/* Fix table action button hover icons */
+.table .btn:hover .bi {
+  color: white !important;
+}
+
+/* Fix badge icon visibility */
+.badge .bi {
+  color: white !important;
+  opacity: 1 !important;
+}
+
+/* Fix toast notification icons */
+.toast .bi {
+  opacity: 1 !important;
+  color: inherit !important;
+}
+
+/* Fix modal header icons */
+.modal-header .bi {
+  opacity: 1 !important;
+  color: inherit !important;
+}
+
+/* Fix spinner icon combinations */
+.spinner-border + .bi,
+.bi + .spinner-border {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+/* Specific fix for header chevron icon */
+.dropdown-toggle .bi-chevron-down {
+  color: inherit !important;
+  opacity: 0.8;
+  transition: transform 0.3s ease;
+}
+
+.dropdown-toggle:hover .bi-chevron-down {
+  opacity: 1 !important;
+  transform: rotate(180deg);
+}
+
+/* Fix for product card icons */
+.product-card .btn:hover .bi {
+  color: white !important;
+}
+
+/* Fix for footer icons */
+.medical-footer .bi {
+  color: inherit !important;
+  opacity: 1 !important;
+}
+
+.medical-footer a:hover .bi {
+  color: var(--color-medical-red, #e63946) !important;
+  transform: translateY(-2px);
+}
+
+/* Ensure consistent icon sizing */
+.bi {
+  font-size: inherit;
+  line-height: 1;
+  vertical-align: baseline;
+}
+
+/* Fix for responsive icon visibility */
+@media (max-width: 768px) {
+  .btn .bi {
+    color: inherit !important;
+  }
+
+  .nav-link .bi {
+    color: inherit !important;
+  }
+}
