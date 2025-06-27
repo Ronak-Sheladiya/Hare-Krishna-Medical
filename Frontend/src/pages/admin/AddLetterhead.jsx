@@ -603,6 +603,8 @@ const AddLetterhead = () => {
       letterheadElement.style.transform = originalTransform;
       letterheadElement.style.width = originalWidth;
       letterheadElement.style.height = originalHeight;
+      letterheadElement.style.margin = originalMargin;
+      letterheadElement.style.padding = originalPadding;
 
       if (!result.success) {
         throw new Error(result.error);
