@@ -773,15 +773,16 @@ const AddLetterhead = () => {
                 ) : (
                   <div
                     style={{
-                      transform: "scale(0.45)",
+                      transform: "scale(0.4)",
                       transformOrigin: "top left",
-                      width: "222%",
-                      height: "222%",
+                      width: "250%",
+                      height: "250%",
                       overflow: "hidden",
                       border: "2px solid #dee2e6",
                       borderRadius: "12px",
                       backgroundColor: "white",
                       boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      margin: "0 0 -50% 0", // Prevent overlap
                     }}
                     dangerouslySetInnerHTML={{
                       __html: createLetterheadTemplate(),
