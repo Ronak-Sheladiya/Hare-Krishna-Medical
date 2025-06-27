@@ -54,8 +54,8 @@ app.use("/api/", limiter);
 // ==========================
 const mongoURI =
   process.env.MONGODB_URI ||
-  "mongodb+srv://ronaksheladiya652:Ronak95865@cluster0.idf2afh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-console.log("🔄 Attempting MongoDB connection to:", mongoURI);
+  "MONGODB_URI=mongodb+srv://ronaksheladiya652:Ronak95865@cluster0.idf2afh.mongodb.net/Hare_Krishna_Medical_db?retryWrites=true&w=majority&appName=Cluster0
+", mongoURI);
 
 // Set mongoose buffer commands to false to fail fast
 mongoose.set("bufferCommands", false);
