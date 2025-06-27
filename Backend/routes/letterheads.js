@@ -71,7 +71,8 @@ const validateUpdateLetterhead = [
     ])
     .withMessage("Invalid letter type"),
   body("recipient.name")
-    .optional()
+    .optional({ values: "falsy" })
+    .isString()
     .trim()
     .withMessage("Recipient name must be a string"),
   body("subject").optional().trim().withMessage("Subject must be a string"),
