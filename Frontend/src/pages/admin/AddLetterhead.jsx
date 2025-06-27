@@ -174,6 +174,20 @@ const AddLetterhead = () => {
     setShowPreview(true);
   };
 
+  // Manual refresh QR code
+  const handleRefreshPreview = async () => {
+    if (!formData.title || !formData.content) return;
+
+    const tempId = letterheadId || generateTempLetterheadId();
+    setLetterheadId(tempId);
+
+    // Force regenerate QR code
+    const generatedQR = await generatePreviewQRCode(tempId);
+    if (generatedQR) {
+      setQrCode(generatedQR);
+    }
+  };
+
   const createLetterheadTemplate = () => {
     const currentDate = new Date().toLocaleDateString("en-IN");
     const currentLetterheadId = letterheadId || generateTempLetterheadId();
