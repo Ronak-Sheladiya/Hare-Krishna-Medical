@@ -417,33 +417,6 @@ const AddLetterhead = () => {
     `;
   };
 
-  // PDF DOWNLOAD FUNCTIONALITY
-  const handlePDFDownload = async () => {
-    try {
-      setPdfDownloadLoading(true);
-      setError(null);
-
-      const pdfBlobUrl = await generateLetterheadPDF();
-      if (pdfBlobUrl) {
-        // Create download link
-        const a = document.createElement("a");
-        a.href = pdfBlobUrl;
-        a.download = `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead_${new Date().toISOString().split("T")[0]}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        setSuccess("PDF downloaded successfully!");
-        setTimeout(() => setSuccess(null), 3000);
-      }
-    } catch (error) {
-      console.error("PDF download failed:", error);
-      setError(`PDF download failed: ${error.message}`);
-    } finally {
-      setPdfDownloadLoading(false);
-    }
-  };
-
   // PROFESSIONAL PRINT FUNCTIONALITY
   const handlePrint = async () => {
     if (!formData.title || !formData.content) {
