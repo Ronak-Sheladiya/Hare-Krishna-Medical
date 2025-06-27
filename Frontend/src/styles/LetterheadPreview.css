@@ -16,12 +16,35 @@
 
 /* Print-specific styles */
 @media print {
+  /* Reset all margins and padding for print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
   .letterhead-a4-container {
     width: 100% !important;
-    min-height: 100vh !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
     margin: 0 !important;
+    padding: 15mm !important;
     box-shadow: none !important;
     border: none !important;
+    border-radius: 0 !important;
+    background: white !important;
+    position: relative !important;
+    overflow: visible !important;
+    transform: none !important;
+    scale: 1 !important;
+    page-break-inside: avoid !important;
+    page-break-after: avoid !important;
+    page-break-before: avoid !important;
   }
 
   /* Hide action buttons in print */
@@ -31,8 +54,38 @@
 
   /* Ensure proper page sizing */
   @page {
-    size: A4;
-    margin: 15mm;
+    size: A4 portrait;
+    margin: 0mm;
+    padding: 0mm;
+  }
+
+  /* Fix footer positioning for print */
+  .letterhead-footer {
+    position: fixed !important;
+    bottom: 15mm !important;
+    left: 15mm !important;
+    right: 15mm !important;
+    width: calc(100% - 30mm) !important;
+    margin: 0 !important;
+    padding-top: 15px !important;
+    border-top: 2px solid #e63946 !important;
+    background: white !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Ensure content doesn't overlap footer */
+  .letterhead-content {
+    margin-bottom: 80px !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Remove transforms and shadows that can cause print issues */
+  .letterhead-header,
+  .letterhead-qr-container,
+  .letterhead-logo-container {
+    box-shadow: none !important;
+    transform: none !important;
+    border-radius: 8px !important;
   }
 }
 
