@@ -99,7 +99,24 @@ connectDB().then(async (conn) => {
     // Auto-create database collections and seed data if empty
     try {
       const { seedDatabase } = require("./scripts/seed");
+
+      // Import all models to ensure collections are created
       const User = require("./models/User");
+      const Product = require("./models/Product");
+      const Order = require("./models/Order");
+      const Invoice = require("./models/Invoice");
+      const Message = require("./models/Message");
+      const Letterhead = require("./models/Letterhead");
+      const Verification = require("./models/Verification");
+
+      console.log("📋 Models loaded - collections will be created:");
+      console.log("   - User model ✅");
+      console.log("   - Product model ✅");
+      console.log("   - Order model ✅");
+      console.log("   - Invoice model ✅");
+      console.log("   - Message model ✅");
+      console.log("   - Letterhead model ✅");
+      console.log("   - Verification model ✅");
 
       // Check if database is empty (no users exist)
       const userCount = await User.countDocuments();
