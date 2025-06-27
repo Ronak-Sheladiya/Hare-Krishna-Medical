@@ -19,6 +19,7 @@ import {
   ThemeButton,
 } from "../../components/common/ConsistentTheme";
 import "../../styles/RichTextEditor.css";
+import "../../styles/LetterheadPreview.css";
 
 const AddLetterhead = () => {
   const navigate = useNavigate();
