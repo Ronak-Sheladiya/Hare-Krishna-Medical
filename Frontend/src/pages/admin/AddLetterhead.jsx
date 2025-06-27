@@ -403,172 +403,35 @@ const AddLetterhead = () => {
   // PDF generation states - separate for print and download
   const [printLoading, setPrintLoading] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
-  const [pdfUrl, setPdfUrl] = useState(null);
 
-  // Generate actual PDF for letterhead with proper A4 sizing
-  const generateLetterheadPDF = async () => {
-    if (!formData.title || !formData.content) return null;
-
-    setDownloadLoading(true);
-    try {
-      // Import PDF service
-      const pdfService = (await import("../../services/PDFService")).default;
-
-      // Wait for DOM to render letterhead content
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      const letterheadElement = document.getElementById(
-        "letterhead-print-content",
-      );
-      if (!letterheadElement) {
-        throw new Error("Letterhead content not found");
-      }
-
-      // Generate actual PDF blob with A4 specifications
-      const result = await pdfService.generatePDFFromElement(
-        letterheadElement,
-        {
-          filename: `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`,
-          quality: 1.0, // High quality for letterheads
-          scale: 2.0, // Higher scale for better text rendering
-          backgroundColor: "#ffffff",
-          onProgress: (message, progress) => {
-            console.log(`PDF Generation: ${message} (${progress}%)`);
-          },
-          returnBlob: true, // Request blob return instead of direct download
-          // A4 specific settings
-          format: "a4",
-          orientation: "portrait",
-          margin: 0, // No additional margins since template already has proper spacing
-        },
-      );
-
-      if (result.success && result.blob) {
-        const pdfObjectUrl = URL.createObjectURL(result.blob);
-        setPdfUrl(pdfObjectUrl);
-        setDownloadLoading(false);
-        return result.blob;
-      } else {
-        throw new Error("Failed to generate PDF");
-      }
-    } catch (error) {
-      console.error("PDF generation failed:", error);
-      setDownloadLoading(false);
-      return null;
-    }
-  };
-
-  // No auto-generation of PDF - only generate when print/download is clicked
-
-  // PRINT FUNCTIONALITY - Generate PDF and open in new window for printing
+  // PRINT FUNCTIONALITY - Using LetterheadService for consistency with invoice system
   const handlePrint = async () => {
+    if (!formData.title || !formData.content) {
+      alert("Please fill in both title and content before printing.");
+      return;
+    }
+
     try {
       setPrintLoading(true);
 
-      // Use html2pdf.js for better printing
-      const html2pdf = (await import("html2pdf.js")).default;
-
-      const letterheadElement = document.getElementById(
-        "letterhead-print-content",
-      );
-      if (!letterheadElement) {
-        alert("Letterhead content not found. Please refresh and try again.");
-        return;
-      }
-
-      // Clone the element to avoid modifying the original
-      const clonedElement = letterheadElement.cloneNode(true);
-
-      // Configure html2pdf options for perfect A4 layout
-      const options = {
-        margin: 0,
-        filename: `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`,
-        image: {
-          type: "jpeg",
-          quality: 0.98,
-        },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          allowTaint: false,
-          backgroundColor: "#ffffff",
-          width: 794,
-          height: 1123,
-          letterRendering: true,
-          logging: false,
-          windowWidth: 794,
-          windowHeight: 1123,
-        },
-        jsPDF: {
-          unit: "mm",
-          format: "a4",
-          orientation: "portrait",
-          compress: true,
-        },
+      // Create letterhead data object
+      const letterheadData = {
+        letterheadId: letterheadId || generateTempLetterheadId(),
+        title: formData.title,
+        content: formData.content,
+        qrCode: qrCode,
+        issueDate: new Date().toISOString(),
+        status: "draft",
       };
 
-      // Force exact A4 dimensions on the cloned element
-      clonedElement.style.cssText = `
-        width: 210mm !important;
-        height: 297mm !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        box-sizing: border-box !important;
-        background: white !important;
-        font-family: Arial, sans-serif !important;
-        display: flex !important;
-        flex-direction: column !important;
-        overflow: hidden !important;
-        position: relative !important;
-      `;
+      // Use LetterheadService for consistent printing
+      const result = await letterheadService.printLetterhead(letterheadData);
 
-      // Temporarily add to DOM for processing
-      clonedElement.style.position = "fixed";
-      clonedElement.style.top = "-9999px";
-      clonedElement.style.left = "-9999px";
-      clonedElement.style.zIndex = "-1";
-      document.body.appendChild(clonedElement);
-
-      // Generate PDF blob for printing
-      const pdfBlob = await html2pdf()
-        .set(options)
-        .from(clonedElement)
-        .outputPdf("blob");
-
-      // Clean up
-      document.body.removeChild(clonedElement);
-
-      if (pdfBlob) {
-        // Create PDF URL and open in new window for printing
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        const printWindow = window.open(
-          pdfUrl,
-          "_blank",
-          "width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes",
-        );
-
-        if (printWindow) {
-          printWindow.document.title = `${formData.title} - Letterhead Print`;
-
-          // Setup print handlers
-          printWindow.onload = () => {
-            printWindow.focus();
-            printWindow.print();
-          };
-
-          // Fallback print trigger
-          setTimeout(() => {
-            try {
-              printWindow.focus();
-              printWindow.print();
-            } catch (error) {
-              console.log("Fallback print trigger:", error);
-            }
-          }, 1000);
-        }
-      } else {
-        alert("Failed to generate PDF for printing. Please try again.");
+      if (!result.success) {
+        throw new Error(result.error || "Print failed");
       }
+
+      console.log("Print initiated successfully");
     } catch (error) {
       console.error("Print failed:", error);
       alert("Print failed. Please try again.");
@@ -577,8 +440,12 @@ const AddLetterhead = () => {
     }
   };
 
+  // DOWNLOAD FUNCTIONALITY - Using html2pdf.js for PDF generation
   const handleDownload = async () => {
-    if (!formData.title || !formData.content) return;
+    if (!formData.title || !formData.content) {
+      alert("Please fill in both title and content before downloading.");
+      return;
+    }
 
     try {
       setDownloadLoading(true);
@@ -664,15 +531,6 @@ const AddLetterhead = () => {
       setDownloadLoading(false);
     }
   };
-
-  // Cleanup PDF URL on unmount
-  useEffect(() => {
-    return () => {
-      if (pdfUrl) {
-        URL.revokeObjectURL(pdfUrl);
-      }
-    };
-  }, [pdfUrl]);
 
   return (
     <Container fluid style={{ padding: "10px" }}>
