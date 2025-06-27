@@ -51,19 +51,21 @@ const AddLetterhead = () => {
     }
   };
 
-  // Generate QR code for preview
+  // Generate QR code for preview - Enhanced for real-time generation
   const generatePreviewQRCode = async (tempId) => {
     try {
       const QRCode = await import("qrcode");
       const verificationUrl = `${window.location.origin}/verify-docs?id=${tempId}&type=letterhead`;
       const qrDataURL = await QRCode.toDataURL(verificationUrl, {
-        width: 150,
+        width: 200,
         margin: 2,
         color: {
           dark: "#1a202c",
           light: "#ffffff",
         },
-        errorCorrectionLevel: "M",
+        errorCorrectionLevel: "H", // High error correction for better scanning
+        type: "image/png",
+        quality: 0.95,
       });
       return qrDataURL;
     } catch (error) {
@@ -71,6 +73,30 @@ const AddLetterhead = () => {
       return null;
     }
   };
+
+  // Auto-generate QR when form data changes
+  useEffect(() => {
+    const generateQRCodeOnChange = async () => {
+      if (formData.title && formData.content) {
+        const tempId = letterheadId || generateTempLetterheadId();
+        if (!letterheadId) {
+          setLetterheadId(tempId);
+        }
+
+        // Only generate new QR if we don't have one yet
+        if (!qrCode) {
+          const generatedQR = await generatePreviewQRCode(tempId);
+          if (generatedQR) {
+            setQrCode(generatedQR);
+          }
+        }
+      }
+    };
+
+    // Debounce QR generation to avoid too many calls
+    const timeoutId = setTimeout(generateQRCodeOnChange, 500);
+    return () => clearTimeout(timeoutId);
+  }, [formData.title, formData.content, letterheadId, qrCode]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
