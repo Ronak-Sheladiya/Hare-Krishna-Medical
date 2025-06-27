@@ -197,12 +197,12 @@ const AddLetterhead = () => {
     return `
       <div id="letterhead-print-content" style="
         font-family: Arial, sans-serif;
-        width: 210mm;
-        height: 297mm;
+        width: 794px;
+        height: 1123px;
         background: white;
         position: relative;
-        margin: 0;
-        padding: 0;
+        margin: 0 !important;
+        padding: 0 !important;
         box-sizing: border-box;
         font-size: 13px;
         line-height: 1.5;
@@ -210,15 +210,16 @@ const AddLetterhead = () => {
         display: flex;
         flex-direction: column;
         overflow: hidden;
+        transform: scale(1) !important;
       ">
-        <!-- Page Content Container using 98% of A4 page -->
+        <!-- Page Content Container using full page -->
         <div style="
-          padding: 2mm;
+          padding: 8px;
           height: 100%;
           display: flex;
           flex-direction: column;
           box-sizing: border-box;
-        ">
+        ">`;
           <!-- Header Section -->
           <div style="
             background: #e63946;
