@@ -427,9 +427,7 @@ const AddLetterhead = () => {
         });
       }
 
-      const letterheadElement = document.getElementById(
-        "letterhead-print-content",
-      );
+      const letterheadElement = document.getElementById("letterhead-print-content");
       if (!letterheadElement) {
         throw new Error("Letterhead content not found");
       }
@@ -516,11 +514,9 @@ const AddLetterhead = () => {
       }
 
       // Wait for QR code to render
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, 300));
 
-      const letterheadElement = document.getElementById(
-        "letterhead-print-content",
-      );
+      const letterheadElement = document.getElementById("letterhead-print-content");
       if (!letterheadElement) {
         throw new Error("Letterhead content not found");
       }
@@ -1073,15 +1069,13 @@ const AddLetterhead = () => {
                       onMouseEnter={(e) => {
                         if (!printLoading && !downloadLoading) {
                           e.target.style.transform = "translateY(-1px)";
-                          e.target.style.boxShadow =
-                            "0 6px 16px rgba(40, 167, 69, 0.4)";
+                          e.target.style.boxShadow = "0 6px 16px rgba(40, 167, 69, 0.4)";
                         }
                       }}
                       onMouseLeave={(e) => {
                         if (!printLoading && !downloadLoading) {
                           e.target.style.transform = "translateY(0)";
-                          e.target.style.boxShadow =
-                            "0 4px 12px rgba(40, 167, 69, 0.3)";
+                          e.target.style.boxShadow = "0 4px 12px rgba(40, 167, 69, 0.3)";
                         }
                       }}
                     >
@@ -1115,15 +1109,13 @@ const AddLetterhead = () => {
                       onMouseEnter={(e) => {
                         if (!downloadLoading && !printLoading) {
                           e.target.style.transform = "translateY(-1px)";
-                          e.target.style.boxShadow =
-                            "0 6px 16px rgba(230, 57, 70, 0.4)";
+                          e.target.style.boxShadow = "0 6px 16px rgba(230, 57, 70, 0.4)";
                         }
                       }}
                       onMouseLeave={(e) => {
                         if (!downloadLoading && !printLoading) {
                           e.target.style.transform = "translateY(0)";
-                          e.target.style.boxShadow =
-                            "0 4px 12px rgba(230, 57, 70, 0.3)";
+                          e.target.style.boxShadow = "0 4px 12px rgba(230, 57, 70, 0.3)";
                         }
                       }}
                     >
@@ -1141,41 +1133,29 @@ const AddLetterhead = () => {
                     </Button>
                   </div>
                   <div className="text-center mt-3">
-                    {pdfGenerating ? (
-                      <small className="text-muted d-flex align-items-center justify-content-center gap-1">
-                        <Spinner size="sm" className="me-1" />
-                        <span>Generating PDF for print and download...</span>
-                      </small>
-                    ) : pdfUrl ? (
-                      <small className="text-success d-flex align-items-center justify-content-center gap-1">
-                        <i className="bi bi-check-circle text-success"></i>
-                        <span>PDF ready for print and download</span>
-                      </small>
-                    ) : (
-                      <small className="text-muted d-flex align-items-center justify-content-center gap-1">
-                        <i className="bi bi-shield-check text-success"></i>
-                        <span>
-                          Professional A4 letterhead with QR verification ready
-                          for official use
-                        </span>
-                      </small>
-                    )}
+                    <small className="text-success d-flex align-items-center justify-content-center gap-1">
+                      <i className="bi bi-shield-check text-success"></i>
+                      <span>Professional A4 letterhead with QR verification ready for official use</span>
+                    </small>
                   </div>
 
                   {/* Additional Info */}
                   <div className="text-center mt-2">
                     <div className="d-flex justify-content-center gap-3 flex-wrap">
                       <small className="text-muted d-flex align-items-center gap-1">
-                        <i
-                          className={`bi ${pdfUrl ? "bi-file-earmark-pdf text-success" : "bi-file-earmark-pdf text-danger"}`}
-                        ></i>
-                        <span>{pdfUrl ? "PDF Ready" : "A4 PDF Format"}</span>
+                        <i className="bi bi-file-earmark-code text-primary"></i>
+                        <span>HTML Format</span>
                       </small>
                       <small className="text-muted d-flex align-items-center gap-1">
-                        <i
-                          className={`bi ${qrCode ? "bi-qr-code text-success" : "bi-qr-code text-primary"}`}
-                        ></i>
-                        <span>
+                        <i className={`bi ${qrCode ? 'bi-qr-code text-success' : 'bi-qr-code text-primary'}`}></i>
+                        <span>{qrCode ? 'QR Generated' : 'QR Code Included'}</span>
+                      </small>
+                      <small className="text-muted d-flex align-items-center gap-1">
+                        <i className="bi bi-printer text-success"></i>
+                        <span>Print Ready</span>
+                      </small>
+                    </div>
+                  </div>
                           {qrCode ? "QR Generated" : "QR Code Included"}
                         </span>
                       </small>
