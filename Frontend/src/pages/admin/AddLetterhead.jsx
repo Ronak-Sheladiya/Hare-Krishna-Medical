@@ -456,19 +456,9 @@ const AddLetterhead = () => {
                       ref={editorRef}
                       contentEditable
                       onInput={handleContentChange}
-                      style={{
-                        minHeight: "400px",
-                        padding: "20px",
-                        border: "2px solid #dee2e6",
-                        borderRadius: "8px",
-                        backgroundColor: "#fff",
-                        outline: "none",
-                        fontSize: "14px",
-                        lineHeight: "1.6",
-                        fontFamily: '"Times New Roman", serif',
-                      }}
-                      className="form-control"
+                      className="rich-text-editor"
                       placeholder="Start typing your letterhead content here. Use the formatting tools above to style your text..."
+                      data-placeholder="Start typing your letterhead content here. Use the formatting tools above to style your text..."
                     />
                     <Form.Text className="text-muted">
                       Use the formatting toolbar above to style your content
