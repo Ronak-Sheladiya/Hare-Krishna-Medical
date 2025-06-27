@@ -1764,64 +1764,6 @@ const AddLetterhead = () => {
               </small>
             </div>
           </div>
-                  color: "white",
-                  padding: "10px 20px",
-                  fontWeight: "600",
-                  boxShadow: "0 3px 8px rgba(253, 126, 20, 0.3)",
-                  minWidth: "120px",
-                }}
-              >
-                {pdfDownloadLoading ? (
-                  <>
-                    <Spinner size="sm" className="me-2" />
-                    PDF...
-                  </>
-                ) : (
-                  <>
-                    <i className="bi bi-file-earmark-pdf me-2"></i>
-                    PDF
-                  </>
-                )}
-              </Button>
-
-              <Button
-                onClick={handleDownload}
-                disabled={downloadLoading || printLoading || pdfDownloadLoading}
-                style={{
-                  borderRadius: "8px",
-                  background: "linear-gradient(135deg, #e63946, #dc3545)",
-                  border: "none",
-                  color: "white",
-                  padding: "10px 20px",
-                  fontWeight: "600",
-                  boxShadow: "0 3px 8px rgba(230, 57, 70, 0.3)",
-                  minWidth: "120px",
-                }}
-              >
-                {downloadLoading ? (
-                  <>
-                    <Spinner size="sm" className="me-2" />
-                    HTML...
-                  </>
-                ) : (
-                  <>
-                    <i className="bi bi-download me-2"></i>
-                    HTML
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-
-          {/* Footer info */}
-          <div className="w-100 mt-2">
-            <small className="text-muted d-flex align-items-center justify-content-center gap-1">
-              <i className="bi bi-info-circle"></i>
-              <span>
-                Actions will use the content shown in the preview above
-              </span>
-            </small>
-          </div>
         </Modal.Footer>
       </Modal>
     </Container>
