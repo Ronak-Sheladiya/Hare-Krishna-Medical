@@ -424,59 +424,7 @@ const AddLetterhead = () => {
 
 
 
-        "letterhead-print-content",
-      );
-      if (!letterheadElement) {
-        throw new Error("Letterhead content not found");
-      }
 
-      // Create complete HTML document
-      const htmlContent = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>${formData.title} - Letterhead</title>
-  <style>
-    @page {
-      size: A4;
-      margin: 0;
-    }
-    @media print {
-      body {
-        margin: 0 !important;
-        padding: 0 !important;
-        color: black !important;
-        background: white !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-      .no-print {
-        display: none !important;
-      }
-    }
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: white;
-      color: black;
-    }
-  </style>
-</head>
-<body>
-  ${letterheadElement.outerHTML}
-</body>
-</html>`;
-
-      // Create and download HTML file
-      const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead_${new Date().toISOString().split("T")[0]}.html`;
-      document.body.appendChild(a);
-      a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
