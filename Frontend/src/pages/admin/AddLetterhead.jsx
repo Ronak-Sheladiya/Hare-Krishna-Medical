@@ -583,14 +583,14 @@ const AddLetterhead = () => {
         status: "draft",
       };
 
-      // Use optimized PDF generation for download with 98% page usage
+      // Use optimized PDF generation for download with FULL page usage
       const result = await pdfService.generatePDFFromElement(
         letterheadElement,
         {
           filename: `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead_${new Date().toISOString().split("T")[0]}.pdf`,
-          quality: 0.9, // Better quality for downloads
-          scale: 2, // Higher scale for downloads
-          margin: 2.1, // Minimal margin (1% of A4 width = 2.1mm) for 98% usage
+          quality: 0.95, // Highest quality for downloads
+          scale: 2.5, // Higher scale for downloads
+          margin: 0, // ZERO margin for full page usage
         },
       );
 
