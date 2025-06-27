@@ -214,60 +214,81 @@ const AddLetterhead = () => {
     setError(null);
 
     try {
-      // Create a clean container for PDF generation
+      // Create a visible container for PDF generation
       const pdfContainer = document.createElement("div");
       pdfContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
         width: 794px;
         height: 1123px;
-        position: absolute;
-        left: -10000px;
-        top: 0;
         background: white;
         font-family: Arial, sans-serif;
-        box-sizing: border-box;
-        padding: 20px;
+        z-index: -1000;
+        opacity: 0;
+        pointer-events: none;
+        overflow: hidden;
       `;
 
-      // Create content with 20px safe margins
-      const contentHtml = createLetterheadTemplate();
-      pdfContainer.innerHTML = contentHtml;
+      // Create content wrapper with proper structure
+      const contentWrapper = document.createElement("div");
+      contentWrapper.style.cssText = `
+        width: 100%;
+        height: 100%;
+        background: white;
+        position: relative;
+      `;
+
+      // Insert the letterhead content
+      contentWrapper.innerHTML = createLetterheadTemplate();
+      pdfContainer.appendChild(contentWrapper);
 
       // Append to body for rendering
       document.body.appendChild(pdfContainer);
 
-      // Wait for fonts and images to load
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Wait for proper rendering and image loading
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Make sure all images are loaded
+      const images = pdfContainer.querySelectorAll("img");
+      const imagePromises = Array.from(images).map((img) => {
+        return new Promise((resolve) => {
+          if (img.complete) {
+            resolve();
+          } else {
+            img.onload = resolve;
+            img.onerror = resolve;
+          }
+        });
+      });
+      await Promise.all(imagePromises);
 
       const options = {
-        margin: [20, 20, 20, 20], // 20px margins on all sides
+        margin: [15, 15, 15, 15], // 15px margins on all sides
         filename: `Letterhead-${letterheadId || "Draft"}.pdf`,
         image: {
           type: "jpeg",
-          quality: 0.98,
+          quality: 1.0,
         },
         html2canvas: {
-          scale: 2,
+          scale: 1.5,
           useCORS: true,
           allowTaint: false,
           backgroundColor: "#ffffff",
           width: 794,
           height: 1123,
+          x: 0,
+          y: 0,
           scrollX: 0,
           scrollY: 0,
           windowWidth: 794,
           windowHeight: 1123,
+          logging: false,
         },
         jsPDF: {
           unit: "pt",
           format: "a4",
           orientation: "portrait",
-          compress: true,
-        },
-        pagebreak: {
-          mode: ["avoid-all"],
-          before: ".page-break-before",
-          after: ".page-break-after",
-          avoid: ".avoid-break",
         },
       };
 
@@ -300,7 +321,7 @@ const AddLetterhead = () => {
           <style>
             @page {
               size: A4;
-              margin: 0;
+              margin: 15px; /* 15px margins for print */
             }
             * {
               box-sizing: border-box;
@@ -322,6 +343,7 @@ const AddLetterhead = () => {
                 transform: none !important;
                 width: 100% !important;
                 height: 100% !important;
+                margin: 0 !important;
               }
             }
           </style>
@@ -356,11 +378,11 @@ const AddLetterhead = () => {
     return `
       <div id="letterhead-print-content" style="
         font-family: Arial, sans-serif;
-        width: 754px;
-        height: 1083px;
+        width: 764px;
+        height: 1093px;
         background: white;
         position: relative;
-        margin: 20px;
+        margin: 15px;
         padding: 0;
         box-sizing: border-box;
         font-size: 13px;
@@ -371,14 +393,14 @@ const AddLetterhead = () => {
         overflow: hidden;
         transform: scale(1) !important;
       ">
-        <!-- Page Content Container with 20px safe margins -->
+        <!-- Page Content Container with 15px safe margins -->
         <div style="
-          padding: 20px;
-          height: calc(100% - 40px);
+          padding: 15px;
+          height: calc(100% - 30px);
           display: flex;
           flex-direction: column;
           box-sizing: border-box;
-          min-height: 1043px;
+          min-height: 1063px;
         ">
           <!-- Header Section -->
           <div style="
@@ -538,10 +560,10 @@ const AddLetterhead = () => {
             background: white;
             flex-shrink: 0;
             position: absolute;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            width: calc(100% - 40px);
+            bottom: 15px;
+            left: 15px;
+            right: 15px;
+            width: calc(100% - 30px);
           ">
           <div style="text-align: center;">
             <p style="
