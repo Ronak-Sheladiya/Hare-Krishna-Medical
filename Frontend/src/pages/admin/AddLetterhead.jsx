@@ -18,6 +18,7 @@ import {
   PageHeroSection,
   ThemeButton,
 } from "../../components/common/ConsistentTheme";
+import "../../styles/RichTextEditor.css";
 
 const AddLetterhead = () => {
   const navigate = useNavigate();
@@ -122,7 +123,7 @@ const AddLetterhead = () => {
       <body>
         <div class="letterhead-header">
           <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
-            <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800" 
+            <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
                  alt="Hare Krishna Medical" style="width: 60px; height: 60px; margin-right: 15px;" />
             <div>
               <h1 style="margin: 0; color: #e63946; font-size: 20px;">HARE KRISHNA MEDICAL STORE</h1>
@@ -134,10 +135,10 @@ const AddLetterhead = () => {
             📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
           </p>
         </div>
-        
+
         <div class="letterhead-title">${formData.title}</div>
         <div class="letterhead-content">${formData.content}</div>
-        
+
         <div style="margin-top: 50px; border-top: 1px solid #ddd; padding-top: 20px; font-size: 12px; color: #666; text-align: center;">
           Generated on ${new Date().toLocaleDateString()} | Hare Krishna Medical Store
         </div>
@@ -187,7 +188,7 @@ const AddLetterhead = () => {
 <body>
   <div class="letterhead-header">
     <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
-      <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800" 
+      <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800"
            alt="Hare Krishna Medical" style="width: 60px; height: 60px; margin-right: 15px;" />
       <div>
         <h1 style="margin: 0; color: #e63946; font-size: 20px;">HARE KRISHNA MEDICAL STORE</h1>
@@ -199,10 +200,10 @@ const AddLetterhead = () => {
       📞 +91 76989 13354 | 📧 hkmedicalamroli@gmail.com
     </p>
   </div>
-  
+
   <div class="letterhead-title">${formData.title}</div>
   <div class="letterhead-content">${formData.content}</div>
-  
+
   <div style="margin-top: 50px; border-top: 1px solid #ddd; padding-top: 20px; font-size: 12px; color: #666; text-align: center;">
     Generated on ${new Date().toLocaleDateString()} | Hare Krishna Medical Store
   </div>
