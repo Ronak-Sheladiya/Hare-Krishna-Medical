@@ -1206,6 +1206,23 @@ const AdminProducts = () => {
                           {selectedProduct.description ||
                             "No description available"}
                         </p>
+                        <h6>Benefits</h6>
+                        {selectedProduct.benefits ? (
+                          <div className="text-muted">
+                            {selectedProduct.benefits.split("\n").map(
+                              (benefit, index) =>
+                                benefit.trim() && (
+                                  <div key={index} className="mb-1">
+                                    {benefit.startsWith("•")
+                                      ? benefit
+                                      : `• ${benefit}`}
+                                  </div>
+                                ),
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-muted">No benefits listed</p>
+                        )}
 
                         <h6 className="mt-3">Usage</h6>
                         <p className="text-muted">
