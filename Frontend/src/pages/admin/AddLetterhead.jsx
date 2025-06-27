@@ -208,92 +208,130 @@ const AddLetterhead = () => {
     }
   };
 
-  // Professional PDF generation using html2pdf.js
+  // Professional PDF generation using html2canvas + jsPDF
   const generateLetterheadPDF = async () => {
     setPdfDownloadLoading(true);
     setError(null);
 
     try {
-      // Create a visible container for PDF generation
+      // Create a simple, clean container for PDF generation
       const pdfContainer = document.createElement("div");
       pdfContainer.style.cssText = `
-        position: fixed;
-        top: 0;
+        position: absolute;
+        top: -10000px;
         left: 0;
         width: 794px;
         height: 1123px;
         background: white;
         font-family: Arial, sans-serif;
-        z-index: -1000;
-        opacity: 0;
-        pointer-events: none;
-        overflow: hidden;
+        box-sizing: border-box;
+        padding: 15px;
+        overflow: visible;
       `;
 
-      // Create content wrapper with proper structure
-      const contentWrapper = document.createElement("div");
-      contentWrapper.style.cssText = `
-        width: 100%;
-        height: 100%;
-        background: white;
-        position: relative;
-      `;
+      // Create simplified content for PDF
+      const currentDate = new Date().toLocaleDateString("en-IN");
+      const currentLetterheadId = letterheadId || generateTempLetterheadId();
 
-      // Insert the letterhead content
-      contentWrapper.innerHTML = createLetterheadTemplate();
-      pdfContainer.appendChild(contentWrapper);
+      pdfContainer.innerHTML = `
+        <div style="width: 764px; height: 1093px; background: white; font-family: Arial, sans-serif; position: relative;">
+          <!-- Header Section -->
+          <div style="background: #e63946; color: white; padding: 15px; border-radius: 6px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                <div style="background: white; border-radius: 50%; padding: 10px; margin-right: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                  <div style="width: 45px; height: 45px; background: #e63946; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; font-weight: bold;">HK</div>
+                </div>
+                <div>
+                  <h1 style="font-size: 24px; font-weight: 900; margin: 0; line-height: 1.1; font-family: Georgia, serif;">HARE KRISHNA MEDICAL</h1>
+                  <p style="font-size: 12px; margin: 4px 0 0 0; opacity: 0.95; font-weight: 500;">🏥 Your Trusted Health Partner Since 2020</p>
+                </div>
+              </div>
+              <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 6px; font-size: 10px; line-height: 1.4;">
+                <div style="margin-bottom: 4px;">📍 3 Sahyog Complex, Man Sarovar circle, Amroli, 394107, Gujarat</div>
+                <div style="margin-bottom: 4px;">📞 +91 76989 13354 | +91 91060 18508</div>
+                <div>✉️ hkmedicalamroli@gmail.com</div>
+              </div>
+            </div>
+            <div style="text-align: center; min-width: 110px; margin-left: 20px;">
+              <div style="background: white; padding: 10px; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.15);">
+                <div style="width: 85px; height: 85px; border: 2px dashed #e63946; border-radius: 6px; background: #f8f9fa; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #e63946;">
+                  <div style="font-size: 14px; margin-bottom: 4px;">📱</div>
+                  <div style="font-size: 9px; font-weight: bold; text-align: center; line-height: 1.1;">QR CODE<br>VERIFICATION</div>
+                </div>
+                <div style="margin-top: 6px; color: #333; font-size: 9px; font-weight: bold;">📱 SCAN TO VERIFY</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reference and Date -->
+          <div style="text-align: left; margin: 0 0 16px auto; font-size: 11px; color: #666; width: fit-content;">
+            <div style="margin-bottom: 3px; font-weight: 600;">Ref: ${currentLetterheadId}</div>
+            <div style="font-weight: 600;">Date: ${currentDate}</div>
+          </div>
+
+          <!-- Document Title -->
+          <div style="text-align: center; margin-bottom: 20px;">
+            <h2 style="color: #e63946; font-size: 20px; font-weight: bold; margin: 0; text-transform: uppercase; letter-spacing: 1.2px; border-bottom: 3px solid #e63946; display: inline-block; padding-bottom: 6px; font-family: Georgia, serif;">
+              ${formData.title}
+            </h2>
+          </div>
+
+          <!-- Content Section -->
+          <div style="font-size: 13px; line-height: 1.5; text-align: justify; color: #333; font-family: Arial, sans-serif; margin-bottom: 60px; min-height: 300px;">
+            ${formData.content}
+          </div>
+
+          <!-- Footer Section -->
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; border-top: 2px solid #e63946; padding-top: 10px; background: white;">
+            <div style="text-align: center;">
+              <p style="font-size: 11px; color: #666; margin-bottom: 5px; font-weight: 600;">
+                ✅ This letterhead has been verified and is authentic
+              </p>
+              <p style="font-size: 10px; color: #999; margin-bottom: 0; line-height: 1.3;">
+                Verified on ${new Date().toLocaleString("en-IN")} | For queries: +91 76989 13354 | hkmedicalamroli@gmail.com
+              </p>
+            </div>
+          </div>
+        </div>
+      `;
 
       // Append to body for rendering
       document.body.appendChild(pdfContainer);
 
-      // Wait for proper rendering and image loading
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Wait for rendering
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-      // Make sure all images are loaded
-      const images = pdfContainer.querySelectorAll("img");
-      const imagePromises = Array.from(images).map((img) => {
-        return new Promise((resolve) => {
-          if (img.complete) {
-            resolve();
-          } else {
-            img.onload = resolve;
-            img.onerror = resolve;
-          }
-        });
+      // Capture with html2canvas
+      const canvas = await html2canvas(pdfContainer, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+        width: 794,
+        height: 1123,
+        scrollX: 0,
+        scrollY: 0,
+        logging: false,
       });
-      await Promise.all(imagePromises);
 
-      const options = {
-        margin: [15, 15, 15, 15], // 15px margins on all sides
-        filename: `Letterhead-${letterheadId || "Draft"}.pdf`,
-        image: {
-          type: "jpeg",
-          quality: 1.0,
-        },
-        html2canvas: {
-          scale: 1.5,
-          useCORS: true,
-          allowTaint: false,
-          backgroundColor: "#ffffff",
-          width: 794,
-          height: 1123,
-          x: 0,
-          y: 0,
-          scrollX: 0,
-          scrollY: 0,
-          windowWidth: 794,
-          windowHeight: 1123,
-          logging: false,
-        },
-        jsPDF: {
-          unit: "pt",
-          format: "a4",
-          orientation: "portrait",
-        },
-      };
+      // Create PDF with jsPDF
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "pt",
+        format: "a4",
+      });
 
-      // Generate and save PDF
-      await html2pdf().set(options).from(pdfContainer).save();
+      // A4 dimensions in points: 595.28 x 841.89
+      // Add the image with 15px margins (converted to points: 15 * 0.75 = 11.25pt)
+      const imgWidth = 595.28 - 11.25 * 2; // A4 width minus margins
+      const imgHeight = 841.89 - 11.25 * 2; // A4 height minus margins
+
+      pdf.addImage(imgData, "JPEG", 11.25, 11.25, imgWidth, imgHeight);
+
+      // Save the PDF
+      pdf.save(`Letterhead-${letterheadId || "Draft"}.pdf`);
 
       // Cleanup
       document.body.removeChild(pdfContainer);
