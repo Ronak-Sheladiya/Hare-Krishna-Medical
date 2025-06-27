@@ -447,7 +447,7 @@ const AddLetterhead = () => {
   // PRINT FUNCTIONALITY - Generate PDF and open in new window for printing
   const handlePrint = async () => {
     try {
-      setPdfGenerating(true);
+      setPrintLoading(true);
 
       // Generate PDF first
       const pdfBlob = await generateLetterheadPDF();
