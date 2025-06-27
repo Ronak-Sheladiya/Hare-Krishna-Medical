@@ -60,7 +60,7 @@ const AddLetterhead = () => {
         return;
       }
 
-      const response = await safeApiCall(
+      const safeResponse = await safeApiCall(() =>
         api.post("/api/letterheads", {
           title: formData.title,
           content: formData.content,
@@ -69,13 +69,18 @@ const AddLetterhead = () => {
         }),
       );
 
-      if (response?.success) {
-        setSuccess("Letterhead created successfully!");
-        setTimeout(() => {
-          navigate("/admin/letterheads");
-        }, 1500);
+      if (safeResponse?.success) {
+        const response = safeResponse.data;
+        if (response?.success) {
+          setSuccess("Letterhead created successfully!");
+          setTimeout(() => {
+            navigate("/admin/letterheads");
+          }, 1500);
+        } else {
+          throw new Error(response?.message || "Failed to create letterhead");
+        }
       } else {
-        throw new Error(response?.message || "Failed to create letterhead");
+        throw new Error(safeResponse?.error || "Failed to create letterhead");
       }
     } catch (error) {
       console.error("Submit error:", error);
