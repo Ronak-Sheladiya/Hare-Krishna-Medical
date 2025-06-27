@@ -188,16 +188,21 @@ const AdminLetterheads = () => {
 
     try {
       setActionLoading(true);
-      const response = await safeApiCall(
+      const safeResponse = await safeApiCall(() =>
         api.delete(`/api/letterheads/${letterheadToDelete._id}`),
       );
 
-      if (response?.success) {
-        showNotification("Letterhead deleted successfully", "success");
-        fetchLetterheads();
-        setShowDeleteModal(false);
+      if (safeResponse?.success) {
+        const response = safeResponse.data;
+        if (response?.success) {
+          showNotification("Letterhead deleted successfully", "success");
+          fetchLetterheads();
+          setShowDeleteModal(false);
+        } else {
+          throw new Error(response?.message || "Failed to delete letterhead");
+        }
       } else {
-        throw new Error(response?.message || "Failed to delete letterhead");
+        throw new Error(safeResponse?.error || "Failed to delete letterhead");
       }
     } catch (error) {
       console.error("Delete letterhead error:", error);
