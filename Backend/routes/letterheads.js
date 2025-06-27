@@ -87,7 +87,8 @@ const validateUpdateLetterhead = [
     .notEmpty()
     .withMessage("Content cannot be empty"),
   body("issuer.name")
-    .optional()
+    .optional({ values: "falsy" })
+    .isString()
     .trim()
     .withMessage("Issuer name must be a string"),
   body("issuer.designation")
