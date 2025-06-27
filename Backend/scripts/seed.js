@@ -631,8 +631,11 @@ const seedDatabase = async () => {
     console.log("🔐 Seeding verification tokens...");
     const verifications = await seedVerifications(users);
 
-    console.log("🛒 Seeding orders and invoices...");
-    const { orders, invoices } = await seedOrders(users, products);
+    console.log("🛒 Seeding orders...");
+    const orders = await seedOrders(users, products);
+
+    console.log("🧾 Seeding invoices...");
+    const invoices = await seedInvoices(users, orders);
 
     console.log("✅ Database seeding completed successfully!");
     console.log(`📊 Summary:`);
