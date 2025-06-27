@@ -331,6 +331,150 @@ const seedProducts = async () => {
   }
 };
 
+const seedMessages = async (users) => {
+  try {
+    await Message.deleteMany({});
+
+    const messages = [
+      {
+        name: "John Smith",
+        email: "john@example.com",
+        mobile: "9876543210",
+        message:
+          "I would like to know about the delivery charges for bulk orders. Can you provide more information?",
+        status: "Open",
+        priority: "Medium",
+        subject: "Bulk Order Delivery Inquiry",
+        createdAt: new Date("2024-06-20"),
+      },
+      {
+        name: "Jane Doe",
+        email: "jane@example.com",
+        mobile: "9123456789",
+        message:
+          "I received a damaged product in my last order. Please help me with the return process.",
+        status: "In Progress",
+        priority: "High",
+        subject: "Product Return Request",
+        createdAt: new Date("2024-06-18"),
+        adminResponse:
+          "We will process your return request within 24 hours. A representative will contact you soon.",
+        respondedAt: new Date("2024-06-18"),
+        respondedBy: users[0]._id,
+      },
+      {
+        name: "Customer Service",
+        email: "customer@test.com",
+        mobile: "9999999999",
+        message:
+          "What are your store hours and location? I want to visit in person.",
+        status: "Resolved",
+        priority: "Low",
+        subject: "Store Information",
+        createdAt: new Date("2024-06-15"),
+        adminResponse:
+          "Our store is open Monday to Saturday, 9 AM to 8 PM. We are located at 3 Sahyog Complex, Surat, Gujarat.",
+        respondedAt: new Date("2024-06-15"),
+        respondedBy: users[1]._id,
+      },
+    ];
+
+    const createdMessages = await Message.insertMany(messages);
+    console.log(`✅ ${createdMessages.length} messages created`);
+    return createdMessages;
+  } catch (error) {
+    console.error("❌ Error seeding messages:", error);
+    return [];
+  }
+};
+
+const seedLetterheads = async (users) => {
+  try {
+    await Letterhead.deleteMany({});
+
+    const letterheads = [
+      {
+        name: "Official Company Letterhead",
+        description:
+          "Main company letterhead for official documents and invoices",
+        logoUrl:
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTYzOTQ2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SEsgTWVkaWNhbDwvdGV4dD48L3N2Zz4=",
+        companyName: "Hare Krishna Medical Store",
+        address: "3 Sahyog Complex, Surat, Gujarat - 394107",
+        phone: "7698913354",
+        email: "info@harekrishnamedical.com",
+        website: "www.harekrishnamedical.com",
+        isDefault: true,
+        isActive: true,
+        createdBy: users[0]._id,
+        colors: {
+          primary: "#e63946",
+          secondary: "#2c3e50",
+          text: "#333333",
+        },
+      },
+      {
+        name: "Invoice Letterhead",
+        description: "Special letterhead design for invoices and billing",
+        logoUrl:
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjhhNzQ1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SEsgSW52b2ljZTwvdGV4dD48L3N2Zz4=",
+        companyName: "Hare Krishna Medical Store",
+        address: "3 Sahyog Complex, Surat, Gujarat - 394107",
+        phone: "7698913354",
+        email: "billing@harekrishnamedical.com",
+        website: "www.harekrishnamedical.com",
+        isDefault: false,
+        isActive: true,
+        createdBy: users[1]._id,
+        colors: {
+          primary: "#28a745",
+          secondary: "#6c757d",
+          text: "#212529",
+        },
+      },
+    ];
+
+    const createdLetterheads = await Letterhead.insertMany(letterheads);
+    console.log(`✅ ${createdLetterheads.length} letterheads created`);
+    return createdLetterheads;
+  } catch (error) {
+    console.error("❌ Error seeding letterheads:", error);
+    return [];
+  }
+};
+
+const seedVerifications = async (users) => {
+  try {
+    await Verification.deleteMany({});
+
+    const verifications = [
+      {
+        email: "newuser@example.com",
+        token: "verification_token_123456",
+        type: "email_verification",
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
+        createdAt: new Date(),
+      },
+      {
+        email: "john@example.com",
+        token: "password_reset_789012",
+        type: "password_reset",
+        expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
+        createdAt: new Date(),
+      },
+    ];
+
+    const createdVerifications = await Verification.insertMany(verifications);
+    console.log(
+      `✅ ${createdVerifications.length} verification tokens created`,
+    );
+    return createdVerifications;
+  } catch (error) {
+    console.error("❌ Error seeding verifications:", error);
+    return [];
+  }
+};
+
 const seedOrders = async (users, products) => {
   try {
     await Order.deleteMany({});
