@@ -183,9 +183,9 @@ const Order = () => {
 
   const generateQRCode = async (invoiceId) => {
     try {
-      // Fixed: Generate QR for invoice verification using invoiceId
-      const invoiceUrl = `${window.location.origin}/invoice/${invoiceId}`;
-      const qrCodeDataURL = await QRCode.toDataURL(invoiceUrl, {
+      // Generate QR for invoice verification using verify-docs URL format
+      const verifyUrl = `${window.location.origin}/verify-docs?id=${invoiceId}&type=invoice`;
+      const qrCodeDataURL = await QRCode.toDataURL(verifyUrl, {
         width: 200,
         margin: 2,
         color: {
