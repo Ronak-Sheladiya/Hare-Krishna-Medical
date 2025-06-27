@@ -59,18 +59,14 @@ const validateUpdateLetterhead = [
       "invitation",
       "acknowledgment",
       "verification",
+      "document",
     ])
     .withMessage("Invalid letter type"),
   body("recipient.name")
     .optional()
     .trim()
-    .notEmpty()
-    .withMessage("Recipient name cannot be empty"),
-  body("subject")
-    .optional()
-    .trim()
-    .notEmpty()
-    .withMessage("Subject cannot be empty"),
+    .withMessage("Recipient name must be a string"),
+  body("subject").optional().trim().withMessage("Subject must be a string"),
   body("content")
     .optional()
     .trim()
@@ -79,13 +75,11 @@ const validateUpdateLetterhead = [
   body("issuer.name")
     .optional()
     .trim()
-    .notEmpty()
-    .withMessage("Issuer name cannot be empty"),
+    .withMessage("Issuer name must be a string"),
   body("issuer.designation")
     .optional()
     .trim()
-    .notEmpty()
-    .withMessage("Issuer designation cannot be empty"),
+    .withMessage("Issuer designation must be a string"),
 ];
 
 const validateQueryParams = [
