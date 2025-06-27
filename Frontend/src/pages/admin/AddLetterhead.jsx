@@ -804,13 +804,39 @@ const AddLetterhead = () => {
           >
             Close Preview
           </Button>
-          <Button variant="success" onClick={handlePrint}>
-            <i className="bi bi-printer me-2"></i>
-            Print
+          <Button
+            variant="success"
+            onClick={handlePrint}
+            disabled={pdfGenerating}
+          >
+            {pdfGenerating ? (
+              <>
+                <Spinner size="sm" className="me-2" />
+                Generating PDF...
+              </>
+            ) : (
+              <>
+                <i className="bi bi-printer me-2"></i>
+                Print PDF
+              </>
+            )}
           </Button>
-          <Button variant="primary" onClick={handleDownload}>
-            <i className="bi bi-download me-2"></i>
-            Download
+          <Button
+            variant="primary"
+            onClick={handleDownload}
+            disabled={pdfGenerating}
+          >
+            {pdfGenerating ? (
+              <>
+                <Spinner size="sm" className="me-2" />
+                Generating PDF...
+              </>
+            ) : (
+              <>
+                <i className="bi bi-download me-2"></i>
+                Download PDF
+              </>
+            )}
           </Button>
         </Modal.Footer>
       </Modal>
