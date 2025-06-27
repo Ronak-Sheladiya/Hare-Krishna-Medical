@@ -518,25 +518,43 @@ const AddLetterhead = () => {
     try {
       setPdfGenerating(true);
 
-      // Generate PDF first
-      const pdfBlob = await generateLetterheadPDF();
+      // Use html2canvas and jsPDF directly for better control
+      const html2canvas = (await import("html2canvas")).default;
+      const jsPDF = (await import("jspdf")).default;
 
-      if (pdfBlob) {
-        // Create download link and trigger download
-        const filename = `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`;
-        const url = URL.createObjectURL(pdfBlob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        console.log("PDF downloaded successfully:", filename);
-      } else {
-        alert("Failed to generate PDF for download. Please try again.");
+      const letterheadElement = document.getElementById(
+        "letterhead-print-content",
+      );
+      if (!letterheadElement) {
+        alert("Letterhead content not found. Please refresh and try again.");
+        return;
       }
+
+      // Generate canvas
+      const canvas = await html2canvas(letterheadElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+        width: letterheadElement.scrollWidth,
+        height: letterheadElement.scrollHeight,
+      });
+
+      // Create PDF
+      const pdf = new jsPDF("portrait", "mm", "a4");
+      const imgData = canvas.toDataURL("image/png", 1.0);
+
+      // A4 dimensions: 210mm x 297mm
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+
+      // Download
+      const filename = `${formData.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_letterhead.pdf`;
+      pdf.save(filename);
+
+      console.log("PDF downloaded successfully:", filename);
     } catch (error) {
       console.error("Download failed:", error);
       alert("Download failed. Please try again.");
