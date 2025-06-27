@@ -59,7 +59,6 @@ const SocketDiagnostics = () => {
         const backendUrl =
           import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
         const isProduction =
-          window.location.hostname.includes("fly.dev") ||
           window.location.hostname.includes("vercel.app") ||
           window.location.hostname.includes("netlify.app");
 
@@ -85,9 +84,9 @@ const SocketDiagnostics = () => {
           if (isProduction && backendUrl.includes("localhost")) {
             // Try common production patterns
             const hostname = window.location.hostname;
-            if (hostname.includes("fly.dev")) {
-              // For Fly.dev, try to guess backend URL
-              testUrl = `https://${hostname.replace("frontend", "backend")}`;
+            if (hostname.includes("vercel.app")) {
+              // For Vercel, use configured production backend
+              testUrl = "https://hare-krishna-medical.onrender.com";
             } else {
               testUrl = `https://api.${hostname}`;
             }
@@ -272,9 +271,7 @@ const SocketDiagnostics = () => {
       const hostname = window.location.hostname;
       const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
       const isProduction =
-        hostname.includes("fly.dev") ||
-        hostname.includes("vercel.app") ||
-        hostname.includes("netlify.app");
+        hostname.includes("vercel.app") || hostname.includes("netlify.app");
       const backendUrl =
         import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
@@ -367,7 +364,6 @@ const SocketDiagnostics = () => {
   const backendUrl =
     import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
   const isProduction =
-    window.location.hostname.includes("fly.dev") ||
     window.location.hostname.includes("vercel.app") ||
     window.location.hostname.includes("netlify.app");
   const hasConfigIssue = isProduction && backendUrl.includes("localhost");
@@ -481,7 +477,7 @@ const SocketDiagnostics = () => {
                         {import.meta.env.VITE_BACKEND_URL ||
                           "http://localhost:5000"}
                       </code>
-                      {window.location.hostname.includes("fly.dev") &&
+                      {window.location.hostname.includes("vercel.app") &&
                         (
                           import.meta.env.VITE_BACKEND_URL ||
                           "http://localhost:5000"
@@ -627,7 +623,7 @@ const SocketDiagnostics = () => {
       </Row>
 
       {/* Production Configuration Alert */}
-      {window.location.hostname.includes("fly.dev") &&
+      {window.location.hostname.includes("vercel.app") &&
         (import.meta.env.VITE_BACKEND_URL || "http://localhost:5000").includes(
           "localhost",
         ) && (
@@ -636,7 +632,7 @@ const SocketDiagnostics = () => {
               ⚠️ Production Configuration Issue Detected
             </Alert.Heading>
             <p>
-              Your frontend is running on Fly.dev (production) but the backend
+              Your frontend is running on Vercel (production) but the backend
               URL is set to localhost. This will cause connection failures.
             </p>
             <hr />
@@ -649,7 +645,7 @@ const SocketDiagnostics = () => {
                 </li>
                 <li>
                   Point it to your actual backend URL (e.g.,{" "}
-                  <code>https://your-backend.fly.dev</code>)
+                  <code>https://hare-krishna-medical.onrender.com</code>)
                 </li>
                 <li>
                   Ensure your backend allows CORS from your frontend domain
@@ -725,7 +721,7 @@ cd Frontend && npm run dev`}</code>
               <div className="bg-light p-3 rounded">
                 <strong>Production Environment Variable:</strong>
                 <pre className="mt-2 mb-0">
-                  <code>{`VITE_BACKEND_URL=https://your-backend.fly.dev`}</code>
+                  <code>{`VITE_BACKEND_URL=https://hare-krishna-medical.onrender.com`}</code>
                 </pre>
               </div>
             </Col>
