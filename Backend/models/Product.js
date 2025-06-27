@@ -19,38 +19,39 @@ const productSchema = new mongoose.Schema(
       required: [true, "Product description is required"],
       maxlength: [2000, "Description cannot exceed 2000 characters"],
     },
+    company: {
+      type: String,
+      required: [true, "Company name is required"],
+      trim: true,
+    },
     price: {
       type: Number,
       required: [true, "Product price is required"],
       min: [0, "Price cannot be negative"],
     },
-    mrp: {
+    originalPrice: {
       type: Number,
-      required: [true, "MRP is required"],
-      min: [0, "MRP cannot be negative"],
-    },
-    discount: {
-      type: Number,
-      default: 0,
-      min: [0, "Discount cannot be negative"],
-      max: [100, "Discount cannot exceed 100%"],
+      min: [0, "Original price cannot be negative"],
     },
     category: {
       type: String,
       required: [true, "Product category is required"],
       enum: [
-        "Medicine",
-        "Healthcare",
-        "Personal Care",
+        "Pain Relief",
+        "Vitamins",
+        "Cough & Cold",
+        "First Aid",
+        "Medical Devices",
         "Supplements",
-        "Baby Care",
-        "Ayurvedic",
+        "Antibiotics",
+        "Digestive Health",
+        "Heart & Blood Pressure",
+        "Diabetes Care",
       ],
     },
-    subCategory: String,
-    brand: {
+    weight: {
       type: String,
-      required: [true, "Brand is required"],
+      trim: true,
     },
     stock: {
       type: Number,
