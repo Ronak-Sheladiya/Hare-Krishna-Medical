@@ -320,47 +320,61 @@ const AddLetterhead = () => {
 
   // IMMEDIATE PRINT FUNCTIONALITY - Like Invoice Verify Page
   const handlePrint = () => {
-    if (pdfUrl) {
-      // Create print window immediately
-      const printWindow = window.open(
-        pdfUrl,
-        "_blank",
-        "width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes",
-      );
+    const printContent = createLetterheadTemplate();
 
-      if (printWindow) {
-        printWindow.document.title = `${formData.title} - Letterhead Print`;
+    // Create print window immediately with proper PDF-like content
+    const printWindow = window.open("", "_blank");
 
-        const setupPrintHandlers = () => {
-          const afterPrint = () => {
-            // Keep window open after printing for user convenience
-            console.log("Print completed - PDF viewer remains open");
-          };
-
-          printWindow.addEventListener("afterprint", afterPrint);
-        };
-
-        // Immediate PDF loading and printing
-        printWindow.onload = () => {
-          setupPrintHandlers();
-          printWindow.focus();
-          printWindow.print();
-        };
-
-        // Immediate fallback - no timeout
-        try {
-          setupPrintHandlers();
-          printWindow.focus();
-          printWindow.print();
-        } catch (error) {
-          console.log("Fallback print trigger:", error);
-        }
-      }
-    } else if (pdfGenerating) {
-      console.log("PDF is generating, please wait...");
-    } else {
-      alert("PDF not available. Regenerating...");
-      generateLetterheadPDF();
+    if (printWindow) {
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${formData.title} - Letterhead</title>
+            <style>
+              @page {
+                size: A4;
+                margin: 15mm;
+              }
+              @media print {
+                body {
+                  margin: 0 !important;
+                  color: black !important;
+                  font-size: 11px !important;
+                  line-height: 1.3 !important;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                }
+                .no-print {
+                  display: none !important;
+                }
+              }
+              body {
+                font-family: Arial, sans-serif !important;
+                line-height: 1.3 !important;
+                color: #333 !important;
+                font-size: 12px !important;
+              }
+              .letterhead-header {
+                background: #e63946 !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+            </style>
+          </head>
+          <body>
+            ${printContent}
+            <script>
+              window.onload = function() {
+                window.focus();
+                window.print();
+              };
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
     }
   };
 
