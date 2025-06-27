@@ -1268,6 +1268,10 @@ const AddLetterhead = () => {
                   <div className="text-center mt-2">
                     <div className="d-flex justify-content-center gap-3 flex-wrap">
                       <small className="text-muted d-flex align-items-center gap-1">
+                        <i className="bi bi-file-earmark-pdf text-warning"></i>
+                        <span>PDF Available</span>
+                      </small>
+                      <small className="text-muted d-flex align-items-center gap-1">
                         <i className="bi bi-file-earmark-code text-primary"></i>
                         <span>HTML Format</span>
                       </small>
