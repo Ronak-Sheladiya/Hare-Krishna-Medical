@@ -191,11 +191,11 @@ letterheadSchema.pre("save", async function (next) {
       this.qrCodeData = JSON.stringify({
         letterhead_id: this.letterheadId,
         letter_type: this.letterType,
-        recipient_name: this.recipient.name,
-        subject: this.subject,
+        recipient_name: this.recipient?.name || "General",
+        subject: this.subject || this.title,
         issue_date: this.issueDate,
         verification_url: this.verificationUrl,
-        issued_by: this.issuer.name,
+        issued_by: this.issuer?.name || "Hare Krishna Medical Store",
         company: "Hare Krishna Medical Store",
         type: "letterhead_verification",
       });
