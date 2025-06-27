@@ -438,12 +438,12 @@ const AdminLetterheads = () => {
               <td>
                 <Badge bg="info">
                   {letterhead.letterType?.charAt(0).toUpperCase() +
-                    letterhead.letterType?.slice(1)}
+                    letterhead.letterType?.slice(1) || "Document"}
                 </Badge>
               </td>
               <td>
                 <div>
-                  <strong>{letterhead.recipient?.name}</strong>
+                  <strong>{letterhead.recipient?.name || "General"}</strong>
                   {letterhead.recipient?.organization && (
                     <>
                       <br />
@@ -451,6 +451,9 @@ const AdminLetterheads = () => {
                         {letterhead.recipient.organization}
                       </small>
                     </>
+                  )}
+                  {!letterhead.recipient?.name && (
+                    <small className="text-muted">No specific recipient</small>
                   )}
                 </div>
               </td>
