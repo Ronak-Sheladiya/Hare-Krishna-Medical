@@ -495,7 +495,7 @@ const AddLetterhead = () => {
     if (!formData.title || !formData.content) return;
 
     try {
-      setPdfGenerating(true);
+      setDownloadLoading(true);
 
       // Use html2canvas and jsPDF directly for better control
       const html2canvas = (await import("html2canvas")).default;
