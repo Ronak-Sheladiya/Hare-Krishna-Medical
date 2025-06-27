@@ -328,6 +328,15 @@ const ProductDetails = () => {
                         </Badge>
                       )}
                     </div>
+                    {/* Short Description */}
+                    {product.shortDescription && (
+                      <p
+                        className="text-muted mb-3"
+                        style={{ fontSize: "16px", lineHeight: "1.5" }}
+                      >
+                        {product.shortDescription}
+                      </p>
+                    )}
                   </div>
 
                   {/* Price */}
