@@ -81,15 +81,31 @@ const productSchema = new mongoose.Schema(
         alt: String,
       },
     ],
-    specifications: {
-      composition: String,
-      dosage: String,
-      sideEffects: String,
-      precautions: String,
-      manufacturer: String,
-      expiryMonths: Number,
-      weight: String,
-      dimensions: String,
+    composition: {
+      type: String,
+      trim: true,
+    },
+    usage: {
+      type: String,
+      trim: true,
+    },
+    sideEffects: {
+      type: String,
+      trim: true,
+    },
+    contraindications: {
+      type: String,
+      trim: true,
+    },
+    batchNo: {
+      type: String,
+      trim: true,
+    },
+    mfgDate: {
+      type: Date,
+    },
+    expDate: {
+      type: Date,
     },
     tags: [String],
     isActive: {
