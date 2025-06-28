@@ -1,4 +1,4 @@
-const express = require("express");
+""const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -87,14 +87,12 @@ connectDB().then(async (conn) => {
 
       const userCount = await models[0].countDocuments();
       if (userCount === 0) {
-        console.log("🌱 Database is empty, creating empty collections...");
-        await seedDatabase();
-        console.log("✅ Collections created successfully!");
-      } else {
-        console.log(`📊 Database has ${userCount} users, skipping seed.`);
+        console.log("🌱 No users found, initializing all collections...");
       }
+
+      await seedDatabase(); // Always try to seed all collections regardless of users
     } catch (error) {
-      console.error("❌ Database initialization error:", error.message);
+      console.error("❌ Database seeding encountered an issue:", error.message);
     }
 
     try {
