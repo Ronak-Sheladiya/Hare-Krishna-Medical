@@ -7,6 +7,7 @@ const letterheadSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      default: () => `DOC-${uuidv4().split("-")[0]}`, // e.g., USER-ab12cd
     },
     // Header Information (similar to invoice header)
     header: {

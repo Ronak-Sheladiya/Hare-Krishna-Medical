@@ -1,9 +1,15 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { v4: uuidv4 } = require("uuid");
 
 const userSchema = new mongoose.Schema(
   {
+    userId: {
+      type: String,
+      unique: true,
+      default: () => `USER-${uuidv4().split("-")[0]}`, // e.g., USER-ab12cd
+    },
     fullName: {
       type: String,
       required: [true, "Full name is required"],
@@ -30,11 +36,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters"],
-      select: false, // ✅ Hide by default
+      select: false,
     },
     role: {
       type: Number,
-      default: 0, // 0: User, 1: Admin
+      default: 0,
       enum: [0, 1],
     },
     address: {
@@ -48,7 +54,7 @@ const userSchema = new mongoose.Schema(
       default: true,
     },
     lastLogin: Date,
-    avatar: String, // Deprecated
+    avatar: String,
     profileImage: {
       type: String,
       default: "",

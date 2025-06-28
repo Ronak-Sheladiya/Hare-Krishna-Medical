@@ -7,6 +7,7 @@ const invoiceSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      default: () => `INV-${uuidv4().split("-")[0]}`, // e.g., USER-ab12cd
     },
     order: {
       type: mongoose.Schema.Types.ObjectId,
