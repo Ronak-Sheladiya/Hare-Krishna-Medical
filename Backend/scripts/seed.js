@@ -1,5 +1,3 @@
-// ✅ Updated seed.js to only initialize collections without inserting data
-
 const mongoose = require("mongoose");
 require("dotenv").config();
 
@@ -11,7 +9,7 @@ const Message = require("../models/Message");
 const Letterhead = require("../models/Letterhead");
 const Verification = require("../models/Verification");
 
-// MongoDB connection
+// Connect to MongoDB
 const connectDB = async () => {
   try {
     await mongoose.connect(
@@ -29,29 +27,73 @@ const connectDB = async () => {
   }
 };
 
-// ✅ Create all collections without inserting actual data
+// Create and delete dummy data to trigger collection creation
 const seedDatabase = async () => {
   try {
     console.log("🌱 Creating empty collections...");
 
-    const models = [
-      User,
-      Product,
-      Order,
-      Invoice,
-      Message,
-      Letterhead,
-      Verification,
-    ];
+    // Step 1: Create dummy user and product
+    const dummyUser = await User.create({
+      fullName: "Init User",
+      email: "init@example.com",
+      password: "dummyPass123",
+      mobile: "0000000000",
+    });
 
-    for (const Model of models) {
-      const dummy = new Model({});
-      await dummy.save(); // creates collection
-      await Model.deleteOne({ _id: dummy._id }); // removes dummy document
-      console.log(`✅ ${Model.modelName} collection initialized`);
-    }
+    const dummyProduct = await Product.create({
+      name: "Init Product",
+      description: "Dummy description",
+      shortDescription: "Short",
+      category: "Syrup", // must be a valid enum
+      company: "Init Co",
+      price: 0,
+      stock: 0,
+      images: ["https://via.placeholder.com/150"],
+      expiryDate: new Date(),
+    });
 
-    console.log("✅ All collections created without inserting seed data");
+    // Step 2: Use real _ids to create other documents
+    const dummyOrder = await Order.create({
+      user: dummyUser._id,
+      products: [{ product: dummyProduct._id, quantity: 1 }],
+      totalAmount: 0,
+    });
+
+    const dummyInvoice = await Invoice.create({
+      user: dummyUser._id,
+      order: dummyOrder._id,
+      amount: 0,
+      issuedDate: new Date(),
+    });
+
+    const dummyMessage = await Message.create({
+      user: dummyUser._id,
+      content: "Welcome",
+    });
+
+    const dummyLetterhead = await Letterhead.create({
+      user: dummyUser._id,
+      content: "Init Letterhead",
+    });
+
+    const dummyVerification = await Verification.create({
+      user: dummyUser._id,
+      otp: 123456,
+      createdAt: new Date(),
+    });
+
+    // Step 3: Delete all dummy docs
+    await Promise.all([
+      User.deleteOne({ _id: dummyUser._id }),
+      Product.deleteOne({ _id: dummyProduct._id }),
+      Order.deleteOne({ _id: dummyOrder._id }),
+      Invoice.deleteOne({ _id: dummyInvoice._id }),
+      Message.deleteOne({ _id: dummyMessage._id }),
+      Letterhead.deleteOne({ _id: dummyLetterhead._id }),
+      Verification.deleteOne({ _id: dummyVerification._id }),
+    ]);
+
+    console.log("✅ All collections initialized without keeping data");
 
     if (require.main === module) process.exit(0);
   } catch (error) {
@@ -61,10 +103,9 @@ const seedDatabase = async () => {
   }
 };
 
-// Run if script is executed directly
+// If run directly (not imported)
 if (require.main === module) {
   connectDB().then(() => seedDatabase());
 }
 
-// Export function for use in server.js
 module.exports = { seedDatabase };
