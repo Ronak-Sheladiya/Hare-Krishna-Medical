@@ -101,14 +101,17 @@ const UserProfile = () => {
     }
   }, [user]);
 
-  // Debug network connectivity on component mount
+  // Debug network connectivity on component mount (safe for production)
   useEffect(() => {
     const debugNetwork = () => {
       const backendURL = getBackendURL();
       console.log("🌐 UserProfile Network Debug:");
       console.log("- Backend URL:", backendURL);
       console.log("- Current Location:", window.location.href);
-      console.log("- User Agent:", navigator.userAgent);
+      console.log(
+        "- User Agent:",
+        navigator.userAgent.substring(0, 50) + "...",
+      );
       console.log(
         "- Connection Status:",
         navigator.onLine ? "Online" : "Offline",
@@ -118,12 +121,27 @@ const UserProfile = () => {
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
       console.log("- Auth Token Present:", !!token);
-      if (token) {
+      if (token && window.location.hostname === "localhost") {
         console.log("- Token Preview:", token.substring(0, 20) + "...");
+      }
+
+      // Add safe connectivity hint for production
+      if (
+        window.location.hostname !== "localhost" &&
+        window.location.hostname !== "127.0.0.1"
+      ) {
+        console.log(
+          "💡 Tip: Add '?debug=true' to URL to enable network testing tools",
+        );
       }
     };
 
-    debugNetwork();
+    // Only run debug on mount, and catch any errors
+    try {
+      debugNetwork();
+    } catch (error) {
+      console.warn("Debug info collection failed:", error.message);
+    }
   }, []);
 
   const showAlert = (message, variant) => {
