@@ -528,9 +528,11 @@ const UserProfile = () => {
             </Row>
           )}
 
-          {/* Network Debug Section (Development/Testing) */}
+          {/* Network Debug Section (Development/Testing Only) */}
           {(window.location.hostname === "localhost" ||
-            window.location.hostname.includes("fly.dev")) && (
+            window.location.hostname === "127.0.0.1" ||
+            (window.location.hostname.includes("fly.dev") &&
+              window.location.search.includes("debug=true"))) && (
             <Row className="mb-3">
               <Col lg={12}>
                 <div className="text-center">
@@ -549,7 +551,7 @@ const UserProfile = () => {
                     Test Network Connection
                   </Button>
                   <small className="text-muted">
-                    Debug tool for connectivity issues
+                    Debug tool for connectivity issues (dev only)
                   </small>
                 </div>
               </Col>
