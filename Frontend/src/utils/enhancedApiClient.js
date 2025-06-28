@@ -1,7 +1,8 @@
 // Enhanced API client with better error handling and fallback mechanisms
-import { getBackendURL } from "./config.js";
+import { getBackendURL, isProduction } from "./config.js";
 
 const API_BASE_URL = getBackendURL();
+const FALLBACK_BACKEND_URL = "https://hare-krishna-medical.onrender.com";
 
 /**
  * Enhanced API call with comprehensive error handling
