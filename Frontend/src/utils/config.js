@@ -22,7 +22,8 @@ export const isProduction = () => {
     env === "production" ||
     hostname.includes("vercel.app") ||
     hostname.includes("render.com") ||
-    hostname.includes("netlify.app")
+    hostname.includes("netlify.app") ||
+    hostname.includes("fly.dev")
   );
 };
 

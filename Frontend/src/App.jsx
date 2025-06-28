@@ -47,6 +47,12 @@ import BackendDocs from "./pages/BackendDocs";
 import LocalSetupGuide from "./pages/LocalSetupGuide";
 import VercelDeploymentGuide from "./pages/VercelDeploymentGuide";
 import OrderDetails from "./pages/OrderDetails";
+import APITestPage from "./pages/APITestPage";
+import ComprehensiveAPITest from "./pages/ComprehensiveAPITest";
+import DatabaseSeeder from "./pages/DatabaseSeeder";
+import QuickDatabaseFix from "./pages/QuickDatabaseFix";
+import EnvironmentTest from "./pages/EnvironmentTest";
+import BackendDebug from "./pages/BackendDebug";
 
 // Admin
 import AdminDashboard from "./pages/AdminDashboard";
@@ -59,6 +65,7 @@ import AdminInvoices from "./pages/admin/AdminInvoices";
 import AdminPaymentMethods from "./pages/admin/AdminPaymentMethods";
 import AdminLetterheads from "./pages/admin/AdminLetterheads";
 import AddLetterhead from "./pages/admin/AddLetterhead";
+import AdminDevTools from "./pages/admin/AdminDevTools";
 import Verify from "./pages/Verify";
 // User
 import UserDashboard from "./pages/UserDashboard";
@@ -328,6 +335,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/admin/dev-tools"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminDevTools />
+                </ProtectedRoute>
+              }
+            />
 
             {/* User Routes */}
             <Route
@@ -386,6 +401,54 @@ function App() {
               element={
                 <ProtectedRoute adminOnly>
                   <SocketDiagnostics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/api-test"
+              element={
+                <ProtectedRoute adminOnly>
+                  <APITestPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/comprehensive-api-test"
+              element={
+                <ProtectedRoute adminOnly>
+                  <ComprehensiveAPITest />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/database-seeder"
+              element={
+                <ProtectedRoute adminOnly>
+                  <DatabaseSeeder />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/fix-database"
+              element={
+                <ProtectedRoute adminOnly>
+                  <QuickDatabaseFix />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/environment-test"
+              element={
+                <ProtectedRoute adminOnly>
+                  <EnvironmentTest />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/backend-debug"
+              element={
+                <ProtectedRoute adminOnly>
+                  <BackendDebug />
                 </ProtectedRoute>
               }
             />
