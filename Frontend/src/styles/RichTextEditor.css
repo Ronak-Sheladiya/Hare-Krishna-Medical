@@ -1,0 +1,284 @@
+/* Rich Text Editor Styles */
+.rich-text-editor {
+  font-family: "Times New Roman", serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  background-color: #fff;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  min-height: 400px;
+  outline: none;
+  transition:
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
+}
+
+/* Placeholder styling for empty editor */
+.rich-text-editor:empty:before {
+  content: attr(data-placeholder);
+  color: #6c757d;
+  font-style: italic;
+  pointer-events: none;
+}
+
+.rich-text-editor:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.rich-text-editor h1,
+.rich-text-editor h2,
+.rich-text-editor h3,
+.rich-text-editor h4,
+.rich-text-editor h5,
+.rich-text-editor h6 {
+  color: #e63946;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.rich-text-editor h1 {
+  font-size: 2em;
+  border-bottom: 2px solid #e63946;
+  padding-bottom: 0.3em;
+}
+
+.rich-text-editor h2 {
+  font-size: 1.5em;
+}
+
+.rich-text-editor h3 {
+  font-size: 1.3em;
+}
+
+.rich-text-editor p {
+  margin-bottom: 1em;
+  text-align: justify;
+}
+
+.rich-text-editor ul,
+.rich-text-editor ol {
+  margin-left: 2em;
+  margin-bottom: 1em;
+}
+
+.rich-text-editor li {
+  margin-bottom: 0.5em;
+}
+
+.rich-text-editor strong,
+.rich-text-editor b {
+  font-weight: bold;
+  color: #495057;
+}
+
+.rich-text-editor em,
+.rich-text-editor i {
+  font-style: italic;
+  color: #6c757d;
+}
+
+.rich-text-editor u {
+  text-decoration: underline;
+}
+
+.rich-text-editor hr {
+  border: none;
+  border-top: 2px solid #e63946;
+  margin: 2em 0;
+}
+
+.rich-text-editor blockquote {
+  border-left: 4px solid #e63946;
+  padding-left: 1em;
+  margin-left: 0;
+  margin-right: 0;
+  background-color: #f8f9fa;
+  padding: 1em;
+  border-radius: 4px;
+}
+
+.rich-text-editor table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+.rich-text-editor th,
+.rich-text-editor td {
+  border: 1px solid #dee2e6;
+  padding: 0.5em;
+  text-align: left;
+}
+
+.rich-text-editor th {
+  background-color: #e63946;
+  color: white;
+  font-weight: bold;
+}
+
+/* Toolbar Styles */
+.editor-toolbar {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.editor-toolbar .btn {
+  margin: 2px;
+  transition: all 0.2s ease;
+}
+
+.editor-toolbar .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.editor-toolbar .btn-outline-secondary {
+  border-color: #6c757d;
+  color: #6c757d;
+}
+
+.editor-toolbar .btn-outline-secondary:hover {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
+}
+
+.editor-toolbar .btn-outline-secondary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+}
+
+/* Active state for formatting buttons */
+.editor-toolbar .btn.active {
+  background-color: #e63946;
+  border-color: #e63946;
+  color: white;
+}
+
+/* Responsive toolbar */
+@media (max-width: 768px) {
+  .editor-toolbar {
+    padding: 8px;
+  }
+
+  .editor-toolbar .btn {
+    margin: 1px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Letter preview styles */
+.letterhead-preview {
+  background: white;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.letterhead-preview .preview-header {
+  background: linear-gradient(135deg, #e63946, #dc3545);
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.letterhead-preview .preview-content {
+  padding: 30px;
+  font-family: "Times New Roman", serif;
+  line-height: 1.6;
+}
+
+.letterhead-preview .preview-title {
+  color: #e63946;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e63946;
+  padding-bottom: 10px;
+}
+
+.letterhead-preview .preview-body {
+  text-align: justify;
+  font-size: 14px;
+}
+
+.letterhead-preview .preview-footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #dee2e6;
+  font-size: 12px;
+  color: #6c757d;
+  text-align: center;
+}
+
+/* Professional letterhead print styles */
+@media print {
+  .letterhead-print {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .letterhead-header {
+    background: #e63946 !important;
+    color: white !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Live preview container */
+.live-preview-container {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.live-preview-container .preview-wrapper {
+  overflow: hidden;
+  height: 100%;
+}
+
+/* Letterhead template styling */
+.letterhead-template {
+  font-family: Arial, sans-serif;
+  background: white;
+  min-height: 297mm;
+  position: relative;
+}
+
+.letterhead-template .header-section {
+  background: #e63946;
+  color: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.letterhead-template .qr-section {
+  background: white;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.letterhead-template .footer-section {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
