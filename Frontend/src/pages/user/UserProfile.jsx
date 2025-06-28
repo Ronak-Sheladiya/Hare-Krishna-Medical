@@ -1124,14 +1124,52 @@ const UserProfile = () => {
                                       Email Verification
                                     </h6>
                                     <p className="text-muted mb-0">
-                                      Your email address is verified
+                                      {emailVerification.isVerified
+                                        ? "Your email address is verified"
+                                        : "Your email address needs verification"}
                                     </p>
                                   </Col>
                                   <Col md={4} className="text-end">
-                                    <Badge bg="success" className="px-3 py-2">
-                                      <i className="bi bi-check-circle me-1"></i>
-                                      Verified
-                                    </Badge>
+                                    {emailVerification.isVerified ? (
+                                      <Badge bg="success" className="px-3 py-2">
+                                        <i className="bi bi-check-circle me-1"></i>
+                                        Verified
+                                      </Badge>
+                                    ) : (
+                                      <div className="d-flex align-items-center gap-2">
+                                        <Badge
+                                          bg="warning"
+                                          className="px-3 py-2"
+                                        >
+                                          <i className="bi bi-exclamation-triangle me-1"></i>
+                                          Unverified
+                                        </Badge>
+                                        <Button
+                                          variant="outline-primary"
+                                          size="sm"
+                                          onClick={sendVerificationOTP}
+                                          disabled={
+                                            emailVerification.isResending ||
+                                            loading
+                                          }
+                                        >
+                                          {emailVerification.isResending ? (
+                                            <>
+                                              <Spinner
+                                                size="sm"
+                                                className="me-1"
+                                              />
+                                              Sending...
+                                            </>
+                                          ) : (
+                                            <>
+                                              <i className="bi bi-envelope-check me-1"></i>
+                                              Verify
+                                            </>
+                                          )}
+                                        </Button>
+                                      </div>
+                                    )}
                                   </Col>
                                 </Row>
                               </Card.Body>
