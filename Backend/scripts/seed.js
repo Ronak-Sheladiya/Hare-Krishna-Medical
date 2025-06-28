@@ -9,7 +9,7 @@ const Message = require("../models/Message");
 const Letterhead = require("../models/Letterhead");
 const Verification = require("../models/Verification");
 
-// Connect to MongoDB
+// MongoDB Connection
 const connectDB = async () => {
   try {
     await mongoose.connect(
@@ -27,12 +27,29 @@ const connectDB = async () => {
   }
 };
 
-// Create and delete dummy data to trigger collection creation
+// Seed Function to Create and Remove Dummy Data
 const seedDatabase = async () => {
   try {
     console.log("🌱 Creating empty collections...");
 
-    // Step 1: Create dummy user and product
+    // Validate models
+    const models = [
+      ["User", User],
+      ["Product", Product],
+      ["Order", Order],
+      ["Invoice", Invoice],
+      ["Message", Message],
+      ["Letterhead", Letterhead],
+      ["Verification", Verification],
+    ];
+
+    for (const [name, Model] of models) {
+      if (typeof Model.create !== "function") {
+        throw new Error(`Model '${name}' is not a valid Mongoose model. Check its export.`);
+      }
+    }
+
+    // Step 1: Create minimal dummy documents
     const dummyUser = await User.create({
       fullName: "Init User",
       email: "init@example.com",
@@ -44,7 +61,7 @@ const seedDatabase = async () => {
       name: "Init Product",
       description: "Dummy description",
       shortDescription: "Short",
-      category: "Syrup", // must be a valid enum
+      category: "Syrup", // must match enum
       company: "Init Co",
       price: 0,
       stock: 0,
@@ -52,7 +69,6 @@ const seedDatabase = async () => {
       expiryDate: new Date(),
     });
 
-    // Step 2: Use real _ids to create other documents
     const dummyOrder = await Order.create({
       user: dummyUser._id,
       products: [{ product: dummyProduct._id, quantity: 1 }],
@@ -68,7 +84,7 @@ const seedDatabase = async () => {
 
     const dummyMessage = await Message.create({
       user: dummyUser._id,
-      content: "Welcome",
+      content: "Welcome to the app!",
     });
 
     const dummyLetterhead = await Letterhead.create({
@@ -82,7 +98,7 @@ const seedDatabase = async () => {
       createdAt: new Date(),
     });
 
-    // Step 3: Delete all dummy docs
+    // Step 2: Delete dummy docs after creation
     await Promise.all([
       User.deleteOne({ _id: dummyUser._id }),
       Product.deleteOne({ _id: dummyProduct._id }),
@@ -103,9 +119,9 @@ const seedDatabase = async () => {
   }
 };
 
-// If run directly (not imported)
+// Run directly
 if (require.main === module) {
-  connectDB().then(() => seedDatabase());
+  connectDB().then(seedDatabase);
 }
 
 module.exports = { seedDatabase };
