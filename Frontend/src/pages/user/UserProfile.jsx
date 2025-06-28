@@ -376,6 +376,96 @@ const UserProfile = () => {
     }
   };
 
+  // Email verification functions
+  const sendVerificationOTP = async () => {
+    setEmailVerification((prev) => ({ ...prev, isResending: true }));
+
+    try {
+      const result = await enhancedApi.post("/api/auth/resend-otp", {
+        email: personalInfo.email,
+      });
+
+      if (result && result.success !== false) {
+        showAlert("✅ Verification OTP sent to your email!", "success");
+        setEmailVerification((prev) => ({
+          ...prev,
+          showOtpModal: true,
+          otpTimer: 300, // 5 minutes
+        }));
+        startOtpTimer();
+      } else {
+        throw new Error(result?.error || "Failed to send OTP");
+      }
+    } catch (error) {
+      console.error("❌ Send OTP error:", error);
+      showAlert(
+        error.message || "Failed to send OTP. Please try again.",
+        "danger",
+      );
+    } finally {
+      setEmailVerification((prev) => ({ ...prev, isResending: false }));
+    }
+  };
+
+  const verifyEmailOTP = async () => {
+    if (!emailVerification.otp || emailVerification.otp.length !== 6) {
+      showAlert("Please enter a valid 6-digit OTP.", "warning");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result = await enhancedApi.post("/api/auth/verify-otp", {
+        email: personalInfo.email,
+        otp: emailVerification.otp,
+      });
+
+      if (result && result.success !== false) {
+        // Update user state
+        dispatch(updateUser({ emailVerified: true }));
+
+        setEmailVerification({
+          isVerified: true,
+          showOtpModal: false,
+          otp: "",
+          isResending: false,
+          otpTimer: 0,
+        });
+
+        showAlert("✅ Email verified successfully!", "success");
+      } else {
+        throw new Error(result?.error || "Invalid OTP. Please try again.");
+      }
+    } catch (error) {
+      console.error("❌ OTP verification error:", error);
+      showAlert(
+        error.message || "OTP verification failed. Please try again.",
+        "danger",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startOtpTimer = () => {
+    const timer = setInterval(() => {
+      setEmailVerification((prev) => {
+        if (prev.otpTimer <= 1) {
+          clearInterval(timer);
+          return { ...prev, otpTimer: 0 };
+        }
+        return { ...prev, otpTimer: prev.otpTimer - 1 };
+      });
+    }, 1000);
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
   return (
     <div className="fade-in">
       {/* Hero Section */}
