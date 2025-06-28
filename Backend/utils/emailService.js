@@ -47,10 +47,12 @@ class EmailService {
     );
   }
 
-  // Enhanced email template with professional red theme
+  // Enhanced email template with professional red theme and logo
   getEmailTemplate(content, type = "general") {
     const websiteUrl =
       process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app";
+    const logoUrl =
+      "https://cdn.builder.io/api/v1/image/assets%2F90997914131d463e9569e4229fc868cf%2Ff973ea075ade4240809d79d29970f08e?format=webp&width=800";
 
     return `
       <!DOCTYPE html>
@@ -118,7 +120,7 @@ class EmailService {
 
                     <!-- Professional Logo Section -->
                     <div class="logo-container" style="background: rgba(255, 255, 255, 0.98); border-radius: 50%; padding: 15px; width: 120px; height: 120px; margin: 0 auto 25px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 4px rgba(255,255,255,0.1), 0 0 0 8px rgba(255,255,255,0.05);">
-                      <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=200"
+                      <img src="${logoUrl}"
                            alt="Hare Krishna Medical Store Logo"
                            style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(230,57,70,0.1);" />
                     </div>
@@ -215,7 +217,7 @@ class EmailService {
 
                       <!-- Small Footer Logo -->
                       <div style="margin-bottom: 15px;">
-                        <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=100"
+                        <img src="${logoUrl}"
                              alt="Hare Krishna Medical Store"
                              style="width: 40px; height: 40px; border-radius: 50%; opacity: 0.8;" />
                       </div>

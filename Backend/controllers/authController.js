@@ -216,6 +216,7 @@ class AuthController {
           role: user.role,
           address: user.address,
           lastLogin: user.lastLogin,
+          emailVerified: user.emailVerified,
         },
       });
     } catch (error) {
@@ -275,6 +276,8 @@ class AuthController {
           role: user.role,
           address: user.address,
           preferences: user.preferences,
+          emailVerified: user.emailVerified,
+          lastLogin: user.lastLogin,
         },
       });
     } catch (error) {

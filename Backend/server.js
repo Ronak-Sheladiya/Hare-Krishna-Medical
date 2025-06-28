@@ -189,6 +189,11 @@ const routes = [
     file: "./routes/letterheads",
     name: "Letterheads",
   },
+  {
+    path: "/api/mail",
+    file: "./routes/mail",
+    name: "Mail",
+  },
 ];
 
 console.log("🔗 Loading API routes...");
@@ -260,8 +265,13 @@ app.use("/api/*", (req, res) => {
       "GET /api/health",
       "POST /api/auth/register",
       "POST /api/auth/login",
+      "POST /api/auth/verify-otp",
+      "POST /api/auth/resend-otp",
       "GET /api/messages",
       "POST /api/messages/contact",
+      "GET /api/mail/sent",
+      "POST /api/mail/send-test",
+      "GET /api/mail/status",
     ],
   });
 });

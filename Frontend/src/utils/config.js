@@ -23,7 +23,8 @@ export const isProduction = () => {
     hostname.includes("vercel.app") ||
     hostname.includes("render.com") ||
     hostname.includes("netlify.app") ||
-    hostname.includes("fly.dev")
+    hostname.includes("fly.dev") ||
+    (hostname !== "localhost" && hostname !== "127.0.0.1")
   );
 };
 
@@ -40,22 +41,31 @@ export const isDevelopment = () => {
  * @returns {string}
  */
 export const getBackendURL = () => {
+  const hostname =
+    typeof window !== "undefined" ? window.location.hostname : "";
+
+  // Always use production backend if explicitly set in environment
+  if (import.meta.env.VITE_BACKEND_URL) {
+    console.log(
+      `🔧 Using explicit backend URL: ${import.meta.env.VITE_BACKEND_URL}`,
+    );
+    return import.meta.env.VITE_BACKEND_URL;
+  }
+
   // Check if we're in production environment
   if (isProduction()) {
-    return (
-      import.meta.env.VITE_BACKEND_URL ||
-      "https://hare-krishna-medical.onrender.com"
+    console.log(
+      `🚀 Production environment detected (${hostname}), using production backend`,
     );
+    return "https://hare-krishna-medical.onrender.com";
   }
 
   // Development environment - try local first, fallback to production
   const localBackend = "http://localhost:5000";
-  const productionBackend =
-    import.meta.env.VITE_BACKEND_URL_FALLBACK ||
-    "https://hare-krishna-medical.onrender.com";
-
-  // Return local backend URL if specified, otherwise fallback
-  return import.meta.env.VITE_BACKEND_URL || localBackend;
+  console.log(
+    `🛠️ Development environment detected, using local backend: ${localBackend}`,
+  );
+  return localBackend;
 };
 
 /**

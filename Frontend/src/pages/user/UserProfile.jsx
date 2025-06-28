@@ -17,6 +17,9 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { updateUser } from "../../store/slices/authSlice";
 import { api } from "../../utils/apiClient";
+import { enhancedApi } from "../../utils/enhancedApiClient";
+import { getBackendURL } from "../../utils/config";
+import { showNetworkDebugInfo } from "../../utils/networkDebug";
 import {
   PageHeroSection,
   ThemeCard,
@@ -61,6 +64,15 @@ const UserProfile = () => {
     confirmPassword: "",
   });
 
+  // Email Verification State
+  const [emailVerification, setEmailVerification] = useState({
+    isVerified: false,
+    showOtpModal: false,
+    otp: "",
+    isResending: false,
+    otpTimer: 0,
+  });
+
   // Initialize form data from user
   useEffect(() => {
     if (user) {
@@ -80,8 +92,57 @@ const UserProfile = () => {
         pincode: user.address?.pincode || user.pincode || "",
         landmark: user.address?.landmark || user.landmark || "",
       });
+
+      // Set email verification status
+      setEmailVerification((prev) => ({
+        ...prev,
+        isVerified: user.emailVerified || false,
+      }));
     }
   }, [user]);
+
+  // Debug network connectivity on component mount (safe for production)
+  useEffect(() => {
+    const debugNetwork = () => {
+      const backendURL = getBackendURL();
+      console.log("🌐 UserProfile Network Debug:");
+      console.log("- Backend URL:", backendURL);
+      console.log("- Current Location:", window.location.href);
+      console.log(
+        "- User Agent:",
+        navigator.userAgent.substring(0, 50) + "...",
+      );
+      console.log(
+        "- Connection Status:",
+        navigator.onLine ? "Online" : "Offline",
+      );
+
+      // Check if auth token exists
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+      console.log("- Auth Token Present:", !!token);
+      if (token && window.location.hostname === "localhost") {
+        console.log("- Token Preview:", token.substring(0, 20) + "...");
+      }
+
+      // Add safe connectivity hint for production
+      if (
+        window.location.hostname !== "localhost" &&
+        window.location.hostname !== "127.0.0.1"
+      ) {
+        console.log(
+          "💡 Tip: Add '?debug=true' to URL to enable network testing tools",
+        );
+      }
+    };
+
+    // Only run debug on mount, and catch any errors
+    try {
+      debugNetwork();
+    } catch (error) {
+      console.warn("Debug info collection failed:", error.message);
+    }
+  }, []);
 
   const showAlert = (message, variant) => {
     setAlert({ show: true, message, variant });
@@ -142,10 +203,17 @@ const UserProfile = () => {
         profileImage: personalInfo.profileImage,
       };
 
-      // Make actual API call to update profile
-      const result = await api.put("/api/auth/update-profile", profileData);
+      console.log("🔄 Attempting to update profile with data:", profileData);
 
-      if (result.success !== false) {
+      // Make actual API call to update profile using enhanced client
+      const result = await enhancedApi.put(
+        "/api/auth/update-profile",
+        profileData,
+      );
+
+      console.log("📊 Profile update API response:", result);
+
+      if (result && result.success !== false) {
         // Update Redux store with new user data
         dispatch(
           updateUser({
@@ -167,14 +235,32 @@ const UserProfile = () => {
 
         showAlert("Personal information updated successfully!", "success");
       } else {
-        throw new Error(result.error || "Failed to update profile");
+        const errorMsg =
+          result?.error || result?.message || "Failed to update profile";
+        console.error("❌ Profile update failed:", errorMsg);
+        throw new Error(errorMsg);
       }
     } catch (error) {
-      console.error("Profile update error:", error);
-      showAlert(
-        error.message || "Failed to update information. Please try again.",
-        "danger",
-      );
+      console.error("❌ Profile update error:", error);
+
+      // Enhanced error message based on error type
+      let errorMessage = "Failed to update information. Please try again.";
+
+      if (error.message === "Failed to fetch") {
+        errorMessage =
+          "Unable to connect to server. Please check your internet connection and try again.";
+      } else if (error.message.includes("timeout")) {
+        errorMessage = "Request timed out. Please try again.";
+      } else if (
+        error.message.includes("401") ||
+        error.message.includes("unauthorized")
+      ) {
+        errorMessage = "Session expired. Please log in again.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      showAlert(errorMessage, "danger");
     } finally {
       setLoading(false);
     }
@@ -185,12 +271,16 @@ const UserProfile = () => {
     setLoading(true);
 
     try {
-      // Make actual API call to update address
-      const result = await api.put("/api/auth/update-profile", {
+      console.log("🔄 Attempting to update address with data:", addressInfo);
+
+      // Make actual API call to update address using enhanced client
+      const result = await enhancedApi.put("/api/auth/update-profile", {
         address: addressInfo,
       });
 
-      if (result.success !== false) {
+      console.log("📊 Address update API response:", result);
+
+      if (result && result.success !== false) {
         // Update Redux store with new address data
         dispatch(
           updateUser({
@@ -207,14 +297,32 @@ const UserProfile = () => {
 
         showAlert("Address updated successfully!", "success");
       } else {
-        throw new Error(result.error || "Failed to update address");
+        const errorMsg =
+          result?.error || result?.message || "Failed to update address";
+        console.error("❌ Address update failed:", errorMsg);
+        throw new Error(errorMsg);
       }
     } catch (error) {
-      console.error("Address update error:", error);
-      showAlert(
-        error.message || "Failed to update address. Please try again.",
-        "danger",
-      );
+      console.error("❌ Address update error:", error);
+
+      // Enhanced error message based on error type
+      let errorMessage = "Failed to update address. Please try again.";
+
+      if (error.message === "Failed to fetch") {
+        errorMessage =
+          "Unable to connect to server. Please check your internet connection and try again.";
+      } else if (error.message.includes("timeout")) {
+        errorMessage = "Request timed out. Please try again.";
+      } else if (
+        error.message.includes("401") ||
+        error.message.includes("unauthorized")
+      ) {
+        errorMessage = "Session expired. Please log in again.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      showAlert(errorMessage, "danger");
     } finally {
       setLoading(false);
     }
@@ -236,8 +344,8 @@ const UserProfile = () => {
     setLoading(true);
 
     try {
-      // Make actual API call to change password
-      const result = await api.put("/api/auth/change-password", {
+      // Make actual API call to change password using enhanced client
+      const result = await enhancedApi.put("/api/auth/change-password", {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       });
@@ -264,6 +372,175 @@ const UserProfile = () => {
     }
   };
 
+  // Network connectivity test function with enhanced error handling
+  const testNetworkConnection = async () => {
+    setLoading(true);
+    try {
+      console.log("🔄 Starting network connectivity test...");
+      const results = await showNetworkDebugInfo();
+
+      if (
+        results?.tests?.health?.success &&
+        results?.tests?.apiClient?.success
+      ) {
+        showAlert("✅ Network connectivity is working properly!", "success");
+      } else if (results?.tests) {
+        // Show specific error details
+        let errorDetails = "Issues found:\n";
+        if (!results.tests.health?.success) {
+          errorDetails += `• Health check: ${results.tests.health?.error || "Failed"}\n`;
+        }
+        if (!results.tests.apiClient?.success) {
+          errorDetails += `• API client: ${results.tests.apiClient?.error || "Failed"}\n`;
+        }
+        if (results.tests.auth?.success === false) {
+          errorDetails += `• Authentication: ${results.tests.auth?.error || "Failed"}\n`;
+        }
+
+        console.warn("Network connectivity issues:", errorDetails);
+        showAlert(
+          "❌ Network connectivity issues detected. Check console for details.",
+          "warning",
+        );
+      } else {
+        throw new Error("Network test returned invalid results");
+      }
+    } catch (error) {
+      console.error("❌ Network test failed:", error);
+
+      // Show user-friendly error message based on error type
+      let userMessage = "Network test failed. ";
+      if (error.message === "Failed to fetch") {
+        userMessage +=
+          "Cannot reach the server. Please check your internet connection.";
+      } else if (error.message.includes("timeout")) {
+        userMessage +=
+          "Request timed out. The server may be slow or unreachable.";
+      } else if (error.name === "TypeError") {
+        userMessage += "Network request error. Please try again.";
+      } else {
+        userMessage += error.message || "Unknown error occurred.";
+      }
+
+      showAlert("❌ " + userMessage, "danger");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Email verification functions
+  const sendVerificationOTP = async () => {
+    if (!personalInfo.email) {
+      showAlert("Please enter your email address first.", "warning");
+      return;
+    }
+
+    setEmailVerification((prev) => ({ ...prev, isResending: true }));
+
+    try {
+      console.log(`🔄 Sending OTP to: ${personalInfo.email}`);
+      const result = await enhancedApi.post("/api/auth/resend-otp", {
+        email: personalInfo.email,
+      });
+
+      console.log("✅ OTP send result:", result);
+
+      if (result && result.success !== false) {
+        showAlert("✅ Verification OTP sent to your email!", "success");
+        setEmailVerification((prev) => ({
+          ...prev,
+          showOtpModal: true,
+          otpTimer: 300, // 5 minutes
+        }));
+        startOtpTimer();
+      } else {
+        throw new Error(
+          result?.message || result?.error || "Failed to send OTP",
+        );
+      }
+    } catch (error) {
+      console.error("❌ Send OTP error:", error);
+
+      // More specific error messages
+      let errorMessage = "Failed to send OTP. Please try again.";
+
+      if (error.message.includes("internet connection")) {
+        errorMessage =
+          "❌ Connection failed. Please check your internet connection and try again.";
+      } else if (error.message.includes("server")) {
+        errorMessage =
+          "❌ Server temporarily unavailable. Please try again in a moment.";
+      } else if (error.message.includes("already verified")) {
+        errorMessage = "✅ Your email is already verified!";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      showAlert(errorMessage, "danger");
+    } finally {
+      setEmailVerification((prev) => ({ ...prev, isResending: false }));
+    }
+  };
+
+  const verifyEmailOTP = async () => {
+    if (!emailVerification.otp || emailVerification.otp.length !== 6) {
+      showAlert("Please enter a valid 6-digit OTP.", "warning");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result = await enhancedApi.post("/api/auth/verify-otp", {
+        email: personalInfo.email,
+        otp: emailVerification.otp,
+      });
+
+      if (result && result.success !== false) {
+        // Update user state
+        dispatch(updateUser({ emailVerified: true }));
+
+        setEmailVerification({
+          isVerified: true,
+          showOtpModal: false,
+          otp: "",
+          isResending: false,
+          otpTimer: 0,
+        });
+
+        showAlert("✅ Email verified successfully!", "success");
+      } else {
+        throw new Error(result?.error || "Invalid OTP. Please try again.");
+      }
+    } catch (error) {
+      console.error("❌ OTP verification error:", error);
+      showAlert(
+        error.message || "OTP verification failed. Please try again.",
+        "danger",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startOtpTimer = () => {
+    const timer = setInterval(() => {
+      setEmailVerification((prev) => {
+        if (prev.otpTimer <= 1) {
+          clearInterval(timer);
+          return { ...prev, otpTimer: 0 };
+        }
+        return { ...prev, otpTimer: prev.otpTimer - 1 };
+      });
+    }, 1000);
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
   return (
     <div className="fade-in">
       {/* Hero Section */}
@@ -288,6 +565,36 @@ const UserProfile = () => {
                 >
                   {alert.message}
                 </Alert>
+              </Col>
+            </Row>
+          )}
+
+          {/* Network Debug Section (Development/Testing Only) */}
+          {(window.location.hostname === "localhost" ||
+            window.location.hostname === "127.0.0.1" ||
+            (window.location.hostname.includes("fly.dev") &&
+              window.location.search.includes("debug=true"))) && (
+            <Row className="mb-3">
+              <Col lg={12}>
+                <div className="text-center">
+                  <Button
+                    variant="outline-info"
+                    size="sm"
+                    onClick={testNetworkConnection}
+                    disabled={loading}
+                    className="me-2"
+                  >
+                    {loading ? (
+                      <Spinner size="sm" className="me-1" />
+                    ) : (
+                      <i className="bi bi-wifi me-1"></i>
+                    )}
+                    Test Network Connection
+                  </Button>
+                  <small className="text-muted">
+                    Debug tool for connectivity issues (dev only)
+                  </small>
+                </div>
               </Col>
             </Row>
           )}
@@ -497,22 +804,75 @@ const UserProfile = () => {
                                 <i className="bi bi-envelope me-2"></i>Email
                                 Address
                               </Form.Label>
-                              <Form.Control
-                                type="email"
-                                placeholder="Enter your email"
-                                value={personalInfo.email}
-                                onChange={(e) =>
-                                  setPersonalInfo({
-                                    ...personalInfo,
-                                    email: e.target.value,
-                                  })
-                                }
-                                className="form-control-custom"
-                                disabled
-                              />
-                              <Form.Text className="text-muted">
-                                Contact support to change your email address
-                              </Form.Text>
+                              <div className="position-relative">
+                                <Form.Control
+                                  type="email"
+                                  placeholder="Enter your email"
+                                  value={personalInfo.email}
+                                  onChange={(e) =>
+                                    setPersonalInfo({
+                                      ...personalInfo,
+                                      email: e.target.value,
+                                    })
+                                  }
+                                  className="form-control-custom"
+                                  disabled
+                                />
+                                <div className="position-absolute top-50 end-0 translate-middle-y pe-3">
+                                  {emailVerification.isVerified ? (
+                                    <Badge
+                                      bg="success"
+                                      className="d-flex align-items-center"
+                                    >
+                                      <i className="bi bi-check-circle me-1"></i>
+                                      Verified
+                                    </Badge>
+                                  ) : (
+                                    <Badge
+                                      bg="warning"
+                                      className="d-flex align-items-center"
+                                    >
+                                      <i className="bi bi-exclamation-triangle me-1"></i>
+                                      Unverified
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                              {emailVerification.isVerified ? (
+                                <Form.Text className="text-success">
+                                  <i className="bi bi-check-circle me-1"></i>
+                                  Your email address is verified
+                                </Form.Text>
+                              ) : (
+                                <div className="mt-2">
+                                  <Form.Text className="text-warning d-block mb-2">
+                                    <i className="bi bi-exclamation-triangle me-1"></i>
+                                    Your email is not verified. Click below to
+                                    verify.
+                                  </Form.Text>
+                                  <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    onClick={sendVerificationOTP}
+                                    disabled={
+                                      emailVerification.isResending || loading
+                                    }
+                                    className="d-flex align-items-center"
+                                  >
+                                    {emailVerification.isResending ? (
+                                      <>
+                                        <Spinner size="sm" className="me-2" />
+                                        Sending OTP...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <i className="bi bi-envelope-check me-2"></i>
+                                        Verify Email
+                                      </>
+                                    )}
+                                  </Button>
+                                </div>
+                              )}
                             </Form.Group>
                           </Col>
                         </Row>
@@ -787,14 +1147,52 @@ const UserProfile = () => {
                                       Email Verification
                                     </h6>
                                     <p className="text-muted mb-0">
-                                      Your email address is verified
+                                      {emailVerification.isVerified
+                                        ? "Your email address is verified"
+                                        : "Your email address needs verification"}
                                     </p>
                                   </Col>
                                   <Col md={4} className="text-end">
-                                    <Badge bg="success" className="px-3 py-2">
-                                      <i className="bi bi-check-circle me-1"></i>
-                                      Verified
-                                    </Badge>
+                                    {emailVerification.isVerified ? (
+                                      <Badge bg="success" className="px-3 py-2">
+                                        <i className="bi bi-check-circle me-1"></i>
+                                        Verified
+                                      </Badge>
+                                    ) : (
+                                      <div className="d-flex align-items-center gap-2">
+                                        <Badge
+                                          bg="warning"
+                                          className="px-3 py-2"
+                                        >
+                                          <i className="bi bi-exclamation-triangle me-1"></i>
+                                          Unverified
+                                        </Badge>
+                                        <Button
+                                          variant="outline-primary"
+                                          size="sm"
+                                          onClick={sendVerificationOTP}
+                                          disabled={
+                                            emailVerification.isResending ||
+                                            loading
+                                          }
+                                        >
+                                          {emailVerification.isResending ? (
+                                            <>
+                                              <Spinner
+                                                size="sm"
+                                                className="me-1"
+                                              />
+                                              Sending...
+                                            </>
+                                          ) : (
+                                            <>
+                                              <i className="bi bi-envelope-check me-1"></i>
+                                              Verify
+                                            </>
+                                          )}
+                                        </Button>
+                                      </div>
+                                    )}
                                   </Col>
                                 </Row>
                               </Card.Body>
@@ -953,6 +1351,136 @@ const UserProfile = () => {
             icon={loading ? "bi-arrow-clockwise" : "bi-check-circle"}
           >
             {loading ? "Changing..." : "Change Password"}
+          </ThemeButton>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Email Verification OTP Modal */}
+      <Modal
+        show={emailVerification.showOtpModal}
+        onHide={() =>
+          setEmailVerification((prev) => ({
+            ...prev,
+            showOtpModal: false,
+            otp: "",
+          }))
+        }
+        centered
+        size="md"
+      >
+        <Modal.Header closeButton className="border-0">
+          <Modal.Title>
+            <i className="bi bi-envelope-check me-2"></i>Verify Your Email
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="px-4">
+          <div className="text-center mb-4">
+            <div className="mb-3">
+              <i
+                className="bi bi-envelope-check"
+                style={{ fontSize: "48px", color: "#e63946" }}
+              ></i>
+            </div>
+            <h6 className="mb-2">Verification Code Sent!</h6>
+            <p className="text-muted mb-0">
+              We've sent a 6-digit verification code to
+            </p>
+            <p className="fw-bold text-primary mb-3">{personalInfo.email}</p>
+            <p className="text-muted small">
+              Please enter the code below to verify your email address.
+            </p>
+          </div>
+
+          <Form>
+            <Form.Group className="mb-4">
+              <Form.Label className="form-label-custom text-center d-block">
+                <i className="bi bi-shield-check me-2"></i>Enter 6-Digit OTP
+              </Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="000000"
+                value={emailVerification.otp}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+                  setEmailVerification((prev) => ({ ...prev, otp: value }));
+                }}
+                className="form-control-custom text-center"
+                style={{
+                  fontSize: "18px",
+                  letterSpacing: "8px",
+                  fontWeight: "600",
+                }}
+                maxLength="6"
+                autoComplete="off"
+              />
+              <Form.Text className="text-muted text-center d-block mt-2">
+                <i className="bi bi-info-circle me-1"></i>
+                Enter the 6-digit code sent to your email
+              </Form.Text>
+            </Form.Group>
+
+            {emailVerification.otpTimer > 0 && (
+              <div className="text-center mb-3">
+                <Badge bg="info" className="px-3 py-2">
+                  <i className="bi bi-clock me-1"></i>
+                  Code expires in: {formatTime(emailVerification.otpTimer)}
+                </Badge>
+              </div>
+            )}
+
+            <div className="text-center mb-3">
+              <Button
+                variant="link"
+                size="sm"
+                onClick={sendVerificationOTP}
+                disabled={
+                  emailVerification.isResending ||
+                  emailVerification.otpTimer > 240
+                } // Disable for first 1 minute
+                className="text-decoration-none"
+              >
+                {emailVerification.isResending ? (
+                  <>
+                    <Spinner size="sm" className="me-2" />
+                    Resending...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-arrow-clockwise me-2"></i>
+                    Resend OTP
+                  </>
+                )}
+              </Button>
+              {emailVerification.otpTimer > 240 && (
+                <Form.Text className="text-muted d-block">
+                  You can resend the code in{" "}
+                  {formatTime(emailVerification.otpTimer - 240)}
+                </Form.Text>
+              )}
+            </div>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer className="border-0 px-4">
+          <Button
+            variant="secondary"
+            onClick={() =>
+              setEmailVerification((prev) => ({
+                ...prev,
+                showOtpModal: false,
+                otp: "",
+              }))
+            }
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <ThemeButton
+            variant="primary"
+            onClick={verifyEmailOTP}
+            disabled={loading || emailVerification.otp.length !== 6}
+            icon={loading ? "bi-arrow-clockwise" : "bi-check-circle"}
+          >
+            {loading ? "Verifying..." : "Verify Email"}
           </ThemeButton>
         </Modal.Footer>
       </Modal>
