@@ -62,8 +62,8 @@ const letterheadSchema = new mongoose.Schema(
     // Metadata
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      ref: "Ref",
+      
     },
     tags: [
       {
