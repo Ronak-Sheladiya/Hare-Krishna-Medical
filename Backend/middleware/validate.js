@@ -25,6 +25,15 @@ const validateUserRegistration = [
   body("password")
     .isLength({ min: 6 })
     .withMessage("Password must be at least 6 characters"),
+  body("address")
+    .optional()
+    .custom((value) => {
+      // Allow both string and object formats
+      if (typeof value === "string" || typeof value === "object") {
+        return true;
+      }
+      throw new Error("Address must be a string or object");
+    }),
   handleValidationErrors,
 ];
 
@@ -41,14 +50,18 @@ const validateProduct = [
     .isLength({ min: 2, max: 200 })
     .withMessage("Product name must be between 2 and 200 characters"),
   body("shortDescription")
+    .optional()
     .trim()
-    .isLength({ min: 10, max: 100 })
-    .withMessage("Short description must be between 10 and 100 characters"),
+    .isLength({ min: 5, max: 100 })
+    .withMessage("Short description must be between 5 and 100 characters"),
   body("description")
     .trim()
     .isLength({ min: 10, max: 2000 })
     .withMessage("Description must be between 10 and 2000 characters"),
-  body("company").trim().notEmpty().withMessage("Company name is required"),
+  body("company")
+    .optional()
+    .trim()
+    .withMessage("Company name must be a valid string"),
   body("price")
     .isFloat({ min: 0 })
     .withMessage("Price must be a positive number"),
@@ -57,24 +70,22 @@ const validateProduct = [
     .isFloat({ min: 0 })
     .withMessage("Original price must be a positive number"),
   body("category")
-    .isIn([
-      "Pain Relief",
-      "Vitamins",
-      "Cough & Cold",
-      "First Aid",
-      "Medical Devices",
-      "Supplements",
-      "Antibiotics",
-      "Digestive Health",
-      "Heart & Blood Pressure",
-      "Diabetes Care",
-    ])
-    .withMessage("Invalid category"),
+    .optional()
+    .trim()
+    .withMessage("Category must be a valid string"),
+  body("weight").optional().trim().withMessage("Weight must be a valid string"),
+  body("productBenefits")
+    .optional()
+    .trim()
+    .withMessage("Product benefits must be a valid string"),
+  body("usageInstructions")
+    .optional()
+    .trim()
+    .withMessage("Usage instructions must be a valid string"),
   body("stock")
     .isInt({ min: 0 })
     .withMessage("Stock must be a non-negative integer"),
   body("images")
-    .optional()
     .isArray({ min: 1, max: 5 })
     .withMessage("Product must have between 1 and 5 images"),
   handleValidationErrors,
