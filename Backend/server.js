@@ -7,6 +7,19 @@ const http = require("http");
 const socketIo = require("socket.io");
 require("dotenv").config();
 
+// Startup validation
+console.log("🚀 Starting Hare Krishna Medical Store Backend...");
+console.log(`📍 Environment: ${process.env.NODE_ENV || "development"}`);
+console.log(
+  `🔐 JWT Secret: ${process.env.JWT_SECRET ? "✅ Configured" : "❌ Missing"}`,
+);
+console.log(
+  `📧 Email User: ${process.env.EMAIL_USER ? "✅ Configured" : "❌ Missing"}`,
+);
+console.log(
+  `🌐 Primary Domain: ${process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app (default)"}`,
+);
+
 const testUserRoute = require("./routes/testUser");
 
 const app = express();
