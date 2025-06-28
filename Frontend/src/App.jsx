@@ -36,6 +36,7 @@ import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
 import VerificationStatus from "./pages/VerificationStatus";
 import AccessDenied from "./pages/AccessDenied";
@@ -231,6 +232,14 @@ function App() {
               element={
                 <AuthRoute>
                   <ForgotPassword />
+                </AuthRoute>
+              }
+            />
+            <Route
+              path="/reset-password/:token"
+              element={
+                <AuthRoute>
+                  <ResetPassword />
                 </AuthRoute>
               }
             />

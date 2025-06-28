@@ -10,16 +10,14 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { api } from "../utils/apiClient";
 
 const ForgotPassword = () => {
-  const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: New Password
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [emailSent, setEmailSent] = useState(false);
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
@@ -28,97 +26,24 @@ const ForgotPassword = () => {
     setMessage("");
 
     try {
-      // Simulate API call to send OTP
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Call forgot password API
+      const response = await api.post("/auth/forgot-password", { email });
 
-      // Mock validation - in real app, this would be an API call
-      const validEmails = [
-        "admin@gmail.com",
-        "user@example.com",
-        "hkmedicalamroli@gmail.com",
-      ];
-
-      if (!validEmails.includes(email)) {
-        throw new Error("Email not found in our records");
+      if (response.success === false) {
+        throw new Error(
+          response.error || response.message || "Failed to send reset email",
+        );
       }
-
-      setMessage("OTP sent successfully to your email address");
-      setStep(2);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOTP = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    setMessage("");
-
-    try {
-      // Simulate API call to verify OTP
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Mock OTP verification - in real app, this would be an API call
-      if (otp !== "123456") {
-        throw new Error("Invalid OTP. Please try again.");
-      }
-
-      setMessage("OTP verified successfully");
-      setStep(3);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResetPassword = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    setMessage("");
-
-    try {
-      // Validation
-      if (newPassword.length < 6) {
-        throw new Error("Password must be at least 6 characters long");
-      }
-
-      if (newPassword !== confirmPassword) {
-        throw new Error("Passwords do not match");
-      }
-
-      // Simulate API call to reset password
-      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       setMessage(
-        "Password reset successfully! You can now login with your new password.",
+        response.message ||
+          "Password reset email sent successfully! Please check your email.",
       );
-
-      // Reset form after 3 seconds and redirect to login
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 3000);
+      setEmailSent(true);
     } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const resendOTP = async () => {
-    setLoading(true);
-    setError("");
-    setMessage("");
-
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setMessage("OTP resent successfully");
-    } catch (err) {
-      setError("Failed to resend OTP");
+      const errorMessage =
+        err.message || "Failed to send reset email. Please try again.";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -138,38 +63,12 @@ const ForgotPassword = () => {
                     className="img-fluid mb-3"
                     style={{ maxHeight: "80px" }}
                   />
-                  <h3 className="text-medical-dark">Reset Password</h3>
+                  <h3 className="text-medical-dark">Forgot Password</h3>
                   <p className="text-muted">
-                    {step === 1 && "Enter your email to receive OTP"}
-                    {step === 2 && "Enter the OTP sent to your email"}
-                    {step === 3 && "Create your new password"}
+                    {!emailSent
+                      ? "Enter your email address and we'll send you a reset link"
+                      : "Check your email for the reset link"}
                   </p>
-                </div>
-
-                {/* Progress Indicator */}
-                <div className="mb-4">
-                  <div className="d-flex justify-content-between align-items-center">
-                    <div
-                      className={`step-indicator ${step >= 1 ? "active" : ""}`}
-                    >
-                      <div className="step-number">1</div>
-                      <small>Email</small>
-                    </div>
-                    <div className="step-line"></div>
-                    <div
-                      className={`step-indicator ${step >= 2 ? "active" : ""}`}
-                    >
-                      <div className="step-number">2</div>
-                      <small>OTP</small>
-                    </div>
-                    <div className="step-line"></div>
-                    <div
-                      className={`step-indicator ${step >= 3 ? "active" : ""}`}
-                    >
-                      <div className="step-number">3</div>
-                      <small>Password</small>
-                    </div>
-                  </div>
                 </div>
 
                 {message && (
@@ -186,8 +85,7 @@ const ForgotPassword = () => {
                   </Alert>
                 )}
 
-                {/* Step 1: Email */}
-                {step === 1 && (
+                {!emailSent ? (
                   <Form onSubmit={handleSendOTP}>
                     <Form.Group className="mb-3">
                       <Form.Label>Email Address</Form.Label>
@@ -200,7 +98,7 @@ const ForgotPassword = () => {
                         disabled={loading}
                       />
                       <Form.Text className="text-muted">
-                        We'll send an OTP to this email address
+                        We'll send a password reset link to this email address
                       </Form.Text>
                     </Form.Group>
                     <Button
@@ -211,103 +109,34 @@ const ForgotPassword = () => {
                       {loading ? (
                         <>
                           <Spinner size="sm" className="me-2" />
-                          Sending OTP...
+                          Sending Reset Link...
                         </>
                       ) : (
-                        "Send OTP"
+                        "Send Reset Link"
                       )}
                     </Button>
                   </Form>
-                )}
-
-                {/* Step 2: OTP Verification */}
-                {step === 2 && (
-                  <Form onSubmit={handleVerifyOTP}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Enter OTP</Form.Label>
-                      <Form.Control
-                        type="text"
-                        placeholder="Enter 6-digit OTP"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
-                        maxLength={6}
-                        required
-                        disabled={loading}
-                        className="text-center"
-                      />
-                      <Form.Text className="text-muted">
-                        OTP sent to {email}. Demo OTP: 123456
-                      </Form.Text>
-                    </Form.Group>
-                    <Button
-                      type="submit"
-                      className="btn-medical-primary w-100 mb-3"
-                      disabled={loading || otp.length !== 6}
-                    >
-                      {loading ? (
-                        <>
-                          <Spinner size="sm" className="me-2" />
-                          Verifying...
-                        </>
-                      ) : (
-                        "Verify OTP"
-                      )}
-                    </Button>
-                    <div className="text-center">
-                      <Button
-                        variant="link"
-                        onClick={resendOTP}
-                        disabled={loading}
-                        className="text-medical-blue"
-                      >
-                        Resend OTP
-                      </Button>
+                ) : (
+                  <div className="text-center">
+                    <div className="mb-4">
+                      <i
+                        className="bi bi-envelope-check"
+                        style={{ fontSize: "3rem", color: "#28a745" }}
+                      ></i>
                     </div>
-                  </Form>
-                )}
-
-                {/* Step 3: New Password */}
-                {step === 3 && (
-                  <Form onSubmit={handleResetPassword}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>New Password</Form.Label>
-                      <Form.Control
-                        type="password"
-                        placeholder="Enter new password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        minLength={6}
-                        required
-                        disabled={loading}
-                      />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Confirm New Password</Form.Label>
-                      <Form.Control
-                        type="password"
-                        placeholder="Confirm new password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        minLength={6}
-                        required
-                        disabled={loading}
-                      />
-                    </Form.Group>
-                    <Button
-                      type="submit"
-                      className="btn-medical-primary w-100"
-                      disabled={loading}
-                    >
-                      {loading ? (
-                        <>
-                          <Spinner size="sm" className="me-2" />
-                          Resetting Password...
-                        </>
-                      ) : (
-                        "Reset Password"
-                      )}
-                    </Button>
-                  </Form>
+                    <h5 className="text-success mb-3">Email Sent!</h5>
+                    <p className="text-muted mb-4">
+                      We've sent a password reset link to{" "}
+                      <strong>{email}</strong>.
+                      <br />
+                      Please check your email and click the link to reset your
+                      password.
+                    </p>
+                    <small className="text-muted">
+                      <i className="bi bi-info-circle me-1"></i>
+                      If you don't see the email, please check your spam folder.
+                    </small>
+                  </div>
                 )}
 
                 <div className="text-center mt-4">
@@ -326,42 +155,64 @@ const ForgotPassword = () => {
       </Container>
 
       <style>{`
-        .step-indicator {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          position: relative;
+        .medical-form {
+          border-radius: 15px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+          border: none;
         }
 
-        .step-number {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          background: #e9ecef;
-          color: #6c757d;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: bold;
-          margin-bottom: 8px;
+        .btn-medical-primary {
+          background: linear-gradient(135deg, #dc3545, #c82333);
+          border: none;
+          border-radius: 10px;
+          font-weight: 600;
+          padding: 12px 24px;
           transition: all 0.3s ease;
         }
 
-        .step-indicator.active .step-number {
-          background: var(--medical-red);
-          color: white;
+        .btn-medical-primary:hover {
+          background: linear-gradient(135deg, #c82333, #bd2130);
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
         }
 
-        .step-line {
-          flex: 1;
-          height: 2px;
-          background: #e9ecef;
-          margin: 0 20px;
-          margin-top: -20px;
+        .btn-medical-primary:disabled {
+          background: #6c757d;
+          transform: none;
+          box-shadow: none;
         }
 
-        .step-indicator.active ~ .step-line {
-          background: var(--medical-red);
+        .text-medical-dark {
+          color: #2c3e50;
+        }
+
+        .text-medical-blue {
+          color: #007bff;
+        }
+
+        .form-control {
+          border-radius: 10px;
+          border: 2px solid #e9ecef;
+          padding: 12px 16px;
+          transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+          border-color: #dc3545;
+          box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+
+        .section-padding {
+          padding: 80px 0;
+          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+        }
+
+        .alert {
+          border-radius: 10px;
+          border: none;
         }
       `}</style>
     </div>
