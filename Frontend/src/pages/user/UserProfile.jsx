@@ -311,8 +311,8 @@ const UserProfile = () => {
     setLoading(true);
 
     try {
-      // Make actual API call to change password
-      const result = await api.put("/api/auth/change-password", {
+      // Make actual API call to change password using enhanced client
+      const result = await enhancedApi.put("/api/auth/change-password", {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       });
