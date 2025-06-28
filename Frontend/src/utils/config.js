@@ -23,7 +23,8 @@ export const isProduction = () => {
     hostname.includes("vercel.app") ||
     hostname.includes("render.com") ||
     hostname.includes("netlify.app") ||
-    hostname.includes("fly.dev")
+    hostname.includes("fly.dev") ||
+    (hostname !== "localhost" && hostname !== "127.0.0.1")
   );
 };
 
