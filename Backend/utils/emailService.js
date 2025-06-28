@@ -236,7 +236,8 @@ class EmailService {
   async sendWelcomeEmail(email, fullName) {
     console.log("📧 Sending professional welcome email to:", email);
 
-    const websiteUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const websiteUrl =
+      process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app";
 
     const welcomeContent = `
       <!-- Personalized Welcome Message -->
