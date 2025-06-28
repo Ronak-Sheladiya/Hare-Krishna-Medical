@@ -13,10 +13,16 @@ const auth = async (req, res, next) => {
       });
     }
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "dev-secret-key",
-    );
+    // Validate JWT secret exists in production
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      console.error("❌ JWT_SECRET environment variable not set");
+      return res.status(500).json({
+        message: "Server configuration error. Please contact administrator.",
+      });
+    }
+
+    const decoded = jwt.verify(token, jwtSecret);
 
     let user;
     if (shouldUseFallback()) {
