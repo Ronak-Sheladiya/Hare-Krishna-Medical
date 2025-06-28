@@ -148,21 +148,50 @@ process.on("SIGINT", () => {
   server.close(() => console.log("💾 Server shutdown complete"));
 });
 
-// Routes
-app.use("/api/test", testUserRoute);
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/users", require("./routes/users"));
-app.use("/api/products", require("./routes/products"));
-app.use("/api/orders", require("./routes/orders"));
-app.use("/api/invoices", require("./routes/invoices"));
-app.use("/api/messages", require("./routes/messages"));
-app.use("/api/analytics", require("./routes/analytics"));
-app.use("/api/upload", require("./routes/upload"));
-app.use("/api/seed", require("./routes/seed"));
-app.use("/api/dev", require("./routes/dev"));
-app.use("/api/verification", require("./routes/verification"));
-app.use("/api/admin/notifications", require("./routes/notifications"));
-app.use("/api/letterheads", require("./routes/letterheads"));
+// Routes with error handling
+const routes = [
+  { path: "/api/test", file: testUserRoute, name: "Test" },
+  { path: "/api/auth", file: "./routes/auth", name: "Auth" },
+  { path: "/api/users", file: "./routes/users", name: "Users" },
+  { path: "/api/products", file: "./routes/products", name: "Products" },
+  { path: "/api/orders", file: "./routes/orders", name: "Orders" },
+  { path: "/api/invoices", file: "./routes/invoices", name: "Invoices" },
+  { path: "/api/messages", file: "./routes/messages", name: "Messages" },
+  { path: "/api/analytics", file: "./routes/analytics", name: "Analytics" },
+  { path: "/api/upload", file: "./routes/upload", name: "Upload" },
+  { path: "/api/seed", file: "./routes/seed", name: "Seed" },
+  { path: "/api/dev", file: "./routes/dev", name: "Dev" },
+  {
+    path: "/api/verification",
+    file: "./routes/verification",
+    name: "Verification",
+  },
+  {
+    path: "/api/admin/notifications",
+    file: "./routes/notifications",
+    name: "Notifications",
+  },
+  {
+    path: "/api/letterheads",
+    file: "./routes/letterheads",
+    name: "Letterheads",
+  },
+];
+
+console.log("🔗 Loading API routes...");
+routes.forEach((route) => {
+  try {
+    const routeHandler =
+      typeof route.file === "string" ? require(route.file) : route.file;
+    app.use(route.path, routeHandler);
+    console.log(`✅ ${route.name} routes loaded: ${route.path}`);
+  } catch (error) {
+    console.error(
+      `❌ Failed to load ${route.name} routes (${route.path}):`,
+      error.message,
+    );
+  }
+});
 
 // Health Check
 app.get("/api/health", (req, res) => {
