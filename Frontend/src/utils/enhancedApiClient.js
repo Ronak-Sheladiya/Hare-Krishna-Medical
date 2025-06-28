@@ -5,7 +5,7 @@ const API_BASE_URL = getBackendURL();
 const FALLBACK_BACKEND_URL = "https://hare-krishna-medical.onrender.com";
 
 /**
- * Enhanced API call with comprehensive error handling
+ * Enhanced API call with comprehensive error handling and fallback
  */
 const enhancedApiCall = async (endpoint, options = {}) => {
   const config = {
@@ -31,20 +31,61 @@ const enhancedApiCall = async (endpoint, options = {}) => {
     console.warn("Could not access localStorage/sessionStorage for token");
   }
 
-  const fullUrl = `${API_BASE_URL}${endpoint}`;
-  console.log(`🌐 API Call: ${config.method || "GET"} ${fullUrl}`);
+  // Try primary backend first
+  const primaryUrl = `${API_BASE_URL}${endpoint}`;
+  console.log(`🌐 API Call: ${config.method || "GET"} ${primaryUrl}`);
 
   try {
-    // Create abort controller for timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), config.timeout);
+    const response = await makeRequest(primaryUrl, config);
+    console.log(`📊 API Response: ${response.status} ${response.statusText}`);
+    return await handleResponse(response);
+  } catch (primaryError) {
+    console.warn(`❌ Primary backend failed: ${primaryError.message}`);
 
-    const response = await fetch(fullUrl, {
+    // Try fallback backend if primary fails and we're in production
+    if (API_BASE_URL !== FALLBACK_BACKEND_URL && (isProduction() || primaryError.message.includes("Failed to fetch"))) {
+      const fallbackUrl = `${FALLBACK_BACKEND_URL}${endpoint}`;
+      console.log(`🔄 Trying fallback backend: ${fallbackUrl}`);
+
+      try {
+        const response = await makeRequest(fallbackUrl, config);
+        console.log(`📊 Fallback API Response: ${response.status} ${response.statusText}`);
+        return await handleResponse(response);
+      } catch (fallbackError) {
+        console.error(`❌ Fallback backend also failed: ${fallbackError.message}`);
+        throw primaryError; // Throw the original error
+      }
+    }
+
+    throw primaryError;
+  }
+};
+
+/**
+ * Make HTTP request with timeout
+ */
+const makeRequest = async (url, config) => {
+  // Create abort controller for timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), config.timeout);
+
+  try {
+    const response = await fetch(url, {
       ...config,
       signal: controller.signal,
     });
-
     clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+};
+
+/**
+ * Handle API response
+ */
+const handleResponse = async (response) => {
 
     console.log(`📊 API Response: ${response.status} ${response.statusText}`);
 
