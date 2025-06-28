@@ -1,3 +1,5 @@
+// ✅ Fixed `scripts/seed.js` to avoid validation errors and improve data consistency
+
 const mongoose = require("mongoose");
 require("dotenv").config();
 
@@ -9,7 +11,6 @@ const Message = require("../models/Message");
 const Letterhead = require("../models/Letterhead");
 const Verification = require("../models/Verification");
 
-// MongoDB Connection
 const connectDB = async () => {
   try {
     await mongoose.connect(
@@ -20,108 +21,231 @@ const connectDB = async () => {
         useUnifiedTopology: true,
       }
     );
-    console.log("✅ Connected to MongoDB for initializing collections");
+    console.log("✅ Connected to MongoDB for seeding");
   } catch (error) {
     console.error("❌ MongoDB connection failed:", error.message);
     process.exit(1);
   }
 };
 
-// Seed Function to Create and Remove Dummy Data
+const hashPasswords = async (users) => {
+  for (const user of users) {
+    user.password = await require("bcryptjs").hash(user.password, 10);
+  }
+};
+
+const seedUsers = async () => {
+  await User.deleteMany({});
+  const users = [
+    {
+      fullName: "Admin User",
+      email: "admin@harekrishnamedical.com",
+      mobile: "7698913354",
+      password: "admin123",
+      role: 1,
+      isActive: true,
+      emailVerified: true,
+      address: {
+        street: "3 Sahyog Complex",
+        city: "Surat",
+        state: "Gujarat",
+        pincode: "394107",
+      },
+    },
+    {
+      fullName: "Ronak Sheladiya",
+      email: "ronaksheladiya62@gmail.com",
+      mobile: "9876543211",
+      password: "admin@123",
+      role: 1,
+      isActive: true,
+      emailVerified: true,
+      address: {
+        street: "Admin Complex",
+        city: "Surat",
+        state: "Gujarat",
+        pincode: "394107",
+      },
+    },
+    {
+      fullName: "Mayur Gajera",
+      email: "mayurgajera098@gmail.com",
+      mobile: "9876543212",
+      password: "admin@123",
+      role: 1,
+      isActive: true,
+      emailVerified: true,
+      address: {
+        street: "Admin Complex",
+        city: "Surat",
+        state: "Gujarat",
+        pincode: "394107",
+      },
+    },
+    {
+      fullName: "John Smith",
+      email: "john@example.com",
+      mobile: "9876543210",
+      password: "user123",
+      role: 0,
+      isActive: true,
+      emailVerified: true,
+      address: {
+        street: "123 Main Street",
+        city: "Surat",
+        state: "Gujarat",
+        pincode: "395007",
+      },
+    },
+    {
+      fullName: "Jane Doe",
+      email: "jane@example.com",
+      mobile: "9123456789",
+      password: "user123",
+      role: 0,
+      isActive: true,
+      emailVerified: true,
+      address: {
+        street: "456 Oak Avenue",
+        city: "Ahmedabad",
+        state: "Gujarat",
+        pincode: "380001",
+      },
+    },
+  ];
+  await hashPasswords(users);
+  const createdUsers = await User.insertMany(users);
+  console.log(`✅ ${createdUsers.length} users created`);
+  return createdUsers;
+};
+
+const seedProducts = async () => {
+  await Product.deleteMany({});
+  const products = [
+    {
+      name: "Paracetamol 500mg",
+      description: "Pain reliever and fever reducer",
+      category: "Tablet",
+      price: 20,
+      stock: 100,
+      minStock: 10,
+      manufacturer: "ABC Pharma",
+      expiryDate: new Date("2026-12-31"),
+    },
+    {
+      name: "Cough Syrup",
+      description: "Relief from cough and cold",
+      category: "Syrup",
+      price: 60,
+      stock: 50,
+      minStock: 5,
+      manufacturer: "XYZ Labs",
+      expiryDate: new Date("2025-08-15"),
+    },
+  ];
+  const createdProducts = await Product.insertMany(products);
+  console.log(`✅ ${createdProducts.length} products created`);
+  return createdProducts;
+};
+
+const seedMessages = async (users) => {
+  await Message.deleteMany({});
+  const messages = users.map((user) => ({
+    user: user._id,
+    content: `Welcome, ${user.fullName}!`,
+  }));
+  const createdMessages = await Message.insertMany(messages);
+  console.log(`✅ ${createdMessages.length} messages created`);
+  return createdMessages;
+};
+
+const seedLetterheads = async (users) => {
+  await Letterhead.deleteMany({});
+  const letters = users.map((user) => ({
+    user: user._id,
+    content: `Letterhead for ${user.fullName}`,
+  }));
+  const createdLetters = await Letterhead.insertMany(letters);
+  console.log(`✅ ${createdLetters.length} letterheads created`);
+  return createdLetters;
+};
+
+const seedVerifications = async (users) => {
+  await Verification.deleteMany({});
+  const verifications = users.map((user) => ({
+    user: user._id,
+    otp: Math.floor(100000 + Math.random() * 900000),
+    createdAt: new Date(),
+  }));
+  const createdVerifications = await Verification.insertMany(verifications);
+  console.log(`✅ ${createdVerifications.length} verifications created`);
+  return createdVerifications;
+};
+
+const seedOrders = async (users, products) => {
+  await Order.deleteMany({});
+  const orders = users.map((user, idx) => ({
+    user: user._id,
+    products: [
+      {
+        product: products[idx % products.length]._id,
+        quantity: 2,
+      },
+    ],
+    totalAmount: products[idx % products.length].price * 2,
+    status: "Placed",
+  }));
+  const createdOrders = await Order.insertMany(orders);
+  console.log(`✅ ${createdOrders.length} orders created`);
+  return createdOrders;
+};
+
+const seedInvoices = async (users, orders) => {
+  await Invoice.deleteMany({});
+  const invoices = orders.map((order) => ({
+    user: order.user,
+    order: order._id,
+    amount: order.totalAmount,
+    issuedDate: new Date(),
+  }));
+  const createdInvoices = await Invoice.insertMany(invoices);
+  console.log(`✅ ${createdInvoices.length} invoices created`);
+  return createdInvoices;
+};
+
 const seedDatabase = async () => {
   try {
-    console.log("🌱 Creating empty collections...");
+    console.log("🌱 Starting database seeding...");
+    if (mongoose.connection.readyState !== 1) await connectDB();
 
-    // Validate models
-    const models = [
-      ["User", User],
-      ["Product", Product],
-      ["Order", Order],
-      ["Invoice", Invoice],
-      ["Message", Message],
-      ["Letterhead", Letterhead],
-      ["Verification", Verification],
-    ];
+    const users = await seedUsers();
+    const products = await seedProducts();
+    const messages = await seedMessages(users);
+    const letterheads = await seedLetterheads(users);
+    const verifications = await seedVerifications(users);
+    const orders = await seedOrders(users, products);
+    const invoices = await seedInvoices(users, orders);
 
-    for (const [name, Model] of models) {
-      if (typeof Model.create !== "function") {
-        throw new Error(`Model '${name}' is not a valid Mongoose model. Check its export.`);
-      }
-    }
-
-    // Step 1: Create minimal dummy documents
-    const dummyUser = await User.create({
-      fullName: "Init User",
-      email: "init@example.com",
-      password: "dummyPass123",
-      mobile: "9586599031",
+    console.log("✅ Seeding completed! Summary:");
+    console.log({
+      Users: users?.length,
+      Products: products?.length,
+      Messages: messages?.length,
+      Letterheads: letterheads?.length,
+      Verifications: verifications?.length,
+      Orders: orders?.length,
+      Invoices: invoices?.length,
     });
-
-    const dummyProduct = await Product.create({
-      name: "Init Product",
-      description: "Dummy description",
-      shortDescription: "Short",
-      category: "Syrup", // must match enum
-      company: "Init Co",
-      price: 0,
-      stock: 0,
-      images: ["https://via.placeholder.com/150"],
-      expiryDate: new Date(),
-    });
-
-    const dummyOrder = await Order.create({
-      user: dummyUser._id,
-      products: [{ product: dummyProduct._id, quantity: 1 }],
-      totalAmount: 0,
-    });
-
-    const dummyInvoice = await Invoice.create({
-      user: dummyUser._id,
-      order: dummyOrder._id,
-      amount: 0,
-      issuedDate: new Date(),
-    });
-
-    const dummyMessage = await Message.create({
-      user: dummyUser._id,
-      content: "Welcome to the app!",
-    });
-
-    const dummyLetterhead = await Letterhead.create({
-      user: dummyUser._id,
-      content: "Init Letterhead",
-    });
-
-    const dummyVerification = await Verification.create({
-      user: dummyUser._id,
-      otp: 123456,
-      createdAt: new Date(),
-    });
-
-    // Step 2: Delete dummy docs after creation
-    await Promise.all([
-      User.deleteOne({ _id: dummyUser._id }),
-      Product.deleteOne({ _id: dummyProduct._id }),
-      Order.deleteOne({ _id: dummyOrder._id }),
-      Invoice.deleteOne({ _id: dummyInvoice._id }),
-      Message.deleteOne({ _id: dummyMessage._id }),
-      Letterhead.deleteOne({ _id: dummyLetterhead._id }),
-      Verification.deleteOne({ _id: dummyVerification._id }),
-    ]);
-
-    console.log("✅ All collections initialized without keeping data");
 
     if (require.main === module) process.exit(0);
+    return { users, products, messages, letterheads, verifications, orders, invoices };
   } catch (error) {
-    console.error("❌ Failed to initialize collections:", error);
+    console.error("❌ Database seeding failed:", error);
     if (require.main === module) process.exit(1);
     throw error;
   }
 };
 
-// Run directly
-if (require.main === module) {
-  connectDB().then(seedDatabase);
-}
+if (require.main === module) seedDatabase();
 
 module.exports = { seedDatabase };

@@ -49,15 +49,7 @@ const productSchema = new mongoose.Schema(
       required: [true, "Stock is required"],
       min: [0, "Stock must be a non-negative number"],
     },
-    minStock: {
-      type: Number,
-      required: [true, "Minimum stock is required"],
-      min: [0, "Minimum stock must be a non-negative number"],
-    },
-    expiryDate: {
-      type: Date,
-      required: [true, "Expiry date is required"],
-    },
+    
     images: {
       type: [String],
       required: [true, "At least one product image is required"],
