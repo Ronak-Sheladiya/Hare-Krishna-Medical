@@ -212,6 +212,14 @@ class EmailService {
 
                     <!-- Legal & Verification Notice -->
                     <div style="border-top: 2px solid rgba(255,255,255,0.2); padding-top: 20px; text-align: center;">
+
+                      <!-- Small Footer Logo -->
+                      <div style="margin-bottom: 15px;">
+                        <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=100"
+                             alt="Hare Krishna Medical Store"
+                             style="width: 40px; height: 40px; border-radius: 50%; opacity: 0.8;" />
+                      </div>
+
                       <p style="margin: 0 0 8px 0; font-size: 12px; opacity: 0.8; font-weight: 500;">
                         🔒 This email is digitally verified and contains confidential medical information
                       </p>
