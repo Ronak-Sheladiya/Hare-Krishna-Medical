@@ -7,6 +7,19 @@ const http = require("http");
 const socketIo = require("socket.io");
 require("dotenv").config();
 
+// Startup validation
+console.log("🚀 Starting Hare Krishna Medical Store Backend...");
+console.log(`📍 Environment: ${process.env.NODE_ENV || "development"}`);
+console.log(
+  `🔐 JWT Secret: ${process.env.JWT_SECRET ? "✅ Configured" : "❌ Missing"}`,
+);
+console.log(
+  `📧 Email User: ${process.env.EMAIL_USER ? "✅ Configured" : "❌ Missing"}`,
+);
+console.log(
+  `🌐 Primary Domain: ${process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app (default)"}`,
+);
+
 const testUserRoute = require("./routes/testUser");
 
 const app = express();
@@ -148,21 +161,50 @@ process.on("SIGINT", () => {
   server.close(() => console.log("💾 Server shutdown complete"));
 });
 
-// Routes
-app.use("/api/test", testUserRoute);
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/users", require("./routes/users"));
-app.use("/api/products", require("./routes/products"));
-app.use("/api/orders", require("./routes/orders"));
-app.use("/api/invoices", require("./routes/invoices"));
-app.use("/api/messages", require("./routes/messages"));
-app.use("/api/analytics", require("./routes/analytics"));
-app.use("/api/upload", require("./routes/upload"));
-app.use("/api/seed", require("./routes/seed"));
-app.use("/api/dev", require("./routes/dev"));
-app.use("/api/verification", require("./routes/verification"));
-app.use("/api/admin/notifications", require("./routes/notifications"));
-app.use("/api/letterheads", require("./routes/letterheads"));
+// Routes with error handling
+const routes = [
+  { path: "/api/test", file: testUserRoute, name: "Test" },
+  { path: "/api/auth", file: "./routes/auth", name: "Auth" },
+  { path: "/api/users", file: "./routes/users", name: "Users" },
+  { path: "/api/products", file: "./routes/products", name: "Products" },
+  { path: "/api/orders", file: "./routes/orders", name: "Orders" },
+  { path: "/api/invoices", file: "./routes/invoices", name: "Invoices" },
+  { path: "/api/messages", file: "./routes/messages", name: "Messages" },
+  { path: "/api/analytics", file: "./routes/analytics", name: "Analytics" },
+  { path: "/api/upload", file: "./routes/upload", name: "Upload" },
+  { path: "/api/seed", file: "./routes/seed", name: "Seed" },
+  { path: "/api/dev", file: "./routes/dev", name: "Dev" },
+  {
+    path: "/api/verification",
+    file: "./routes/verification",
+    name: "Verification",
+  },
+  {
+    path: "/api/admin/notifications",
+    file: "./routes/notifications",
+    name: "Notifications",
+  },
+  {
+    path: "/api/letterheads",
+    file: "./routes/letterheads",
+    name: "Letterheads",
+  },
+];
+
+console.log("🔗 Loading API routes...");
+routes.forEach((route) => {
+  try {
+    const routeHandler =
+      typeof route.file === "string" ? require(route.file) : route.file;
+    app.use(route.path, routeHandler);
+    console.log(`✅ ${route.name} routes loaded: ${route.path}`);
+  } catch (error) {
+    console.error(
+      `❌ Failed to load ${route.name} routes (${route.path}):`,
+      error.message,
+    );
+  }
+});
 
 // Health Check
 app.get("/api/health", (req, res) => {
@@ -175,6 +217,71 @@ app.get("/api/health", (req, res) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || "development",
+  });
+});
+
+// Route debugging endpoint (development only)
+if (process.env.NODE_ENV !== "production") {
+  app.get("/api/debug/routes", (req, res) => {
+    const routes = [];
+    app._router.stack.forEach(function (r) {
+      if (r.route && r.route.path) {
+        routes.push({
+          method: Object.keys(r.route.methods)[0].toUpperCase(),
+          path: r.route.path,
+        });
+      } else if (r.name === "router") {
+        r.handle.stack.forEach(function (nestedR) {
+          if (nestedR.route) {
+            routes.push({
+              method: Object.keys(nestedR.route.methods)[0].toUpperCase(),
+              path:
+                r.regexp.source
+                  .replace("\\", "")
+                  .replace("(?:", "")
+                  .replace(")?", "") + nestedR.route.path,
+            });
+          }
+        });
+      }
+    });
+    res.json({ routes, total: routes.length });
+  });
+}
+
+// 404 Handler for API routes
+app.use("/api/*", (req, res) => {
+  console.log(`❌ API route not found: ${req.method} ${req.originalUrl}`);
+  res.status(404).json({
+    success: false,
+    message: `API route not found: ${req.method} ${req.originalUrl}`,
+    timestamp: new Date().toISOString(),
+    availableRoutes: [
+      "GET /api/health",
+      "POST /api/auth/register",
+      "POST /api/auth/login",
+      "GET /api/messages",
+      "POST /api/messages/contact",
+    ],
+  });
+});
+
+// Global Error Handler
+app.use((error, req, res, next) => {
+  console.error(`❌ Server Error on ${req.method} ${req.originalUrl}:`, error);
+
+  if (res.headersSent) {
+    return next(error);
+  }
+
+  res.status(500).json({
+    success: false,
+    message: "Internal server error",
+    error:
+      process.env.NODE_ENV === "production"
+        ? "Something went wrong"
+        : error.message,
+    timestamp: new Date().toISOString(),
   });
 });
 

@@ -49,7 +49,8 @@ class EmailService {
 
   // Enhanced email template with professional red theme
   getEmailTemplate(content, type = "general") {
-    const websiteUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const websiteUrl =
+      process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app";
 
     return `
       <!DOCTYPE html>
@@ -115,11 +116,11 @@ class EmailService {
                   <!-- Header Content -->
                   <div class="content-padding" style="position: relative; padding: 45px 40px; text-align: center; color: #ffffff;">
 
-                    <!-- Enhanced Logo Section -->
-                    <div class="logo-container" style="background: rgba(255, 255, 255, 0.98); border-radius: 50%; padding: 20px; width: 120px; height: 120px; margin: 0 auto 25px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 4px rgba(255,255,255,0.1), 0 0 0 8px rgba(255,255,255,0.05);">
-                      <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #e63946, #dc2626); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-                        🏥
-                      </div>
+                    <!-- Professional Logo Section -->
+                    <div class="logo-container" style="background: rgba(255, 255, 255, 0.98); border-radius: 50%; padding: 15px; width: 120px; height: 120px; margin: 0 auto 25px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 4px rgba(255,255,255,0.1), 0 0 0 8px rgba(255,255,255,0.05);">
+                      <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=200"
+                           alt="Hare Krishna Medical Store Logo"
+                           style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(230,57,70,0.1);" />
                     </div>
 
                     <!-- Enhanced Company Name -->
@@ -211,6 +212,14 @@ class EmailService {
 
                     <!-- Legal & Verification Notice -->
                     <div style="border-top: 2px solid rgba(255,255,255,0.2); padding-top: 20px; text-align: center;">
+
+                      <!-- Small Footer Logo -->
+                      <div style="margin-bottom: 15px;">
+                        <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=100"
+                             alt="Hare Krishna Medical Store"
+                             style="width: 40px; height: 40px; border-radius: 50%; opacity: 0.8;" />
+                      </div>
+
                       <p style="margin: 0 0 8px 0; font-size: 12px; opacity: 0.8; font-weight: 500;">
                         🔒 This email is digitally verified and contains confidential medical information
                       </p>
@@ -235,7 +244,8 @@ class EmailService {
   async sendWelcomeEmail(email, fullName) {
     console.log("📧 Sending professional welcome email to:", email);
 
-    const websiteUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const websiteUrl =
+      process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app";
 
     const welcomeContent = `
       <!-- Personalized Welcome Message -->
@@ -501,7 +511,9 @@ class EmailService {
   async sendPasswordResetEmail(email, fullName, resetToken) {
     console.log("📧 Sending professional password reset email to:", email);
 
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    const primaryDomain =
+      process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app";
+    const resetUrl = `${primaryDomain}/reset-password/${resetToken}`;
 
     const resetContent = `
       <!-- Reset Message -->
@@ -614,7 +626,8 @@ class EmailService {
   async sendOrderConfirmation(email, fullName, order) {
     console.log("📧 Sending professional order confirmation email to:", email);
 
-    const websiteUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const websiteUrl =
+      process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app";
 
     const orderContent = `
       <!-- Order Confirmation Header -->
@@ -972,7 +985,7 @@ class EmailService {
 
       <!-- Track Order Button -->
       <div style="text-align: center; margin: 40px 0;">
-        <a href="${process.env.FRONTEND_URL}/user/orders"
+        <a href="${process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app"}/user/orders"
            style="display: inline-block; background: linear-gradient(135deg, #e63946, #dc2626); color: #ffffff; text-decoration: none; padding: 18px 40px; border-radius: 30px; font-family: 'Segoe UI', sans-serif; font-weight: 600; font-size: 18px; box-shadow: 0 10px 30px rgba(230,57,70,0.4); transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px;">
           📱 View Order Details
         </a>
@@ -1063,7 +1076,7 @@ class EmailService {
             Your professional invoice is attached to this email and also available in your dashboard for future reference.
           </p>
 
-          <a href="${process.env.FRONTEND_URL}/user/invoices"
+          <a href="${process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app"}/user/invoices"
              style="display: inline-block; background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #ffffff; text-decoration: none; padding: 18px 40px; border-radius: 30px; font-family: 'Segoe UI', sans-serif; font-weight: 600; font-size: 18px; box-shadow: 0 10px 30px rgba(139,92,246,0.4); transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px;">
             📄 View All Invoices
           </a>

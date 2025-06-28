@@ -359,8 +359,10 @@ class AuthController {
 
       await user.save();
 
-      // Send reset email
-      const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+      // Send reset email - use primary domain
+      const primaryDomain =
+        process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app";
+      const resetUrl = `${primaryDomain}/reset-password/${resetToken}`;
 
       try {
         await emailService.sendPasswordResetEmail(

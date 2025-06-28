@@ -113,9 +113,10 @@ invoiceSchema.pre("save", async function (next) {
   // Always generate/update QR code for invoice
   if (this.invoiceId) {
     try {
-      // Create public verification URL for QR code
-      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-      const verificationUrl = `${frontendUrl}/invoice/${this.invoiceId}`;
+      // Create public verification URL for QR code - use primary domain
+      const primaryDomain =
+        process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app";
+      const verificationUrl = `${primaryDomain}/invoice/${this.invoiceId}`;
 
       // Store comprehensive data for verification
       this.qrCodeData = JSON.stringify({

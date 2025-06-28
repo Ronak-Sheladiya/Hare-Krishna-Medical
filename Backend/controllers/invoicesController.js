@@ -263,9 +263,10 @@ class InvoicesController {
         });
       }
 
-      // Generate new QR code with public verification URL
-      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-      const verificationUrl = `${frontendUrl}/invoice/${invoice.invoiceId}`;
+      // Generate new QR code with public verification URL - use primary domain
+      const primaryDomain =
+        process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app";
+      const verificationUrl = `${primaryDomain}/invoice/${invoice.invoiceId}`;
 
       invoice.qrCodeData = JSON.stringify({
         invoice_id: invoice.invoiceId,
@@ -330,8 +331,9 @@ class InvoicesController {
 
       // Generate QR code if it doesn't exist
       if (!invoice.qrCode && invoice.invoiceId) {
-        const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-        const verificationUrl = `${frontendUrl}/invoice/${invoice.invoiceId}`;
+        const primaryDomain =
+          process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app";
+        const verificationUrl = `${primaryDomain}/invoice/${invoice.invoiceId}`;
 
         try {
           invoice.qrCodeData = JSON.stringify({

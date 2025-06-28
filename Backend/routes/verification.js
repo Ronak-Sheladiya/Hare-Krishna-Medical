@@ -51,7 +51,7 @@ router.post("/send-email-verification", auth, async (req, res) => {
     await verification.save();
 
     // Send verification email
-    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email/${verification.emailVerificationToken}`;
+    const verificationUrl = `${process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app"}/verify-email/${verification.emailVerificationToken}`;
 
     try {
       await emailService.sendEmailVerification(
@@ -317,7 +317,7 @@ router.post("/resend-email", auth, async (req, res) => {
     await verification.save();
 
     // Send verification email
-    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email/${verification.emailVerificationToken}`;
+    const verificationUrl = `${process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app"}/verify-email/${verification.emailVerificationToken}`;
 
     try {
       await emailService.sendEmailVerification(
