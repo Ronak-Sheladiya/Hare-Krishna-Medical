@@ -97,7 +97,13 @@ const optionalAuth = async (req, res, next) => {
     const token = req.header("Authorization")?.replace("Bearer ", "");
 
     if (token) {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        next(); // Skip auth if JWT secret not configured
+        return;
+      }
+
+      const decoded = jwt.verify(token, jwtSecret);
       const user = await User.findById(decoded.id).select("-password");
 
       if (user && user.isActive) {
