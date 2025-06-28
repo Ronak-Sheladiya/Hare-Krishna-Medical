@@ -49,7 +49,8 @@ class EmailService {
 
   // Enhanced email template with professional red theme
   getEmailTemplate(content, type = "general") {
-    const websiteUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const websiteUrl =
+      process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app";
 
     return `
       <!DOCTYPE html>
