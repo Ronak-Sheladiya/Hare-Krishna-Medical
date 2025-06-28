@@ -61,6 +61,7 @@ const validateProduct = [
   body("company")
     .optional()
     .trim()
+    .isLength({ min: 1 })
     .withMessage("Company name must be a valid string"),
   body("price")
     .isFloat({ min: 0 })
@@ -72,15 +73,22 @@ const validateProduct = [
   body("category")
     .optional()
     .trim()
+    .isLength({ min: 1 })
     .withMessage("Category must be a valid string"),
-  body("weight").optional().trim().withMessage("Weight must be a valid string"),
+  body("weight")
+    .optional()
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage("Weight must be a valid string"),
   body("productBenefits")
     .optional()
     .trim()
+    .isLength({ min: 1 })
     .withMessage("Product benefits must be a valid string"),
   body("usageInstructions")
     .optional()
     .trim()
+    .isLength({ min: 1 })
     .withMessage("Usage instructions must be a valid string"),
   body("stock")
     .isInt({ min: 0 })
