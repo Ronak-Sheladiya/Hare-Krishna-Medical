@@ -9,77 +9,9 @@ const letterheadSchema = new mongoose.Schema(
       unique: true,
       default: () => "HK" + "DOCS" + Math.floor(1000 + Math.random() * 9000), // e.g., USER-ab12cd
     },
-    // Header Information (similar to invoice header)
-    header: {
-      companyName: {
-        type: String,
-        default: "Hare Krishna Medical Store",
-      },
-      companyAddress: {
-        type: String,
-        default: "123 Main Street, Healthcare District",
-      },
-      companyCity: {
-        type: String,
-        default: "Medical City, State 12345",
-      },
-      companyPhone: {
-        type: String,
-        default: "+91 98765 43210",
-      },
-      companyEmail: {
-        type: String,
-        default: "info@harekrishnamedical.com",
-      },
-      logo: {
-        type: String, // URL or base64 image
-        default: "",
-      },
-    },
-    // Letterhead Content
-    title: {
-      type: String,
-      required: [true, "Letterhead title is required"],
-      trim: true,
-    },
-    letterType: {
-      type: String,
-      required: false,
-      enum: [
-        "certificate",
-        "recommendation",
-        "authorization",
-        "notice",
-        "announcement",
-        "invitation",
-        "acknowledgment",
-        "verification",
-        "document", // Added for simplified letterheads
-      ],
-      default: "document",
-    },
-    // Recipient Information (optional for simplified letterheads)
-    recipient: {
-      name: {
-        type: String,
-        required: false,
-        trim: true,
-      },
-      designation: {
-        type: String,
-        trim: true,
-      },
-      organization: {
-        type: String,
-        trim: true,
-      },
-      address: {
-        type: String,
-        trim: true,
-      },
-    },
+    
     // Letter Content
-    subject: {
+    title: {
       type: String,
       required: false, // Not required for simplified letterheads
       trim: true,
@@ -88,25 +20,7 @@ const letterheadSchema = new mongoose.Schema(
       type: String,
       required: [true, "Letter content is required"],
     },
-    // Issuer Information (optional for simplified letterheads)
-    issuer: {
-      name: {
-        type: String,
-        required: false,
-        trim: true,
-        default: "Hare Krishna Medical Store",
-      },
-      designation: {
-        type: String,
-        required: false,
-        trim: true,
-        default: "Administrator",
-      },
-      signature: {
-        type: String, // base64 image or URL
-        default: "",
-      },
-    },
+    
     // Footer Information (similar to invoice footer)
     footer: {
       terms: {

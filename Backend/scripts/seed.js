@@ -116,15 +116,9 @@ const seedDatabase = async () => {
     });
 
     await Letterhead.create({
-      name: "Temp",
-      description: "For init",
-      logoUrl: "https://via.placeholder.com/100",
-      companyName: "Temp Co",
-      address: "Temp Addr",
-      phone: "7777777777",
-      email: "info@temp.com",
-      website: "temp.com",
-      createdBy: user._id,
+      title: "Temp",
+      content: "For init",
+      
     });
 
     await Verification.create({
