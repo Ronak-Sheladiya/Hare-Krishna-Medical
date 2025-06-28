@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
     userId: {
       type: String,
       unique: true,
-      default: () => `USER-${uuidv4().split("-")[0]}`, // e.g., USER-ab12cd
+      default: () => "USER" + Math.floor(1000 + Math.random() * 9000), // e.g., USER-ab12cd
     },
     fullName: {
       type: String,

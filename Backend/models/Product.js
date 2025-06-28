@@ -6,7 +6,7 @@ const productSchema = new mongoose.Schema(
     productId: {
       type: String,
       unique: true,
-      default: () => `PROD-${uuidv4().split("-")[0]}`, // e.g., PROD-ab12cd
+      default: () => "PROD"+ Math.floor(1000 + Math.random() * 9000), // e.g., PROD-ab12cd
     },
     name: {
       type: String,

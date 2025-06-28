@@ -6,7 +6,7 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      default: () => `ORDER-${uuidv4().split("-")[0]}`, // e.g., USER-ab12cd
+      default: () => "ORD" + Math.floor(1000 + Math.random() * 9000), // e.g., USER-ab12cd
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
