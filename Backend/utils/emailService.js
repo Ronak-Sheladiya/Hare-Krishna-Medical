@@ -217,7 +217,7 @@ class EmailService {
 
                       <!-- Small Footer Logo -->
                       <div style="margin-bottom: 15px;">
-                        <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=100"
+                        <img src="${logoUrl}"
                              alt="Hare Krishna Medical Store"
                              style="width: 40px; height: 40px; border-radius: 50%; opacity: 0.8;" />
                       </div>
