@@ -385,6 +385,34 @@ const UserProfile = () => {
             </Row>
           )}
 
+          {/* Network Debug Section (Development/Testing) */}
+          {(window.location.hostname === "localhost" ||
+            window.location.hostname.includes("fly.dev")) && (
+            <Row className="mb-3">
+              <Col lg={12}>
+                <div className="text-center">
+                  <Button
+                    variant="outline-info"
+                    size="sm"
+                    onClick={testNetworkConnection}
+                    disabled={loading}
+                    className="me-2"
+                  >
+                    {loading ? (
+                      <Spinner size="sm" className="me-1" />
+                    ) : (
+                      <i className="bi bi-wifi me-1"></i>
+                    )}
+                    Test Network Connection
+                  </Button>
+                  <small className="text-muted">
+                    Debug tool for connectivity issues
+                  </small>
+                </div>
+              </Col>
+            </Row>
+          )}
+
           {/* Profile Overview Card */}
           <Row className="mb-4">
             <Col lg={12}>
