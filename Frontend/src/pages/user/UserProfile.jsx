@@ -64,6 +64,15 @@ const UserProfile = () => {
     confirmPassword: "",
   });
 
+  // Email Verification State
+  const [emailVerification, setEmailVerification] = useState({
+    isVerified: false,
+    showOtpModal: false,
+    otp: "",
+    isResending: false,
+    otpTimer: 0,
+  });
+
   // Initialize form data from user
   useEffect(() => {
     if (user) {
