@@ -1068,7 +1068,7 @@ class EmailService {
             Your professional invoice is attached to this email and also available in your dashboard for future reference.
           </p>
 
-          <a href="${process.env.FRONTEND_URL}/user/invoices"
+          <a href="${process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app"}/user/invoices"
              style="display: inline-block; background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #ffffff; text-decoration: none; padding: 18px 40px; border-radius: 30px; font-family: 'Segoe UI', sans-serif; font-weight: 600; font-size: 18px; box-shadow: 0 10px 30px rgba(139,92,246,0.4); transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px;">
             📄 View All Invoices
           </a>
