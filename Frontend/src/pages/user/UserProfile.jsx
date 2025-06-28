@@ -142,10 +142,14 @@ const UserProfile = () => {
         profileImage: personalInfo.profileImage,
       };
 
+      console.log("🔄 Attempting to update profile with data:", profileData);
+
       // Make actual API call to update profile
       const result = await api.put("/api/auth/update-profile", profileData);
 
-      if (result.success !== false) {
+      console.log("📊 Profile update API response:", result);
+
+      if (result && result.success !== false) {
         // Update Redux store with new user data
         dispatch(
           updateUser({
@@ -167,14 +171,32 @@ const UserProfile = () => {
 
         showAlert("Personal information updated successfully!", "success");
       } else {
-        throw new Error(result.error || "Failed to update profile");
+        const errorMsg =
+          result?.error || result?.message || "Failed to update profile";
+        console.error("❌ Profile update failed:", errorMsg);
+        throw new Error(errorMsg);
       }
     } catch (error) {
-      console.error("Profile update error:", error);
-      showAlert(
-        error.message || "Failed to update information. Please try again.",
-        "danger",
-      );
+      console.error("❌ Profile update error:", error);
+
+      // Enhanced error message based on error type
+      let errorMessage = "Failed to update information. Please try again.";
+
+      if (error.message === "Failed to fetch") {
+        errorMessage =
+          "Unable to connect to server. Please check your internet connection and try again.";
+      } else if (error.message.includes("timeout")) {
+        errorMessage = "Request timed out. Please try again.";
+      } else if (
+        error.message.includes("401") ||
+        error.message.includes("unauthorized")
+      ) {
+        errorMessage = "Session expired. Please log in again.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      showAlert(errorMessage, "danger");
     } finally {
       setLoading(false);
     }
