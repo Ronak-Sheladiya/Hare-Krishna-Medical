@@ -17,6 +17,7 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { updateUser } from "../../store/slices/authSlice";
 import { api } from "../../utils/apiClient";
+import { enhancedApi } from "../../utils/enhancedApiClient";
 import { getBackendURL } from "../../utils/config";
 import { showNetworkDebugInfo } from "../../utils/networkDebug";
 import {
