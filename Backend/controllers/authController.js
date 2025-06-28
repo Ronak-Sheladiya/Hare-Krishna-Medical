@@ -39,7 +39,11 @@ class AuthController {
       }
 
       // Check database connectivity
-      this.checkDBConnection();
+      if (mongoose.connection.readyState !== 1) {
+        throw new Error(
+          "Database connection not available. Please ensure MongoDB is running.",
+        );
+      }
 
       // Check if user already exists
       const existingUser = await User.findOne({
@@ -141,7 +145,11 @@ class AuthController {
       }
 
       // Check database connectivity
-      this.checkDBConnection();
+      if (mongoose.connection.readyState !== 1) {
+        throw new Error(
+          "Database connection not available. Please ensure MongoDB is running.",
+        );
+      }
 
       // Find user and include password for comparison
       const user = await User.findOne({ email }).select("+password");

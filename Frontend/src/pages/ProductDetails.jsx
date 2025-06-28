@@ -43,10 +43,29 @@ const ProductDetails = () => {
     } = await safeApiCall(() => api.get(`/api/products/${id}`), null);
 
     if (success && data) {
-      const productData = data.data || data;
-      setProduct(productData);
+      const productData =
+        data.data?.product || data.product || data.data || data;
+
+      // Normalize product data to handle different backend response formats
+      const normalizedProduct = {
+        ...productData,
+        // Handle price variations
+        discountPrice:
+          productData.discountPrice ||
+          (productData.originalPrice &&
+          productData.originalPrice > productData.price
+            ? productData.price
+            : null),
+        price: productData.originalPrice || productData.price,
+        // Ensure images array exists
+        images: productData.images || [],
+        // Ensure stock exists
+        stock: productData.stock !== undefined ? productData.stock : 0,
+      };
+
+      setProduct(normalizedProduct);
       // Fetch related products in the same category
-      fetchRelatedProducts(productData.category);
+      fetchRelatedProducts(normalizedProduct.category);
     } else {
       setError(apiError || "Product not found");
     }
@@ -68,9 +87,26 @@ const ProductDetails = () => {
 
     if (success && data) {
       const productsData = data.data || data;
-      const products = productsData.products || [];
+      const products =
+        productsData.relatedProducts ||
+        productsData.products ||
+        productsData ||
+        [];
+
+      // Normalize related products data
+      const normalizedProducts = products.map((product) => ({
+        ...product,
+        discountPrice:
+          product.discountPrice ||
+          (product.originalPrice && product.originalPrice > product.price
+            ? product.price
+            : null),
+        price: product.originalPrice || product.price,
+        images: product.images || [],
+      }));
+
       // Filter out the current product
-      setRelatedProducts(products.filter((p) => p._id !== id));
+      setRelatedProducts(normalizedProducts.filter((p) => p._id !== id));
     }
   };
 

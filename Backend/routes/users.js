@@ -13,6 +13,11 @@ const router = express.Router();
 // @access  Private
 router.get("/dashboard", auth, usersController.getDashboard);
 
+// @route   GET /api/users/dashboard-stats
+// @desc    Get user dashboard statistics
+// @access  Private
+router.get("/dashboard-stats", auth, usersController.getDashboardStats);
+
 // @route   GET /api/users/profile
 // @desc    Get user profile with order history
 // @access  Private

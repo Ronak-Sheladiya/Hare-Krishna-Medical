@@ -609,6 +609,77 @@ class UsersController {
       });
     }
   }
+
+  // Get user dashboard statistics
+  async getDashboardStats(req, res) {
+    try {
+      const userId = req.user.id;
+
+      // Get comprehensive dashboard statistics
+      const [orderStats, monthlySpending] = await Promise.all([
+        Order.aggregate([
+          { $match: { user: userId } },
+          {
+            $group: {
+              _id: null,
+              totalOrders: { $sum: 1 },
+              totalSpent: { $sum: "$total" },
+              pendingOrders: {
+                $sum: { $cond: [{ $eq: ["$orderStatus", "Pending"] }, 1, 0] },
+              },
+              completedOrders: {
+                $sum: { $cond: [{ $eq: ["$orderStatus", "Delivered"] }, 1, 0] },
+              },
+              cancelledOrders: {
+                $sum: { $cond: [{ $eq: ["$orderStatus", "Cancelled"] }, 1, 0] },
+              },
+              avgOrderValue: { $avg: "$total" },
+            },
+          },
+        ]),
+        Order.aggregate([
+          { $match: { user: userId } },
+          {
+            $group: {
+              _id: {
+                year: { $year: "$createdAt" },
+                month: { $month: "$createdAt" },
+              },
+              monthlySpent: { $sum: "$total" },
+              ordersCount: { $sum: 1 },
+            },
+          },
+          { $sort: { "_id.year": -1, "_id.month": -1 } },
+          { $limit: 6 },
+        ]),
+      ]);
+
+      const stats = orderStats[0] || {
+        totalOrders: 0,
+        totalSpent: 0,
+        pendingOrders: 0,
+        completedOrders: 0,
+        cancelledOrders: 0,
+        avgOrderValue: 0,
+      };
+
+      res.json({
+        success: true,
+        data: {
+          ...stats,
+          monthlySpending: monthlySpending || [],
+          lastUpdated: new Date().toISOString(),
+        },
+      });
+    } catch (error) {
+      console.error("Get dashboard stats error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch dashboard statistics",
+        error: error.message,
+      });
+    }
+  }
 }
 
 module.exports = new UsersController();

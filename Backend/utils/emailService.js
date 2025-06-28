@@ -1212,7 +1212,7 @@ class EmailService {
       <!-- Confirmation Header -->
       <div style="text-align: center; margin-bottom: 40px;">
         <div style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 3px solid #10b981; border-radius: 20px; padding: 35px;">
-          <div style="background: #10b981; color: white; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 36px; box-shadow: 0 8px 25px rgba(16,185,129,0.3);">✅</div>
+          <div style="background: #10b981; color: white; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 36px; box-shadow: 0 8px 25px rgba(16,185,129,0.3);">��</div>
 
           <h2 style="color: #047857; margin: 0 0 15px 0; font-family: 'Segoe UI', sans-serif; font-size: 28px; font-weight: 700;">
             Message Received Successfully
@@ -1412,6 +1412,42 @@ class EmailService {
       console.error("❌ Error sending message reply email:", error.message);
       await this.logEmailError(error, "reply", email);
       throw error;
+    }
+  }
+
+  // Generic send email method for custom emails
+  async sendEmail(options) {
+    try {
+      if (!options.to) {
+        throw new Error("Recipient email is required");
+      }
+
+      const mailOptions = {
+        from: `"Hare Krishna Medical Store" <${process.env.EMAIL_USER}>`,
+        to: options.to,
+        subject:
+          options.subject || "Notification from Hare Krishna Medical Store",
+        html: options.html || options.message || "No content provided",
+        ...(options.replyTo && { replyTo: options.replyTo }),
+        ...(options.attachments && { attachments: options.attachments }),
+      };
+
+      console.log(`📧 Sending custom email to: ${options.to}`);
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log(`✅ Custom email sent successfully:`, result.messageId);
+
+      return {
+        success: true,
+        messageId: result.messageId,
+        response: result.response,
+      };
+    } catch (error) {
+      console.error("❌ Error sending custom email:", error.message);
+      await this.logEmailError(error, "custom", options.to);
+      return {
+        success: false,
+        error: error.message,
+      };
     }
   }
 }

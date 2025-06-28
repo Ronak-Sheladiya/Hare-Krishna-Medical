@@ -558,6 +558,36 @@ class OrdersController {
       });
     }
   }
+
+  // Get recent user orders
+  async getRecentUserOrders(req, res) {
+    try {
+      const { limit = 3 } = req.query;
+      const userId = req.user.id;
+
+      const orders = await Order.find({ user: userId })
+        .populate("items.product", "name images")
+        .sort({ createdAt: -1 })
+        .limit(parseInt(limit))
+        .lean();
+
+      res.json({
+        success: true,
+        data: orders,
+        meta: {
+          total: orders.length,
+          limit: parseInt(limit),
+        },
+      });
+    } catch (error) {
+      console.error("Get recent user orders error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch recent orders",
+        error: error.message,
+      });
+    }
+  }
 }
 
 module.exports = new OrdersController();

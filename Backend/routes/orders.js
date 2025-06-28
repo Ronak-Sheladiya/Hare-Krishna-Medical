@@ -19,6 +19,11 @@ router.post("/", auth, validateOrder, ordersController.createOrder);
 // @access  Private
 router.get("/", auth, validatePagination, ordersController.getUserOrders);
 
+// @route   GET /api/orders/user/recent
+// @desc    Get recent user orders
+// @access  Private
+router.get("/user/recent", auth, ordersController.getRecentUserOrders);
+
 // @route   GET /api/orders/admin/all
 // @desc    Get all orders (Admin)
 // @access  Admin
