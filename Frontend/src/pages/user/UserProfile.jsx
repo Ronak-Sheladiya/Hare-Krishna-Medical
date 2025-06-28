@@ -92,6 +92,12 @@ const UserProfile = () => {
         pincode: user.address?.pincode || user.pincode || "",
         landmark: user.address?.landmark || user.landmark || "",
       });
+
+      // Set email verification status
+      setEmailVerification((prev) => ({
+        ...prev,
+        isVerified: user.emailVerified || false,
+      }));
     }
   }, [user]);
 
