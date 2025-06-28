@@ -47,10 +47,12 @@ class EmailService {
     );
   }
 
-  // Enhanced email template with professional red theme
+  // Enhanced email template with professional red theme and logo
   getEmailTemplate(content, type = "general") {
     const websiteUrl =
       process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app";
+    const logoUrl =
+      "https://cdn.builder.io/api/v1/image/assets%2F90997914131d463e9569e4229fc868cf%2Ff973ea075ade4240809d79d29970f08e?format=webp&width=800";
 
     return `
       <!DOCTYPE html>
