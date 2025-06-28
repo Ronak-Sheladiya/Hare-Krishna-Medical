@@ -84,6 +84,31 @@ const UserProfile = () => {
     }
   }, [user]);
 
+  // Debug network connectivity on component mount
+  useEffect(() => {
+    const debugNetwork = () => {
+      const backendURL = getBackendURL();
+      console.log("🌐 UserProfile Network Debug:");
+      console.log("- Backend URL:", backendURL);
+      console.log("- Current Location:", window.location.href);
+      console.log("- User Agent:", navigator.userAgent);
+      console.log(
+        "- Connection Status:",
+        navigator.onLine ? "Online" : "Offline",
+      );
+
+      // Check if auth token exists
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+      console.log("- Auth Token Present:", !!token);
+      if (token) {
+        console.log("- Token Preview:", token.substring(0, 20) + "...");
+      }
+    };
+
+    debugNetwork();
+  }, []);
+
   const showAlert = (message, variant) => {
     setAlert({ show: true, message, variant });
     setTimeout(() => {
