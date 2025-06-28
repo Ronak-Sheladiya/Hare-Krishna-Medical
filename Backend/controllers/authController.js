@@ -216,6 +216,7 @@ class AuthController {
           role: user.role,
           address: user.address,
           lastLogin: user.lastLogin,
+          emailVerified: user.emailVerified,
         },
       });
     } catch (error) {
