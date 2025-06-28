@@ -37,7 +37,7 @@ const seedDatabase = async () => {
       fullName: "Init User",
       email: "init@example.com",
       password: "dummyPass123",
-      mobile: "0000000000",
+      mobile: "9586599031",
     });
 
     const dummyProduct = await Product.create({
