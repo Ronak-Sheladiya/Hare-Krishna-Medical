@@ -9,7 +9,7 @@ const letterheadSchema = new mongoose.Schema(
       unique: true,
       default: () => "HK" + "DOCS" + Math.floor(1000 + Math.random() * 9000), // e.g., USER-ab12cd
     },
-    
+
     // Letter Content
     title: {
       type: String,
@@ -20,7 +20,7 @@ const letterheadSchema = new mongoose.Schema(
       type: String,
       required: [true, "Letter content is required"],
     },
-    
+
     // Footer Information (similar to invoice footer)
     footer: {
       terms: {
@@ -63,7 +63,6 @@ const letterheadSchema = new mongoose.Schema(
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Ref",
-      
     },
     tags: [
       {
@@ -99,8 +98,9 @@ letterheadSchema.pre("save", async function (next) {
   // Generate QR code for verification
   if (this.letterheadId) {
     try {
-      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-      this.verificationUrl = `${frontendUrl}/verify-docs?id=${this.letterheadId}&type=letterhead`;
+      const primaryDomain =
+        process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app";
+      this.verificationUrl = `${primaryDomain}/verify-docs?id=${this.letterheadId}&type=letterhead`;
 
       // Create verification data
       this.qrCodeData = JSON.stringify({
