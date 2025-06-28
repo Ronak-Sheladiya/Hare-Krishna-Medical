@@ -430,12 +430,20 @@ const UserProfile = () => {
 
   // Email verification functions
   const sendVerificationOTP = async () => {
+    if (!personalInfo.email) {
+      showAlert("Please enter your email address first.", "warning");
+      return;
+    }
+
     setEmailVerification((prev) => ({ ...prev, isResending: true }));
 
     try {
+      console.log(`🔄 Sending OTP to: ${personalInfo.email}`);
       const result = await enhancedApi.post("/api/auth/resend-otp", {
         email: personalInfo.email,
       });
+
+      console.log("✅ OTP send result:", result);
 
       if (result && result.success !== false) {
         showAlert("✅ Verification OTP sent to your email!", "success");
@@ -446,14 +454,29 @@ const UserProfile = () => {
         }));
         startOtpTimer();
       } else {
-        throw new Error(result?.error || "Failed to send OTP");
+        throw new Error(
+          result?.message || result?.error || "Failed to send OTP",
+        );
       }
     } catch (error) {
       console.error("❌ Send OTP error:", error);
-      showAlert(
-        error.message || "Failed to send OTP. Please try again.",
-        "danger",
-      );
+
+      // More specific error messages
+      let errorMessage = "Failed to send OTP. Please try again.";
+
+      if (error.message.includes("internet connection")) {
+        errorMessage =
+          "❌ Connection failed. Please check your internet connection and try again.";
+      } else if (error.message.includes("server")) {
+        errorMessage =
+          "❌ Server temporarily unavailable. Please try again in a moment.";
+      } else if (error.message.includes("already verified")) {
+        errorMessage = "✅ Your email is already verified!";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      showAlert(errorMessage, "danger");
     } finally {
       setEmailVerification((prev) => ({ ...prev, isResending: false }));
     }
