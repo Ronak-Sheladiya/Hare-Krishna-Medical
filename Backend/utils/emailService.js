@@ -501,7 +501,9 @@ class EmailService {
   async sendPasswordResetEmail(email, fullName, resetToken) {
     console.log("📧 Sending professional password reset email to:", email);
 
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    const primaryDomain =
+      process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app";
+    const resetUrl = `${primaryDomain}/reset-password/${resetToken}`;
 
     const resetContent = `
       <!-- Reset Message -->
