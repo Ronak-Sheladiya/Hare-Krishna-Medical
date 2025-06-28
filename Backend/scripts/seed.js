@@ -29,13 +29,10 @@ const connectDB = async () => {
   }
 };
 
-// Create all collections without data
-const initializeCollections = async () => {
+// ✅ Create all collections without inserting actual data
+const seedDatabase = async () => {
   try {
     console.log("🌱 Creating empty collections...");
-
-    // Force-create collections by inserting + removing dummy doc
-    const dummy = { _init: true };
 
     const models = [
       User,
@@ -48,8 +45,9 @@ const initializeCollections = async () => {
     ];
 
     for (const Model of models) {
-      const doc = await Model.create(dummy);
-      await Model.deleteOne({ _id: doc._id });
+      const dummy = new Model({});
+      await dummy.save(); // creates collection
+      await Model.deleteOne({ _id: dummy._id }); // removes dummy document
       console.log(`✅ ${Model.modelName} collection initialized`);
     }
 
@@ -63,10 +61,10 @@ const initializeCollections = async () => {
   }
 };
 
-// Run if called directly
+// Run if script is executed directly
 if (require.main === module) {
-  connectDB().then(() => initializeCollections());
+  connectDB().then(() => seedDatabase());
 }
 
-// Export in case used elsewhere
-module.exports = { initializeCollections };
+// Export function for use in server.js
+module.exports = { seedDatabase };
