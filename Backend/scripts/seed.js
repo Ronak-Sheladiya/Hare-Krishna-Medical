@@ -122,6 +122,8 @@ const seedDatabase = async () => {
     });
 
     await Verification.create({
+      user:user._id,
+      mobile : "8888888888",
       email: "verify@temp.com",
       token: "seed-token",
       type: "email_verification",
