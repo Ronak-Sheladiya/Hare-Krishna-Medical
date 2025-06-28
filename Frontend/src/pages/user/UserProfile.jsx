@@ -354,23 +354,57 @@ const UserProfile = () => {
     }
   };
 
-  // Network connectivity test function
+  // Network connectivity test function with enhanced error handling
   const testNetworkConnection = async () => {
     setLoading(true);
     try {
+      console.log("🔄 Starting network connectivity test...");
       const results = await showNetworkDebugInfo();
 
-      if (results.tests.health?.success && results.tests.apiClient?.success) {
+      if (
+        results?.tests?.health?.success &&
+        results?.tests?.apiClient?.success
+      ) {
         showAlert("✅ Network connectivity is working properly!", "success");
-      } else {
+      } else if (results?.tests) {
+        // Show specific error details
+        let errorDetails = "Issues found:\n";
+        if (!results.tests.health?.success) {
+          errorDetails += `• Health check: ${results.tests.health?.error || "Failed"}\n`;
+        }
+        if (!results.tests.apiClient?.success) {
+          errorDetails += `• API client: ${results.tests.apiClient?.error || "Failed"}\n`;
+        }
+        if (results.tests.auth?.success === false) {
+          errorDetails += `• Authentication: ${results.tests.auth?.error || "Failed"}\n`;
+        }
+
+        console.warn("Network connectivity issues:", errorDetails);
         showAlert(
           "❌ Network connectivity issues detected. Check console for details.",
           "warning",
         );
+      } else {
+        throw new Error("Network test returned invalid results");
       }
     } catch (error) {
-      console.error("Network test error:", error);
-      showAlert("❌ Network test failed: " + error.message, "danger");
+      console.error("❌ Network test failed:", error);
+
+      // Show user-friendly error message based on error type
+      let userMessage = "Network test failed. ";
+      if (error.message === "Failed to fetch") {
+        userMessage +=
+          "Cannot reach the server. Please check your internet connection.";
+      } else if (error.message.includes("timeout")) {
+        userMessage +=
+          "Request timed out. The server may be slow or unreachable.";
+      } else if (error.name === "TypeError") {
+        userMessage += "Network request error. Please try again.";
+      } else {
+        userMessage += error.message || "Unknown error occurred.";
+      }
+
+      showAlert("❌ " + userMessage, "danger");
     } finally {
       setLoading(false);
     }
