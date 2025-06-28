@@ -41,6 +41,19 @@ export const isDevelopment = () => {
  * @returns {string}
  */
 export const getBackendURL = () => {
+  const hostname =
+    typeof window !== "undefined" ? window.location.hostname : "";
+
+  // If deployed on fly.dev, use the same domain for backend
+  if (hostname.includes("fly.dev")) {
+    // Extract the subdomain from frontend URL and use it for backend
+    const backendUrl = `https://${hostname.replace(/^[\w-]+/, "hare-krishna-medical-backend")}`;
+    console.log(
+      `🚀 Fly.dev environment detected, using backend: ${backendUrl}`,
+    );
+    return backendUrl;
+  }
+
   // Check if we're in production environment
   if (isProduction()) {
     return (
