@@ -207,12 +207,16 @@ const UserProfile = () => {
     setLoading(true);
 
     try {
+      console.log("🔄 Attempting to update address with data:", addressInfo);
+
       // Make actual API call to update address
       const result = await api.put("/api/auth/update-profile", {
         address: addressInfo,
       });
 
-      if (result.success !== false) {
+      console.log("📊 Address update API response:", result);
+
+      if (result && result.success !== false) {
         // Update Redux store with new address data
         dispatch(
           updateUser({
