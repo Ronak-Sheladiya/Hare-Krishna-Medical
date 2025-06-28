@@ -120,7 +120,7 @@ class EmailService {
 
                     <!-- Professional Logo Section -->
                     <div class="logo-container" style="background: rgba(255, 255, 255, 0.98); border-radius: 50%; padding: 15px; width: 120px; height: 120px; margin: 0 auto 25px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 4px rgba(255,255,255,0.1), 0 0 0 8px rgba(255,255,255,0.05);">
-                      <img src="https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=200"
+                      <img src="${logoUrl}"
                            alt="Hare Krishna Medical Store Logo"
                            style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(230,57,70,0.1);" />
                     </div>
