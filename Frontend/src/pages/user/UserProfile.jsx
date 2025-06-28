@@ -172,8 +172,11 @@ const UserProfile = () => {
 
       console.log("🔄 Attempting to update profile with data:", profileData);
 
-      // Make actual API call to update profile
-      const result = await api.put("/api/auth/update-profile", profileData);
+      // Make actual API call to update profile using enhanced client
+      const result = await enhancedApi.put(
+        "/api/auth/update-profile",
+        profileData,
+      );
 
       console.log("📊 Profile update API response:", result);
 
