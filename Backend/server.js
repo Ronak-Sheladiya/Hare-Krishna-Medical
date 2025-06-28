@@ -189,6 +189,11 @@ const routes = [
     file: "./routes/letterheads",
     name: "Letterheads",
   },
+  {
+    path: "/api/mail",
+    file: "./routes/mail",
+    name: "Mail",
+  },
 ];
 
 console.log("🔗 Loading API routes...");
