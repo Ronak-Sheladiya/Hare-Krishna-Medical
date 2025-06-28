@@ -727,22 +727,75 @@ const UserProfile = () => {
                                 <i className="bi bi-envelope me-2"></i>Email
                                 Address
                               </Form.Label>
-                              <Form.Control
-                                type="email"
-                                placeholder="Enter your email"
-                                value={personalInfo.email}
-                                onChange={(e) =>
-                                  setPersonalInfo({
-                                    ...personalInfo,
-                                    email: e.target.value,
-                                  })
-                                }
-                                className="form-control-custom"
-                                disabled
-                              />
-                              <Form.Text className="text-muted">
-                                Contact support to change your email address
-                              </Form.Text>
+                              <div className="position-relative">
+                                <Form.Control
+                                  type="email"
+                                  placeholder="Enter your email"
+                                  value={personalInfo.email}
+                                  onChange={(e) =>
+                                    setPersonalInfo({
+                                      ...personalInfo,
+                                      email: e.target.value,
+                                    })
+                                  }
+                                  className="form-control-custom"
+                                  disabled
+                                />
+                                <div className="position-absolute top-50 end-0 translate-middle-y pe-3">
+                                  {emailVerification.isVerified ? (
+                                    <Badge
+                                      bg="success"
+                                      className="d-flex align-items-center"
+                                    >
+                                      <i className="bi bi-check-circle me-1"></i>
+                                      Verified
+                                    </Badge>
+                                  ) : (
+                                    <Badge
+                                      bg="warning"
+                                      className="d-flex align-items-center"
+                                    >
+                                      <i className="bi bi-exclamation-triangle me-1"></i>
+                                      Unverified
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                              {emailVerification.isVerified ? (
+                                <Form.Text className="text-success">
+                                  <i className="bi bi-check-circle me-1"></i>
+                                  Your email address is verified
+                                </Form.Text>
+                              ) : (
+                                <div className="mt-2">
+                                  <Form.Text className="text-warning d-block mb-2">
+                                    <i className="bi bi-exclamation-triangle me-1"></i>
+                                    Your email is not verified. Click below to
+                                    verify.
+                                  </Form.Text>
+                                  <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    onClick={sendVerificationOTP}
+                                    disabled={
+                                      emailVerification.isResending || loading
+                                    }
+                                    className="d-flex align-items-center"
+                                  >
+                                    {emailVerification.isResending ? (
+                                      <>
+                                        <Spinner size="sm" className="me-2" />
+                                        Sending OTP...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <i className="bi bi-envelope-check me-2"></i>
+                                        Verify Email
+                                      </>
+                                    )}
+                                  </Button>
+                                </div>
+                              )}
                             </Form.Group>
                           </Col>
                         </Row>
