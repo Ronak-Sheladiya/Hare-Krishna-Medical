@@ -22,29 +22,42 @@ export const testNetworkConnectivity = async () => {
   console.log("Backend URL:", backendURL);
   console.log("Online Status:", navigator.onLine);
 
-  // Test 1: Basic fetch to health endpoint
+  // Test 1: Basic fetch to health endpoint with proper timeout
   try {
     console.log("🔄 Testing /api/health endpoint...");
+
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
     const healthResponse = await fetch(`${backendURL}/api/health`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
-      timeout: 5000,
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (healthResponse.ok) {
       const healthData = await healthResponse.json();
       results.tests.health = { success: true, data: healthData };
       console.log("✅ Health check passed:", healthData);
     } else {
-      results.tests.health = {
-        success: false,
-        status: healthResponse.status,
-        statusText: healthResponse.statusText,
-      };
-      console.log(
-        "❌ Health check failed:",
+      results.tests.health = { success: false, status: healthResponse.status, statusText: healthResponse.statusText };
+      console.log("❌ Health check failed:", healthResponse.status, healthResponse.statusText);
+    }
+  } catch (error) {
+    let errorMessage = error.message;
+    if (error.name === 'AbortError') {
+      errorMessage = 'Request timed out after 5 seconds';
+    } else if (error.message === 'Failed to fetch') {
+      errorMessage = 'Network error - cannot reach backend server';
+    }
+    results.tests.health = { success: false, error: errorMessage };
+    console.log("❌ Health check error:", errorMessage);
+  }
         healthResponse.status,
         healthResponse.statusText,
       );
