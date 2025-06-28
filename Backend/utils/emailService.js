@@ -977,7 +977,7 @@ class EmailService {
 
       <!-- Track Order Button -->
       <div style="text-align: center; margin: 40px 0;">
-        <a href="${process.env.FRONTEND_URL}/user/orders"
+        <a href="${process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app"}/user/orders"
            style="display: inline-block; background: linear-gradient(135deg, #e63946, #dc2626); color: #ffffff; text-decoration: none; padding: 18px 40px; border-radius: 30px; font-family: 'Segoe UI', sans-serif; font-weight: 600; font-size: 18px; box-shadow: 0 10px 30px rgba(230,57,70,0.4); transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px;">
           📱 View Order Details
         </a>
