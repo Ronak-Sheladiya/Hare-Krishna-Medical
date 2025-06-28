@@ -207,6 +207,71 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// Route debugging endpoint (development only)
+if (process.env.NODE_ENV !== "production") {
+  app.get("/api/debug/routes", (req, res) => {
+    const routes = [];
+    app._router.stack.forEach(function (r) {
+      if (r.route && r.route.path) {
+        routes.push({
+          method: Object.keys(r.route.methods)[0].toUpperCase(),
+          path: r.route.path,
+        });
+      } else if (r.name === "router") {
+        r.handle.stack.forEach(function (nestedR) {
+          if (nestedR.route) {
+            routes.push({
+              method: Object.keys(nestedR.route.methods)[0].toUpperCase(),
+              path:
+                r.regexp.source
+                  .replace("\\", "")
+                  .replace("(?:", "")
+                  .replace(")?", "") + nestedR.route.path,
+            });
+          }
+        });
+      }
+    });
+    res.json({ routes, total: routes.length });
+  });
+}
+
+// 404 Handler for API routes
+app.use("/api/*", (req, res) => {
+  console.log(`❌ API route not found: ${req.method} ${req.originalUrl}`);
+  res.status(404).json({
+    success: false,
+    message: `API route not found: ${req.method} ${req.originalUrl}`,
+    timestamp: new Date().toISOString(),
+    availableRoutes: [
+      "GET /api/health",
+      "POST /api/auth/register",
+      "POST /api/auth/login",
+      "GET /api/messages",
+      "POST /api/messages/contact",
+    ],
+  });
+});
+
+// Global Error Handler
+app.use((error, req, res, next) => {
+  console.error(`❌ Server Error on ${req.method} ${req.originalUrl}:`, error);
+
+  if (res.headersSent) {
+    return next(error);
+  }
+
+  res.status(500).json({
+    success: false,
+    message: "Internal server error",
+    error:
+      process.env.NODE_ENV === "production"
+        ? "Something went wrong"
+        : error.message,
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Error Handling
 app.use((err, req, res, next) => {
   if (res.headersSent) return next(err);
