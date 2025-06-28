@@ -233,14 +233,32 @@ const UserProfile = () => {
 
         showAlert("Address updated successfully!", "success");
       } else {
-        throw new Error(result.error || "Failed to update address");
+        const errorMsg =
+          result?.error || result?.message || "Failed to update address";
+        console.error("❌ Address update failed:", errorMsg);
+        throw new Error(errorMsg);
       }
     } catch (error) {
-      console.error("Address update error:", error);
-      showAlert(
-        error.message || "Failed to update address. Please try again.",
-        "danger",
-      );
+      console.error("❌ Address update error:", error);
+
+      // Enhanced error message based on error type
+      let errorMessage = "Failed to update address. Please try again.";
+
+      if (error.message === "Failed to fetch") {
+        errorMessage =
+          "Unable to connect to server. Please check your internet connection and try again.";
+      } else if (error.message.includes("timeout")) {
+        errorMessage = "Request timed out. Please try again.";
+      } else if (
+        error.message.includes("401") ||
+        error.message.includes("unauthorized")
+      ) {
+        errorMessage = "Session expired. Please log in again.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      showAlert(errorMessage, "danger");
     } finally {
       setLoading(false);
     }
