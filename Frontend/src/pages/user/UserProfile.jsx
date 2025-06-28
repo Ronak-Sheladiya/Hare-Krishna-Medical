@@ -335,6 +335,28 @@ const UserProfile = () => {
     }
   };
 
+  // Network connectivity test function
+  const testNetworkConnection = async () => {
+    setLoading(true);
+    try {
+      const results = await showNetworkDebugInfo();
+
+      if (results.tests.health?.success && results.tests.apiClient?.success) {
+        showAlert("✅ Network connectivity is working properly!", "success");
+      } else {
+        showAlert(
+          "❌ Network connectivity issues detected. Check console for details.",
+          "warning",
+        );
+      }
+    } catch (error) {
+      console.error("Network test error:", error);
+      showAlert("❌ Network test failed: " + error.message, "danger");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="fade-in">
       {/* Hero Section */}
