@@ -83,6 +83,9 @@ const seedDatabase = async () => {
         state: "GJ",
         pincode: "000000",
       },
+      paymentMethod:  "COD",
+      paymentStatus: "Pending",
+      subtotal : 1,
     });
 
     await Invoice.create({
