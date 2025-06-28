@@ -1240,6 +1240,136 @@ const UserProfile = () => {
         </Modal.Footer>
       </Modal>
 
+      {/* Email Verification OTP Modal */}
+      <Modal
+        show={emailVerification.showOtpModal}
+        onHide={() =>
+          setEmailVerification((prev) => ({
+            ...prev,
+            showOtpModal: false,
+            otp: "",
+          }))
+        }
+        centered
+        size="md"
+      >
+        <Modal.Header closeButton className="border-0">
+          <Modal.Title>
+            <i className="bi bi-envelope-check me-2"></i>Verify Your Email
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="px-4">
+          <div className="text-center mb-4">
+            <div className="mb-3">
+              <i
+                className="bi bi-envelope-check"
+                style={{ fontSize: "48px", color: "#e63946" }}
+              ></i>
+            </div>
+            <h6 className="mb-2">Verification Code Sent!</h6>
+            <p className="text-muted mb-0">
+              We've sent a 6-digit verification code to
+            </p>
+            <p className="fw-bold text-primary mb-3">{personalInfo.email}</p>
+            <p className="text-muted small">
+              Please enter the code below to verify your email address.
+            </p>
+          </div>
+
+          <Form>
+            <Form.Group className="mb-4">
+              <Form.Label className="form-label-custom text-center d-block">
+                <i className="bi bi-shield-check me-2"></i>Enter 6-Digit OTP
+              </Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="000000"
+                value={emailVerification.otp}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+                  setEmailVerification((prev) => ({ ...prev, otp: value }));
+                }}
+                className="form-control-custom text-center"
+                style={{
+                  fontSize: "18px",
+                  letterSpacing: "8px",
+                  fontWeight: "600",
+                }}
+                maxLength="6"
+                autoComplete="off"
+              />
+              <Form.Text className="text-muted text-center d-block mt-2">
+                <i className="bi bi-info-circle me-1"></i>
+                Enter the 6-digit code sent to your email
+              </Form.Text>
+            </Form.Group>
+
+            {emailVerification.otpTimer > 0 && (
+              <div className="text-center mb-3">
+                <Badge bg="info" className="px-3 py-2">
+                  <i className="bi bi-clock me-1"></i>
+                  Code expires in: {formatTime(emailVerification.otpTimer)}
+                </Badge>
+              </div>
+            )}
+
+            <div className="text-center mb-3">
+              <Button
+                variant="link"
+                size="sm"
+                onClick={sendVerificationOTP}
+                disabled={
+                  emailVerification.isResending ||
+                  emailVerification.otpTimer > 240
+                } // Disable for first 1 minute
+                className="text-decoration-none"
+              >
+                {emailVerification.isResending ? (
+                  <>
+                    <Spinner size="sm" className="me-2" />
+                    Resending...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-arrow-clockwise me-2"></i>
+                    Resend OTP
+                  </>
+                )}
+              </Button>
+              {emailVerification.otpTimer > 240 && (
+                <Form.Text className="text-muted d-block">
+                  You can resend the code in{" "}
+                  {formatTime(emailVerification.otpTimer - 240)}
+                </Form.Text>
+              )}
+            </div>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer className="border-0 px-4">
+          <Button
+            variant="secondary"
+            onClick={() =>
+              setEmailVerification((prev) => ({
+                ...prev,
+                showOtpModal: false,
+                otp: "",
+              }))
+            }
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <ThemeButton
+            variant="primary"
+            onClick={verifyEmailOTP}
+            disabled={loading || emailVerification.otp.length !== 6}
+            icon={loading ? "bi-arrow-clockwise" : "bi-check-circle"}
+          >
+            {loading ? "Verifying..." : "Verify Email"}
+          </ThemeButton>
+        </Modal.Footer>
+      </Modal>
+
       <style jsx>{`
         .form-label-custom {
           font-weight: 600;
