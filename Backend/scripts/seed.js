@@ -125,7 +125,7 @@ const seedDatabase = async () => {
       user:user._id,
       mobile : "8888888888",
       email: "verify@temp.com",
-      token: "seed-token",
+      emailVerificationToken: "seed-token",
       type: "email_verification",
       expiresAt: new Date(Date.now() + 3600000),
     });
