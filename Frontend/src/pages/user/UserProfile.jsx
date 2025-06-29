@@ -571,14 +571,18 @@ const UserProfile = () => {
 
   return (
     <div className="fade-in">
-      {/* Hero Section */}
       <PageHeroSection
-        title={`Welcome, ${personalInfo.fullName || user?.name || "User"}!`}
-        subtitle="Manage your profile information and account settings"
+        title="User Profile"
+        subtitle="Manage your personal information and account settings"
         icon="bi-person-circle"
       />
 
       <ThemeSection background="#f8f9fa">
+        <Container>
+          <NetworkRestrictedNotice
+            title="Profile Update Restrictions"
+            message="Profile updates may not work in this preview environment due to network restrictions."
+          />
         <Container>
           {/* Alert */}
           {alert.show && (
