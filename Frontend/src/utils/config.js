@@ -176,11 +176,17 @@ if (isDevelopment() || import.meta.env.VITE_DEBUG === "true") {
 // Always log basic config for debugging production issues
 if (typeof window !== "undefined") {
   const hostname = window.location.hostname;
+  console.group("🔧 App Configuration");
   console.log(`🌐 App running on: ${hostname}`);
   console.log(`📍 Environment: ${getEnvironment()}`);
   console.log(`🏭 Production mode: ${isProduction()}`);
   console.log(`🔗 Backend URL: ${getBackendURL()}`);
   console.log(`🔌 Socket URL: ${getSocketURL()}`);
+  console.log(
+    `🔍 VITE_BACKEND_URL: ${import.meta.env.VITE_BACKEND_URL || "Not set"}`,
+  );
+  console.log(`🔍 MODE: ${import.meta.env.MODE}`);
+  console.groupEnd();
 }
 
 export default {
