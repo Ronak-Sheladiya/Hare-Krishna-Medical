@@ -37,39 +37,58 @@ const createHeaders = (includeAuth = true) => {
 };
 
 /**
- * Make API request with consistent error handling
+ * Make API request with consistent error handling and retry mechanism
  */
 const makeApiRequest = async (endpoint, options = {}) => {
   const {
     method = "GET",
     body = null,
     includeAuth = true,
-    timeout = 15000,
+    timeout = null, // Will be determined based on backend type
+    retries = 2,
     ...otherOptions
   } = options;
 
   const url = `${BACKEND_URL}${endpoint}`;
-  console.log(`🌐 API Request: ${method} ${url}`);
 
-  try {
-    // Create abort controller for timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
+  // Determine timeout based on backend type
+  const isProductionBackend = BACKEND_URL.includes('render.com') || BACKEND_URL.includes('railway.app') || BACKEND_URL.includes('herokuapp.com');
+  const requestTimeout = timeout || (isProductionBackend ? 45000 : 15000); // 45s for production, 15s for local
 
-    const requestOptions = {
-      method,
-      headers: createHeaders(includeAuth),
-      signal: controller.signal,
-      ...otherOptions,
-    };
+  console.log(`🌐 API Request: ${method} ${url} (timeout: ${requestTimeout}ms)`);
 
-    if (body && method !== "GET") {
-      requestOptions.body =
-        typeof body === "string" ? body : JSON.stringify(body);
-    }
+  let lastError;
 
-    const response = await fetch(url, requestOptions);
-    clearTimeout(timeoutId);
+  // Retry mechanism
+  for (let attempt = 1; attempt <= retries + 1; attempt++) {
+    try {
+      if (attempt > 1) {
+        console.log(`🔄 Retry attempt ${attempt - 1}/${retries} for ${endpoint}`);
+        // Wait before retry (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt - 2)));
+      }
+
+      // Create abort controller for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        console.log(`⏱️ Request timeout after ${requestTimeout}ms for ${endpoint}`);
+        controller.abort();
+      }, requestTimeout);
+
+      const requestOptions = {
+        method,
+        headers: createHeaders(includeAuth),
+        signal: controller.signal,
+        ...otherOptions,
+      };
+
+      if (body && method !== "GET") {
+        requestOptions.body =
+          typeof body === "string" ? body : JSON.stringify(body);
+      }
+
+      const response = await fetch(url, requestOptions);
+      clearTimeout(timeoutId);
 
     console.log(`📊 API Response: ${response.status} ${response.statusText}`);
 
