@@ -47,6 +47,7 @@ import InvoiceView from "./pages/InvoiceView";
 import InvoiceVerify from "./pages/InvoiceVerify";
 import UserGuide from "./pages/UserGuide";
 import BackendDocs from "./pages/BackendDocs";
+import BackendTest from "./pages/BackendTest";
 import LocalSetupGuide from "./pages/LocalSetupGuide";
 import VercelDeploymentGuide from "./pages/VercelDeploymentGuide";
 import OrderDetails from "./pages/OrderDetails";
