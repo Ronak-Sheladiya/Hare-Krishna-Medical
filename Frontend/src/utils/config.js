@@ -59,11 +59,17 @@ export const getBackendURL = () => {
   }
 
   // Check if we're in production environment
-  if (isProduction()) {
+  const isProd = isProduction();
+  console.log(
+    `🌍 Environment check: hostname=${hostname}, isProduction=${isProd}`,
+  );
+
+  if (isProd) {
+    const prodURL = "https://hare-krishna-medical.onrender.com";
     console.log(
-      `🚀 Production environment detected (${hostname}), using production backend`,
+      `🚀 Production environment detected (${hostname}), using production backend: ${prodURL}`,
     );
-    return "https://hare-krishna-medical.onrender.com";
+    return prodURL;
   }
 
   // Development environment - try local first, fallback to production
