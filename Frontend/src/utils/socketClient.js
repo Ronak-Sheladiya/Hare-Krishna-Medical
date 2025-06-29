@@ -20,14 +20,17 @@ const socketClient = {
       return socket;
     }
 
-    // In production, if we've failed multiple times, enter fallback mode
-    if (isProduction() && connectionAttempts >= 2) {
-      console.warn(
-        "🚨 Production environment: Too many failed attempts, entering fallback mode",
+    // In production, disable Socket.IO entirely for reliability
+    if (isProduction()) {
+      console.log(
+        "🚨 Production environment detected: Socket.IO disabled for reliability",
       );
+      console.log("💡 App will work with manual refresh for updates");
       fallbackMode = true;
       isConnecting = false;
-      this.notifyFallbackMode("Multiple connection failures in production");
+      this.notifyFallbackMode(
+        "Socket.IO disabled in production for reliability",
+      );
       return null;
     }
 
