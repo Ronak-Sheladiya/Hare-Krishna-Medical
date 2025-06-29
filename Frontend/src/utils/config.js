@@ -121,7 +121,7 @@ export const getSocketURL = () => {
   }
 
   // Development environment - try local first, fallback to production
-  const localSocket = "http://localhost:5002";
+  const localSocket = "http://localhost:5001";
   const socketURL = import.meta.env.VITE_SOCKET_URL || localSocket;
   console.log(`🛠️ Using development socket URL: ${socketURL}`);
   return socketURL;
