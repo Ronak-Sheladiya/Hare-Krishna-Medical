@@ -173,9 +173,14 @@ const sendPasswordResetEmail = async (email, name, token) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log("Password reset email sent to:", email);
+    console.log("✅ Password reset email sent to:", email);
+    return { success: true, message: "Password reset email sent successfully" };
   } catch (error) {
-    console.error("Password reset email failed:", error);
+    console.error("❌ Password reset email failed:", error.message);
+    return {
+      success: false,
+      message: `Password reset email failed: ${error.message}`,
+    };
   }
 };
 
