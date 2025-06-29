@@ -142,13 +142,23 @@ const AdminUsers = () => {
   };
 
   const fetchUserStats = async () => {
-    const { success, data } = await safeApiCall(
+    // Check if user is authenticated first
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    if (!token) {
+      return; // Skip stats if not authenticated
+    }
+
+    const { success, data, error } = await safeApiCall(
       () => api.get("/api/users/admin/stats"),
       {},
     );
 
     if (success && data?.data) {
       setUserStats(data.data);
+    } else {
+      console.warn("Failed to fetch user stats:", error);
+      // Don't show error for stats, just log it
     }
   };
 
