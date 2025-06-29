@@ -57,40 +57,53 @@ const Contact = () => {
         return;
       }
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Create message object for admin
-      const newMessage = {
-        id: Date.now(),
+      // Send to backend API
+      const response = await api.post("/api/messages/contact", {
         name: formData.name,
         email: formData.email,
         mobile: formData.mobile,
         subject: formData.subject || "Contact Form Inquiry",
         message: formData.message,
-        priority: "Medium",
-        status: "Open",
-        isRead: false,
-        createdAt: getCurrentISOString(),
-        reply: "",
-        repliedAt: null,
-      };
-
-      // Add to Redux store
-      dispatch(addMessage(newMessage));
-
-      // Reset form and show success
-      setFormData({
-        name: "",
-        email: "",
-        mobile: "",
-        subject: "",
-        message: "",
+        category: "general",
+        priority: "normal",
       });
-      setSubmitted(true);
-      setTimeout(() => setSubmitted(false), 5000);
+
+      if (response.success) {
+        // Create message object for admin dashboard (local Redux state)
+        const newMessage = {
+          id: response.data?.message?._id || Date.now(),
+          name: formData.name,
+          email: formData.email,
+          mobile: formData.mobile,
+          subject: formData.subject || "Contact Form Inquiry",
+          message: formData.message,
+          priority: "Medium",
+          status: "Open",
+          isRead: false,
+          createdAt: getCurrentISOString(),
+          reply: "",
+          repliedAt: null,
+        };
+
+        // Add to Redux store for admin dashboard
+        dispatch(addMessage(newMessage));
+
+        // Reset form and show success
+        setFormData({
+          name: "",
+          email: "",
+          mobile: "",
+          subject: "",
+          message: "",
+        });
+        setSubmitted(true);
+        setTimeout(() => setSubmitted(false), 5000);
+      } else {
+        throw new Error(response.error || "Failed to send message");
+      }
     } catch (error) {
-      alert("Something went wrong. Please try again.");
+      console.error("Contact form submission error:", error);
+      alert(`Failed to send message: ${error.message || "Please try again."}`);
     } finally {
       setLoading(false);
     }
