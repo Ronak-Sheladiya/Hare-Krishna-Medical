@@ -301,6 +301,17 @@ class CentralSessionManager {
     }
   }
 
+  handleRemoteHeartbeat(payload) {
+    // Handle session heartbeat from other tabs
+    if (payload && payload.timestamp) {
+      const timeDiff = Date.now() - payload.timestamp;
+      if (timeDiff < 30000) {
+        // Within 30 seconds
+        this.updateSessionTimestamp();
+      }
+    }
+  }
+
   performInitialSessionCheck() {
     setTimeout(() => {
       this.performSessionCheck();
