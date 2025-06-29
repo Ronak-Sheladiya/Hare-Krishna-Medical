@@ -37,6 +37,22 @@ export const RealTimeDataProvider = ({ children }) => {
       if (socketClient) {
         const status = socketClient.getConnectionStatus();
         setIsConnected(status.connected);
+
+        // If connection failed and we haven't diagnosed yet, run diagnostics
+        if (!status.connected && status.connectionAttempts >= 3) {
+          console.warn(
+            "🔍 Socket connection struggling, running diagnostics...",
+          );
+          // Only run diagnostics once to avoid spam
+          if (!window.socketDiagnosticsRun) {
+            window.socketDiagnosticsRun = true;
+            import("../../utils/socketTester").then(
+              ({ diagnoseSocketIssues }) => {
+                diagnoseSocketIssues();
+              },
+            );
+          }
+        }
       }
     };
 
