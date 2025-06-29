@@ -74,11 +74,21 @@ const corsOptions = {
       "https://hkmedical.vercel.app",
       "https://harekrishnamedical.vercel.app",
       "https://hare-krishna-medical.vercel.app",
+      /\.vercel\.app$/,
+      /\.netlify\.app$/,
       /\.fly\.dev$/,
+      /\.onrender\.com$/,
     ];
+
+    // Add FRONTEND_URL from environment if set
+    if (process.env.FRONTEND_URL) {
+      allowedOrigins.push(process.env.FRONTEND_URL);
+    }
 
     // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin) return callback(null, true);
+
+    console.log(`🔍 CORS check for origin: ${origin}`);
 
     // Check if origin is allowed
     const isAllowed = allowedOrigins.some((allowedOrigin) => {
@@ -91,8 +101,11 @@ const corsOptions = {
     });
 
     if (isAllowed || process.env.NODE_ENV === "development") {
+      console.log(`✅ CORS allowed for: ${origin}`);
       callback(null, true);
     } else {
+      console.log(`❌ CORS blocked for: ${origin}`);
+      console.log(`📋 Allowed origins: ${allowedOrigins.join(", ")}`);
       callback(new Error("Not allowed by CORS"));
     }
   },
