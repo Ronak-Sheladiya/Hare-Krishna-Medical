@@ -273,15 +273,31 @@ const AdminUsers = () => {
           {error && (
             <Row className="mb-4">
               <Col lg={12}>
-                <Alert variant="warning" className="d-flex align-items-center">
-                  <i className="bi bi-exclamation-triangle me-2"></i>
-                  {error}
+                <Alert variant="danger" className="d-flex align-items-center">
+                  <i className="bi bi-exclamation-triangle-fill me-3"></i>
+                  <div className="flex-grow-1">
+                    {error}
+                    {error.includes("log in") && (
+                      <div className="mt-2">
+                        <Link
+                          to="/login"
+                          className="btn btn-sm btn-primary me-2"
+                        >
+                          <i className="bi bi-box-arrow-in-right me-1"></i>
+                          Go to Login
+                        </Link>
+                        <small className="text-muted">
+                          Use admin credentials to access user management
+                        </small>
+                      </div>
+                    )}
+                  </div>
                   <ThemeButton
                     variant="outline"
                     size="sm"
-                    className="ms-auto"
                     onClick={refreshData}
                   >
+                    <i className="bi bi-arrow-clockwise me-1"></i>
                     Retry
                   </ThemeButton>
                 </Alert>
