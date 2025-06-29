@@ -14,6 +14,7 @@ import { useDispatch } from "react-redux";
 import { addMessage } from "../store/slices/messageSlice";
 import { getCurrentISOString } from "../utils/dateUtils";
 import { PageHeroSection } from "../components/common/ConsistentTheme";
+import { api } from "../utils/apiClient";
 
 const Contact = () => {
   const dispatch = useDispatch();
