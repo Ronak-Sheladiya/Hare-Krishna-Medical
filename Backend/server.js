@@ -170,6 +170,7 @@ app.use(
   analyticsRoutes,
 );
 app.use("/api/upload", authenticateToken, uploadRoutes);
+app.use("/api/diagnostics", diagnosticsRoutes);
 
 // Socket.IO connection handling
 socketHandler(io);
