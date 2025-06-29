@@ -81,17 +81,22 @@ export const getBackendURL = () => {
     `🌍 Environment check: hostname=${hostname}, isProduction=${isProd}, isRestricted=${isRestricted}`,
   );
 
-  // Always use production backend for consistency
-  const prodURL = "https://hare-krishna-medical.onrender.com";
-  console.log(`🚀 Using unified production backend: ${prodURL}`);
+  // Use local backend in development
+  if (
+    !isProd &&
+    (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "")
+  ) {
+    const localBackend = "http://localhost:5001";
+    console.log(
+      `🛠️ Development environment detected, using local backend: ${localBackend}`,
+    );
+    return localBackend;
+  }
 
+  // Production environment - use remote backend
+  const prodURL = "https://hare-krishna-medical.onrender.com";
+  console.log(`🚀 Using production backend: ${prodURL}`);
   return prodURL;
-  // Development environment - try local first, fallback to production
-  const localBackend = "http://localhost:5002";
-  console.log(
-    `🛠️ Development environment detected, using local backend: ${localBackend}`,
-  );
-  return localBackend;
 };
 /**
  * Get the Socket.IO URL based on environment
