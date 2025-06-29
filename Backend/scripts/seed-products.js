@@ -103,8 +103,9 @@ const medicineProducts = [
     expiryDate: new Date("2026-02-15"),
     batchNumber: "AC30-2024-005",
     featured: false,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500&h=300&fit=crop",
+    ],
   },
   {
     name: "Multivitamin Capsules",
