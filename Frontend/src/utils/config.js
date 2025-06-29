@@ -61,7 +61,7 @@ export const getBackendURL = () => {
   }
 
   // Development environment - try local first, fallback to production
-  const localBackend = "http://localhost:5001";
+  const localBackend = "http://localhost:5002";
   console.log(
     `🛠️ Development environment detected, using local backend: ${localBackend}`,
   );
@@ -82,7 +82,7 @@ export const getSocketURL = () => {
   }
 
   // Development environment - try local first, fallback to production
-  const localSocket = "http://localhost:5001";
+  const localSocket = "http://localhost:5002";
   const productionSocket =
     import.meta.env.VITE_SOCKET_URL_FALLBACK ||
     "https://hare-krishna-medical.onrender.com";
