@@ -148,12 +148,13 @@ const Register = () => {
         // If we get here, registration was successful
         setShowOtpModal(true);
         return;
-
       } catch (error) {
         // Handle API errors
+        console.log("Registration API error:", error.message);
+
         if (error.message && error.message.includes("already exists")) {
           // User already exists, redirect to login with prefilled email
-          const isEmailExists = data.message.includes("email");
+          const isEmailExists = error.message.includes("email");
           const message = isEmailExists
             ? "An account with this email already exists. Redirecting to login..."
             : "An account with this mobile number already exists. Please login instead.";
@@ -168,10 +169,9 @@ const Register = () => {
             navigate("/login");
           }, 1500);
           return;
-        } else {
-          throw new Error(data.message || "Registration failed");
         }
-      } catch (backendError) {
+
+        // For other errors, fall back to demo mode
         console.log("Backend not available, using demo mode");
       }
 
