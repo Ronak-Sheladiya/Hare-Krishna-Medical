@@ -97,20 +97,13 @@ const Login = () => {
     try {
       // Try backend API first
       try {
-        const response = await fetch("/api/auth/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: formData.emailOrMobile,
-            password: formData.password,
-          }),
+        const data = await unifiedApi.post("/api/auth/login", {
+          email: formData.emailOrMobile,
+          password: formData.password,
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          const { user, token } = data;
+        // If we get here, login was successful
+        const { user, token } = data;
 
           // Store token
           if (formData.rememberMe) {
