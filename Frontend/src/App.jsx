@@ -220,6 +220,7 @@ function App() {
                 </AuthRoute>
               }
             />
+            <Route path="/login-debug" element={<LoginDebug />} />
             <Route
               path="/register"
               element={
