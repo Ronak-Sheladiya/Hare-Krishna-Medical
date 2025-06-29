@@ -572,10 +572,6 @@ const UserProfile = () => {
 
       <ThemeSection background="#f8f9fa">
         <Container>
-          <NetworkRestrictedNotice
-            title="Profile Update Restrictions"
-            message="Profile updates may not work in this preview environment due to network restrictions."
-          />
           {/* Alert */}
           {alert.show && (
             <Row className="mb-4">
