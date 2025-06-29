@@ -1,9 +1,9 @@
 // API Client utility with proper error handling and timeout
 import { getBackendURL } from "./config.js";
 
-// Dynamically get backend URL to ensure production detection works
+// Use consistent backend URL across the application
 const getApiBaseUrl = () => {
-  const url = getBackendURL();
+  const url = "https://hare-krishna-medical.onrender.com";
   console.log(`🔗 API Client using: ${url}`);
   return url;
 };
