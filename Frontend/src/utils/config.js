@@ -68,14 +68,35 @@ export const getPrimaryDomain = () => {
 };
 
 /**
- * Mock backend URL (for compatibility with existing code)
+ * Get backend URL based on environment
  * @returns {string}
  */
 export const getBackendURL = () => {
-  console.warn(
-    "🎨 Frontend-only mode: getBackendURL() called but no backend available",
-  );
-  return ""; // Return empty string since no backend exists
+  const hostname =
+    typeof window !== "undefined" ? window.location.hostname : "";
+
+  // Use environment variable if set
+  if (import.meta.env.VITE_BACKEND_URL) {
+    console.log(
+      `🔧 Using explicit backend URL: ${import.meta.env.VITE_BACKEND_URL}`,
+    );
+    return import.meta.env.VITE_BACKEND_URL;
+  }
+
+  // Development environment - use local backend
+  if (
+    isDevelopment() &&
+    (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "")
+  ) {
+    const localBackend = "http://localhost:5001";
+    console.log(`🛠️ Development: Using local backend: ${localBackend}`);
+    return localBackend;
+  }
+
+  // Production fallback
+  const prodURL = "https://hare-krishna-medical.onrender.com";
+  console.log(`🚀 Using production backend: ${prodURL}`);
+  return prodURL;
 };
 
 /**
