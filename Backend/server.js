@@ -342,9 +342,7 @@ io.on("connection", (socket) => {
   socket.emit("connection-confirmed", {
     message: "Socket.IO connection established",
     socketId: socket.id,
-    timestamp: new Date().toISOString()
-  });
-});
+    timestamp: new Date().toISOString(),
   });
 });
 
