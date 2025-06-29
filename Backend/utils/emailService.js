@@ -3,26 +3,45 @@ const nodemailer = require("nodemailer");
 // Create reusable transporter
 let transporter = null;
 
-const createTransporter = () => {
+const createTransporter = async () => {
   if (transporter) return transporter;
 
   try {
+    // Check if email credentials are configured
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.log(
+        "⚠️ Email credentials not configured - emails will be skipped",
+      );
+      return null;
+    }
+
     transporter = nodemailer.createTransporter({
-      host: process.env.EMAIL_HOST || "smtp.gmail.com",
-      port: process.env.EMAIL_PORT || 587,
-      secure: false, // true for 465, false for other ports
+      service: "gmail", // Use Gmail service directly
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        pass: process.env.EMAIL_PASS, // This should be an app password for Gmail
       },
       tls: {
         rejectUnauthorized: false,
       },
     });
 
+    // Verify the transporter configuration
+    await transporter.verify();
+    console.log("✅ Email service configured and verified successfully");
+
     return transporter;
   } catch (error) {
-    console.error("Email transporter creation failed:", error);
+    console.error(
+      "❌ Email transporter creation/verification failed:",
+      error.message,
+    );
+    console.log("💡 Gmail setup instructions:");
+    console.log("1. Enable 2-factor authentication on your Gmail account");
+    console.log("2. Generate an App Password for this application");
+    console.log(
+      "3. Use the App Password (not your regular password) in EMAIL_PASS",
+    );
     return null;
   }
 };
@@ -181,7 +200,7 @@ const sendOrderConfirmationEmail = async (email, name, order) => {
           <h2 style="color: #e63946;">Order Confirmation</h2>
           <p>Dear ${name},</p>
           <p>Thank you for your order! Your order has been confirmed and is being processed.</p>
-          
+
           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #e63946;">Order Details</h3>
             <p><strong>Order ID:</strong> ${order.orderId}</p>
