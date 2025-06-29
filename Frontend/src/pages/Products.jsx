@@ -181,7 +181,6 @@ const Products = () => {
 
     dispatch(setLoading(false));
   };
-  };
 
   // Fetch featured products separately
   const fetchFeaturedProducts = async () => {
