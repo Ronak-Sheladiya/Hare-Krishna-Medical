@@ -93,7 +93,7 @@ export const getBackendURL = () => {
     return localBackend;
   }
 
-  // Production fallback
+  // Production backend URL
   const prodURL = "https://hare-krishna-medical.onrender.com";
   console.log(`🚀 Using production backend: ${prodURL}`);
   return prodURL;
@@ -123,9 +123,9 @@ export const getAppConfig = () => {
     frontendURLs: getFrontendURLs(),
     primaryDomain: getPrimaryDomain(),
     maxFileSize: parseInt(import.meta.env.VITE_MAX_FILE_SIZE) || 5242880,
-    // Frontend-only mode
-    frontendOnly: true,
-    hasBackend: false,
+    // Backend integration enabled for production
+    frontendOnly: false,
+    hasBackend: true,
   };
 };
 
