@@ -335,9 +335,16 @@ io.on("connection", (socket) => {
 
   // Handle disconnection
   socket.on("disconnect", (reason) => {
-    console.log(`❌ Socket disconnected: ${socket.id} - Reason: ${reason}`);
+    console.log(`🔌 Socket disconnected: ${socket.id} - ${reason}`);
   });
 
+  // Send connection confirmation
+  socket.emit("connection-confirmed", {
+    message: "Socket.IO connection established",
+    socketId: socket.id,
+    timestamp: new Date().toISOString()
+  });
+});
   // Send connection confirmation
   socket.emit("connection-confirmed", {
     socketId: socket.id,
@@ -380,7 +387,7 @@ app.use("*", (req, res) => {
 // Start Server
 const PORT = process.env.PORT || 5001; // Use 5001 to avoid conflicts
 server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`��� Server running on port ${PORT}`);
   console.log(`🌐 Environment: ${process.env.NODE_ENV || "development"}`);
 });
 
