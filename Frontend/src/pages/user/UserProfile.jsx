@@ -39,8 +39,7 @@ const UserProfile = () => {
 
   // Debug authentication state
   useEffect(() => {
-    const token =
-      localStorage.getItem("token") || sessionStorage.getItem("token");
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
     console.log("🔍 Auth Debug:", {
       isAuthenticated,
       hasUser: !!user,
@@ -161,8 +160,35 @@ const UserProfile = () => {
 
   const showAlert = (message, variant) => {
     setAlert({ show: true, message, variant });
-    setTimeout(() => {
-      setAlert({ show: false, message: "", variant: "" });
+    setTimeout(() => setAlert({ show: false, message: "", variant: "" }), 5000);
+  };
+
+  // Debug function to test authentication
+  const testAuth = async () => {
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    console.log("🔑 Current token:", token ? "Present" : "Missing");
+
+    try {
+      const response = await fetch("https://hare-krishna-medical.onrender.com/api/auth/update-profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ fullName: "Test" })
+      });
+
+      console.log("📡 Auth test response:", response.status, response.statusText);
+      const data = await response.json();
+      console.log("📦 Auth test data:", data);
+
+      showAlert(`Auth test: ${response.status} - ${data.message || 'Success'}`,
+                response.ok ? "success" : "danger");
+    } catch (error) {
+      console.error("❌ Auth test error:", error);
+      showAlert(`Auth test failed: ${error.message}`, "danger");
+    }
+  };
     }, 5000);
   };
 
@@ -275,11 +301,9 @@ const UserProfile = () => {
       // Enhanced error message based on error type
       let errorMessage = "Failed to update information. Please try again.";
 
-      if (
-        error.message?.includes("No authentication token") ||
-        error.message?.includes("Authentication failed") ||
-        error.message?.includes("Access denied")
-      ) {
+      if (error.message?.includes("No authentication token") ||
+          error.message?.includes("Authentication failed") ||
+          error.message?.includes("Access denied")) {
         errorMessage = "Your session has expired. Please log in again.";
         // Optionally redirect to login
         setTimeout(() => {
