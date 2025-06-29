@@ -475,9 +475,34 @@ const AdminProducts = () => {
                   variant="danger"
                   dismissible
                   onClose={() => setError(null)}
+                  className="d-flex align-items-center"
                 >
-                  <i className="bi bi-exclamation-triangle me-2"></i>
-                  {error}
+                  <i className="bi bi-exclamation-triangle-fill me-3"></i>
+                  <div className="flex-grow-1">
+                    {error}
+                    {error.includes("log in") && (
+                      <div className="mt-2">
+                        <Link
+                          to="/login"
+                          className="btn btn-sm btn-primary me-2"
+                        >
+                          <i className="bi bi-box-arrow-in-right me-1"></i>
+                          Go to Login
+                        </Link>
+                        <small className="text-muted">
+                          Use admin credentials to access product management
+                        </small>
+                      </div>
+                    )}
+                  </div>
+                  <ThemeButton
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchProducts()}
+                  >
+                    <i className="bi bi-arrow-clockwise me-1"></i>
+                    Retry
+                  </ThemeButton>
                 </Alert>
               </Col>
             </Row>
