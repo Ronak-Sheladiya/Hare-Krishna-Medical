@@ -254,13 +254,27 @@ const UserProfile = () => {
       if (error.message === "Failed to fetch") {
         errorMessage =
           "Unable to connect to server. Please check your internet connection and try again.";
-      } else if (error.message.includes("timeout")) {
-        errorMessage = "Request timed out. Please try again.";
+      } else if (
+        error.message.includes("timeout") ||
+        error.message.includes("timed out")
+      ) {
+        errorMessage =
+          "⏱️ The server is taking longer than expected. This often happens when the server is starting up (common with free hosting). Please wait a moment and try again.";
+      } else if (
+        error.message.includes("server is starting up") ||
+        error.message.includes("longer than expected")
+      ) {
+        errorMessage = error.message; // Use the detailed message from our API client
       } else if (
         error.message.includes("401") ||
         error.message.includes("unauthorized")
       ) {
         errorMessage = "Session expired. Please log in again.";
+      } else if (
+        error.message.includes("500") ||
+        error.message.includes("Internal Server Error")
+      ) {
+        errorMessage = "Server error occurred. Please try again in a moment.";
       } else if (error.message) {
         errorMessage = error.message;
       }
