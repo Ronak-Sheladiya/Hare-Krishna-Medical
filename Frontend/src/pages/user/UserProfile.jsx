@@ -495,7 +495,7 @@ const UserProfile = () => {
     setLoading(true);
 
     try {
-      const result = await enhancedApi.post("/api/auth/verify-otp", {
+      const result = await unifiedApi.post("/api/auth/verify-otp", {
         email: personalInfo.email,
         otp: emailVerification.otp,
       });
