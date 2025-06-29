@@ -443,7 +443,7 @@ const UserProfile = () => {
 
     try {
       console.log(`🔄 Sending OTP to: ${personalInfo.email}`);
-      const result = await enhancedApi.post("/api/auth/resend-otp", {
+      const result = await unifiedApi.post("/api/auth/resend-otp", {
         email: personalInfo.email,
       });
 
