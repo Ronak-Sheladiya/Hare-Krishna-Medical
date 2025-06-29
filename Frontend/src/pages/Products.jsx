@@ -94,7 +94,7 @@ const Products = () => {
 
     // Load sample data (for offline mode or empty database)
     // Provide sample data as fallback
-      const sampleProducts = [
+    const sampleProducts = [
         {
           _id: "sample1",
           name: "Paracetamol 500mg",
