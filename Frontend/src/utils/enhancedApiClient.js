@@ -114,6 +114,39 @@ const enhancedApiCall = async (endpoint, options = {}) => {
   // Get current backend URL dynamically
   const currentApiUrl = getApiBaseUrl();
 
+  // In production, test connectivity first
+  if (isProduction()) {
+    console.log("🔍 Testing backend connectivity in production...");
+    const isConnectable = await testBackendConnectivity(currentApiUrl);
+    if (!isConnectable && currentApiUrl !== FALLBACK_BACKEND_URL) {
+      console.warn("⚠️ Primary backend not accessible, trying fallback...");
+      const fallbackConnectable =
+        await testBackendConnectivity(FALLBACK_BACKEND_URL);
+      if (fallbackConnectable) {
+        // Use fallback backend
+        const fallbackUrl = `${FALLBACK_BACKEND_URL}${endpoint}`;
+        console.log(`🔄 Using fallback backend: ${fallbackUrl}`);
+        try {
+          const response = await makeRequest(fallbackUrl, config);
+          return await handleResponse(response);
+        } catch (fallbackError) {
+          console.error("❌ Fallback backend also failed:", fallbackError);
+          throw new Error(
+            "Backend services are currently unavailable. Please try again later.",
+          );
+        }
+      } else {
+        throw new Error(
+          "Backend services are currently unavailable. Please try again later.",
+        );
+      }
+    } else if (!isConnectable) {
+      throw new Error(
+        "Backend service is currently unavailable. Please try again later.",
+      );
+    }
+  }
+
   // Try primary backend first
   const primaryUrl = `${currentApiUrl}${endpoint}`;
   console.log(`🌐 API Call: ${config.method || "GET"} ${primaryUrl}`);
