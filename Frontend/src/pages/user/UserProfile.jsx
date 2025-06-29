@@ -260,7 +260,7 @@ const UserProfile = () => {
         showAlert("Personal information updated successfully!", "success");
       } else {
         const errorMsg =
-          response?.error || response?.message || "Failed to update profile";
+          result?.error || result?.message || "Failed to update profile";
         console.error("❌ Profile update failed:", errorMsg);
         throw new Error(errorMsg);
       }
