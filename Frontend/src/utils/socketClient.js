@@ -241,9 +241,30 @@ const socketClient = {
     }
   },
 
-  // Force reconnection
+  // Notify about fallback mode
+  notifyFallbackMode(reason) {
+    console.warn("🚨 Entering Socket.IO fallback mode:", reason);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("socket-fallback-mode", {
+          detail: { reason, timestamp: new Date().toISOString() },
+        }),
+      );
+    }
+  },
+
+  // Force reconnection (but respect production limits)
   forceReconnect(userToken = null, userRole = null) {
     console.log("🔄 Forcing WebSocket reconnection");
+
+    // In production, only allow reconnect if we haven't exceeded limits
+    if (isProduction() && connectionAttempts >= 3) {
+      console.warn(
+        "🚨 Production: Max reconnection attempts reached, staying in fallback mode",
+      );
+      return null;
+    }
+
     this.disconnect();
     connectionAttempts = 0;
     fallbackMode = false;
