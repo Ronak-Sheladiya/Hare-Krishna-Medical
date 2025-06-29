@@ -189,9 +189,15 @@ const enhancedApiCall = async (endpoint, options = {}) => {
 
     if (primaryError.message === "Failed to fetch") {
       // Network connectivity issue
-      throw new Error(
-        "Unable to connect to server. Please check your internet connection.",
-      );
+      if (isProduction()) {
+        throw new Error(
+          "Service temporarily unavailable. Our team has been notified. Please try again in a few minutes.",
+        );
+      } else {
+        throw new Error(
+          "Unable to connect to server. Please check your internet connection.",
+        );
+      }
     }
 
     if (primaryError.message.includes("401")) {
