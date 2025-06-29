@@ -187,12 +187,12 @@ const sendPasswordResetEmail = async (email, name, token) => {
 // Send order confirmation email
 const sendOrderConfirmationEmail = async (email, name, order) => {
   try {
-    const transporter = createTransporter();
+    const transporter = await createTransporter();
     if (!transporter) {
       console.log(
-        "Email service not configured, skipping order confirmation email",
+        "📧 Email service not configured, skipping order confirmation email",
       );
-      return;
+      return { success: false, message: "Email service not configured" };
     }
 
     const itemsHtml = order.items
