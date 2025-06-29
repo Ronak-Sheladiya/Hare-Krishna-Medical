@@ -257,9 +257,17 @@ const sendOrderConfirmationEmail = async (email, name, order) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log("Order confirmation email sent to:", email);
+    console.log("✅ Order confirmation email sent to:", email);
+    return {
+      success: true,
+      message: "Order confirmation email sent successfully",
+    };
   } catch (error) {
-    console.error("Order confirmation email failed:", error);
+    console.error("❌ Order confirmation email failed:", error.message);
+    return {
+      success: false,
+      message: `Order confirmation email failed: ${error.message}`,
+    };
   }
 };
 
