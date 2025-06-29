@@ -157,8 +157,9 @@ const medicineProducts = [
     expiryDate: new Date("2029-02-01"),
     batchNumber: "DT-2024-008",
     featured: false,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&h=300&fit=crop",
+    ],
   },
 ];
 
