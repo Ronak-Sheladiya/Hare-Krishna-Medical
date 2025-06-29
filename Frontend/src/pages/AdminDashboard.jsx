@@ -28,21 +28,19 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Real dashboard data state
-  const [dashboardStats, setDashboardStats] = useState({
-    totalOrders: 0,
-    totalProducts: 0,
-    totalUsers: 0,
-    totalRevenue: 0,
-    monthlyGrowth: 0,
-    pendingOrders: 0,
-    lowStockProducts: 0,
-    newUsersToday: 0,
-    unreadMessages: 0,
-  });
+  // Use real-time data provider
+  const { isConnected, lastUpdate, liveStats, forceRefresh } =
+    useRealTimeData();
 
+  // Local state for additional data not in real-time provider
   const [recentOrders, setRecentOrders] = useState([]);
   const [lowStockProducts, setLowStockProducts] = useState([]);
+
+  // Merge real-time stats with unread messages
+  const dashboardStats = {
+    ...liveStats,
+    unreadMessages: unreadCount || 0,
+  };
 
   // Fetch dashboard data
   const fetchDashboardData = async () => {
