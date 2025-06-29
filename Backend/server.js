@@ -221,7 +221,7 @@ process.on("SIGINT", () => {
 
 // Routes with error handling
 const routes = [
-  { path: "/api/test", file: testUserRoute, name: "Test" },
+  { path: "/api/test", file: "./routes/test", name: "Test" },
   { path: "/api/auth", file: "./routes/auth", name: "Auth" },
   { path: "/api/debug-auth", file: "./routes/debug-auth", name: "Debug Auth" },
   { path: "/api/users", file: "./routes/users", name: "Users" },
