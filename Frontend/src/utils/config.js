@@ -68,6 +68,28 @@ export const getPrimaryDomain = () => {
 };
 
 /**
+ * Mock backend URL (for compatibility with existing code)
+ * @returns {string}
+ */
+export const getBackendURL = () => {
+  console.warn(
+    "🎨 Frontend-only mode: getBackendURL() called but no backend available",
+  );
+  return ""; // Return empty string since no backend exists
+};
+
+/**
+ * Mock socket URL (for compatibility with existing code)
+ * @returns {string}
+ */
+export const getSocketURL = () => {
+  console.warn(
+    "🎨 Frontend-only mode: getSocketURL() called but no backend available",
+  );
+  return ""; // Return empty string since no backend exists
+};
+
+/**
  * Get application configuration
  * @returns {object}
  */
