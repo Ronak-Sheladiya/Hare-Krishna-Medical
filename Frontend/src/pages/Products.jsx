@@ -113,36 +113,13 @@ const Products = () => {
 
     if (success && data) {
       const featuredData = data.data || data;
-      dispatch(setFeaturedProducts(featuredData));
+      const featured = Array.isArray(featuredData)
+        ? featuredData
+        : featuredData.products || [];
+      dispatch(setFeaturedProducts(featured));
     } else {
-      // Fallback featured products
-      const sampleFeatured = [
-        {
-          _id: "featured1",
-          name: "Paracetamol 500mg",
-          company: "Cipla",
-          price: 25.5,
-          discountPrice: 25.5,
-          stock: 150,
-          category: "Pain Relief",
-          images: [
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5QYXJhY2V0YW1vbDwvdGV4dD48L3N2Zz4=",
-          ],
-        },
-        {
-          _id: "featured2",
-          name: "First Aid Kit",
-          company: "Johnson & Johnson",
-          price: 450.0,
-          discountPrice: 450.0,
-          stock: 25,
-          category: "First Aid",
-          images: [
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGMzNTQ1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Rmlyc3QgQWlkPC90ZXh0Pjwvc3ZnPg==",
-          ],
-        },
-      ];
-      dispatch(setFeaturedProducts(sampleFeatured));
+      // No fallback - show empty featured products if API fails
+      dispatch(setFeaturedProducts([]));
     }
   };
 
