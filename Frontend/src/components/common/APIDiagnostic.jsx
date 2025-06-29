@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, Button, Alert, Table, Badge } from "react-bootstrap";
 import unifiedApi from "../../utils/unifiedApiClient";
+import smartApi from "../../utils/smartApiClient";
 import { getBackendURL } from "../../utils/config";
 
 const APIDiagnostic = ({ show = true }) => {
