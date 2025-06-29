@@ -19,6 +19,7 @@ export const useRealTimeData = () => {
 export const RealTimeDataProvider = ({ children }) => {
   const { user, token } = useSelector((state) => state.auth);
   const [isConnected, setIsConnected] = useState(false);
+  const [fallbackMode, setFallbackMode] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [liveStats, setLiveStats] = useState({
     totalOrders: 0,
