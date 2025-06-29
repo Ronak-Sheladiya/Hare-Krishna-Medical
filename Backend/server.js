@@ -61,6 +61,19 @@ app.use(
         return callback(null, true);
       }
 
+      // Check for matches with/without trailing slash
+      const originWithSlash = origin.endsWith("/") ? origin : origin + "/";
+      const originWithoutSlash = origin.endsWith("/")
+        ? origin.slice(0, -1)
+        : origin;
+
+      if (
+        allowedOrigins.includes(originWithSlash) ||
+        allowedOrigins.includes(originWithoutSlash)
+      ) {
+        return callback(null, true);
+      }
+
       // Check for fly.dev subdomains
       if (origin.endsWith(".fly.dev")) {
         console.log(`✅ Allowing fly.dev subdomain: ${origin}`);
