@@ -168,9 +168,19 @@ export const logConfig = () => {
   }
 };
 
-// Auto-log configuration in development
-if (isDevelopment()) {
+// Auto-log configuration in development and when debugging
+if (isDevelopment() || import.meta.env.VITE_DEBUG === "true") {
   logConfig();
+}
+
+// Always log basic config for debugging production issues
+if (typeof window !== "undefined") {
+  const hostname = window.location.hostname;
+  console.log(`🌐 App running on: ${hostname}`);
+  console.log(`📍 Environment: ${getEnvironment()}`);
+  console.log(`🏭 Production mode: ${isProduction()}`);
+  console.log(`🔗 Backend URL: ${getBackendURL()}`);
+  console.log(`🔌 Socket URL: ${getSocketURL()}`);
 }
 
 export default {
