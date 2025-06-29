@@ -38,8 +38,8 @@ const socketClient = {
       console.log("🔌 Attempting to connect to WebSocket:", SOCKET_URL);
 
       socket = io(SOCKET_URL, {
-        transports: ["websocket", "polling"], // Fallback to polling if websocket fails
-        timeout: 20000,
+        transports: ["polling", "websocket"], // Try polling first, then websocket
+        timeout: 10000, // Reduce timeout to 10 seconds
         forceNew: true,
         autoConnect: true,
         auth: {
@@ -47,6 +47,10 @@ const socketClient = {
           role: userRole,
         },
         withCredentials: true,
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionAttempts: 5,
+        upgrade: true,
       });
 
       // Connection successful
