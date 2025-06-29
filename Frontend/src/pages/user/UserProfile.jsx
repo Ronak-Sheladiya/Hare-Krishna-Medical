@@ -195,14 +195,7 @@ const UserProfile = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Check if we're in a restricted network environment
-    if (isRestrictedEnvironment()) {
-      setError(
-        "Profile updates are currently unavailable in this preview environment due to network restrictions. In a normal deployment, this feature would work properly.",
-      );
-      setLoading(false);
-      return;
-    }
+    // Since user creation works, let's try profile updates too
 
     try {
       // Prepare profile data for API
