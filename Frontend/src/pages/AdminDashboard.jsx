@@ -200,12 +200,16 @@ const AdminDashboard = () => {
                   alignItems: "center",
                   justifyContent: "space-between",
                   fontSize: "14px",
-                  fontWeight: "600"
+                  fontWeight: "600",
                 }}
               >
                 <div>
-                  <i className={`bi ${isConnected ? 'bi-wifi' : 'bi-wifi-off'} me-2`}></i>
-                  {isConnected ? 'Real-time data connected' : 'Real-time data disconnected'}
+                  <i
+                    className={`bi ${isConnected ? "bi-wifi" : "bi-wifi-off"} me-2`}
+                  ></i>
+                  {isConnected
+                    ? "Real-time data connected"
+                    : "Real-time data disconnected"}
                 </div>
                 <div className="d-flex align-items-center gap-3">
                   <span>Last update: {lastUpdate.toLocaleTimeString()}</span>
@@ -218,7 +222,7 @@ const AdminDashboard = () => {
                       color: "white",
                       padding: "4px 8px",
                       fontSize: "12px",
-                      cursor: "pointer"
+                      cursor: "pointer",
                     }}
                   >
                     <i className="bi bi-arrow-clockwise me-1"></i>
@@ -239,10 +243,6 @@ const AdminDashboard = () => {
                   <ThemeButton onClick={fetchDashboardData} size="sm">
                     Retry
                   </ThemeButton>
-                </Alert>
-              </Col>
-            </Row>
-          )}
                 </Alert>
               </Col>
             </Row>
