@@ -55,14 +55,14 @@ export const RealTimeDataProvider = ({ children }) => {
       setIsConnected(false);
     };
 
-    window.addEventListener("socket-fallback-mode", handleFallbackMode);
+    window.addEventListener('socket-fallback-mode', handleFallbackMode);
 
     checkConnection();
     const interval = setInterval(checkConnection, 2000);
 
     return () => {
       clearInterval(interval);
-      window.removeEventListener("socket-fallback-mode", handleFallbackMode);
+      window.removeEventListener('socket-fallback-mode', handleFallbackMode);
     };
   }, []);
 
@@ -257,10 +257,12 @@ export const RealTimeDataProvider = ({ children }) => {
   };
 
   return (
-    <RealTimeDataContext.Provider value={contextValue}>
-      {children}
-    </RealTimeDataContext.Provider>
-  );
-};
-
-export default RealTimeDataProvider;
+    <RealTimeDataContext.Provider
+      value={{
+        isConnected,
+        fallbackMode,
+        lastUpdate,
+        liveStats,
+        forceRefresh,
+      }}
+    >
