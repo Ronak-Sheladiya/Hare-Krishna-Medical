@@ -47,6 +47,15 @@ const AdminDashboard = () => {
     setLoading(true);
     setError(null);
 
+    // Check if user is authenticated first
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    if (!token) {
+      setError("Please log in as an admin to access the dashboard.");
+      setLoading(false);
+      return;
+    }
+
     // Fetch all required data using the safe API client
     const [statsResult, ordersResult, productsResult] = await Promise.all([
       safeApiCall(() => api.get("/api/analytics/dashboard-stats"), {}),
@@ -56,6 +65,28 @@ const AdminDashboard = () => {
       ),
       safeApiCall(() => api.get("/api/products?limit=10&stock=low"), []),
     ]);
+
+    // Check for authentication errors
+    const authErrors = [statsResult, ordersResult, productsResult].filter(
+      (result) => !result.success && result.error?.includes("401"),
+    );
+
+    if (authErrors.length > 0) {
+      setError("Authentication failed. Please log in as an admin.");
+      setLoading(false);
+      return;
+    }
+
+    // Check for authorization errors (403 - not admin)
+    const authzErrors = [statsResult, ordersResult, productsResult].filter(
+      (result) => !result.success && result.error?.includes("403"),
+    );
+
+    if (authzErrors.length > 0) {
+      setError("Access denied. Admin privileges required.");
+      setLoading(false);
+      return;
+    }
 
     // Process stats
     if (statsResult.success && statsResult.data?.data) {
@@ -89,9 +120,20 @@ const AdminDashboard = () => {
       !ordersResult.success &&
       !productsResult.success
     ) {
-      setError(
-        "Unable to load dashboard data. Please check if the backend server is running.",
-      );
+      // More specific error messages
+      const firstError =
+        statsResult.error || ordersResult.error || productsResult.error;
+      if (firstError?.includes("Network error")) {
+        setError(
+          "Unable to connect to the backend server. Please check if it's running.",
+        );
+      } else if (firstError?.includes("timeout")) {
+        setError("Server is taking too long to respond. Please try again.");
+      } else {
+        setError(
+          "Unable to load dashboard data. Please try refreshing the page.",
+        );
+      }
     }
 
     setLoading(false);
