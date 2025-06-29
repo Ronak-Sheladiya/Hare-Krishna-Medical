@@ -115,14 +115,37 @@ export const smartApi = {
 
   // Update profile
   updateProfile: async (profileData) => {
+    // Check token first
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    console.log("🔑 Token check:", token ? "Token found" : "No token");
+
+    if (!token) {
+      throw new Error("No authentication token found. Please log in again.");
+    }
+
     const isBackendAvailable = await checkBackendAvailability();
 
     if (isBackendAvailable) {
       try {
-        return await unifiedApi.put("/api/auth/update-profile", profileData);
+        console.log("🚀 Attempting backend profile update...");
+        const result = await unifiedApi.put(
+          "/api/auth/update-profile",
+          profileData,
+        );
+        console.log("✅ Backend profile update successful");
+        return result;
       } catch (error) {
+        console.error("❌ Backend profile update failed:", error);
+        // Don't fallback to client-side if it's an auth error - user needs to re-login
+        if (
+          error.message?.includes("401") ||
+          error.message?.includes("Access denied")
+        ) {
+          throw new Error("Authentication failed. Please log in again.");
+        }
         console.log(
-          "Backend profile update failed, falling back to client-side",
+          "⚠️ Backend profile update failed, falling back to client-side",
         );
         backendAvailable = false; // Mark as unavailable
       }
