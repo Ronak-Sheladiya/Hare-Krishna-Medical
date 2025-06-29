@@ -34,6 +34,8 @@ const seedData = async () => {
     await Product.deleteMany({});
     await Letterhead.deleteMany({});
 
+    console.log("🗑️ Cleared existing data");
+
     // Create admin user
     const adminUser = new User({
       fullName: "Admin User",
