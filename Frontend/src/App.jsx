@@ -211,7 +211,6 @@ function App() {
               path="/vercel-deployment"
               element={<VercelDeploymentGuide />}
             />
-
             <Route
               path="/login"
               element={
@@ -244,20 +243,19 @@ function App() {
                 </AuthRoute>
               }
             />
-
             <Route path="/access-denied" element={<AccessDenied />} />
-
             {/* Admin Routes */}
             <Route
-              path="/admin"
+              path="/user"
               element={
-                <ProtectedRoute adminOnly>
+                <ProtectedRoute userOnly>
                   <RealTimeDataProvider>
-                    <AdminDashboard />
+                    <UserDashboard />
                   </RealTimeDataProvider>
                 </ProtectedRoute>
               }
             />
+            } />
             <Route
               path="/admin/products"
               element={
@@ -314,7 +312,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path="/admin/profile"
               element={
@@ -355,7 +352,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             {/* User Routes */}
             <Route
               path="/user/dashboard"
@@ -389,7 +385,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             {/* Debug Routes */}
             <Route
               path="/navigation-test"
@@ -464,7 +459,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
