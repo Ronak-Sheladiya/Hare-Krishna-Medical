@@ -98,54 +98,62 @@ const AdminDashboard = () => {
     setLoading(false);
   };
 
+  // Add real-time hooks
+  const { notifications, clearNotification } = useAdminRealTime();
+
   useEffect(() => {
     fetchDashboardData();
 
-    // Setup real-time refresh listeners
-    const handleRefreshOrders = () => {
-      console.log("Refreshing dashboard due to order updates");
-      fetchDashboardData();
-    };
+    // Setup socket real-time listeners
+    if (socketClient && socketClient.on) {
+      // Listen for new orders
+      socketClient.on("admin_notification", (data) => {
+        console.log("🔔 Admin notification received:", data);
+        if (data.type === "order" || data.type === "new-order") {
+          fetchDashboardData();
+        }
+      });
 
-    const handleRefreshProducts = () => {
-      console.log("Refreshing dashboard due to product updates");
-      fetchDashboardData();
-    };
+      // Listen for new users
+      socketClient.on("new-user-registered", (data) => {
+        console.log("👤 New user registered:", data);
+        fetchDashboardData();
+      });
 
-    const handleRefreshAnalytics = () => {
-      console.log("Refreshing dashboard due to analytics updates");
-      fetchDashboardData();
-    };
+      // Listen for new messages
+      socketClient.on("new-message", (data) => {
+        console.log("💬 New message received:", data);
+        fetchDashboardData();
+      });
 
-    const handleRefreshDashboard = () => {
-      console.log("Refreshing dashboard due to general updates");
-      fetchDashboardData();
-    };
+      // Listen for inventory updates
+      socketClient.on("inventory-changed", (data) => {
+        console.log("📦 Inventory updated:", data);
+        fetchDashboardData();
+      });
 
-    const handleProfileUpdate = () => {
-      console.log("Refreshing dashboard due to profile updates");
-      fetchDashboardData();
-    };
+      // Listen for order status updates
+      socketClient.on("order-updated", (data) => {
+        console.log("🛍️ Order updated:", data);
+        fetchDashboardData();
+      });
+    }
 
-    // Add event listeners for real-time updates
-    window.addEventListener("refreshOrders", handleRefreshOrders);
-    window.addEventListener("refreshProducts", handleRefreshProducts);
-    window.addEventListener("refreshAnalytics", handleRefreshAnalytics);
-    window.addEventListener("refreshDashboard", handleRefreshDashboard);
-    window.addEventListener("profileUpdated", handleProfileUpdate);
-
-    // Auto-refresh dashboard every 30 seconds for live data
+    // Auto-refresh dashboard every 2 minutes for live data
     const autoRefreshInterval = setInterval(() => {
-      console.log("Auto-refreshing dashboard data");
+      console.log("🔄 Auto-refreshing dashboard data");
       fetchDashboardData();
-    }, 30000);
+    }, 120000); // 2 minutes
 
     return () => {
-      window.removeEventListener("refreshOrders", handleRefreshOrders);
-      window.removeEventListener("refreshProducts", handleRefreshProducts);
-      window.removeEventListener("refreshAnalytics", handleRefreshAnalytics);
-      window.removeEventListener("refreshDashboard", handleRefreshDashboard);
-      window.removeEventListener("profileUpdated", handleProfileUpdate);
+      // Clean up socket listeners
+      if (socketClient && socketClient.off) {
+        socketClient.off("admin_notification");
+        socketClient.off("new-user-registered");
+        socketClient.off("new-message");
+        socketClient.off("inventory-changed");
+        socketClient.off("order-updated");
+      }
       clearInterval(autoRefreshInterval);
     };
   }, [unreadCount]);
