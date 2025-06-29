@@ -127,9 +127,14 @@ const sendVerificationEmail = async (email, name, token) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log("Verification email sent to:", email);
+    console.log("✅ Verification email sent to:", email);
+    return { success: true, message: "Verification email sent successfully" };
   } catch (error) {
-    console.error("Verification email failed:", error);
+    console.error("❌ Verification email failed:", error.message);
+    return {
+      success: false,
+      message: `Verification email failed: ${error.message}`,
+    };
   }
 };
 
