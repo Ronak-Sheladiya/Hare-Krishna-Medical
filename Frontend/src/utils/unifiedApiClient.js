@@ -94,6 +94,7 @@ const makeApiRequest = async (endpoint, options = {}) => {
     return responseData;
   } catch (error) {
     console.error(`❌ API Error for ${endpoint}:`, error.message);
+    console.error(`❌ Backend URL being used: ${BACKEND_URL}`);
 
     // Handle specific error types
     if (error.name === "AbortError") {
@@ -101,9 +102,42 @@ const makeApiRequest = async (endpoint, options = {}) => {
     }
 
     if (error.message === "Failed to fetch") {
+      // Check if we're in development and try local backend
+      const currentURL = BACKEND_URL;
+      if (
+        currentURL.includes("localhost") ||
+        currentURL.includes("127.0.0.1")
+      ) {
+        console.log(
+          "🔄 Local backend not available, this is likely expected in production",
+        );
+        throw new Error(
+          "Local backend server is not running. Please start the backend server with 'npm run start:backend' or check if you're in production mode.",
+        );
+      } else {
+        console.log("🔄 Production backend not reachable");
+        throw new Error(
+          "Backend server is not available. Please try again later or contact support.",
+        );
+      }
+    }
+
+    // Network errors
+    if (
+      error.message.includes("NetworkError") ||
+      error.message.includes("ERR_NETWORK")
+    ) {
       throw new Error(
-        "Unable to connect to server. Please check your internet connection.",
+        "Network error. Please check your internet connection and try again.",
       );
+    }
+
+    // CORS errors
+    if (
+      error.message.includes("CORS") ||
+      error.message.includes("cross-origin")
+    ) {
+      throw new Error("Server configuration error. Please contact support.");
     }
 
     // Re-throw the original error
