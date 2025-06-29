@@ -183,22 +183,66 @@ const AdminDashboard = () => {
         icon="bi-speedometer2"
       />
 
-      <ThemeSection background="#f8f9fa">
+      <ThemeSection>
         <Container>
-          {error && (
-            <Row className="mb-4">
-              <Col lg={12}>
-                <Alert variant="warning" className="d-flex align-items-center">
-                  <i className="bi bi-exclamation-triangle me-2"></i>
-                  {error}
-                  <ThemeButton
-                    variant="outline"
-                    size="sm"
-                    className="ms-auto"
-                    onClick={fetchDashboardData}
+          {/* Real-time Status Bar */}
+          <Row className="mb-4">
+            <Col lg={12}>
+              <div
+                style={{
+                  background: isConnected
+                    ? "linear-gradient(135deg, #28a745, #20c997)"
+                    : "linear-gradient(135deg, #dc3545, #e63946)",
+                  borderRadius: "8px",
+                  padding: "12px 20px",
+                  color: "white",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  fontSize: "14px",
+                  fontWeight: "600"
+                }}
+              >
+                <div>
+                  <i className={`bi ${isConnected ? 'bi-wifi' : 'bi-wifi-off'} me-2`}></i>
+                  {isConnected ? 'Real-time data connected' : 'Real-time data disconnected'}
+                </div>
+                <div className="d-flex align-items-center gap-3">
+                  <span>Last update: {lastUpdate.toLocaleTimeString()}</span>
+                  <button
+                    onClick={forceRefresh}
+                    style={{
+                      background: "rgba(255,255,255,0.2)",
+                      border: "1px solid rgba(255,255,255,0.3)",
+                      borderRadius: "4px",
+                      color: "white",
+                      padding: "4px 8px",
+                      fontSize: "12px",
+                      cursor: "pointer"
+                    }}
                   >
+                    <i className="bi bi-arrow-clockwise me-1"></i>
+                    Refresh
+                  </button>
+                </div>
+              </div>
+            </Col>
+          </Row>
+
+          {/* Error State */}
+          {error && !loading && (
+            <Row>
+              <Col lg={12}>
+                <Alert variant="danger" className="d-flex align-items-center">
+                  <i className="bi bi-exclamation-triangle-fill me-3"></i>
+                  <div className="flex-grow-1">{error}</div>
+                  <ThemeButton onClick={fetchDashboardData} size="sm">
                     Retry
                   </ThemeButton>
+                </Alert>
+              </Col>
+            </Row>
+          )}
                 </Alert>
               </Col>
             </Row>
