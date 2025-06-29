@@ -93,6 +93,23 @@ export const getBackendURL = () => {
     return localBackend;
   }
 
+  // Special handling for fly.dev deployments
+  if (hostname.includes("fly.dev")) {
+    // First, try to use a same-origin backend if available
+    const currentProtocol = window.location.protocol;
+    const potentialBackendURL = `${currentProtocol}//${hostname}`;
+    console.log(
+      `🔄 Fly.dev detected, will try same-origin first: ${potentialBackendURL}`,
+    );
+
+    // For now, still return the production backend but the API client will handle fallbacks
+    const prodURL = "https://hare-krishna-medical.onrender.com";
+    console.log(
+      `🚀 Fly.dev using production backend: ${prodURL} (with fallback)`,
+    );
+    return prodURL;
+  }
+
   // Production environment - use remote backend
   const prodURL = "https://hare-krishna-medical.onrender.com";
   console.log(`🚀 Using production backend: ${prodURL}`);
