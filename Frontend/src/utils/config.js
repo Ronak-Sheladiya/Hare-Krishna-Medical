@@ -18,13 +18,19 @@ export const isProduction = () => {
     typeof window !== "undefined" ? window.location.hostname : "";
   const env = getEnvironment();
 
-  return (
-    env === "production" ||
+  // Check for production domains or non-localhost hostnames
+  const isProductionDomain =
     hostname.includes("vercel.app") ||
     hostname.includes("render.com") ||
     hostname.includes("netlify.app") ||
     hostname.includes("fly.dev") ||
-    (hostname !== "localhost" && hostname !== "127.0.0.1")
+    hostname.includes("railway.app") ||
+    hostname.includes("herokuapp.com");
+
+  return (
+    env === "production" ||
+    isProductionDomain ||
+    (hostname !== "localhost" && hostname !== "127.0.0.1" && hostname !== "")
   );
 };
 
