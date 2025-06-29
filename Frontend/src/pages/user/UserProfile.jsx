@@ -588,26 +588,36 @@ const UserProfile = () => {
             </Row>
           )}
 
-          {/* Mode Indicator */}
+          {/* Simple Mode Indicator */}
           <Row className="mb-3">
             <Col lg={12}>
-              <ModeIndicator show={true} />
+              <SimpleModeIndicator show={true} />
             </Col>
           </Row>
 
-          {/* Backend Status Indicator */}
-          <Row className="mb-3">
-            <Col lg={12}>
-              <BackendStatusIndicator show={true} />
-            </Col>
-          </Row>
+          {/* Detailed Diagnostics (only show for non-fly.dev or when debug=true) */}
+          {(!window.location.hostname.includes("fly.dev") ||
+            window.location.search.includes("debug=true")) && (
+            <>
+              <Row className="mb-3">
+                <Col lg={12}>
+                  <ModeIndicator show={true} />
+                </Col>
+              </Row>
 
-          {/* API Diagnostic (for debugging) */}
-          <Row className="mb-3">
-            <Col lg={12}>
-              <APIDiagnostic show={true} />
-            </Col>
-          </Row>
+              <Row className="mb-3">
+                <Col lg={12}>
+                  <BackendStatusIndicator show={true} />
+                </Col>
+              </Row>
+
+              <Row className="mb-3">
+                <Col lg={12}>
+                  <APIDiagnostic show={true} />
+                </Col>
+              </Row>
+            </>
+          )}
 
           {/* Network Debug Section (Development/Testing Only) */}
           {(window.location.hostname === "localhost" ||
