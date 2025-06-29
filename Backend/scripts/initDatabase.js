@@ -141,28 +141,43 @@ const createDefaultLetterhead = async () => {
       return;
     }
 
+    // Get the admin user to set as createdBy
+    const adminUser = await User.findOne({ role: "admin" });
+    if (!adminUser) {
+      console.log("⚠️ Admin user not found, skipping letterhead creation");
+      return;
+    }
+
     const defaultLetterhead = new Letterhead({
       name: "Default Letterhead",
-      companyName: "Hare Krishna Medical Store",
-      address: {
-        street: "123 Medical Street",
-        city: "Healthcare City",
-        state: "Gujarat",
-        zipCode: "123456",
-        country: "India",
+      description: "Default company letterhead for invoices and documents",
+      companyInfo: {
+        name: "Hare Krishna Medical Store",
+        address: {
+          street: "123 Medical Street",
+          city: "Healthcare City",
+          state: "Gujarat",
+          pincode: "123456",
+          country: "India",
+        },
+        contact: {
+          phone: "+91 9876543210",
+          email: "info@harekrishnamedical.com",
+          website: "https://harekrishnamedical.vercel.app",
+        },
+        registration: {
+          gst: "24XXXXX1234X1ZX",
+          licenseNumber: "MED123456",
+        },
       },
-      phone: "+91 9876543210",
-      email: "info@harekrishnamedical.com",
-      website: "https://harekrishnamedical.vercel.app",
-      gstNumber: "24XXXXX1234X1ZX",
-      licenseNumber: "MED123456",
-      logo: "https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800",
+      logo: {
+        url: "https://cdn.builder.io/api/v1/assets/030c65a34d11492ab1cc545443b12540/hk-e0ec29?format=webp&width=800",
+        width: 100,
+        height: 100,
+        position: "left",
+      },
       isDefault: true,
-      colors: {
-        primary: "#e63946",
-        secondary: "#457b9d",
-        accent: "#f1faee",
-      },
+      createdBy: adminUser._id,
     });
 
     await defaultLetterhead.save();
@@ -183,101 +198,117 @@ const createSampleProducts = async () => {
       return;
     }
 
+    // Get the admin user to set as createdBy
+    const adminUser = await User.findOne({ role: "admin" });
+    if (!adminUser) {
+      console.log("⚠️ Admin user not found, skipping product creation");
+      return;
+    }
+
     const sampleProducts = [
       {
         name: "Paracetamol 500mg",
+        company: "PharmaCorp",
         description: "Pain reliever and fever reducer tablets",
-        category: "Tablets",
-        subCategory: "Pain Relief",
+        category: "Pain Relief",
         price: 25.0,
-        costPrice: 15.0,
-        stockQuantity: 100,
-        minStockLevel: 10,
-        manufacturer: "PharmaCorp",
-        batchNumber: "PCM001",
-        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
-        prescriptionRequired: false,
+        originalPrice: 30.0,
+        stock: 100,
+        batchNo: "PCM001",
+        expDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
         isActive: true,
+        isFeatured: true,
         tags: ["paracetamol", "fever", "pain", "headache"],
         images: [
-          "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop",
+          {
+            url: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop",
+            alt: "Paracetamol tablets",
+            isPrimary: true,
+          },
         ],
+        createdBy: adminUser._id,
       },
       {
         name: "Amoxicillin 250mg",
+        company: "MediCare",
         description: "Antibiotic capsules for bacterial infections",
-        category: "Capsules",
-        subCategory: "Antibiotics",
+        category: "Antibiotics",
         price: 85.0,
-        costPrice: 65.0,
-        stockQuantity: 50,
-        minStockLevel: 5,
-        manufacturer: "MediCare",
-        batchNumber: "AMX001",
-        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-        prescriptionRequired: true,
+        originalPrice: 95.0,
+        stock: 50,
+        batchNo: "AMX001",
+        expDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
         isActive: true,
         tags: ["antibiotic", "infection", "bacterial"],
         images: [
-          "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=300&h=300&fit=crop",
+          {
+            url: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=300&h=300&fit=crop",
+            alt: "Amoxicillin capsules",
+            isPrimary: true,
+          },
         ],
+        createdBy: adminUser._id,
       },
       {
         name: "Vitamin D3 Tablets",
+        company: "HealthPlus",
         description: "Vitamin D3 supplement for bone health",
         category: "Supplements",
-        subCategory: "Vitamins",
         price: 120.0,
-        costPrice: 80.0,
-        stockQuantity: 75,
-        minStockLevel: 15,
-        manufacturer: "HealthPlus",
-        batchNumber: "VD3001",
-        expiryDate: new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000), // 2 years
-        prescriptionRequired: false,
+        stock: 75,
+        batchNo: "VD3001",
+        expDate: new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000), // 2 years
         isActive: true,
+        isFeatured: true,
         tags: ["vitamin", "bone health", "supplement", "d3"],
         images: [
-          "https://images.unsplash.com/photo-1550572017-4414ea87ac19?w=300&h=300&fit=crop",
+          {
+            url: "https://images.unsplash.com/photo-1550572017-4414ea87ac19?w=300&h=300&fit=crop",
+            alt: "Vitamin D3 tablets",
+            isPrimary: true,
+          },
         ],
+        createdBy: adminUser._id,
       },
       {
         name: "Cough Syrup",
+        company: "CoughCare",
         description: "Effective cough relief syrup for dry and wet cough",
-        category: "Syrups",
-        subCategory: "Cough & Cold",
+        category: "Cough & Cold",
         price: 65.0,
-        costPrice: 45.0,
-        stockQuantity: 30,
-        minStockLevel: 8,
-        manufacturer: "CoughCare",
-        batchNumber: "CS001",
-        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-        prescriptionRequired: false,
+        stock: 30,
+        batchNo: "CS001",
+        expDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
         isActive: true,
         tags: ["cough", "syrup", "cold", "throat"],
         images: [
-          "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=300&h=300&fit=crop",
+          {
+            url: "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=300&h=300&fit=crop",
+            alt: "Cough syrup bottle",
+            isPrimary: true,
+          },
         ],
+        createdBy: adminUser._id,
       },
       {
         name: "Antiseptic Cream",
+        company: "WoundHeal",
         description: "Topical antiseptic cream for wound care",
-        category: "Topical",
-        subCategory: "Wound Care",
+        category: "First Aid",
         price: 45.0,
-        costPrice: 30.0,
-        stockQuantity: 40,
-        minStockLevel: 10,
-        manufacturer: "WoundHeal",
-        batchNumber: "AC001",
-        expiryDate: new Date(Date.now() + 18 * 30 * 24 * 60 * 60 * 1000), // 18 months
-        prescriptionRequired: false,
+        stock: 40,
+        batchNo: "AC001",
+        expDate: new Date(Date.now() + 18 * 30 * 24 * 60 * 60 * 1000), // 18 months
         isActive: true,
         tags: ["antiseptic", "wound", "cream", "topical"],
         images: [
-          "https://images.unsplash.com/photo-1585435557343-3b092031d8ab?w=300&h=300&fit=crop",
+          {
+            url: "https://images.unsplash.com/photo-1585435557343-3b092031d8ab?w=300&h=300&fit=crop",
+            alt: "Antiseptic cream tube",
+            isPrimary: true,
+          },
         ],
+        createdBy: adminUser._id,
       },
     ];
 
