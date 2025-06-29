@@ -139,8 +139,9 @@ const medicineProducts = [
     expiryDate: new Date("2029-01-01"),
     batchNumber: "BPM-2024-007",
     featured: false,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=500&h=300&fit=crop",
+    ],
   },
   {
     name: "Thermometer Digital",
