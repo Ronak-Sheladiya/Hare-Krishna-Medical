@@ -5,7 +5,11 @@
   "private": true,
   "scripts": {
     "install:frontend": "cd Frontend && npm install --legacy-peer-deps",
+    "install:backend": "cd Backend && npm install",
+    "install:all": "npm run install:backend && npm run install:frontend",
     "dev": "cd Frontend && npm run dev",
+    "dev:backend": "cd Backend && npm run dev",
+    "dev:full": "concurrently \"npm run dev:backend\" \"npm run dev\"",
     "build": "cd Frontend && npm run build",
     "test": "cd Frontend && npm test",
     "preview": "cd Frontend && npm run preview"
