@@ -95,10 +95,12 @@ const sendWelcomeEmail = async (email, name) => {
 // Send verification email
 const sendVerificationEmail = async (email, name, token) => {
   try {
-    const transporter = createTransporter();
+    const transporter = await createTransporter();
     if (!transporter) {
-      console.log("Email service not configured, skipping verification email");
-      return;
+      console.log(
+        "📧 Email service not configured, skipping verification email",
+      );
+      return { success: false, message: "Email service not configured" };
     }
 
     const verificationUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/verify-email?token=${token}`;
