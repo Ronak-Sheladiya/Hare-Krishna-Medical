@@ -41,7 +41,7 @@ const socketClient = {
       fetch(`${SOCKET_URL.replace("/socket.io", "")}/api/health`)
         .then((response) => {
           if (response.ok) {
-            console.log("✅ Backend server is reachable");
+            console.log("�� Backend server is reachable");
           } else {
             console.warn("⚠️ Backend server responded with:", response.status);
           }
@@ -93,9 +93,19 @@ const socketClient = {
           console.warn(
             "🔄 Max reconnection attempts reached, entering fallback mode",
           );
+          console.log("💡 App will continue to work without real-time updates");
           fallbackMode = true;
           socket?.disconnect();
           socket = null;
+
+          // Notify about fallback mode
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(
+              new CustomEvent("socket-fallback-mode", {
+                detail: { reason: "Max reconnection attempts reached" },
+              }),
+            );
+          }
         }
       });
 
