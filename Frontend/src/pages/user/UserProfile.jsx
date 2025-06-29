@@ -573,6 +573,13 @@ const UserProfile = () => {
             </Row>
           )}
 
+          {/* Backend Status Indicator */}
+          <Row className="mb-3">
+            <Col lg={12}>
+              <BackendStatusIndicator show={true} />
+            </Col>
+          </Row>
+
           {/* Network Debug Section (Development/Testing Only) */}
           {(window.location.hostname === "localhost" ||
             window.location.hostname === "127.0.0.1" ||
