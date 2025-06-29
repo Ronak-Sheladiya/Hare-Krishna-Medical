@@ -1,7 +1,12 @@
 // Enhanced API client with better error handling and fallback mechanisms
 import { getBackendURL, isProduction } from "./config.js";
 
-const API_BASE_URL = getBackendURL();
+// Dynamically get backend URL to ensure production detection works
+const getApiBaseUrl = () => {
+  const url = getBackendURL();
+  console.log(`🔗 Enhanced API Client using: ${url}`);
+  return url;
+};
 const FALLBACK_BACKEND_URL = "https://hare-krishna-medical.onrender.com";
 
 /**
