@@ -1071,6 +1071,15 @@ const UserProfile = () => {
 
                         <div className="text-end">
                           <ThemeButton
+                            type="button"
+                            variant="outline-secondary"
+                            onClick={testAuth}
+                            className="me-2"
+                            size="sm"
+                          >
+                            🔍 Test Auth
+                          </ThemeButton>
+                          <ThemeButton
                             type="submit"
                             variant="primary"
                             disabled={loading}
