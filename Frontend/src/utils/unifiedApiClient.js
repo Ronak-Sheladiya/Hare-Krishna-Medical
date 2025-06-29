@@ -183,9 +183,16 @@ const makeApiRequest = async (endpoint, options = {}) => {
   if (lastError.message === "Failed to fetch") {
     // Check if we're in development and try local backend
     const currentURL = BACKEND_URL;
+    const currentHost =
+      typeof window !== "undefined" ? window.location.hostname : "";
+
     if (currentURL.includes("localhost") || currentURL.includes("127.0.0.1")) {
       throw new Error(
         "Local backend server is not running. Please start the backend server with 'npm run start:backend' or check if you're in production mode.",
+      );
+    } else if (currentHost.includes("fly.dev")) {
+      throw new Error(
+        "Unable to connect to the backend server. This appears to be a network connectivity issue between Fly.dev and the backend service. You can try: 1) Refreshing the page, 2) Waiting a moment for the backend to wake up, or 3) Using a different network.",
       );
     } else {
       throw new Error(
