@@ -85,22 +85,28 @@ export const getBackendURL = () => {
  * @returns {string}
  */
 export const getSocketURL = () => {
+  const hostname =
+    typeof window !== "undefined" ? window.location.hostname : "";
+
   // Check if we're in production environment
-  if (isProduction()) {
-    return (
+  const isProd = isProduction();
+  console.log(
+    `🔌 Socket URL check: hostname=${hostname}, isProduction=${isProd}`,
+  );
+
+  if (isProd) {
+    const prodSocketURL =
       import.meta.env.VITE_SOCKET_URL ||
-      "https://hare-krishna-medical.onrender.com"
-    );
+      "https://hare-krishna-medical.onrender.com";
+    console.log(`🚀 Using production socket URL: ${prodSocketURL}`);
+    return prodSocketURL;
   }
 
   // Development environment - try local first, fallback to production
   const localSocket = "http://localhost:5002";
-  const productionSocket =
-    import.meta.env.VITE_SOCKET_URL_FALLBACK ||
-    "https://hare-krishna-medical.onrender.com";
-
-  // Return local socket URL if specified, otherwise fallback
-  return import.meta.env.VITE_SOCKET_URL || localSocket;
+  const socketURL = import.meta.env.VITE_SOCKET_URL || localSocket;
+  console.log(`🛠️ Using development socket URL: ${socketURL}`);
+  return socketURL;
 };
 
 /**
