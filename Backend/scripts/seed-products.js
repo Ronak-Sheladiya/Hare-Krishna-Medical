@@ -49,8 +49,9 @@ const medicineProducts = [
     expiryDate: new Date("2026-02-10"),
     batchNumber: "AMX250-2024-002",
     featured: true,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&h=300&fit=crop",
+    ],
   },
   {
     name: "Cough Syrup 100ml",
