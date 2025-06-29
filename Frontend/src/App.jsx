@@ -13,6 +13,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import sessionManager from "./utils/sessionManager";
 import socketClient from "./utils/socketClient";
 import invoiceService from "./services/InvoiceService";
+import "./utils/appInit"; // Initialize app for better connectivity handling
 
 // Components
 import Header from "./components/layout/Header";
