@@ -21,33 +21,78 @@ const BackendStatusIndicator = ({ show = true, onStatusChange = null }) => {
 
     const startTime = Date.now();
 
-    try {
-      await unifiedApi.get("/api/health", { timeout: 10000, retries: 0 });
-      const responseTime = Date.now() - startTime;
+    // Try multiple methods to check backend connectivity
+    const checkMethods = [
+      // Method 1: Try unified API with health endpoint
+      async () => {
+        return await unifiedApi.get("/api/health", {
+          timeout: 8000,
+          retries: 0,
+        });
+      },
+      // Method 2: Try direct fetch with relative URL (works with proxy)
+      async () => {
+        const response = await fetch("/api/health", {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.json();
+      },
+      // Method 3: Try a simple auth endpoint that we know works
+      async () => {
+        return await unifiedApi.get("/api/debug-auth/users", {
+          timeout: 8000,
+          retries: 0,
+        });
+      },
+    ];
 
-      setResponseTime(responseTime);
-      setLastCheck(new Date());
+    let lastError;
 
-      if (responseTime > 5000) {
-        setStatus("slow");
-      } else {
-        setStatus("online");
-      }
+    for (let i = 0; i < checkMethods.length; i++) {
+      try {
+        await checkMethods[i]();
+        const responseTime = Date.now() - startTime;
 
-      if (onStatusChange) {
-        onStatusChange({ status: "online", responseTime });
-      }
-    } catch (error) {
-      console.log("Backend status check failed:", error.message);
-      setStatus("offline");
-      setLastCheck(new Date());
+        setResponseTime(responseTime);
+        setLastCheck(new Date());
 
-      if (onStatusChange) {
-        onStatusChange({ status: "offline", error: error.message });
+        if (responseTime > 8000) {
+          setStatus("slow");
+        } else {
+          setStatus("online");
+        }
+
+        if (onStatusChange) {
+          onStatusChange({ status: "online", responseTime });
+        }
+
+        console.log(`✅ Backend status check succeeded with method ${i + 1}`);
+        return; // Success, exit function
+      } catch (error) {
+        lastError = error;
+        console.log(
+          `❌ Backend status check method ${i + 1} failed:`,
+          error.message,
+        );
+        continue; // Try next method
       }
     }
-  };
 
+    // All methods failed
+    console.log(
+      "❌ All backend status check methods failed:",
+      lastError?.message,
+    );
+    setStatus("offline");
+    setLastCheck(new Date());
+
+    if (onStatusChange) {
+      onStatusChange({ status: "offline", error: lastError?.message });
+    }
+  };
   if (!show) return null;
 
   const getStatusColor = () => {
