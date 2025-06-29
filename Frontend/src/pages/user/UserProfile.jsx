@@ -222,14 +222,18 @@ const UserProfile = () => {
         // Fallback to production API
         response = await productionApi.put("/api/auth/update-profile", profileData);
       }
+
+      // Handle successful response
+      if (response && response.success) {
+        dispatch(
           updateUser({
             name: personalInfo.fullName,
             fullName: personalInfo.fullName,
             mobile: personalInfo.mobile,
             dateOfBirth: personalInfo.dateOfBirth,
-            gender: personalInfo.gender,
             profileImage: personalInfo.profileImage,
-          }),
+          })
+        );
         );
 
         // Trigger real-time sync event for other components
