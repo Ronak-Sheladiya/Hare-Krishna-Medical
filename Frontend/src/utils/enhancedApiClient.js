@@ -103,7 +103,7 @@ const enhancedApiCall = async (endpoint, options = {}) => {
 
     // Try fallback backend if primary fails and we're in production or have connection issues
     if (
-      API_BASE_URL !== FALLBACK_BACKEND_URL &&
+      currentApiUrl !== FALLBACK_BACKEND_URL &&
       (isProduction() || primaryError.message.includes("Failed to fetch"))
     ) {
       const fallbackUrl = `${FALLBACK_BACKEND_URL}${endpoint}`;
