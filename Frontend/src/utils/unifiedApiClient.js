@@ -37,6 +37,11 @@ const createHeaders = (includeAuth = true) => {
 };
 
 /**
+ * Sleep function for retry delays
+ */
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
  * Make API request with consistent error handling and retry mechanism
  */
 const makeApiRequest = async (endpoint, options = {}) => {
@@ -44,7 +49,7 @@ const makeApiRequest = async (endpoint, options = {}) => {
     method = "GET",
     body = null,
     includeAuth = true,
-    timeout = null, // Will be determined based on backend type
+    timeout = null,
     retries = 2,
     ...otherOptions
   } = options;
@@ -52,10 +57,16 @@ const makeApiRequest = async (endpoint, options = {}) => {
   const url = `${BACKEND_URL}${endpoint}`;
 
   // Determine timeout based on backend type
-  const isProductionBackend = BACKEND_URL.includes('render.com') || BACKEND_URL.includes('railway.app') || BACKEND_URL.includes('herokuapp.com');
-  const requestTimeout = timeout || (isProductionBackend ? 45000 : 15000); // 45s for production, 15s for local
+  const isProductionBackend =
+    BACKEND_URL.includes("render.com") ||
+    BACKEND_URL.includes("railway.app") ||
+    BACKEND_URL.includes("herokuapp.com") ||
+    BACKEND_URL.includes("fly.dev");
+  const requestTimeout = timeout || (isProductionBackend ? 60000 : 15000); // 60s for production, 15s for local
 
-  console.log(`🌐 API Request: ${method} ${url} (timeout: ${requestTimeout}ms)`);
+  console.log(
+    `🌐 API Request: ${method} ${url} (timeout: ${requestTimeout}ms, retries: ${retries})`,
+  );
 
   let lastError;
 
@@ -63,15 +74,19 @@ const makeApiRequest = async (endpoint, options = {}) => {
   for (let attempt = 1; attempt <= retries + 1; attempt++) {
     try {
       if (attempt > 1) {
-        console.log(`🔄 Retry attempt ${attempt - 1}/${retries} for ${endpoint}`);
+        console.log(
+          `🔄 Retry attempt ${attempt - 1}/${retries} for ${endpoint}`,
+        );
         // Wait before retry (exponential backoff)
-        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt - 2)));
+        await sleep(1000 * Math.pow(2, attempt - 2));
       }
 
       // Create abort controller for timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => {
-        console.log(`⏱️ Request timeout after ${requestTimeout}ms for ${endpoint}`);
+        console.log(
+          `⏱️ Request timeout after ${requestTimeout}ms for ${endpoint}`,
+        );
         controller.abort();
       }, requestTimeout);
 
@@ -90,132 +105,161 @@ const makeApiRequest = async (endpoint, options = {}) => {
       const response = await fetch(url, requestOptions);
       clearTimeout(timeoutId);
 
-    console.log(`📊 API Response: ${response.status} ${response.statusText}`);
+      console.log(`📊 API Response: ${response.status} ${response.statusText}`);
 
-    // Handle non-JSON responses
-    const contentType = response.headers.get("content-type");
-    let responseData;
+      // Handle non-JSON responses
+      const contentType = response.headers.get("content-type");
+      let responseData;
 
-    if (contentType && contentType.includes("application/json")) {
-      responseData = await response.json();
-    } else {
-      responseData = await response.text();
-    }
-
-    if (!response.ok) {
-      const errorMessage =
-        responseData?.message ||
-        responseData?.error ||
-        `HTTP ${response.status}: ${response.statusText}`;
-      throw new Error(errorMessage);
-    }
-
-    return responseData;
-  } catch (error) {
-    console.error(`❌ API Error for ${endpoint}:`, error.message);
-    console.error(`❌ Backend URL being used: ${BACKEND_URL}`);
-
-    // Handle specific error types
-    if (error.name === "AbortError") {
-      throw new Error("Request timed out. Please try again.");
-    }
-
-    if (error.message === "Failed to fetch") {
-      // Check if we're in development and try local backend
-      const currentURL = BACKEND_URL;
-      if (
-        currentURL.includes("localhost") ||
-        currentURL.includes("127.0.0.1")
-      ) {
-        console.log(
-          "🔄 Local backend not available, this is likely expected in production",
-        );
-        throw new Error(
-          "Local backend server is not running. Please start the backend server with 'npm run start:backend' or check if you're in production mode.",
-        );
+      if (contentType && contentType.includes("application/json")) {
+        responseData = await response.json();
       } else {
-        console.log("🔄 Production backend not reachable");
-        throw new Error(
-          "Backend server is not available. Please try again later or contact support.",
-        );
+        responseData = await response.text();
+      }
+
+      if (!response.ok) {
+        const errorMessage =
+          responseData?.message ||
+          responseData?.error ||
+          `HTTP ${response.status}: ${response.statusText}`;
+        throw new Error(errorMessage);
+      }
+
+      // Success - return the response
+      if (attempt > 1) {
+        console.log(`✅ Request succeeded on attempt ${attempt}`);
+      }
+      return responseData;
+    } catch (error) {
+      lastError = error;
+      console.error(
+        `❌ API Error for ${endpoint} (attempt ${attempt}):`,
+        error.message,
+      );
+
+      // Don't retry on certain errors
+      if (error.name === "AbortError" && attempt < retries + 1) {
+        console.log(`⏱️ Request timed out, will retry...`);
+        continue;
+      }
+
+      // Don't retry on authentication errors
+      if (error.message.includes("401") || error.message.includes("403")) {
+        console.log(`🚫 Authentication error, not retrying`);
+        break;
+      }
+
+      // Don't retry on validation errors
+      if (
+        error.message.includes("400") &&
+        !error.message.includes("Failed to fetch")
+      ) {
+        console.log(`🚫 Validation error, not retrying`);
+        break;
+      }
+
+      // If this was the last attempt, break
+      if (attempt === retries + 1) {
+        break;
       }
     }
+  }
 
-    // Network errors
-    if (
-      error.message.includes("NetworkError") ||
-      error.message.includes("ERR_NETWORK")
-    ) {
+  // All retries failed, handle the final error
+  console.error(`❌ All attempts failed for ${endpoint}`);
+  console.error(`❌ Backend URL being used: ${BACKEND_URL}`);
+
+  // Handle specific error types
+  if (lastError.name === "AbortError") {
+    if (isProductionBackend) {
       throw new Error(
-        "Network error. Please check your internet connection and try again.",
+        "The server is taking longer than expected to respond. This might be because the server is starting up (common with free hosting). Please wait a moment and try again.",
+      );
+    } else {
+      throw new Error("Request timed out. Please try again.");
+    }
+  }
+
+  if (lastError.message === "Failed to fetch") {
+    // Check if we're in development and try local backend
+    const currentURL = BACKEND_URL;
+    if (currentURL.includes("localhost") || currentURL.includes("127.0.0.1")) {
+      throw new Error(
+        "Local backend server is not running. Please start the backend server with 'npm run start:backend' or check if you're in production mode.",
+      );
+    } else {
+      throw new Error(
+        "Backend server is not available. This might be a temporary issue with the hosting service. Please try again in a moment.",
       );
     }
-
-    // CORS errors
-    if (
-      error.message.includes("CORS") ||
-      error.message.includes("cross-origin")
-    ) {
-      throw new Error("Server configuration error. Please contact support.");
-    }
-
-    // Re-throw the original error
-    throw error;
   }
+
+  // Network errors
+  if (
+    lastError.message.includes("NetworkError") ||
+    lastError.message.includes("ERR_NETWORK")
+  ) {
+    throw new Error(
+      "Network error. Please check your internet connection and try again.",
+    );
+  }
+
+  // CORS errors
+  if (
+    lastError.message.includes("CORS") ||
+    lastError.message.includes("cross-origin")
+  ) {
+    throw new Error("Server configuration error. Please contact support.");
+  }
+
+  // Re-throw the original error
+  throw lastError;
 };
 
 /**
- * API methods
+ * Unified API client with consistent methods
  */
-export const unifiedApi = {
+const unifiedApi = {
   // GET request
-  get: (endpoint, options = {}) =>
-    makeApiRequest(endpoint, { ...options, method: "GET" }),
+  get: (endpoint, options = {}) => {
+    return makeApiRequest(endpoint, { method: "GET", ...options });
+  },
 
   // POST request
-  post: (endpoint, data, options = {}) =>
-    makeApiRequest(endpoint, { ...options, method: "POST", body: data }),
+  post: (endpoint, body = null, options = {}) => {
+    return makeApiRequest(endpoint, { method: "POST", body, ...options });
+  },
 
   // PUT request
-  put: (endpoint, data, options = {}) =>
-    makeApiRequest(endpoint, { ...options, method: "PUT", body: data }),
-
-  // PATCH request
-  patch: (endpoint, data, options = {}) =>
-    makeApiRequest(endpoint, { ...options, method: "PATCH", body: data }),
+  put: (endpoint, body = null, options = {}) => {
+    return makeApiRequest(endpoint, { method: "PUT", body, ...options });
+  },
 
   // DELETE request
-  delete: (endpoint, options = {}) =>
-    makeApiRequest(endpoint, { ...options, method: "DELETE" }),
+  delete: (endpoint, options = {}) => {
+    return makeApiRequest(endpoint, { method: "DELETE", ...options });
+  },
 
-  // Get backend URL
-  getBackendUrl: () => BACKEND_URL,
+  // PATCH request
+  patch: (endpoint, body = null, options = {}) => {
+    return makeApiRequest(endpoint, { method: "PATCH", body, ...options });
+  },
 
-  // Health check
-  healthCheck: () => makeApiRequest("/api/health", { includeAuth: false }),
+  // Get current backend URL
+  getBackendURL: () => BACKEND_URL,
 
   // Test connectivity
   testConnection: async () => {
     try {
-      const result = await unifiedApi.healthCheck();
-      console.log("✅ Backend connectivity test passed:", result);
+      await unifiedApi.get("/api/health");
       return true;
     } catch (error) {
-      console.error("❌ Backend connectivity test failed:", error.message);
+      console.error("Connection test failed:", error.message);
       return false;
     }
   },
 };
 
-// Export as default and named export for flexibility
-export default unifiedApi;
-
-// Configuration object for the app
-export const apiConfig = {
-  backendUrl: BACKEND_URL,
-  timeout: 15000,
-  retryAttempts: 3,
-  isProduction: true,
-};
-
 console.log("🔧 Unified API Client initialized with backend:", BACKEND_URL);
+
+export default unifiedApi;
