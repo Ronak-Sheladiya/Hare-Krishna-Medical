@@ -12,8 +12,14 @@ const createTransporter = async () => {
       console.log(
         "⚠️ Email credentials not configured - emails will be skipped",
       );
+      console.log(
+        "📧 To enable emails, set EMAIL_USER and EMAIL_PASS environment variables",
+      );
       return null;
     }
+
+    console.log("🔧 Creating email transporter...");
+    console.log(`📧 Using email: ${process.env.EMAIL_USER}`);
 
     transporter = nodemailer.createTransport({
       service: "gmail", // Use Gmail service directly
@@ -24,9 +30,14 @@ const createTransporter = async () => {
       tls: {
         rejectUnauthorized: false,
       },
+      timeout: 10000, // 10 second timeout
+      connectionTimeout: 10000,
+      greetingTimeout: 5000,
+      socketTimeout: 10000,
     });
 
     // Verify the transporter configuration
+    console.log("🔍 Verifying email configuration...");
     await transporter.verify();
     console.log("✅ Email service configured and verified successfully");
 
@@ -36,12 +47,19 @@ const createTransporter = async () => {
       "❌ Email transporter creation/verification failed:",
       error.message,
     );
-    console.log("💡 Gmail setup instructions:");
+    console.log("💡 Gmail setup instructions for production:");
     console.log("1. Enable 2-factor authentication on your Gmail account");
     console.log("2. Generate an App Password for this application");
+    console.log("3. Set EMAIL_USER to your Gmail address");
     console.log(
-      "3. Use the App Password (not your regular password) in EMAIL_PASS",
+      "4. Set EMAIL_PASS to the App Password (not your regular password)",
     );
+    console.log(
+      "5. Make sure FRONTEND_URL is set to your deployed frontend domain",
+    );
+
+    // Reset transporter to null so it can be retried
+    transporter = null;
     return null;
   }
 };
