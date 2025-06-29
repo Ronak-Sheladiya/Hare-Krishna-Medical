@@ -1,7 +1,9 @@
 // Unified API Client - Single source of truth for all API calls
 // Ensures consistent backend connectivity across the entire application
 
-const BACKEND_URL = "https://hare-krishna-medical.onrender.com";
+import { getBackendURL } from "./config.js";
+
+const BACKEND_URL = getBackendURL();
 
 /**
  * Get authentication token from storage
