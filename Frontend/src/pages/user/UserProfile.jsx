@@ -220,7 +220,7 @@ const UserProfile = () => {
       const response = await api.put("/api/auth/update-profile", profileData);
 
       // Handle successful response
-      if (response && response.success) {
+      if (response && (response.success || response.data)) {
         dispatch(
           updateUser({
             name: personalInfo.fullName,
