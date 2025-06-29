@@ -215,11 +215,8 @@ const UserProfile = () => {
         ...(profileImageFile && { profileImage: personalInfo.profileImage }),
       };
 
-      // Use unified API client for consistent connectivity
-      const result = await unifiedApi.put(
-        "/api/auth/update-profile",
-        profileData,
-      );
+      // Use smart API client with automatic fallback
+      const result = await smartApi.updateProfile(profileData);
 
       // Handle successful response
       if (result && result.success !== false) {
