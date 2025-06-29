@@ -72,7 +72,7 @@ const socketClient = {
 
       socket = io(SOCKET_URL, {
         transports: ["polling", "websocket"], // Try polling first, then websocket
-        timeout: 15000, // Increase timeout for polling
+        timeout: isProduction() ? 8000 : 15000, // Shorter timeout in production
         forceNew: true,
         autoConnect: true,
         auth: {
@@ -80,13 +80,13 @@ const socketClient = {
           role: userRole,
         },
         withCredentials: true,
-        reconnection: true,
+        reconnection: isProduction() ? false : true, // Disable auto-reconnection in production
         reconnectionDelay: 1000,
-        reconnectionAttempts: 3, // Reduce attempts but retry faster
+        reconnectionAttempts: isProduction() ? 1 : 3, // Only 1 attempt in production
         upgrade: true,
         // Polling specific options
         polling: {
-          timeout: 10000,
+          timeout: isProduction() ? 5000 : 10000,
         },
         // Additional options for reliability
         rememberUpgrade: false,
