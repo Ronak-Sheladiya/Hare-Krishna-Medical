@@ -1,7 +1,8 @@
 // Production-first API client for critical operations
-// Always uses production backend URL to avoid connectivity issues
+// Uses backend URL based on environment
+import { getBackendURL } from "./config.js";
 
-const PRODUCTION_BACKEND_URL = "https://hare-krishna-medical.onrender.com";
+const PRODUCTION_BACKEND_URL = getBackendURL();
 
 /**
  * Simple production API client with minimal dependencies

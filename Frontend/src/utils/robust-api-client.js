@@ -1,11 +1,16 @@
 import { getBackendURL } from "./config";
 
-// List of potential backend URLs to try
+// Get primary backend URL from config and add fallbacks
+const getPrimaryBackendURL = () => getBackendURL();
+
+// List of potential backend URLs to try (prioritize config URL)
 const BACKEND_URLS = [
+  getPrimaryBackendURL(),
+  "http://localhost:5001",
+  "http://localhost:5000",
   "https://hare-krishna-medical.onrender.com",
   "https://hare-krishna-medical-backend.onrender.com",
   "https://hk-medical-backend.onrender.com",
-  "http://localhost:5000",
 ];
 
 // Cache for working backend URL

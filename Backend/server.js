@@ -37,12 +37,16 @@ const {
 const app = express();
 const server = createServer(app);
 
+// Trust proxy for rate limiting and security (required for production)
+app.set("trust proxy", 1);
+
 // Socket.IO setup with CORS
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL || [
       "http://localhost:3000",
       "http://localhost:5173",
+      /\.fly\.dev$/,
     ],
     methods: ["GET", "POST"],
     credentials: true,
@@ -70,15 +74,23 @@ const corsOptions = {
       "https://hkmedical.vercel.app",
       "https://harekrishnamedical.vercel.app",
       "https://hare-krishna-medical.vercel.app",
+      /\.fly\.dev$/,
     ];
 
     // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin) return callback(null, true);
 
-    if (
-      allowedOrigins.indexOf(origin) !== -1 ||
-      process.env.NODE_ENV === "development"
-    ) {
+    // Check if origin is allowed
+    const isAllowed = allowedOrigins.some((allowedOrigin) => {
+      if (typeof allowedOrigin === "string") {
+        return allowedOrigin === origin;
+      } else if (allowedOrigin instanceof RegExp) {
+        return allowedOrigin.test(origin);
+      }
+      return false;
+    });
+
+    if (isAllowed || process.env.NODE_ENV === "development") {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));

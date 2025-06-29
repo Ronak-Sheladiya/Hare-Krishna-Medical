@@ -11,7 +11,6 @@ const productSchema = new mongoose.Schema(
     },
     slug: {
       type: String,
-      unique: true,
       lowercase: true,
     },
     company: {
@@ -225,13 +224,34 @@ productSchema.index({ "ratings.average": -1 });
 productSchema.index({ salesCount: -1 });
 
 // Pre-save middleware to generate slug
-productSchema.pre("save", function (next) {
-  if (this.isModified("name")) {
-    this.slug = slugify(this.name, {
+productSchema.pre("save", async function (next) {
+  if (this.isModified("name") && this.name) {
+    let baseSlug = slugify(this.name, {
       lower: true,
       strict: true,
       remove: /[*+~.()'"!:@]/g,
     });
+
+    // Ensure unique slug
+    let slug = baseSlug;
+    let counter = 1;
+
+    // Check if slug already exists
+    while (true) {
+      const existingProduct = await this.constructor.findOne({
+        slug: slug,
+        _id: { $ne: this._id },
+      });
+
+      if (!existingProduct) {
+        break;
+      }
+
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
+    this.slug = slug;
   }
 
   // Ensure at least one image is primary
