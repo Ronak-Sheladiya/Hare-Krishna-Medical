@@ -112,7 +112,7 @@ export const apiCall = async (endpoint, options = {}) => {
 
           // Try XMLHttpRequest fallback
           try {
-            response = await xhrFallback(`${API_BASE_URL}${endpoint}`, config);
+            response = await xhrFallback(`${apiBaseUrl}${endpoint}`, config);
             if (!response) {
               throw new Error("Both fetch and XHR failed");
             }
