@@ -35,7 +35,53 @@ const APIDiagnostic = ({ show = true }) => {
     setResults([]);
 
     const backendURL = getBackendURL();
+    const hostname =
+      typeof window !== "undefined" ? window.location.hostname : "";
     console.log(`🔧 Starting API diagnostics with backend: ${backendURL}`);
+
+    // For fly.dev, run simplified diagnostics focused on the smart API client
+    if (hostname.includes("fly.dev")) {
+      console.log(`🚁 Running fly.dev optimized diagnostics`);
+
+      // Test 1: Smart API status check
+      await testEndpoint(
+        "Smart API Status",
+        "GET",
+        "status-check",
+        async () => {
+          const status = smartApi.getStatus();
+          return {
+            mode: status.mode,
+            backendAvailable: status.backendAvailable,
+            fallbackAvailable: status.fallbackAvailable,
+            message: `Running in ${status.mode} mode`,
+          };
+        },
+      );
+
+      // Test 2: Smart API health check
+      await testEndpoint("Smart API Health", "GET", "/api/health", async () => {
+        return await smartApi.health();
+      });
+
+      // Test 3: Profile update (smart API)
+      await testEndpoint(
+        "Profile Update (Smart)",
+        "PUT",
+        "/api/auth/update-profile",
+        async () => {
+          return await smartApi.updateProfile({
+            fullName: "Test User (Diagnostic)",
+          });
+        },
+      );
+
+      setTesting(false);
+      return;
+    }
+
+    // For other environments, run full diagnostics
+    console.log(`🌐 Running full diagnostics for ${hostname}`);
 
     // Test 1: Direct fetch to health endpoint (relative URL)
     await testEndpoint(
@@ -65,47 +111,13 @@ const APIDiagnostic = ({ show = true }) => {
       },
     );
 
-    // Test 3: Auth debug endpoint
+    // Test 3: Smart API health check
     await testEndpoint(
-      "Auth Debug (Unified API)",
+      "Health Check (Smart API)",
       "GET",
-      "/api/debug-auth/users",
+      "/api/health",
       async () => {
-        return await unifiedApi.get("/api/debug-auth/users", {
-          timeout: 8000,
-          retries: 0,
-        });
-      },
-    );
-
-    // Test 4: Direct fetch to auth debug (relative URL)
-    await testEndpoint(
-      "Auth Debug (Relative)",
-      "GET",
-      "/api/debug-auth/users",
-      async () => {
-        const response = await fetch("/api/debug-auth/users", {
-          method: "GET",
-          headers: { Accept: "application/json" },
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return await response.json();
-      },
-    );
-
-    // Test 5: Try a profile-like request (this is what's failing)
-    await testEndpoint(
-      "Profile Update Test",
-      "PUT",
-      "/api/auth/update-profile",
-      async () => {
-        return await unifiedApi.put(
-          "/api/auth/update-profile",
-          {
-            fullName: "Test User",
-          },
-          { timeout: 8000, retries: 0 },
-        );
+        return await smartApi.health();
       },
     );
 
