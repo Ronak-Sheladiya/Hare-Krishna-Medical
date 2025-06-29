@@ -266,3 +266,5 @@ export const RealTimeDataProvider = ({ children }) => {
         forceRefresh,
       }}
     >
+      {children}
+    </RealTimeDataContext.Provider>
