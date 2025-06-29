@@ -188,7 +188,13 @@ const seedData = async () => {
       },
     ];
 
-    const createdProducts = await Product.insertMany(products);
+    // Create products one by one to trigger slug generation middleware
+    const createdProducts = [];
+    for (const productData of products) {
+      const product = new Product(productData);
+      await product.save();
+      createdProducts.push(product);
+    }
     console.log(`🛍️ ${createdProducts.length} products created`);
 
     // Create default letterhead
