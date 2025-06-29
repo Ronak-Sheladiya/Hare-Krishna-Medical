@@ -198,25 +198,30 @@ const UserProfile = () => {
       // Prepare profile data for API
       const profileData = {
         fullName: personalInfo.fullName,
-        mobile: personalInfo.mobile,
+        email: personalInfo.email,
+        phone: personalInfo.phone,
+        address: personalInfo.address,
+        city: personalInfo.city,
+        pincode: personalInfo.pincode,
+        state: personalInfo.state,
+        country: personalInfo.country,
+        emergencyContact: personalInfo.emergencyContact,
         dateOfBirth: personalInfo.dateOfBirth,
         gender: personalInfo.gender,
-        profileImage: personalInfo.profileImage,
+        maritalStatus: personalInfo.maritalStatus,
+        occupation: personalInfo.occupation,
+        ...(profileImageFile && { profileImage: personalInfo.profileImage }),
       };
 
-      console.log("🔄 Attempting to update profile with data:", profileData);
-
-      // Make actual API call to update profile using enhanced client
-      const result = await enhancedApi.put(
-        "/api/auth/update-profile",
-        profileData,
-      );
-
-      console.log("📊 Profile update API response:", result);
-
-      if (result && result.success !== false) {
-        // Update Redux store with new user data
-        dispatch(
+      let response;
+      try {
+        // Try enhanced API first
+        response = await enhancedApi.put("/api/auth/update-profile", profileData);
+      } catch (enhancedError) {
+        console.warn("Enhanced API failed, trying production fallback:", enhancedError.message);
+        // Fallback to production API
+        response = await productionApi.put("/api/auth/update-profile", profileData);
+      }
           updateUser({
             name: personalInfo.fullName,
             fullName: personalInfo.fullName,
