@@ -61,7 +61,7 @@ export const getBackendURL = () => {
   }
 
   // Development environment - try local first, fallback to production
-  const localBackend = "http://localhost:5000";
+  const localBackend = "http://localhost:5001";
   console.log(
     `🛠️ Development environment detected, using local backend: ${localBackend}`,
   );
