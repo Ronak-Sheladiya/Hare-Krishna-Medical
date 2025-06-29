@@ -255,7 +255,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            } />
             <Route
               path="/admin/products"
               element={
