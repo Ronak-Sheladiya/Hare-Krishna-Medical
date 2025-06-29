@@ -200,10 +200,13 @@ const UserProfile = () => {
       // Check if user is authenticated
       const token =
         localStorage.getItem("token") || sessionStorage.getItem("token");
-      const user = useSelector((state) => state.auth.user);
 
       if (!token && !user) {
-        setError("Please log in to update your profile");
+        setAlert({
+          show: true,
+          message: "Please log in to update your profile",
+          variant: "danger",
+        });
         setLoading(false);
         return;
       }
