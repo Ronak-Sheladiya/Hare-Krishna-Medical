@@ -113,13 +113,25 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
+  const dbStatus = mongoose.connection.readyState;
+  const dbStatusText =
+    {
+      0: "disconnected",
+      1: "connected",
+      2: "connecting",
+      3: "disconnecting",
+    }[dbStatus] || "unknown";
+
   res.json({
     status: "OK",
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || "development",
-    database:
-      mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    database: {
+      status: dbStatusText,
+      readyState: dbStatus,
+    },
+    server: "running",
   });
 });
 
