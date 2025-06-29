@@ -595,6 +595,13 @@ const UserProfile = () => {
             </Col>
           </Row>
 
+          {/* API Diagnostic (for debugging) */}
+          <Row className="mb-3">
+            <Col lg={12}>
+              <APIDiagnostic show={true} />
+            </Col>
+          </Row>
+
           {/* Network Debug Section (Development/Testing Only) */}
           {(window.location.hostname === "localhost" ||
             window.location.hostname === "127.0.0.1" ||
