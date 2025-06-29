@@ -25,6 +25,7 @@ import {
   ThemeSection,
 } from "../../components/common/ConsistentTheme";
 import BackendStatusIndicator from "../../components/common/BackendStatusIndicator";
+import APIDiagnostic from "../../components/common/APIDiagnostic";
 
 const UserProfile = () => {
   const { user } = useSelector((state) => state.auth);
