@@ -61,7 +61,31 @@ const handleResponse = async (response) => {
 };
 
 /**
- * Enhanced API call with comprehensive error handling and fallback
+ * Test if backend is accessible
+ */
+const testBackendConnectivity = async (baseUrl) => {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    const response = await fetch(`${baseUrl}/api/health`, {
+      method: "GET",
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+    return response.ok;
+  } catch (error) {
+    console.warn(
+      `Backend connectivity test failed for ${baseUrl}:`,
+      error.message,
+    );
+    return false;
+  }
+};
+
+/**
+ * Enhanced API call with automatic fallback and comprehensive error handling
  */
 const enhancedApiCall = async (endpoint, options = {}) => {
   const config = {
