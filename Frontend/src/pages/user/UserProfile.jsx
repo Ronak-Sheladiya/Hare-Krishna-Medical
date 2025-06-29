@@ -239,7 +239,7 @@ const UserProfile = () => {
       const result = await response.json();
 
       // Handle successful response
-      if (response && (response.success || response.data)) {
+      if (result && result.success !== false) {
         dispatch(
           updateUser({
             name: personalInfo.fullName,
