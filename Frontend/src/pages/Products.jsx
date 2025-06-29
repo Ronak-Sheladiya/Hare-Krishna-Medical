@@ -74,6 +74,14 @@ const Products = () => {
       const products = Array.isArray(productsData)
         ? productsData
         : productsData.products || [];
+
+      // If API returns empty results, use sample data
+      if (products.length === 0) {
+        console.log("🛒 API returned empty products, using sample data");
+        dispatch(setError("Database is empty - showing sample products"));
+        return this.loadSampleProducts();
+      }
+
       dispatch(setProducts(products));
 
       // Show offline mode indicator if applicable
