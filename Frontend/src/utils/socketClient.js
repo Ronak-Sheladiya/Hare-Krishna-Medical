@@ -269,13 +269,14 @@ const socketClient = {
 
   // Force reconnection (but respect production limits)
   forceReconnect(userToken = null, userRole = null) {
-    console.log("🔄 Forcing WebSocket reconnection");
+    console.log("🔄 Attempting to force WebSocket reconnection");
 
-    // In production, only allow reconnect if we haven't exceeded limits
-    if (isProduction() && connectionAttempts >= 3) {
-      console.warn(
-        "🚨 Production: Max reconnection attempts reached, staying in fallback mode",
+    // In production, Socket.IO is disabled entirely
+    if (isProduction()) {
+      console.log(
+        "🚨 Production: Socket.IO is disabled, staying in fallback mode",
       );
+      console.log("💡 Use the refresh button to update data manually");
       return null;
     }
 
