@@ -309,7 +309,9 @@ app.use("/api/*", (req, res) => {
     timestamp: new Date().toISOString(),
     availableRoutes: [
       "GET /api/health",
+      "GET /api/auth/register (Method Not Allowed - use POST)",
       "POST /api/auth/register",
+      "GET /api/auth/login (Method Not Allowed - use POST)",
       "POST /api/auth/login",
       "POST /api/auth/verify-otp",
       "POST /api/auth/resend-otp",
