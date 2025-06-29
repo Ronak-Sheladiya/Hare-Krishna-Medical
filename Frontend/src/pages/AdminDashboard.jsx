@@ -20,6 +20,7 @@ import {
 } from "../components/common/ConsistentTheme";
 import ProfessionalLoading from "../components/common/ProfessionalLoading";
 import { useAdminRealTime } from "../hooks/useRealTime";
+import { useRealTimeData } from "../components/common/RealTimeDataProvider";
 import socketClient from "../utils/socketClient";
 
 const AdminDashboard = () => {
