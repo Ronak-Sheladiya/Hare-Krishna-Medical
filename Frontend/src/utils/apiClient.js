@@ -157,25 +157,31 @@ export const apiCall = async (endpoint, options = {}) => {
             return;
           }
         } else if (response) {
-          // Handle HTTP errors
+          // Handle HTTP errors - clone response to avoid body stream read issues
+          let errorData;
           try {
-            const errorData = await response.json();
-            resolve({
-              success: false,
-              error:
-                errorData.message ||
-                `HTTP ${response.status}: ${response.statusText}`,
-              status: response.status,
-            });
-            return;
+            const responseClone = response.clone();
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+              errorData = await responseClone.json();
+            } else {
+              errorData = { message: await responseClone.text() };
+            }
           } catch (parseError) {
-            resolve({
-              success: false,
-              error: `HTTP ${response.status}: ${response.statusText}`,
-              status: response.status,
-            });
-            return;
+            errorData = {
+              message: `HTTP ${response.status}: ${response.statusText}`,
+            };
           }
+
+          resolve({
+            success: false,
+            error:
+              errorData.message ||
+              `HTTP ${response.status}: ${response.statusText}`,
+            status: response.status,
+            data: errorData,
+          });
+          return;
         } else {
           resolve({
             success: false,
