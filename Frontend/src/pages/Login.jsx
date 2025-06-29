@@ -16,6 +16,7 @@ import {
   loginSuccess,
   loginFailure,
 } from "../store/slices/authSlice.js";
+import unifiedApi from "../utils/unifiedApiClient";
 
 const Login = () => {
   const navigate = useNavigate();
