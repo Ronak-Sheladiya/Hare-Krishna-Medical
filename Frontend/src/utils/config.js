@@ -75,7 +75,7 @@ export const getBackendURL = () => {
   const hostname =
     typeof window !== "undefined" ? window.location.hostname : "";
 
-  // Use environment variable if set
+  // Use environment variable if set (highest priority)
   if (import.meta.env.VITE_BACKEND_URL) {
     console.log(
       `🔧 Using explicit backend URL: ${import.meta.env.VITE_BACKEND_URL}`,
@@ -89,7 +89,6 @@ export const getBackendURL = () => {
     hostname === "127.0.0.1" ||
     hostname === "" ||
     hostname.includes("localhost") ||
-    hostname.includes("fly.dev") ||
     isDevelopment()
   ) {
     const localBackend = "http://localhost:5001";
@@ -97,10 +96,26 @@ export const getBackendURL = () => {
     return localBackend;
   }
 
-  // Production backend URL
-  const prodURL = "https://hare-krishna-medical.onrender.com";
-  console.log(`🚀 Using production backend: ${prodURL}`);
-  return prodURL;
+  // Production backend URL mapping
+  const backendMap = {
+    "hk-medical.vercel.app": "https://hare-krishna-medical.onrender.com",
+    "hkmedical.vercel.app": "https://hare-krishna-medical.onrender.com",
+    "harekrishnamedical.vercel.app":
+      "https://hare-krishna-medical.onrender.com",
+    "hare-krishna-medical.vercel.app":
+      "https://hare-krishna-medical.onrender.com",
+  };
+
+  // Check if hostname has a specific backend mapping
+  if (backendMap[hostname]) {
+    console.log(`🚀 Production: ${hostname} -> ${backendMap[hostname]}`);
+    return backendMap[hostname];
+  }
+
+  // Default production backend URL
+  const defaultProdURL = "https://hare-krishna-medical.onrender.com";
+  console.log(`🚀 Default production backend: ${defaultProdURL}`);
+  return defaultProdURL;
 };
 
 /**
