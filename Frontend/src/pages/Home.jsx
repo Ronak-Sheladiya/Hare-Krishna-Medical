@@ -15,6 +15,7 @@ import { addToCart } from "../store/slices/cartSlice";
 import { setFeaturedProducts } from "../store/slices/productsSlice";
 import { api, safeApiCall } from "../utils/apiClient";
 import QRCameraScanner from "../components/common/QRCameraScanner";
+import CRUDTest from "../components/common/CRUDTest";
 
 const Home = () => {
   const dispatch = useDispatch();
