@@ -5,6 +5,16 @@ const router = express.Router();
 // Import email service
 const emailService = require("../utils/emailService");
 
+// Simple test endpoint
+router.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "API test endpoint is working!",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || "development",
+  });
+});
+
 router.get("/create-user", async (req, res) => {
   try {
     const userExists = await User.findOne({ email: "geeta@example.com" });
