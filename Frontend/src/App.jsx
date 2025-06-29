@@ -208,6 +208,7 @@ function App() {
             />
             <Route path="/user-guide" element={<UserGuide />} />
             <Route path="/backend-docs" element={<BackendDocs />} />
+            <Route path="/backend-test" element={<BackendTest />} />
             <Route path="/localsetup-guide" element={<LocalSetupGuide />} />
             <Route
               path="/vercel-deployment"
