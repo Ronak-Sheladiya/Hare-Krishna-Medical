@@ -27,6 +27,20 @@ router.get("/register", (req, res) => {
 // @access  Public
 router.post("/register", validateUserRegistration, authController.register);
 
+// @route   GET /api/auth/login
+// @desc    Handle incorrect GET requests to login endpoint
+// @access  Public
+router.get("/login", (req, res) => {
+  res.status(405).json({
+    success: false,
+    message: "Method Not Allowed. Use POST to login.",
+    hint: "This endpoint requires a POST request with user credentials.",
+    correctMethod: "POST",
+    endpoint: "/api/auth/login",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // @route   POST /api/auth/login
 // @desc    Login user
 // @access  Public
