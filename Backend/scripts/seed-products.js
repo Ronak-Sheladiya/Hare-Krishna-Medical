@@ -121,8 +121,9 @@ const medicineProducts = [
     expiryDate: new Date("2026-01-10"),
     batchNumber: "MV-2024-006",
     featured: false,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=500&h=300&fit=crop",
+    ],
   },
   {
     name: "Blood Pressure Monitor",
