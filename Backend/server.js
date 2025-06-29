@@ -246,10 +246,45 @@ process.on("SIGINT", async () => {
   });
 });
 
+// Environment validation
+const validateEnvironment = () => {
+  const requiredEnvVars = ["JWT_SECRET"];
+  const missingVars = requiredEnvVars.filter(
+    (varName) => !process.env[varName],
+  );
+
+  if (missingVars.length > 0) {
+    console.error(
+      "❌ Missing required environment variables:",
+      missingVars.join(", "),
+    );
+    process.exit(1);
+  }
+
+  // Warn about optional but recommended variables
+  const recommendedVars = {
+    EMAIL_USER: "Email sending will be disabled",
+    EMAIL_PASS: "Email sending will be disabled",
+    FRONTEND_URL: "CORS may not work properly in production",
+    CLOUDINARY_CLOUD_NAME: "Image uploads will not work",
+  };
+
+  Object.entries(recommendedVars).forEach(([varName, consequence]) => {
+    if (!process.env[varName]) {
+      console.warn(`⚠️ Missing ${varName}: ${consequence}`);
+    }
+  });
+
+  console.log("✅ Environment validation completed");
+};
+
 // Start server
 const PORT = process.env.PORT || 5001;
 
 const startServer = async () => {
+  // Validate environment first
+  validateEnvironment();
+
   await connectDB();
 
   // Initialize database after connection
@@ -266,6 +301,10 @@ const startServer = async () => {
     console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
     console.log(`📡 Socket.IO enabled`);
     console.log(`🎯 API available at: http://localhost:${PORT}/api`);
+    console.log(
+      `📧 Email service: ${process.env.EMAIL_USER ? "✅ Configured" : "❌ Not configured"}`,
+    );
+    console.log(`🎨 Frontend URL: ${process.env.FRONTEND_URL || "❌ Not set"}`);
     console.log(`💊 Hare Krishna Medical Store Backend Ready!`);
   });
 };
