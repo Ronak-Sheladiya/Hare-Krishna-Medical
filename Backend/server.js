@@ -37,6 +37,9 @@ const {
 const app = express();
 const server = createServer(app);
 
+// Trust proxy for rate limiting and security (required for production)
+app.set("trust proxy", 1);
+
 // Socket.IO setup with CORS
 const io = new Server(server, {
   cors: {
