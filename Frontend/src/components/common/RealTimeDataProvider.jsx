@@ -270,3 +270,5 @@ export const RealTimeDataProvider = ({ children }) => {
     </RealTimeDataContext.Provider>
   );
 };
+
+export default RealTimeDataProvider;
