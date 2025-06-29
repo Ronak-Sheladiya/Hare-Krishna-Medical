@@ -82,7 +82,7 @@ export const getSocketURL = () => {
   }
 
   // Development environment - try local first, fallback to production
-  const localSocket = "http://localhost:5000";
+  const localSocket = "http://localhost:5001";
   const productionSocket =
     import.meta.env.VITE_SOCKET_URL_FALLBACK ||
     "https://hare-krishna-medical.onrender.com";
