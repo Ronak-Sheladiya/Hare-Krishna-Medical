@@ -277,8 +277,8 @@ const UserProfile = () => {
     try {
       console.log("🔄 Attempting to update address with data:", addressInfo);
 
-      // Make actual API call to update address using enhanced client
-      const result = await enhancedApi.put("/api/auth/update-profile", {
+      // Make actual API call to update address using unified client
+      const result = await unifiedApi.put("/api/auth/update-profile", {
         address: addressInfo,
       });
 
