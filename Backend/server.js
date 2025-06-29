@@ -174,6 +174,7 @@ process.on("SIGINT", () => {
 const routes = [
   { path: "/api/test", file: testUserRoute, name: "Test" },
   { path: "/api/auth", file: "./routes/auth", name: "Auth" },
+  { path: "/api/debug-auth", file: "./routes/debug-auth", name: "Debug Auth" },
   { path: "/api/users", file: "./routes/users", name: "Users" },
   { path: "/api/products", file: "./routes/products", name: "Products" },
   { path: "/api/orders", file: "./routes/orders", name: "Orders" },
