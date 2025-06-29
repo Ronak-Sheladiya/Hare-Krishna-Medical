@@ -20,7 +20,6 @@ const messageRoutes = require("./routes/messages");
 const letterheadRoutes = require("./routes/letterheads");
 const analyticsRoutes = require("./routes/analytics");
 const uploadRoutes = require("./routes/upload");
-const diagnosticsRoutes = require("./routes/diagnostics");
 
 // Import middleware
 const { authenticateToken, authorizeRole } = require("./middleware/auth");
@@ -170,7 +169,6 @@ app.use(
   analyticsRoutes,
 );
 app.use("/api/upload", authenticateToken, uploadRoutes);
-app.use("/api/diagnostics", diagnosticsRoutes);
 
 // Socket.IO connection handling
 socketHandler(io);
