@@ -38,20 +38,12 @@ export const RealTimeDataProvider = ({ children }) => {
         const status = socketClient.getConnectionStatus();
         setIsConnected(status.connected);
 
-        // If connection failed and we haven't diagnosed yet, run diagnostics
+        // If connection failed, log diagnostic info
         if (!status.connected && status.connectionAttempts >= 3) {
-          console.warn(
-            "🔍 Socket connection struggling, running diagnostics...",
+          console.warn("🔍 Socket connection struggling...");
+          console.log(
+            "💡 Try refreshing the page or check if backend is running on port 5001",
           );
-          // Only run diagnostics once to avoid spam
-          if (!window.socketDiagnosticsRun) {
-            window.socketDiagnosticsRun = true;
-            import("../../utils/socketTester").then(
-              ({ diagnoseSocketIssues }) => {
-                diagnoseSocketIssues();
-              },
-            );
-          }
         }
       }
     };
