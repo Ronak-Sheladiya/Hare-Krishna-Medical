@@ -234,7 +234,9 @@ const AdminDashboard = () => {
                 style={{
                   background: isConnected
                     ? "linear-gradient(135deg, #28a745, #20c997)"
-                    : "linear-gradient(135deg, #dc3545, #e63946)",
+                    : fallbackMode
+                      ? "linear-gradient(135deg, #ffc107, #fd7e14)"
+                      : "linear-gradient(135deg, #dc3545, #e63946)",
                   borderRadius: "8px",
                   padding: "12px 20px",
                   color: "white",
@@ -247,11 +249,19 @@ const AdminDashboard = () => {
               >
                 <div>
                   <i
-                    className={`bi ${isConnected ? "bi-wifi" : "bi-wifi-off"} me-2`}
+                    className={`bi ${
+                      isConnected
+                        ? "bi-wifi"
+                        : fallbackMode
+                          ? "bi-arrow-clockwise"
+                          : "bi-wifi-off"
+                    } me-2`}
                   ></i>
                   {isConnected
                     ? "Real-time data connected"
-                    : "Real-time data disconnected"}
+                    : fallbackMode
+                      ? "Manual refresh mode (Production)"
+                      : "Real-time data disconnected"}
                 </div>
                 <div className="d-flex align-items-center gap-3">
                   <span>Last update: {lastUpdate.toLocaleTimeString()}</span>
