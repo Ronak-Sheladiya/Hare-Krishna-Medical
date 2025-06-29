@@ -31,11 +31,23 @@ import ModeIndicator from "../../components/common/ModeIndicator";
 import SimpleModeIndicator from "../../components/common/SimpleModeIndicator";
 
 const UserProfile = () => {
-  const { user } = useSelector((state) => state.auth);
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState("personal");
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, message: "", variant: "" });
+
+  // Debug authentication state
+  useEffect(() => {
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    console.log("🔍 Auth Debug:", {
+      isAuthenticated,
+      hasUser: !!user,
+      hasToken: !!token,
+      userName: user?.fullName || user?.name,
+    });
+  }, [user, isAuthenticated]);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   // Personal Information State
