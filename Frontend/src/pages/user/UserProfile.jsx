@@ -216,8 +216,27 @@ const UserProfile = () => {
         ...(profileImageFile && { profileImage: personalInfo.profileImage }),
       };
 
-      // Use the regular API client that works for user creation
-      const response = await api.put("/api/auth/update-profile", profileData);
+      // Use direct fetch call like user creation does
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+
+      const response = await fetch(
+        "https://hare-krishna-medical.onrender.com/api/auth/update-profile",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+          body: JSON.stringify(profileData),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
 
       // Handle successful response
       if (response && (response.success || response.data)) {
