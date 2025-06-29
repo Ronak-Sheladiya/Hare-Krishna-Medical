@@ -261,7 +261,7 @@ export const safeApiCall = async (apiFunction, fallbackValue = null) => {
   }
 };
 
-// Export API base URL for other components
-export { API_BASE_URL };
+// Export dynamic API base URL getter for other components
+export { getApiBaseUrl as API_BASE_URL };
 
 export default api;
