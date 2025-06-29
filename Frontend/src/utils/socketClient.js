@@ -126,13 +126,7 @@ const socketClient = {
           socket = null;
 
           // Notify about fallback mode
-          if (typeof window !== "undefined") {
-            window.dispatchEvent(
-              new CustomEvent("socket-fallback-mode", {
-                detail: { reason: "Max reconnection attempts reached" },
-              }),
-            );
-          }
+          this.notifyFallbackMode("Max reconnection attempts reached");
         }
       });
 
