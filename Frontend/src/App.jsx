@@ -249,10 +249,12 @@ function App() {
 
             {/* Admin Routes */}
             <Route
-              path="/admin/dashboard"
+              path="/admin"
               element={
                 <ProtectedRoute adminOnly>
-                  <AdminDashboard />
+                  <RealTimeDataProvider>
+                    <AdminDashboard />
+                  </RealTimeDataProvider>
                 </ProtectedRoute>
               }
             />
