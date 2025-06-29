@@ -24,6 +24,7 @@ import RealTimeStatus from "./components/common/RealTimeStatus";
 import CrossTabCartSync from "./components/common/CrossTabCartSync";
 import SecurityLayer from "./components/common/SecurityLayer";
 import SocketDiagnostic from "./components/common/SocketDiagnostic";
+import RealTimeDataProvider from "./components/common/RealTimeDataProvider";
 
 // Pages
 import Home from "./pages/Home";
