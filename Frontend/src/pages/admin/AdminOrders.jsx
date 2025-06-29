@@ -50,6 +50,15 @@ const AdminOrders = () => {
     setLoading(true);
     setError(null);
 
+    // Check if user is authenticated first
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    if (!token) {
+      setError("Please log in as an admin to access order management.");
+      setLoading(false);
+      return;
+    }
+
     const {
       success,
       data,
@@ -61,7 +70,22 @@ const AdminOrders = () => {
       setOrders(ordersData);
       setFilteredOrders(ordersData);
     } else {
-      setError(apiError || "Failed to load orders");
+      // Handle specific error types
+      if (apiError?.includes("401")) {
+        setError("Authentication failed. Please log in as an admin.");
+      } else if (apiError?.includes("403")) {
+        setError("Access denied. Admin privileges required.");
+      } else if (apiError?.includes("Network error")) {
+        setError(
+          "Unable to connect to the backend server. Please check if it's running.",
+        );
+      } else if (apiError?.includes("timeout")) {
+        setError("Server is taking too long to respond. Please try again.");
+      } else {
+        setError(
+          apiError || "Failed to load orders. Please try refreshing the page.",
+        );
+      }
       // Keep empty state for offline mode
       setOrders([]);
       setFilteredOrders([]);
