@@ -41,7 +41,7 @@ const socketClient = {
       fetch(`${SOCKET_URL.replace("/socket.io", "")}/api/health`)
         .then((response) => {
           if (response.ok) {
-            console.log("�� Backend server is reachable");
+            console.log("✅ Backend server is reachable");
           } else {
             console.warn("⚠️ Backend server responded with:", response.status);
           }
@@ -52,7 +52,7 @@ const socketClient = {
 
       socket = io(SOCKET_URL, {
         transports: ["polling", "websocket"], // Try polling first, then websocket
-        timeout: 10000, // Reduce timeout to 10 seconds
+        timeout: 15000, // Increase timeout for polling
         forceNew: true,
         autoConnect: true,
         auth: {
@@ -62,8 +62,15 @@ const socketClient = {
         withCredentials: true,
         reconnection: true,
         reconnectionDelay: 1000,
-        reconnectionAttempts: 5,
+        reconnectionAttempts: 3, // Reduce attempts but retry faster
         upgrade: true,
+        // Polling specific options
+        polling: {
+          timeout: 10000,
+        },
+        // Additional options for reliability
+        rememberUpgrade: false,
+        rejectUnauthorized: false,
       });
 
       // Connection successful
