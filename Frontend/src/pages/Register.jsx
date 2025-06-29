@@ -132,35 +132,26 @@ const Register = () => {
     try {
       // Try backend API first, fallback to demo mode
       try {
-        const response = await fetch("/api/auth/register", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+        const data = await unifiedApi.post("/api/auth/register", {
+          fullName: formData.fullName,
+          email: formData.email,
+          mobile: formData.mobile,
+          password: formData.password,
+          address: {
+            street: "",
+            city: "",
+            state: "",
+            pincode: "",
           },
-          body: JSON.stringify({
-            fullName: formData.fullName,
-            email: formData.email,
-            mobile: formData.mobile,
-            password: formData.password,
-            address: {
-              street: "",
-              city: "",
-              state: "",
-              pincode: "",
-            },
-          }),
         });
 
-        const data = await response.json();
+        // If we get here, registration was successful
+        setShowOtpModal(true);
+        return;
 
-        if (response.ok) {
-          setShowOtpModal(true);
-          return;
-        } else if (
-          response.status === 400 &&
-          data.message &&
-          data.message.includes("already exists")
-        ) {
+      } catch (error) {
+        // Handle API errors
+        if (error.message && error.message.includes("already exists")) {
           // User already exists, redirect to login with prefilled email
           const isEmailExists = data.message.includes("email");
           const message = isEmailExists
