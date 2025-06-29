@@ -19,7 +19,8 @@ import { updateUser } from "../../store/slices/authSlice";
 import { api } from "../../utils/apiClient";
 import { enhancedApi } from "../../utils/enhancedApiClient";
 import { productionApi } from "../../utils/productionApiClient";
-import { getBackendURL } from "../../utils/config";
+import { getBackendURL, isRestrictedEnvironment } from "../../utils/config";
+import NetworkRestrictedNotice from "../../components/common/NetworkRestrictedNotice";
 import { showNetworkDebugInfo } from "../../utils/networkDebug";
 import {
   PageHeroSection,
