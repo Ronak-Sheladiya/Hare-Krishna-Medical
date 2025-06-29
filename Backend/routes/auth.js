@@ -8,10 +8,38 @@ const authController = require("../controllers/authController");
 
 const router = express.Router();
 
+// @route   GET /api/auth/register
+// @desc    Handle incorrect GET requests to register endpoint
+// @access  Public
+router.get("/register", (req, res) => {
+  res.status(405).json({
+    success: false,
+    message: "Method Not Allowed. Use POST to register a new user.",
+    hint: "This endpoint requires a POST request with user registration data.",
+    correctMethod: "POST",
+    endpoint: "/api/auth/register",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // @route   POST /api/auth/register
 // @desc    Register a new user
 // @access  Public
 router.post("/register", validateUserRegistration, authController.register);
+
+// @route   GET /api/auth/login
+// @desc    Handle incorrect GET requests to login endpoint
+// @access  Public
+router.get("/login", (req, res) => {
+  res.status(405).json({
+    success: false,
+    message: "Method Not Allowed. Use POST to login.",
+    hint: "This endpoint requires a POST request with user credentials.",
+    correctMethod: "POST",
+    endpoint: "/api/auth/login",
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // @route   POST /api/auth/login
 // @desc    Login user
