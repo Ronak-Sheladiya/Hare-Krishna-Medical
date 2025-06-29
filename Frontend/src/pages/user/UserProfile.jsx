@@ -218,15 +218,6 @@ const UserProfile = () => {
 
       // Use the regular API client that works for user creation
       const response = await api.put("/api/auth/update-profile", profileData);
-          "Enhanced API failed, trying production fallback:",
-          enhancedError.message,
-        );
-        // Fallback to production API
-        response = await productionApi.put(
-          "/api/auth/update-profile",
-          profileData,
-        );
-      }
 
       // Handle successful response
       if (response && response.success) {
