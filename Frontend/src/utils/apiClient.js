@@ -1,7 +1,12 @@
 // API Client utility with proper error handling and timeout
 import { getBackendURL } from "./config.js";
 
-const API_BASE_URL = getBackendURL();
+// Dynamically get backend URL to ensure production detection works
+const getApiBaseUrl = () => {
+  const url = getBackendURL();
+  console.log(`🔗 API Client using: ${url}`);
+  return url;
+};
 
 // Store original fetch to avoid external interference
 const originalFetch = window.fetch.bind(window);
