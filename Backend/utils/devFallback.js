@@ -163,9 +163,21 @@ const devAuth = {
 
 // Check if we should use development fallback
 const shouldUseFallback = () => {
-  return (
-    process.env.NODE_ENV === "development" && global.DB_CONNECTED === false
-  );
+  // Use fallback if database is not connected, regardless of environment
+  const dbConnected = global.DB_CONNECTED !== false;
+  const mongoose = require("mongoose");
+  const isDBReady = mongoose.connection.readyState === 1;
+
+  const shouldUse = !dbConnected || !isDBReady;
+
+  if (shouldUse) {
+    console.log(
+      "🔄 Using development fallback - DB connection state:",
+      mongoose.connection.readyState,
+    );
+  }
+
+  return shouldUse;
 };
 
 module.exports = {
