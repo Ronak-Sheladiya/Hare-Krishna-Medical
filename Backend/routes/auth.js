@@ -1,89 +1,478 @@
 const express = require("express");
-const { auth } = require("../middleware/auth");
+const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
+const User = require("../models/User");
+const { generateToken, authenticateToken } = require("../middleware/auth");
 const {
-  validateUserRegistration,
-  validateUserLogin,
-} = require("../middleware/validate");
-const authController = require("../controllers/authController");
+  validationRules,
+  handleValidationErrors,
+} = require("../middleware/validation");
+const {
+  sendWelcomeEmail,
+  sendPasswordResetEmail,
+  sendVerificationEmail,
+} = require("../utils/emailService");
 
 const router = express.Router();
-
-// @route   GET /api/auth/register
-// @desc    Handle incorrect GET requests to register endpoint
-// @access  Public
-router.get("/register", (req, res) => {
-  res.status(405).json({
-    success: false,
-    message: "Method Not Allowed. Use POST to register a new user.",
-    hint: "This endpoint requires a POST request with user registration data.",
-    correctMethod: "POST",
-    endpoint: "/api/auth/register",
-    timestamp: new Date().toISOString(),
-  });
-});
 
 // @route   POST /api/auth/register
 // @desc    Register a new user
 // @access  Public
-router.post("/register", validateUserRegistration, authController.register);
+router.post(
+  "/register",
+  validationRules.userRegistration,
+  handleValidationErrors,
+  async (req, res) => {
+    try {
+      const { fullName, email, password, mobile } = req.body;
 
-// @route   GET /api/auth/login
-// @desc    Handle incorrect GET requests to login endpoint
-// @access  Public
-router.get("/login", (req, res) => {
-  res.status(405).json({
-    success: false,
-    message: "Method Not Allowed. Use POST to login.",
-    hint: "This endpoint requires a POST request with user credentials.",
-    correctMethod: "POST",
-    endpoint: "/api/auth/login",
-    timestamp: new Date().toISOString(),
-  });
-});
+      // Check if user already exists
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: "User with this email already exists",
+        });
+      }
+
+      // Create verification token
+      const verificationToken = crypto.randomBytes(32).toString("hex");
+      const verificationTokenExpires = new Date(
+        Date.now() + 24 * 60 * 60 * 1000,
+      ); // 24 hours
+
+      // Create new user
+      const user = new User({
+        fullName,
+        email,
+        password,
+        mobile,
+        verificationToken,
+        verificationTokenExpires,
+      });
+
+      await user.save();
+
+      // Generate JWT token
+      const token = generateToken(user._id);
+
+      // Send verification email (don't wait for it)
+      sendVerificationEmail(user.email, user.fullName, verificationToken).catch(
+        (err) => console.error("Email sending failed:", err),
+      );
+
+      res.status(201).json({
+        success: true,
+        message:
+          "User registered successfully. Please check your email to verify your account.",
+        data: {
+          user: user.getPublicProfile(),
+          token,
+        },
+      });
+    } catch (error) {
+      console.error("Registration error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Registration failed. Please try again.",
+      });
+    }
+  },
+);
 
 // @route   POST /api/auth/login
 // @desc    Login user
 // @access  Public
-router.post("/login", validateUserLogin, authController.login);
+router.post(
+  "/login",
+  validationRules.userLogin,
+  handleValidationErrors,
+  async (req, res) => {
+    try {
+      const { email, password, rememberMe = false } = req.body;
 
-// @route   GET /api/auth/profile
-// @desc    Get user profile
-// @access  Private
-router.get("/profile", auth, authController.getProfile);
+      // Find user by email
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid email or password",
+        });
+      }
 
-// @route   PUT /api/auth/update-profile
-// @desc    Update user profile
-// @access  Private
-router.put("/update-profile", auth, authController.updateProfile);
+      // Check if account is locked
+      if (user.isLocked) {
+        return res.status(423).json({
+          success: false,
+          message:
+            "Account is temporarily locked due to too many failed login attempts. Please try again later.",
+        });
+      }
 
-// @route   POST /api/auth/change-password
-// @desc    Change user password
-// @access  Private
-router.post("/change-password", auth, authController.changePassword);
+      // Check if account is active
+      if (!user.isActive) {
+        return res.status(401).json({
+          success: false,
+          message: "Account is deactivated. Please contact support.",
+        });
+      }
+
+      // Check password
+      const isPasswordValid = await user.comparePassword(password);
+      if (!isPasswordValid) {
+        // Increment login attempts
+        await user.incLoginAttempts();
+
+        return res.status(401).json({
+          success: false,
+          message: "Invalid email or password",
+        });
+      }
+
+      // Reset login attempts on successful login
+      if (user.loginAttempts > 0) {
+        await user.resetLoginAttempts();
+      }
+
+      // Update last login
+      user.lastLogin = new Date();
+      await user.save();
+
+      // Generate JWT token with appropriate expiry
+      const tokenExpiry = rememberMe ? "30d" : "7d";
+      const token = generateToken(user._id);
+
+      res.json({
+        success: true,
+        message: "Login successful",
+        data: {
+          user: user.getPublicProfile(),
+          token,
+          expiresIn: tokenExpiry,
+        },
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Login failed. Please try again.",
+      });
+    }
+  },
+);
+
+// @route   POST /api/auth/verify-email
+// @desc    Verify user email
+// @access  Public
+router.post("/verify-email", async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "Verification token is required",
+      });
+    }
+
+    // Find user with verification token
+    const user = await User.findOne({
+      verificationToken: token,
+      verificationTokenExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired verification token",
+      });
+    }
+
+    // Mark user as verified
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
+    await user.save();
+
+    // Send welcome email
+    sendWelcomeEmail(user.email, user.fullName).catch((err) =>
+      console.error("Welcome email failed:", err),
+    );
+
+    res.json({
+      success: true,
+      message: "Email verified successfully",
+      data: {
+        user: user.getPublicProfile(),
+      },
+    });
+  } catch (error) {
+    console.error("Email verification error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Email verification failed. Please try again.",
+    });
+  }
+});
+
+// @route   POST /api/auth/resend-verification
+// @desc    Resend verification email
+// @access  Public
+router.post("/resend-verification", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is already verified",
+      });
+    }
+
+    // Generate new verification token
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    user.verificationToken = verificationToken;
+    user.verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await user.save();
+
+    // Send verification email
+    sendVerificationEmail(user.email, user.fullName, verificationToken).catch(
+      (err) => console.error("Email sending failed:", err),
+    );
+
+    res.json({
+      success: true,
+      message: "Verification email sent successfully",
+    });
+  } catch (error) {
+    console.error("Resend verification error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to resend verification email. Please try again.",
+    });
+  }
+});
 
 // @route   POST /api/auth/forgot-password
 // @desc    Send password reset email
 // @access  Public
-router.post("/forgot-password", authController.forgotPassword);
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
 
-// @route   POST /api/auth/reset-password/:token
-// @desc    Reset password
-// @access  Public
-router.post("/reset-password/:token", authController.resetPassword);
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
 
-// @route   POST /api/auth/verify-otp
-// @desc    Verify email OTP
-// @access  Public
-router.post("/verify-otp", authController.verifyOtp);
+    const user = await User.findOne({ email });
+    if (!user) {
+      // Don't reveal that user doesn't exist
+      return res.json({
+        success: true,
+        message:
+          "If an account with this email exists, a password reset link has been sent.",
+      });
+    }
 
-// @route   POST /api/auth/resend-otp
-// @desc    Resend email OTP
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.passwordResetToken = resetToken;
+    user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    await user.save();
+
+    // Send password reset email
+    sendPasswordResetEmail(user.email, user.fullName, resetToken).catch((err) =>
+      console.error("Password reset email failed:", err),
+    );
+
+    res.json({
+      success: true,
+      message:
+        "If an account with this email exists, a password reset link has been sent.",
+    });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to process password reset request. Please try again.",
+    });
+  }
+});
+
+// @route   POST /api/auth/reset-password
+// @desc    Reset password with token
 // @access  Public
-router.post("/resend-otp", authController.resendOtp);
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Token and password are required",
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long",
+      });
+    }
+
+    // Find user with reset token
+    const user = await User.findOne({
+      passwordResetToken: token,
+      passwordResetExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired reset token",
+      });
+    }
+
+    // Update password
+    user.password = password;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+
+    // Reset login attempts if any
+    user.loginAttempts = 0;
+    user.lockUntil = undefined;
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Password reset successfully",
+    });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Password reset failed. Please try again.",
+    });
+  }
+});
+
+// @route   POST /api/auth/change-password
+// @desc    Change password (authenticated)
+// @access  Private
+router.post(
+  "/change-password",
+  authenticateToken,
+  validationRules.passwordChange,
+  handleValidationErrors,
+  async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+
+      // Get user with password
+      const user = await User.findById(req.user._id);
+
+      // Verify current password
+      const isCurrentPasswordValid =
+        await user.comparePassword(currentPassword);
+      if (!isCurrentPasswordValid) {
+        return res.status(400).json({
+          success: false,
+          message: "Current password is incorrect",
+        });
+      }
+
+      // Update password
+      user.password = newPassword;
+      await user.save();
+
+      res.json({
+        success: true,
+        message: "Password changed successfully",
+      });
+    } catch (error) {
+      console.error("Change password error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Password change failed. Please try again.",
+      });
+    }
+  },
+);
+
+// @route   GET /api/auth/me
+// @desc    Get current user
+// @access  Private
+router.get("/me", authenticateToken, async (req, res) => {
+  try {
+    res.json({
+      success: true,
+      data: {
+        user: req.user.getPublicProfile(),
+      },
+    });
+  } catch (error) {
+    console.error("Get user error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to get user information",
+    });
+  }
+});
 
 // @route   POST /api/auth/logout
-// @desc    Logout user (client-side token removal)
+// @desc    Logout user (client-side token invalidation)
 // @access  Private
-router.post("/logout", auth, authController.logout);
+router.post("/logout", authenticateToken, (req, res) => {
+  // Since we're using stateless JWT, logout is handled client-side
+  // This endpoint can be used for logging purposes
+  res.json({
+    success: true,
+    message: "Logged out successfully",
+  });
+});
+
+// @route   POST /api/auth/refresh-token
+// @desc    Refresh JWT token
+// @access  Private
+router.post("/refresh-token", authenticateToken, async (req, res) => {
+  try {
+    // Generate new token
+    const newToken = generateToken(req.user._id);
+
+    res.json({
+      success: true,
+      message: "Token refreshed successfully",
+      data: {
+        token: newToken,
+        user: req.user.getPublicProfile(),
+      },
+    });
+  } catch (error) {
+    console.error("Token refresh error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Token refresh failed",
+    });
+  }
+});
 
 module.exports = router;

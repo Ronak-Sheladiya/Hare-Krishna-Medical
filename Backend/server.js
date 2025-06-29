@@ -2,434 +2,249 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
+const compression = require("compression");
+const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
-const http = require("http");
-const socketIo = require("socket.io");
+const { createServer } = require("http");
+const { Server } = require("socket.io");
 require("dotenv").config();
 
-// Startup validation
-console.log("🚀 Starting Hare Krishna Medical Store Backend...");
-console.log(`📍 Environment: ${process.env.NODE_ENV || "development"}`);
-console.log(
-  `🔐 JWT Secret: ${process.env.JWT_SECRET ? "✅ Configured" : "❌ Missing"}`,
-);
-console.log(
-  `📧 Email User: ${process.env.EMAIL_USER ? "✅ Configured" : "❌ Missing"}`,
-);
-console.log(
-  `�� Primary Domain: ${process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app (default)"}`,
-);
+// Import routes
+const authRoutes = require("./routes/auth");
+const productRoutes = require("./routes/products");
+const userRoutes = require("./routes/users");
+const orderRoutes = require("./routes/orders");
+const cartRoutes = require("./routes/cart");
+const invoiceRoutes = require("./routes/invoices");
+const messageRoutes = require("./routes/messages");
+const letterheadRoutes = require("./routes/letterheads");
+const analyticsRoutes = require("./routes/analytics");
+const uploadRoutes = require("./routes/upload");
 
-const testUserRoute = require("./routes/testUser");
+// Import middleware
+const { authenticateToken, authorizeRole } = require("./middleware/auth");
+const errorHandler = require("./middleware/errorHandler");
+
+// Import socket handlers
+const socketHandler = require("./utils/socketHandler");
+
+// Import database initialization
+const {
+  initializeDatabase,
+  checkDatabaseHealth,
+} = require("./scripts/initDatabase");
 
 const app = express();
-const server = http.createServer(app);
+const server = createServer(app);
 
-// Socket.io Setup
-const io = socketIo(server, {
+// Socket.IO setup with CORS
+const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL?.split(",") || [
-      "http://localhost:5178",
+    origin: process.env.FRONTEND_URL || [
+      "http://localhost:3000",
       "http://localhost:5173",
-      "*",
     ],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST"],
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"],
   },
-  allowEIO3: true, // Support older Socket.IO versions
-  transports: ["polling", "websocket"],
-  pingTimeout: 60000,
-  pingInterval: 25000,
 });
+
+// Make io available globally
 app.set("io", io);
 
-// Middleware
-app.set("trust proxy", 1);
-app.use(helmet());
-// Enhanced CORS configuration to handle various deployment domains
+// Security middleware
 app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, etc.)
-      if (!origin) return callback(null, true);
+  helmet({
+    contentSecurityPolicy: false, // Allow inline scripts for development
+  }),
+);
+app.use(compression());
 
-      const allowedOrigins = process.env.FRONTEND_URL?.split(",") || [];
+// CORS configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "https://hk-medical.vercel.app",
+      "https://hkmedical.vercel.app",
+      "https://harekrishnamedical.vercel.app",
+      "https://hare-krishna-medical.vercel.app",
+    ];
 
-      // Check for exact matches
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
 
-      // Check for fly.dev subdomains
-      if (origin.endsWith(".fly.dev")) {
-        console.log(`✅ Allowing fly.dev subdomain: ${origin}`);
-        return callback(null, true);
-      }
-
-      // Check for localhost (development)
-      if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
-        console.log(`✅ Allowing localhost: ${origin}`);
-        return callback(null, true);
-      }
-
-      // Log rejected origins for debugging
-      console.log(`❌ CORS blocked origin: ${origin}`);
-      console.log(`📋 Allowed origins: ${allowedOrigins.join(", ")}`);
-
-      // Allow all origins in development (fallback)
-      if (process.env.NODE_ENV === "development") {
-        return callback(null, true);
-      }
-
+    if (
+      allowedOrigins.indexOf(origin) !== -1 ||
+      process.env.NODE_ENV === "development"
+    ) {
+      callback(null, true);
+    } else {
       callback(new Error("Not allowed by CORS"));
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Accept"],
-  }),
-);
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
-app.use(
-  "/api/",
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
-    message: "Too many requests from this IP, please try again later.",
-    standardHeaders: true,
-    legacyHeaders: false,
-  }),
-);
-
-// MongoDB Connection
-const mongoURI =
-  process.env.MONGODB_URI ||
-  "mongodb+srv://ronaksheladiya652:Ronak95865@cluster0.loaubzp.mongodb.net/Hare_Krishna_Medical_db?retryWrites=true&w=majority&appName=Cluster0";
-console.log("🔄 Attempting MongoDB connection to:", mongoURI);
-
-mongoose.set("bufferCommands", false);
-
-const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(mongoURI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-      family: 4,
-      maxPoolSize: 10,
-      minPoolSize: 5,
-      maxIdleTimeMS: 30000,
-    });
-    console.log("✅ Connected to MongoDB");
-    console.log("📊 Database:", conn.connection.name);
-    console.log("🏠 Host:", conn.connection.host);
-    console.log("🔌 Port:", conn.connection.port);
-    return conn;
-  } catch (err) {
-    console.error("❌ MongoDB connection failed:", err.message);
-    global.DB_CONNECTED = false;
-    return null;
-  }
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-auth-token"],
 };
 
-// Database Initialization
-connectDB().then(async (conn) => {
-  global.DB_CONNECTED = !!conn;
-  if (conn) {
-    try {
-      const { seedDatabase } = require("./scripts/seed");
-      const models = [
-        require("./models/User"),
-        require("./models/Product"),
-        require("./models/Order"),
-        require("./models/Invoice"),
-        require("./models/Message"),
-        require("./models/Letterhead"),
-        require("./models/Verification"),
-      ];
-      console.log("📋 Models loaded - collections will be created:");
-      models.forEach((model) =>
-        console.log(`   - ${model.modelName} model ✅`),
-      );
+app.use(cors(corsOptions));
 
-      const userCount = await models[0].countDocuments();
-      if (userCount === 0) {
-        console.log("🌱 No users found, initializing all collections...");
-      }
-
-      await seedDatabase(); // Always try to seed all collections regardless of users
-    } catch (error) {
-      console.error("❌ Database seeding encountered an issue:", error.message);
-    }
-
-    try {
-      const emailService = require("./utils/emailService");
-      const isEmailConnected = await emailService.testConnection();
-      if (isEmailConnected) {
-        console.log("✅ Email service is ready");
-      } else {
-        console.log("⚠️ Email service connection failed");
-      }
-    } catch (error) {
-      console.error("❌ Email service error:", error.message);
-    }
-  }
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
-// Mongoose Connection Events
-mongoose.connection.on("connected", () => {
-  console.log("📡 Mongoose connected to MongoDB");
-  global.DB_CONNECTED = true;
-});
-mongoose.connection.on("error", (err) => {
-  console.error("❌ Mongoose error:", err.message);
-  global.DB_CONNECTED = false;
-});
-mongoose.connection.on("disconnected", () => {
-  console.log("📡 Mongoose disconnected");
-  global.DB_CONNECTED = false;
-});
-mongoose.connection.on("reconnected", () => {
-  console.log("📡 Mongoose reconnected");
-  global.DB_CONNECTED = true;
+app.use(limiter);
+
+// Auth rate limiting (stricter)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 auth requests per windowMs
+  message: "Too many authentication attempts, please try again later.",
+  skipSuccessfulRequests: true,
 });
 
-// Graceful Shutdown
-process.on("SIGTERM", () => {
-  console.log("📡 SIGTERM received");
-  server.close(() => console.log("💾 Server shutdown complete"));
-});
-process.on("SIGINT", () => {
-  console.log("📡 SIGINT received");
-  server.close(() => console.log("💾 Server shutdown complete"));
-});
+// Logging
+app.use(morgan("combined"));
 
-// Routes with error handling
-const routes = [
-  { path: "/api/test", file: testUserRoute, name: "Test" },
-  { path: "/api/auth", file: "./routes/auth", name: "Auth" },
-  { path: "/api/debug-auth", file: "./routes/debug-auth", name: "Debug Auth" },
-  { path: "/api/users", file: "./routes/users", name: "Users" },
-  { path: "/api/products", file: "./routes/products", name: "Products" },
-  { path: "/api/orders", file: "./routes/orders", name: "Orders" },
-  { path: "/api/invoices", file: "./routes/invoices", name: "Invoices" },
-  { path: "/api/messages", file: "./routes/messages", name: "Messages" },
-  { path: "/api/analytics", file: "./routes/analytics", name: "Analytics" },
-  { path: "/api/upload", file: "./routes/upload", name: "Upload" },
-  { path: "/api/seed", file: "./routes/seed", name: "Seed" },
-  { path: "/api/dev", file: "./routes/dev", name: "Dev" },
-  {
-    path: "/api/verification",
-    file: "./routes/verification",
-    name: "Verification",
-  },
-  {
-    path: "/api/admin/notifications",
-    file: "./routes/notifications",
-    name: "Notifications",
-  },
-  {
-    path: "/api/letterheads",
-    file: "./routes/letterheads",
-    name: "Letterheads",
-  },
-  {
-    path: "/api/mail",
-    file: "./routes/mail",
-    name: "Mail",
-  },
-];
+// Body parsing middleware
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-console.log("🔗 Loading API routes...");
-routes.forEach((route) => {
-  try {
-    const routeHandler =
-      typeof route.file === "string" ? require(route.file) : route.file;
-    app.use(route.path, routeHandler);
-    console.log(`✅ ${route.name} routes loaded: ${route.path}`);
-  } catch (error) {
-    console.error(
-      `❌ Failed to load ${route.name} routes (${route.path}):`,
-      error.message,
-    );
-  }
-});
-
-// Health Check
+// Health check endpoint
 app.get("/api/health", (req, res) => {
+  const dbStatus = mongoose.connection.readyState;
+  const dbStatusText =
+    {
+      0: "disconnected",
+      1: "connected",
+      2: "connecting",
+      3: "disconnecting",
+    }[dbStatus] || "unknown";
+
   res.json({
-    success: true,
     status: "OK",
-    server: "online",
-    database:
-      mongoose.connection.readyState === 1 ? "connected" : "disconnected",
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || "development",
+    database: {
+      status: dbStatusText,
+      readyState: dbStatus,
+    },
+    server: "running",
   });
 });
 
-// Route debugging endpoint (development only)
-if (process.env.NODE_ENV !== "production") {
-  app.get("/api/debug/routes", (req, res) => {
-    const routes = [];
-    app._router.stack.forEach(function (r) {
-      if (r.route && r.route.path) {
-        routes.push({
-          method: Object.keys(r.route.methods)[0].toUpperCase(),
-          path: r.route.path,
-        });
-      } else if (r.name === "router") {
-        r.handle.stack.forEach(function (nestedR) {
-          if (nestedR.route) {
-            routes.push({
-              method: Object.keys(nestedR.route.methods)[0].toUpperCase(),
-              path:
-                r.regexp.source
-                  .replace("\\", "")
-                  .replace("(?:", "")
-                  .replace(")?", "") + nestedR.route.path,
-            });
-          }
-        });
-      }
-    });
-    res.json({ routes, total: routes.length });
-  });
-}
+// API Routes
+app.use("/api/auth", authLimiter, authRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/users", authenticateToken, userRoutes);
+app.use("/api/orders", authenticateToken, orderRoutes);
+app.use("/api/cart", authenticateToken, cartRoutes);
+app.use("/api/invoices", invoiceRoutes);
+app.use("/api/messages", authenticateToken, messageRoutes);
+app.use("/api/letterheads", authenticateToken, letterheadRoutes);
+app.use(
+  "/api/analytics",
+  authenticateToken,
+  authorizeRole(["admin"]),
+  analyticsRoutes,
+);
+app.use("/api/upload", authenticateToken, uploadRoutes);
 
-// 404 Handler for API routes
-app.use("/api/*", (req, res) => {
-  console.log(`❌ API route not found: ${req.method} ${req.originalUrl}`);
+// Socket.IO connection handling
+socketHandler(io);
+
+// Error handling middleware
+app.use(errorHandler);
+
+// 404 handler
+app.use("*", (req, res) => {
   res.status(404).json({
     success: false,
-    message: `API route not found: ${req.method} ${req.originalUrl}`,
-    timestamp: new Date().toISOString(),
-    availableRoutes: [
-      "GET /api/health",
-      "GET /api/auth/register (Method Not Allowed - use POST)",
-      "POST /api/auth/register",
-      "GET /api/auth/login (Method Not Allowed - use POST)",
-      "POST /api/auth/login",
-      "POST /api/auth/verify-otp",
-      "POST /api/auth/resend-otp",
-      "GET /api/messages",
-      "POST /api/messages/contact",
-      "GET /api/mail/sent",
-      "POST /api/mail/send-test",
-      "GET /api/mail/status",
-    ],
+    message: "Route not found",
   });
 });
 
-// Socket.IO Connection Handling
-io.on("connection", (socket) => {
-  console.log(`🔌 Socket connected: ${socket.id}`);
+// MongoDB connection
+const connectDB = async () => {
+  try {
+    const mongoURI =
+      process.env.MONGODB_URI ||
+      "mongodb://localhost:27017/hare-krishna-medical";
 
-  // Handle user authentication
-  const userToken = socket.handshake.auth.token;
-  const userRole = socket.handshake.auth.role;
+    console.log("🔄 Attempting to connect to MongoDB...");
+    console.log(`📍 MongoDB URI: ${mongoURI}`);
 
-  if (userRole === 1 || userRole === "admin") {
-    socket.join("admin-room");
-    console.log(`👨‍💼 Admin joined admin-room: ${socket.id}`);
+    await mongoose.connect(mongoURI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+      socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+    });
+
+    console.log("✅ MongoDB connected successfully");
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error.message);
+    console.log("⚠️ Starting server without MongoDB connection");
+    console.log("📝 Note: Some features may not work without database");
+    // Don't exit, allow server to start without DB for development
+  }
+};
+
+// Handle MongoDB connection events
+mongoose.connection.on("disconnected", () => {
+  console.log("❌ MongoDB disconnected");
+});
+
+mongoose.connection.on("error", (err) => {
+  console.error("❌ MongoDB error:", err);
+});
+
+// Graceful shutdown
+process.on("SIGINT", async () => {
+  console.log("🔄 Gracefully shutting down...");
+
+  // Close MongoDB connection
+  await mongoose.connection.close();
+
+  // Close server
+  server.close(() => {
+    console.log("✅ Server closed");
+    process.exit(0);
+  });
+});
+
+// Start server
+const PORT = process.env.PORT || 5001;
+
+const startServer = async () => {
+  await connectDB();
+
+  // Initialize database after connection
+  try {
+    await initializeDatabase();
+    await checkDatabaseHealth();
+  } catch (error) {
+    console.warn("⚠️ Database initialization failed:", error.message);
+    console.log("📝 Server will continue without full initialization");
   }
 
-  if (userToken) {
-    socket.join(`user-${userToken}`);
-    console.log(`👤 User joined personal room: ${socket.id}`);
-  }
-
-  // Handle admin room join
-  socket.on("join-admin-room", () => {
-    socket.join("admin-room");
-    console.log(`👨‍💼 Socket ${socket.id} joined admin-room`);
+  server.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
+    console.log(`📡 Socket.IO enabled`);
+    console.log(`🎯 API available at: http://localhost:${PORT}/api`);
+    console.log(`💊 Hare Krishna Medical Store Backend Ready!`);
   });
+};
 
-  // Handle user room join
-  socket.on("join-user-room", (token) => {
-    socket.join(`user-${token}`);
-    console.log(`👤 Socket ${socket.id} joined user-${token} room`);
-  });
+startServer();
 
-  // Handle real-time order updates
-  socket.on("order-status-update", (data) => {
-    io.to("admin-room").emit("order-updated", data);
-    io.to(`user-${data.userId}`).emit("order-status-changed", data);
-  });
-
-  // Handle real-time message updates
-  socket.on("new-message", (data) => {
-    io.to("admin-room").emit("admin-new-message", data);
-  });
-
-  // Handle real-time notifications
-  socket.on("send-notification", (data) => {
-    if (data.target === "admin") {
-      io.to("admin-room").emit("admin_notification", data);
-    } else if (data.target === "user" && data.userId) {
-      io.to(`user-${data.userId}`).emit("user_notification", data);
-    } else {
-      io.emit("global_notification", data);
-    }
-  });
-
-  // Handle inventory updates
-  socket.on("inventory-update", (data) => {
-    io.emit("inventory-changed", data);
-  });
-
-  // Handle disconnection
-  socket.on("disconnect", (reason) => {
-    console.log(`🔌 Socket disconnected: ${socket.id} - ${reason}`);
-  });
-
-  // Send connection confirmation
-  socket.emit("connection-confirmed", {
-    message: "Socket.IO connection established",
-    socketId: socket.id,
-    timestamp: new Date().toISOString(),
-  });
-});
-
-// Global Error Handler
-app.use((error, req, res, next) => {
-  console.error(`❌ Server Error on ${req.method} ${req.originalUrl}:`, error);
-
-  if (res.headersSent) {
-    return next(error);
-  }
-
-  res.status(500).json({
-    success: false,
-    message: "Internal server error",
-    error:
-      process.env.NODE_ENV === "production"
-        ? "Something went wrong"
-        : error.message,
-    timestamp: new Date().toISOString(),
-  });
-});
-
-// Error Handling
-app.use((err, req, res, next) => {
-  if (res.headersSent) return next(err);
-  console.error(err.stack);
-  res
-    .status(500)
-    .json({ message: "Something went wrong!", error: err.message });
-});
-app.use("*", (req, res) => {
-  res.status(404).json({ message: "Route not found" });
-});
-
-// Start Server
-const PORT = process.env.PORT || 5001; // Use 5001 to avoid conflicts
-server.listen(PORT, () => {
-  console.log(`��� Server running on port ${PORT}`);
-  console.log(`🌐 Environment: ${process.env.NODE_ENV || "development"}`);
-});
-
-module.exports = { app, io };
+module.exports = app;

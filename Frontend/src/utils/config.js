@@ -1,9 +1,9 @@
-// Environment Configuration Utility
-// Centralized configuration management for the application
+// Frontend-Only Configuration Utility
+// Simplified configuration for frontend-only application
 
 /**
  * Get the current environment
- * @returns {'development' | 'production' | 'staging'}
+ * @returns {'development' | 'production'}
  */
 export const getEnvironment = () => {
   return import.meta.env.VITE_NODE_ENV || import.meta.env.MODE || "development";
@@ -18,14 +18,12 @@ export const isProduction = () => {
     typeof window !== "undefined" ? window.location.hostname : "";
   const env = getEnvironment();
 
-  // Check for production domains or non-localhost hostnames
+  // Check for production domains
   const isProductionDomain =
     hostname.includes("vercel.app") ||
-    hostname.includes("render.com") ||
     hostname.includes("netlify.app") ||
-    hostname.includes("fly.dev") ||
-    hostname.includes("railway.app") ||
-    hostname.includes("herokuapp.com");
+    hostname.includes("github.io") ||
+    hostname.includes("surge.sh");
 
   return (
     env === "production" ||
@@ -43,109 +41,7 @@ export const isDevelopment = () => {
 };
 
 /**
- * Get the backend URL based on environment
- * @returns {string}
- */
-/**
- * Check if we're in a restricted network environment
- */
-export const isRestrictedEnvironment = () => {
-  const hostname =
-    typeof window !== "undefined" ? window.location.hostname : "";
-
-  // Known problematic environments where cross-origin requests fail
-  return (
-    hostname.includes("fly.dev") ||
-    hostname.includes("railway.app") ||
-    hostname.includes("replit.") ||
-    hostname.includes("stackblitz.")
-  );
-};
-
-export const getBackendURL = () => {
-  const hostname =
-    typeof window !== "undefined" ? window.location.hostname : "";
-
-  // Always use production backend if explicitly set in environment
-  if (import.meta.env.VITE_BACKEND_URL) {
-    console.log(
-      `🔧 Using explicit backend URL: ${import.meta.env.VITE_BACKEND_URL}`,
-    );
-    return import.meta.env.VITE_BACKEND_URL;
-  }
-
-  // Check if we're in production environment
-  const isProd = isProduction();
-  const isRestricted = isRestrictedEnvironment();
-  console.log(
-    `🌍 Environment check: hostname=${hostname}, isProduction=${isProd}, isRestricted=${isRestricted}`,
-  );
-
-  // Use local backend in development
-  if (
-    !isProd &&
-    (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "")
-  ) {
-    const localBackend = "http://localhost:5001";
-    console.log(
-      `🛠️ Development environment detected, using local backend: ${localBackend}`,
-    );
-    return localBackend;
-  }
-
-  // Special handling for fly.dev deployments
-  if (hostname.includes("fly.dev")) {
-    // First, try to use a same-origin backend if available
-    const currentProtocol = window.location.protocol;
-    const potentialBackendURL = `${currentProtocol}//${hostname}`;
-    console.log(
-      `🔄 Fly.dev detected, will try same-origin first: ${potentialBackendURL}`,
-    );
-
-    // For now, still return the production backend but the API client will handle fallbacks
-    const prodURL = "https://hare-krishna-medical.onrender.com";
-    console.log(
-      `🚀 Fly.dev using production backend: ${prodURL} (with fallback)`,
-    );
-    return prodURL;
-  }
-
-  // Production environment - use remote backend
-  const prodURL = "https://hare-krishna-medical.onrender.com";
-  console.log(`🚀 Using production backend: ${prodURL}`);
-  return prodURL;
-};
-/**
- * Get the Socket.IO URL based on environment
- * @returns {string}
- */
-export const getSocketURL = () => {
-  const hostname =
-    typeof window !== "undefined" ? window.location.hostname : "";
-
-  // Check if we're in production environment
-  const isProd = isProduction();
-  console.log(
-    `🔌 Socket URL check: hostname=${hostname}, isProduction=${isProd}`,
-  );
-
-  if (isProd) {
-    const prodSocketURL =
-      import.meta.env.VITE_SOCKET_URL ||
-      "https://hare-krishna-medical.onrender.com";
-    console.log(`🚀 Using production socket URL: ${prodSocketURL}`);
-    return prodSocketURL;
-  }
-
-  // Development environment - try local first, fallback to production
-  const localSocket = "http://localhost:5001";
-  const socketURL = import.meta.env.VITE_SOCKET_URL || localSocket;
-  console.log(`🛠️ Using development socket URL: ${socketURL}`);
-  return socketURL;
-};
-
-/**
- * Get frontend URLs (for CORS and reference)
+ * Get frontend URLs (for reference)
  * @returns {string[]}
  */
 export const getFrontendURLs = () => {
@@ -154,7 +50,7 @@ export const getFrontendURLs = () => {
     return frontendUrls.split(",").map((url) => url.trim());
   }
 
-  // Default production URLs
+  // Default URLs where this app might be deployed
   return [
     "https://hk-medical.vercel.app",
     "https://hkmedical.vercel.app",
@@ -172,6 +68,47 @@ export const getPrimaryDomain = () => {
 };
 
 /**
+ * Get backend URL based on environment
+ * @returns {string}
+ */
+export const getBackendURL = () => {
+  const hostname =
+    typeof window !== "undefined" ? window.location.hostname : "";
+
+  // Use environment variable if set
+  if (import.meta.env.VITE_BACKEND_URL) {
+    console.log(
+      `🔧 Using explicit backend URL: ${import.meta.env.VITE_BACKEND_URL}`,
+    );
+    return import.meta.env.VITE_BACKEND_URL;
+  }
+
+  // Development environment - use local backend
+  if (
+    isDevelopment() &&
+    (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "")
+  ) {
+    const localBackend = "http://localhost:5001";
+    console.log(`🛠️ Development: Using local backend: ${localBackend}`);
+    return localBackend;
+  }
+
+  // Production backend URL
+  const prodURL = "https://hare-krishna-medical.onrender.com";
+  console.log(`🚀 Using production backend: ${prodURL}`);
+  return prodURL;
+};
+
+/**
+ * Get Socket.IO URL based on environment
+ * @returns {string}
+ */
+export const getSocketURL = () => {
+  // Socket URL is the same as backend URL
+  return getBackendURL();
+};
+
+/**
  * Get application configuration
  * @returns {object}
  */
@@ -183,12 +120,12 @@ export const getAppConfig = () => {
     isProduction: isProduction(),
     isDevelopment: isDevelopment(),
     debug: import.meta.env.VITE_DEBUG === "true",
-    backendURL: getBackendURL(),
-    socketURL: getSocketURL(),
     frontendURLs: getFrontendURLs(),
     primaryDomain: getPrimaryDomain(),
-    sessionTimeout: parseInt(import.meta.env.VITE_SESSION_TIMEOUT) || 3600000,
     maxFileSize: parseInt(import.meta.env.VITE_MAX_FILE_SIZE) || 5242880,
+    // Backend integration enabled for production
+    frontendOnly: false,
+    hasBackend: true,
   };
 };
 
@@ -197,32 +134,26 @@ export const getAppConfig = () => {
  */
 export const logConfig = () => {
   if (isDevelopment() || import.meta.env.VITE_DEBUG === "true") {
-    console.group("🔧 Application Configuration");
+    console.group("🔧 Frontend-Only Application Configuration");
     console.table(getAppConfig());
     console.groupEnd();
   }
 };
 
-// Auto-log configuration in development and when debugging
+// Auto-log configuration in development
 if (isDevelopment() || import.meta.env.VITE_DEBUG === "true") {
   logConfig();
 }
 
-// Always log basic config for debugging production issues
+// Always log basic config for debugging
 if (typeof window !== "undefined") {
   const hostname = window.location.hostname;
-  console.group("🔧 App Configuration");
+  console.group("🔧 Full-Stack App Configuration");
   console.log(`🌐 App running on: ${hostname}`);
   console.log(`📍 Environment: ${getEnvironment()}`);
   console.log(`🏭 Production mode: ${isProduction()}`);
-  console.log(`🔗 Backend URL: ${getBackendURL()}`);
-  console.log(`🔌 Socket URL: ${getSocketURL()}`);
-  console.log(
-    `🔍 VITE_BACKEND_URL: ${import.meta.env.VITE_BACKEND_URL || "Not set"}`,
-  );
-  console.log(`🔍 MODE: ${import.meta.env.MODE}`);
-  console.log(`🔍 Restricted Environment: ${isRestrictedEnvironment()}`);
-  console.groupEnd();
+  console.log(`🎨 Backend URL: ${getBackendURL()}`);
+  console.log(`📦 Backend: ENABLED`);
   console.groupEnd();
 }
 

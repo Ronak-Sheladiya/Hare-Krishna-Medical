@@ -690,8 +690,8 @@ const UserProfile = () => {
             </Col>
           </Row>
 
-          {/* Detailed Diagnostics (only show for non-fly.dev or when debug=true) */}
-          {(!window.location.hostname.includes("fly.dev") ||
+          {/* Detailed Diagnostics (only show in development or when debug=true) */}
+          {(window.location.hostname === "localhost" ||
             window.location.search.includes("debug=true")) && (
             <>
               <Row className="mb-3">
@@ -717,8 +717,7 @@ const UserProfile = () => {
           {/* Network Debug Section (Development/Testing Only) */}
           {(window.location.hostname === "localhost" ||
             window.location.hostname === "127.0.0.1" ||
-            (window.location.hostname.includes("fly.dev") &&
-              window.location.search.includes("debug=true"))) && (
+            window.location.search.includes("debug=true")) && (
             <Row className="mb-3">
               <Col lg={12}>
                 <div className="text-center">

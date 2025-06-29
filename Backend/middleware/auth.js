@@ -1,124 +1,203 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-const { devAuth, shouldUseFallback } = require("../utils/devFallback");
 
-// ✅ General User Authentication Middleware
-const auth = async (req, res, next) => {
+// Middleware to authenticate JWT token
+const authenticateToken = async (req, res, next) => {
   try {
-    const token = req.header("Authorization")?.replace("Bearer ", "");
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
 
     if (!token) {
       return res.status(401).json({
-        message: "Access denied. No token provided.",
+        success: false,
+        message: "Access token required",
       });
     }
 
-    // Validate JWT secret exists in production
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      console.error("❌ JWT_SECRET environment variable not set");
-      return res.status(500).json({
-        message: "Server configuration error. Please contact administrator.",
-      });
-    }
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const decoded = jwt.verify(token, jwtSecret);
-
-    let user;
-    if (shouldUseFallback()) {
-      user = await devAuth.findUserById(decoded.id);
-      if (user) {
-        // Remove password from user object for security
-        const { password, ...userWithoutPassword } = user;
-        user = userWithoutPassword;
-      }
-    } else {
-      user = await User.findById(decoded.id).select("-password");
-    }
+    // Get user from database
+    const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
       return res.status(401).json({
-        message: "Invalid token. User not found.",
+        success: false,
+        message: "Invalid token - user not found",
       });
     }
 
     if (!user.isActive) {
       return res.status(401).json({
-        message: "Account has been deactivated.",
+        success: false,
+        message: "User account is deactivated",
       });
     }
 
+    if (user.isLocked) {
+      return res.status(401).json({
+        success: false,
+        message: "User account is locked. Please try again later.",
+      });
+    }
+
+    // Add user to request object
     req.user = user;
     next();
   } catch (error) {
+    console.error("Auth middleware error:", error);
+
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token",
+      });
+    }
+
     if (error.name === "TokenExpiredError") {
       return res.status(401).json({
-        message: "Token has expired. Please login again.",
+        success: false,
+        message: "Token expired",
       });
     }
 
+    return res.status(500).json({
+      success: false,
+      message: "Authentication error",
+    });
+  }
+};
+
+// Middleware to authorize based on user roles
+const authorizeRole = (roles = []) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    // Convert single role to array
+    if (typeof roles === "string") {
+      roles = [roles];
+    }
+
+    if (roles.length && !roles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: "Insufficient permissions",
+      });
+    }
+
+    next();
+  };
+};
+
+// Middleware to check if user is admin
+const requireAdmin = (req, res, next) => {
+  if (!req.user || req.user.role !== "admin") {
+    return res.status(403).json({
+      success: false,
+      message: "Admin access required",
+    });
+  }
+  next();
+};
+
+// Middleware to check if user owns the resource or is admin
+const requireOwnershipOrAdmin = (paramName = "userId") => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const resourceUserId = req.params[paramName] || req.body[paramName];
+
+    // Admin can access any resource
+    if (req.user.role === "admin") {
+      return next();
+    }
+
+    // User can only access their own resources
+    if (req.user._id.toString() !== resourceUserId) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only access your own resources",
+      });
+    }
+
+    next();
+  };
+};
+
+// Middleware to check if user is verified
+const requireVerification = (req, res, next) => {
+  if (!req.user) {
     return res.status(401).json({
-      message: "Invalid token.",
-      error: error.message,
+      success: false,
+      message: "Authentication required",
     });
   }
-};
 
-// ✅ Admin Only Authentication Middleware
-const adminAuth = async (req, res, next) => {
-  try {
-    // Authenticate user first
-    await auth(req, res, async () => {
-      // If `auth` already responded, avoid duplicate response
-      if (!req.user) return;
-
-      if (req.user.role !== 1) {
-        return res.status(403).json({
-          message: "Access denied. Admin privileges required.",
-        });
-      }
-
-      next();
+  if (!req.user.isVerified) {
+    return res.status(403).json({
+      success: false,
+      message: "Email verification required",
     });
-  } catch (error) {
-    // Catch fallback for unexpected errors
-    if (!res.headersSent) {
-      return res.status(500).json({
-        message: "Admin authentication failed.",
-        error: error.message,
-      });
-    }
   }
+
+  next();
 };
 
-// ✅ Optional Auth Middleware (e.g., public pages showing optional user data)
+// Optional authentication - don't fail if no token
 const optionalAuth = async (req, res, next) => {
   try {
-    const token = req.header("Authorization")?.replace("Bearer ", "");
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
 
     if (token) {
-      const jwtSecret = process.env.JWT_SECRET;
-      if (!jwtSecret) {
-        next(); // Skip auth if JWT secret not configured
-        return;
-      }
-
-      const decoded = jwt.verify(token, jwtSecret);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const user = await User.findById(decoded.id).select("-password");
 
-      if (user && user.isActive) {
+      if (user && user.isActive && !user.isLocked) {
         req.user = user;
       }
     }
 
-    next(); // Always proceed
+    next();
   } catch (error) {
-    next(); // Proceed even if token fails
+    // Continue without authentication
+    next();
+  }
+};
+
+// Generate JWT token
+const generateToken = (userId) => {
+  return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+  });
+};
+
+// Verify JWT token
+const verifyToken = (token) => {
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET);
+  } catch (error) {
+    throw error;
   }
 };
 
 module.exports = {
-  auth,
-  adminAuth,
+  authenticateToken,
+  authorizeRole,
+  requireAdmin,
+  requireOwnershipOrAdmin,
+  requireVerification,
   optionalAuth,
+  generateToken,
+  verifyToken,
 };

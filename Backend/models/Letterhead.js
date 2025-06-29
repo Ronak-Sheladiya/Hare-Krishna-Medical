@@ -1,210 +1,295 @@
 const mongoose = require("mongoose");
-const QRCode = require("qrcode");
 
 const letterheadSchema = new mongoose.Schema(
   {
-    letterheadId: {
+    name: {
       type: String,
-      required: true,
-      unique: true,
-      default: () => "HK" + "DOCS" + Math.floor(1000 + Math.random() * 9000), // e.g., USER-ab12cd
-    },
-
-    // Letter Content
-    title: {
-      type: String,
-      required: false, // Not required for simplified letterheads
+      required: [true, "Letterhead name is required"],
       trim: true,
+      maxlength: [100, "Name cannot exceed 100 characters"],
     },
-    content: {
+    description: {
       type: String,
-      required: [true, "Letter content is required"],
+      trim: true,
+      maxlength: [500, "Description cannot exceed 500 characters"],
     },
-
-    // Footer Information (similar to invoice footer)
-    footer: {
-      terms: {
+    companyInfo: {
+      name: {
         type: String,
-        default:
-          "This is an official document issued by Hare Krishna Medical Store. For verification, please contact us at the above details.",
+        required: [true, "Company name is required"],
+        default: "Hare Krishna Medical Store",
       },
-      additionalInfo: {
+      address: {
+        street: { type: String, required: true },
+        city: { type: String, required: true },
+        state: { type: String, required: true },
+        pincode: { type: String, required: true },
+        country: { type: String, default: "India" },
+      },
+      contact: {
+        phone: { type: String, required: true },
+        mobile: { type: String },
+        email: { type: String, required: true },
+        website: { type: String },
+      },
+      registration: {
+        gst: { type: String },
+        pan: { type: String },
+        registrationNumber: { type: String },
+        licenseNumber: { type: String },
+      },
+    },
+    logo: {
+      url: { type: String },
+      publicId: { type: String },
+      width: { type: Number, default: 100 },
+      height: { type: Number, default: 100 },
+      position: {
         type: String,
-        default: "",
+        enum: ["left", "center", "right"],
+        default: "left",
       },
     },
-    // Status and Metadata
-    status: {
-      type: String,
-      enum: ["draft", "issued", "sent", "archived"],
-      default: "draft",
-    },
-    issueDate: {
-      type: Date,
-      default: Date.now,
-    },
-    validUntil: {
-      type: Date,
-      default: function () {
-        return new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year from now
+    styling: {
+      headerBackgroundColor: { type: String, default: "#ffffff" },
+      headerTextColor: { type: String, default: "#000000" },
+      primaryColor: { type: String, default: "#e63946" },
+      secondaryColor: { type: String, default: "#6c757d" },
+      fontFamily: {
+        type: String,
+        enum: ["Arial", "Times New Roman", "Calibri", "Georgia", "Verdana"],
+        default: "Arial",
+      },
+      fontSize: {
+        company: { type: Number, default: 24 },
+        address: { type: Number, default: 12 },
+        contact: { type: Number, default: 10 },
       },
     },
-    // QR Code and Verification (similar to invoice)
-    qrCode: {
-      type: String,
+    layout: {
+      showLogo: { type: Boolean, default: true },
+      showCompanyName: { type: Boolean, default: true },
+      showAddress: { type: Boolean, default: true },
+      showContact: { type: Boolean, default: true },
+      showRegistration: { type: Boolean, default: true },
+      headerHeight: { type: Number, default: 120 },
+      footerText: {
+        type: String,
+        default: "Thank you for your business!",
+      },
+      showFooter: { type: Boolean, default: true },
     },
-    qrCodeData: {
+    template: {
       type: String,
+      enum: ["modern", "classic", "minimal", "professional", "medical"],
+      default: "medical",
     },
-    verificationUrl: {
-      type: String,
+    isDefault: {
+      type: Boolean,
+      default: false,
     },
-    // Metadata
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    usageCount: {
+      type: Number,
+      default: 0,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Ref",
+      ref: "User",
+      required: true,
     },
-    tags: [
-      {
-        type: String,
-        trim: true,
-      },
-    ],
-    notes: {
-      type: String,
-      trim: true,
+    lastUsed: {
+      type: Date,
+    },
+    preview: {
+      thumbnailUrl: { type: String },
+      generatedAt: { type: Date },
     },
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 );
 
-// Generate letterhead ID and QR code before saving
+// Virtual for full company address
+letterheadSchema.virtual("fullAddress").get(function () {
+  const addr = this.companyInfo.address;
+  return `${addr.street}, ${addr.city}, ${addr.state} - ${addr.pincode}, ${addr.country}`;
+});
+
+// Virtual for complete contact info
+letterheadSchema.virtual("contactInfo").get(function () {
+  const contact = this.companyInfo.contact;
+  let info = [];
+
+  if (contact.phone) info.push(`Phone: ${contact.phone}`);
+  if (contact.mobile) info.push(`Mobile: ${contact.mobile}`);
+  if (contact.email) info.push(`Email: ${contact.email}`);
+  if (contact.website) info.push(`Website: ${contact.website}`);
+
+  return info.join(" | ");
+});
+
+// Indexes
+letterheadSchema.index({ createdBy: 1 });
+letterheadSchema.index({ isDefault: 1 });
+letterheadSchema.index({ isActive: 1 });
+letterheadSchema.index({ template: 1 });
+letterheadSchema.index({ createdAt: -1 });
+
+// Pre-save middleware
 letterheadSchema.pre("save", async function (next) {
-  // Generate letterheadId if not exists
-  if (!this.letterheadId) {
-    const year = new Date().getFullYear();
-    const month = String(new Date().getMonth() + 1).padStart(2, "0");
-    const day = String(new Date().getDate()).padStart(2, "0");
-    const random = Math.floor(Math.random() * 1000)
-      .toString()
-      .padStart(3, "0");
-
-    // Format: HKMS/LH/YYYY/MM/DD/XXX
-    this.letterheadId = `HKMS/LH/${year}/${month}/${day}/${random}`;
-  }
-
-  // Generate QR code for verification
-  if (this.letterheadId) {
-    try {
-      const primaryDomain =
-        process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app";
-      this.verificationUrl = `${primaryDomain}/verify-docs?id=${this.letterheadId}&type=letterhead`;
-
-      // Create verification data
-      this.qrCodeData = JSON.stringify({
-        letterhead_id: this.letterheadId,
-        letter_type: this.letterType,
-        recipient_name: this.recipient?.name || "General",
-        subject: this.subject || this.title,
-        issue_date: this.issueDate,
-        verification_url: this.verificationUrl,
-        issued_by: this.issuer?.name || "Hare Krishna Medical Store",
-        company: "Hare Krishna Medical Store",
-        type: "letterhead_verification",
-      });
-
-      // Generate QR code
-      this.qrCode = await QRCode.toDataURL(this.verificationUrl, {
-        width: 200,
-        margin: 2,
-        color: {
-          dark: "#1a202c",
-          light: "#ffffff",
-        },
-        errorCorrectionLevel: "M",
-      });
-    } catch (error) {
-      console.error("QR Code generation error:", error);
-      this.qrCode = null;
-      this.qrCodeData = null;
-    }
+  // Ensure only one default letterhead per user
+  if (this.isDefault) {
+    await this.constructor.updateMany(
+      {
+        createdBy: this.createdBy,
+        _id: { $ne: this._id },
+        isDefault: true,
+      },
+      { isDefault: false },
+    );
   }
 
   next();
 });
 
-// Instance methods
-letterheadSchema.methods.markAsIssued = function () {
-  this.status = "issued";
-  this.issueDate = new Date();
+// Method to increment usage count
+letterheadSchema.methods.incrementUsage = function () {
+  this.usageCount += 1;
+  this.lastUsed = new Date();
   return this.save();
 };
 
-letterheadSchema.methods.markAsSent = function () {
-  this.status = "sent";
-  return this.save();
-};
-
-letterheadSchema.methods.archive = function () {
-  this.status = "archived";
-  return this.save();
-};
-
-// Static methods
-letterheadSchema.statics.getStats = async function () {
-  const stats = await this.aggregate([
+// Method to set as default
+letterheadSchema.methods.setAsDefault = async function () {
+  // Remove default from other letterheads of the same user
+  await this.constructor.updateMany(
     {
-      $group: {
-        _id: null,
-        total: { $sum: 1 },
-        draft: { $sum: { $cond: [{ $eq: ["$status", "draft"] }, 1, 0] } },
-        issued: { $sum: { $cond: [{ $eq: ["$status", "issued"] }, 1, 0] } },
-        sent: { $sum: { $cond: [{ $eq: ["$status", "sent"] }, 1, 0] } },
-        archived: { $sum: { $cond: [{ $eq: ["$status", "archived"] }, 1, 0] } },
-      },
+      createdBy: this.createdBy,
+      _id: { $ne: this._id },
+      isDefault: true,
     },
-  ]);
-
-  return (
-    stats[0] || {
-      total: 0,
-      draft: 0,
-      issued: 0,
-      sent: 0,
-      archived: 0,
-    }
+    { isDefault: false },
   );
+
+  this.isDefault = true;
+  return this.save();
 };
 
-letterheadSchema.statics.getTypeStats = async function () {
-  return await this.aggregate([
-    {
-      $group: {
-        _id: "$letterType",
-        count: { $sum: 1 },
-      },
-    },
-    {
-      $sort: { count: -1 },
-    },
-  ]);
+// Method to generate CSS styles
+letterheadSchema.methods.generateCSS = function () {
+  const styles = this.styling;
+
+  return `
+    .letterhead-header {
+      background-color: ${styles.headerBackgroundColor};
+      color: ${styles.headerTextColor};
+      font-family: ${styles.fontFamily}, sans-serif;
+      height: ${this.layout.headerHeight}px;
+      padding: 20px;
+      border-bottom: 2px solid ${styles.primaryColor};
+    }
+    
+    .company-name {
+      font-size: ${styles.fontSize.company}px;
+      font-weight: bold;
+      color: ${styles.primaryColor};
+      margin-bottom: 10px;
+    }
+    
+    .company-address {
+      font-size: ${styles.fontSize.address}px;
+      color: ${styles.secondaryColor};
+      margin-bottom: 5px;
+    }
+    
+    .company-contact {
+      font-size: ${styles.fontSize.contact}px;
+      color: ${styles.secondaryColor};
+    }
+    
+    .letterhead-logo {
+      width: ${this.logo.width}px;
+      height: ${this.logo.height}px;
+      object-fit: contain;
+    }
+    
+    .letterhead-footer {
+      text-align: center;
+      font-size: 12px;
+      color: ${styles.secondaryColor};
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid ${styles.secondaryColor};
+    }
+  `;
 };
 
-// Virtual for full recipient display
-letterheadSchema.virtual("recipientDisplay").get(function () {
-  let display = this.recipient.name;
-  if (this.recipient.designation) {
-    display += `, ${this.recipient.designation}`;
-  }
-  if (this.recipient.organization) {
-    display += ` (${this.recipient.organization})`;
-  }
-  return display;
-});
+// Method to generate HTML template
+letterheadSchema.methods.generateHTML = function () {
+  const logo =
+    this.layout.showLogo && this.logo.url
+      ? `<img src="${this.logo.url}" alt="Logo" class="letterhead-logo" style="float: ${this.logo.position}; margin-right: 20px;">`
+      : "";
 
-// Ensure virtuals are serialized
-letterheadSchema.set("toJSON", { virtuals: true });
+  const companyName = this.layout.showCompanyName
+    ? `<div class="company-name">${this.companyInfo.name}</div>`
+    : "";
+
+  const address = this.layout.showAddress
+    ? `<div class="company-address">${this.fullAddress}</div>`
+    : "";
+
+  const contact = this.layout.showContact
+    ? `<div class="company-contact">${this.contactInfo}</div>`
+    : "";
+
+  const registration =
+    this.layout.showRegistration && this.companyInfo.registration.gst
+      ? `<div class="company-contact">GST: ${this.companyInfo.registration.gst}</div>`
+      : "";
+
+  const footer = this.layout.showFooter
+    ? `<div class="letterhead-footer">${this.layout.footerText}</div>`
+    : "";
+
+  return `
+    <div class="letterhead-header">
+      ${logo}
+      <div>
+        ${companyName}
+        ${address}
+        ${contact}
+        ${registration}
+      </div>
+      <div style="clear: both;"></div>
+    </div>
+    <!-- Invoice content will be inserted here -->
+    ${footer}
+  `;
+};
+
+// Static method to get default letterhead for user
+letterheadSchema.statics.getDefaultForUser = function (userId) {
+  return this.findOne({
+    createdBy: userId,
+    isDefault: true,
+    isActive: true,
+  });
+};
+
+// Static method to get system default letterhead
+letterheadSchema.statics.getSystemDefault = function () {
+  return this.findOne({
+    isDefault: true,
+    isActive: true,
+  }).sort({ createdAt: 1 });
+};
 
 module.exports = mongoose.model("Letterhead", letterheadSchema);

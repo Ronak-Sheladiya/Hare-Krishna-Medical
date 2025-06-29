@@ -2,26 +2,22 @@ const mongoose = require("mongoose");
 
 const messageSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: [true, "Name is required"],
-      trim: true,
-      maxlength: [100, "Name cannot exceed 100 characters"],
+    sender: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
-    email: {
-      type: String,
-      required: [true, "Email is required"],
-      trim: true,
-      lowercase: true,
-      match: [
-        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
-        "Please enter a valid email",
-      ],
+    recipient: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
-    mobile: {
+    senderName: {
       type: String,
-      trim: true,
-      maxlength: [20, "Mobile number cannot exceed 20 characters"],
+      required: true,
+    },
+    senderEmail: {
+      type: String,
+      required: true,
     },
     subject: {
       type: String,
@@ -35,75 +31,107 @@ const messageSchema = new mongoose.Schema(
       trim: true,
       maxlength: [2000, "Message cannot exceed 2000 characters"],
     },
-    status: {
+    type: {
       type: String,
-      enum: ["unread", "read", "responded", "archived"],
-      default: "unread",
-    },
-    response: {
-      type: String,
-      trim: true,
-      maxlength: [2000, "Response cannot exceed 2000 characters"],
-    },
-    respondedAt: {
-      type: Date,
-    },
-    respondedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-    ipAddress: {
-      type: String,
-      trim: true,
-    },
-    userAgent: {
-      type: String,
-      trim: true,
+      enum: [
+        "inquiry",
+        "complaint",
+        "support",
+        "feedback",
+        "order_related",
+        "general",
+      ],
+      default: "general",
     },
     priority: {
       type: String,
-      enum: ["low", "normal", "high", "urgent"],
-      default: "normal",
+      enum: ["low", "medium", "high", "urgent"],
+      default: "medium",
     },
-    category: {
+    status: {
       type: String,
-      enum: [
-        "general",
-        "product_inquiry",
-        "order_issue",
-        "complaint",
-        "suggestion",
-        "technical_support",
-        "billing",
-        "other",
-      ],
-      default: "general",
+      enum: ["new", "read", "replied", "resolved", "closed"],
+      default: "new",
     },
     tags: [
       {
         type: String,
         trim: true,
+        lowercase: true,
       },
     ],
     attachments: [
       {
-        filename: String,
-        originalName: String,
-        mimetype: String,
-        size: Number,
-        url: String,
-        uploadedAt: {
-          type: Date,
-          default: Date.now,
-        },
+        filename: { type: String, required: true },
+        originalName: { type: String, required: true },
+        url: { type: String, required: true },
+        fileSize: { type: Number },
+        mimeType: { type: String },
       },
     ],
-    isDeleted: {
+    replies: [
+      {
+        sender: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        senderName: { type: String, required: true },
+        message: { type: String, required: true, maxlength: 2000 },
+        isAdmin: { type: Boolean, default: false },
+        attachments: [
+          {
+            filename: { type: String },
+            originalName: { type: String },
+            url: { type: String },
+            fileSize: { type: Number },
+            mimeType: { type: String },
+          },
+        ],
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
+    relatedOrder: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order",
+    },
+    relatedProduct: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+    },
+    assignedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    isRead: {
       type: Boolean,
       default: false,
     },
-    deletedAt: {
+    readAt: {
       type: Date,
+    },
+    readBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    isArchived: {
+      type: Boolean,
+      default: false,
+    },
+    archivedAt: {
+      type: Date,
+    },
+    resolvedAt: {
+      type: Date,
+    },
+    resolvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    customerSatisfaction: {
+      rating: { type: Number, min: 1, max: 5 },
+      feedback: { type: String, maxlength: 500 },
+      ratedAt: { type: Date },
     },
   },
   {
@@ -113,105 +141,240 @@ const messageSchema = new mongoose.Schema(
   },
 );
 
-// Indexes for better query performance
-messageSchema.index({ email: 1 });
-messageSchema.index({ status: 1 });
-messageSchema.index({ createdAt: -1 });
-messageSchema.index({ category: 1 });
-messageSchema.index({ priority: 1 });
-messageSchema.index({ isDeleted: 1 });
+// Virtuals
+messageSchema.virtual("isOverdue").get(function () {
+  if (this.status === "resolved" || this.status === "closed") return false;
 
-// Text index for search functionality
-messageSchema.index({
-  name: "text",
-  email: "text",
-  subject: "text",
-  message: "text",
-  response: "text",
+  // Consider messages overdue after 24 hours for urgent, 48 hours for high, 72 hours for others
+  const overdueHours = {
+    urgent: 24,
+    high: 48,
+    medium: 72,
+    low: 96,
+  };
+
+  const hours = overdueHours[this.priority] || 72;
+  const overdueTime = new Date(
+    this.createdAt.getTime() + hours * 60 * 60 * 1000,
+  );
+
+  return new Date() > overdueTime;
 });
 
-// Virtual for message age
-messageSchema.virtual("messageAge").get(function () {
-  return Date.now() - this.createdAt;
-});
-
-// Virtual for response time (if responded)
 messageSchema.virtual("responseTime").get(function () {
-  if (this.respondedAt && this.createdAt) {
-    return this.respondedAt - this.createdAt;
-  }
-  return null;
+  if (this.replies.length === 0) return null;
+
+  const firstReply = this.replies[0];
+  const timeDiff = firstReply.createdAt - this.createdAt;
+
+  return {
+    milliseconds: timeDiff,
+    hours: Math.floor(timeDiff / (1000 * 60 * 60)),
+    minutes: Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60)),
+  };
 });
 
-// Middleware to update respondedAt when status changes to responded
+messageSchema.virtual("totalReplies").get(function () {
+  return this.replies.length;
+});
+
+messageSchema.virtual("lastReply").get(function () {
+  return this.replies[this.replies.length - 1];
+});
+
+// Indexes
+messageSchema.index({ sender: 1, createdAt: -1 });
+messageSchema.index({ recipient: 1, createdAt: -1 });
+messageSchema.index({ status: 1 });
+messageSchema.index({ priority: 1 });
+messageSchema.index({ type: 1 });
+messageSchema.index({ isRead: 1 });
+messageSchema.index({ assignedTo: 1 });
+messageSchema.index({ createdAt: -1 });
+messageSchema.index({ subject: "text", message: "text" });
+
+// Pre-save middleware
 messageSchema.pre("save", function (next) {
+  // Set readAt when marking as read
+  if (this.isModified("isRead") && this.isRead && !this.readAt) {
+    this.readAt = new Date();
+  }
+
+  // Set resolvedAt when marking as resolved
   if (
     this.isModified("status") &&
-    this.status === "responded" &&
-    !this.respondedAt
+    this.status === "resolved" &&
+    !this.resolvedAt
   ) {
-    this.respondedAt = new Date();
+    this.resolvedAt = new Date();
   }
+
+  // Set archivedAt when archiving
+  if (this.isModified("isArchived") && this.isArchived && !this.archivedAt) {
+    this.archivedAt = new Date();
+  }
+
   next();
 });
 
-// Middleware to set deletedAt when isDeleted is set to true
-messageSchema.pre("save", function (next) {
-  if (this.isModified("isDeleted") && this.isDeleted && !this.deletedAt) {
-    this.deletedAt = new Date();
+// Method to mark as read
+messageSchema.methods.markAsRead = function (readBy = null) {
+  this.isRead = true;
+  this.readAt = new Date();
+  if (readBy) {
+    this.readBy = readBy;
   }
-  next();
-});
-
-// Static method to get unread count
-messageSchema.statics.getUnreadCount = function () {
-  return this.countDocuments({ status: "unread", isDeleted: false });
+  return this.save();
 };
 
-// Static method to get messages by status
-messageSchema.statics.getByStatus = function (status, options = {}) {
-  const query = { status, isDeleted: false };
-  return this.find(query, null, options).sort({ createdAt: -1 });
-};
-
-// Static method to search messages
-messageSchema.statics.searchMessages = function (searchTerm, options = {}) {
-  const query = {
-    $text: { $search: searchTerm },
-    isDeleted: false,
-  };
-  return this.find(query, { score: { $meta: "textScore" } }, options).sort({
-    score: { $meta: "textScore" },
-    createdAt: -1,
+// Method to add reply
+messageSchema.methods.addReply = function (
+  senderId,
+  senderName,
+  message,
+  isAdmin = false,
+  attachments = [],
+) {
+  this.replies.push({
+    sender: senderId,
+    senderName,
+    message,
+    isAdmin,
+    attachments,
+    createdAt: new Date(),
   });
-};
 
-// Instance method to mark as read
-messageSchema.methods.markAsRead = function () {
-  this.status = "read";
+  // Update status to replied if it was new or read
+  if (["new", "read"].includes(this.status)) {
+    this.status = "replied";
+  }
+
   return this.save();
 };
 
-// Instance method to archive
+// Method to resolve message
+messageSchema.methods.resolve = function (resolvedBy = null) {
+  this.status = "resolved";
+  this.resolvedAt = new Date();
+  if (resolvedBy) {
+    this.resolvedBy = resolvedBy;
+  }
+  return this.save();
+};
+
+// Method to close message
+messageSchema.methods.close = function () {
+  this.status = "closed";
+  return this.save();
+};
+
+// Method to assign to user
+messageSchema.methods.assignTo = function (userId) {
+  this.assignedTo = userId;
+  return this.save();
+};
+
+// Method to add satisfaction rating
+messageSchema.methods.addSatisfactionRating = function (rating, feedback = "") {
+  this.customerSatisfaction = {
+    rating,
+    feedback,
+    ratedAt: new Date(),
+  };
+  return this.save();
+};
+
+// Method to archive message
 messageSchema.methods.archive = function () {
-  this.status = "archived";
+  this.isArchived = true;
+  this.archivedAt = new Date();
   return this.save();
 };
 
-// Instance method to soft delete
-messageSchema.methods.softDelete = function () {
-  this.isDeleted = true;
-  this.deletedAt = new Date();
-  return this.save();
-};
+// Static method to get message statistics
+messageSchema.statics.getMessageStats = async function (startDate, endDate) {
+  const matchCondition = { isArchived: { $ne: true } };
 
-// Instance method to respond to message
-messageSchema.methods.respond = function (responseText, respondedBy) {
-  this.response = responseText;
-  this.status = "responded";
-  this.respondedAt = new Date();
-  this.respondedBy = respondedBy;
-  return this.save();
+  if (startDate && endDate) {
+    matchCondition.createdAt = {
+      $gte: new Date(startDate),
+      $lte: new Date(endDate),
+    };
+  }
+
+  const stats = await this.aggregate([
+    { $match: matchCondition },
+    {
+      $group: {
+        _id: null,
+        totalMessages: { $sum: 1 },
+        newMessages: {
+          $sum: { $cond: [{ $eq: ["$status", "new"] }, 1, 0] },
+        },
+        readMessages: {
+          $sum: { $cond: [{ $eq: ["$status", "read"] }, 1, 0] },
+        },
+        repliedMessages: {
+          $sum: { $cond: [{ $eq: ["$status", "replied"] }, 1, 0] },
+        },
+        resolvedMessages: {
+          $sum: { $cond: [{ $eq: ["$status", "resolved"] }, 1, 0] },
+        },
+        urgentMessages: {
+          $sum: { $cond: [{ $eq: ["$priority", "urgent"] }, 1, 0] },
+        },
+        highPriorityMessages: {
+          $sum: { $cond: [{ $eq: ["$priority", "high"] }, 1, 0] },
+        },
+      },
+    },
+  ]);
+
+  // Calculate average response time
+  const responseTimeStats = await this.aggregate([
+    { $match: { ...matchCondition, "replies.0": { $exists: true } } },
+    {
+      $project: {
+        responseTime: {
+          $subtract: [
+            { $arrayElemAt: ["$replies.createdAt", 0] },
+            "$createdAt",
+          ],
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        avgResponseTime: { $avg: "$responseTime" },
+        messagesWithResponse: { $sum: 1 },
+      },
+    },
+  ]);
+
+  const baseStats = stats[0] || {
+    totalMessages: 0,
+    newMessages: 0,
+    readMessages: 0,
+    repliedMessages: 0,
+    resolvedMessages: 0,
+    urgentMessages: 0,
+    highPriorityMessages: 0,
+  };
+
+  const responseStats = responseTimeStats[0] || {
+    avgResponseTime: 0,
+    messagesWithResponse: 0,
+  };
+
+  return {
+    ...baseStats,
+    ...responseStats,
+    avgResponseTimeHours: responseStats.avgResponseTime
+      ? Math.round((responseStats.avgResponseTime / (1000 * 60 * 60)) * 100) /
+        100
+      : 0,
+  };
 };
 
 module.exports = mongoose.model("Message", messageSchema);
