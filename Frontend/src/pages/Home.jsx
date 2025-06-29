@@ -576,6 +576,22 @@ const Home = () => {
         </Container>
       </section>
 
+      {/* Debug Section - CRUD & Real-time Tests */}
+      {process.env.NODE_ENV === "development" && (
+        <section
+          style={{
+            background: "#fff",
+            paddingTop: "40px",
+            paddingBottom: "40px",
+            borderTop: "1px solid #dee2e6",
+          }}
+        >
+          <Container>
+            <CRUDTest />
+          </Container>
+        </section>
+      )}
+
       {/* Why Choose Us Section */}
       <section
         className="section-padding"
