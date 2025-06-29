@@ -75,21 +75,22 @@ const Products = () => {
         ? productsData
         : productsData.products || [];
 
-      // If API returns empty results, use sample data
-      if (products.length === 0) {
-        console.log("🛒 API returned empty products, using sample data");
-        dispatch(setError("Database is empty - showing sample products"));
-        // Fall through to sample data loading below
-      } else {
-        dispatch(setProducts(products));
+      // Always use real data from API if available
+      dispatch(setProducts(products));
 
-        // Show offline mode indicator if applicable
-        if (data.offline) {
-          dispatch(setError("Working in offline mode - showing sample data"));
-        }
-        dispatch(setLoading(false));
-        return;
+      // Clear any previous errors if we got real data
+      if (products.length > 0) {
+        dispatch(setError(null));
+      } else {
+        dispatch(
+          setError(
+            "No products found in database. Please add products through admin panel.",
+          ),
+        );
       }
+
+      dispatch(setLoading(false));
+      return;
     }
 
     // Load sample data (for offline mode or empty database)
