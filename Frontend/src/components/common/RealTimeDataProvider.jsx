@@ -209,12 +209,19 @@ export const RealTimeDataProvider = ({ children }) => {
     };
   }, [user, token]);
 
-  // Force refresh function
-  const forceRefresh = () => {
-    console.log("🔄 Force refreshing dashboard data");
-    fetchDashboardStats();
-  };
+  // Force refresh data and reconnect socket
+  const forceRefresh = async () => {
+    console.log("🔄 Force refreshing dashboard data and reconnecting socket");
 
+    // Try to reconnect socket if disconnected
+    if (!isConnected && user && token) {
+      console.log("🔌 Attempting to reconnect socket...");
+      socketClient.forceReconnect(token, user.role);
+    }
+
+    await fetchDashboardStats();
+    setLastUpdate(new Date());
+  };
   // Update single stat
   const updateStat = (key, value) => {
     setLiveStats((prev) => ({
