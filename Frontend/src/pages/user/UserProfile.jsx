@@ -216,11 +216,20 @@ const UserProfile = () => {
       let response;
       try {
         // Try enhanced API first
-        response = await enhancedApi.put("/api/auth/update-profile", profileData);
+        response = await enhancedApi.put(
+          "/api/auth/update-profile",
+          profileData,
+        );
       } catch (enhancedError) {
-        console.warn("Enhanced API failed, trying production fallback:", enhancedError.message);
+        console.warn(
+          "Enhanced API failed, trying production fallback:",
+          enhancedError.message,
+        );
         // Fallback to production API
-        response = await productionApi.put("/api/auth/update-profile", profileData);
+        response = await productionApi.put(
+          "/api/auth/update-profile",
+          profileData,
+        );
       }
 
       // Handle successful response
@@ -232,8 +241,7 @@ const UserProfile = () => {
             mobile: personalInfo.mobile,
             dateOfBirth: personalInfo.dateOfBirth,
             profileImage: personalInfo.profileImage,
-          })
-        );
+          }),
         );
 
         // Trigger real-time sync event for other components
