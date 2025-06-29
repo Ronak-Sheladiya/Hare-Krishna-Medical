@@ -148,12 +148,12 @@ if (isDevelopment() || import.meta.env.VITE_DEBUG === "true") {
 // Always log basic config for debugging
 if (typeof window !== "undefined") {
   const hostname = window.location.hostname;
-  console.group("🔧 Frontend-Only App Configuration");
+  console.group("🔧 Full-Stack App Configuration");
   console.log(`🌐 App running on: ${hostname}`);
   console.log(`📍 Environment: ${getEnvironment()}`);
   console.log(`🏭 Production mode: ${isProduction()}`);
-  console.log(`🎨 Frontend-only mode: ENABLED`);
-  console.log(`📦 Backend: DISABLED`);
+  console.log(`🎨 Backend URL: ${getBackendURL()}`);
+  console.log(`📦 Backend: ENABLED`);
   console.groupEnd();
 }
 
