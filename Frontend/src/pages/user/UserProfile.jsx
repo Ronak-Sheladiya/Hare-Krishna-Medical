@@ -583,7 +583,6 @@ const UserProfile = () => {
             title="Profile Update Restrictions"
             message="Profile updates may not work in this preview environment due to network restrictions."
           />
-        <Container>
           {/* Alert */}
           {alert.show && (
             <Row className="mb-4">
