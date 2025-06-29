@@ -97,6 +97,15 @@ const AdminUsers = () => {
     setLoading(true);
     setError(null);
 
+    // Check if user is authenticated first
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    if (!token) {
+      setError("Please log in as an admin to access user management.");
+      setLoading(false);
+      return;
+    }
+
     const queryParams = new URLSearchParams({
       ...(searchTerm && { search: searchTerm }),
       ...(roleFilter && { role: roleFilter }),
@@ -111,7 +120,22 @@ const AdminUsers = () => {
     if (success && data?.data) {
       setUsers(data.data);
     } else {
-      setError(error || "Failed to fetch users");
+      // Handle specific error types
+      if (error?.includes("401")) {
+        setError("Authentication failed. Please log in as an admin.");
+      } else if (error?.includes("403")) {
+        setError("Access denied. Admin privileges required.");
+      } else if (error?.includes("Network error")) {
+        setError(
+          "Unable to connect to the backend server. Please check if it's running.",
+        );
+      } else if (error?.includes("timeout")) {
+        setError("Server is taking too long to respond. Please try again.");
+      } else {
+        setError(
+          error || "Failed to fetch users. Please try refreshing the page.",
+        );
+      }
     }
 
     setLoading(false);
