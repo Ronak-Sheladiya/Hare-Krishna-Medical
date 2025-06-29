@@ -1,23 +1,37 @@
 {
-  "name": "hare-krishna-medical-app",
+  "name": "hare-krishna-medical-store",
   "version": "1.0.0",
-  "description": "Medical store frontend application with React",
+  "description": "Medical store frontend and backend application",
+  "type": "module",
   "private": true,
   "scripts": {
-    "install:frontend": "cd Frontend && npm install --legacy-peer-deps",
+    "install:frontend": "cd Frontend && npm install",
     "install:backend": "cd Backend && npm install",
-    "install:all": "npm run install:backend && npm run install:frontend",
-    "dev": "cd Frontend && npm run dev",
+    "install:all": "npm run install:frontend && npm run install:backend",
+    "dev:frontend": "cd Frontend && npm run dev",
     "dev:backend": "cd Backend && npm run dev",
-    "dev:full": "concurrently \"npm run dev:backend\" \"npm run dev\"",
-    "build": "cd Frontend && npm run build",
-    "test": "cd Frontend && npm test",
-    "preview": "cd Frontend && npm run preview"
-  },
-  "engines": {
-    "node": ">=16.0.0"
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build:frontend": "cd Frontend && npm run build",
+    "build:backend": "cd Backend && npm run build",
+    "build": "npm run build:backend && npm run build:frontend",
+    "start:frontend": "cd Frontend && npm run preview",
+    "start:backend": "cd Backend && npm start",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "seed": "cd Backend && node scripts/seed.js"
   },
   "dependencies": {
-    "concurrently": "^9.2.0"
-  }
+    "concurrently": "^8.2.2"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "medical",
+    "pharmacy",
+    "react",
+    "nodejs",
+    "mongodb",
+    "ecommerce"
+  ],
+  "author": "Ronak Sheladiya",
+  "license": "MIT"
 }
