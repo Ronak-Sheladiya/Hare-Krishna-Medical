@@ -16,6 +16,7 @@ import {
   loginSuccess,
   loginFailure,
 } from "../store/slices/authSlice.js";
+import unifiedApi from "../utils/unifiedApiClient";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -96,65 +97,54 @@ const Login = () => {
     try {
       // Try backend API first
       try {
-        const response = await fetch("/api/auth/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: formData.emailOrMobile,
-            password: formData.password,
-          }),
+        const data = await unifiedApi.post("/api/auth/login", {
+          email: formData.emailOrMobile,
+          password: formData.password,
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          const { user, token } = data;
+        // If we get here, login was successful
+        const { user, token } = data;
 
-          // Store token
-          if (formData.rememberMe) {
-            localStorage.setItem("authToken", token);
-          } else {
-            sessionStorage.setItem("authToken", token);
-          }
-
-          dispatch(
-            loginSuccess({
-              user: {
-                ...user,
-                name: user.fullName, // Ensure compatibility
-              },
-              rememberMe: formData.rememberMe,
-            }),
-          );
-
-          // Handle redirect after login
-          const redirectUrl =
-            from ||
-            sessionStorage.getItem("redirectAfterLogin") ||
-            localStorage.getItem("lastAttemptedUrl");
-
-          // Clear stored redirect URLs
-          sessionStorage.removeItem("redirectAfterLogin");
-          localStorage.removeItem("lastAttemptedUrl");
-
-          if (
-            redirectUrl &&
-            redirectUrl !== "/login" &&
-            redirectUrl !== "/register" &&
-            redirectUrl !== "/access-denied"
-          ) {
-            navigate(redirectUrl, { replace: true });
-          } else {
-            const dashboardRoute =
-              user.role === 1 ? "/admin/dashboard" : "/user/dashboard";
-            navigate(dashboardRoute, { replace: true });
-          }
-          return;
+        // Store token
+        if (formData.rememberMe) {
+          localStorage.setItem("authToken", token);
         } else {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Login failed");
+          sessionStorage.setItem("authToken", token);
         }
+
+        dispatch(
+          loginSuccess({
+            user: {
+              ...user,
+              name: user.fullName, // Ensure compatibility
+            },
+            rememberMe: formData.rememberMe,
+          }),
+        );
+
+        // Handle redirect after login
+        const redirectUrl =
+          from ||
+          sessionStorage.getItem("redirectAfterLogin") ||
+          localStorage.getItem("lastAttemptedUrl");
+
+        // Clear stored redirect URLs
+        sessionStorage.removeItem("redirectAfterLogin");
+        localStorage.removeItem("lastAttemptedUrl");
+
+        if (
+          redirectUrl &&
+          redirectUrl !== "/login" &&
+          redirectUrl !== "/register" &&
+          redirectUrl !== "/access-denied"
+        ) {
+          navigate(redirectUrl, { replace: true });
+        } else {
+          const dashboardRoute =
+            user.role === 1 ? "/admin/dashboard" : "/user/dashboard";
+          navigate(dashboardRoute, { replace: true });
+        }
+        return;
       } catch (backendError) {
         console.log(
           "Backend not available, using demo mode:",

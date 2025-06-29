@@ -13,6 +13,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import sessionManager from "./utils/sessionManager";
 import socketClient from "./utils/socketClient";
 import invoiceService from "./services/InvoiceService";
+import "./utils/appInit"; // Initialize app for better connectivity handling
 
 // Components
 import Header from "./components/layout/Header";
@@ -35,6 +36,7 @@ import Order from "./pages/Order";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
+import LoginDebug from "./pages/LoginDebug";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -46,6 +48,7 @@ import InvoiceView from "./pages/InvoiceView";
 import InvoiceVerify from "./pages/InvoiceVerify";
 import UserGuide from "./pages/UserGuide";
 import BackendDocs from "./pages/BackendDocs";
+import BackendTest from "./pages/BackendTest";
 import LocalSetupGuide from "./pages/LocalSetupGuide";
 import VercelDeploymentGuide from "./pages/VercelDeploymentGuide";
 import OrderDetails from "./pages/OrderDetails";
@@ -206,6 +209,7 @@ function App() {
             />
             <Route path="/user-guide" element={<UserGuide />} />
             <Route path="/backend-docs" element={<BackendDocs />} />
+            <Route path="/backend-test" element={<BackendTest />} />
             <Route path="/localsetup-guide" element={<LocalSetupGuide />} />
             <Route
               path="/vercel-deployment"
@@ -219,6 +223,7 @@ function App() {
                 </AuthRoute>
               }
             />
+            <Route path="/login-debug" element={<LoginDebug />} />
             <Route
               path="/register"
               element={

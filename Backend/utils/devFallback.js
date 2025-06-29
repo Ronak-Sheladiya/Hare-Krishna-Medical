@@ -14,14 +14,60 @@ let devLetterheads = [];
 // Initialize with a default admin user
 const initializeDevData = async () => {
   if (devUsers.length === 0) {
-    const hashedPassword = await bcrypt.hash("admin123", 12);
+    const adminPassword1 = await bcrypt.hash("Ronak@95865", 12);
+    const adminPassword2 = await bcrypt.hash("admin@123", 12);
+    const userPassword = await bcrypt.hash("admin123", 12);
 
+    // Add frontend expected admin users
+    devUsers.push({
+      _id: "dev_admin_main",
+      fullName: "Admin",
+      email: "admin@gmail.com",
+      mobile: "+91 98765 43210",
+      password: adminPassword1,
+      role: 1, // Admin
+      isActive: true,
+      emailVerified: true,
+      address: "123 Admin Street, Medical City",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    devUsers.push({
+      _id: "dev_ronak_admin",
+      fullName: "Ronak Sheladiya",
+      email: "ronaksheladiya652@gmail.com",
+      mobile: "+91 98765 43211",
+      password: adminPassword2,
+      role: 1, // Admin
+      isActive: true,
+      emailVerified: true,
+      address: "123 Admin Street, Medical City",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    devUsers.push({
+      _id: "dev_mayur_admin",
+      fullName: "Mayur Gajera",
+      email: "mayurgajera098@gmail.com",
+      mobile: "+91 98765 43212",
+      password: adminPassword2,
+      role: 1, // Admin
+      isActive: true,
+      emailVerified: true,
+      address: "123 Admin Street, Medical City",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    // Original fallback users
     devUsers.push({
       _id: "dev_admin_user",
       fullName: "Admin User",
       email: "admin@harekrishnamedical.com",
-      mobile: "+91 98765 43210",
-      password: hashedPassword,
+      mobile: "+91 98765 43213",
+      password: userPassword,
       role: 1, // Admin
       isActive: true,
       emailVerified: true,
@@ -35,7 +81,7 @@ const initializeDevData = async () => {
       fullName: "Test User",
       email: "user@test.com",
       mobile: "+91 87654 32109",
-      password: hashedPassword,
+      password: userPassword,
       role: 0, // Regular user
       isActive: true,
       emailVerified: true,
@@ -45,8 +91,11 @@ const initializeDevData = async () => {
     });
 
     console.log("📝 Development fallback data initialized");
-    console.log("🔑 Admin Login: admin@harekrishnamedical.com / admin123");
-    console.log("🔑 User Login: user@test.com / admin123");
+    console.log("🔑 Main Admin: admin@gmail.com / Ronak@95865");
+    console.log("🔑 Ronak Admin: ronaksheladiya652@gmail.com / admin@123");
+    console.log("🔑 Mayur Admin: mayurgajera098@gmail.com / admin@123");
+    console.log("🔑 Fallback Admin: admin@harekrishnamedical.com / admin123");
+    console.log("🔑 Test User: user@test.com / admin123");
   }
 };
 
@@ -163,9 +212,21 @@ const devAuth = {
 
 // Check if we should use development fallback
 const shouldUseFallback = () => {
-  return (
-    process.env.NODE_ENV === "development" && global.DB_CONNECTED === false
-  );
+  // Use fallback if database is not connected, regardless of environment
+  const dbConnected = global.DB_CONNECTED !== false;
+  const mongoose = require("mongoose");
+  const isDBReady = mongoose.connection.readyState === 1;
+
+  const shouldUse = !dbConnected || !isDBReady;
+
+  if (shouldUse) {
+    console.log(
+      "🔄 Using development fallback - DB connection state:",
+      mongoose.connection.readyState,
+    );
+  }
+
+  return shouldUse;
 };
 
 module.exports = {

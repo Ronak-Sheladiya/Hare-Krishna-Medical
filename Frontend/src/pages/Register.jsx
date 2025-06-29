@@ -13,6 +13,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../store/slices/authSlice.js";
+import unifiedApi from "../utils/unifiedApiClient";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -131,37 +132,29 @@ const Register = () => {
     try {
       // Try backend API first, fallback to demo mode
       try {
-        const response = await fetch("/api/auth/register", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+        const data = await unifiedApi.post("/api/auth/register", {
+          fullName: formData.fullName,
+          email: formData.email,
+          mobile: formData.mobile,
+          password: formData.password,
+          address: {
+            street: "",
+            city: "",
+            state: "",
+            pincode: "",
           },
-          body: JSON.stringify({
-            fullName: formData.fullName,
-            email: formData.email,
-            mobile: formData.mobile,
-            password: formData.password,
-            address: {
-              street: "",
-              city: "",
-              state: "",
-              pincode: "",
-            },
-          }),
         });
 
-        const data = await response.json();
+        // If we get here, registration was successful
+        setShowOtpModal(true);
+        return;
+      } catch (error) {
+        // Handle API errors
+        console.log("Registration API error:", error.message);
 
-        if (response.ok) {
-          setShowOtpModal(true);
-          return;
-        } else if (
-          response.status === 400 &&
-          data.message &&
-          data.message.includes("already exists")
-        ) {
+        if (error.message && error.message.includes("already exists")) {
           // User already exists, redirect to login with prefilled email
-          const isEmailExists = data.message.includes("email");
+          const isEmailExists = error.message.includes("email");
           const message = isEmailExists
             ? "An account with this email already exists. Redirecting to login..."
             : "An account with this mobile number already exists. Please login instead.";
@@ -176,10 +169,9 @@ const Register = () => {
             navigate("/login");
           }, 1500);
           return;
-        } else {
-          throw new Error(data.message || "Registration failed");
         }
-      } catch (backendError) {
+
+        // For other errors, fall back to demo mode
         console.log("Backend not available, using demo mode");
       }
 

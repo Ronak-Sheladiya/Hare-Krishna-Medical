@@ -16,7 +16,8 @@ import {
 } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { updateUser } from "../../store/slices/authSlice";
-import { unifiedApi } from "../../utils/unifiedApiClient";
+import unifiedApi from "../../utils/unifiedApiClient";
+import smartApi from "../../utils/smartApiClient";
 import { showNetworkDebugInfo } from "../../utils/networkDebug";
 import {
   PageHeroSection,
@@ -24,6 +25,10 @@ import {
   ThemeButton,
   ThemeSection,
 } from "../../components/common/ConsistentTheme";
+import BackendStatusIndicator from "../../components/common/BackendStatusIndicator";
+import APIDiagnostic from "../../components/common/APIDiagnostic";
+import ModeIndicator from "../../components/common/ModeIndicator";
+import SimpleModeIndicator from "../../components/common/SimpleModeIndicator";
 
 const UserProfile = () => {
   const { user } = useSelector((state) => state.auth);
@@ -212,11 +217,8 @@ const UserProfile = () => {
         ...(profileImageFile && { profileImage: personalInfo.profileImage }),
       };
 
-      // Use unified API client for consistent connectivity
-      const result = await unifiedApi.put(
-        "/api/auth/update-profile",
-        profileData,
-      );
+      // Use smart API client with automatic fallback
+      const result = await smartApi.updateProfile(profileData);
 
       // Handle successful response
       if (result && result.success !== false) {
@@ -253,13 +255,27 @@ const UserProfile = () => {
       if (error.message === "Failed to fetch") {
         errorMessage =
           "Unable to connect to server. Please check your internet connection and try again.";
-      } else if (error.message.includes("timeout")) {
-        errorMessage = "Request timed out. Please try again.";
+      } else if (
+        error.message.includes("timeout") ||
+        error.message.includes("timed out")
+      ) {
+        errorMessage =
+          "⏱️ The server is taking longer than expected. This often happens when the server is starting up (common with free hosting). Please wait a moment and try again.";
+      } else if (
+        error.message.includes("server is starting up") ||
+        error.message.includes("longer than expected")
+      ) {
+        errorMessage = error.message; // Use the detailed message from our API client
       } else if (
         error.message.includes("401") ||
         error.message.includes("unauthorized")
       ) {
         errorMessage = "Session expired. Please log in again.";
+      } else if (
+        error.message.includes("500") ||
+        error.message.includes("Internal Server Error")
+      ) {
+        errorMessage = "Server error occurred. Please try again in a moment.";
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -398,7 +414,7 @@ const UserProfile = () => {
           errorDetails += `• API client: ${results.tests.apiClient?.error || "Failed"}\n`;
         }
         if (results.tests.auth?.success === false) {
-          errorDetails += `• Authentication: ${results.tests.auth?.error || "Failed"}\n`;
+          errorDetails += `��� Authentication: ${results.tests.auth?.error || "Failed"}\n`;
         }
 
         console.warn("Network connectivity issues:", errorDetails);
@@ -570,6 +586,37 @@ const UserProfile = () => {
                 </Alert>
               </Col>
             </Row>
+          )}
+
+          {/* Simple Mode Indicator */}
+          <Row className="mb-3">
+            <Col lg={12}>
+              <SimpleModeIndicator show={true} />
+            </Col>
+          </Row>
+
+          {/* Detailed Diagnostics (only show for non-fly.dev or when debug=true) */}
+          {(!window.location.hostname.includes("fly.dev") ||
+            window.location.search.includes("debug=true")) && (
+            <>
+              <Row className="mb-3">
+                <Col lg={12}>
+                  <ModeIndicator show={true} />
+                </Col>
+              </Row>
+
+              <Row className="mb-3">
+                <Col lg={12}>
+                  <BackendStatusIndicator show={true} />
+                </Col>
+              </Row>
+
+              <Row className="mb-3">
+                <Col lg={12}>
+                  <APIDiagnostic show={true} />
+                </Col>
+              </Row>
+            </>
           )}
 
           {/* Network Debug Section (Development/Testing Only) */}

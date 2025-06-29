@@ -47,10 +47,46 @@ app.set("io", io);
 // Middleware
 app.set("trust proxy", 1);
 app.use(helmet());
+// Enhanced CORS configuration to handle various deployment domains
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL?.split(",") || "*",
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, etc.)
+      if (!origin) return callback(null, true);
+
+      const allowedOrigins = process.env.FRONTEND_URL?.split(",") || [];
+
+      // Check for exact matches
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // Check for fly.dev subdomains
+      if (origin.endsWith(".fly.dev")) {
+        console.log(`✅ Allowing fly.dev subdomain: ${origin}`);
+        return callback(null, true);
+      }
+
+      // Check for localhost (development)
+      if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
+        console.log(`✅ Allowing localhost: ${origin}`);
+        return callback(null, true);
+      }
+
+      // Log rejected origins for debugging
+      console.log(`❌ CORS blocked origin: ${origin}`);
+      console.log(`📋 Allowed origins: ${allowedOrigins.join(", ")}`);
+
+      // Allow all origins in development (fallback)
+      if (process.env.NODE_ENV === "development") {
+        return callback(null, true);
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Accept"],
   }),
 );
 app.use(express.json({ limit: "10mb" }));
@@ -174,6 +210,7 @@ process.on("SIGINT", () => {
 const routes = [
   { path: "/api/test", file: testUserRoute, name: "Test" },
   { path: "/api/auth", file: "./routes/auth", name: "Auth" },
+  { path: "/api/debug-auth", file: "./routes/debug-auth", name: "Debug Auth" },
   { path: "/api/users", file: "./routes/users", name: "Users" },
   { path: "/api/products", file: "./routes/products", name: "Products" },
   { path: "/api/orders", file: "./routes/orders", name: "Orders" },

@@ -1,0 +1,176 @@
+import React, { useState, useEffect } from "react";
+import { Alert, Badge, Spinner } from "react-bootstrap";
+import unifiedApi from "../../utils/unifiedApiClient";
+import smartApi from "../../utils/smartApiClient";
+
+const BackendStatusIndicator = ({ show = true, onStatusChange = null }) => {
+  const [status, setStatus] = useState("checking"); // checking, online, offline, slow
+  const [lastCheck, setLastCheck] = useState(null);
+  const [responseTime, setResponseTime] = useState(null);
+
+  useEffect(() => {
+    if (show) {
+      checkBackendStatus();
+      // Check every 30 seconds
+      const interval = setInterval(checkBackendStatus, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [show]);
+
+  const checkBackendStatus = async () => {
+    if (!show) return;
+
+    const startTime = Date.now();
+    const hostname =
+      typeof window !== "undefined" ? window.location.hostname : "";
+
+    try {
+      // For fly.dev environments, use smart API client that has fallback logic
+      if (hostname.includes("fly.dev")) {
+        const apiStatus = smartApi.getStatus();
+        const responseTime = Date.now() - startTime;
+
+        setResponseTime(responseTime);
+        setLastCheck(new Date());
+
+        if (apiStatus.backendAvailable === true) {
+          setStatus("online");
+          if (onStatusChange) {
+            onStatusChange({ status: "online", responseTime });
+          }
+        } else if (apiStatus.fallbackAvailable) {
+          setStatus("slow"); // Show as slow when using fallback
+          if (onStatusChange) {
+            onStatusChange({ status: "fallback", responseTime });
+          }
+        } else {
+          setStatus("offline");
+          if (onStatusChange) {
+            onStatusChange({
+              status: "offline",
+              error: "No backend or fallback available",
+            });
+          }
+        }
+
+        console.log(`✅ Fly.dev status check: ${apiStatus.mode} mode`);
+        return;
+      }
+
+      // For other environments, try the health endpoint
+      try {
+        await unifiedApi.get("/api/health", { timeout: 5000, retries: 0 });
+        const responseTime = Date.now() - startTime;
+
+        setResponseTime(responseTime);
+        setLastCheck(new Date());
+
+        if (responseTime > 5000) {
+          setStatus("slow");
+        } else {
+          setStatus("online");
+        }
+
+        if (onStatusChange) {
+          onStatusChange({ status: "online", responseTime });
+        }
+
+        console.log(
+          `✅ Backend status check succeeded, response time: ${responseTime}ms`,
+        );
+      } catch (error) {
+        throw error; // Re-throw to be caught by outer catch
+      }
+    } catch (error) {
+      console.log("❌ Backend status check failed:", error.message);
+      setStatus("offline");
+      setLastCheck(new Date());
+
+      if (onStatusChange) {
+        onStatusChange({ status: "offline", error: error.message });
+      }
+    }
+  };
+  if (!show) return null;
+
+  const getStatusColor = () => {
+    switch (status) {
+      case "online":
+        return "success";
+      case "slow":
+        return "warning";
+      case "offline":
+        return "danger";
+      case "checking":
+        return "secondary";
+      default:
+        return "secondary";
+    }
+  };
+
+  const getStatusText = () => {
+    switch (status) {
+      case "online":
+        return responseTime ? `Online (${responseTime}ms)` : "Online";
+      case "slow":
+        return `Slow (${responseTime}ms)`;
+      case "offline":
+        return "Offline";
+      case "checking":
+        return "Checking...";
+      default:
+        return "Unknown";
+    }
+  };
+
+  const getStatusMessage = () => {
+    switch (status) {
+      case "online":
+        return null;
+      case "slow":
+        return (
+          <Alert variant="warning" className="mb-2">
+            <small>
+              ⚠️ The server is responding slowly. This is normal for free
+              hosting services that may need time to wake up. Your requests may
+              take longer than usual.
+            </small>
+          </Alert>
+        );
+      case "offline":
+        return (
+          <Alert variant="danger" className="mb-2">
+            <small>
+              ❌ Cannot connect to the server. This might be temporary. Please
+              check your internet connection or try again later.
+            </small>
+          </Alert>
+        );
+      case "checking":
+        return null;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="backend-status-indicator">
+      {getStatusMessage()}
+
+      <div className="d-flex align-items-center gap-2 mb-2">
+        <small className="text-muted">Backend Status:</small>
+        <Badge bg={getStatusColor()}>
+          {status === "checking" && <Spinner size="sm" className="me-1" />}
+          {getStatusText()}
+        </Badge>
+        {lastCheck && (
+          <small className="text-muted">
+            Last checked: {lastCheck.toLocaleTimeString()}
+          </small>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default BackendStatusIndicator;
