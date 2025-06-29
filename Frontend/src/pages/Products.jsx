@@ -93,8 +93,7 @@ const Products = () => {
     }
 
     // Load sample data (for offline mode or empty database)
-    {
-      // Provide sample data as fallback
+    // Provide sample data as fallback
       const sampleProducts = [
         {
           _id: "sample1",
