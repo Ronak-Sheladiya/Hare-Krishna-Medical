@@ -105,50 +105,46 @@ const Login = () => {
         // If we get here, login was successful
         const { user, token } = data;
 
-          // Store token
-          if (formData.rememberMe) {
-            localStorage.setItem("authToken", token);
-          } else {
-            sessionStorage.setItem("authToken", token);
-          }
-
-          dispatch(
-            loginSuccess({
-              user: {
-                ...user,
-                name: user.fullName, // Ensure compatibility
-              },
-              rememberMe: formData.rememberMe,
-            }),
-          );
-
-          // Handle redirect after login
-          const redirectUrl =
-            from ||
-            sessionStorage.getItem("redirectAfterLogin") ||
-            localStorage.getItem("lastAttemptedUrl");
-
-          // Clear stored redirect URLs
-          sessionStorage.removeItem("redirectAfterLogin");
-          localStorage.removeItem("lastAttemptedUrl");
-
-          if (
-            redirectUrl &&
-            redirectUrl !== "/login" &&
-            redirectUrl !== "/register" &&
-            redirectUrl !== "/access-denied"
-          ) {
-            navigate(redirectUrl, { replace: true });
-          } else {
-            const dashboardRoute =
-              user.role === 1 ? "/admin/dashboard" : "/user/dashboard";
-            navigate(dashboardRoute, { replace: true });
-          }
-          return;
+        // Store token
+        if (formData.rememberMe) {
+          localStorage.setItem("authToken", token);
         } else {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Login failed");
+          sessionStorage.setItem("authToken", token);
         }
+
+        dispatch(
+          loginSuccess({
+            user: {
+              ...user,
+              name: user.fullName, // Ensure compatibility
+            },
+            rememberMe: formData.rememberMe,
+          }),
+        );
+
+        // Handle redirect after login
+        const redirectUrl =
+          from ||
+          sessionStorage.getItem("redirectAfterLogin") ||
+          localStorage.getItem("lastAttemptedUrl");
+
+        // Clear stored redirect URLs
+        sessionStorage.removeItem("redirectAfterLogin");
+        localStorage.removeItem("lastAttemptedUrl");
+
+        if (
+          redirectUrl &&
+          redirectUrl !== "/login" &&
+          redirectUrl !== "/register" &&
+          redirectUrl !== "/access-denied"
+        ) {
+          navigate(redirectUrl, { replace: true });
+        } else {
+          const dashboardRoute =
+            user.role === 1 ? "/admin/dashboard" : "/user/dashboard";
+          navigate(dashboardRoute, { replace: true });
+        }
+        return;
       } catch (backendError) {
         console.log(
           "Backend not available, using demo mode:",
