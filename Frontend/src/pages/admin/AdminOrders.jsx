@@ -544,14 +544,30 @@ const AdminOrders = () => {
                 <div className="mb-3">
                   <span style={{ fontSize: "4rem" }}>📦</span>
                 </div>
-                <h5>No Orders Found</h5>
+                <h5>{error ? "Unable to Load Orders" : "No Orders Found"}</h5>
                 <p className="text-muted">
-                  {error
-                    ? "Unable to load orders. Please check your connection."
-                    : "No orders match your current filters."}
+                  {error ? error : "No orders match your current filters."}
                 </p>
                 {error && (
-                  <ThemeButton onClick={fetchOrders}>Try Again</ThemeButton>
+                  <div>
+                    <ThemeButton onClick={fetchOrders} className="me-2">
+                      <i className="bi bi-arrow-clockwise me-1"></i>
+                      Try Again
+                    </ThemeButton>
+                    {error.includes("log in") && (
+                      <div className="mt-3">
+                        <Link to="/login" className="btn btn-primary btn-sm">
+                          <i className="bi bi-box-arrow-in-right me-1"></i>
+                          Go to Login
+                        </Link>
+                        <div className="mt-2">
+                          <small className="text-muted">
+                            Use admin credentials to access order management
+                          </small>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             )}
