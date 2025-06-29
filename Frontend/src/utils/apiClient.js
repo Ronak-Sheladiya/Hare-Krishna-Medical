@@ -3,7 +3,7 @@ import { getBackendURL } from "./config.js";
 
 // Use consistent backend URL across the application
 const getApiBaseUrl = () => {
-  const url = "https://hare-krishna-medical.onrender.com";
+  const url = getBackendURL();
   console.log(`🔗 API Client using: ${url}`);
   return url;
 };

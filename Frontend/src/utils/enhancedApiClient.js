@@ -3,11 +3,11 @@ import { getBackendURL, isProduction } from "./config.js";
 
 // Use consistent backend URL across the application
 const getApiBaseUrl = () => {
-  const url = "https://hare-krishna-medical.onrender.com";
+  const url = getBackendURL();
   console.log(`🔗 Enhanced API Client using: ${url}`);
   return url;
 };
-const FALLBACK_BACKEND_URL = "https://hare-krishna-medical.onrender.com";
+const FALLBACK_BACKEND_URL = getBackendURL();
 
 /**
  * Make HTTP request with timeout
