@@ -27,6 +27,7 @@ import {
 } from "../../components/common/ConsistentTheme";
 import BackendStatusIndicator from "../../components/common/BackendStatusIndicator";
 import APIDiagnostic from "../../components/common/APIDiagnostic";
+import ModeIndicator from "../../components/common/ModeIndicator";
 
 const UserProfile = () => {
   const { user } = useSelector((state) => state.auth);
