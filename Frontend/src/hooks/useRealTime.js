@@ -30,8 +30,8 @@ export const useRealTime = () => {
   }, []);
 
   const emitEvent = (eventName, data) => {
-    if (socketClient && typeof socketClient.emitEvent === "function") {
-      socketClient.emitEvent(eventName, data);
+    if (socketClient && typeof socketClient.emit === "function") {
+      socketClient.emit(eventName, data);
     }
   };
 
