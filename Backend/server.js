@@ -28,6 +28,12 @@ const errorHandler = require("./middleware/errorHandler");
 // Import socket handlers
 const socketHandler = require("./utils/socketHandler");
 
+// Import database initialization
+const {
+  initializeDatabase,
+  checkDatabaseHealth,
+} = require("./scripts/initDatabase");
+
 const app = express();
 const server = createServer(app);
 
