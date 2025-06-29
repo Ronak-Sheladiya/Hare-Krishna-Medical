@@ -85,8 +85,9 @@ const medicineProducts = [
     expiryDate: new Date("2026-01-20"),
     batchNumber: "VD3-2024-004",
     featured: true,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1550572017-7bb9bbeb7bcc?w=500&h=300&fit=crop",
+    ],
   },
   {
     name: "Antiseptic Cream 30g",
