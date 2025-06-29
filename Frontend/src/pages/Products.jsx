@@ -75,107 +75,29 @@ const Products = () => {
         ? productsData
         : productsData.products || [];
 
-      // If API returns empty results, use sample data
-      if (products.length === 0) {
-        console.log("🛒 API returned empty products, using sample data");
-        dispatch(setError("Database is empty - showing sample products"));
-        // Fall through to sample data loading below
-      } else {
-        dispatch(setProducts(products));
+      // Always use real data from API if available
+      dispatch(setProducts(products));
 
-        // Show offline mode indicator if applicable
-        if (data.offline) {
-          dispatch(setError("Working in offline mode - showing sample data"));
-        }
-        dispatch(setLoading(false));
-        return;
+      // Clear any previous errors if we got real data
+      if (products.length > 0) {
+        dispatch(setError(null));
+      } else {
+        dispatch(
+          setError(
+            "No products found in database. Please add products through admin panel.",
+          ),
+        );
       }
+
+      dispatch(setLoading(false));
+      return;
     }
 
-    // Load sample data (for offline mode or empty database)
-    const sampleProducts = [
-      {
-        _id: "sample1",
-        name: "Paracetamol 500mg",
-        company: "Cipla",
-        price: 25.5,
-        originalPrice: 30.0,
-        discountPrice: 25.5,
-        stock: 150,
-        category: "Pain Relief",
-        description:
-          "Effective pain relief and fever reducer suitable for adults and children over 12 years.",
-        images: [
-          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5QYXJhY2V0YW1vbDwvdGV4dD48L3N2Zz4=",
-        ],
-      },
-      {
-        _id: "sample2",
-        name: "Vitamin D3 Tablets",
-        company: "Sun Pharma",
-        price: 180.0,
-        originalPrice: 200.0,
-        discountPrice: 180.0,
-        stock: 85,
-        category: "Vitamins",
-        description:
-          "Essential vitamin D3 supplement for bone health and immunity support.",
-        images: [
-          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmZlNTAwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM2NjY2NjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5WaXRhbWluIEQzPC90ZXh0Pjwvc3ZnPg==",
-        ],
-      },
-      {
-        _id: "sample3",
-        name: "Cough Syrup 100ml",
-        company: "Dabur",
-        price: 95.0,
-        originalPrice: 110.0,
-        discountPrice: 95.0,
-        stock: 65,
-        category: "Cough & Cold",
-        description:
-          "Natural ayurvedic cough syrup for dry and wet cough relief.",
-        images: [
-          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTc0YzNjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Q291Z2ggU3lydXA8L3RleHQ+PC9zdmc+",
-        ],
-      },
-      {
-        _id: "sample4",
-        name: "Digital Thermometer",
-        company: "Omron",
-        price: 280.0,
-        originalPrice: 320.0,
-        discountPrice: 280.0,
-        stock: 45,
-        category: "Medical Devices",
-        description:
-          "Accurate digital thermometer with fast reading and fever alarm.",
-        images: [
-          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMDA3YmZmIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+VGhlcm1vbWV0ZXI8L3RleHQ+PC9zdmc+",
-        ],
-      },
-      {
-        _id: "sample5",
-        name: "Multivitamin Capsules",
-        company: "Himalaya",
-        price: 350.0,
-        originalPrice: 380.0,
-        discountPrice: 350.0,
-        stock: 120,
-        category: "Supplements",
-        description:
-          "Complete multivitamin and mineral supplement for daily health support.",
-        images: [
-          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjhhNzQ1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+TXVsdGl2aXRhbWluPC90ZXh0Pjwvc3ZnPg==",
-        ],
-      },
-    ];
-
-    dispatch(setProducts(sampleProducts));
+    // If API call failed, show empty state with proper error message
+    dispatch(setProducts([]));
     dispatch(
       setError(
-        "Database is empty - showing sample products. " +
-          (apiError || "Please add products through admin panel."),
+        `Failed to load products from database: ${apiError || "Unknown error"}. Please try refreshing the page.`,
       ),
     );
 
@@ -191,36 +113,13 @@ const Products = () => {
 
     if (success && data) {
       const featuredData = data.data || data;
-      dispatch(setFeaturedProducts(featuredData));
+      const featured = Array.isArray(featuredData)
+        ? featuredData
+        : featuredData.products || [];
+      dispatch(setFeaturedProducts(featured));
     } else {
-      // Fallback featured products
-      const sampleFeatured = [
-        {
-          _id: "featured1",
-          name: "Paracetamol 500mg",
-          company: "Cipla",
-          price: 25.5,
-          discountPrice: 25.5,
-          stock: 150,
-          category: "Pain Relief",
-          images: [
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5QYXJhY2V0YW1vbDwvdGV4dD48L3N2Zz4=",
-          ],
-        },
-        {
-          _id: "featured2",
-          name: "First Aid Kit",
-          company: "Johnson & Johnson",
-          price: 450.0,
-          discountPrice: 450.0,
-          stock: 25,
-          category: "First Aid",
-          images: [
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGMzNTQ1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Rmlyc3QgQWlkPC90ZXh0Pjwvc3ZnPg==",
-          ],
-        },
-      ];
-      dispatch(setFeaturedProducts(sampleFeatured));
+      // No fallback - show empty featured products if API fails
+      dispatch(setFeaturedProducts([]));
     }
   };
 
