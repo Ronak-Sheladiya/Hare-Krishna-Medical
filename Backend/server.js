@@ -276,6 +276,76 @@ app.use("/api/*", (req, res) => {
   });
 });
 
+// Socket.IO Connection Handling
+io.on("connection", (socket) => {
+  console.log(`🔌 Socket connected: ${socket.id}`);
+
+  // Handle user authentication
+  const userToken = socket.handshake.auth.token;
+  const userRole = socket.handshake.auth.role;
+
+  if (userRole === 1 || userRole === "admin") {
+    socket.join("admin-room");
+    console.log(`👨‍💼 Admin joined admin-room: ${socket.id}`);
+  }
+
+  if (userToken) {
+    socket.join(`user-${userToken}`);
+    console.log(`👤 User joined personal room: ${socket.id}`);
+  }
+
+  // Handle admin room join
+  socket.on("join-admin-room", () => {
+    socket.join("admin-room");
+    console.log(`👨‍💼 Socket ${socket.id} joined admin-room`);
+  });
+
+  // Handle user room join
+  socket.on("join-user-room", (token) => {
+    socket.join(`user-${token}`);
+    console.log(`👤 Socket ${socket.id} joined user-${token} room`);
+  });
+
+  // Handle real-time order updates
+  socket.on("order-status-update", (data) => {
+    io.to("admin-room").emit("order-updated", data);
+    io.to(`user-${data.userId}`).emit("order-status-changed", data);
+  });
+
+  // Handle real-time message updates
+  socket.on("new-message", (data) => {
+    io.to("admin-room").emit("admin-new-message", data);
+  });
+
+  // Handle real-time notifications
+  socket.on("send-notification", (data) => {
+    if (data.target === "admin") {
+      io.to("admin-room").emit("admin_notification", data);
+    } else if (data.target === "user" && data.userId) {
+      io.to(`user-${data.userId}`).emit("user_notification", data);
+    } else {
+      io.emit("global_notification", data);
+    }
+  });
+
+  // Handle inventory updates
+  socket.on("inventory-update", (data) => {
+    io.emit("inventory-changed", data);
+  });
+
+  // Handle disconnection
+  socket.on("disconnect", (reason) => {
+    console.log(`❌ Socket disconnected: ${socket.id} - Reason: ${reason}`);
+  });
+
+  // Send connection confirmation
+  socket.emit("connection-confirmed", {
+    socketId: socket.id,
+    timestamp: new Date().toISOString(),
+    message: "Successfully connected to Hare Krishna Medical Store backend",
+  });
+});
+
 // Global Error Handler
 app.use((error, req, res, next) => {
   console.error(`❌ Server Error on ${req.method} ${req.originalUrl}:`, error);
