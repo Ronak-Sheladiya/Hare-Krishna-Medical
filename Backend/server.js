@@ -46,6 +46,7 @@ const io = new Server(server, {
     origin: process.env.FRONTEND_URL || [
       "http://localhost:3000",
       "http://localhost:5173",
+      /\.fly\.dev$/,
     ],
     methods: ["GET", "POST"],
     credentials: true,
