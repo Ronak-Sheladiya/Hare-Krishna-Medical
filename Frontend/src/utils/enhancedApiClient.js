@@ -87,8 +87,11 @@ const enhancedApiCall = async (endpoint, options = {}) => {
     console.warn("Could not access localStorage/sessionStorage for token");
   }
 
+  // Get current backend URL dynamically
+  const currentApiUrl = getApiBaseUrl();
+
   // Try primary backend first
-  const primaryUrl = `${API_BASE_URL}${endpoint}`;
+  const primaryUrl = `${currentApiUrl}${endpoint}`;
   console.log(`🌐 API Call: ${config.method || "GET"} ${primaryUrl}`);
 
   try {
