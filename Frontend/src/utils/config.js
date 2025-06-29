@@ -50,7 +50,8 @@ export const isDevelopment = () => {
  * Check if we're in a restricted network environment
  */
 export const isRestrictedEnvironment = () => {
-  const hostname = typeof window !== "undefined" ? window.location.hostname : "";
+  const hostname =
+    typeof window !== "undefined" ? window.location.hostname : "";
 
   // Known problematic environments where cross-origin requests fail
   return (
@@ -76,7 +77,9 @@ export const getBackendURL = () => {
   // Check if we're in production environment
   const isProd = isProduction();
   const isRestricted = isRestrictedEnvironment();
-  console.log(`🌍 Environment check: hostname=${hostname}, isProduction=${isProd}, isRestricted=${isRestricted}`);
+  console.log(
+    `🌍 Environment check: hostname=${hostname}, isProduction=${isProd}, isRestricted=${isRestricted}`,
+  );
 
   if (isProd) {
     const prodURL = "https://hare-krishna-medical.onrender.com";
@@ -85,7 +88,9 @@ export const getBackendURL = () => {
     );
 
     if (isRestricted) {
-      console.warn(`⚠️ Restricted network environment detected (${hostname}). API calls may fail due to CORS/network policies.`);
+      console.warn(
+        `⚠️ Restricted network environment detected (${hostname}). API calls may fail due to CORS/network policies.`,
+      );
     }
 
     return prodURL;
@@ -201,7 +206,8 @@ if (typeof window !== "undefined") {
   console.log(`🔗 Backend URL: ${getBackendURL()}`);
   console.log(`🔌 Socket URL: ${getSocketURL()}`);
   console.log(
-  console.log(`🔍 VITE_BACKEND_URL: ${import.meta.env.VITE_BACKEND_URL || 'Not set'}`);
+    `🔍 VITE_BACKEND_URL: ${import.meta.env.VITE_BACKEND_URL || "Not set"}`,
+  );
   console.log(`🔍 MODE: ${import.meta.env.MODE}`);
   console.log(`🔍 Restricted Environment: ${isRestrictedEnvironment()}`);
   console.groupEnd();
