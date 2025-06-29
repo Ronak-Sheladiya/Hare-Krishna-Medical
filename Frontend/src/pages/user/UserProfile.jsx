@@ -216,15 +216,8 @@ const UserProfile = () => {
         ...(profileImageFile && { profileImage: personalInfo.profileImage }),
       };
 
-      let response;
-      try {
-        // Try enhanced API first
-        response = await enhancedApi.put(
-          "/api/auth/update-profile",
-          profileData,
-        );
-      } catch (enhancedError) {
-        console.warn(
+      // Use the regular API client that works for user creation
+      const response = await api.put("/api/auth/update-profile", profileData);
           "Enhanced API failed, trying production fallback:",
           enhancedError.message,
         );
