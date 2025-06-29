@@ -100,14 +100,12 @@ export const getBackendURL = () => {
 };
 
 /**
- * Mock socket URL (for compatibility with existing code)
+ * Get Socket.IO URL based on environment
  * @returns {string}
  */
 export const getSocketURL = () => {
-  console.warn(
-    "🎨 Frontend-only mode: getSocketURL() called but no backend available",
-  );
-  return ""; // Return empty string since no backend exists
+  // Socket URL is the same as backend URL
+  return getBackendURL();
 };
 
 /**
