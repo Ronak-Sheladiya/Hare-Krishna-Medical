@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Alert, Badge, Spinner } from "react-bootstrap";
 import unifiedApi from "../../utils/unifiedApiClient";
+import smartApi from "../../utils/smartApiClient";
 
 const BackendStatusIndicator = ({ show = true, onStatusChange = null }) => {
   const [status, setStatus] = useState("checking"); // checking, online, offline, slow
