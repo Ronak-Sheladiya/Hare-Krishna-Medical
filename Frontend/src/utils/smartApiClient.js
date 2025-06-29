@@ -41,6 +41,16 @@ const checkBackendAvailability = async () => {
  * Smart API wrapper that chooses between backend and client-side
  */
 export const smartApi = {
+  // Initialize the smart API (checks backend on first load)
+  init: async () => {
+    console.log("🔧 Initializing Smart API Client...");
+    const isAvailable = await checkBackendAvailability();
+    console.log(
+      `🔧 Smart API initialized: Backend ${isAvailable ? "available" : "unavailable"}`,
+    );
+    return isAvailable;
+  },
+
   // Health check
   health: async () => {
     const isBackendAvailable = await checkBackendAvailability();
