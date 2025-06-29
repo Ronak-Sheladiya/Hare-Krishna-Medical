@@ -218,6 +218,12 @@ const socketClient = {
 
   // Emit event with fallback handling
   emit(event, data, callback) {
+    if (fallbackMode) {
+      // In fallback mode, just acknowledge the event without doing anything
+      if (callback) callback({ success: true, fallback: true });
+      return false;
+    }
+
     if (this.isConnected()) {
       socket.emit(event, data, callback);
       return true;
@@ -230,6 +236,11 @@ const socketClient = {
 
   // Listen to events
   on(event, callback) {
+    if (fallbackMode) {
+      // In fallback mode, don't set up event listeners
+      return;
+    }
+
     if (socket) {
       socket.on(event, callback);
     } else {
