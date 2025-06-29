@@ -1,7 +1,12 @@
 // API Client utility with proper error handling and timeout
 import { getBackendURL } from "./config.js";
 
-const API_BASE_URL = getBackendURL();
+// Use consistent backend URL across the application
+const getApiBaseUrl = () => {
+  const url = "https://hare-krishna-medical.onrender.com";
+  console.log(`🔗 API Client using: ${url}`);
+  return url;
+};
 
 // Store original fetch to avoid external interference
 const originalFetch = window.fetch.bind(window);
@@ -96,8 +101,9 @@ export const apiCall = async (endpoint, options = {}) => {
         }, config.timeout);
 
         let response;
+        const apiBaseUrl = getApiBaseUrl();
         try {
-          response = await originalFetch(`${API_BASE_URL}${endpoint}`, {
+          response = await originalFetch(`${apiBaseUrl}${endpoint}`, {
             ...config,
             signal: controller.signal,
           });
@@ -106,7 +112,7 @@ export const apiCall = async (endpoint, options = {}) => {
 
           // Try XMLHttpRequest fallback
           try {
-            response = await xhrFallback(`${API_BASE_URL}${endpoint}`, config);
+            response = await xhrFallback(`${apiBaseUrl}${endpoint}`, config);
             if (!response) {
               throw new Error("Both fetch and XHR failed");
             }
@@ -255,7 +261,7 @@ export const safeApiCall = async (apiFunction, fallbackValue = null) => {
   }
 };
 
-// Export API base URL for other components
-export { API_BASE_URL };
+// Export dynamic API base URL getter for other components
+export { getApiBaseUrl as API_BASE_URL };
 
 export default api;

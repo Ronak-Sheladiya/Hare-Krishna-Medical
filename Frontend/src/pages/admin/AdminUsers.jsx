@@ -22,6 +22,7 @@ import {
   StatsCard,
 } from "../../components/common/ConsistentTheme";
 import useRealTime from "../../hooks/useRealTime";
+import { Link } from "react-router-dom";
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -97,6 +98,15 @@ const AdminUsers = () => {
     setLoading(true);
     setError(null);
 
+    // Check if user is authenticated first
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    if (!token) {
+      setError("Please log in as an admin to access user management.");
+      setLoading(false);
+      return;
+    }
+
     const queryParams = new URLSearchParams({
       ...(searchTerm && { search: searchTerm }),
       ...(roleFilter && { role: roleFilter }),
@@ -111,20 +121,45 @@ const AdminUsers = () => {
     if (success && data?.data) {
       setUsers(data.data);
     } else {
-      setError(error || "Failed to fetch users");
+      // Handle specific error types
+      if (error?.includes("401")) {
+        setError("Authentication failed. Please log in as an admin.");
+      } else if (error?.includes("403")) {
+        setError("Access denied. Admin privileges required.");
+      } else if (error?.includes("Network error")) {
+        setError(
+          "Unable to connect to the backend server. Please check if it's running.",
+        );
+      } else if (error?.includes("timeout")) {
+        setError("Server is taking too long to respond. Please try again.");
+      } else {
+        setError(
+          error || "Failed to fetch users. Please try refreshing the page.",
+        );
+      }
     }
 
     setLoading(false);
   };
 
   const fetchUserStats = async () => {
-    const { success, data } = await safeApiCall(
+    // Check if user is authenticated first
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    if (!token) {
+      return; // Skip stats if not authenticated
+    }
+
+    const { success, data, error } = await safeApiCall(
       () => api.get("/api/users/admin/stats"),
       {},
     );
 
     if (success && data?.data) {
       setUserStats(data.data);
+    } else {
+      console.warn("Failed to fetch user stats:", error);
+      // Don't show error for stats, just log it
     }
   };
 
@@ -238,15 +273,31 @@ const AdminUsers = () => {
           {error && (
             <Row className="mb-4">
               <Col lg={12}>
-                <Alert variant="warning" className="d-flex align-items-center">
-                  <i className="bi bi-exclamation-triangle me-2"></i>
-                  {error}
+                <Alert variant="danger" className="d-flex align-items-center">
+                  <i className="bi bi-exclamation-triangle-fill me-3"></i>
+                  <div className="flex-grow-1">
+                    {error}
+                    {error.includes("log in") && (
+                      <div className="mt-2">
+                        <Link
+                          to="/login"
+                          className="btn btn-sm btn-primary me-2"
+                        >
+                          <i className="bi bi-box-arrow-in-right me-1"></i>
+                          Go to Login
+                        </Link>
+                        <small className="text-muted">
+                          Use admin credentials to access user management
+                        </small>
+                      </div>
+                    )}
+                  </div>
                   <ThemeButton
                     variant="outline"
                     size="sm"
-                    className="ms-auto"
                     onClick={refreshData}
                   >
+                    <i className="bi bi-arrow-clockwise me-1"></i>
                     Retry
                   </ThemeButton>
                 </Alert>

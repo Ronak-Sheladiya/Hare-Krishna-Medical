@@ -10,6 +10,8 @@ import {
   ThemeSection,
   StatsCard,
 } from "../components/common/ConsistentTheme";
+import { useUserRealTime } from "../hooks/useRealTime";
+import socketClient from "../utils/socketClient";
 
 const UserDashboard = () => {
   const { user } = useSelector((state) => state.auth);
@@ -72,8 +74,59 @@ const UserDashboard = () => {
     setLoading(false);
   };
 
+  // Add real-time hooks
+  const { orderUpdates, clearOrderUpdate } = useUserRealTime();
+
   useEffect(() => {
     fetchUserData();
+
+    // Setup socket real-time listeners for user-specific updates
+    if (socketClient && socketClient.on) {
+      // Listen for order status changes
+      socketClient.on("order-status-changed", (data) => {
+        console.log("🛍️ Order status changed:", data);
+        fetchUserData();
+      });
+
+      // Listen for user-specific notifications
+      socketClient.on("user_notification", (data) => {
+        console.log("🔔 User notification received:", data);
+        fetchUserData();
+      });
+
+      // Listen for inventory changes that might affect cart
+      socketClient.on("inventory-changed", (data) => {
+        console.log("📦 Inventory updated:", data);
+        // Update cart products count
+        try {
+          const cartItems = JSON.parse(
+            localStorage.getItem("cartItems") || "[]",
+          );
+          setUserStats((prev) => ({
+            ...prev,
+            cartProducts: cartItems.length,
+          }));
+        } catch (e) {
+          // Ignore localStorage errors
+        }
+      });
+    }
+
+    // Auto-refresh user data every 3 minutes
+    const autoRefreshInterval = setInterval(() => {
+      console.log("🔄 Auto-refreshing user dashboard data");
+      fetchUserData();
+    }, 180000); // 3 minutes
+
+    return () => {
+      // Clean up socket listeners
+      if (socketClient && socketClient.off) {
+        socketClient.off("order-status-changed");
+        socketClient.off("user_notification");
+        socketClient.off("inventory-changed");
+      }
+      clearInterval(autoRefreshInterval);
+    };
   }, []);
 
   const getStatusBadge = (status) => {

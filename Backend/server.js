@@ -17,7 +17,7 @@ console.log(
   `📧 Email User: ${process.env.EMAIL_USER ? "✅ Configured" : "❌ Missing"}`,
 );
 console.log(
-  `🌐 Primary Domain: ${process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app (default)"}`,
+  `�� Primary Domain: ${process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app (default)"}`,
 );
 
 const testUserRoute = require("./routes/testUser");
@@ -28,10 +28,19 @@ const server = http.createServer(app);
 // Socket.io Setup
 const io = socketIo(server, {
   cors: {
-    origin: process.env.FRONTEND_URL?.split(",") || "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: process.env.FRONTEND_URL?.split(",") || [
+      "http://localhost:5178",
+      "http://localhost:5173",
+      "*",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
   },
+  allowEIO3: true, // Support older Socket.IO versions
+  transports: ["polling", "websocket"],
+  pingTimeout: 60000,
+  pingInterval: 25000,
 });
 app.set("io", io);
 
@@ -276,6 +285,76 @@ app.use("/api/*", (req, res) => {
   });
 });
 
+// Socket.IO Connection Handling
+io.on("connection", (socket) => {
+  console.log(`🔌 Socket connected: ${socket.id}`);
+
+  // Handle user authentication
+  const userToken = socket.handshake.auth.token;
+  const userRole = socket.handshake.auth.role;
+
+  if (userRole === 1 || userRole === "admin") {
+    socket.join("admin-room");
+    console.log(`👨‍💼 Admin joined admin-room: ${socket.id}`);
+  }
+
+  if (userToken) {
+    socket.join(`user-${userToken}`);
+    console.log(`👤 User joined personal room: ${socket.id}`);
+  }
+
+  // Handle admin room join
+  socket.on("join-admin-room", () => {
+    socket.join("admin-room");
+    console.log(`👨‍💼 Socket ${socket.id} joined admin-room`);
+  });
+
+  // Handle user room join
+  socket.on("join-user-room", (token) => {
+    socket.join(`user-${token}`);
+    console.log(`👤 Socket ${socket.id} joined user-${token} room`);
+  });
+
+  // Handle real-time order updates
+  socket.on("order-status-update", (data) => {
+    io.to("admin-room").emit("order-updated", data);
+    io.to(`user-${data.userId}`).emit("order-status-changed", data);
+  });
+
+  // Handle real-time message updates
+  socket.on("new-message", (data) => {
+    io.to("admin-room").emit("admin-new-message", data);
+  });
+
+  // Handle real-time notifications
+  socket.on("send-notification", (data) => {
+    if (data.target === "admin") {
+      io.to("admin-room").emit("admin_notification", data);
+    } else if (data.target === "user" && data.userId) {
+      io.to(`user-${data.userId}`).emit("user_notification", data);
+    } else {
+      io.emit("global_notification", data);
+    }
+  });
+
+  // Handle inventory updates
+  socket.on("inventory-update", (data) => {
+    io.emit("inventory-changed", data);
+  });
+
+  // Handle disconnection
+  socket.on("disconnect", (reason) => {
+    console.log(`🔌 Socket disconnected: ${socket.id} - ${reason}`);
+  });
+
+  // Send connection confirmation
+  socket.emit("connection-confirmed", {
+    message: "Socket.IO connection established",
+    socketId: socket.id,
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Global Error Handler
 app.use((error, req, res, next) => {
   console.error(`❌ Server Error on ${req.method} ${req.originalUrl}:`, error);
@@ -308,9 +387,9 @@ app.use("*", (req, res) => {
 });
 
 // Start Server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001; // Use 5001 to avoid conflicts
 server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`��� Server running on port ${PORT}`);
   console.log(`🌐 Environment: ${process.env.NODE_ENV || "development"}`);
 });
 

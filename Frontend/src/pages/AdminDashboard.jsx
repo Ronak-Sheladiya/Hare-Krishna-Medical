@@ -19,32 +19,42 @@ import {
   StatsCard,
 } from "../components/common/ConsistentTheme";
 import ProfessionalLoading from "../components/common/ProfessionalLoading";
+import { useAdminRealTime } from "../hooks/useRealTime";
+import { useRealTimeData } from "../components/common/RealTimeDataProvider";
+import socketClient from "../utils/socketClient";
 
 const AdminDashboard = () => {
   const { unreadCount } = useSelector((state) => state.messages);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Real dashboard data state
-  const [dashboardStats, setDashboardStats] = useState({
-    totalOrders: 0,
-    totalProducts: 0,
-    totalUsers: 0,
-    totalRevenue: 0,
-    monthlyGrowth: 0,
-    pendingOrders: 0,
-    lowStockProducts: 0,
-    newUsersToday: 0,
-    unreadMessages: 0,
-  });
+  // Use real-time data provider
+  const { isConnected, fallbackMode, lastUpdate, liveStats, forceRefresh } =
+    useRealTimeData();
 
+  // Local state for additional data not in real-time provider
   const [recentOrders, setRecentOrders] = useState([]);
   const [lowStockProducts, setLowStockProducts] = useState([]);
+
+  // Merge real-time stats with unread messages
+  const dashboardStats = {
+    ...liveStats,
+    unreadMessages: unreadCount || 0,
+  };
 
   // Fetch dashboard data
   const fetchDashboardData = async () => {
     setLoading(true);
     setError(null);
+
+    // Check if user is authenticated first
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    if (!token) {
+      setError("Please log in as an admin to access the dashboard.");
+      setLoading(false);
+      return;
+    }
 
     // Fetch all required data using the safe API client
     const [statsResult, ordersResult, productsResult] = await Promise.all([
@@ -55,6 +65,28 @@ const AdminDashboard = () => {
       ),
       safeApiCall(() => api.get("/api/products?limit=10&stock=low"), []),
     ]);
+
+    // Check for authentication errors
+    const authErrors = [statsResult, ordersResult, productsResult].filter(
+      (result) => !result.success && result.error?.includes("401"),
+    );
+
+    if (authErrors.length > 0) {
+      setError("Authentication failed. Please log in as an admin.");
+      setLoading(false);
+      return;
+    }
+
+    // Check for authorization errors (403 - not admin)
+    const authzErrors = [statsResult, ordersResult, productsResult].filter(
+      (result) => !result.success && result.error?.includes("403"),
+    );
+
+    if (authzErrors.length > 0) {
+      setError("Access denied. Admin privileges required.");
+      setLoading(false);
+      return;
+    }
 
     // Process stats
     if (statsResult.success && statsResult.data?.data) {
@@ -88,62 +120,81 @@ const AdminDashboard = () => {
       !ordersResult.success &&
       !productsResult.success
     ) {
-      setError(
-        "Unable to load dashboard data. Please check if the backend server is running.",
-      );
+      // More specific error messages
+      const firstError =
+        statsResult.error || ordersResult.error || productsResult.error;
+      if (firstError?.includes("Network error")) {
+        setError(
+          "Unable to connect to the backend server. Please check if it's running.",
+        );
+      } else if (firstError?.includes("timeout")) {
+        setError("Server is taking too long to respond. Please try again.");
+      } else {
+        setError(
+          "Unable to load dashboard data. Please try refreshing the page.",
+        );
+      }
     }
 
     setLoading(false);
   };
 
+  // Add real-time hooks
+  const { notifications, clearNotification } = useAdminRealTime();
+
   useEffect(() => {
     fetchDashboardData();
 
-    // Setup real-time refresh listeners
-    const handleRefreshOrders = () => {
-      console.log("Refreshing dashboard due to order updates");
-      fetchDashboardData();
-    };
+    // Setup socket real-time listeners
+    if (socketClient && socketClient.on) {
+      // Listen for new orders
+      socketClient.on("admin_notification", (data) => {
+        console.log("🔔 Admin notification received:", data);
+        if (data.type === "order" || data.type === "new-order") {
+          fetchDashboardData();
+        }
+      });
 
-    const handleRefreshProducts = () => {
-      console.log("Refreshing dashboard due to product updates");
-      fetchDashboardData();
-    };
+      // Listen for new users
+      socketClient.on("new-user-registered", (data) => {
+        console.log("👤 New user registered:", data);
+        fetchDashboardData();
+      });
 
-    const handleRefreshAnalytics = () => {
-      console.log("Refreshing dashboard due to analytics updates");
-      fetchDashboardData();
-    };
+      // Listen for new messages
+      socketClient.on("new-message", (data) => {
+        console.log("💬 New message received:", data);
+        fetchDashboardData();
+      });
 
-    const handleRefreshDashboard = () => {
-      console.log("Refreshing dashboard due to general updates");
-      fetchDashboardData();
-    };
+      // Listen for inventory updates
+      socketClient.on("inventory-changed", (data) => {
+        console.log("📦 Inventory updated:", data);
+        fetchDashboardData();
+      });
 
-    const handleProfileUpdate = () => {
-      console.log("Refreshing dashboard due to profile updates");
-      fetchDashboardData();
-    };
+      // Listen for order status updates
+      socketClient.on("order-updated", (data) => {
+        console.log("🛍️ Order updated:", data);
+        fetchDashboardData();
+      });
+    }
 
-    // Add event listeners for real-time updates
-    window.addEventListener("refreshOrders", handleRefreshOrders);
-    window.addEventListener("refreshProducts", handleRefreshProducts);
-    window.addEventListener("refreshAnalytics", handleRefreshAnalytics);
-    window.addEventListener("refreshDashboard", handleRefreshDashboard);
-    window.addEventListener("profileUpdated", handleProfileUpdate);
-
-    // Auto-refresh dashboard every 30 seconds for live data
+    // Auto-refresh dashboard every 2 minutes for live data
     const autoRefreshInterval = setInterval(() => {
-      console.log("Auto-refreshing dashboard data");
+      console.log("🔄 Auto-refreshing dashboard data");
       fetchDashboardData();
-    }, 30000);
+    }, 120000); // 2 minutes
 
     return () => {
-      window.removeEventListener("refreshOrders", handleRefreshOrders);
-      window.removeEventListener("refreshProducts", handleRefreshProducts);
-      window.removeEventListener("refreshAnalytics", handleRefreshAnalytics);
-      window.removeEventListener("refreshDashboard", handleRefreshDashboard);
-      window.removeEventListener("profileUpdated", handleProfileUpdate);
+      // Clean up socket listeners
+      if (socketClient && socketClient.off) {
+        socketClient.off("admin_notification");
+        socketClient.off("new-user-registered");
+        socketClient.off("new-message");
+        socketClient.off("inventory-changed");
+        socketClient.off("order-updated");
+      }
       clearInterval(autoRefreshInterval);
     };
   }, [unreadCount]);
@@ -174,20 +225,91 @@ const AdminDashboard = () => {
         icon="bi-speedometer2"
       />
 
-      <ThemeSection background="#f8f9fa">
+      <ThemeSection>
         <Container>
-          {error && (
-            <Row className="mb-4">
-              <Col lg={12}>
-                <Alert variant="warning" className="d-flex align-items-center">
-                  <i className="bi bi-exclamation-triangle me-2"></i>
-                  {error}
-                  <ThemeButton
-                    variant="outline"
-                    size="sm"
-                    className="ms-auto"
-                    onClick={fetchDashboardData}
+          {/* Real-time Status Bar */}
+          <Row className="mb-4">
+            <Col lg={12}>
+              <div
+                style={{
+                  background: isConnected
+                    ? "linear-gradient(135deg, #28a745, #20c997)"
+                    : fallbackMode
+                      ? "linear-gradient(135deg, #ffc107, #fd7e14)"
+                      : "linear-gradient(135deg, #dc3545, #e63946)",
+                  borderRadius: "8px",
+                  padding: "12px 20px",
+                  color: "white",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                }}
+              >
+                <div>
+                  <i
+                    className={`bi ${
+                      isConnected
+                        ? "bi-wifi"
+                        : fallbackMode
+                          ? "bi-arrow-clockwise"
+                          : "bi-wifi-off"
+                    } me-2`}
+                  ></i>
+                  {isConnected
+                    ? "Real-time data connected"
+                    : fallbackMode
+                      ? "Manual refresh mode (Production)"
+                      : "Real-time data disconnected"}
+                </div>
+                <div className="d-flex align-items-center gap-3">
+                  <span>Last update: {lastUpdate.toLocaleTimeString()}</span>
+                  <button
+                    onClick={forceRefresh}
+                    style={{
+                      background: "rgba(255,255,255,0.2)",
+                      border: "1px solid rgba(255,255,255,0.3)",
+                      borderRadius: "4px",
+                      color: "white",
+                      padding: "4px 8px",
+                      fontSize: "12px",
+                      cursor: "pointer",
+                    }}
                   >
+                    <i className="bi bi-arrow-clockwise me-1"></i>
+                    Refresh
+                  </button>
+                </div>
+              </div>
+            </Col>
+          </Row>
+
+          {/* Error State */}
+          {error && !loading && (
+            <Row>
+              <Col lg={12}>
+                <Alert variant="danger" className="d-flex align-items-center">
+                  <i className="bi bi-exclamation-triangle-fill me-3"></i>
+                  <div className="flex-grow-1">
+                    {error}
+                    {error.includes("log in") && (
+                      <div className="mt-2">
+                        <Link
+                          to="/login"
+                          className="btn btn-sm btn-primary me-2"
+                        >
+                          <i className="bi bi-box-arrow-in-right me-1"></i>
+                          Go to Login
+                        </Link>
+                        <small className="text-muted">
+                          Use admin credentials to access the dashboard
+                        </small>
+                      </div>
+                    )}
+                  </div>
+                  <ThemeButton onClick={fetchDashboardData} size="sm">
+                    <i className="bi bi-arrow-clockwise me-1"></i>
                     Retry
                   </ThemeButton>
                 </Alert>

@@ -27,7 +27,7 @@ const ForgotPassword = () => {
 
     try {
       // Call forgot password API
-      const response = await api.post("/auth/forgot-password", { email });
+      const response = await api.post("/api/auth/forgot-password", { email });
 
       if (response.success === false) {
         throw new Error(

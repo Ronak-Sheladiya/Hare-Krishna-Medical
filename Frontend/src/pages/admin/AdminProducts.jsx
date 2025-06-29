@@ -116,6 +116,15 @@ const AdminProducts = () => {
     setLoading(true);
     setError(null);
 
+    // Check if user is authenticated first
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    if (!token) {
+      setError("Please log in as an admin to access product management.");
+      setLoading(false);
+      return;
+    }
+
     const {
       success,
       data,
@@ -138,7 +147,23 @@ const AdminProducts = () => {
         Math.ceil((data.data.total || productsData.length) / productsPerPage),
       );
     } else {
-      setError(apiError || "Failed to fetch products");
+      // Handle specific error types
+      if (apiError?.includes("401")) {
+        setError("Authentication failed. Please log in as an admin.");
+      } else if (apiError?.includes("403")) {
+        setError("Access denied. Admin privileges required.");
+      } else if (apiError?.includes("Network error")) {
+        setError(
+          "Unable to connect to the backend server. Please check if it's running.",
+        );
+      } else if (apiError?.includes("timeout")) {
+        setError("Server is taking too long to respond. Please try again.");
+      } else {
+        setError(
+          apiError ||
+            "Failed to fetch products. Please try refreshing the page.",
+        );
+      }
       setProducts([]);
     }
 
@@ -450,9 +475,34 @@ const AdminProducts = () => {
                   variant="danger"
                   dismissible
                   onClose={() => setError(null)}
+                  className="d-flex align-items-center"
                 >
-                  <i className="bi bi-exclamation-triangle me-2"></i>
-                  {error}
+                  <i className="bi bi-exclamation-triangle-fill me-3"></i>
+                  <div className="flex-grow-1">
+                    {error}
+                    {error.includes("log in") && (
+                      <div className="mt-2">
+                        <Link
+                          to="/login"
+                          className="btn btn-sm btn-primary me-2"
+                        >
+                          <i className="bi bi-box-arrow-in-right me-1"></i>
+                          Go to Login
+                        </Link>
+                        <small className="text-muted">
+                          Use admin credentials to access product management
+                        </small>
+                      </div>
+                    )}
+                  </div>
+                  <ThemeButton
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchProducts()}
+                  >
+                    <i className="bi bi-arrow-clockwise me-1"></i>
+                    Retry
+                  </ThemeButton>
                 </Alert>
               </Col>
             </Row>

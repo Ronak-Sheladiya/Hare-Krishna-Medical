@@ -1,7 +1,12 @@
 // Enhanced API client with better error handling and fallback mechanisms
 import { getBackendURL, isProduction } from "./config.js";
 
-const API_BASE_URL = getBackendURL();
+// Use consistent backend URL across the application
+const getApiBaseUrl = () => {
+  const url = "https://hare-krishna-medical.onrender.com";
+  console.log(`🔗 Enhanced API Client using: ${url}`);
+  return url;
+};
 const FALLBACK_BACKEND_URL = "https://hare-krishna-medical.onrender.com";
 
 /**
@@ -56,7 +61,31 @@ const handleResponse = async (response) => {
 };
 
 /**
- * Enhanced API call with comprehensive error handling and fallback
+ * Test if backend is accessible
+ */
+const testBackendConnectivity = async (baseUrl) => {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    const response = await fetch(`${baseUrl}/api/health`, {
+      method: "GET",
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+    return response.ok;
+  } catch (error) {
+    console.warn(
+      `Backend connectivity test failed for ${baseUrl}:`,
+      error.message,
+    );
+    return false;
+  }
+};
+
+/**
+ * Enhanced API call with automatic fallback and comprehensive error handling
  */
 const enhancedApiCall = async (endpoint, options = {}) => {
   const config = {
@@ -82,8 +111,44 @@ const enhancedApiCall = async (endpoint, options = {}) => {
     console.warn("Could not access localStorage/sessionStorage for token");
   }
 
+  // Get current backend URL dynamically
+  const currentApiUrl = getApiBaseUrl();
+
+  // In production, test connectivity first
+  if (isProduction()) {
+    console.log("🔍 Testing backend connectivity in production...");
+    const isConnectable = await testBackendConnectivity(currentApiUrl);
+    if (!isConnectable && currentApiUrl !== FALLBACK_BACKEND_URL) {
+      console.warn("⚠️ Primary backend not accessible, trying fallback...");
+      const fallbackConnectable =
+        await testBackendConnectivity(FALLBACK_BACKEND_URL);
+      if (fallbackConnectable) {
+        // Use fallback backend
+        const fallbackUrl = `${FALLBACK_BACKEND_URL}${endpoint}`;
+        console.log(`🔄 Using fallback backend: ${fallbackUrl}`);
+        try {
+          const response = await makeRequest(fallbackUrl, config);
+          return await handleResponse(response);
+        } catch (fallbackError) {
+          console.error("❌ Fallback backend also failed:", fallbackError);
+          throw new Error(
+            "Backend services are currently unavailable. Please try again later.",
+          );
+        }
+      } else {
+        throw new Error(
+          "Backend services are currently unavailable. Please try again later.",
+        );
+      }
+    } else if (!isConnectable) {
+      throw new Error(
+        "Backend service is currently unavailable. Please try again later.",
+      );
+    }
+  }
+
   // Try primary backend first
-  const primaryUrl = `${API_BASE_URL}${endpoint}`;
+  const primaryUrl = `${currentApiUrl}${endpoint}`;
   console.log(`🌐 API Call: ${config.method || "GET"} ${primaryUrl}`);
 
   try {
@@ -95,7 +160,7 @@ const enhancedApiCall = async (endpoint, options = {}) => {
 
     // Try fallback backend if primary fails and we're in production or have connection issues
     if (
-      API_BASE_URL !== FALLBACK_BACKEND_URL &&
+      currentApiUrl !== FALLBACK_BACKEND_URL &&
       (isProduction() || primaryError.message.includes("Failed to fetch"))
     ) {
       const fallbackUrl = `${FALLBACK_BACKEND_URL}${endpoint}`;
@@ -124,9 +189,15 @@ const enhancedApiCall = async (endpoint, options = {}) => {
 
     if (primaryError.message === "Failed to fetch") {
       // Network connectivity issue
-      throw new Error(
-        "Unable to connect to server. Please check your internet connection.",
-      );
+      if (isProduction()) {
+        throw new Error(
+          "Service temporarily unavailable. Our team has been notified. Please try again in a few minutes.",
+        );
+      } else {
+        throw new Error(
+          "Unable to connect to server. Please check your internet connection.",
+        );
+      }
     }
 
     if (primaryError.message.includes("401")) {

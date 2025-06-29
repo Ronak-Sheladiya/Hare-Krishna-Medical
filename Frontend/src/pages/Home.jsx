@@ -15,6 +15,7 @@ import { addToCart } from "../store/slices/cartSlice";
 import { setFeaturedProducts } from "../store/slices/productsSlice";
 import { api, safeApiCall } from "../utils/apiClient";
 import QRCameraScanner from "../components/common/QRCameraScanner";
+import CRUDTest from "../components/common/CRUDTest";
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -574,6 +575,22 @@ const Home = () => {
           </Row>
         </Container>
       </section>
+
+      {/* Debug Section - CRUD & Real-time Tests */}
+      {process.env.NODE_ENV === "development" && (
+        <section
+          style={{
+            background: "#fff",
+            paddingTop: "40px",
+            paddingBottom: "40px",
+            borderTop: "1px solid #dee2e6",
+          }}
+        >
+          <Container>
+            <CRUDTest />
+          </Container>
+        </section>
+      )}
 
       {/* Why Choose Us Section */}
       <section

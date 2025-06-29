@@ -24,6 +24,7 @@ import RealTimeStatus from "./components/common/RealTimeStatus";
 import CrossTabCartSync from "./components/common/CrossTabCartSync";
 import SecurityLayer from "./components/common/SecurityLayer";
 import SocketDiagnostic from "./components/common/SocketDiagnostic";
+import RealTimeDataProvider from "./components/common/RealTimeDataProvider";
 
 // Pages
 import Home from "./pages/Home";
@@ -210,7 +211,6 @@ function App() {
               path="/vercel-deployment"
               element={<VercelDeploymentGuide />}
             />
-
             <Route
               path="/login"
               element={
@@ -243,15 +243,35 @@ function App() {
                 </AuthRoute>
               }
             />
-
             <Route path="/access-denied" element={<AccessDenied />} />
-
             {/* Admin Routes */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute adminOnly>
+                  <RealTimeDataProvider>
+                    <AdminDashboard />
+                  </RealTimeDataProvider>
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/admin/dashboard"
               element={
                 <ProtectedRoute adminOnly>
-                  <AdminDashboard />
+                  <RealTimeDataProvider>
+                    <AdminDashboard />
+                  </RealTimeDataProvider>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/user"
+              element={
+                <ProtectedRoute userOnly>
+                  <RealTimeDataProvider>
+                    <UserDashboard />
+                  </RealTimeDataProvider>
                 </ProtectedRoute>
               }
             />
@@ -311,7 +331,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path="/admin/profile"
               element={
@@ -352,7 +371,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             {/* User Routes */}
             <Route
               path="/user/dashboard"
@@ -386,7 +404,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             {/* Debug Routes */}
             <Route
               path="/navigation-test"
@@ -461,7 +478,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

@@ -16,9 +16,7 @@ import {
 } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { updateUser } from "../../store/slices/authSlice";
-import { api } from "../../utils/apiClient";
-import { enhancedApi } from "../../utils/enhancedApiClient";
-import { getBackendURL } from "../../utils/config";
+import { unifiedApi } from "../../utils/unifiedApiClient";
 import { showNetworkDebugInfo } from "../../utils/networkDebug";
 import {
   PageHeroSection,
@@ -193,35 +191,41 @@ const UserProfile = () => {
     e.preventDefault();
     setLoading(true);
 
+    // Since user creation works, let's try profile updates too
+
     try {
       // Prepare profile data for API
       const profileData = {
         fullName: personalInfo.fullName,
-        mobile: personalInfo.mobile,
+        email: personalInfo.email,
+        phone: personalInfo.phone,
+        address: personalInfo.address,
+        city: personalInfo.city,
+        pincode: personalInfo.pincode,
+        state: personalInfo.state,
+        country: personalInfo.country,
+        emergencyContact: personalInfo.emergencyContact,
         dateOfBirth: personalInfo.dateOfBirth,
         gender: personalInfo.gender,
-        profileImage: personalInfo.profileImage,
+        maritalStatus: personalInfo.maritalStatus,
+        occupation: personalInfo.occupation,
+        ...(profileImageFile && { profileImage: personalInfo.profileImage }),
       };
 
-      console.log("🔄 Attempting to update profile with data:", profileData);
-
-      // Make actual API call to update profile using enhanced client
-      const result = await enhancedApi.put(
+      // Use unified API client for consistent connectivity
+      const result = await unifiedApi.put(
         "/api/auth/update-profile",
         profileData,
       );
 
-      console.log("📊 Profile update API response:", result);
-
+      // Handle successful response
       if (result && result.success !== false) {
-        // Update Redux store with new user data
         dispatch(
           updateUser({
             name: personalInfo.fullName,
             fullName: personalInfo.fullName,
             mobile: personalInfo.mobile,
             dateOfBirth: personalInfo.dateOfBirth,
-            gender: personalInfo.gender,
             profileImage: personalInfo.profileImage,
           }),
         );
@@ -273,8 +277,8 @@ const UserProfile = () => {
     try {
       console.log("🔄 Attempting to update address with data:", addressInfo);
 
-      // Make actual API call to update address using enhanced client
-      const result = await enhancedApi.put("/api/auth/update-profile", {
+      // Make actual API call to update address using unified client
+      const result = await unifiedApi.put("/api/auth/update-profile", {
         address: addressInfo,
       });
 
@@ -344,8 +348,8 @@ const UserProfile = () => {
     setLoading(true);
 
     try {
-      // Make actual API call to change password using enhanced client
-      const result = await enhancedApi.put("/api/auth/change-password", {
+      // Make actual API call to change password using unified client
+      const result = await unifiedApi.put("/api/auth/change-password", {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       });
@@ -439,7 +443,7 @@ const UserProfile = () => {
 
     try {
       console.log(`🔄 Sending OTP to: ${personalInfo.email}`);
-      const result = await enhancedApi.post("/api/auth/resend-otp", {
+      const result = await unifiedApi.post("/api/auth/resend-otp", {
         email: personalInfo.email,
       });
 
@@ -491,7 +495,7 @@ const UserProfile = () => {
     setLoading(true);
 
     try {
-      const result = await enhancedApi.post("/api/auth/verify-otp", {
+      const result = await unifiedApi.post("/api/auth/verify-otp", {
         email: personalInfo.email,
         otp: emailVerification.otp,
       });
@@ -543,10 +547,9 @@ const UserProfile = () => {
 
   return (
     <div className="fade-in">
-      {/* Hero Section */}
       <PageHeroSection
-        title={`Welcome, ${personalInfo.fullName || user?.name || "User"}!`}
-        subtitle="Manage your profile information and account settings"
+        title="User Profile"
+        subtitle="Manage your personal information and account settings"
         icon="bi-person-circle"
       />
 

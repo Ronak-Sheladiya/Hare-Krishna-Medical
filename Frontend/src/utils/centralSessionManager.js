@@ -236,6 +236,17 @@ class CentralSessionManager {
     }
   }
 
+  handleLoginTimeChange(newValue) {
+    // Handle login time changes across tabs
+    if (newValue && newValue !== null) {
+      const currentState = store.getState().auth;
+      if (currentState.isAuthenticated) {
+        console.log("🕒 [HK Medical] Login time updated across tabs");
+        // Optionally trigger session validation or refresh
+      }
+    }
+  }
+
   handleSessionEvent(eventData) {
     if (!eventData) return;
 

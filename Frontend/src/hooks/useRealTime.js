@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
-// Use simple socket client until socket.io-client is installed
-import socketClient from "../utils/socketClient.simple";
+// Use the proper socket client
+import socketClient from "../utils/socketClient";
 
 export const useRealTime = () => {
   const { user, token } = useSelector((state) => state.auth);
@@ -30,8 +30,8 @@ export const useRealTime = () => {
   }, []);
 
   const emitEvent = (eventName, data) => {
-    if (socketClient && typeof socketClient.emitEvent === "function") {
-      socketClient.emitEvent(eventName, data);
+    if (socketClient && typeof socketClient.emit === "function") {
+      socketClient.emit(eventName, data);
     }
   };
 

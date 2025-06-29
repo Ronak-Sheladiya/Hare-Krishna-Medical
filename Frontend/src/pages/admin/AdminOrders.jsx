@@ -14,7 +14,7 @@ import {
   Alert,
   Dropdown,
 } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import OfficialInvoiceDesign from "../../components/common/OfficialInvoiceDesign.jsx";
 import {
   viewInvoice,
@@ -50,6 +50,15 @@ const AdminOrders = () => {
     setLoading(true);
     setError(null);
 
+    // Check if user is authenticated first
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    if (!token) {
+      setError("Please log in as an admin to access order management.");
+      setLoading(false);
+      return;
+    }
+
     const {
       success,
       data,
@@ -61,7 +70,22 @@ const AdminOrders = () => {
       setOrders(ordersData);
       setFilteredOrders(ordersData);
     } else {
-      setError(apiError || "Failed to load orders");
+      // Handle specific error types
+      if (apiError?.includes("401")) {
+        setError("Authentication failed. Please log in as an admin.");
+      } else if (apiError?.includes("403")) {
+        setError("Access denied. Admin privileges required.");
+      } else if (apiError?.includes("Network error")) {
+        setError(
+          "Unable to connect to the backend server. Please check if it's running.",
+        );
+      } else if (apiError?.includes("timeout")) {
+        setError("Server is taking too long to respond. Please try again.");
+      } else {
+        setError(
+          apiError || "Failed to load orders. Please try refreshing the page.",
+        );
+      }
       // Keep empty state for offline mode
       setOrders([]);
       setFilteredOrders([]);
@@ -520,14 +544,30 @@ const AdminOrders = () => {
                 <div className="mb-3">
                   <span style={{ fontSize: "4rem" }}>📦</span>
                 </div>
-                <h5>No Orders Found</h5>
+                <h5>{error ? "Unable to Load Orders" : "No Orders Found"}</h5>
                 <p className="text-muted">
-                  {error
-                    ? "Unable to load orders. Please check your connection."
-                    : "No orders match your current filters."}
+                  {error ? error : "No orders match your current filters."}
                 </p>
                 {error && (
-                  <ThemeButton onClick={fetchOrders}>Try Again</ThemeButton>
+                  <div>
+                    <ThemeButton onClick={fetchOrders} className="me-2">
+                      <i className="bi bi-arrow-clockwise me-1"></i>
+                      Try Again
+                    </ThemeButton>
+                    {error.includes("log in") && (
+                      <div className="mt-3">
+                        <Link to="/login" className="btn btn-primary btn-sm">
+                          <i className="bi bi-box-arrow-in-right me-1"></i>
+                          Go to Login
+                        </Link>
+                        <div className="mt-2">
+                          <small className="text-muted">
+                            Use admin credentials to access order management
+                          </small>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             )}
