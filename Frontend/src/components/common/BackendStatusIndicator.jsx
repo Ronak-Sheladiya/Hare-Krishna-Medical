@@ -69,7 +69,9 @@ const BackendStatusIndicator = ({ show = true, onStatusChange = null }) => {
           onStatusChange({ status: "online", responseTime });
         }
 
-        console.log(`✅ Backend status check succeeded with method ${i + 1}`);
+        console.log(
+          `✅ Backend status check succeeded with method ${i + 1}, response time: ${responseTime}ms`,
+        );
         return; // Success, exit function
       } catch (error) {
         lastError = error;
