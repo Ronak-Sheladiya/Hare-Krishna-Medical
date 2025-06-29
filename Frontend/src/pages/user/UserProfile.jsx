@@ -16,7 +16,7 @@ import {
 } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { updateUser } from "../../store/slices/authSlice";
-import { unifiedApi } from "../../utils/unifiedApiClient";
+import unifiedApi from "../../utils/unifiedApiClient";
 import { showNetworkDebugInfo } from "../../utils/networkDebug";
 import {
   PageHeroSection,
