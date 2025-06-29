@@ -31,8 +31,9 @@ const medicineProducts = [
     expiryDate: new Date("2026-01-15"),
     batchNumber: "PC500-2024-001",
     featured: true,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=500&h=300&fit=crop",
+    ],
   },
   {
     name: "Amoxicillin 250mg",
