@@ -10,7 +10,13 @@ const BACKEND_URL = getBackendURL();
  */
 const getAuthToken = () => {
   try {
-    return localStorage.getItem("token") || sessionStorage.getItem("token");
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    console.log(
+      "🔑 Retrieved token:",
+      token ? `${token.substring(0, 20)}...` : "No token found",
+    );
+    return token;
   } catch (error) {
     console.warn("Unable to access token storage:", error);
     return null;
