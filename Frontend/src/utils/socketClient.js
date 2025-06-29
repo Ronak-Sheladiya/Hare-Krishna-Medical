@@ -20,6 +20,17 @@ const socketClient = {
       return socket;
     }
 
+    // In production, if we've failed multiple times, enter fallback mode
+    if (isProduction() && connectionAttempts >= 2) {
+      console.warn(
+        "🚨 Production environment: Too many failed attempts, entering fallback mode",
+      );
+      fallbackMode = true;
+      isConnecting = false;
+      this.notifyFallbackMode("Multiple connection failures in production");
+      return null;
+    }
+
     isConnecting = true;
 
     try {
@@ -32,13 +43,17 @@ const socketClient = {
         );
         fallbackMode = true;
         isConnecting = false;
+        this.notifyFallbackMode("Localhost URL in production");
         return null;
       }
 
       console.log("🔌 Attempting to connect to WebSocket:", SOCKET_URL);
 
-      // Test backend connectivity first
-      fetch(`${SOCKET_URL.replace("/socket.io", "")}/api/health`)
+      // Test backend connectivity first (but don't block on it in production)
+      const healthCheckPromise = fetch(
+        `${SOCKET_URL.replace("/socket.io", "")}/api/health`,
+        { timeout: 3000 },
+      )
         .then((response) => {
           if (response.ok) {
             console.log("✅ Backend server is reachable");
@@ -47,7 +62,12 @@ const socketClient = {
           }
         })
         .catch((error) => {
-          console.warn("⚠️ Backend server not reachable:", error.message);
+          console.warn("⚠️ Backend server health check failed:", error.message);
+          if (isProduction()) {
+            console.warn(
+              "🚨 Production: Backend unreachable, will try Socket.IO anyway",
+            );
+          }
         });
 
       socket = io(SOCKET_URL, {
