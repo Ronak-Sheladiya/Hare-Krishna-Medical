@@ -81,9 +81,14 @@ const sendWelcomeEmail = async (email, name) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log("Welcome email sent to:", email);
+    console.log("✅ Welcome email sent to:", email);
+    return { success: true, message: "Welcome email sent successfully" };
   } catch (error) {
-    console.error("Welcome email failed:", error);
+    console.error("❌ Welcome email failed:", error.message);
+    return {
+      success: false,
+      message: `Welcome email failed: ${error.message}`,
+    };
   }
 };
 
