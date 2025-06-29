@@ -37,6 +37,19 @@ const socketClient = {
 
       console.log("🔌 Attempting to connect to WebSocket:", SOCKET_URL);
 
+      // Test backend connectivity first
+      fetch(`${SOCKET_URL.replace("/socket.io", "")}/api/health`)
+        .then((response) => {
+          if (response.ok) {
+            console.log("✅ Backend server is reachable");
+          } else {
+            console.warn("⚠️ Backend server responded with:", response.status);
+          }
+        })
+        .catch((error) => {
+          console.warn("⚠️ Backend server not reachable:", error.message);
+        });
+
       socket = io(SOCKET_URL, {
         transports: ["polling", "websocket"], // Try polling first, then websocket
         timeout: 10000, // Reduce timeout to 10 seconds
