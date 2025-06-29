@@ -196,9 +196,17 @@ const UserProfile = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Since user creation works, let's try profile updates too
-
     try {
+      // Check if user is authenticated
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+      const user = useSelector((state) => state.auth.user);
+
+      if (!token && !user) {
+        setError("Please log in to update your profile");
+        setLoading(false);
+        return;
+      }
       // Prepare profile data for API
       const profileData = {
         fullName: personalInfo.fullName,
