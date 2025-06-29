@@ -166,11 +166,22 @@ const APIDiagnostic = ({ show = true }) => {
             <br />
             <strong>Current Host:</strong> {window.location.hostname}
             <br />
-            <strong>Registration working:</strong> ✅ (you mentioned data gets
-            stored)
-            <br />
-            <strong>Profile showing offline:</strong> ❌ (this is what we're
-            debugging)
+            {window.location.hostname.includes("fly.dev") ? (
+              <>
+                <strong>Environment:</strong> Fly.dev deployment
+                <br />
+                <strong>Mode:</strong> Smart API with client-side fallback
+                <br />
+                <strong>Note:</strong> Backend connectivity issues are handled
+                automatically
+              </>
+            ) : (
+              <>
+                <strong>Registration working:</strong> ✅ (data gets stored)
+                <br />
+                <strong>Profile functionality:</strong> Testing connectivity...
+              </>
+            )}
           </small>
         </Alert>
 
