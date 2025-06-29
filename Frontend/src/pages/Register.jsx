@@ -13,6 +13,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../store/slices/authSlice.js";
+import unifiedApi from "../utils/unifiedApiClient";
 
 const Register = () => {
   const navigate = useNavigate();
