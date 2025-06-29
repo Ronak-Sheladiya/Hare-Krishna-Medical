@@ -28,6 +28,7 @@ import {
 import BackendStatusIndicator from "../../components/common/BackendStatusIndicator";
 import APIDiagnostic from "../../components/common/APIDiagnostic";
 import ModeIndicator from "../../components/common/ModeIndicator";
+import SimpleModeIndicator from "../../components/common/SimpleModeIndicator";
 
 const UserProfile = () => {
   const { user } = useSelector((state) => state.auth);
