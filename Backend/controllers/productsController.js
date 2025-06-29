@@ -226,6 +226,12 @@ class ProductsController {
         Product.countDocuments(filter),
       ]);
 
+      // If database is empty, use fallback data
+      if (totalProducts === 0) {
+        console.log("📦 Database is empty, using fallback sample products");
+        return this.handleOfflineProducts(req, res);
+      }
+
       // Calculate pagination info
       const totalPages = Math.ceil(totalProducts / limit);
       const hasNextPage = page < totalPages;
