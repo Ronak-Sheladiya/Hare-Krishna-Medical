@@ -83,10 +83,12 @@ export const getBackendURL = () => {
     return import.meta.env.VITE_BACKEND_URL;
   }
 
-  // Development environment - use local backend
+  // Force local backend for localhost development
   if (
-    isDevelopment() &&
-    (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "")
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "" ||
+    hostname.includes("localhost")
   ) {
     const localBackend = "http://localhost:5001";
     console.log(`🛠️ Development: Using local backend: ${localBackend}`);
