@@ -132,23 +132,54 @@ class AuthController {
     try {
       const { email, password } = req.body;
 
+      // Validate input
+      if (!email || !password) {
+        return res.status(400).json({
+          message: "Email and password are required",
+        });
+      }
+
+      console.log(`🔐 Login attempt for: ${email}`);
+      console.log(
+        `🔐 Database connection state: ${mongoose.connection.readyState}`,
+      );
+
       // Use development fallback if database is not available
       if (shouldUseFallback()) {
         console.log("🔄 Using development fallback for login");
-        const result = await devAuth.login(email, password);
-
-        return res.json({
-          message: "Login successful (Development Mode)",
-          token: result.token,
-          user: result.user,
-        });
+        try {
+          const result = await devAuth.login(email, password);
+          return res.json({
+            message: "Login successful (Development Mode)",
+            token: result.token,
+            user: result.user,
+          });
+        } catch (devError) {
+          console.log(
+            `❌ Development fallback login failed: ${devError.message}`,
+          );
+          return res.status(400).json({
+            message: "Invalid email or password",
+          });
+        }
       }
 
       // Check database connectivity
       if (mongoose.connection.readyState !== 1) {
-        throw new Error(
-          "Database connection not available. Please ensure MongoDB is running.",
-        );
+        console.log("❌ Database not connected, falling back to dev mode");
+        try {
+          const result = await devAuth.login(email, password);
+          return res.json({
+            message: "Login successful (Fallback Mode)",
+            token: result.token,
+            user: result.user,
+          });
+        } catch (devError) {
+          return res.status(500).json({
+            message: "Database connection not available and fallback failed",
+            error: "Please try again later",
+          });
+        }
       }
 
       // Find user and include password for comparison
@@ -161,6 +192,13 @@ class AuthController {
         });
       }
 
+      console.log(`✅ User found: ${user._id}`);
+      console.log(`🔐 User active status: ${user.isActive}`);
+      console.log(`🔐 Password hash exists: ${!!user.password}`);
+      console.log(
+        `🔐 Password hash length: ${user.password ? user.password.length : 0}`,
+      );
+
       if (!user.isActive) {
         console.log(`❌ Login failed: Account inactive for email: ${email}`);
         return res.status(400).json({
@@ -168,18 +206,25 @@ class AuthController {
         });
       }
 
-      // Debug password comparison
-      console.log(`🔐 Attempting login for: ${email}`);
-      console.log(`🔐 User found: ${user._id}`);
-      console.log(
-        `🔐 Password provided length: ${password ? password.length : 0}`,
-      );
-      console.log(`🔐 Stored password hash exists: ${!!user.password}`);
+      // Validate password exists
+      if (!user.password) {
+        console.log(
+          `❌ Login failed: No password hash stored for user: ${email}`,
+        );
+        return res.status(400).json({
+          message: "Invalid email or password",
+        });
+      }
 
-      // Check password
+      // Check password with detailed logging
+      console.log(`🔐 Comparing password for user: ${email}`);
       const isMatch = await user.comparePassword(password);
+      console.log(`🔐 Password comparison result: ${isMatch}`);
 
-      console.log(`🔐 Password match result: ${isMatch}`);
+      // Additional direct bcrypt comparison for debugging
+      const bcrypt = require("bcryptjs");
+      const directMatch = await bcrypt.compare(password, user.password);
+      console.log(`🔐 Direct bcrypt comparison: ${directMatch}`);
 
       if (!isMatch) {
         console.log(`❌ Login failed: Password mismatch for email: ${email}`);
@@ -188,22 +233,30 @@ class AuthController {
         });
       }
 
+      console.log(`✅ Login successful for: ${email}`);
+
       // Update last login
-      await user.updateLastLogin();
+      try {
+        await user.updateLastLogin();
+      } catch (updateError) {
+        console.log(`⚠️ Failed to update last login: ${updateError.message}`);
+      }
 
       // Generate JWT token
       const token = user.generateAuthToken();
 
       // Emit real-time update
       const io = req.app.get("io");
-      io.to("admin-room").emit("user-logged-in", {
-        user: {
-          id: user._id,
-          fullName: user.fullName,
-          email: user.email,
-          lastLogin: user.lastLogin,
-        },
-      });
+      if (io) {
+        io.to("admin-room").emit("user-logged-in", {
+          user: {
+            id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            lastLogin: user.lastLogin,
+          },
+        });
+      }
 
       res.json({
         message: "Login successful",
@@ -220,7 +273,7 @@ class AuthController {
         },
       });
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("❌ Login error:", error);
       res.status(500).json({
         message: "Login failed",
         error: error.message,
