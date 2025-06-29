@@ -10,6 +10,8 @@ import {
   ThemeSection,
   StatsCard,
 } from "../components/common/ConsistentTheme";
+import { useUserRealTime } from "../hooks/useRealTime";
+import socketClient from "../utils/socketClient";
 
 const UserDashboard = () => {
   const { user } = useSelector((state) => state.auth);
