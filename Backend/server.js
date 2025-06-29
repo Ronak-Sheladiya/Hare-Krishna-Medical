@@ -161,15 +161,22 @@ const connectDB = async () => {
       process.env.MONGODB_URI ||
       "mongodb://localhost:27017/hare-krishna-medical";
 
+    console.log("🔄 Attempting to connect to MongoDB...");
+    console.log(`📍 MongoDB URI: ${mongoURI}`);
+
     await mongoose.connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+      socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
     });
 
     console.log("✅ MongoDB connected successfully");
   } catch (error) {
     console.error("❌ MongoDB connection error:", error.message);
-    process.exit(1);
+    console.log("⚠️ Starting server without MongoDB connection");
+    console.log("📝 Note: Some features may not work without database");
+    // Don't exit, allow server to start without DB for development
   }
 };
 
