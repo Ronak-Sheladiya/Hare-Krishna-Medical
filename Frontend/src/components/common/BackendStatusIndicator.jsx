@@ -21,46 +21,51 @@ const BackendStatusIndicator = ({ show = true, onStatusChange = null }) => {
     if (!show) return;
 
     const startTime = Date.now();
+    const hostname =
+      typeof window !== "undefined" ? window.location.hostname : "";
 
-    // Try multiple methods to check backend connectivity
-    const checkMethods = [
-      // Method 1: Try unified API with health endpoint
-      async () => {
-        return await unifiedApi.get("/api/health", {
-          timeout: 8000,
-          retries: 0,
-        });
-      },
-      // Method 2: Try direct fetch with relative URL (works with proxy)
-      async () => {
-        const response = await fetch("/api/health", {
-          method: "GET",
-          headers: { Accept: "application/json" },
-          signal: AbortSignal.timeout(8000),
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return await response.json();
-      },
-      // Method 3: Try a simple auth endpoint that we know works
-      async () => {
-        return await unifiedApi.get("/api/debug-auth/users", {
-          timeout: 8000,
-          retries: 0,
-        });
-      },
-    ];
-
-    let lastError;
-
-    for (let i = 0; i < checkMethods.length; i++) {
-      try {
-        await checkMethods[i]();
+    try {
+      // For fly.dev environments, use smart API client that has fallback logic
+      if (hostname.includes("fly.dev")) {
+        const apiStatus = smartApi.getStatus();
         const responseTime = Date.now() - startTime;
 
         setResponseTime(responseTime);
         setLastCheck(new Date());
 
-        if (responseTime > 8000) {
+        if (apiStatus.backendAvailable === true) {
+          setStatus("online");
+          if (onStatusChange) {
+            onStatusChange({ status: "online", responseTime });
+          }
+        } else if (apiStatus.fallbackAvailable) {
+          setStatus("slow"); // Show as slow when using fallback
+          if (onStatusChange) {
+            onStatusChange({ status: "fallback", responseTime });
+          }
+        } else {
+          setStatus("offline");
+          if (onStatusChange) {
+            onStatusChange({
+              status: "offline",
+              error: "No backend or fallback available",
+            });
+          }
+        }
+
+        console.log(`✅ Fly.dev status check: ${apiStatus.mode} mode`);
+        return;
+      }
+
+      // For other environments, try the health endpoint
+      try {
+        await unifiedApi.get("/api/health", { timeout: 5000, retries: 0 });
+        const responseTime = Date.now() - startTime;
+
+        setResponseTime(responseTime);
+        setLastCheck(new Date());
+
+        if (responseTime > 5000) {
           setStatus("slow");
         } else {
           setStatus("online");
@@ -71,29 +76,19 @@ const BackendStatusIndicator = ({ show = true, onStatusChange = null }) => {
         }
 
         console.log(
-          `✅ Backend status check succeeded with method ${i + 1}, response time: ${responseTime}ms`,
+          `✅ Backend status check succeeded, response time: ${responseTime}ms`,
         );
-        return; // Success, exit function
       } catch (error) {
-        lastError = error;
-        console.log(
-          `❌ Backend status check method ${i + 1} failed:`,
-          error.message,
-        );
-        continue; // Try next method
+        throw error; // Re-throw to be caught by outer catch
       }
-    }
+    } catch (error) {
+      console.log("❌ Backend status check failed:", error.message);
+      setStatus("offline");
+      setLastCheck(new Date());
 
-    // All methods failed
-    console.log(
-      "❌ All backend status check methods failed:",
-      lastError?.message,
-    );
-    setStatus("offline");
-    setLastCheck(new Date());
-
-    if (onStatusChange) {
-      onStatusChange({ status: "offline", error: lastError?.message });
+      if (onStatusChange) {
+        onStatusChange({ status: "offline", error: error.message });
+      }
     }
   };
   if (!show) return null;
