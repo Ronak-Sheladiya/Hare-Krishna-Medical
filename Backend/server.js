@@ -345,11 +345,6 @@ io.on("connection", (socket) => {
     timestamp: new Date().toISOString()
   });
 });
-  // Send connection confirmation
-  socket.emit("connection-confirmed", {
-    socketId: socket.id,
-    timestamp: new Date().toISOString(),
-    message: "Successfully connected to Hare Krishna Medical Store backend",
   });
 });
 
