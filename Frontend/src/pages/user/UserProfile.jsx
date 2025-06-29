@@ -1107,6 +1107,15 @@ const UserProfile = () => {
                             🔍 Test Auth
                           </ThemeButton>
                           <ThemeButton
+                            type="button"
+                            variant="outline-warning"
+                            onClick={fixAuth}
+                            className="me-2"
+                            size="sm"
+                          >
+                            🔧 Fix Auth
+                          </ThemeButton>
+                          <ThemeButton
                             type="submit"
                             variant="primary"
                             disabled={loading}
