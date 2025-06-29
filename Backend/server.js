@@ -17,7 +17,7 @@ console.log(
   `📧 Email User: ${process.env.EMAIL_USER ? "✅ Configured" : "❌ Missing"}`,
 );
 console.log(
-  `🌐 Primary Domain: ${process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app (default)"}`,
+  `�� Primary Domain: ${process.env.PRIMARY_DOMAIN || "https://hk-medical.vercel.app (default)"}`,
 );
 
 const testUserRoute = require("./routes/testUser");
@@ -28,10 +28,19 @@ const server = http.createServer(app);
 // Socket.io Setup
 const io = socketIo(server, {
   cors: {
-    origin: process.env.FRONTEND_URL?.split(",") || "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: process.env.FRONTEND_URL?.split(",") || [
+      "http://localhost:5178",
+      "http://localhost:5173",
+      "*",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
   },
+  allowEIO3: true, // Support older Socket.IO versions
+  transports: ["polling", "websocket"],
+  pingTimeout: 60000,
+  pingInterval: 25000,
 });
 app.set("io", io);
 
