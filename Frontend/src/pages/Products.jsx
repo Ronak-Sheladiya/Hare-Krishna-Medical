@@ -79,16 +79,21 @@ const Products = () => {
       if (products.length === 0) {
         console.log("🛒 API returned empty products, using sample data");
         dispatch(setError("Database is empty - showing sample products"));
-        return this.loadSampleProducts();
-      }
+        // Fall through to sample data loading below
+      } else {
+        dispatch(setProducts(products));
 
-      dispatch(setProducts(products));
-
-      // Show offline mode indicator if applicable
-      if (data.offline) {
-        dispatch(setError("Working in offline mode - showing sample data"));
+        // Show offline mode indicator if applicable
+        if (data.offline) {
+          dispatch(setError("Working in offline mode - showing sample data"));
+        }
+        dispatch(setLoading(false));
+        return;
       }
-    } else {
+    }
+
+    // Load sample data (for offline mode or empty database)
+    {
       // Provide sample data as fallback
       const sampleProducts = [
         {
