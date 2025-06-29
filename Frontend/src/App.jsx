@@ -246,6 +246,26 @@ function App() {
             <Route path="/access-denied" element={<AccessDenied />} />
             {/* Admin Routes */}
             <Route
+              path="/admin"
+              element={
+                <ProtectedRoute adminOnly>
+                  <RealTimeDataProvider>
+                    <AdminDashboard />
+                  </RealTimeDataProvider>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute adminOnly>
+                  <RealTimeDataProvider>
+                    <AdminDashboard />
+                  </RealTimeDataProvider>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/user"
               element={
                 <ProtectedRoute userOnly>
