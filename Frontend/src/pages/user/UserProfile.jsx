@@ -413,7 +413,7 @@ const UserProfile = () => {
           errorDetails += `• API client: ${results.tests.apiClient?.error || "Failed"}\n`;
         }
         if (results.tests.auth?.success === false) {
-          errorDetails += `• Authentication: ${results.tests.auth?.error || "Failed"}\n`;
+          errorDetails += `��� Authentication: ${results.tests.auth?.error || "Failed"}\n`;
         }
 
         console.warn("Network connectivity issues:", errorDetails);
@@ -586,6 +586,13 @@ const UserProfile = () => {
               </Col>
             </Row>
           )}
+
+          {/* Mode Indicator */}
+          <Row className="mb-3">
+            <Col lg={12}>
+              <ModeIndicator show={true} />
+            </Col>
+          </Row>
 
           {/* Backend Status Indicator */}
           <Row className="mb-3">
