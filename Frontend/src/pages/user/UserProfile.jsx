@@ -263,7 +263,17 @@ const UserProfile = () => {
       // Enhanced error message based on error type
       let errorMessage = "Failed to update information. Please try again.";
 
-      if (error.message === "Failed to fetch") {
+      if (
+        error.message?.includes("No authentication token") ||
+        error.message?.includes("Authentication failed") ||
+        error.message?.includes("Access denied")
+      ) {
+        errorMessage = "Your session has expired. Please log in again.";
+        // Optionally redirect to login
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+      } else if (error.message === "Failed to fetch") {
         errorMessage =
           "Unable to connect to server. Please check your internet connection and try again.";
       } else if (
