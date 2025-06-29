@@ -49,10 +49,10 @@ const createTransporter = async () => {
 // Send welcome email
 const sendWelcomeEmail = async (email, name) => {
   try {
-    const transporter = createTransporter();
+    const transporter = await createTransporter();
     if (!transporter) {
-      console.log("Email service not configured, skipping welcome email");
-      return;
+      console.log("📧 Email service not configured, skipping welcome email");
+      return { success: false, message: "Email service not configured" };
     }
 
     const mailOptions = {
