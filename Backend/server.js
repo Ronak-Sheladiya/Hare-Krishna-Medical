@@ -73,6 +73,7 @@ const corsOptions = {
       "https://hkmedical.vercel.app",
       "https://harekrishnamedical.vercel.app",
       "https://hare-krishna-medical.vercel.app",
+      /\.fly\.dev$/,
     ];
 
     // Allow requests with no origin (mobile apps, Postman, etc.)
