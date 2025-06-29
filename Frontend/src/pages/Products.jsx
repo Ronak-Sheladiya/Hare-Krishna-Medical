@@ -93,65 +93,94 @@ const Products = () => {
     }
 
     // Load sample data (for offline mode or empty database)
-    // Provide sample data as fallback
     const sampleProducts = [
-        {
-          _id: "sample1",
-          name: "Paracetamol 500mg",
-          company: "Cipla",
-          price: 25.5,
-          originalPrice: 30.0,
-          discountPrice: 25.5,
-          stock: 150,
-          category: "Pain Relief",
-          description:
-            "Effective pain relief and fever reducer suitable for adults and children over 12 years.",
-          images: [
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5QYXJhY2V0YW1vbDwvdGV4dD48L3N2Zz4=",
-          ],
-        },
-        {
-          _id: "sample2",
-          name: "Vitamin D3 Tablets",
-          company: "Sun Pharma",
-          price: 180.0,
-          originalPrice: 200.0,
-          discountPrice: 180.0,
-          stock: 85,
-          category: "Vitamins",
-          description:
-            "Essential vitamin D3 supplement for bone health and immunity support.",
-          images: [
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmZlNTAwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM2NjY2NjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5WaXRhbWluIEQzPC90ZXh0Pjwvc3ZnPg==",
-          ],
-        },
-        {
-          _id: "sample3",
-          name: "Cough Syrup 100ml",
-          company: "Dabur",
-          price: 95.0,
-          originalPrice: 110.0,
-          discountPrice: 95.0,
-          stock: 65,
-          category: "Cough & Cold",
-          description:
-            "Natural ayurvedic cough syrup for dry and wet cough relief.",
-          images: [
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTc0YzNjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Q291Z2ggU3lydXA8L3RleHQ+PC9zdmc+",
-          ],
-        },
-      ];
+      {
+        _id: "sample1",
+        name: "Paracetamol 500mg",
+        company: "Cipla",
+        price: 25.5,
+        originalPrice: 30.0,
+        discountPrice: 25.5,
+        stock: 150,
+        category: "Pain Relief",
+        description:
+          "Effective pain relief and fever reducer suitable for adults and children over 12 years.",
+        images: [
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5QYXJhY2V0YW1vbDwvdGV4dD48L3N2Zz4=",
+        ],
+      },
+      {
+        _id: "sample2",
+        name: "Vitamin D3 Tablets",
+        company: "Sun Pharma",
+        price: 180.0,
+        originalPrice: 200.0,
+        discountPrice: 180.0,
+        stock: 85,
+        category: "Vitamins",
+        description:
+          "Essential vitamin D3 supplement for bone health and immunity support.",
+        images: [
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmZlNTAwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM2NjY2NjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5WaXRhbWluIEQzPC90ZXh0Pjwvc3ZnPg==",
+        ],
+      },
+      {
+        _id: "sample3",
+        name: "Cough Syrup 100ml",
+        company: "Dabur",
+        price: 95.0,
+        originalPrice: 110.0,
+        discountPrice: 95.0,
+        stock: 65,
+        category: "Cough & Cold",
+        description:
+          "Natural ayurvedic cough syrup for dry and wet cough relief.",
+        images: [
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTc0YzNjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Q291Z2ggU3lydXA8L3RleHQ+PC9zdmc+",
+        ],
+      },
+      {
+        _id: "sample4",
+        name: "Digital Thermometer",
+        company: "Omron",
+        price: 280.0,
+        originalPrice: 320.0,
+        discountPrice: 280.0,
+        stock: 45,
+        category: "Medical Devices",
+        description:
+          "Accurate digital thermometer with fast reading and fever alarm.",
+        images: [
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMDA3YmZmIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+VGhlcm1vbWV0ZXI8L3RleHQ+PC9zdmc+",
+        ],
+      },
+      {
+        _id: "sample5",
+        name: "Multivitamin Capsules",
+        company: "Himalaya",
+        price: 350.0,
+        originalPrice: 380.0,
+        discountPrice: 350.0,
+        stock: 120,
+        category: "Supplements",
+        description:
+          "Complete multivitamin and mineral supplement for daily health support.",
+        images: [
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjhhNzQ1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+TXVsdGl2aXRhbWluPC90ZXh0Pjwvc3ZnPg==",
+        ],
+      },
+    ];
 
-      dispatch(setProducts(sampleProducts));
-      dispatch(
-        setError(
-          "Backend connection issue - showing sample products. " +
-            (apiError || "Please try refreshing the page."),
-        ),
-      );
-    }
+    dispatch(setProducts(sampleProducts));
+    dispatch(
+      setError(
+        "Database is empty - showing sample products. " +
+          (apiError || "Please add products through admin panel."),
+      ),
+    );
 
     dispatch(setLoading(false));
+  };
   };
 
   // Fetch featured products separately
