@@ -29,7 +29,7 @@ const AdminDashboard = () => {
   const [error, setError] = useState(null);
 
   // Use real-time data provider
-  const { isConnected, lastUpdate, liveStats, forceRefresh } =
+  const { isConnected, fallbackMode, lastUpdate, liveStats, forceRefresh } =
     useRealTimeData();
 
   // Local state for additional data not in real-time provider
