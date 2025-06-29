@@ -227,10 +227,21 @@ const PORT = process.env.PORT || 5001;
 const startServer = async () => {
   await connectDB();
 
+  // Initialize database after connection
+  try {
+    await initializeDatabase();
+    await checkDatabaseHealth();
+  } catch (error) {
+    console.warn("⚠️ Database initialization failed:", error.message);
+    console.log("📝 Server will continue without full initialization");
+  }
+
   server.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
     console.log(`📡 Socket.IO enabled`);
+    console.log(`🎯 API available at: http://localhost:${PORT}/api`);
+    console.log(`💊 Hare Krishna Medical Store Backend Ready!`);
   });
 };
 
