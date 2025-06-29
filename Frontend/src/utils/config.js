@@ -46,6 +46,22 @@ export const isDevelopment = () => {
  * Get the backend URL based on environment
  * @returns {string}
  */
+/**
+ * Check if we're in a restricted network environment
+ */
+export const isRestrictedEnvironment = () => {
+  const hostname =
+    typeof window !== "undefined" ? window.location.hostname : "";
+
+  // Known problematic environments where cross-origin requests fail
+  return (
+    hostname.includes("fly.dev") ||
+    hostname.includes("railway.app") ||
+    hostname.includes("replit.") ||
+    hostname.includes("stackblitz.")
+  );
+};
+
 export const getBackendURL = () => {
   const hostname =
     typeof window !== "undefined" ? window.location.hostname : "";
@@ -60,8 +76,9 @@ export const getBackendURL = () => {
 
   // Check if we're in production environment
   const isProd = isProduction();
+  const isRestricted = isRestrictedEnvironment();
   console.log(
-    `🌍 Environment check: hostname=${hostname}, isProduction=${isProd}`,
+    `🌍 Environment check: hostname=${hostname}, isProduction=${isProd}, isRestricted=${isRestricted}`,
   );
 
   if (isProd) {
@@ -69,6 +86,13 @@ export const getBackendURL = () => {
     console.log(
       `🚀 Production environment detected (${hostname}), using production backend: ${prodURL}`,
     );
+
+    if (isRestricted) {
+      console.warn(
+        `⚠️ Restricted network environment detected (${hostname}). API calls may fail due to CORS/network policies.`,
+      );
+    }
+
     return prodURL;
   }
 
@@ -79,7 +103,6 @@ export const getBackendURL = () => {
   );
   return localBackend;
 };
-
 /**
  * Get the Socket.IO URL based on environment
  * @returns {string}
