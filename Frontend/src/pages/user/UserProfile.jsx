@@ -191,6 +191,15 @@ const UserProfile = () => {
       const data = await response.json();
       console.log("📦 Auth test data:", data);
 
+      // If token is invalid, offer to fix it
+      if (response.status === 401 && data.message?.includes("Invalid token")) {
+        showAlert(
+          "⚠️ Invalid token detected! Click 'Fix Auth' to clear and re-login.",
+          "warning",
+        );
+        return;
+      }
+
       showAlert(
         `Auth test: ${response.status} - ${data.message || "Success"}`,
         response.ok ? "success" : "danger",
@@ -199,6 +208,24 @@ const UserProfile = () => {
       console.error("❌ Auth test error:", error);
       showAlert(`Auth test failed: ${error.message}`, "danger");
     }
+  };
+
+  // Function to fix authentication issues
+  const fixAuth = () => {
+    // Clear all authentication data
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("isAuthenticated");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("isAuthenticated");
+
+    showAlert("🔧 Authentication cleared. Redirecting to login...", "info");
+
+    // Redirect to login
+    setTimeout(() => {
+      window.location.href = "/login";
+    }, 1500);
   };
 
   const handleProfileImageChange = (e) => {
