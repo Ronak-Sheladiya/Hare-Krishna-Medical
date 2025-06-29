@@ -67,8 +67,9 @@ const medicineProducts = [
     expiryDate: new Date("2026-03-05"),
     batchNumber: "CS100-2024-003",
     featured: true,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=500&h=300&fit=crop",
+    ],
   },
   {
     name: "Vitamin D3 Tablets",
