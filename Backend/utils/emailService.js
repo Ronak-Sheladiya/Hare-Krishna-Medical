@@ -141,12 +141,12 @@ const sendVerificationEmail = async (email, name, token) => {
 // Send password reset email
 const sendPasswordResetEmail = async (email, name, token) => {
   try {
-    const transporter = createTransporter();
+    const transporter = await createTransporter();
     if (!transporter) {
       console.log(
-        "Email service not configured, skipping password reset email",
+        "📧 Email service not configured, skipping password reset email",
       );
-      return;
+      return { success: false, message: "Email service not configured" };
     }
 
     const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/reset-password?token=${token}`;
