@@ -32,26 +32,38 @@ export const RealTimeDataProvider = ({ children }) => {
     unreadMessages: 0,
   });
 
-  // Track connection status
+  // Track connection status and fallback mode
   useEffect(() => {
     const checkConnection = () => {
       if (socketClient) {
         const status = socketClient.getConnectionStatus();
         setIsConnected(status.connected);
+        setFallbackMode(status.fallbackMode);
 
         // If connection failed, log diagnostic info
         if (!status.connected && status.connectionAttempts >= 3) {
           console.warn("🔍 Socket connection struggling...");
-          console.log(
-            "💡 Try refreshing the page or check if backend is running on port 5001",
-          );
+          console.log("💡 App will continue with manual refresh for updates");
         }
       }
     };
 
+    // Listen for fallback mode events
+    const handleFallbackMode = (event) => {
+      console.log("🚨 Socket fallback mode activated:", event.detail.reason);
+      setFallbackMode(true);
+      setIsConnected(false);
+    };
+
+    window.addEventListener("socket-fallback-mode", handleFallbackMode);
+
     checkConnection();
     const interval = setInterval(checkConnection, 2000);
-    return () => clearInterval(interval);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("socket-fallback-mode", handleFallbackMode);
+    };
   }, []);
 
   // Fetch initial dashboard data
