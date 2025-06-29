@@ -31,11 +31,23 @@ import ModeIndicator from "../../components/common/ModeIndicator";
 import SimpleModeIndicator from "../../components/common/SimpleModeIndicator";
 
 const UserProfile = () => {
-  const { user } = useSelector((state) => state.auth);
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState("personal");
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, message: "", variant: "" });
+
+  // Debug authentication state
+  useEffect(() => {
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    console.log("🔍 Auth Debug:", {
+      isAuthenticated,
+      hasUser: !!user,
+      hasToken: !!token,
+      userName: user?.fullName || user?.name,
+    });
+  }, [user, isAuthenticated]);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   // Personal Information State
@@ -149,9 +161,71 @@ const UserProfile = () => {
 
   const showAlert = (message, variant) => {
     setAlert({ show: true, message, variant });
+    setTimeout(() => setAlert({ show: false, message: "", variant: "" }), 5000);
+  };
+
+  // Debug function to test authentication
+  const testAuth = async () => {
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    console.log("🔑 Current token:", token ? "Present" : "Missing");
+
+    try {
+      const response = await fetch(
+        "https://hare-krishna-medical.onrender.com/api/auth/update-profile",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ fullName: "Test" }),
+        },
+      );
+
+      console.log(
+        "📡 Auth test response:",
+        response.status,
+        response.statusText,
+      );
+      const data = await response.json();
+      console.log("📦 Auth test data:", data);
+
+      // If token is invalid, offer to fix it
+      if (response.status === 401 && data.message?.includes("Invalid token")) {
+        showAlert(
+          "⚠️ Invalid token detected! Click 'Fix Auth' to clear and re-login.",
+          "warning",
+        );
+        return;
+      }
+
+      showAlert(
+        `Auth test: ${response.status} - ${data.message || "Success"}`,
+        response.ok ? "success" : "danger",
+      );
+    } catch (error) {
+      console.error("❌ Auth test error:", error);
+      showAlert(`Auth test failed: ${error.message}`, "danger");
+    }
+  };
+
+  // Function to fix authentication issues
+  const fixAuth = () => {
+    // Clear all authentication data
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("isAuthenticated");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("isAuthenticated");
+
+    showAlert("🔧 Authentication cleared. Redirecting to login...", "info");
+
+    // Redirect to login
     setTimeout(() => {
-      setAlert({ show: false, message: "", variant: "" });
-    }, 5000);
+      window.location.href = "/login";
+    }, 1500);
   };
 
   const handleProfileImageChange = (e) => {
@@ -196,9 +270,20 @@ const UserProfile = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Since user creation works, let's try profile updates too
-
     try {
+      // Check if user is authenticated
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+
+      if (!token && !user) {
+        setAlert({
+          show: true,
+          message: "Please log in to update your profile",
+          variant: "danger",
+        });
+        setLoading(false);
+        return;
+      }
       // Prepare profile data for API
       const profileData = {
         fullName: personalInfo.fullName,
@@ -252,7 +337,17 @@ const UserProfile = () => {
       // Enhanced error message based on error type
       let errorMessage = "Failed to update information. Please try again.";
 
-      if (error.message === "Failed to fetch") {
+      if (
+        error.message?.includes("No authentication token") ||
+        error.message?.includes("Authentication failed") ||
+        error.message?.includes("Access denied")
+      ) {
+        errorMessage = "Your session has expired. Please log in again.";
+        // Optionally redirect to login
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+      } else if (error.message === "Failed to fetch") {
         errorMessage =
           "Unable to connect to server. Please check your internet connection and try again.";
       } else if (
@@ -1002,6 +1097,24 @@ const UserProfile = () => {
                         </Row>
 
                         <div className="text-end">
+                          <ThemeButton
+                            type="button"
+                            variant="outline-secondary"
+                            onClick={testAuth}
+                            className="me-2"
+                            size="sm"
+                          >
+                            🔍 Test Auth
+                          </ThemeButton>
+                          <ThemeButton
+                            type="button"
+                            variant="outline-warning"
+                            onClick={fixAuth}
+                            className="me-2"
+                            size="sm"
+                          >
+                            🔧 Fix Auth
+                          </ThemeButton>
                           <ThemeButton
                             type="submit"
                             variant="primary"

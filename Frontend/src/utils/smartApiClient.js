@@ -115,14 +115,37 @@ export const smartApi = {
 
   // Update profile
   updateProfile: async (profileData) => {
+    // Check token first
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    console.log("🔑 Token check:", token ? "Token found" : "No token");
+
+    if (!token) {
+      throw new Error("No authentication token found. Please log in again.");
+    }
+
     const isBackendAvailable = await checkBackendAvailability();
 
     if (isBackendAvailable) {
       try {
-        return await unifiedApi.put("/api/auth/update-profile", profileData);
+        console.log("🚀 Attempting backend profile update...");
+        const result = await unifiedApi.put(
+          "/api/auth/update-profile",
+          profileData,
+        );
+        console.log("✅ Backend profile update successful");
+        return result;
       } catch (error) {
+        console.error("❌ Backend profile update failed:", error);
+        // Don't fallback to client-side if it's an auth error - user needs to re-login
+        if (
+          error.message?.includes("401") ||
+          error.message?.includes("Access denied")
+        ) {
+          throw new Error("Authentication failed. Please log in again.");
+        }
         console.log(
-          "Backend profile update failed, falling back to client-side",
+          "⚠️ Backend profile update failed, falling back to client-side",
         );
         backendAvailable = false; // Mark as unavailable
       }
@@ -130,13 +153,35 @@ export const smartApi = {
 
     // Fallback to client-side
     if (shouldUseClientSideFallback()) {
-      // Get current user ID from token or storage
+      // Get current user from Redux store or storage
       const currentUser = clientSideAuth.getCurrentUser();
-      if (!currentUser) {
+
+      // Also check localStorage/sessionStorage for auth state
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+      const userData =
+        localStorage.getItem("user") || sessionStorage.getItem("user");
+
+      if (!currentUser && !token && !userData) {
         throw new Error("No user logged in");
       }
 
-      return clientSideAuth.updateProfile(currentUser.id, profileData);
+      // Use stored user data if available
+      let userId = currentUser?.id;
+      if (!userId && userData) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          userId = parsedUser.id;
+        } catch (e) {
+          console.warn("Failed to parse stored user data");
+        }
+      }
+
+      if (!userId) {
+        throw new Error("Unable to identify current user");
+      }
+
+      return clientSideAuth.updateProfile(userId, profileData);
     }
 
     throw new Error(

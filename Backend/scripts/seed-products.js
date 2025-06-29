@@ -31,8 +31,9 @@ const medicineProducts = [
     expiryDate: new Date("2026-01-15"),
     batchNumber: "PC500-2024-001",
     featured: true,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=500&h=300&fit=crop",
+    ],
   },
   {
     name: "Amoxicillin 250mg",
@@ -48,8 +49,9 @@ const medicineProducts = [
     expiryDate: new Date("2026-02-10"),
     batchNumber: "AMX250-2024-002",
     featured: true,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&h=300&fit=crop",
+    ],
   },
   {
     name: "Cough Syrup 100ml",
@@ -65,8 +67,9 @@ const medicineProducts = [
     expiryDate: new Date("2026-03-05"),
     batchNumber: "CS100-2024-003",
     featured: true,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=500&h=300&fit=crop",
+    ],
   },
   {
     name: "Vitamin D3 Tablets",
@@ -82,8 +85,9 @@ const medicineProducts = [
     expiryDate: new Date("2026-01-20"),
     batchNumber: "VD3-2024-004",
     featured: true,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1550572017-7bb9bbeb7bcc?w=500&h=300&fit=crop",
+    ],
   },
   {
     name: "Antiseptic Cream 30g",
@@ -99,8 +103,9 @@ const medicineProducts = [
     expiryDate: new Date("2026-02-15"),
     batchNumber: "AC30-2024-005",
     featured: false,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500&h=300&fit=crop",
+    ],
   },
   {
     name: "Multivitamin Capsules",
@@ -116,8 +121,9 @@ const medicineProducts = [
     expiryDate: new Date("2026-01-10"),
     batchNumber: "MV-2024-006",
     featured: false,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=500&h=300&fit=crop",
+    ],
   },
   {
     name: "Blood Pressure Monitor",
@@ -133,8 +139,9 @@ const medicineProducts = [
     expiryDate: new Date("2029-01-01"),
     batchNumber: "BPM-2024-007",
     featured: false,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=500&h=300&fit=crop",
+    ],
   },
   {
     name: "Thermometer Digital",
@@ -150,8 +157,9 @@ const medicineProducts = [
     expiryDate: new Date("2029-02-01"),
     batchNumber: "DT-2024-008",
     featured: false,
-    image:
+    images: [
       "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&h=300&fit=crop",
+    ],
   },
 ];
 
