@@ -81,21 +81,11 @@ export const getBackendURL = () => {
     `🌍 Environment check: hostname=${hostname}, isProduction=${isProd}, isRestricted=${isRestricted}`,
   );
 
-  if (isProd) {
-    const prodURL = "https://hare-krishna-medical.onrender.com";
-    console.log(
-      `🚀 Production environment detected (${hostname}), using production backend: ${prodURL}`,
-    );
+  // Always use production backend for consistency
+  const prodURL = "https://hare-krishna-medical.onrender.com";
+  console.log(`🚀 Using unified production backend: ${prodURL}`);
 
-    if (isRestricted) {
-      console.warn(
-        `⚠️ Restricted network environment detected (${hostname}). API calls may fail due to CORS/network policies.`,
-      );
-    }
-
-    return prodURL;
-  }
-
+  return prodURL;
   // Development environment - try local first, fallback to production
   const localBackend = "http://localhost:5002";
   console.log(
