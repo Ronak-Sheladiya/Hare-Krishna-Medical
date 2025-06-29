@@ -142,6 +142,8 @@ export default {
   getEnvironment,
   isProduction,
   isDevelopment,
+  getBackendURL,
+  getSocketURL,
   getFrontendURLs,
   getPrimaryDomain,
   getAppConfig,
