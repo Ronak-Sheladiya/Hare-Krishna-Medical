@@ -14,9 +14,10 @@ const router = express.Router();
 
 // @route   POST /api/orders
 // @desc    Create new order
-// @access  Private
+// @access  Private/Guest
 router.post(
   "/",
+  optionalAuth,
   validationRules.orderCreate,
   handleValidationErrors,
   async (req, res) => {
