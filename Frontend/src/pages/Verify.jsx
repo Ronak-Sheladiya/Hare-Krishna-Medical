@@ -982,14 +982,14 @@ const Verify = () => {
                             <Form.Group className="mb-4">
                               <Form.Label className="fw-bold text-dark mb-3">
                                 <i className="bi bi-hash me-2 text-danger"></i>
-                                Invoice ID / Reference Number
+                                Order/Invoice ID / Reference Number
                               </Form.Label>
                               <InputGroup>
                                 <Form.Control
                                   type="text"
                                   value={invoiceId}
                                   onChange={(e) => setInvoiceId(e.target.value)}
-                                  placeholder="e.g., HKM-INV-2024-001"
+                                  placeholder="e.g., HKM123456789 or HKM-INV-2024-001"
                                   className="form-control-modern"
                                   required
                                 />
@@ -1010,8 +1010,8 @@ const Verify = () => {
                               </InputGroup>
                               <Form.Text className="text-muted mt-2">
                                 <i className="bi bi-info-circle me-1"></i>
-                                Enter the invoice ID exactly as shown on your
-                                medical invoice
+                                Enter the order ID (HKM...) or invoice ID
+                                exactly as shown on your document
                               </Form.Text>
                             </Form.Group>
                           </Col>
