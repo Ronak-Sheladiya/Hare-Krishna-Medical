@@ -128,16 +128,24 @@ router.post(
       // Emit socket event for real-time updates
       const io = req.app.get("io");
       if (io) {
-        io.notifyUser(req.user._id.toString(), "order-created", {
-          orderId: order.orderId,
-          totalAmount: order.totalAmount,
-        });
+        // Only notify user if authenticated
+        if (req.user) {
+          io.notifyUser(req.user._id.toString(), "order-created", {
+            orderId: order.orderId,
+            totalAmount: order.totalAmount,
+          });
+        }
 
+        // Notify admins about new order
+        const customerName = order.user
+          ? order.user.fullName
+          : order.guestUserInfo?.fullName || "Guest User";
         io.broadcastToAdmins("new-order", {
           orderId: order.orderId,
-          customerName: order.user.fullName,
+          customerName: customerName,
           totalAmount: order.totalAmount,
           timestamp: order.createdAt,
+          isGuestOrder: !order.user,
         });
       }
 
