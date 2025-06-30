@@ -1,7 +1,12 @@
 const express = require("express");
 const Order = require("../models/Order");
 const Product = require("../models/Product");
-const { requireAdmin, requireOwnershipOrAdmin } = require("../middleware/auth");
+const {
+  requireAdmin,
+  requireOwnershipOrAdmin,
+  optionalAuth,
+  authenticateToken,
+} = require("../middleware/auth");
 const {
   validationRules,
   handleValidationErrors,
@@ -12,9 +17,10 @@ const router = express.Router();
 
 // @route   POST /api/orders
 // @desc    Create new order
-// @access  Private
+// @access  Private/Guest
 router.post(
   "/",
+  optionalAuth,
   validationRules.orderCreate,
   handleValidationErrors,
   async (req, res) => {
@@ -66,9 +72,9 @@ router.post(
       const tax = Math.round(subtotal * 0.18 * 100) / 100; // 18% GST
       const totalAmount = subtotal + shippingCharges + tax;
 
-      // Create order
+      // Create order (handle both authenticated and guest users)
       const order = new Order({
-        user: req.user._id,
+        user: req.user ? req.user._id : null, // Allow null for guest orders
         items: orderItems,
         shippingAddress: shippingAddress || billingAddress,
         billingAddress: billingAddress || shippingAddress,
@@ -78,6 +84,16 @@ router.post(
         totalAmount,
         paymentMethod,
         notes: { customerNote },
+        // For guest orders, store basic user info in notes
+        ...(req.user
+          ? {}
+          : {
+              guestUserInfo: {
+                email: req.body.guestEmail,
+                fullName: shippingAddress.fullName,
+                mobile: shippingAddress.mobile,
+              },
+            }),
       });
 
       await order.save();
@@ -93,28 +109,46 @@ router.post(
       order.calculateEstimatedDelivery();
       await order.save();
 
-      await order.populate("user", "fullName email");
+      // Populate user if order has a user (authenticated order)
+      if (order.user) {
+        await order.populate("user", "fullName email");
+      }
 
       // Send order confirmation email (don't wait for it)
-      sendOrderConfirmationEmail(
-        order.user.email,
-        order.user.fullName,
-        order,
-      ).catch((err) => console.error("Order confirmation email failed:", err));
+      const userEmail = order.user
+        ? order.user.email
+        : order.guestUserInfo?.email;
+      const userName = order.user
+        ? order.user.fullName
+        : order.guestUserInfo?.fullName;
+
+      if (userEmail && userName) {
+        sendOrderConfirmationEmail(userEmail, userName, order).catch((err) =>
+          console.error("Order confirmation email failed:", err),
+        );
+      }
 
       // Emit socket event for real-time updates
       const io = req.app.get("io");
       if (io) {
-        io.notifyUser(req.user._id.toString(), "order-created", {
-          orderId: order.orderId,
-          totalAmount: order.totalAmount,
-        });
+        // Only notify user if authenticated
+        if (req.user) {
+          io.notifyUser(req.user._id.toString(), "order-created", {
+            orderId: order.orderId,
+            totalAmount: order.totalAmount,
+          });
+        }
 
+        // Notify admins about new order
+        const customerName = order.user
+          ? order.user.fullName
+          : order.guestUserInfo?.fullName || "Guest User";
         io.broadcastToAdmins("new-order", {
           orderId: order.orderId,
-          customerName: order.user.fullName,
+          customerName: customerName,
           totalAmount: order.totalAmount,
           timestamp: order.createdAt,
+          isGuestOrder: !order.user,
         });
       }
 
@@ -138,6 +172,7 @@ router.post(
 // @access  Private
 router.get(
   "/",
+  authenticateToken,
   validationRules.pagination,
   handleValidationErrors,
   async (req, res) => {
@@ -210,6 +245,7 @@ router.get(
 // @access  Private (Owner or Admin)
 router.get(
   "/:id",
+  authenticateToken,
   validationRules.mongoId,
   handleValidationErrors,
   async (req, res) => {
@@ -403,6 +439,60 @@ router.post(
     }
   },
 );
+
+// @route   GET /api/orders/verify/:orderId
+// @desc    Verify order (public access for QR verification)
+// @access  Public
+router.get("/verify/:orderId", async (req, res) => {
+  try {
+    const order = await Order.findOne({ orderId: req.params.orderId })
+      .populate("user", "fullName email")
+      .populate("items.product", "name");
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    // Return public order verification data
+    const publicData = {
+      orderId: order.orderId,
+      orderDate: order.createdAt,
+      customerName: order.user
+        ? order.user.fullName
+        : order.guestUserInfo?.fullName || "Guest Customer",
+      totalAmount: order.totalAmount,
+      status: order.orderStatus,
+      paymentStatus: order.paymentStatus,
+      paymentMethod: order.paymentMethod,
+      items: order.items.map((item) => ({
+        name: item.productName,
+        quantity: item.quantity,
+        price: item.price,
+        totalPrice: item.totalPrice,
+      })),
+      shippingAddress: {
+        city: order.shippingAddress.city,
+        state: order.shippingAddress.state,
+        pincode: order.shippingAddress.pincode,
+      },
+      isVerified: true,
+    };
+
+    res.json({
+      success: true,
+      data: { order: publicData },
+    });
+  } catch (error) {
+    console.error("Verify order error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to verify order",
+    });
+  }
+});
 
 // @route   GET /api/orders/stats/summary
 // @desc    Get order statistics

@@ -59,6 +59,10 @@ const Verify = () => {
         setDocumentId(id);
         setDocumentType(type);
         handleDocumentVerify(id, type);
+      } else if (type === "order") {
+        setActiveTab("invoices");
+        setInvoiceId(id);
+        handleOrderVerify(id);
       }
     }
 
@@ -148,6 +152,63 @@ const Verify = () => {
     }
   };
 
+  // Order verification logic
+  const handleOrderVerify = async (id = invoiceId) => {
+    if (!id.trim()) {
+      setInvoiceError("Please enter an order ID");
+      return;
+    }
+
+    setInvoiceLoading(true);
+    setInvoiceError("");
+    setInvoice(null);
+    setInvoiceSuccess(false);
+
+    try {
+      const response = await safeApiCall(
+        () => api.get(`/orders/verify/${encodeURIComponent(id)}`),
+        null,
+      );
+
+      if (response.success && response.data) {
+        // Convert order data to invoice-like format for display
+        const orderData = response.data.order;
+        const invoiceData = {
+          id: orderData.orderId,
+          customerName: orderData.customerName,
+          amount: orderData.totalAmount,
+          status: orderData.status,
+          date: orderData.orderDate,
+          paymentStatus: orderData.paymentStatus,
+          paymentMethod: orderData.paymentMethod,
+          items: orderData.items,
+          shippingAddress: orderData.shippingAddress,
+          isOrder: true, // Flag to indicate this is an order, not an invoice
+        };
+
+        setInvoice(invoiceData);
+        setInvoiceSuccess(true);
+
+        // Update URL
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.set("id", id);
+        newUrl.searchParams.set("type", "order");
+        window.history.replaceState({}, "", newUrl);
+      } else {
+        setInvoiceError(
+          response.message || "Order not found or verification failed",
+        );
+      }
+    } catch (err) {
+      console.error("Order verification error:", err);
+      setInvoiceError(
+        "Failed to verify order. Please check the ID and try again.",
+      );
+    } finally {
+      setInvoiceLoading(false);
+    }
+  };
+
   // Invoice verification logic
   const handleInvoiceVerify = async (id = invoiceId) => {
     if (!id.trim()) {
@@ -161,6 +222,12 @@ const Verify = () => {
     setInvoiceSuccess(false);
 
     try {
+      // First try to verify as an order (since that's what we're generating now)
+      if (id.startsWith("HKM")) {
+        await handleOrderVerify(id);
+        return;
+      }
+
       const response = await safeApiCall(
         () => api.get(`/invoices/verify/${encodeURIComponent(id)}`),
         null,
@@ -224,6 +291,10 @@ const Verify = () => {
           setDocumentType(type);
           setDocumentId(id);
           handleDocumentVerify(id, type);
+        } else if (type === "order") {
+          setActiveTab("invoices");
+          setInvoiceId(id);
+          handleOrderVerify(id);
         }
         setShowQRScanner(false);
         return;
@@ -883,7 +954,7 @@ const Verify = () => {
                     title={
                       <span>
                         <i className="bi bi-receipt me-2"></i>
-                        Quick Invoice Verification
+                        Invoice & Order Verification
                       </span>
                     }
                   >
@@ -911,14 +982,14 @@ const Verify = () => {
                             <Form.Group className="mb-4">
                               <Form.Label className="fw-bold text-dark mb-3">
                                 <i className="bi bi-hash me-2 text-danger"></i>
-                                Invoice ID / Reference Number
+                                Order/Invoice ID / Reference Number
                               </Form.Label>
                               <InputGroup>
                                 <Form.Control
                                   type="text"
                                   value={invoiceId}
                                   onChange={(e) => setInvoiceId(e.target.value)}
-                                  placeholder="e.g., HKM-INV-2024-001"
+                                  placeholder="e.g., HKM123456789 or HKM-INV-2024-001"
                                   className="form-control-modern"
                                   required
                                 />
@@ -939,8 +1010,8 @@ const Verify = () => {
                               </InputGroup>
                               <Form.Text className="text-muted mt-2">
                                 <i className="bi bi-info-circle me-1"></i>
-                                Enter the invoice ID exactly as shown on your
-                                medical invoice
+                                Enter the order ID (HKM...) or invoice ID
+                                exactly as shown on your document
                               </Form.Text>
                             </Form.Group>
                           </Col>
