@@ -169,6 +169,7 @@ router.post(
 // @access  Private
 router.get(
   "/",
+  authenticateToken,
   validationRules.pagination,
   handleValidationErrors,
   async (req, res) => {
