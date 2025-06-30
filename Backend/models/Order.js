@@ -35,7 +35,12 @@ const orderSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false, // Allow null for guest orders
+    },
+    guestUserInfo: {
+      email: { type: String },
+      fullName: { type: String },
+      mobile: { type: String },
     },
     items: [orderItemSchema],
     shippingAddress: {
