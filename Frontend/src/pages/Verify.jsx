@@ -152,6 +152,63 @@ const Verify = () => {
     }
   };
 
+  // Order verification logic
+  const handleOrderVerify = async (id = invoiceId) => {
+    if (!id.trim()) {
+      setInvoiceError("Please enter an order ID");
+      return;
+    }
+
+    setInvoiceLoading(true);
+    setInvoiceError("");
+    setInvoice(null);
+    setInvoiceSuccess(false);
+
+    try {
+      const response = await safeApiCall(
+        () => api.get(`/orders/verify/${encodeURIComponent(id)}`),
+        null,
+      );
+
+      if (response.success && response.data) {
+        // Convert order data to invoice-like format for display
+        const orderData = response.data.order;
+        const invoiceData = {
+          id: orderData.orderId,
+          customerName: orderData.customerName,
+          amount: orderData.totalAmount,
+          status: orderData.status,
+          date: orderData.orderDate,
+          paymentStatus: orderData.paymentStatus,
+          paymentMethod: orderData.paymentMethod,
+          items: orderData.items,
+          shippingAddress: orderData.shippingAddress,
+          isOrder: true, // Flag to indicate this is an order, not an invoice
+        };
+
+        setInvoice(invoiceData);
+        setInvoiceSuccess(true);
+
+        // Update URL
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.set("id", id);
+        newUrl.searchParams.set("type", "order");
+        window.history.replaceState({}, "", newUrl);
+      } else {
+        setInvoiceError(
+          response.message || "Order not found or verification failed",
+        );
+      }
+    } catch (err) {
+      console.error("Order verification error:", err);
+      setInvoiceError(
+        "Failed to verify order. Please check the ID and try again.",
+      );
+    } finally {
+      setInvoiceLoading(false);
+    }
+  };
+
   // Invoice verification logic
   const handleInvoiceVerify = async (id = invoiceId) => {
     if (!id.trim()) {
@@ -165,6 +222,12 @@ const Verify = () => {
     setInvoiceSuccess(false);
 
     try {
+      // First try to verify as an order (since that's what we're generating now)
+      if (id.startsWith("HKM")) {
+        await handleOrderVerify(id);
+        return;
+      }
+
       const response = await safeApiCall(
         () => api.get(`/invoices/verify/${encodeURIComponent(id)}`),
         null,
