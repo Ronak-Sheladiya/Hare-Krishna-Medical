@@ -207,32 +207,90 @@ const Order = () => {
       return;
     }
 
-    const orderId = generateOrderId();
-    const invoiceId = `INV${orderId.slice(-6)}`;
-    const qrCodeData = await generateQRCode(invoiceId);
+    try {
+      // Prepare order data for backend API
+      const orderPayload = {
+        items: items.map((item) => ({
+          productId: item.id,
+          quantity: item.quantity,
+        })),
+        shippingAddress: {
+          fullName: formData.fullName,
+          mobile: formData.mobile,
+          street: formData.address,
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.pincode,
+          landmark: formData.landmark,
+        },
+        billingAddress: {
+          fullName: formData.fullName,
+          mobile: formData.mobile,
+          street: formData.address,
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.pincode,
+          landmark: formData.landmark,
+        },
+        paymentMethod: paymentMethod,
+        customerNote: `Email: ${formData.email}${formData.alternatePhone ? `, Alt Phone: ${formData.alternatePhone}` : ""}`,
+      };
 
-    const orderData = {
-      orderId,
-      invoiceId,
-      items: [...items],
-      customerDetails: { ...formData },
-      orderSummary: {
-        subtotal: totalAmount,
-        shipping: shippingCost,
-        tax: taxAmount,
-        total: finalTotal,
-      },
-      orderDate: new Date().toLocaleDateString(),
-      orderTime: new Date().toLocaleTimeString(),
-      status: "Pending",
-      paymentMethod: paymentMethod,
-      paymentStatus: "Pending",
-      qrCode: qrCodeData,
-    };
+      // Submit order to backend API
+      const token = localStorage.getItem("token");
+      const backendUrl =
+        import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
 
-    setOrderDetails(orderData);
-    setQrCode(qrCodeData);
-    setShowOrderModal(true);
+      const response = await fetch(`${backendUrl}/api/orders`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: JSON.stringify(orderPayload),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to place order");
+      }
+
+      const savedOrder = result.data.order;
+
+      // Generate QR code for the actual order ID
+      const qrCodeData = await generateQRCode(savedOrder.orderId);
+
+      const orderData = {
+        orderId: savedOrder.orderId,
+        invoiceId:
+          savedOrder.invoice?.invoiceId || `INV${savedOrder.orderId.slice(-6)}`,
+        items: [...items],
+        customerDetails: { ...formData },
+        orderSummary: {
+          subtotal: savedOrder.subtotal,
+          shipping: savedOrder.shippingCharges,
+          tax: savedOrder.tax,
+          total: savedOrder.totalAmount,
+        },
+        orderDate: new Date(savedOrder.createdAt).toLocaleDateString(),
+        orderTime: new Date(savedOrder.createdAt).toLocaleTimeString(),
+        status: savedOrder.orderStatus,
+        paymentMethod: savedOrder.paymentMethod,
+        paymentStatus: savedOrder.paymentStatus,
+        qrCode: qrCodeData,
+        backendOrder: savedOrder,
+      };
+
+      setOrderDetails(orderData);
+      setQrCode(qrCodeData);
+      setShowOrderModal(true);
+    } catch (error) {
+      console.error("Order placement error:", error);
+      alert(
+        `Failed to place order: ${error.message}. Please try again or contact support.`,
+      );
+    }
   };
 
   const handleOrderConfirm = () => {
