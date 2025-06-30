@@ -234,6 +234,8 @@ const Order = () => {
         },
         paymentMethod: paymentMethod,
         customerNote: `Email: ${formData.email}${formData.alternatePhone ? `, Alt Phone: ${formData.alternatePhone}` : ""}`,
+        // Include email for guest orders
+        guestEmail: formData.email,
       };
 
       // Submit order to backend API
