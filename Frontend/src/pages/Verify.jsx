@@ -291,6 +291,10 @@ const Verify = () => {
           setDocumentType(type);
           setDocumentId(id);
           handleDocumentVerify(id, type);
+        } else if (type === "order") {
+          setActiveTab("invoices");
+          setInvoiceId(id);
+          handleOrderVerify(id);
         }
         setShowQRScanner(false);
         return;
