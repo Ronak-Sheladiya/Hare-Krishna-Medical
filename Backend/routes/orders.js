@@ -437,6 +437,60 @@ router.post(
   },
 );
 
+// @route   GET /api/orders/verify/:orderId
+// @desc    Verify order (public access for QR verification)
+// @access  Public
+router.get("/verify/:orderId", async (req, res) => {
+  try {
+    const order = await Order.findOne({ orderId: req.params.orderId })
+      .populate("user", "fullName email")
+      .populate("items.product", "name");
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    // Return public order verification data
+    const publicData = {
+      orderId: order.orderId,
+      orderDate: order.createdAt,
+      customerName: order.user
+        ? order.user.fullName
+        : order.guestUserInfo?.fullName || "Guest Customer",
+      totalAmount: order.totalAmount,
+      status: order.orderStatus,
+      paymentStatus: order.paymentStatus,
+      paymentMethod: order.paymentMethod,
+      items: order.items.map((item) => ({
+        name: item.productName,
+        quantity: item.quantity,
+        price: item.price,
+        totalPrice: item.totalPrice,
+      })),
+      shippingAddress: {
+        city: order.shippingAddress.city,
+        state: order.shippingAddress.state,
+        pincode: order.shippingAddress.pincode,
+      },
+      isVerified: true,
+    };
+
+    res.json({
+      success: true,
+      data: { order: publicData },
+    });
+  } catch (error) {
+    console.error("Verify order error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to verify order",
+    });
+  }
+});
+
 // @route   GET /api/orders/stats/summary
 // @desc    Get order statistics
 // @access  Private (Admin only)
