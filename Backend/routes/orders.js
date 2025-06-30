@@ -242,6 +242,7 @@ router.get(
 // @access  Private (Owner or Admin)
 router.get(
   "/:id",
+  authenticateToken,
   validationRules.mongoId,
   handleValidationErrors,
   async (req, res) => {
