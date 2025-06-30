@@ -7,6 +7,10 @@ const {
   optionalAuth,
   authenticateToken,
 } = require("../middleware/auth");
+const {
+  validationRules,
+  handleValidationErrors,
+} = require("../middleware/validation");
 const { sendOrderConfirmationEmail } = require("../utils/emailService");
 
 const router = express.Router();
