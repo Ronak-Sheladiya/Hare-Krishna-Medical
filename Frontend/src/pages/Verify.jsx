@@ -59,6 +59,10 @@ const Verify = () => {
         setDocumentId(id);
         setDocumentType(type);
         handleDocumentVerify(id, type);
+      } else if (type === "order") {
+        setActiveTab("invoices");
+        setInvoiceId(id);
+        handleOrderVerify(id);
       }
     }
 
