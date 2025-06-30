@@ -3,9 +3,11 @@ const Order = require("../models/Order");
 const Product = require("../models/Product");
 const { requireAdmin, requireOwnershipOrAdmin } = require("../middleware/auth");
 const {
-  validationRules,
-  handleValidationErrors,
-} = require("../middleware/validation");
+  requireAdmin,
+  requireOwnershipOrAdmin,
+  optionalAuth,
+  authenticateToken,
+} = require("../middleware/auth");
 const { sendOrderConfirmationEmail } = require("../utils/emailService");
 
 const router = express.Router();
