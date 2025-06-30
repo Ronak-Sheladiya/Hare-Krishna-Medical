@@ -954,7 +954,7 @@ const Verify = () => {
                     title={
                       <span>
                         <i className="bi bi-receipt me-2"></i>
-                        Quick Invoice Verification
+                        Invoice & Order Verification
                       </span>
                     }
                   >
