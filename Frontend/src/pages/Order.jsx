@@ -181,10 +181,10 @@ const Order = () => {
     return "HKM" + Date.now().toString().slice(-8);
   };
 
-  const generateQRCode = async (invoiceId) => {
+  const generateQRCode = async (orderId) => {
     try {
-      // Generate QR for invoice verification using verify URL format
-      const verifyUrl = `${window.location.origin}/verify?id=${invoiceId}&type=invoice`;
+      // Generate QR for order verification using the order ID
+      const verifyUrl = `${window.location.origin}/verify?id=${orderId}&type=order`;
       const qrCodeDataURL = await QRCode.toDataURL(verifyUrl, {
         width: 200,
         margin: 2,
