@@ -69,9 +69,9 @@ router.post(
       const tax = Math.round(subtotal * 0.18 * 100) / 100; // 18% GST
       const totalAmount = subtotal + shippingCharges + tax;
 
-      // Create order
+      // Create order (handle both authenticated and guest users)
       const order = new Order({
-        user: req.user._id,
+        user: req.user ? req.user._id : null, // Allow null for guest orders
         items: orderItems,
         shippingAddress: shippingAddress || billingAddress,
         billingAddress: billingAddress || shippingAddress,
@@ -81,6 +81,16 @@ router.post(
         totalAmount,
         paymentMethod,
         notes: { customerNote },
+        // For guest orders, store basic user info in notes
+        ...(req.user
+          ? {}
+          : {
+              guestUserInfo: {
+                email: req.body.guestEmail,
+                fullName: shippingAddress.fullName,
+                mobile: shippingAddress.mobile,
+              },
+            }),
       });
 
       await order.save();
