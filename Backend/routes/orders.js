@@ -106,14 +106,24 @@ router.post(
       order.calculateEstimatedDelivery();
       await order.save();
 
-      await order.populate("user", "fullName email");
+      // Populate user if order has a user (authenticated order)
+      if (order.user) {
+        await order.populate("user", "fullName email");
+      }
 
       // Send order confirmation email (don't wait for it)
-      sendOrderConfirmationEmail(
-        order.user.email,
-        order.user.fullName,
-        order,
-      ).catch((err) => console.error("Order confirmation email failed:", err));
+      const userEmail = order.user
+        ? order.user.email
+        : order.guestUserInfo?.email;
+      const userName = order.user
+        ? order.user.fullName
+        : order.guestUserInfo?.fullName;
+
+      if (userEmail && userName) {
+        sendOrderConfirmationEmail(userEmail, userName, order).catch((err) =>
+          console.error("Order confirmation email failed:", err),
+        );
+      }
 
       // Emit socket event for real-time updates
       const io = req.app.get("io");
