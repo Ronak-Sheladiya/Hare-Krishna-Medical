@@ -4,6 +4,10 @@ import { getBackendURL } from "./config.js";
 // Use consistent backend URL across the application
 const getApiBaseUrl = () => {
   const url = getBackendURL();
+  if (!url) {
+    console.log(`📱 Frontend-only mode: No API calls`);
+    return null;
+  }
   console.log(`🔗 API Client using: ${url}`);
   return url;
 };
@@ -67,6 +71,18 @@ const DEFAULT_CONFIG = {
 export const apiCall = async (endpoint, options = {}) => {
   // Return a promise that always resolves, never rejects
   return new Promise((resolve) => {
+    // Check if running in frontend-only mode
+    const apiBaseUrl = getApiBaseUrl();
+    if (!apiBaseUrl) {
+      console.log(`📱 Frontend-only mode: Skipping API call to ${endpoint}`);
+      resolve({
+        success: false,
+        error: "Frontend-only mode: No backend connection",
+        frontendOnly: true,
+      });
+      return;
+    }
+
     // Wrap the entire async operation in try-catch to ensure promise always resolves
     const executeApiCall = async () => {
       try {
