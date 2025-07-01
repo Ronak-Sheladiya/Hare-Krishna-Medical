@@ -117,7 +117,6 @@ export const apiCall = async (endpoint, options = {}) => {
         }, config.timeout);
 
         let response;
-        const apiBaseUrl = getApiBaseUrl();
         try {
           response = await originalFetch(`${apiBaseUrl}${endpoint}`, {
             ...config,
