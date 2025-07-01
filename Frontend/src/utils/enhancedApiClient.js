@@ -1,267 +1,406 @@
-// Enhanced API client with better error handling and fallback mechanisms
-import { getBackendURL, isProduction } from "./config.js";
+// Enhanced API Client with Frontend-Only Mode Support
+import { apiCall } from "./apiClient.js";
+import { frontendOnlyApi, isFrontendOnlyMode } from "./frontendOnlyData.js";
+import { getAppConfig } from "./config.js";
 
-// Use consistent backend URL across the application
-const getApiBaseUrl = () => {
-  const url = getBackendURL();
-  console.log(`🔗 Enhanced API Client using: ${url}`);
-  return url;
-};
-const FALLBACK_BACKEND_URL = getBackendURL();
-
-/**
- * Make HTTP request with timeout
- */
-const makeRequest = async (url, config) => {
-  // Create abort controller for timeout
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), config.timeout);
-
+// Check if running in frontend-only mode
+const isAppFrontendOnly = () => {
   try {
-    const response = await fetch(url, {
-      ...config,
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-    return response;
+    const config = getAppConfig();
+    return config.frontendOnly || !config.hasBackend;
   } catch (error) {
-    clearTimeout(timeoutId);
-    throw error;
+    return true; // Default to frontend-only if config fails
   }
 };
 
-/**
- * Handle API response
- */
-const handleResponse = async (response) => {
-  if (!response.ok) {
-    let errorData;
-    try {
-      errorData = await response.json();
-    } catch (e) {
-      errorData = {
-        message: `HTTP ${response.status}: ${response.statusText}`,
+// Enhanced API client that automatically uses mock data in frontend-only mode
+class EnhancedApiClient {
+  constructor() {
+    this.frontendOnly = isAppFrontendOnly();
+    if (this.frontendOnly) {
+      console.log("📱 Enhanced API Client: Running in frontend-only mode");
+    }
+  }
+
+  // Authentication endpoints
+  async login(email, password) {
+    if (this.frontendOnly) {
+      return frontendOnlyApi.login(email, password);
+    }
+    return apiCall("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+  }
+
+  async register(userData) {
+    if (this.frontendOnly) {
+      return frontendOnlyApi.register(userData);
+    }
+    return apiCall("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify(userData),
+    });
+  }
+
+  async logout() {
+    if (this.frontendOnly) {
+      // Clear local storage in frontend-only mode
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("user");
+      return { success: true, message: "Logged out successfully" };
+    }
+    return apiCall("/api/auth/logout", { method: "POST" });
+  }
+
+  async getProfile() {
+    if (this.frontendOnly) {
+      return frontendOnlyApi.getProfile();
+    }
+    return apiCall("/api/auth/me");
+  }
+
+  async forgotPassword(email) {
+    if (this.frontendOnly) {
+      return {
+        success: true,
+        message: "Password reset email sent (demo mode)",
       };
     }
-
-    throw new Error(
-      errorData.message || `HTTP ${response.status}: ${response.statusText}`,
-    );
-  }
-
-  const contentType = response.headers.get("content-type");
-  if (contentType && contentType.includes("application/json")) {
-    const data = await response.json();
-    console.log(`✅ API Success:`, data);
-    return data;
-  } else {
-    const textData = await response.text();
-    return { success: true, data: textData };
-  }
-};
-
-/**
- * Test if backend is accessible
- */
-const testBackendConnectivity = async (baseUrl) => {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-    const response = await fetch(`${baseUrl}/api/health`, {
-      method: "GET",
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-    return response.ok;
-  } catch (error) {
-    console.warn(
-      `Backend connectivity test failed for ${baseUrl}:`,
-      error.message,
-    );
-    return false;
-  }
-};
-
-/**
- * Enhanced API call with automatic fallback and comprehensive error handling
- */
-const enhancedApiCall = async (endpoint, options = {}) => {
-  const config = {
-    timeout: 10000, // 10 seconds
-    headers: {
-      "Content-Type": "application/json",
-    },
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  };
-
-  // Add authentication token if available
-  try {
-    const token =
-      localStorage.getItem("token") || sessionStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-  } catch (e) {
-    console.warn("Could not access localStorage/sessionStorage for token");
-  }
-
-  // Get current backend URL dynamically
-  const currentApiUrl = getApiBaseUrl();
-
-  // In production, test connectivity first
-  if (isProduction()) {
-    console.log("🔍 Testing backend connectivity in production...");
-    const isConnectable = await testBackendConnectivity(currentApiUrl);
-    if (!isConnectable && currentApiUrl !== FALLBACK_BACKEND_URL) {
-      console.warn("⚠️ Primary backend not accessible, trying fallback...");
-      const fallbackConnectable =
-        await testBackendConnectivity(FALLBACK_BACKEND_URL);
-      if (fallbackConnectable) {
-        // Use fallback backend
-        const fallbackUrl = `${FALLBACK_BACKEND_URL}${endpoint}`;
-        console.log(`🔄 Using fallback backend: ${fallbackUrl}`);
-        try {
-          const response = await makeRequest(fallbackUrl, config);
-          return await handleResponse(response);
-        } catch (fallbackError) {
-          console.error("❌ Fallback backend also failed:", fallbackError);
-          throw new Error(
-            "Backend services are currently unavailable. Please try again later.",
-          );
-        }
-      } else {
-        throw new Error(
-          "Backend services are currently unavailable. Please try again later.",
-        );
-      }
-    } else if (!isConnectable) {
-      throw new Error(
-        "Backend service is currently unavailable. Please try again later.",
-      );
-    }
-  }
-
-  // Try primary backend first
-  const primaryUrl = `${currentApiUrl}${endpoint}`;
-  console.log(`🌐 API Call: ${config.method || "GET"} ${primaryUrl}`);
-
-  try {
-    const response = await makeRequest(primaryUrl, config);
-    console.log(`📊 API Response: ${response.status} ${response.statusText}`);
-    return await handleResponse(response);
-  } catch (primaryError) {
-    console.warn(`❌ Primary backend failed: ${primaryError.message}`);
-
-    // Try fallback backend if primary fails and we're in production or have connection issues
-    if (
-      currentApiUrl !== FALLBACK_BACKEND_URL &&
-      (isProduction() || primaryError.message.includes("Failed to fetch"))
-    ) {
-      const fallbackUrl = `${FALLBACK_BACKEND_URL}${endpoint}`;
-      console.log(`🔄 Trying fallback backend: ${fallbackUrl}`);
-
-      try {
-        const response = await makeRequest(fallbackUrl, config);
-        console.log(
-          `📊 Fallback API Response: ${response.status} ${response.statusText}`,
-        );
-        return await handleResponse(response);
-      } catch (fallbackError) {
-        console.error(
-          `❌ Fallback backend also failed: ${fallbackError.message}`,
-        );
-        // Fall through to original error handling
-      }
-    }
-
-    // Handle specific error types
-    console.error(`❌ API Error for ${endpoint}:`, primaryError);
-
-    if (primaryError.name === "AbortError") {
-      throw new Error("Request timed out - server may be slow or unreachable");
-    }
-
-    if (primaryError.message === "Failed to fetch") {
-      // Network connectivity issue
-      if (isProduction()) {
-        throw new Error(
-          "Service temporarily unavailable. Our team has been notified. Please try again in a few minutes.",
-        );
-      } else {
-        throw new Error(
-          "Unable to connect to server. Please check your internet connection.",
-        );
-      }
-    }
-
-    if (primaryError.message.includes("401")) {
-      // Authentication error
-      throw new Error("Session expired. Please log in again.");
-    }
-
-    if (primaryError.message.includes("403")) {
-      // Authorization error
-      throw new Error(
-        "Access denied. You do not have permission to perform this action.",
-      );
-    }
-
-    if (primaryError.message.includes("404")) {
-      // Not found error
-      throw new Error("The requested resource was not found on the server.");
-    }
-
-    if (primaryError.message.includes("500")) {
-      // Server error
-      throw new Error("Server error. Please try again later.");
-    }
-
-    // Re-throw the original error if it's already descriptive
-    throw primaryError;
-  }
-};
-
-/**
- * Enhanced API client with better error messages
- */
-export const enhancedApi = {
-  get: async (endpoint, options = {}) => {
-    return await enhancedApiCall(endpoint, { method: "GET", ...options });
-  },
-
-  post: async (endpoint, data, options = {}) => {
-    return await enhancedApiCall(endpoint, {
+    return apiCall("/api/auth/forgot-password", {
       method: "POST",
-      body: JSON.stringify(data),
-      ...options,
+      body: JSON.stringify({ email }),
     });
-  },
+  }
 
-  put: async (endpoint, data, options = {}) => {
-    return await enhancedApiCall(endpoint, {
+  async resetPassword(token, password) {
+    if (this.frontendOnly) {
+      return {
+        success: true,
+        message: "Password reset successful (demo mode)",
+      };
+    }
+    return apiCall("/api/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify({ token, password }),
+    });
+  }
+
+  async verifyEmail(token) {
+    if (this.frontendOnly) {
+      return {
+        success: true,
+        message: "Email verified successfully (demo mode)",
+      };
+    }
+    return apiCall("/api/auth/verify-email", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    });
+  }
+
+  // Product endpoints
+  async getProducts(params = {}) {
+    if (this.frontendOnly) {
+      return frontendOnlyApi.getProducts();
+    }
+    const queryString = new URLSearchParams(params).toString();
+    return apiCall(`/api/products${queryString ? `?${queryString}` : ""}`);
+  }
+
+  async getProduct(id) {
+    if (this.frontendOnly) {
+      return frontendOnlyApi.getProduct(id);
+    }
+    return apiCall(`/api/products/${id}`);
+  }
+
+  async getFeaturedProducts() {
+    if (this.frontendOnly) {
+      return frontendOnlyApi.getFeaturedProducts();
+    }
+    return apiCall("/api/products/featured");
+  }
+
+  async createProduct(productData) {
+    if (this.frontendOnly) {
+      return {
+        success: true,
+        message: "Product created successfully (demo mode)",
+      };
+    }
+    return apiCall("/api/products", {
+      method: "POST",
+      body: JSON.stringify(productData),
+    });
+  }
+
+  async updateProduct(id, productData) {
+    if (this.frontendOnly) {
+      return {
+        success: true,
+        message: "Product updated successfully (demo mode)",
+      };
+    }
+    return apiCall(`/api/products/${id}`, {
       method: "PUT",
-      body: JSON.stringify(data),
-      ...options,
+      body: JSON.stringify(productData),
     });
-  },
+  }
 
-  delete: async (endpoint, options = {}) => {
-    return await enhancedApiCall(endpoint, { method: "DELETE", ...options });
-  },
+  async deleteProduct(id) {
+    if (this.frontendOnly) {
+      return {
+        success: true,
+        message: "Product deleted successfully (demo mode)",
+      };
+    }
+    return apiCall(`/api/products/${id}`, { method: "DELETE" });
+  }
 
-  patch: async (endpoint, data, options = {}) => {
-    return await enhancedApiCall(endpoint, {
-      method: "PATCH",
-      body: JSON.stringify(data),
-      ...options,
+  // Order endpoints
+  async getOrders() {
+    if (this.frontendOnly) {
+      return frontendOnlyApi.getOrders();
+    }
+    return apiCall("/api/orders");
+  }
+
+  async getOrder(id) {
+    if (this.frontendOnly) {
+      const orders = await frontendOnlyApi.getOrders();
+      const order = orders.data.find((o) => o._id === id);
+      return order
+        ? { success: true, data: order }
+        : { success: false, error: "Order not found" };
+    }
+    return apiCall(`/api/orders/${id}`);
+  }
+
+  async createOrder(orderData) {
+    if (this.frontendOnly) {
+      return frontendOnlyApi.createOrder(orderData);
+    }
+    return apiCall("/api/orders", {
+      method: "POST",
+      body: JSON.stringify(orderData),
     });
-  },
+  }
+
+  async updateOrderStatus(id, status) {
+    if (this.frontendOnly) {
+      return {
+        success: true,
+        message: "Order status updated successfully (demo mode)",
+      };
+    }
+    return apiCall(`/api/orders/${id}/status`, {
+      method: "PUT",
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  // Cart endpoints (frontend-only since cart is managed locally)
+  async addToCart(productId, quantity = 1) {
+    // Cart is always managed locally in frontend
+    return { success: true, message: "Added to cart", frontendOnly: true };
+  }
+
+  async removeFromCart(productId) {
+    // Cart is always managed locally in frontend
+    return { success: true, message: "Removed from cart", frontendOnly: true };
+  }
+
+  async updateCartItem(productId, quantity) {
+    // Cart is always managed locally in frontend
+    return { success: true, message: "Cart updated", frontendOnly: true };
+  }
+
+  async clearCart() {
+    // Cart is always managed locally in frontend
+    return { success: true, message: "Cart cleared", frontendOnly: true };
+  }
+
+  // Message endpoints
+  async getMessages() {
+    if (this.frontendOnly) {
+      return frontendOnlyApi.getMessages();
+    }
+    return apiCall("/api/messages");
+  }
+
+  async sendMessage(messageData) {
+    if (this.frontendOnly) {
+      return frontendOnlyApi.sendMessage(messageData);
+    }
+    return apiCall("/api/messages", {
+      method: "POST",
+      body: JSON.stringify(messageData),
+    });
+  }
+
+  async markMessageAsRead(id) {
+    if (this.frontendOnly) {
+      return { success: true, message: "Message marked as read (demo mode)" };
+    }
+    return apiCall(`/api/messages/${id}/read`, { method: "PUT" });
+  }
+
+  // Analytics endpoints
+  async getAnalytics() {
+    if (this.frontendOnly) {
+      return frontendOnlyApi.getAnalytics();
+    }
+    return apiCall("/api/analytics");
+  }
+
+  async getDashboardStats() {
+    if (this.frontendOnly) {
+      return frontendOnlyApi.getAnalytics();
+    }
+    return apiCall("/api/analytics/dashboard");
+  }
+
+  // Invoice endpoints
+  async getInvoices() {
+    if (this.frontendOnly) {
+      return { success: true, data: [], message: "No invoices in demo mode" };
+    }
+    return apiCall("/api/invoices");
+  }
+
+  async getInvoice(id) {
+    if (this.frontendOnly) {
+      return { success: false, error: "Invoice not found in demo mode" };
+    }
+    return apiCall(`/api/invoices/${id}`);
+  }
+
+  async createInvoice(invoiceData) {
+    if (this.frontendOnly) {
+      return {
+        success: true,
+        message: "Invoice created successfully (demo mode)",
+      };
+    }
+    return apiCall("/api/invoices", {
+      method: "POST",
+      body: JSON.stringify(invoiceData),
+    });
+  }
+
+  // User management endpoints
+  async getUsers() {
+    if (this.frontendOnly) {
+      return { success: true, data: [], message: "No users in demo mode" };
+    }
+    return apiCall("/api/users");
+  }
+
+  async updateUser(id, userData) {
+    if (this.frontendOnly) {
+      return {
+        success: true,
+        message: "User updated successfully (demo mode)",
+      };
+    }
+    return apiCall(`/api/users/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(userData),
+    });
+  }
+
+  // File upload endpoints
+  async uploadFile(file, type = "image") {
+    if (this.frontendOnly) {
+      // Return a mock uploaded file URL
+      return {
+        success: true,
+        data: {
+          url: `https://via.placeholder.com/300x300?text=${encodeURIComponent(file.name)}`,
+          filename: file.name,
+          size: file.size,
+          type: file.type,
+        },
+        message: "File uploaded successfully (demo mode)",
+      };
+    }
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", type);
+
+    return apiCall("/api/upload", {
+      method: "POST",
+      body: formData,
+      headers: {}, // Remove Content-Type to let browser set it with boundary
+    });
+  }
+
+  // Health check
+  async health() {
+    if (this.frontendOnly) {
+      return frontendOnlyApi.health();
+    }
+    return apiCall("/api/health");
+  }
+
+  // Generic API call method
+  async call(endpoint, options = {}) {
+    if (this.frontendOnly) {
+      console.log(`📱 Frontend-only mode: Skipping API call to ${endpoint}`);
+      return {
+        success: false,
+        error: "Frontend-only mode: No backend connection",
+        frontendOnly: true,
+      };
+    }
+    return apiCall(endpoint, options);
+  }
+}
+
+// Create and export a singleton instance
+const enhancedApiClient = new EnhancedApiClient();
+
+// Export both the class and the singleton instance
+export { EnhancedApiClient };
+export default enhancedApiClient;
+
+// Convenient named exports for common operations
+export const api = enhancedApiClient;
+export const auth = {
+  login: (email, password) => enhancedApiClient.login(email, password),
+  register: (userData) => enhancedApiClient.register(userData),
+  logout: () => enhancedApiClient.logout(),
+  getProfile: () => enhancedApiClient.getProfile(),
+  forgotPassword: (email) => enhancedApiClient.forgotPassword(email),
+  resetPassword: (token, password) =>
+    enhancedApiClient.resetPassword(token, password),
+  verifyEmail: (token) => enhancedApiClient.verifyEmail(token),
 };
 
-export default enhancedApi;
+export const products = {
+  getAll: (params) => enhancedApiClient.getProducts(params),
+  getOne: (id) => enhancedApiClient.getProduct(id),
+  getFeatured: () => enhancedApiClient.getFeaturedProducts(),
+  create: (data) => enhancedApiClient.createProduct(data),
+  update: (id, data) => enhancedApiClient.updateProduct(id, data),
+  delete: (id) => enhancedApiClient.deleteProduct(id),
+};
+
+export const orders = {
+  getAll: () => enhancedApiClient.getOrders(),
+  getOne: (id) => enhancedApiClient.getOrder(id),
+  create: (data) => enhancedApiClient.createOrder(data),
+  updateStatus: (id, status) => enhancedApiClient.updateOrderStatus(id, status),
+};
+
+export const cart = {
+  add: (productId, quantity) =>
+    enhancedApiClient.addToCart(productId, quantity),
+  remove: (productId) => enhancedApiClient.removeFromCart(productId),
+  update: (productId, quantity) =>
+    enhancedApiClient.updateCartItem(productId, quantity),
+  clear: () => enhancedApiClient.clearCart(),
+};
