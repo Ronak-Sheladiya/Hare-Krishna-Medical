@@ -1,28 +1,17 @@
 {
   "name": "hare-krishna-medical-store",
   "version": "1.0.0",
-  "description": "Medical store frontend and backend application",
+  "description": "Medical store frontend application",
   "type": "module",
   "private": true,
   "scripts": {
-    "install:frontend": "cd Frontend && npm install",
-    "install:backend": "cd Backend && npm install",
-    "install:all": "npm run install:frontend && npm run install:backend",
-    "dev:frontend": "cd Frontend && npm run dev",
-    "dev:backend": "cd Backend && npm run dev",
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "build:frontend": "cd Frontend && npm run build",
-    "build:backend": "cd Backend && npm run build",
-    "build": "npm run build:backend && npm run build:frontend",
-    "start:frontend": "cd Frontend && npm run preview",
-    "start:backend": "cd Backend && npm start",
-    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "seed": "cd Backend && node scripts/seed.js"
+    "install": "cd Frontend && npm install",
+    "dev": "cd Frontend && npm run dev",
+    "build": "cd Frontend && npm run build",
+    "start": "cd Frontend && npm run preview",
+    "test": "cd Frontend && npm test"
   },
-  "dependencies": {
-    "concurrently": "^8.2.2"
-  },
+  "dependencies": {},
   "devDependencies": {},
   "keywords": [
     "medical",
