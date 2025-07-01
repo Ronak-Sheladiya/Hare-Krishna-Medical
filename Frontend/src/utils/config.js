@@ -68,63 +68,23 @@ export const getPrimaryDomain = () => {
 };
 
 /**
- * Get backend URL based on environment
+ * Get backend URL based on environment (disabled for frontend-only mode)
  * @returns {string}
  */
 export const getBackendURL = () => {
-  const hostname =
-    typeof window !== "undefined" ? window.location.hostname : "";
-
-  // Use environment variable if set (highest priority)
-  if (import.meta.env.VITE_BACKEND_URL) {
-    console.log(
-      `🔧 Using explicit backend URL: ${import.meta.env.VITE_BACKEND_URL}`,
-    );
-    return import.meta.env.VITE_BACKEND_URL;
-  }
-
-  // Development environment detection
-  if (
-    hostname === "localhost" ||
-    hostname === "127.0.0.1" ||
-    hostname === "" ||
-    hostname.includes("localhost") ||
-    isDevelopment()
-  ) {
-    const localBackend = "http://localhost:5001";
-    console.log(`🛠️ Development: Using local backend: ${localBackend}`);
-    return localBackend;
-  }
-
-  // Production backend URL mapping
-  const backendMap = {
-    "hk-medical.vercel.app": "https://hare-krishna-medical.onrender.com",
-    "hkmedical.vercel.app": "https://hare-krishna-medical.onrender.com",
-    "harekrishnamedical.vercel.app":
-      "https://hare-krishna-medical.onrender.com",
-    "hare-krishna-medical.vercel.app":
-      "https://hare-krishna-medical.onrender.com",
-  };
-
-  // Check if hostname has a specific backend mapping
-  if (backendMap[hostname]) {
-    console.log(`🚀 Production: ${hostname} -> ${backendMap[hostname]}`);
-    return backendMap[hostname];
-  }
-
-  // Default production backend URL
-  const defaultProdURL = "https://hare-krishna-medical.onrender.com";
-  console.log(`🚀 Default production backend: ${defaultProdURL}`);
-  return defaultProdURL;
+  // Frontend-only mode - no backend connection
+  console.log(`📱 Frontend-only mode: No backend connection`);
+  return null;
 };
 
 /**
- * Get Socket.IO URL based on environment
+ * Get Socket.IO URL based on environment (disabled for frontend-only mode)
  * @returns {string}
  */
 export const getSocketURL = () => {
-  // Socket URL is the same as backend URL
-  return getBackendURL();
+  // Frontend-only mode - no socket connection
+  console.log(`📱 Frontend-only mode: No socket connection`);
+  return null;
 };
 
 /**
@@ -142,9 +102,9 @@ export const getAppConfig = () => {
     frontendURLs: getFrontendURLs(),
     primaryDomain: getPrimaryDomain(),
     maxFileSize: parseInt(import.meta.env.VITE_MAX_FILE_SIZE) || 5242880,
-    // Backend integration enabled for production
-    frontendOnly: false,
-    hasBackend: true,
+    // Backend integration disabled - frontend-only mode
+    frontendOnly: true,
+    hasBackend: false,
   };
 };
 
@@ -167,12 +127,12 @@ if (isDevelopment() || import.meta.env.VITE_DEBUG === "true") {
 // Always log basic config for debugging
 if (typeof window !== "undefined") {
   const hostname = window.location.hostname;
-  console.group("🔧 Full-Stack App Configuration");
+  console.group("🔧 Frontend-Only App Configuration");
   console.log(`🌐 App running on: ${hostname}`);
   console.log(`📍 Environment: ${getEnvironment()}`);
   console.log(`🏭 Production mode: ${isProduction()}`);
-  console.log(`🎨 Backend URL: ${getBackendURL()}`);
-  console.log(`📦 Backend: ENABLED`);
+  console.log(`📱 Mode: FRONTEND-ONLY`);
+  console.log(`📦 Backend: DISABLED`);
   console.groupEnd();
 }
 
