@@ -12,8 +12,13 @@
     "start": "cd Backend && npm start",
     "start:backend": "cd Backend && npm run dev",
     "build": "cd Frontend && npm run build",
+    "build:frontend": "cd Frontend && npm run build",
     "test": "cd Frontend && npm test",
-    "test:backend": "cd Backend && npm test"
+    "test:backend": "cd Backend && npm test",
+    "deploy:check": "node deploy.js",
+    "vercel:deploy": "vercel --prod",
+    "production:setup": "npm run install:all && npm run build:frontend && npm run deploy:check",
+    "setup:supabase": "node setup-supabase.js"
   },
   "engines": {
     "node": ">=16.0.0"

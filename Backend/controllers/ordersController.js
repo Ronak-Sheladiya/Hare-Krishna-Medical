@@ -1,7 +1,4 @@
-const Order = require("../models/Order");
-const Product = require("../models/Product");
-const User = require("../models/User");
-const Invoice = require("../models/Invoice");
+const { supabase, supabaseAdmin } = require("../config/supabase");
 const emailService = require("../utils/emailService");
 
 class OrdersController {

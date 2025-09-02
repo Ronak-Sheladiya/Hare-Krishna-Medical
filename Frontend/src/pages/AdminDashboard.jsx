@@ -19,13 +19,21 @@ import {
   StatsCard,
 } from "../components/common/ConsistentTheme";
 import ProfessionalLoading from "../components/common/ProfessionalLoading";
+import { useSupabaseRealtime } from "../hooks/useSupabaseRealtime";
+import supabaseService from "../services/supabaseService";
 
 const AdminDashboard = () => {
   const { unreadCount } = useSelector((state) => state.messages);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Real dashboard data state
+  // Real-time data from Supabase
+  const { data: orders, loading: ordersLoading } = useSupabaseRealtime('orders', []);
+  const { data: products, loading: productsLoading } = useSupabaseRealtime('products', []);
+  const { data: users, loading: usersLoading } = useSupabaseRealtime('users', []);
+  const { data: invoices, loading: invoicesLoading } = useSupabaseRealtime('invoices', []);
+
+  // Computed dashboard stats
   const [dashboardStats, setDashboardStats] = useState({
     totalOrders: 0,
     totalProducts: 0,
@@ -41,112 +49,48 @@ const AdminDashboard = () => {
   const [recentOrders, setRecentOrders] = useState([]);
   const [lowStockProducts, setLowStockProducts] = useState([]);
 
-  // Fetch dashboard data
-  const fetchDashboardData = async () => {
-    setLoading(true);
-    setError(null);
-
-    // Fetch all required data using the safe API client
-    const [statsResult, ordersResult, productsResult] = await Promise.all([
-      safeApiCall(() => api.get("/api/analytics/dashboard-stats"), {}),
-      safeApiCall(
-        () => api.get("/api/orders?limit=5&sort=createdAt&order=desc"),
-        [],
-      ),
-      safeApiCall(() => api.get("/api/products?limit=10&stock=low"), []),
-    ]);
-
-    // Process stats
-    if (statsResult.success && statsResult.data?.data) {
-      setDashboardStats((prev) => ({
-        ...prev,
-        ...statsResult.data.data,
-        unreadMessages: unreadCount || 0,
-      }));
-    }
-
-    // Process recent orders
-    if (ordersResult.success && ordersResult.data?.data) {
-      setRecentOrders(ordersResult.data.data);
-    }
-
-    // Process low stock products
-    if (productsResult.success && productsResult.data?.data) {
-      const products = Array.isArray(productsResult.data.data)
-        ? productsResult.data.data
-        : productsResult.data.data.products || [];
-
-      const lowStock = products.filter(
-        (product) => product.stock <= (product.lowStockThreshold || 10),
-      );
-      setLowStockProducts(lowStock);
-    }
-
-    // Set error only if all API calls failed
-    if (
-      !statsResult.success &&
-      !ordersResult.success &&
-      !productsResult.success
-    ) {
-      setError(
-        "Unable to load dashboard data. Please check if the backend server is running.",
-      );
-    }
-
-    setLoading(false);
-  };
-
+  // Calculate dashboard stats from real-time data
   useEffect(() => {
-    fetchDashboardData();
+    const totalOrders = orders.length;
+    const totalProducts = products.length;
+    const totalUsers = users.length;
+    const totalRevenue = invoices.reduce((sum, invoice) => sum + (invoice.total || 0), 0);
+    const pendingOrders = orders.filter(order => order.status === 'pending').length;
+    const lowStock = products.filter(product => product.stock <= (product.low_stock_threshold || 10));
+    
+    // Get today's date for new users calculation
+    const today = new Date().toISOString().split('T')[0];
+    const newUsersToday = users.filter(user => 
+      user.created_at && user.created_at.startsWith(today)
+    ).length;
 
-    // Setup real-time refresh listeners
-    const handleRefreshOrders = () => {
-      console.log("Refreshing dashboard due to order updates");
-      fetchDashboardData();
-    };
+    setDashboardStats({
+      totalOrders,
+      totalProducts,
+      totalUsers,
+      totalRevenue,
+      monthlyGrowth: 0, // Calculate based on historical data
+      pendingOrders,
+      lowStockProducts: lowStock.length,
+      newUsersToday,
+      unreadMessages: unreadCount || 0,
+    });
 
-    const handleRefreshProducts = () => {
-      console.log("Refreshing dashboard due to product updates");
-      fetchDashboardData();
-    };
+    // Set recent orders (last 5)
+    const sortedOrders = [...orders].sort((a, b) => 
+      new Date(b.created_at) - new Date(a.created_at)
+    ).slice(0, 5);
+    setRecentOrders(sortedOrders);
 
-    const handleRefreshAnalytics = () => {
-      console.log("Refreshing dashboard due to analytics updates");
-      fetchDashboardData();
-    };
+    // Set low stock products
+    setLowStockProducts(lowStock);
+    
+    // Update loading state
+    setLoading(ordersLoading || productsLoading || usersLoading || invoicesLoading);
+  }, [orders, products, users, invoices, unreadCount, ordersLoading, productsLoading, usersLoading, invoicesLoading]);
 
-    const handleRefreshDashboard = () => {
-      console.log("Refreshing dashboard due to general updates");
-      fetchDashboardData();
-    };
-
-    const handleProfileUpdate = () => {
-      console.log("Refreshing dashboard due to profile updates");
-      fetchDashboardData();
-    };
-
-    // Add event listeners for real-time updates
-    window.addEventListener("refreshOrders", handleRefreshOrders);
-    window.addEventListener("refreshProducts", handleRefreshProducts);
-    window.addEventListener("refreshAnalytics", handleRefreshAnalytics);
-    window.addEventListener("refreshDashboard", handleRefreshDashboard);
-    window.addEventListener("profileUpdated", handleProfileUpdate);
-
-    // Auto-refresh dashboard every 30 seconds for live data
-    const autoRefreshInterval = setInterval(() => {
-      console.log("Auto-refreshing dashboard data");
-      fetchDashboardData();
-    }, 30000);
-
-    return () => {
-      window.removeEventListener("refreshOrders", handleRefreshOrders);
-      window.removeEventListener("refreshProducts", handleRefreshProducts);
-      window.removeEventListener("refreshAnalytics", handleRefreshAnalytics);
-      window.removeEventListener("refreshDashboard", handleRefreshDashboard);
-      window.removeEventListener("profileUpdated", handleProfileUpdate);
-      clearInterval(autoRefreshInterval);
-    };
-  }, [unreadCount]);
+  // Real-time updates are handled automatically by Supabase hooks
+  // No need for manual refresh intervals or event listeners
 
   const getStatusVariant = (status) => {
     switch (status?.toLowerCase()) {

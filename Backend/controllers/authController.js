@@ -1,18 +1,19 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const User = require("../models/User");
+const { supabase, supabaseAdmin } = require("../config/supabase");
 const emailService = require("../utils/emailService");
-const mongoose = require("mongoose");
-const { devAuth, shouldUseFallback } = require("../utils/devFallback");
 
 class AuthController {
   // Check database connectivity
-  checkDBConnection() {
-    if (mongoose.connection.readyState !== 1) {
-      throw new Error(
-        "Database connection not available. Please ensure MongoDB is running.",
-      );
+  async checkDBConnection() {
+    try {
+      const { error } = await supabase.from('users').select('count').limit(1);
+      if (error && error.code !== 'PGRST116') {
+        throw new Error("Supabase connection not available.");
+      }
+    } catch (err) {
+      throw new Error("Database connection failed.");
     }
   }
   // Register a new user
@@ -20,98 +21,75 @@ class AuthController {
     try {
       const { fullName, email, mobile, password, address } = req.body;
 
-      // Use development fallback if database is not available
-      if (shouldUseFallback()) {
-        console.log("🔄 Using development fallback for registration");
-        const result = await devAuth.register({
-          fullName,
-          email,
-          mobile,
-          password,
-          address,
-        });
-
-        return res.status(201).json({
-          message: "Registration successful (Development Mode)",
-          token: result.token,
-          user: result.user,
-        });
-      }
-
-      // Check database connectivity
-      this.checkDBConnection();
-
       // Check if user already exists
-      const existingUser = await User.findOne({
-        $or: [{ email }, { mobile }],
-      });
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('email, mobile')
+        .or(`email.eq.${email},mobile.eq.${mobile}`);
 
-      if (existingUser) {
+      if (existingUser && existingUser.length > 0) {
+        const existing = existingUser[0];
         return res.status(400).json({
-          message:
-            existingUser.email === email
-              ? "User with this email already exists"
-              : "User with this mobile number already exists",
+          message: existing.email === email
+            ? "User with this email already exists"
+            : "User with this mobile number already exists",
         });
       }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 12);
 
       // Create new user
-      const user = new User({
-        fullName,
+      const userData = {
+        full_name: fullName,
         email,
         mobile,
-        password,
+        password_hash: hashedPassword,
         address,
-        emailVerificationToken: crypto.randomBytes(32).toString("hex"),
-      });
+        role: 0, // Regular user
+        email_verified: false,
+        is_active: true
+      };
 
-      await user.save();
+      const { data: user, error } = await supabase
+        .from('users')
+        .insert(userData)
+        .select()
+        .single();
+
+      if (error) throw error;
 
       // Generate JWT token
-      const token = user.generateAuthToken();
-
-      // Generate and send OTP for email verification
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      user.emailOTP = otp;
-      user.emailOTPExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-      await user.save();
-
-      // Send OTP for email verification
-      try {
-        await emailService.sendVerificationEmail(
-          user.email,
-          user.fullName,
-          otp,
-        );
-      } catch (emailError) {
-        console.error("OTP email failed:", emailError);
-      }
+      const token = jwt.sign(
+        { id: user.id, email: user.email, role: user.role },
+        process.env.JWT_SECRET || 'fallback-secret',
+        { expiresIn: '7d' }
+      );
 
       // Emit real-time update
       const io = req.app.get("io");
       if (io) {
         io.to("admin-room").emit("new-user-registered", {
           user: {
-            id: user._id,
-            fullName: user.fullName,
+            id: user.id,
+            fullName: user.full_name,
             email: user.email,
-            registeredAt: user.createdAt,
+            registeredAt: user.created_at,
           },
         });
       }
 
       res.status(201).json({
-        message:
-          "User registered successfully. Please check your email for verification OTP.",
+        message: "User registered successfully",
         token,
         user: {
-          id: user._id,
-          fullName: user.fullName,
+          id: user.id,
+          fullName: user.full_name,
           email: user.email,
           mobile: user.mobile,
           role: user.role,
           address: user.address,
-          emailVerified: user.emailVerified,
+          emailVerified: user.email_verified,
         },
       });
     } catch (error) {
@@ -128,86 +106,69 @@ class AuthController {
     try {
       const { email, password } = req.body;
 
-      // Use development fallback if database is not available
-      if (shouldUseFallback()) {
-        console.log("🔄 Using development fallback for login");
-        const result = await devAuth.login(email, password);
+      // Find user
+      const { data: users, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email)
+        .eq('is_active', true);
 
-        return res.json({
-          message: "Login successful (Development Mode)",
-          token: result.token,
-          user: result.user,
-        });
-      }
+      if (error) throw error;
 
-      // Check database connectivity
-      this.checkDBConnection();
-
-      // Find user and include password for comparison
-      const user = await User.findOne({ email }).select("+password");
-
-      if (!user) {
-        console.log(`❌ Login failed: User not found for email: ${email}`);
+      if (!users || users.length === 0) {
         return res.status(400).json({
           message: "Invalid email or password",
         });
       }
 
-      if (!user.isActive) {
-        console.log(`❌ Login failed: Account inactive for email: ${email}`);
-        return res.status(400).json({
-          message: "Account has been deactivated. Please contact support.",
-        });
-      }
-
-      // Debug password comparison
-      console.log(`🔐 Attempting login for: ${email}`);
-      console.log(`🔐 User found: ${user._id}`);
-      console.log(
-        `🔐 Password provided length: ${password ? password.length : 0}`,
-      );
-      console.log(`🔐 Stored password hash exists: ${!!user.password}`);
+      const user = users[0];
 
       // Check password
-      const isMatch = await user.comparePassword(password);
-
-      console.log(`🔐 Password match result: ${isMatch}`);
+      const isMatch = await bcrypt.compare(password, user.password_hash);
 
       if (!isMatch) {
-        console.log(`❌ Login failed: Password mismatch for email: ${email}`);
         return res.status(400).json({
           message: "Invalid email or password",
         });
       }
 
       // Update last login
-      await user.updateLastLogin();
+      await supabase
+        .from('users')
+        .update({ last_login: new Date().toISOString() })
+        .eq('id', user.id);
 
       // Generate JWT token
-      const token = user.generateAuthToken();
+      const token = jwt.sign(
+        { id: user.id, email: user.email, role: user.role },
+        process.env.JWT_SECRET || 'fallback-secret',
+        { expiresIn: '7d' }
+      );
 
       // Emit real-time update
       const io = req.app.get("io");
-      io.to("admin-room").emit("user-logged-in", {
-        user: {
-          id: user._id,
-          fullName: user.fullName,
-          email: user.email,
-          lastLogin: user.lastLogin,
-        },
-      });
+      if (io) {
+        io.to("admin-room").emit("user-logged-in", {
+          user: {
+            id: user.id,
+            fullName: user.full_name,
+            email: user.email,
+            lastLogin: new Date().toISOString(),
+          },
+        });
+      }
 
       res.json({
         message: "Login successful",
         token,
         user: {
-          id: user._id,
-          fullName: user.fullName,
+          id: user.id,
+          fullName: user.full_name,
           email: user.email,
           mobile: user.mobile,
           role: user.role,
           address: user.address,
-          lastLogin: user.lastLogin,
+          lastLogin: new Date().toISOString(),
         },
       });
     } catch (error) {

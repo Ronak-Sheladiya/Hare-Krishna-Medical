@@ -21,15 +21,18 @@ import {
   setError,
 } from "../store/slices/productsSlice.js";
 import ProductCard from "../components/products/ProductCard.jsx";
-import { api, safeApiCall } from "../utils/apiClient.js";
+import { useSupabaseRealtime } from "../hooks/useSupabaseRealtime.js";
+import supabaseService from "../services/supabaseService.js";
 
 const Products = () => {
   const dispatch = useDispatch();
-  const { products, featuredProducts, filters, loading, error } = useSelector(
-    (state) => state.products,
-  );
+  const { filters } = useSelector((state) => state.products);
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [viewMode, setViewMode] = useState("card"); // 'card' or 'list'
+  const [viewMode, setViewMode] = useState("card");
+  
+  // Real-time data from Supabase
+  const { data: products, loading, error } = useSupabaseRealtime('products', []);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
 
   // Categories for filtering
   const categories = [
@@ -45,166 +48,32 @@ const Products = () => {
     "Digestive Health",
   ];
 
-  // Fetch products from API using safeApiCall
-  const fetchProducts = async () => {
-    dispatch(setLoading(true));
-    dispatch(setError(null));
-
-    const queryParams = new URLSearchParams({
-      ...(filters.search && { q: filters.search }),
-      ...(filters.category && { category: filters.category }),
-      ...(filters.priceSort && {
-        sort: "price",
-        order: filters.priceSort === "low-to-high" ? "asc" : "desc",
-      }),
-      limit: 50,
-    });
-
-    const {
-      success,
-      data,
-      error: apiError,
-    } = await safeApiCall(() => api.get(`/api/products?${queryParams}`), {
-      products: [],
-      featured: [],
-    });
-
-    if (success && data) {
-      const productsData = data.data || data;
-      const products = Array.isArray(productsData)
-        ? productsData
-        : productsData.products || [];
-      dispatch(setProducts(products));
-
-      // Show offline mode indicator if applicable
-      if (data.offline) {
-        dispatch(setError("Working in offline mode - showing sample data"));
-      }
-    } else {
-      // Provide sample data as fallback
-      const sampleProducts = [
-        {
-          _id: "sample1",
-          name: "Paracetamol 500mg",
-          company: "Cipla",
-          price: 25.5,
-          originalPrice: 30.0,
-          discountPrice: 25.5,
-          stock: 150,
-          category: "Pain Relief",
-          description:
-            "Effective pain relief and fever reducer suitable for adults and children over 12 years.",
-          images: [
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5QYXJhY2V0YW1vbDwvdGV4dD48L3N2Zz4=",
-          ],
-        },
-        {
-          _id: "sample2",
-          name: "Vitamin D3 Tablets",
-          company: "Sun Pharma",
-          price: 180.0,
-          originalPrice: 200.0,
-          discountPrice: 180.0,
-          stock: 85,
-          category: "Vitamins",
-          description:
-            "Essential vitamin D3 supplement for bone health and immunity support.",
-          images: [
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmZlNTAwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM2NjY2NjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5WaXRhbWluIEQzPC90ZXh0Pjwvc3ZnPg==",
-          ],
-        },
-        {
-          _id: "sample3",
-          name: "Cough Syrup 100ml",
-          company: "Dabur",
-          price: 95.0,
-          originalPrice: 110.0,
-          discountPrice: 95.0,
-          stock: 65,
-          category: "Cough & Cold",
-          description:
-            "Natural ayurvedic cough syrup for dry and wet cough relief.",
-          images: [
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTc0YzNjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Q291Z2ggU3lydXA8L3RleHQ+PC9zdmc+",
-          ],
-        },
-      ];
-
-      dispatch(setProducts(sampleProducts));
-      dispatch(
-        setError(
-          "Backend connection issue - showing sample products. " +
-            (apiError || "Please try refreshing the page."),
-        ),
-      );
-    }
-
-    dispatch(setLoading(false));
-  };
-
-  // Fetch featured products separately
+  // Fetch featured products
   const fetchFeaturedProducts = async () => {
-    const { success, data } = await safeApiCall(
-      () => api.get("/api/products/featured"),
-      [],
-    );
-
-    if (success && data) {
-      const featuredData = data.data || data;
-      dispatch(setFeaturedProducts(featuredData));
-    } else {
-      // Fallback featured products
-      const sampleFeatured = [
-        {
-          _id: "featured1",
-          name: "Paracetamol 500mg",
-          company: "Cipla",
-          price: 25.5,
-          discountPrice: 25.5,
-          stock: 150,
-          category: "Pain Relief",
-          images: [
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5QYXJhY2V0YW1vbDwvdGV4dD48L3N2Zz4=",
-          ],
-        },
-        {
-          _id: "featured2",
-          name: "First Aid Kit",
-          company: "Johnson & Johnson",
-          price: 450.0,
-          discountPrice: 450.0,
-          stock: 25,
-          category: "First Aid",
-          images: [
-            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGMzNTQ1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Rmlyc3QgQWlkPC90ZXh0Pjwvc3ZnPg==",
-          ],
-        },
-      ];
-      dispatch(setFeaturedProducts(sampleFeatured));
+    try {
+      const featuredData = await supabaseService.getAll('products', {
+        orderBy: { column: 'created_at', ascending: false },
+        limit: 4
+      });
+      setFeaturedProducts(featuredData.filter(p => p.is_active));
+    } catch (error) {
+      console.error('Error fetching featured products:', error);
     }
   };
 
   useEffect(() => {
-    fetchProducts();
     fetchFeaturedProducts();
   }, []);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [filters]);
-
   // Filter products based on current filters
   useEffect(() => {
-    let filtered = [...products];
+    let filtered = [...(products || [])];
 
     // Search filter
     if (filters.search) {
       filtered = filtered.filter(
         (product) =>
           product.name?.toLowerCase().includes(filters.search.toLowerCase()) ||
-          product.company
-            ?.toLowerCase()
-            .includes(filters.search.toLowerCase()) ||
           product.description
             ?.toLowerCase()
             .includes(filters.search.toLowerCase()),
@@ -235,11 +104,10 @@ const Products = () => {
   const handleAddToCart = (product) => {
     dispatch(
       addToCart({
-        id: product._id,
+        id: product.id,
         name: product.name,
         price: product.price,
-        image: product.images?.[0] || "/placeholder.svg",
-        company: product.company,
+        image: product.image_url || "/placeholder.svg",
         quantity: 1,
       }),
     );

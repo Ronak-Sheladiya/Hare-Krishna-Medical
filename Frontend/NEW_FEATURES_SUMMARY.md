@@ -258,9 +258,9 @@ All features tested and compatible with:
 
 ### Enhanced Verification
 
-- **Blockchain Verification**: Immutable verification records
 - **Digital Signatures**: Cryptographic verification
 - **Audit Trail**: Complete verification history
+- **Advanced Encryption**: Secure verification records
 
 ### Advanced Features
 

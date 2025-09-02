@@ -1,4 +1,4 @@
-const Product = require("../models/Product");
+const { supabase, supabaseAdmin } = require("../config/supabase");
 const QRCode = require("qrcode");
 
 // Fallback sample data for development when database is disconnected
@@ -171,11 +171,6 @@ class ProductsController {
   // Get all products with filtering, sorting, and pagination
   async getAllProducts(req, res) {
     try {
-      // Check if database is connected
-      if (!global.DB_CONNECTED) {
-        return this.handleOfflineProducts(req, res);
-      }
-
       const {
         page = 1,
         limit = 12,
@@ -183,69 +178,51 @@ class ProductsController {
         brand,
         minPrice,
         maxPrice,
-        sort = "createdAt",
+        sort = "created_at",
         order = "desc",
         q,
         featured,
       } = req.query;
 
-      // Build filter object
-      const filter = { isActive: true };
-
-      if (category) filter.category = category;
-      if (brand) filter.brand = new RegExp(brand, "i");
-      if (featured !== undefined) filter.isFeatured = featured === "true";
-
-      // Price range filter
-      if (minPrice || maxPrice) {
-        filter.price = {};
-        if (minPrice) filter.price.$gte = parseFloat(minPrice);
-        if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
-      }
-
-      // Text search
-      if (q) {
-        filter.$text = { $search: q };
-      }
-
-      // Sort options
-      const sortOrder = order === "desc" ? -1 : 1;
-      const sortOptions = {};
-      sortOptions[sort] = sortOrder;
-
-      // Calculate pagination
-      const skip = (parseInt(page) - 1) * parseInt(limit);
-
-      // Execute query
-      const [products, totalProducts] = await Promise.all([
-        Product.find(filter)
-          .sort(sortOptions)
-          .skip(skip)
-          .limit(parseInt(limit))
-          .populate("createdBy", "fullName"),
-        Product.countDocuments(filter),
-      ]);
-
-      // Calculate pagination info
-      const totalPages = Math.ceil(totalProducts / limit);
-      const hasNextPage = page < totalPages;
-      const hasPrevPage = page > 1;
-
+      let query = supabase.from('products').select('*', { count: 'exact' });
+      
+      // Apply filters
+      query = query.eq('is_active', true);
+      if (category) query = query.eq('category', category);
+      if (featured !== undefined) query = query.eq('is_featured', featured === 'true');
+      if (minPrice) query = query.gte('price', parseFloat(minPrice));
+      if (maxPrice) query = query.lte('price', parseFloat(maxPrice));
+      if (q) query = query.ilike('name', `%${q}%`);
+      
+      // Apply sorting
+      const ascending = order === 'asc';
+      query = query.order(sort, { ascending });
+      
+      // Apply pagination
+      const from = (parseInt(page) - 1) * parseInt(limit);
+      const to = from + parseInt(limit) - 1;
+      query = query.range(from, to);
+      
+      const { data: products, error, count } = await query;
+      
+      if (error) throw error;
+      
+      const totalPages = Math.ceil(count / limit);
+      
       res.json({
         success: true,
-        data: products,
+        data: products || [],
         pagination: {
           currentPage: parseInt(page),
           totalPages,
-          totalProducts,
-          hasNextPage,
-          hasPrevPage,
+          totalProducts: count,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1,
           limit: parseInt(limit),
         },
       });
     } catch (error) {
       console.error("Get products error:", error);
-      // Fallback to offline mode if database fails
       return this.handleOfflineProducts(req, res);
     }
   }
@@ -665,67 +642,29 @@ class ProductsController {
   // Create new product
   async createProduct(req, res) {
     try {
-      if (!global.DB_CONNECTED) {
-        // In offline mode, simulate product creation
-        const newProduct = {
-          _id: `offline_${Date.now()}`,
-          ...req.body,
-          createdBy: req.user?.id || "offline_user",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          isActive: true,
-          rating: { average: 0, count: 0 },
-          sales: 0,
-          views: 0,
-        };
-
-        // Add to sample products (in-memory)
-        sampleProducts.push(newProduct);
-
-        // Emit real-time update
-        const io = req.app.get("io");
-        if (io) {
-          io.to("admin-room").emit("product-created", {
-            product: {
-              id: newProduct._id,
-              name: newProduct.name,
-              category: newProduct.category,
-              price: newProduct.price,
-              stock: newProduct.stock,
-              createdAt: newProduct.createdAt,
-            },
-          });
-        }
-
-        return res.status(201).json({
-          success: true,
-          message: "Product created successfully (offline mode)",
-          data: newProduct,
-          offline: true,
-        });
-      }
-
       const productData = {
-        ...req.body,
-        createdBy: req.user.id,
+        name: req.body.name,
+        description: req.body.description,
+        price: req.body.price,
+        stock: req.body.stock || 0,
+        low_stock_threshold: req.body.low_stock_threshold || 10,
+        category: req.body.category,
+        image_url: req.body.image_url,
+        is_active: true
       };
 
-      const product = new Product(productData);
-      await product.save();
+      const { data: product, error } = await supabase
+        .from('products')
+        .insert(productData)
+        .select()
+        .single();
+
+      if (error) throw error;
 
       // Emit real-time update
       const io = req.app.get("io");
       if (io) {
-        io.to("admin-room").emit("product-created", {
-          product: {
-            id: product._id,
-            name: product.name,
-            category: product.category,
-            price: product.price,
-            stock: product.stock,
-            createdAt: product.createdAt,
-          },
-        });
+        io.to("admin-room").emit("product-created", { product });
       }
 
       res.status(201).json({
@@ -735,26 +674,10 @@ class ProductsController {
       });
     } catch (error) {
       console.error("Create product error:", error);
-      // Fallback to offline mode
-      const newProduct = {
-        _id: `offline_${Date.now()}`,
-        ...req.body,
-        createdBy: req.user?.id || "offline_user",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isActive: true,
-        rating: { average: 0, count: 0 },
-        sales: 0,
-        views: 0,
-      };
-
-      sampleProducts.push(newProduct);
-
-      res.status(201).json({
-        success: true,
-        message: "Product created successfully (offline mode)",
-        data: newProduct,
-        offline: true,
+      res.status(500).json({
+        success: false,
+        message: "Failed to create product",
+        error: error.message,
       });
     }
   }

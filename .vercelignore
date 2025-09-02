@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Development files
+.env.developer
+.env.example
+*.log
+*.md
+!README.md
+
+# Build artifacts
+.cache/
+.temp/
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test files
+__tests__/
+*.test.js
+*.spec.js
+
+# Documentation
+docs/
+AGENTS.md
+BUTTON_FIX_REPORT.md
+COMPREHENSIVE_*.md
+DEPLOYMENT_*.md
+FIX_*.md
+FIXES_*.md
+LETTERHEAD_*.md
+LOCAL_*.md
+NEW_*.md
+PRODUCTION_*.md
+PROJECT_*.md
+SECURITY_*.md
+SETUP_*.md
+SOCKET_*.md
+VERCEL_*.md
+VERIFICATION_*.md
+CRUD_*.md
+MONGODB_*.md
+
+# Scripts
+Backend/scripts/
+Frontend/quick-setup.sh
+setup-env.js
+
+# Temporary files
+*.tmp
+*.temp

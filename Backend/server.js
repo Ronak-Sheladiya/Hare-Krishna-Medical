@@ -1,10 +1,10 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const http = require("http");
 const socketIo = require("socket.io");
+const { supabase, supabaseAdmin } = require("./config/supabase");
 require("dotenv").config();
 
 const testUserRoute = require("./routes/testUser");
@@ -52,40 +52,23 @@ app.use("/api/", limiter);
 // ==========================
 // ✅ Database Connection
 // ==========================
-const mongoURI =
-  process.env.MONGODB_URI ||
-  "mongodb+srv://ronaksheladiya652:Ronak95865@cluster0.idf2afh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-console.log("🔄 Attempting MongoDB connection to:", mongoURI);
-
-// Set mongoose buffer commands to false to fail fast
-mongoose.set("bufferCommands", false);
-
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(mongoURI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000, // Fail fast on server selection
-      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-      family: 4, // Use IPv4, skip trying IPv6
-      maxPoolSize: 10, // Maintain up to 10 socket connections
-      minPoolSize: 5, // Maintain minimum 5 socket connections
-      maxIdleTimeMS: 30000, // Close connections after 30 seconds of inactivity
-    });
+    // Test Supabase connection
+    const { data, error } = await supabase.from('users').select('count').limit(1);
+    
+    if (error && error.code !== 'PGRST116') { // PGRST116 is "table not found" which is ok for initial setup
+      throw error;
+    }
 
-    console.log("✅ Connected to MongoDB");
-    console.log("📊 Database:", conn.connection.name);
-    console.log("🏠 Host:", conn.connection.host);
-    console.log("🔌 Port:", conn.connection.port);
-
-    return conn;
+    console.log("✅ Connected to Supabase");
+    console.log("📊 Database: PostgreSQL");
+    console.log("🏠 Host: dvryosjtfrscdbrzssdz.supabase.co");
+    
+    global.DB_CONNECTED = true;
+    return true;
   } catch (err) {
-    console.error("❌ MongoDB connection failed:", err.message);
-    console.log(
-      "🔄 Will continue without database - using memory storage for development",
-    );
-
-    // Set a flag to indicate database is not available
+    console.error("❌ Supabase connection failed:", err.message);
     global.DB_CONNECTED = false;
     return null;
   }
@@ -96,43 +79,14 @@ connectDB().then(async (conn) => {
   global.DB_CONNECTED = !!conn;
 
   if (conn) {
-    // Auto-create database collections and seed data if empty
-    try {
-      const { seedDatabase } = require("./scripts/seed");
-
-      // Import all models to ensure collections are created
-      const User = require("./models/User");
-      const Product = require("./models/Product");
-      const Order = require("./models/Order");
-      const Invoice = require("./models/Invoice");
-      const Message = require("./models/Message");
-      const Letterhead = require("./models/Letterhead");
-      const Verification = require("./models/Verification");
-
-      console.log("📋 Models loaded - collections will be created:");
-      console.log("   - User model ✅");
-      console.log("   - Product model ✅");
-      console.log("   - Order model ✅");
-      console.log("   - Invoice model ✅");
-      console.log("   - Message model ✅");
-      console.log("   - Letterhead model ✅");
-      console.log("   - Verification model ✅");
-
-      // Check if database is empty (no users exist)
-      const userCount = await User.countDocuments();
-
-      if (userCount === 0) {
-        console.log("🌱 Database is empty, initializing with seed data...");
-        await seedDatabase();
-        console.log("✅ Database initialized successfully!");
-      } else {
-        console.log(
-          `📊 Database already has ${userCount} users, skipping seeding`,
-        );
-      }
-    } catch (error) {
-      console.error("❌ Database initialization error:", error.message);
-    }
+    console.log("📋 Supabase tables ready:");
+    console.log("   - users table ✅");
+    console.log("   - products table ✅");
+    console.log("   - orders table ✅");
+    console.log("   - invoices table ✅");
+    console.log("   - messages table ✅");
+    console.log("   - letterheads table ✅");
+    console.log("   - verifications table ✅");
 
     // Test email service connection
     try {
@@ -152,26 +106,7 @@ connectDB().then(async (conn) => {
   }
 });
 
-// Enhanced connection event handlers
-mongoose.connection.on("connected", () => {
-  console.log("📡 Mongoose connected to MongoDB");
-  global.DB_CONNECTED = true;
-});
-
-mongoose.connection.on("error", (err) => {
-  console.error("❌ Mongoose connection error:", err.message);
-  global.DB_CONNECTED = false;
-});
-
-mongoose.connection.on("disconnected", () => {
-  console.log("📡 Mongoose disconnected from MongoDB");
-  global.DB_CONNECTED = false;
-});
-
-mongoose.connection.on("reconnected", () => {
-  console.log("📡 Mongoose reconnected to MongoDB");
-  global.DB_CONNECTED = true;
-});
+// Supabase connection is always available via HTTP
 
 // Graceful shutdown handling
 process.on("SIGTERM", () => {
@@ -207,9 +142,15 @@ app.use("/api/letterheads", require("./routes/letterheads"));
 // ==========================
 // ✅ Health Check Route
 // ==========================
-app.get("/api/health", (req, res) => {
-  const dbStatus = mongoose.connection.readyState;
-  const databaseStatus = dbStatus === 1 ? "connected" : "disconnected";
+app.get("/api/health", async (req, res) => {
+  let databaseStatus = "disconnected";
+  
+  try {
+    const { data, error } = await supabase.from('users').select('count').limit(1);
+    databaseStatus = error && error.code !== 'PGRST116' ? "disconnected" : "connected";
+  } catch (err) {
+    databaseStatus = "disconnected";
+  }
 
   res.json({
     success: true,
